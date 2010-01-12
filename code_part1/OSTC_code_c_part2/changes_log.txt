@@ -1,0 +1,20 @@
+changes for v.101_C last deco:
+
+text_table_v111.asm : line 249
+	DA	"Last Deco   [m]}"		;65 (entspricht CF29)
+
+menu_reset_v111.asm : 
+line 153
+#DEFINE	last_deco_depth				d'3'		; 8Bit		3m
+line 253f
+	movlw	LOW		last_deco_depth				
+
+divemode_v111.asm
+line 421ff
+	GETCUSTOM8	d'29'				; Depth Last Deco in meter for simulation
+	movwf	wait_temp
+	movff	wait_temp,char_I_depth_last_deco
+
+definitions_v111.asm
+line 302
+ char_I_depth_last_deco;			; 0x51E	new in v.101

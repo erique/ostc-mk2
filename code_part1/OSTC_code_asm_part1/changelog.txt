@@ -1,0 +1,2 @@
+New in 1.50 Stable:
+- Initial release for OSTC Mk.2

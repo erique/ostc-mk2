@@ -1,0 +1,52 @@
+Byte38 im EEPROM=1:
+
+a - PLED Serial and Firmware version updated
+b - PLED Ambient pressure updated
+c - PLED Clock updated
+e - PLED Temperature updated
+d - PLED Date updated
+f - PLED Battery voltage updated
+g - PLED NoFly time updated
+h - PLED Desaturation time updated
+h - PLED Tissue saturation graph divemode updated
+i - PLED Tissue saturation graph surfacemode updated
+j - PLED const. ppO2 value surfacemode updated
+k - PLED cns value updated
+l - PLED Divemenu cursor updated
+m - PLED Divemode gaslist updated
+n - PLED Decoplan updated
+o - PLED Divemode menu updated
+p - PLED max Depth updated
+q - PLED Surfacemode startgas updated
+r - PLED Depth updated
+s - PLED Divemode active gas updated
+t - PLED ppO2 value divemode updated
+u - PLED Temperature divemode updated
+v - PLED Velocity updated
+w - PLED Gradient Factor updated
+x - PLED complete ascend time updated
+y - PLED decompression updated
+z - PLED NDL updated
+A - PLED Divetime updated
+B - Decompression algorithm started
+C - Decompression algorithm finished
+D - Profile Sample stored
+E - Decompression gas set
+F - Decompression gas reset
+G - Desaturation time calculation started
+H - Desaturation time calculation finished
+I - Surfmode/sleepmode desaturation calculation started
+J - Surfmode/sleepmode desaturation calculation finished
+K - calculate noflytime percentage started
+L - calculate noflytime percentage finished
+M - I2C Bus Timeout
+N - I2C Bus Failed
+O - I2C Bus Restored
+P - Stand-alone Simulator started
+Q - Divemode init started
+R - Divemode init finished
+S - Tissues copy start
+T - Tissue copy done.
+U - Average Depth Display updated
+V - Gauge mode Stopwatch updated
+

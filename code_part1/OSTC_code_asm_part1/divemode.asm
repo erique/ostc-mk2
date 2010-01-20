@@ -153,10 +153,15 @@ diveloop_loop3:
 	btfsc	store_sample					; store new sample?
 	call	store_dive_data					; Store profile data
 
-	btfss	menubit							; Sleep only with inactive menu...
+	btfsc	menubit							; Sleep only with inactive menu...
+	bra		diveloop_loop4
+
+	btfsc	simulatormode_active			; Do not sleep in Simualtor mode
+	bra		diveloop_loop4
+
 	sleep
-	
 	nop
+diveloop_loop4:
 	bra		diveloop_loop					; Loop the divemode
 
 timeout_premenu_divemode:

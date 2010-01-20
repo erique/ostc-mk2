@@ -520,6 +520,7 @@ PLED_boot:
 
 ; Now Gamma settings...
 	rcall	PLED_brightness_full
+	;rcall	PLED_brightness_low
 ; End Gamma Settings
 
 	rcall	PLED_ClearScreen

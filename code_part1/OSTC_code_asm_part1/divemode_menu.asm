@@ -599,6 +599,9 @@ divemenu_set_gas2:
 	bra		divemenu_set_gas2a			; no, choose gas
 	; Yes, so select SP 1-3 or Sensor mode
 	
+	bcf		is_bailout					;=1: CC mode, but bailout active!		
+	call	PLED_show_ppO2_clear; Clear ppO2 value
+	
 divemenu_set_gas1:	
 	movlw	d'35'						; offset in memory
 	addwf	menupos,W					; add SP number 0-2
@@ -641,6 +644,7 @@ divemenu_set_gas1a:
 	bra		timeout_divemenu2			; quit menu!
 
 divemenu_set_gas2a:
+	bsf		is_bailout					;=1: CC mode, but bailout active!		
 	clrf	lo							; clear Setpoint, PLED_const_ppO2_value now displayes "Bail"
 	movff	lo,char_I_const_ppO2		
 

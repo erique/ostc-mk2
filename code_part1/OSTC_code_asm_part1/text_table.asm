@@ -574,8 +574,8 @@
 ; 32 custom function descriptors with length=16!
 	DA	"GF Low      [%]}"		;154
 	DA	"GF High     [%]}"		;155
-	DA	"Color #Battery }"		;156
-	DA	"not used       }"		;157
+	DA	"Color# Battery }"		;156
+	DA	"Color# Standard}"		;157
 	DA	"not used       }"		;158
 	DA	"not used       }"		;159
 	DA	"Show secs. [=1]}"		;160

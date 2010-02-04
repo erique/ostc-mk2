@@ -237,8 +237,7 @@ PLED_frame5:
 	cpfseq	box_temp+4
 	bra		PLED_frame5
 
-	movlw	color_white
-	call	PLED_set_color
+	call	PLED_standard_color
 
 	return
 
@@ -350,10 +349,8 @@ PLED_box3:
 	movlw	0x00					; NOP, to stop Address Update Counter
 	rcall	PLED_CmdWrite
 
-	movlw	color_white
-	call	PLED_set_color
+	call	PLED_standard_color
 	return
-
 
 ; -----------------------------
 ; PLED_ClearScreen:
@@ -464,8 +461,8 @@ PLED_boot:
 	bcf		oled_cs
 	nop
 	bsf		oled_nreset
-	WAITMS	d'10'			; Quick wake-up
-;	WAITMS	d'250'
+;	WAITMS	d'10'			; Quick wake-up
+	WAITMS	d'250'			; Standard wake-up
 	bsf		oled_e_nwr	
 	nop
 	bcf		oled_nreset

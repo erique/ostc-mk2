@@ -568,7 +568,7 @@ profile_display_loop2:
 	incf		timeout_counter3,F
 	movf		timeout_counter3,W
 	call		PLED_SetColumnPixel			; pixel x2
-	WIN_COLOR	color_white
+	call		PLED_standard_color
 	call		PLED_PxlWrite				; Write two pixels
 
 profile_display_skip_loop1:					; skips readings!
@@ -635,7 +635,8 @@ profile_display_fill_down2:			; Loop
 	decf		xC+1,F
 	movf		xC+1,W				; Row
 	call		PLED_SetRow			; 0...259
-	WIN_COLOR	color_white
+	call		PLED_standard_color
+
 	call		PLED_PxlWrite_Single; Write one Pixel
 	movf		xC+0,W
 	cpfseq		xC+1				; Loop until xC+1=xC+0
@@ -648,7 +649,8 @@ profile_display_fill_up2:			; Loop
 	decf		xC+1,F
 	movf		xC+1,W				; Row
 	call		PLED_SetRow			; 0...259
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	call		PLED_PxlWrite_Single; Write one Pixel
 	movf		apnoe_mins,W
 	cpfseq		xC+1				; Loop until xC+1=apnoe_mins

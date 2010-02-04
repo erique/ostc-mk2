@@ -90,6 +90,9 @@ diveloop_loop1b:
 diveloop_loop1c:
 	call	PLED_const_ppO2_value			; display const ppO2 setting in [Bar]
 	call	calc_deko_divemode				; calculate decompression and display result (any two seconds)
+	btfsc	is_bailout						; Are we in Bailout mode?
+	call	check_ppO2_bail					; Yes, display ppO2 (If required)
+
 	bra		diveloop_loop1x					; Common Tasks
 	
 ; Common Tasks for all modes
@@ -800,6 +803,7 @@ check_ppO2:								; check current ppO2 and display warning if required
 	btfsc		FLAG_const_ppO2_mode		; ignore in ppO2 mode....
 	return
 
+check_ppO2_bail:						; In CC mode but bailout active!
 	movff		amb_pressure+0,xA+0
 	movff		amb_pressure+1,xA+1
 	movlw		d'10'
@@ -1429,7 +1433,8 @@ diveloop_boot:
 	bcf		depth_greater_100m			; clear flag
 	setf	last_diluent				; to be displayed after first calculation (range: 0 to 100 [%])
 	clrf	char_last_pointer
-	bcf		dekostop_active			
+	bcf		dekostop_active	
+	bcf		is_bailout					;=1: CC mode, but bailout active!		
 	call	get_free_EEPROM_location	; get last position in external EEPROM, may be up to 2 secs!
 
 	movff	last_surfpressure_30min+1,int_I_pres_surface+1	; HIGH copy surfacepressure to deco routine

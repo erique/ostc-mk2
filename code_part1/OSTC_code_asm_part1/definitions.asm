@@ -49,7 +49,7 @@
 #DEFINE	color_red	b'11100000'
 #DEFINE	color_blue	b'00000011'
 #DEFINE	color_green	b'00011100'
-#DEFINE	color_white b'11111111'
+;#DEFINE	color_white b'11111111'
 #DEFINE	color_black b'00000000'
 #DEFINE	color_deepblue b'00000001'
 #DEFINE	color_grey	d'73'
@@ -604,7 +604,7 @@
 
 #DEFINE	enter_error_sleep		flag14,0	;=1: Sleep immediately displaying the error using LED codes
 #DEFINE	stopwatch_active		flag14,1	;=1: Show Stopwatch in Divemode
-;free
+#DEFINE	is_bailout				flag14,2	;=1: CC mode, but bailout active!
 #DEFINE	standalone_simulator	flag14,3	;=1: Standalone Simulator active
 #DEFINE	display_set_simulator	flag14,4	;=1: Show Divemode simulator menu
 #DEFINE	displaytext_high		flag14,5	;=1: Show/Use Texts 255-511 in Texttable
@@ -614,7 +614,7 @@
 #DEFINE	restore_deco_data		flag15,0	;=1: Restore Decodata after the dive from 0x380 buffer
 #DEFINE	uart_store_tissue_data	flag15,1	;=1: Store tissue data for next simualted dive!
 ;free
-#DEFINE	flip_display			flag15,3	;=1: Flip Display
+;free
 #DEFINE	display_see_l_tissue	flag15,4	;=1: Leading Tissue details are now displayed
 ;free
 ;free

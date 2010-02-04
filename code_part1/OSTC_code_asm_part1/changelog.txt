@@ -1,5 +1,11 @@
 New in 1.51 Beta:
+BETA Version - Do NOT use for diving!
 BUGFIX: PC Simulator mode
+NEW: CF35 sets standard color
+BUGFIX: Display startup at very cold ambient temperatures
+BUGFIX: Battery voltage accuracy
+BUGFIX: Temperature accuracy
+BUGFIX: ppO2 is displayed in Bailout mode
 
 New in 1.50 Stable:
 Initial release for OSTC Mk.2

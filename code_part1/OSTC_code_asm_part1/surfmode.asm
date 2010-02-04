@@ -86,7 +86,8 @@ surfloop3:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	bcf		switch_left
 	bcf		switch_right
 	call	PLED_custom_text			; Displays custom text

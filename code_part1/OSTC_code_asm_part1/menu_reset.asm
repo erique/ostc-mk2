@@ -252,7 +252,7 @@ reset_all_cf:
 #DEFINE	GF_low_default				d'30'		; 8Bit		30%
 #DEFINE	GF_high_default				d'90'		; 8Bit		90%
 #DEFINE	color_battery_surface		d'223'		; 8Bit		Color Battery sign Surfacemode
-#DEFINE	SP_high_HUD_default			d'140'		; 8Bit		1.40Bar
+#DEFINE	color_standard1				d'255'		; 8Bit		1.40Bar
 #DEFINE	SP_nom_HUD_default			d'120'		; 8Bit		1.20Bar
 #DEFINE	HUD_style					d'0'		; 8Bit		OSTC Style
 
@@ -384,7 +384,7 @@ reset_all_cf_bank1:
 	movlw	color_battery_surface
 	rcall	reset_customfunction	; saves default and current value
 
-	movlw	SP_high_HUD_default			
+	movlw	color_standard1
 	rcall	reset_customfunction	; saves default and current value
 
 	movlw	SP_nom_HUD_default			

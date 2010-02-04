@@ -23,6 +23,12 @@
 ; known bugs:
 ; ToDo:	More comments
 
+PLED_standard_color:
+	GETCUSTOM8	d'35'			; Standard output color
+	call	PLED_set_color
+	return
+
+
 ostc_debug	macro debug_temp
 	movlw	debug_temp
 	call	ostc_debug1
@@ -45,7 +51,7 @@ ostc_debug1:
 	WIN_LEFT	.100
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movf	debug_char+0,W
 	movwf 	POSTINC2
@@ -71,7 +77,7 @@ PLED_resetdebugger:
 	call	PLED_boot				; PLED boot
 	call	PLED_ClearScreen		; clean up OLED
 
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 
 	DISPLAYTEXT	.133
 	DISPLAYTEXT	.134
@@ -82,7 +88,7 @@ PLED_resetdebugger:
 	WIN_LEFT	.10
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movf	debug_char+0,W
 	movwf 	POSTINC2
@@ -112,7 +118,7 @@ PLED_resetdebugger:
 	WIN_LEFT	.10
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 
 	lfsr	FSR2,letter
 	movff	flag3,lo
@@ -139,7 +145,7 @@ PLED_resetdebugger:
 	WIN_LEFT	.10
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 
 	lfsr	FSR2,letter
 	movff	flag8,lo
@@ -173,7 +179,7 @@ PLED_divemode_mask:					; Displays mask in Dive-Mode
 	DISPLAYTEXTH	.267		; Max Depth
 	DISPLAYTEXT		.86			; Divetime
 	DISPLAYTEXT		.87			; Depth
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	return
 
 PLED_clear_decoarea:
@@ -198,7 +204,7 @@ PLED_display_ndl_mask:
 
 	WIN_COLOR	color_red
 	DISPLAYTEXT		d'84'			; NoStop
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 
 PLED_display_ndl_mask2:
 	; Clears Gradient Factor
@@ -219,7 +225,8 @@ PLED_display_ndl:
 	WIN_LEFT	.119
 	WIN_FONT 	FT_MEDIUM
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	movff	char_O_nullzeit,lo				; NDL in minutes
 	output_8
@@ -234,7 +241,7 @@ PLED_display_deko_mask:
 ; total deco time word
 	WIN_COLOR	color_red
 	DISPLAYTEXT	d'85'			; DECOSUM
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	return
 
 PLED_display_deko:
@@ -248,13 +255,13 @@ PLED_display_deko:
 ; deco stop word
 	WIN_COLOR	color_red
 	DISPLAYTEXT	d'82'			; DEKOSTOP
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 
 	WIN_TOP		.118
 	WIN_LEFT	.94
 	WIN_FONT 	FT_MEDIUM
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movff	char_O_array_decodepth+0,lo		; Ceiling in m
 	output_99
@@ -277,7 +284,7 @@ PLED_display_deko1:
 	WIN_LEFT	.119
 	WIN_FONT 	FT_MEDIUM
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movff	char_O_ascenttime,lo		; complete ascend time
 	movlw	d'199'							; limit display of total ascend time to 99mins....
@@ -302,7 +309,7 @@ PLED_display_deko2:
 	WIN_TOP		.145
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movlw	'G'
 	movwf	POSTINC2
@@ -323,7 +330,7 @@ PLED_simulator_data:
 	WIN_TOP		.65
 	WIN_LEFT	.105
 	WIN_FONT 	FT_SMALL
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movff	logbook_temp1,lo
 	bsf		leftbind
@@ -342,7 +349,7 @@ PLED_simulator_data:
 	WIN_TOP		.95
 	WIN_LEFT	.100
 	WIN_FONT 	FT_SMALL
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movff	logbook_temp2,lo
 	bsf		leftbind
@@ -363,7 +370,7 @@ PLED_display_velocity:
 	WIN_TOP		.90
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movlw	'-'
 	btfsc	neg_flag
@@ -417,7 +424,8 @@ PLED_clock:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 
 	movff	surface_interval+0,lo
@@ -514,7 +522,8 @@ PLED_menu_cursor:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
@@ -524,7 +533,8 @@ PLED_menu_cursor:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
@@ -534,7 +544,8 @@ PLED_menu_cursor:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
@@ -544,7 +555,8 @@ PLED_menu_cursor:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
@@ -554,7 +566,8 @@ PLED_menu_cursor:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
@@ -564,7 +577,8 @@ PLED_menu_cursor:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
@@ -588,7 +602,8 @@ PLED_menu_cursor:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	movlw	0xB7
 	movwf	POSTINC2
@@ -683,7 +698,8 @@ PLED_temp_surfmode:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	movlw	'-'
 	btfsc	neg_temp			; Show "-"?
@@ -718,7 +734,8 @@ PLED_temp_divemode:
 	WIN_LEFT	.65
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	movlw	'-'
 	btfsc	neg_temp			; Show "-"?
@@ -742,7 +759,8 @@ PLED_show_ppO2:					; Show ppO2
 	WIN_TOP		.120
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	movlw	'p'
 	movwf	POSTINC2
@@ -792,7 +810,8 @@ PLED_active_gas_divemode:				; Displays current gas (e.g. 40/20) if a) He>0 or b
 	WIN_LEFT	.65
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 
 	movlw	d'100'						; 100% in the tank
 	movff	char_I_N2_ratio,lo			; minus N2
@@ -853,7 +872,8 @@ PLED_display_decotype_surface:
 
 ;ZH-L16
 	WIN_TOP		.125
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter		
 	movlw	'O'
 	movwf	POSTINC2
@@ -862,7 +882,8 @@ PLED_display_decotype_surface:
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	WIN_TOP		.150
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter		
 	movlw	'C'
 	movwf	POSTINC2
@@ -881,7 +902,8 @@ show_decotype_surface3:
 	bra	show_decotype_surface4
 	; const. ppO2
 	WIN_TOP		.125
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter		
 	movlw	'C'
 	movwf	POSTINC2
@@ -890,7 +912,8 @@ show_decotype_surface3:
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	word_processor
 	WIN_TOP		.150
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter		
 	movlw	'C'
 	movwf	POSTINC2
@@ -917,7 +940,8 @@ show_decotype_surface5:
 	WIN_LEFT	.85
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	call	word_processor
 	WIN_TOP		.150
 	lfsr	FSR2,letter		
@@ -926,7 +950,8 @@ show_decotype_surface5:
 	WIN_LEFT	.85
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	call	word_processor
 	return
 
@@ -939,7 +964,8 @@ show_decotype_surface6:
 	WIN_LEFT	.85
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	call	word_processor
 	WIN_TOP		.150
 	lfsr	FSR2,letter		
@@ -948,7 +974,8 @@ show_decotype_surface6:
 	WIN_LEFT	.85
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	call	word_processor
 	return
 
@@ -970,7 +997,8 @@ PLED_active_gas_surfmode:				; Displays start gas/SP 1
 	WIN_LEFT	.90
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter		
 	read_int_eeprom	d'36'
 	movff	EEDATA,lo				; copy to lo
@@ -991,7 +1019,8 @@ PLED_active_gas_surfmode2:
 	WIN_LEFT	.100
 	WIN_FONT 	FT_MEDIUM
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 
 	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)
 	movff	EEDATA,active_gas			; Read start gas (1-5)
@@ -1119,7 +1148,8 @@ PLED_confirmbox2:
 	WIN_LEFT	.39
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	movlw	0xB7			; Arrow for menu
 	movwf	POSTINC2
@@ -1211,7 +1241,8 @@ PLED_depth:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_LARGE
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 
 	movlw	HIGH	d'99'
 	movwf	sub_a+1
@@ -1239,7 +1270,8 @@ pled_depth3:
 	WIN_FONT 	FT_MEDIUM
 	WIN_TOP		.50
 	WIN_LEFT	.40
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 
 	movff	rel_pressure+1,hi
 	movff	rel_pressure+0,lo
@@ -1285,7 +1317,8 @@ depth_greater_99_84mtr:			; Display only in full meters
 	WIN_LEFT	.0
 	WIN_FONT 	FT_LARGE
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	bsf		ignore_digit4
 	bsf		leftbind
 	output_16
@@ -1322,7 +1355,8 @@ PLED_desaturation_time:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	OUTPUTTEXT	d'14'				; Desat
 	movlw		' '
@@ -1349,7 +1383,8 @@ PLED_nofly_time:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	OUTPUTTEXT	d'35'				; NoFly
 	movlw		' '
@@ -1383,7 +1418,8 @@ update_surf_press:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	movff	amb_pressure+0,lo
 	movff	amb_pressure+1,hi
@@ -1418,7 +1454,8 @@ update_batt_voltage:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	movff	batt_voltage+0,lo
 	movff	batt_voltage+1,hi
@@ -1513,7 +1550,8 @@ update_batt_voltage3:
 	movff	wait_temp,box_temp+4		; column right (0-159)
 	call	PLED_box
 
-	WIN_COLOR	color_white		; Reset Color
+	GETCUSTOM8	d'35'			; Standard output color
+	call	PLED_set_color
 	return
 		
 update_batt_voltage2_empty:
@@ -1640,7 +1678,8 @@ update_date:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white		
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 
 	movff	month,convert_value_temp+0
@@ -1674,7 +1713,8 @@ PLED_max_pressure:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_MEDIUM
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	movff	max_pressure+0,lo
 	movff	max_pressure+1,hi
@@ -1716,7 +1756,8 @@ PLED_divemins2:
 	WIN_TOP		.20
 	WIN_LEFT	.120
 	WIN_FONT	FT_MEDIUM
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	call	word_processor
 	WIN_FONT	FT_SMALL
 	return
@@ -1727,12 +1768,14 @@ PLED_display_apnoe_surface:
 
 	WIN_COLOR	color_red
 	DISPLAYTEXT	d'140'			; "SURFACE"
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 
 	WIN_TOP		.85
 	WIN_LEFT	.90
 	WIN_FONT	FT_MEDIUM
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 
 	movff	apnoe_surface_mins,lo
 	bcf		leftbind
@@ -1765,12 +1808,14 @@ PLED_apnoe_clear_surface:
 PLED_display_apnoe_descent:
 	WIN_COLOR	color_red
 	DISPLAYTEXT		d'139'			; "Descent"
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 
 	WIN_TOP		.145
 	WIN_LEFT	.90
 	WIN_FONT	FT_MEDIUM
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 
 	movff	apnoe_mins,lo
 	lfsr	FSR2,letter
@@ -1799,7 +1844,8 @@ PLED_divemins_gauge:
 	WIN_TOP		.20
 	WIN_LEFT	.90
 	WIN_FONT	FT_MEDIUM
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	call	word_processor
 	bcf		show_last3
 	WIN_FONT	FT_SMALL
@@ -1829,12 +1875,14 @@ PLED_stopwatch_show:
 
 	WIN_COLOR	color_red
 	DISPLAYTEXTH	d'283'			; Counter
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 
 	WIN_TOP		.80
 	WIN_LEFT	.110
 	WIN_FONT	FT_SMALL
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 
 
 
@@ -1868,7 +1916,8 @@ PLED_stopwatch_show:
 	WIN_TOP		.80
 	WIN_LEFT	.62
 	WIN_FONT	FT_SMALL
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 
 	lfsr	FSR2,letter
 	movff	avr_rel_pressure+0,lo
@@ -1892,7 +1941,8 @@ PLED_serial:			; Writes OSTC #Serial and Firmware version in surfacemode
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 
 	lfsr	FSR2,letter
 	OUTPUTTEXTH		d'262'			; "OSTC "
@@ -1960,7 +2010,8 @@ PLED_divemode_set_xgas:				; Displayes the "Set Gas" menu
 	WIN_LEFT	.100
 	WIN_TOP		.0
 	WIN_FONT	FT_SMALL
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter	
 	movlw	'S'
 	movwf	POSTINC2
@@ -2302,7 +2353,7 @@ PLED_divemenu_cursor:
 	WIN_LEFT	.85
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
@@ -2311,7 +2362,7 @@ PLED_divemenu_cursor:
 	WIN_LEFT	.85
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
@@ -2320,7 +2371,7 @@ PLED_divemenu_cursor:
 	WIN_LEFT	.85
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
@@ -2329,7 +2380,7 @@ PLED_divemenu_cursor:
 	WIN_LEFT	.85
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
@@ -2338,7 +2389,7 @@ PLED_divemenu_cursor:
 	WIN_LEFT	.85
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
@@ -2360,7 +2411,8 @@ PLED_divemenu_cursor:
 	WIN_LEFT	.85
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	movlw	0xB7			; Arrow for menu
 	movwf	POSTINC2
@@ -2416,7 +2468,7 @@ custom_warn_surfmode:
 	call	word_processor
 
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	return
 
 PLED_saturation_graph_divemode:
@@ -2513,7 +2565,7 @@ PLED_tissue_saturation_graph2:
 
 	WIN_LEFT	.84
 	WIN_TOP		.32
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movlw	'N'
 	movwf	POSTINC2
@@ -2523,7 +2575,7 @@ PLED_tissue_saturation_graph2:
 
 	WIN_LEFT	.84
 	WIN_TOP		.90
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movlw	'H'
 	movwf	POSTINC2
@@ -2586,7 +2638,7 @@ PLED_const_ppO2_value:
 	WIN_LEFT 	.65
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movff	char_I_const_ppO2,lo
 	
@@ -2645,7 +2697,7 @@ PLED_show_leading_tissue2:
 	WIN_LEFT	.100
 	WIN_TOP		.25
 	WIN_FONT	FT_SMALL
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	call	word_processor
 
 	lfsr	FSR2,letter
@@ -2663,7 +2715,7 @@ PLED_show_leading_tissue3:		; point to leading tissue...
 	WIN_LEFT	.100
 	WIN_TOP		.50
 	WIN_FONT	FT_SMALL
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	call	word_processor
 	bcf		leftbind
 	return
@@ -2672,7 +2724,7 @@ PLED_topline_box_clear:			; Writes an empty box
 	movlw	.0
 	bra		PLED_topline_box2
 PLED_topline_box:				; Writes a filled box
-	movlw	.255
+	GETCUSTOM8		d'35'
 PLED_topline_box2:
 	movff	WREG,box_temp+0		; Data
 	movlw	.000
@@ -2704,7 +2756,8 @@ PLED_display_cns:
 	WIN_TOP		.090
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
-	WIN_COLOR	color_white
+	call	PLED_standard_color
+
 	
  	lfsr	FSR2,letter
 	movlw	'C'
@@ -2756,7 +2809,7 @@ PLED_custom_text2:
 
 PLED_custom_text3:
 	call	word_processor
-	WIN_COLOR	color_white
+	call	PLED_standard_color
 	return
 
 PLED_get_custom_letter:

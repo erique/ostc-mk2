@@ -198,7 +198,7 @@ menu_gassetup_list0:
 	call	menu_gassetup_grey_inactive			; Sets Greyvalue for inactive gases
 	call	word_processor	
 
-	WIN_COLOR	color_white	
+	call	PLED_standard_color
 	
 	incf	decodata+0,F
 	movlw	d'5'	
@@ -1050,8 +1050,15 @@ menu_gassetup_list1:
 	rrcf	EEDATA			; roll flags into carry
 	decfsz	lo,F			; max. 5 times...
 	bra		menu_gassetup_list1
-	movlw	color_white	
+	
 	btfss	STATUS,C		; test carry
+	bra		menu_gassetup_list1_grey
+
+	GETCUSTOM8	d'35'		;movlw	color_white	
+	call	PLED_set_color	; grey out inactive gases!
+	return
+
+menu_gassetup_list1_grey:
 	movlw	color_grey
 	call	PLED_set_color	; grey out inactive gases!
 	return

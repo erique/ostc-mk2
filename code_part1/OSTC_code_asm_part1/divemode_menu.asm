@@ -608,6 +608,7 @@ divemenu_set_gas1:
 	movwf	EEADR
 	call	read_eeprom					; Read SetPoint
 	movff	EEDATA, char_I_const_ppO2	; Use SetPoint
+	movff	EEDATA, ppO2_setpoint_store	; Store also in this byte...
 
 divemenu_set_gas1a:
 	bcf		display_set_setpoint		; Clear Display Flag

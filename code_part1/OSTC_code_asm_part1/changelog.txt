@@ -1,3 +1,7 @@
+New in 1.52 Beta:
+BETA Version - Do NOT use for diving!
+NEW: Fixed-Setpoint ppO2 limited to physically possible value
+
 New in 1.51 Beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: PC Simulator mode

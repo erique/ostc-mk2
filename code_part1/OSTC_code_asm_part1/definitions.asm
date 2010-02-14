@@ -23,7 +23,7 @@
 ;#DEFINE		NO_SENSOR_MODE			; uses Dummy values
 
 #DEFINE	softwareversion_x		d'1'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'51'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'52'		; Software version  XX.YY
 
 #DEFINE	max_custom_number		d'41'		; Number of last used custom function
 
@@ -183,7 +183,8 @@
 	dLSB						;Pressure sensor interface 
 	dMSB
 	clock_count
-	temperature_correction		; additional temperature correction value
+	ppO2_setpoint_store			; Actual setpoint
+;	temperature_correction		; additional temperature correction value
 	W1:2
 	W2:2
 	W3:2

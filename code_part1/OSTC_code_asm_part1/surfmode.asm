@@ -90,6 +90,7 @@ surfloop3:
 
 	bcf		switch_left
 	bcf		switch_right
+	call	PLED_active_gas_surfmode	; Show start gas / SetPoint
 	call	PLED_custom_text			; Displays custom text
 	movlw	d'1'						; next cf to check
 	movwf	cf_checker_counter			; 
@@ -127,7 +128,7 @@ surfloop_loop1:
 	call	timeout_premenu				; timeout premenu
 	call	set_leds_surfmode			; Sets Warning and No-Fly LEDs
 	call	custom_functions_check_surfmode	; Checks CF functions and displays warning symbol if something critical is wrong
-	call	PLED_active_gas_surfmode	; Show start gas / SetPoint
+;	call	PLED_active_gas_surfmode	; Show start gas / SetPoint
 	call	PLED_display_decotype_surface	; Show deco mode
 	btfsc	enter_error_sleep			; Enter Fatal Error Routine?
 	goto	fatal_error_sleep			; Yes (In Sleepmode_vxx.asm!)
@@ -184,6 +185,7 @@ surfloop_loop2:
 
 update_surfloop60:
 ; One minute tasks for all modes
+;	call	PLED_active_gas_surfmode	; Show start gas / SetPoint
 	call	update_date					; and date in divemode
 	call	calc_deko_surfmode			; calculate desaturation every minute
 	call	check_temp_extrema			; check for new temperature extremas

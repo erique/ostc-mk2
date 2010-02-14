@@ -2627,10 +2627,6 @@ PLED_new_cf_warning:
 PLED_const_ppO2_value:
 	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
 	return								; Yes, No update and return!
-	btfsc	menubit						; Divemode menu active?
-	return								; Yes, No update and return!
-	btfsc	premenu						; Showing "Menu?"?
-	return								; Yes, do not display ppO2/"Bail"
 
 	ostc_debug	'j'		; Sends debug-information to screen if debugmode active
 	
@@ -2638,7 +2634,8 @@ PLED_const_ppO2_value:
 	WIN_LEFT 	.65
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
+	call		PLED_standard_color
+
 	lfsr	FSR2,letter
 	movff	char_I_const_ppO2,lo
 	
@@ -2652,6 +2649,31 @@ PLED_const_ppO2_value:
 
 PLED_const_ppO2_value2:				; Display SetPoint
 ;Show fixed SP value
+	movff		amb_pressure+0,xA+0
+	movff		amb_pressure+1,xA+1
+	movlw		d'10'
+	movwf		xB+0
+	clrf		xB+1
+	;xA/xB=xC with xA as remainder 	
+	call		div16x16				; xC+0=p_amb/10
+	; char_I_const_ppO2 > p_amb/10 -> Not physically possible! -> Display actual value!
+
+	tstfsz	xC+1				; xC>255
+	setf	xC+0				; Yes, set xC+0 to 2,55bar ppO2
+	
+	movff		ppO2_setpoint_store,WREG
+	cpfslt		xC+0							; Setpoint value possible?
+	bra			PLED_const_ppO2_value1			; Yes!
+
+	movff		xC+0,char_I_const_ppO2			; No, Overwrite with actual value
+	bra			PLED_const_ppO2_value1a
+
+PLED_const_ppO2_value1:
+
+	movff		ppO2_setpoint_store,char_I_const_ppO2		; Restore Setpoint
+
+PLED_const_ppO2_value1a:
+	movff	char_I_const_ppO2,lo
 	clrf	hi
 	bsf		leftbind
 	output_16dp	d'3'

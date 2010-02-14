@@ -1504,6 +1504,7 @@ divemode1:
 	read_int_eeprom	d'36'				; Read mix 1 ppO2
 	btfsc	FLAG_const_ppO2_mode
 	movff	EEDATA,char_I_const_ppO2	; Set ppO2 setpoint if in ppO2 mode
+	movff	EEDATA, ppO2_setpoint_store	; Store also in this byte...
 
 	call	clear_LEDnofly				; Clear flags
 	bcf		low_battery_state			; clear flag for battery warning mode

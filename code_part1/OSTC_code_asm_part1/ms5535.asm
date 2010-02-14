@@ -278,19 +278,19 @@ get_temperature_value:
 	return
 
 get_calibration_data:
-	; read addional temperature correction from internal EEPROM 0x100
-	bsf		no_sensor_int				; No sensor interupt!
-	clrf	temperature_correction		; clear compensation value
-	movlw	LOW		0x100
-	movwf	EEADR
-	movlw	HIGH	0x100
-	movwf	EEADRH
-	call	read_eeprom
-	clrf	EEADRH						; Only 256Bytes used in normal program
-	movlw	d'200'						; limit value
-	cpfsgt	EEDATA						; EEDATA>200?
-	movff	EEDATA, temperature_correction	; No, Store for compensation
-	
+;	; read addional temperature correction from internal EEPROM 0x100
+;	bsf		no_sensor_int				; No sensor interupt!
+;	clrf	temperature_correction		; clear compensation value
+;	movlw	LOW		0x100
+;	movwf	EEADR
+;	movlw	HIGH	0x100
+;	movwf	EEADRH
+;	call	read_eeprom
+;	clrf	EEADRH						; Only 256Bytes used in normal program
+;	movlw	d'200'						; limit value
+;	cpfsgt	EEDATA						; EEDATA>200?
+;	movff	EEDATA, temperature_correction	; No, Store for compensation
+;	
 	rcall	reset_MS5535A
 	movlw	d'13'
 	movwf	clock_count

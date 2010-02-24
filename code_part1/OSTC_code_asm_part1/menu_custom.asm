@@ -113,16 +113,13 @@ getcustom15_3:
 menu_custom_functions_page2:
 	movlw	d'154'			; start of custom function descriptors		
 	movwf	customfunction_temp1
-	bsf		customfunction_page	; Use Page I...
-	movlw	d'1'
-	movwf	EEADRH
+	bsf		customfunction_page	; Use Page II...
 	bra		menu_custom_functions0
 
 menu_custom_functions:
 	movlw	d'36'			; start of custom function descriptors		
 	movwf	customfunction_temp1
 	bcf		customfunction_page	; Use Page I...
-	clrf	EEADRH
 	
 menu_custom_functions0:
 	bsf		leftbind
@@ -153,6 +150,11 @@ menu_custom_functions11:
 	WIN_INVERT	.0	; Init new Wordprocessor	
 
 menu_custom_functions1:
+	movlw	d'1'
+	btfss	customfunction_page	; Use Page II...
+	movlw	d'0'
+	movwf	EEADRH
+
 	clrf	timeout_counter2
 	bcf		menubit2
 	bcf		menubit3
@@ -174,12 +176,6 @@ menu_custom_functions1:
 	movwf	POSTINC2
 	call	word_processor
 
-;	movlw	d'16'
-;	movwf	temp1
-;	WIN_LEFT 	.40
-;	WIN_TOP		.35
-;	call	PLED_display_clear_common_y1
-;
 	movf	customfunction_temp1,W		; start of custom function descriptors		
 	addwf	decodata+0,W				; add # of current custom function, place result in wreg
 	call	displaytext1				; shows descriptor

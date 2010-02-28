@@ -313,6 +313,8 @@ calc_deko_divemode:
 	btfsc	STATUS,C
 	call	PLED_display_cns			; Show CNS
 
+	call	check_gas_change			; Checks if a better gas should be selected (by user)
+
 ; Check for decompression gases if in decomode
 divemode_check_decogases:					; CALLed from Simulator
 	btfss	dekostop_active
@@ -881,6 +883,123 @@ check_ppO2_3:
 	return		; done
 
 
+check_gas_change:						; Checks if a better gas should be selected (by user)
+	bcf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
+	
+	movff	rel_pressure+0,xA+0			
+	movff	rel_pressure+1,xA+1
+	movlw	d'100'
+	movwf	xB+0
+	clrf	xB+1
+	call	div16x16				; compute depth in full m -> result in xC+0
+
+check_gas_change1:					; check gas1 
+	read_int_eeprom		d'27'		; read flag register
+	btfss	EEDATA,0				; check active flag
+	bra		check_gas_change2		; skip inactive gases!
+	movlw	d'1'
+	cpfseq	active_gas				; is this gas currently selected?
+	bra		check_gas_change1x		; No...
+	bra		check_gas_change2		; Yes, skip depth check
+check_gas_change1x:	
+	read_int_eeprom		d'28'		; read gas_change_depth
+	movlw	d'3'
+	cpfsgt	EEDATA					; Change depth>3m?
+	bra		check_gas_change2		; No, Change depth not deep enough, skip!
+	movf	xC+0,W					; load depth in m into WREG
+	cpfsgt	EEDATA					; gas_change_depth < current depth?
+	bra		check_gas_change2		; No, check next gas
+	movlw	d'3'
+	subwf	EEDATA,W				; Change depth-3m
+	cpfslt	xC+0					; current depth<Change depth-3m?
+	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
+
+check_gas_change2:					; check gas2
+	read_int_eeprom		d'27'		; read flag register
+	btfss	EEDATA,1				; check active flag
+	bra		check_gas_change3		; skip inactive gases!
+	movlw	d'2'
+	cpfseq	active_gas				; is this gas currently selected?
+	bra		check_gas_change2x		; No...
+	bra		check_gas_change3		; Yes, skip depth check
+check_gas_change2x:	
+	read_int_eeprom		d'29'		; read gas_change_depth
+	movlw	d'3'
+	cpfsgt	EEDATA					; Change depth>3m?
+	bra		check_gas_change3		; No, Change depth not deep enough, skip!
+	movf	xC+0,W					; load depth in m into WREG
+	cpfsgt	EEDATA					; gas_change_depth < current depth?
+	bra		check_gas_change3		; No, check next gas
+	movlw	d'3'
+	subwf	EEDATA,W				; Change depth-3m
+	cpfslt	xC+0					; current depth<Change depth-3m?
+	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
+
+check_gas_change3:					; check gas3
+	read_int_eeprom		d'27'		; read flag register
+	btfss	EEDATA,2				; check active flag
+	bra		check_gas_change4		; skip inactive gases!
+	movlw	d'3'
+	cpfseq	active_gas				; is this gas currently selected?
+	bra		check_gas_change3x		; No...
+	bra		check_gas_change4		; Yes, skip depth check
+check_gas_change3x:	
+	read_int_eeprom		d'30'		; read gas_change_depth
+	movlw	d'3'
+	cpfsgt	EEDATA					; Change depth>3m?
+	bra		check_gas_change4		; No, Change depth not deep enough, skip!
+	movf	xC+0,W					; load depth in m into WREG
+	cpfsgt	EEDATA					; gas_change_depth < current depth?
+	bra		check_gas_change4		; No, check next gas
+	movlw	d'3'
+	subwf	EEDATA,W				; Change depth-3m
+	cpfslt	xC+0					; current depth<Change depth-3m?
+	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
+
+check_gas_change4:					; check gas4
+	read_int_eeprom		d'27'		; read flag register
+	btfss	EEDATA,3				; check active flag
+	bra		check_gas_change5		; skip inactive gases!
+	movlw	d'4'
+	cpfseq	active_gas				; is this gas currently selected?
+	bra		check_gas_change4x		; No...
+	bra		check_gas_change5		; Yes, skip depth check
+check_gas_change4x:	
+	read_int_eeprom		d'31'		; read gas_change_depth
+	cpfsgt	EEDATA					; Change depth>3m?
+	bra		check_gas_change5		; No, Change depth not deep enough, skip!
+	movf	xC+0,W					; load depth in m into WREG
+	cpfsgt	EEDATA					; gas_change_depth < current depth?
+	bra		check_gas_change5		; No, check next gas
+	movlw	d'3'
+	subwf	EEDATA,W				; Change depth-3m
+	cpfslt	xC+0					; current depth<Change depth-3m?
+	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
+
+check_gas_change5:					; check gas5
+	read_int_eeprom		d'27'		; read flag register
+	btfss	EEDATA,4				; check active flag
+	bra		check_gas_change6		; skip inactive gases!
+	movlw	d'5'
+	cpfseq	active_gas				; is this gas currently selected?
+	bra		check_gas_change5x		; No...
+	bra		check_gas_change6		; Yes, skip depth check
+check_gas_change5x:	
+	read_int_eeprom		d'32'		; read gas_change_depth
+	cpfsgt	EEDATA					; Change depth>3m?
+	bra		check_gas_change6		; No, Change depth not deep enough, skip!
+	movf	xC+0,W					; load depth in m into WREG
+	cpfsgt	EEDATA					; gas_change_depth < current depth?
+	bra		check_gas_change6		; No, check next gas
+	movlw	d'3'
+	subwf	EEDATA,W				; Change depth-3m
+	cpfslt	xC+0					; current depth<Change depth-3m?
+	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
+
+check_gas_change6:			;Done
+	call	PLED_active_gas_divemode	; Display gas, if required (and with "*" if irequired...)
+	return
+
 calculate_noflytime:
 	; calculate nofly time
 	movff	int_O_desaturation_time+0,xA+0
@@ -1435,6 +1554,8 @@ diveloop_boot:
 	clrf	char_last_pointer
 	bcf		dekostop_active	
 	bcf		is_bailout					;=1: CC mode, but bailout active!		
+	bcf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
+	
 	call	get_free_EEPROM_location	; get last position in external EEPROM, may be up to 2 secs!
 
 	movff	last_surfpressure_30min+1,int_I_pres_surface+1	; HIGH copy surfacepressure to deco routine

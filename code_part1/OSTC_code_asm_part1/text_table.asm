@@ -53,7 +53,7 @@
 	DB	.12,.10,.8,.8,.8,.8		; t88, t89, t90, t91, t92, t93
 	DB	.6,.6,.4,.10,.12,.18	; t94, t95, t96, t97, t98, t99
 	DB	.10,.10,.10,.6,.10,.14	;t100,t101,t102,t103,t104,t105
-	DB	.20,.8,.8,.6,.18,.20	;t106,t107,t108,t109,t110,t111
+	DB	.20,.8,.8,.6,.18,.18	;t106,t107,t108,t109,t110,t111
 	DB	.4,.14,.20,.8,.6,.16	;t112,t113,t114,t115,t116,117
 	DB	.14,.12,.6,.6,.8,.6		;t118,t119,t120,t121,t122,123
 	DB	.6,.6,.6,.6,.8,.8		;t124,t125,t126,t127,t128,129
@@ -215,7 +215,7 @@
 	DB	.0,.0,.1,.15		;108
 	DB	.20,.35,.1,.15		;109
 	DB	.20,.65,.1,.15		;110
-	DB	.14,.2,.1,.15		;111
+	DB	.20,.2,.1,.15		;111
 	DB	.0,.0,.1,.15		;112
 	DB	.20,.95,.1,.15		;113
 	DB	.10,.2,.1,.15		;114
@@ -525,8 +525,8 @@
 	DA	"Depth +}"				;107	l=8
 	DA	"Depth -}"				;108	l=8
 	DA	"Back}}"				;109	l=6
-	DA	"Const. ppO2 Setup}"	;110	l=18
-	DA	"Constant ppO2 Setup}"	;111	l=20
+	DA	"CCR SetPoint Menu}"	;110	l=18
+	DA	"CCR SetPoint Menu}"	;111	l=18
 	DA	"SP#}"					;112	l=4
 	DA	"Battery Info}}"		;113	l=14
 	DA	"Battery Information}"	;114	l=20
@@ -635,9 +635,9 @@
 	DA	"For (Semi-)Closed  }"	;208		l=20
 	DA	"Circuit rebreathers}"	;209		l=20
 	DA	"Configure the 3    }"	;210		l=20
-	DA	"SetPoints in ppO2- }"	;211		l=20	
+	DA	"SetPoints in CCR - }"	;211		l=20	
 	DA	"Setup menu. 5 bail-}"	;212		l=20		
-	DA	"out are available. }"	;213		l=20	
+	DA	"outs are available.}"	;213		l=20	
 ; Apnoemode description
 	DA	"Decotype: Apnoe    }"	;214		l=20
 	DA	"OSTC2 will display }"	;215		l=20
@@ -694,7 +694,7 @@
 	DA	"YYMMDD}}"				;261		l=8
 	DA	"OSTC }"				;262		l=6
 	DA	"Bail}}"				;263		l=6 
-	DA	"Air  }"				;264		l=6
+	DA	"Air }}"				;264		l=6
 	DA	"Air  }"				;265		l=6
 	DA	"Calibrate}"			;266		l=10
 	DA	"Max Depth}"			;267		l=10

@@ -609,7 +609,7 @@
 #DEFINE	standalone_simulator	flag14,3	;=1: Standalone Simulator active
 #DEFINE	display_set_simulator	flag14,4	;=1: Show Divemode simulator menu
 #DEFINE	displaytext_high		flag14,5	;=1: Show/Use Texts 255-511 in Texttable
-;free
+#DEFINE	better_gas_available	flag14,6	;=1: A better gas is available and a gas change is advised in divemode
 #DEFINE	displaytext_invert		flag14,7	;=1: inverts word prozessor output
 
 #DEFINE	restore_deco_data		flag15,0	;=1: Restore Decodata after the dive from 0x380 buffer

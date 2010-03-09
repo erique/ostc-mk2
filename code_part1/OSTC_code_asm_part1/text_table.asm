@@ -576,7 +576,7 @@
 	DA	"GF High     [%]}"		;155
 	DA	"Color# Battery }"		;156
 	DA	"Color# Standard}"		;157
-	DA	"not used       }"		;158
+	DA	"Color# Divemask}"		;158
 	DA	"not used       }"		;159
 	DA	"Show secs. [=1]}"		;160
 	DA	"not used       }"		;161

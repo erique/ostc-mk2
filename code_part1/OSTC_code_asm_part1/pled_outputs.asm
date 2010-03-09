@@ -28,6 +28,11 @@ PLED_standard_color:
 	call	PLED_set_color
 	return
 
+PLED_divemask_color:
+	GETCUSTOM8	d'36'			; Standard output color
+	call	PLED_set_color
+	return
+
 
 ostc_debug	macro debug_temp
 	movlw	debug_temp
@@ -175,7 +180,7 @@ PLED_resetdebugger_loop:
 	return
 
 PLED_divemode_mask:					; Displays mask in Dive-Mode
-	WIN_COLOR	color_red
+	call		PLED_divemask_color	; Set Color for Divemode mask
 	DISPLAYTEXTH	.267		; Max Depth
 	DISPLAYTEXT		.86			; Divetime
 	DISPLAYTEXT		.87			; Depth
@@ -202,7 +207,7 @@ PLED_display_ndl_mask:
 	; Clear Dekostop and Dekosum
 	rcall	PLED_clear_decoarea	
 
-	WIN_COLOR	color_red
+	call		PLED_divemask_color	; Set Color for Divemode mask
 	DISPLAYTEXT		d'84'			; NoStop
 	call	PLED_standard_color
 
@@ -239,7 +244,7 @@ PLED_display_ndl:
 PLED_display_deko_mask:
 	rcall	PLED_clear_decoarea	
 ; total deco time word
-	WIN_COLOR	color_red
+	call		PLED_divemask_color	; Set Color for Divemode mask
 	DISPLAYTEXT	d'85'			; DECOSUM
 	call	PLED_standard_color
 	return
@@ -253,7 +258,7 @@ PLED_display_deko:
 
 	ostc_debug	'y'		; Sends debug-information to screen if debugmode active
 ; deco stop word
-	WIN_COLOR	color_red
+	call		PLED_divemask_color	; Set Color for Divemode mask
 	DISPLAYTEXT	d'82'			; DEKOSTOP
 	call	PLED_standard_color
 
@@ -1113,7 +1118,7 @@ PLED_confirmbox:
 	movff	WREG,box_temp+4		; column right (0-159)
 	call	PLED_box
 
-	movlw	.255
+	GETCUSTOM8	d'35'			; Standard output color
 	movff	WREG,box_temp+0		; Data
 	movlw	.70
 	movff	WREG,box_temp+1		; row top (0-239)
@@ -1479,7 +1484,7 @@ update_batt_voltage:
 	return
 	
 update_batt_voltage2:
-	movlw	.255
+	GETCUSTOM8	d'35'			; Standard output color
 	movff	WREG,box_temp+0		; Data
 	movlw	.174
 	movff	WREG,box_temp+1		; row top (0-239)
@@ -1532,7 +1537,7 @@ update_batt_voltage2:
 
 
 update_batt_voltage2a:
-	movlw	.255
+	GETCUSTOM8	d'35'			; Standard output color
 	movff	WREG,box_temp+0		; Data
 	movlw	.181
 	movff	WREG,box_temp+1		; row top (0-239)
@@ -1569,7 +1574,7 @@ update_batt_voltage2_full:
 	movlw	d'30'
 	movwf	wait_temp
 
-	movlw	.255
+	GETCUSTOM8	d'35'			; Standard output color
 	movff	WREG,box_temp+0		; Data
 	movlw	.181
 	movff	WREG,box_temp+1		; row top (0-239)
@@ -1772,7 +1777,7 @@ PLED_display_apnoe_surface:
 	btfsc	menubit					; Divemode menu active?
 	return							; Yes, do not display surface mode timeout
 
-	WIN_COLOR	color_red
+	call		PLED_divemask_color	; Set Color for Divemode mask
 	DISPLAYTEXT	d'140'			; "SURFACE"
 	call	PLED_standard_color
 
@@ -1812,7 +1817,7 @@ PLED_apnoe_clear_surface:
 
 
 PLED_display_apnoe_descent:
-	WIN_COLOR	color_red
+	call		PLED_divemask_color	; Set Color for Divemode mask
 	DISPLAYTEXT		d'139'			; "Descent"
 	call	PLED_standard_color
 
@@ -1879,7 +1884,7 @@ PLED_stopwatch_show:
 	ostc_debug	'V'		; Sends debug-information to screen if debugmode active
 	; Stopwatch
 
-	WIN_COLOR	color_red
+	call		PLED_divemask_color	; Set Color for Divemode mask
 	DISPLAYTEXTH	d'283'			; Counter
 	call	PLED_standard_color
 
@@ -2050,7 +2055,7 @@ PLED_divemode_simulator_mask:
 	return
 
 PLED_decoplan_bargraph:
-	movlw	.255
+	GETCUSTOM8	d'35'			; Standard output color
 	movff	WREG,box_temp+0			; Data
 	movff	win_top,box_temp+1		; row top (0-239)
 	movff	win_top,box_temp+2		; 
@@ -2444,7 +2449,7 @@ custom_warn_surfmode:
 	movff	WREG,box_temp+4		; column right (0-159)
 	call	PLED_box
 
-	movlw	.255
+	GETCUSTOM8	d'35'			; Standard output color
 	movff	WREG,box_temp+0		; Data
 	movlw	.58
 	movff	WREG,box_temp+1		; row top (0-239)
@@ -2461,7 +2466,7 @@ custom_warn_surfmode:
 	WIN_LEFT	.71
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.1					; Init new Wordprocessor
-	WIN_COLOR	color_red
+	call		PLED_divemask_color	; Set Color for Divemode mask
  	lfsr	FSR2,letter
 	movlw	'C'
 	movwf	POSTINC2
@@ -2483,7 +2488,7 @@ PLED_tissue_saturation_graph:
 	ostc_debug	'i'		; Sends debug-information to screen if debugmode active
 ; with dd_font2display
 
-	movlw	.255
+	GETCUSTOM8	d'35'			; Standard output color
 	movff	WREG,box_temp+0		; Data
 	movlw	.25
 	movff	WREG,box_temp+1		; row top (0-239)
@@ -2500,7 +2505,7 @@ PLED_tissue_saturation_graph:
 	movwf	wait_temp		; 16 tissues
 	clrf	waitms_temp		; Row offset
 PLED_tissue_saturation_graph3:
-	movlw	.255
+	GETCUSTOM8	d'35'			; Standard output color
 	movff	WREG,box_temp+0		; Data
 	movlw	.28
 	addwf	waitms_temp,W
@@ -2537,7 +2542,7 @@ PLED_tissue_saturation_graph3:
 	movwf	wait_temp		; 16 tissues
 	clrf	waitms_temp		; Row offset
 PLED_tissue_saturation_graph2:
-	movlw	.255
+	GETCUSTOM8	d'35'			; Standard output color
 	movff	WREG,box_temp+0		; Data
 	movlw	.86
 	addwf	waitms_temp,W
@@ -2814,7 +2819,7 @@ PLED_custom_text:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	WIN_COLOR	color_red
+	call		PLED_divemask_color	; Set Color for Divemode mask
 
 	lfsr	FSR2,letter	
 	movlw	d'64'

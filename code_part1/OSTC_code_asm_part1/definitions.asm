@@ -46,7 +46,7 @@
 #DEFINE wp_fontheight .24
 
 ; Color Definitions: 8Bit RGB b'RRRGGGBB'
-#DEFINE	color_red	b'11100000'
+;#DEFINE	color_red	b'11100000'
 #DEFINE	color_blue	b'00000011'
 #DEFINE	color_green	b'00011100'
 ;#DEFINE	color_white b'11111111'

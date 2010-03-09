@@ -4,6 +4,8 @@ NEW: Fixed-Setpoint ppO2 limited to physically possible value
 BUGFIX: CF32 was displayed wrong on first call
 NEW: Gas change recommendation in divemode ('*' after Gas)
 CHANGE: "Const.ppO2 Setup" renamed to "CCR SetPoint Menu"
+BUGFIX: CF35 now affects all items in surface and divemode
+NEW: CF36 sets Divemode mask color
 
 New in 1.51 Beta:
 BETA Version - Do NOT use for diving!

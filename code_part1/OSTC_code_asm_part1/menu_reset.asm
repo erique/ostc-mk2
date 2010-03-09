@@ -251,9 +251,9 @@ reset_all_cf:
 
 #DEFINE	GF_low_default				d'30'		; 8Bit		30%
 #DEFINE	GF_high_default				d'90'		; 8Bit		90%
-#DEFINE	color_battery_surface		d'223'		; 8Bit		Color Battery sign Surfacemode
-#DEFINE	color_standard1				d'255'		; 8Bit		1.40Bar
-#DEFINE	SP_nom_HUD_default			d'120'		; 8Bit		1.20Bar
+#DEFINE	color_battery_surface		d'223'		; 8Bit		Color Battery sign: Cyan
+#DEFINE	color_standard1				d'255'		; 8Bit		Color Standard: White
+#DEFINE	color_divemask				d'224'		; 8Bit		Color Divemask: Red
 #DEFINE	HUD_style					d'0'		; 8Bit		OSTC Style
 
 #DEFINE	show_seconds_divemode		d'0'		; 1Bit 		=1 Show the seconds in Divemode
@@ -387,7 +387,7 @@ reset_all_cf_bank1:
 	movlw	color_standard1
 	rcall	reset_customfunction	; saves default and current value
 
-	movlw	SP_nom_HUD_default			
+	movlw	color_divemask
 	rcall	reset_customfunction	; saves default and current value
 
 	movlw	HUD_style

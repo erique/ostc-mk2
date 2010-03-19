@@ -464,7 +464,7 @@
 	DA	"Desaturate x[%]}"		;48
 	DA	"NoFly Ratio [%]}"		;49
 	DA	"GF alarm 1  [%]}"		;50
-	DA	"GF alarm 2  [%]}"		;51
+	DA	"not used       }"		;51
 	DA	"Deco Offset[dm]}"		;52
 	DA	"ppO2 low [cBar]}"		;53
 	DA	"ppO2 high[cBar]}"		;54
@@ -472,7 +472,7 @@
 	DA	"sampling rate  }"		;56
 	DA	"Divisor Temp   }"		;57
 	DA	"Divisor Decodat}"		;58
-	DA	"Divisor NotUse0}"		;59
+	DA	"Divisor NotUse1}"		;59
 	DA	"Divisor ppO2	}"		;60
 	DA	"Divisor Debug  }"		;61
 	DA	"Divisor NotUse2}"		;62

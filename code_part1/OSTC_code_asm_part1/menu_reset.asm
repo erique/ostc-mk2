@@ -229,7 +229,7 @@ reset_all_cf:
 #DEFINE	nofly_time_ratio			d'60'		; 8BIT		60%
 #DEFINE	gradient_factor_alarm1		d'100'		; 8Bit		100%
 
-#DEFINE	gradient_factor_alarm2		d'120'		; 8Bit		120%
+#DEFINE	not_used_CF15				d'100'		; 8Bit		
 #DEFINE	deco_distance_for_sim		d'10'		; 8Bit		1m
 #DEFINE	ppo2_warning_low			d'019'		; 8Bit		0.19 Bar
 #DEFINE	ppo2_warning_high			d'160'		; 8Bit		1.60 Bar
@@ -315,7 +315,7 @@ reset_all_cf:
 	movlw	LOW		gradient_factor_alarm1
 	rcall	reset_customfunction	; saves default and current value
 
-	movlw	LOW		gradient_factor_alarm2
+	movlw	LOW		not_used_CF15
 	rcall	reset_customfunction	; saves default and current value
 	
 	movlw	LOW		deco_distance_for_sim

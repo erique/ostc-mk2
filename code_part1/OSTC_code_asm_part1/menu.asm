@@ -389,7 +389,7 @@ more_setup_menu3a:
 more_setup_menu_loop:
 	call	check_switches_menu
 
-	movlw	d'3'				; x-1 menu entries
+	movlw	d'4'				; x-1 menu entries
 	cpfseq	menupos
 	bra		more_setup_menu_loop2
 	movlw	d'6'
@@ -428,7 +428,7 @@ do_more_setup_menu:								; calls submenu
 	dcfsnz	menupos,F
 	bra		toggle_debugmode
 	dcfsnz	menupos,F
-	bra		setup_menu						; spare
+	bra		show_license
 	dcfsnz	menupos,F
 	bra		setup_menu						; spare
 	dcfsnz	menupos,F
@@ -436,6 +436,14 @@ do_more_setup_menu:								; calls submenu
 	movlw	d'5'					; set cursor to "More again"
 	movwf	menupos
 	bra		setup_menu2						; exit...
+
+show_license:
+	call	startup_screen1				;1/2
+	call	startup_screen2				;1/2
+	movlw	d'3'
+	movwf	menupos
+	bcf		switch_right
+	bra		more_setup_menu2			; return to "more menu" loop
 
 toggle_salinity:
 ; Toggles between 1.00 and 1.04

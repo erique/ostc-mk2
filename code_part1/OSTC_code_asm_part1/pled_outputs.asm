@@ -648,7 +648,7 @@ PLED_more_setup_menu_mask:
 	WIN_INVERT	.0	; Init new Wordprocessor	
 	DISPLAYTEXTH	.257	; Date format:
 	DISPLAYTEXT		.129	; Debug: 
-	
+	DISPLAYTEXT		.187	; Show License
 	
 	DISPLAYTEXT .11			; Exit
 	return	

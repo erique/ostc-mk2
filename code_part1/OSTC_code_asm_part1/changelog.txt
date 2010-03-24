@@ -1,3 +1,10 @@
+New in 1.53 Beta:
+BETA Version - Do NOT use for diving!
+CHANGE: License moved into Menu
+NEW: Quick power on
+NEW: Not used O2 Sensors are not shown (OSTC1 only)
+NEW: O2 Board is automatically selected when found within the 1st second in divemode (OSTC1 only)
+
 New in 1.52 Beta:
 BETA Version - Do NOT use for diving!
 NEW: Fixed-Setpoint ppO2 limited to physically possible value

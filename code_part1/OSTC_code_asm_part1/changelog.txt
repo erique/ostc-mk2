@@ -4,6 +4,7 @@ CHANGE: License moved into Menu
 NEW: Quick power on
 NEW: Not used O2 Sensors are not shown (OSTC1 only)
 NEW: O2 Board is automatically selected when found within the 1st second in divemode (OSTC1 only)
+NEW: Quick-View of Gaslist (Pre-Dive Check), press ENTER in Surfacemode
 
 New in 1.52 Beta:
 BETA Version - Do NOT use for diving!

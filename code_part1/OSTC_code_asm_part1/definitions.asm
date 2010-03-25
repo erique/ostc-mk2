@@ -54,6 +54,8 @@
 #DEFINE	color_deepblue b'00000001'
 #DEFINE	color_grey	d'73'
 
+#DEFINE	plus_time_correction	d'42'
+
 
 ;Configuration bits
 	CONFIG	OSC = IRCIO67        ;Internal oscillator block, port function on RA6 and RA7
@@ -614,7 +616,7 @@
 
 #DEFINE	restore_deco_data		flag15,0	;=1: Restore Decodata after the dive from 0x380 buffer
 #DEFINE	uart_store_tissue_data	flag15,1	;=1: Store tissue data for next simualted dive!
-;free
+#DEFINE	pre_dive_screen			flag15,2	;=1: Show predive screen instead of graphs
 ;free
 #DEFINE	display_see_l_tissue	flag15,4	;=1: Leading Tissue details are now displayed
 ;free

@@ -353,7 +353,11 @@ RTCisr2:
 		cpfsgt		hours
 		return
 		clrf		hours
-		incf		day,F					
+		incf		day,F
+movlw	plus_time_correction			; Correct too slow clock
+movwf	secs
+
+						
 check_date:
 		movff		month,isr_divB		; new month?
 		dcfsnz		isr_divB,F

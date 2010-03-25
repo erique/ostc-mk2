@@ -990,6 +990,286 @@ show_decotype_surface6:
 	call	word_processor
 	return
 
+PLED_pre_dive_screen:			;Display Pre-Dive Screen
+	movlw	.0
+	movff	WREG,box_temp+0		; Data
+	movlw	.25
+	movff	WREG,box_temp+1		; row top (0-239)
+	movlw	.120
+	movff	WREG,box_temp+2		; row bottom (0-239)
+	movlw	.82
+	movff	WREG,box_temp+3		; column left (0-159)
+	movlw	.159
+	movff	WREG,box_temp+4		; column right (0-159)
+	call	PLED_box
+
+	; List active gases/Setpoints
+
+	btfsc	FLAG_const_ppO2_mode		; in ppO2 mode?
+	bra		PLED_pre_dive_screen3		; Yes, display SetPoint/Sensor result list
+
+PLED_pre_dive_screen2:
+	ostc_debug	'm'		; Sends debug-information to screen if debugmode active
+
+	WIN_LEFT	.90
+	WIN_FONT	FT_SMALL
+	bsf		leftbind
+	
+	movlw	d'2'
+	movwf	wait_temp			; here: stores eeprom address for gas list
+	movlw	d'0'
+	movwf	waitms_temp		; here: stores row for gas list
+	clrf	hi					; here: Gas counter
+
+PLED_pre_dive_screen2_loop:
+	incf	hi,F				; Increase Gas
+	movlw	d'4'
+	addwf	wait_temp,F			; Increase eeprom address for gas list
+	
+	lfsr	FSR2,letter		
+	movlw	'G'
+	movwf	POSTINC2
+	movff	hi,lo			; copy gas number
+	output_8				; display gas number
+	movlw	':'
+	movwf	POSTINC2
+	movlw	' '
+	movwf	POSTINC2
+	movff	wait_temp, EEADR; Gas #hi: %O2 - Set address in internal EEPROM
+	call	read_eeprom		; get byte (stored in EEDATA)
+	movff	EEDATA,lo		; copy to lo
+	output_8				; outputs into Postinc2!
+	movlw	'/'
+	movwf	POSTINC2
+	incf	EEADR,F			; Gas #hi: %He - Set address in internal EEPROM
+	call	read_eeprom		; get byte (stored in EEDATA)
+	movff	EEDATA,lo		; copy to lo
+	output_8				; outputs into Postinc2!
+	
+	read_int_eeprom		d'27'	; read flag register
+	movff	hi,lo			; copy gas number
+PLED_pre_dive_screen2_loop1:
+	rrcf	EEDATA			; roll flags into carry
+	decfsz	lo,F			; max. 5 times...
+	bra		PLED_pre_dive_screen2_loop1
+	
+	btfss	STATUS,C		; test carry
+	bra		PLED_pre_dive_white
+
+	movlw	color_grey
+	call	PLED_set_color	; grey out inactive gases!
+	bra		PLED_pre_dive_color_done
+
+PLED_pre_dive_white:
+	GETCUSTOM8	d'35'		;movlw	color_white	
+	call	PLED_set_color	; grey out inactive gases!
+
+PLED_pre_dive_color_done:	
+	read_int_eeprom 	d'33'			; Read start gas (1-5)
+	movf	EEDATA,W
+	cpfseq	hi				; Current Gas the active gas?
+	bra		PLED_pre_dive_screen2a
+	bra		PLED_pre_dive_screen2b
+
+PLED_pre_dive_screen2a:
+	movlw	d'25'
+	addwf	waitms_temp,F		; Increase row
+	WIN_LEFT	.90
+	movff	waitms_temp,win_top ; Set Row
+	call	word_processor	; No, display gas
+
+PLED_pre_dive_screen2b:
+	GETCUSTOM8	d'35'		;movlw	color_white	
+	call	PLED_set_color	; grey out inactive gases!
+
+	movlw	d'5'			; list all four (remaining) gases
+	cpfseq	hi				; All gases shown?
+	bra		PLED_pre_dive_screen2_loop	; No
+	
+	return							; No, return (OC mode)
+
+PLED_pre_dive_screen3:	
+	WIN_LEFT	.90
+	WIN_FONT	FT_SMALL
+	bsf		leftbind
+
+	; list three SP in Gaslist
+	movlw	d'35'				; 36 = current SP position in EEPROM
+	movwf	wait_temp			; here: stores eeprom address for gas list
+	movlw	d'0'
+	movwf	waitms_temp			; here: stores row for gas list
+	clrf 	temp5				; here: SP counter
+
+PLED_pre_dive_screen3_loop:
+	incf	wait_temp,F			; EEPROM address
+	incf	temp5,F			; Increase SP
+
+	movlw	d'25'
+	addwf	waitms_temp,F		; Increase row
+	WIN_LEFT	.90
+	movff	waitms_temp,win_top ; Set Row
+	
+	lfsr	FSR2,letter		
+	movlw	'S'
+	movwf	POSTINC2
+	movlw	'P'
+	movwf	POSTINC2
+	movff	temp5,lo		; copy gas number
+	output_8				; display gas number
+	movlw	':'
+	movwf	POSTINC2
+	movlw	' '
+	movwf	POSTINC2
+	movff	wait_temp, EEADR; SP #hi position
+	call	read_eeprom		; get byte (stored in EEDATA)
+	movff	EEDATA,lo		; copy to lo
+	clrf	hi
+	output_16dp	d'3'		; outputs into Postinc2!
+	call	word_processor	
+
+	movlw	d'3'		; list all three SP
+	cpfseq	temp5		; All gases shown?
+	bra		PLED_pre_dive_screen3_loop	;no
+
+	bcf		leftbind
+	return				; Return (CC Mode)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;
+;
+;	WIN_LEFT	.100
+;	WIN_FONT	FT_SMALL
+;	bsf		leftbind
+;	
+;	movlw	d'2'
+;	movwf	wait_temp			; here: stores eeprom address for gas list
+;	movlw	d'231'
+;	movwf	waitms_temp		; here: stores row for gas list
+;	clrf	hi					; here: Gas counter
+;
+;PLED_gas_list_loop:
+;	incf	hi,F				; Increase Gas
+;	movlw	d'4'
+;	addwf	wait_temp,F			; Increase eeprom address for gas list
+;;	movlw	d'25'
+;;	addwf	waitms_temp,F		; Increase row
+;;	WIN_LEFT	.100
+;;	movff	waitms_temp,win_top ; Set Row
+;	
+;	lfsr	FSR2,letter		
+;	movlw	'G'
+;	movwf	POSTINC2
+;	movff	hi,lo			; copy gas number
+;	output_8				; display gas number
+;	movlw	':'
+;	movwf	POSTINC2
+;	movff	wait_temp, EEADR; Gas #hi: %O2 - Set address in internal EEPROM
+;	call	read_eeprom		; get byte (stored in EEDATA)
+;	movff	EEDATA,lo		; copy to lo
+;	output_8				; outputs into Postinc2!
+;	movlw	'/'
+;	movwf	POSTINC2
+;	incf	EEADR,F			; Gas #hi: %He - Set address in internal EEPROM
+;	call	read_eeprom		; get byte (stored in EEDATA)
+;	movff	EEDATA,lo		; copy to lo
+;	output_8				; outputs into Postinc2!
+;	
+;	
+;	read_int_eeprom		d'27'	; read flag register
+;	movff	hi,lo			; copy gas number
+;PLED_gas_list_loop1:
+;	rrcf	EEDATA			; roll flags into carry
+;	decfsz	lo,F			; max. 5 times...
+;	bra		PLED_gas_list_loop1
+;	
+;	movlw	.015	
+;	btfss	STATUS,C		; test carry
+;	movlw	.010
+;	movwf	grayvalue		; grey out inactive gases!
+;	
+;	call	word_processor	
+;	movlw	.015	
+;	movwf	grayvalue		; reset grey value for compatibility
+;
+;	movlw	d'5'			; list all five gases
+;	cpfseq	hi				; All gases shown?
+;	bra		PLED_gas_list_loop	; No
+;	
+;	return							; No, return (OC mode)
+;
+;PLED_splist_start:	
+;	WIN_LEFT	.100
+;	WIN_FONT	FT_SMALL
+;	bsf		leftbind
+;
+;	; list three SP in Gaslist
+;	movlw	d'35'				; 36 = current SP position in EEPROM
+;	movwf	wait_temp			; here: stores eeprom address for gas list
+;	movlw	d'231'
+;	movwf	waitms_temp			; here: stores row for gas list
+;	clrf 	temp5				; here: SP counter
+;
+;PLED_splist_loop:
+;	incf	wait_temp,F			; EEPROM address
+;	incf	temp5,F			; Increase SP
+;
+;	movlw	d'25'
+;	addwf	waitms_temp,F		; Increase row
+;	movff	waitms_temp,win_top ; Set Row
+;	WIN_LEFT	.100
+;	
+;	lfsr	FSR2,letter		
+;	movlw	'S'
+;	movwf	POSTINC2
+;	movlw	'P'
+;	movwf	POSTINC2
+;	movff	temp5,lo		; copy gas number
+;	output_8				; display gas number
+;	movlw	':'
+;	movwf	POSTINC2
+;	movff	wait_temp, EEADR; SP #hi position
+;	call	read_eeprom		; get byte (stored in EEDATA)
+;	movff	EEDATA,lo		; copy to lo
+;	clrf	hi
+;	output_16dp	d'3'		; outputs into Postinc2!
+;	call	word_processor	
+;
+;	movlw	d'3'		; list all three SP
+;	cpfseq	temp5		; All gases shown?
+;	bra		PLED_splist_loop	; No
+;
+;	bcf		leftbind
+;	return						; no, return
+;
+;
+;
+;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 PLED_active_gas_surfmode:				; Displays start gas/SP 1
 	ostc_debug	'q'		; Sends debug-information to screen if debugmode active
@@ -2486,7 +2766,20 @@ PLED_saturation_graph_divemode:
 	ostc_debug	'h'		; Sends debug-information to screen if debugmode active
 PLED_tissue_saturation_graph:
 	ostc_debug	'i'		; Sends debug-information to screen if debugmode active
-; with dd_font2display
+
+; Clear graph area...
+	movlw	.0
+	movff	WREG,box_temp+0		; Data
+	movlw	.25
+	movff	WREG,box_temp+1		; row top (0-239)
+	movlw	.120
+	movff	WREG,box_temp+2		; row bottom (0-239)
+	movlw	.82
+	movff	WREG,box_temp+3		; column left (0-159)
+	movlw	.159
+	movff	WREG,box_temp+4		; column right (0-159)
+	call	PLED_box
+
 
 	GETCUSTOM8	d'35'			; Standard output color
 	movff	WREG,box_temp+0		; Data

@@ -50,7 +50,12 @@ surfloop:
 ; Startup tasks for decompression modes
 	call	PLED_desaturation_time			; display desaturation time
 	call	PLED_nofly_time					; display nofly time
-	call	PLED_tissue_saturation_graph	; display saturation graph
+
+	btfss	pre_dive_screen					; Show predive screen
+	call	PLED_tissue_saturation_graph	; no, display saturation graph
+	btfsc	pre_dive_screen					; Show predive screen
+	call	PLED_pre_dive_screen			; yes, display Pre-Dive Screen
+
 	call	PLED_active_gas_surfmode		; Show start gas
 	call	PLED_display_decotype_surface	; Show deco mode (ZH-L16, const. ppO2 or Multi-GF)
 
@@ -200,8 +205,13 @@ update_surfloop60:
 ; One Minute tasks for deco modes
 	call	PLED_nofly_time				; display nofly time
 	call	PLED_desaturation_time		; display desaturation time
-	btfss	premenu						; Not when "Menu?" is displayed!
-	call	PLED_tissue_saturation_graph; display saturation graph
+	btfsc	premenu						; Not when "Menu?" is displayed!
+	bra		update_surfloop60_2
+
+	btfss	pre_dive_screen					; Show predive screen
+	call	PLED_tissue_saturation_graph	; no, display saturation graph
+	btfsc	pre_dive_screen					; Show predive screen
+	call	PLED_pre_dive_screen			; yes, display Pre-Dive Screen
 
 update_surfloop60_2:
 	call	nofly_timeout60				; checks if nofly time is > 0
@@ -399,7 +409,12 @@ timeout_premenu:
 	bra		timeout_premenu2		; Skip in Gauge mode
 	btfsc	FLAG_apnoe_mode
 	bra		timeout_premenu2		; Skip in Apnoe mode
-	call	PLED_tissue_saturation_graph		; rewrite graph
+
+	btfss	pre_dive_screen					; Show predive screen
+	call	PLED_tissue_saturation_graph	; no, display saturation graph
+	btfsc	pre_dive_screen					; Show predive screen
+	call	PLED_pre_dive_screen			; yes, display Pre-Dive Screen
+
 timeout_premenu2:
 	call	update_surf_press		; rewrite serial number
 	call	PLED_serial				; rewrite serial number
@@ -436,11 +451,19 @@ test_switches_surfmode3:
 test_switches_surfmode2:
 	bcf		switch_left
 	btfss	premenu
-	return
+	bra		test_switches_surfmode4
 	bsf		menubit					; Enter Menu!
 	return
 
+test_switches_surfmode4:
+	btg		pre_dive_screen
 
+	btfss	pre_dive_screen					; Show predive screen
+	call	PLED_tissue_saturation_graph	; no, display saturation graph
+	btfsc	pre_dive_screen					; Show predive screen
+	call	PLED_pre_dive_screen			; yes, display Pre-Dive Screen
+
+	return
 
 timeout_surfmode:
 	incf	timeout_counter2,F		; increase timeout counter

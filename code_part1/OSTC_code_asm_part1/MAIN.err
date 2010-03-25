@@ -1,5 +1,5 @@
-Warning[203] J:\MK2\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\PLED_OUTPUTS.ASM 3230 : Found opcode in column 1. (return)
-Warning[203] J:\MK2\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\PLED_OUTPUTS.ASM 3233 : Found opcode in column 1. (return)
+Warning[203] J:\MK2\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\PLED_OUTPUTS.ASM 3093 : Found opcode in column 1. (return)
+Warning[203] J:\MK2\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\PLED_OUTPUTS.ASM 3096 : Found opcode in column 1. (return)
 Warning[203] J:\MK2\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\ISR.ASM 357 : Found opcode in column 1. (movlw)
 Warning[203] J:\MK2\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\ISR.ASM 358 : Found opcode in column 1. (movwf)
 Warning[203] J:\MK2\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\DIVEMODE_MENU.ASM 411 : Found opcode in column 1. (bra)

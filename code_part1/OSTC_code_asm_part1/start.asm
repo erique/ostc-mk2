@@ -125,6 +125,23 @@ check_firmware_new:
 restart:
 	call	clear_LEDr					
 	call	clear_LEDnofly			; all LEDs off
+
+	clrf	flag1					; clear all flags
+	clrf	flag2
+	clrf	flag3
+	clrf	flag4
+	clrf	flag5
+	clrf	flag6
+	clrf	flag7
+	clrf	flag8
+	clrf	flag9
+	clrf	flag10
+	clrf	flag11
+	clrf	flag12
+	clrf	flag13
+	clrf	flag14
+	clrf	flag15
+
 	call	PLED_boot				; PLED boot (Incl. Clear Screen!)
 	WIN_TOP		.0
 	WIN_LEFT	.0
@@ -155,41 +172,9 @@ restart_01:
 	write_int_eeprom	d'92'		; Store number of CF used in this firmware
 
 restart_1:
-	btfss	pressure_refresh 		; Wait for pressure sensor...
-	bra		restart_1				; loop until pressure and temp stable
-
-;	call	startup_screen3				;splash screen
-;	GETCUSTOM15	.31
-;	movlw	LOW		.666
-;	cpfseq	lo
-;	bra		restart_2			; Not equal!
-;	movlw	HIGH	.666
-;	cpfseq	hi
-;	bra		restart_2			; Not equal!
-;	bra		restart_3			; Skip screen....
+;	btfss	pressure_refresh 		; Wait for pressure sensor...
+;	bra		restart_1				; loop until pressure and temp stable
 ;
-;restart_2:
-;	btfsc	show_startup_screen			; Show start screen?
-;	call	startup_screen1				;1/2
-;	btfsc	show_startup_screen			; Show start screen?	
-;	call	startup_screen2				;2/2
-;
-;restart_3:
-	clrf	flag1					; clear all flags
-	clrf	flag2
-	clrf	flag3
-	clrf	flag4
-	clrf	flag5
-	clrf	flag6
-	clrf	flag7
-	clrf	flag8
-	clrf	flag9
-	clrf	flag10
-	clrf	flag11
-	clrf	flag12
-	clrf	flag13
-	clrf	flag14
-	clrf	flag15
 
 ; Set Debug mode?
 	read_int_eeprom	d'39'

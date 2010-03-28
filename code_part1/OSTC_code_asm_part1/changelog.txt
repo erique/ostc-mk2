@@ -1,5 +1,9 @@
 New in 1.53 Beta:
 BETA Version - Do NOT use for diving!
+BUGFIX: Freeze at startup
+
+New in 1.53 Beta:
+BETA Version - Do NOT use for diving!
 CHANGE: License moved into Menu
 NEW: Quick power on
 NEW: Not used O2 Sensors are not shown (OSTC1 only)

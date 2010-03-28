@@ -1,4 +1,4 @@
-New in 1.53 Beta:
+New in 1.54 Beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: Freeze at startup
 

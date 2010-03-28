@@ -136,7 +136,7 @@ surfloop_loop1:
 ;	call	PLED_active_gas_surfmode	; Show start gas / SetPoint
 	call	PLED_display_decotype_surface	; Show deco mode
 	btfsc	enter_error_sleep			; Enter Fatal Error Routine?
-	goto	fatal_error_sleep			; Yes (In Sleepmode_vxx.asm!)
+	call	fatal_error_sleep			; Yes (In Sleepmode_vxx.asm!)
 	bcf		onesecupdate				; every second tasks done
 	
 surfloop_loop2:	

@@ -106,7 +106,7 @@ diveloop_loop1x:
 	call	timeout_divemenu				; Yes, so check for timeout divemenu
 	call	set_leds_divemode				; Sets warnings, if required. Also Sets buzzer
 	btfsc	enter_error_sleep				; Enter Fatal Error Routine?
-	goto	fatal_error_sleep				; Yes (In Sleepmode_vxx.asm!)
+	call	fatal_error_sleep				; Yes (In Sleepmode_vxx.asm!)
 
 	btfsc	stopwatch_active				;  =1: Show Average Depth instead of Temperature
 	call	PLED_stopwatch_show				; Show stopwatch only in Average mode

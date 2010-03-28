@@ -59,7 +59,7 @@ sleeploop_loop:
 onemin_sleep:
 	call	get_battery_voltage		; get battery voltage
 	btfsc	enter_error_sleep		; Enter Fatal Error Routine?
-	goto	fatal_error_sleep		; Yes (In Sleepmode_vxx.asm!)
+	call	fatal_error_sleep		; Yes (In Sleepmode_vxx.asm!)
 	
 	call	calc_surface_interval	; Increases Surface-Interval time
 	call	nofly_timeout60			; check for no fly time
@@ -188,6 +188,14 @@ pressuretest_sleep_fast:				; Get pressure without averaging (Faster to save som
 	return
 
 fatal_error_sleep:
+	WAITMS	d'250'
+	WAITMS	d'250'
+	WAITMS	d'250'
+	WAITMS	d'250'
+	call	get_battery_voltage			; get battery voltage
+	btfss	enter_error_sleep			; REALLY enter Fatal Error Routine?
+	return								; No!
+
 	clrf	INTCON
 	clrf	INTCON2
 	clrf	INTCON3

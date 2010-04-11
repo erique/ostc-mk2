@@ -205,6 +205,11 @@ menu_custom_functions1:
 	btfsc	STATUS,Z
 	bra		menu_custom_functions10c			; Yes
 
+	movlw	binary_cf6
+	subwf	apnoe_mins,W						; Binary cf?
+	btfsc	STATUS,Z
+	bra		menu_custom_functions10c			; Yes
+
 
 	bra		menu_custom_functions10a			; Not a  binary CF selected
 

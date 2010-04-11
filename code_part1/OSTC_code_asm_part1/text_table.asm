@@ -582,7 +582,7 @@
 	DA	"not used       }"		;161
 	DA	"not used       }"		;162
 	DA	"Avr. Depth [=1]}"		;163
-	DA	"not used       }"		;164
+	DA	"Blink Gas  [=1]}"		;164
 	DA	"not used       }"		;165
 	DA	"not used       }"		;166
 	DA	"not used       }"		;167

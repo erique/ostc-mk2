@@ -922,12 +922,12 @@ profileview_menu_do:
 	bra			exit_profileview		; back to list, quit profileview menu
 	dcfsnz		menupos,F
 	bra			profileview_menu_delete	; Delete Dive from external EEPROM
-	dcfsnz		menupos,F
-	bra			profileview_menu_format	; Delete all Dives from external EEPROM
-
+;	dcfsnz		menupos,F
+;	bra			profileview_menu_format	; Delete all Dives from external EEPROM
+;
 profileview_menu_move_cursor:
 	incf		menupos,F
-	movlw		d'4'						; number of menu options+1
+	movlw		d'3'						; number of menu options+1
 	cpfseq		menupos						; =limit?
 	bra			profileview_menu_move_cursor2	; No!
 	movlw		d'1'							; Yes, reset to position 1!

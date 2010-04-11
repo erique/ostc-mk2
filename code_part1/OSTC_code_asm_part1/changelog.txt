@@ -1,3 +1,10 @@
+New in 1.55 Beta:
+BETA Version - Do NOT use for diving!
+CHANGE: Greyed out gases more readable
+CHANGE: Removed "Delete All" from Logbook Menu
+NEW: CF42=1: Active Gas will blink if a better gas is available
+CHANGE: Returning from Bailout to CCR mode will not reset diluent gas
+
 New in 1.54 Beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: Freeze at startup

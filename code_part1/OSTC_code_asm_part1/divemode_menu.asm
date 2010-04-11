@@ -568,7 +568,7 @@ divemenu_set_bailout:
 
 divemenu_set_gas:
 	btfsc	FLAG_const_ppO2_mode		; in ppO2 mode?
-	bra		divemenu_set_setpoint		; Yes, display SetPoint/Sensor result list
+	bra		divemenu_set_setpoint		; Yes, display SetPoint list
 
 	bsf		display_set_gas				; set flag	
 	call	PLED_clear_divemode_menu	; Clear Menu
@@ -613,32 +613,31 @@ divemenu_set_gas1:
 divemenu_set_gas1a:
 	bcf		display_set_setpoint		; Clear Display Flag
 ; Now, Set correct Diluent (again)
-	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)
-	movff	EEDATA,active_gas			; Read start gas (1-5)
-
-	decf	active_gas,W				; Gas 0-4
-	mullw	d'4'
-	movf	PRODL,W			
-	addlw	d'7'						; = address for He ratio
-	movwf	EEADR
-	call	read_eeprom					; Read He ratio
-	movff	EEDATA,char_I_He_ratio		; And copy into hold register
-	decf	active_gas,W				; Gas 0-4
-	mullw	d'4'
-	movf	PRODL,W			
-	addlw	d'6'						; = address for O2 ratio
-	movwf	EEADR
-	call	read_eeprom					; Read O2 ratio
-	movff	EEDATA, char_I_O2_ratio		; O2 ratio
-	movff	char_I_He_ratio, wait_temp	; copy into bank1 register
-	bsf		STATUS,C					; Borrow bit
-	movlw	d'100'						; 100%
-	subfwb	wait_temp,W					; minus He
-	bsf		STATUS,C					; Borrow bit
-	subfwb	EEDATA,F					; minus O2
-	movff	EEDATA, char_I_N2_ratio		; = N2!
-
-	call	PLED_active_gas_clear		; Clear gas in case of AIR (Will be redrawn)	
+;	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)
+;	movff	EEDATA,active_gas			; Read start gas (1-5)
+;
+;	decf	active_gas,W				; Gas 0-4
+;	mullw	d'4'
+;	movf	PRODL,W			
+;	addlw	d'7'						; = address for He ratio
+;	movwf	EEADR
+;	call	read_eeprom					; Read He ratio
+;	movff	EEDATA,char_I_He_ratio		; And copy into hold register
+;	decf	active_gas,W				; Gas 0-4
+;	mullw	d'4'
+;	movf	PRODL,W			
+;	addlw	d'6'						; = address for O2 ratio
+;	movwf	EEADR
+;	call	read_eeprom					; Read O2 ratio
+;	movff	EEDATA, char_I_O2_ratio		; O2 ratio
+;	movff	char_I_He_ratio, wait_temp	; copy into bank1 register
+;	bsf		STATUS,C					; Borrow bit
+;	movlw	d'100'						; 100%
+;	subfwb	wait_temp,W					; minus He
+;	bsf		STATUS,C					; Borrow bit
+;	subfwb	EEDATA,F					; minus O2
+;	movff	EEDATA, char_I_N2_ratio		; = N2!
+;	call	PLED_active_gas_clear		; Clear gas in case of AIR (Will be redrawn)	
 	
 	bsf		stored_gas_changed			; set event flag
 	bsf		event_occured				; set global event flag

@@ -854,7 +854,7 @@ PLED_active_gas_divemode3:
 	movlw	'*'
 	movwf	POSTINC2
 	call	word_processor
-	return
+	bra		PLED_active_gas_divemode_exit
 
 PLED_active_gas_divemode4:
 	lfsr	FSR2,letter
@@ -870,7 +870,24 @@ PLED_active_gas_divemode4:
 	movwf	POSTINC2
 	bcf		leftbind
 	call	word_processor
-	return
+
+PLED_active_gas_divemode_exit:
+	btfss	better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
+	return					; Done.
+
+; Check if Gas Output should blink when a better gas is available...
+	GETCUSTOM8	d'42'			; =1 if gas should blink
+	movwf	lo
+	movlw	d'1'
+	cpfseq	lo					; =1?
+	return						; No, Done.
+
+	btg		blinking_better_gas		; Toggle blink bit...
+	btfss	blinking_better_gas		; blink now?
+	return							; No, Done.
+	call	PLED_active_gas_clear	; Blink once.
+	return							; Done.
+
 
 PLED_display_decotype_surface:
 	WIN_LEFT	.85
@@ -2576,7 +2593,7 @@ PLED_divemenu_cursor:
 PLED_profileview_menu:
 	DISPLAYTEXT	.127					;"Exit"
 	DISPLAYTEXT	.128					;"Delete"
-	DISPLAYTEXT	.132					;"Format"
+;	DISPLAYTEXT	.132					;"Format"
 	return
 
 custom_warn_surfmode:

@@ -23,7 +23,7 @@
 ;#DEFINE		NO_SENSOR_MODE			; uses Dummy values
 
 #DEFINE	softwareversion_x		d'1'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'54'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'55'		; Software version  XX.YY
 
 #DEFINE	max_custom_number		d'41'		; Number of last used custom function
 
@@ -41,6 +41,7 @@
 #DEFINE	binary_cf3				d'39'
 #DEFINE	binary_cf4				d'40'
 #DEFINE	binary_cf5				d'41'
+#DEFINE	binary_cf6				d'42'
 
 #DEFINE wp_fontwidth  .14
 #DEFINE wp_fontheight .24
@@ -52,7 +53,7 @@
 ;#DEFINE	color_white b'11111111'
 #DEFINE	color_black b'00000000'
 #DEFINE	color_deepblue b'00000001'
-#DEFINE	color_grey	d'73'
+#DEFINE	color_grey	d'74'
 
 #DEFINE	plus_time_correction	d'42'
 
@@ -617,7 +618,7 @@
 #DEFINE	restore_deco_data		flag15,0	;=1: Restore Decodata after the dive from 0x380 buffer
 #DEFINE	uart_store_tissue_data	flag15,1	;=1: Store tissue data for next simualted dive!
 #DEFINE	pre_dive_screen			flag15,2	;=1: Show predive screen instead of graphs
-;free
+#DEFINE	blinking_better_gas		flag15,3	;=1: Gas is currently blinking
 #DEFINE	display_see_l_tissue	flag15,4	;=1: Leading Tissue details are now displayed
 ;free
 ;free

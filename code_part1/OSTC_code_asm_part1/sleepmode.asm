@@ -195,7 +195,6 @@ fatal_error_sleep:
 	call	get_battery_voltage			; get battery voltage
 	btfss	enter_error_sleep			; REALLY enter Fatal Error Routine?
 	return								; No!
-
 	clrf	INTCON
 	clrf	INTCON2
 	clrf	INTCON3

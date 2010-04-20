@@ -1,3 +1,11 @@
+New in 1.56 Beta:
+BETA Version - Do NOT use for diving!
+BUGFIX: Inactive Gases in Divemode greyed out (OSTC Mk.2 only)
+NEW: Scale in Tissue Graph (OSTC Mk.2 only)
+NEW: Leading Tissue percent is displayed in Tissue Graph (OSTC Mk.2 only)
+NEW: Diluent is shown in Pre-Dive screen for CC modes
+
+
 New in 1.55 Beta:
 BETA Version - Do NOT use for diving!
 CHANGE: Greyed out gases more readable

@@ -1148,6 +1148,41 @@ PLED_pre_dive_screen3_loop:
 	cpfseq	temp5		; All gases shown?
 	bra		PLED_pre_dive_screen3_loop	;no
 
+	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)
+	movff	EEDATA,active_gas			; Read start gas (1-5)
+	decf	active_gas,W				; Gas 0-4
+	mullw	d'4'
+	movf	PRODL,W			
+	addlw	d'7'						; = address for He ratio
+	movwf	EEADR
+	call	read_eeprom					; Read He ratio
+	movff	EEDATA,hi		; And copy into hold register
+	decf	active_gas,W				; Gas 0-4
+	mullw	d'4'
+	movf	PRODL,W			
+	addlw	d'6'						; = address for O2 ratio
+	movwf	EEADR
+	call	read_eeprom					; Read O2 ratio
+	movff	EEDATA, lo		; O2 ratio
+
+	WIN_LEFT	.90
+	WIN_TOP		.100
+	lfsr	FSR2,letter		
+	movlw	'D'
+	movwf	POSTINC2
+	movlw	'i'
+	movwf	POSTINC2
+	movlw	'l'
+	movwf	POSTINC2
+	movlw	':'
+	movwf	POSTINC2
+	output_8				; O2 Ratio
+	movlw	'/'
+	movwf	POSTINC2
+	movff	hi,lo
+	output_8				; He Ratio
+	call	word_processor		
+
 	bcf		leftbind
 	return				; Return (CC Mode)
 
@@ -2444,15 +2479,13 @@ PLED_gas_list_loop1:
 	rrcf	EEDATA			; roll flags into carry
 	decfsz	lo,F			; max. 5 times...
 	bra		PLED_gas_list_loop1
-	
-	movlw	.015	
+
+	movlw	color_grey
 	btfss	STATUS,C		; test carry
-	movlw	.010
-	movwf	grayvalue		; grey out inactive gases!
+	call	PLED_set_color	; grey out inactive gases!
 	
 	call	word_processor	
-	movlw	.015	
-	movwf	grayvalue		; reset grey value for compatibility
+	call	PLED_standard_color	
 
 	movlw	d'5'			; list all five gases
 	cpfseq	hi				; All gases shown?
@@ -2660,7 +2693,7 @@ PLED_tissue_saturation_graph:
 	movff	WREG,box_temp+4		; column right (0-159)
 	call	PLED_box
 
-
+; Draw Frame
 	GETCUSTOM8	d'35'			; Standard output color
 	movff	WREG,box_temp+0		; Data
 	movlw	.25
@@ -2673,6 +2706,7 @@ PLED_tissue_saturation_graph:
 	movff	WREG,box_temp+4		; column right (0-159)
 	call	PLED_frame
 
+; Draw N2 Tissues
 	lfsr	FSR2, char_O_tissue_saturation+.000	; N2
 	movlw	d'16'
 	movwf	wait_temp		; 16 tissues
@@ -2710,6 +2744,7 @@ PLED_tissue_saturation_graph3:
 	decfsz	wait_temp,F
 	bra		PLED_tissue_saturation_graph3
 
+; Draw He Tissues
 	lfsr	FSR2, char_O_tissue_saturation+.016	; He
 	movlw	d'16'
 	movwf	wait_temp		; 16 tissues
@@ -2747,6 +2782,7 @@ PLED_tissue_saturation_graph2:
 	decfsz	wait_temp,F
 	bra		PLED_tissue_saturation_graph2
 
+; Draw Text
 	WIN_LEFT	.84
 	WIN_TOP		.32
 	call	PLED_standard_color
@@ -2756,7 +2792,6 @@ PLED_tissue_saturation_graph2:
 	movlw	'2'
 	movwf	POSTINC2
 	call	word_processor
-
 	WIN_LEFT	.84
 	WIN_TOP		.90
 	call	PLED_standard_color
@@ -2766,6 +2801,97 @@ PLED_tissue_saturation_graph2:
 	movlw	'e'
 	movwf	POSTINC2
 	call	word_processor
+
+	movff	char_O_gtissue_no,wait_temp			; used as temp
+
+	lfsr	FSR2,letter
+	lfsr	FSR1,char_O_tissue_saturation+0
+	incf	wait_temp,F			; make 1-16 of 0-15
+PLED_tissue_saturation_graph4:		; point to leading tissue...
+	movff	POSTINC1,lo			; copy/overwrite to lo register
+	decfsz	wait_temp,F			; count until zero
+	bra		PLED_tissue_saturation_graph4	;loop
+	output_8
+	movlw	'%'
+	movwf	POSTINC2
+	movlw	' '
+	movwf	POSTINC2
+	WIN_LEFT	.84
+	WIN_TOP		.62
+	WIN_FONT	FT_SMALL
+	call	PLED_standard_color
+	call	word_processor
+	bcf		leftbind
+
+; Draw Scale
+	GETCUSTOM8	d'35'			; Standard output color
+	movff	WREG,box_temp+0		; Data
+	movlw	.73
+	movff	WREG,box_temp+1		; row top (0-239)
+	movlw	.74
+	movff	WREG,box_temp+2		; row bottom (0-239)
+	movlw	.121
+	movff	WREG,box_temp+3		; column left (0-159)
+	movlw	.157
+	movff	WREG,box_temp+4		; column right (0-159)
+	call	PLED_frame
+
+	GETCUSTOM8	d'35'			; Standard output color
+	movff	WREG,box_temp+0		; Data
+	movlw	.61
+	movff	WREG,box_temp+1		; row top (0-239)
+	movlw	.84
+	movff	WREG,box_temp+2		; row bottom (0-239)
+	movlw	.121
+	movff	WREG,box_temp+3		; column left (0-159)
+	movlw	.122
+	movff	WREG,box_temp+4		; column right (0-159)
+	call	PLED_box
+	GETCUSTOM8	d'35'			; Standard output color
+	movff	WREG,box_temp+0		; Data
+	movlw	.65
+	movff	WREG,box_temp+1		; row top (0-239)
+	movlw	.80
+	movff	WREG,box_temp+2		; row bottom (0-239)
+	movlw	.121+.9
+	movff	WREG,box_temp+3		; column left (0-159)
+	movlw	.122+.9
+	movff	WREG,box_temp+4		; column right (0-159)
+	call	PLED_box
+	GETCUSTOM8	d'35'			; Standard output color
+	movff	WREG,box_temp+0		; Data
+	movlw	.65
+	movff	WREG,box_temp+1		; row top (0-239)
+	movlw	.80
+	movff	WREG,box_temp+2		; row bottom (0-239)
+	movlw	.121+.18
+	movff	WREG,box_temp+3		; column left (0-159)
+	movlw	.122+.18
+	movff	WREG,box_temp+4		; column right (0-159)
+	call	PLED_box
+	GETCUSTOM8	d'35'			; Standard output color
+	movff	WREG,box_temp+0		; Data
+	movlw	.65
+	movff	WREG,box_temp+1		; row top (0-239)
+	movlw	.80
+	movff	WREG,box_temp+2		; row bottom (0-239)
+	movlw	.121+.27
+	movff	WREG,box_temp+3		; column left (0-159)
+	movlw	.122+.27
+	movff	WREG,box_temp+4		; column right (0-159)
+	call	PLED_box
+	GETCUSTOM8	d'35'			; Standard output color
+	movff	WREG,box_temp+0		; Data
+	movlw	.61
+	movff	WREG,box_temp+1		; row top (0-239)
+	movlw	.84
+	movff	WREG,box_temp+2		; row bottom (0-239)
+	movlw	.121+.36
+	movff	WREG,box_temp+3		; column left (0-159)
+	movlw	.122+.36
+	movff	WREG,box_temp+4		; column right (0-159)
+	call	PLED_box
+
 	return
 
 

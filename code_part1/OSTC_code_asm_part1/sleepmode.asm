@@ -117,14 +117,14 @@ onesec_sleep:
 	btfss	nofly_active
 	bra		onesec_sleep_nonofly
 	
-	call	set_LEDnofly			; Set nofly LED
+	bsf		LED_blue				; Set nofly LED
 	
 	nop
 	sleep
 	nop
 
 onesec_sleep_nonofly:
-	call	clear_LEDnofly			; Clear	nofly LED
+	bcf		LED_blue				; Clear	nofly LED
 	incf	divemins+0,F 			; counts to #test_pressure_in_sleep (5)
 	movlw	d'5'
 	cpfsgt	divemins+0				; here: temp variable
@@ -229,10 +229,10 @@ fatal_error_sleep_loop1:
 	decfsz	temp1,F
 	bra		fatal_error_sleep_loop1
 fatal_error_sleep_loop2:
-	call	set_LEDy					
+	bsf		LED_red
 	clrwdt
 	WAIT10US	d'5'
-	call	clear_LEDy					
+	bcf		LED_red
 	sleep
 	nop
 	decfsz	temp4,F

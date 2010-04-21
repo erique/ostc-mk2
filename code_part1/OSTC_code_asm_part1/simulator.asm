@@ -258,7 +258,7 @@ simulator_calc_deco_loop1:
 
 	
 simulator_calc_deco_loop2:
-	call	toggle_LEDr
+	btg		LED_red
 
 	call	divemode_check_decogases			; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
@@ -277,7 +277,7 @@ simulator_calc_deco_loop2:
 	bra		simulator_calc_deco2				; Not finished
 
 simulator_calc_deco3:
-	call	set_LEDr
+	bsf		LED_red
 	
 	call	simulator_restore_tissue_data	; Restore 32 floats "pre_tissue" from bank3
 
@@ -288,7 +288,7 @@ simulator_calc_deco3:
 	WAITMS	d'250'
 	WAITMS	d'250'							; Wait for Pressure Sensor to get real pressure again...
 
-	call	clear_LEDr
+	bcf		LED_red
 	
 	movlw	d'1'
 	movwf	logbook_temp1					; Bottom time>0!

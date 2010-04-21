@@ -1,3 +1,7 @@
+New in 1.60 Stable:
+Stable release
+
+
 New in 1.56 Beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: Inactive Gases in Divemode greyed out (OSTC Mk.2 only)

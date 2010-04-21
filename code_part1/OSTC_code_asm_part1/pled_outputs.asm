@@ -77,8 +77,8 @@ ostc_debug1:
 
 
 PLED_resetdebugger:
-	call	set_LEDr
-	call	clear_LEDnofly		
+	bsf		LED_red
+	bcf		LED_blue
 	call	PLED_boot				; PLED boot
 	call	PLED_ClearScreen		; clean up OLED
 
@@ -176,7 +176,7 @@ PLED_resetdebugger:
 PLED_resetdebugger_loop:
 	btfss	switch_left
 	bra		PLED_resetdebugger_loop		; Loop
-	call	clear_LEDy					
+	bcf		LED_red
 	return
 
 PLED_divemode_mask:					; Displays mask in Dive-Mode

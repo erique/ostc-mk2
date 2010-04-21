@@ -123,8 +123,8 @@ check_firmware_new:
 	goto	reset_all_cf_bank1		; resets all custom functions bank1 and jumps to "restart"
 			
 restart:
-	call	clear_LEDr					
-	call	clear_LEDnofly			; all LEDs off
+	bcf		LED_red
+	bcf		LED_blue				; all LEDs off
 
 	clrf	flag1					; clear all flags
 	clrf	flag2

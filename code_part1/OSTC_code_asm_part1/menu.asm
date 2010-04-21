@@ -56,7 +56,7 @@ wait_switches3:
 	bcf		switch_left
 	bcf		switch_right
 	bcf		button_delay_done
-	call	clear_LEDg					
+	bcf		LED_red
 	return
 
 menu:

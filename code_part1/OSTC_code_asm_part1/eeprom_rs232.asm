@@ -60,24 +60,24 @@ internal_eeprom_access1:
 	movwf	EEADR
 	bcf		PIE1,RCIE					; no interrupt for UART
 	bcf		PIR1,RCIF					; clear flag
-	call	set_LEDusb					; LEDusb ON
+	bsf		LED_blue					; LEDusb ON
 
 internal_eeprom_access2:
 	rcall	rs232_get_byte				; Get byte to write...
 	movff	RCREG,EEDATA				; copy to write register
-	call	set_LEDy					; show activity
+	bsf		LED_red						; show activity
 
 	btfsc	rs232_recieve_overflow		; overflow recieved?
 	bra		internal_eeprom_access3		; Yes, abort!
 
 	rcall	write_eeprom				; No, write one byte
-	call	clear_LEDy					
+	bcf		LED_red
 	movff	EEDATA,TXREG				; Send echo!
 	rcall	rs232_wait_tx				; Wait for UART
 	incfsz 	EEADR,F						; Do until EEADR rolls to zero
 	bra		internal_eeprom_access2
 internal_eeprom_access2a:
-	call	clear_LEDusb				; LEDusb OFF
+	bcf		LED_blue					; LEDusb OFF
 	bcf		PIR1,RCIF					; clear flag
 	bsf		PIE1,RCIE					; re-enable interrupt for UART
 	clrf	EEADRH						; Point to Bank0 again

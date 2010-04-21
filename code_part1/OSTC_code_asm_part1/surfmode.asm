@@ -83,8 +83,8 @@ surfloop3:
 	movlw	d'5'
 	movwf	timeout_counter			; reload counter
 
-	call	clear_LEDusb
-	call	clear_LEDy					
+	bcf		LED_blue
+	bcf		LED_red
 	bcf		simulatormode_active		; Quit simulator mode (if active)
 	bcf		standalone_simulator		; Quit simulator mode (if active)
 	WIN_TOP		.0
@@ -229,7 +229,7 @@ nofly_timeout60:
 	tstfsz	nofly_time+1					; =0?
 	return
 	bcf		nofly_active					; Clear flag
-	call	clear_LEDnofly
+	bcf		LED_blue
 	incf	nofly_time+0,F					; =1
 	return
 
@@ -253,11 +253,11 @@ calc_surface_interval2:						; Increase surface interval timer
 
 set_leds_surfmode:	
 	btfsc	nofly_active
-	call	toggle_LEDnofly
+	btg		LED_blue
 	return	
 
 calc_deko_surfmode:
-	call	set_LEDg					
+	bsf		LED_red
 	ostc_debug	'I'		; Sends debug-information to screen if debugmode active
 
 	movff	last_surfpressure+0,int_I_pres_surface+0	; copy surface air pressure to deco routine
@@ -280,7 +280,7 @@ calc_deko_surfmode:
 	call	deco_main_calc_wo_deco_step_1_m				; calculate deco in surface mode 
 	movlb	b'00000001'									; select ram bank 1
 	ostc_debug	'J'		; Sends debug-information to screen if debugmode active
-	call	clear_LEDg					
+	bcf		LED_red
 	return
 
 
@@ -379,16 +379,16 @@ test_charger2:
 	return	
 
 show_cv_active:							; CV mode
-	call	set_LEDr					
+	bsf		LED_red
 	WAITMS	d'100'
-	call	clear_LEDr					
+	bcf		LED_red
 	WAITMS	d'100'
-	call	set_LEDr					
+	bsf		LED_red
 	bsf		charge_done					; Charge cycle finished
 	return
 
 show_cc_active:							; CC mode
-	call	set_LEDr					
+	bsf		LED_red
 	bsf		charge_started				; Charger started in CC mode
 	bcf		charge_done					; Charge cycle not finished
 	return

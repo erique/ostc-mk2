@@ -234,7 +234,7 @@ apnoe_calc_maxdepth:
 	return
 
 set_leds_divemode:
-	call	clear_LEDy					; LEDy OFF
+	bcf		LED_red							; LEDy OFF
 	movff	char_O_gradient_factor,lo		; gradient factor absolute
 
 	GETCUSTOM8	d'14'		; threshold for LED warning
@@ -242,7 +242,7 @@ set_leds_divemode:
 	call	warn_gf1		; show warning, set flags
 
 	btfsc	ppO2_warn_value	; warn because of too high ppO2?
-	call	set_LEDy		; Yes
+	bsf		LED_red			; Yes
 
 	movff	char_I_deco_model,lo
 		decfsz	lo,W		; jump over return if char_I_deco_model == 1
@@ -255,12 +255,12 @@ set_leds_divemode:
 	call	warn_gf1		; show warning, set flags
 
 	btfsc	ppO2_warn_value	; warn because of too high ppO2?
-	call	set_LEDy		; Yes
+	bsf		LED_red			; Yes
 
 	return
 
 warn_gf1:
-	call		set_LEDy		; LED Yellow on
+	bsf			LED_red			; LED Yellow on
 	movlw		d'2'			; Type of Alarm
 	movwf		AlarmType		; Copy to Alarm Register
 	bsf			event_occured	; Set Event Flag
@@ -517,7 +517,7 @@ store_dive_data:						; CF20 seconds gone
 	bcf		store_sample				; update only any CF20 seconds
 	bsf		update_divetime				; update divemins every CF20 seconds
 
-	call	clear_LEDg					; LEDg off
+	bcf		LED_red						; LEDr off (Marker)
 
 	btfsc	header_stored				; Header already stored?
 	bra	store_dive_data2				; Yes, store only profile data
@@ -1295,7 +1295,7 @@ change_logbook_offset1:
 
 change_logbook_offset2:
 	bcf		simulatormode_active		; if we were in simulator mode
-	call	clear_LEDusb
+	bcf		LED_blue
 
 end_dive_common:
 	btfsc	restore_deco_data			; Restore decodata?
@@ -1627,7 +1627,7 @@ divemode1:
 	movff	EEDATA,char_I_const_ppO2	; Set ppO2 setpoint if in ppO2 mode
 	movff	EEDATA, ppO2_setpoint_store	; Store also in this byte...
 
-	call	clear_LEDnofly				; Clear flags
+	bcf		LED_blue
 	bcf		low_battery_state			; clear flag for battery warning mode
 	bcf		header_stored				
 	bcf		premenu

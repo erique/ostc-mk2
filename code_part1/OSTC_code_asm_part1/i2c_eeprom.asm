@@ -282,7 +282,7 @@ I2C_WaitforACK:
 	
 I2CFail:
 	ostc_debug	'M'		; Sends debug-information to screen if debugmode active
-	call		set_LEDy					
+	bsf			LED_red
 	rcall		I2CReset			; I2C Reset
 	bcf			PIR1,SSPIF
 	clrf		i2c_temp
@@ -330,7 +330,7 @@ I2CReset_2:
 	movwf		SSPCON2
 	movlw		d'8'				; 400kHz I2C clock @ 16MHz Fcy
 	movwf		SSPADD
-	call		clear_LEDy					
+	bcf			LED_red
 	ostc_debug	'O'		; Sends debug-information to screen if debugmode active
 	return
 I2C_TX:

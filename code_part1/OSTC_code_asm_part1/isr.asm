@@ -69,7 +69,7 @@ simulator_int:
 		btfsc	standalone_simulator		; ignore in standalone simulator mode
 		bra		uartint1
 
-		call	set_LEDusb
+		bsf		LED_blue
 		tstfsz	RCREG						; =0x00?
 		bra		simulator_int1				; No
 		incf	RCREG,F						; Yes, so force RCREG=1
@@ -159,8 +159,7 @@ timer1int:
 		bcf		PIR1,TMR1IF					; Clear flag
 
 timer1int_debug:
-
-		call	clear_LEDr					; LEDr off (For charge indicator)
+		bcf		LED_red						; LEDr off (For charge indicator)
 
 		movlw	0x08						; Timer1 int after 62.5ms (=16/second)
 		cpfslt	TMR1H						; Did we miss a 1/16 second?
@@ -354,8 +353,8 @@ RTCisr2:
 		return
 		clrf		hours
 		incf		day,F
-movlw	plus_time_correction			; Correct too slow clock
-movwf	secs
+		movlw		plus_time_correction			; Correct too slow clock
+		movwf		secs
 
 						
 check_date:

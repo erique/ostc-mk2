@@ -15,50 +15,7 @@
 ; low-level routines for i/O
 ; written by: Matthias Heinrichs, info@heinrichsweikamp.com
 ; written: 090801
-; last updated: 090801
+; last updated: 100421
 ; known bugs:
-; ToDo:
-
-set_LEDy:	; Yellow LED
-	bsf		LED_red
-	return
-clear_LEDy	; Yellow LED
-	bcf		LED_red
-	return
-
-set_LEDr:	; Red LED
-	bsf		LED_red
-	return
-clear_LEDr	; Red LED
-	bcf		LED_red
-	return
-toggle_LEDr	; Red LED
-	btg		LED_red
-	return
-
-
-set_LEDg:	; Green LED
-	bsf		LED_red
-	return
-clear_LEDg	; Green LED
-	bcf		LED_red
-	return
-
-set_LEDusb:	; USB LED
-	bsf		LED_blue
-	return
-clear_LEDusb;  USB LED
-	bcf		LED_blue
-	return
-
-set_LEDnofly:	; nofly LED
-	bsf		LED_blue
-	return
-clear_LEDnofly;  nofly LED
-	bcf		LED_blue
-	return
-toggle_LEDnofly	; nofly LED
-	btg		LED_blue
-	return
-
+; ToDo: Remove file
 

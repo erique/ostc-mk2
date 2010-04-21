@@ -26,12 +26,12 @@
 uart_store_tissues:
 	bcf		uart_store_tissue_data			; Clear flag
 	bcf		PIE1,RCIE						; No Interrupt for UART
-	call	set_LEDusb
+	bsf		LED_blue
 	call	simulator_save_tissue_data		; store and set flag for automatic restore
 	movlw		'k'							; send echo
 	movwf		TXREG						; When done
 	call		rs232_wait_tx				; wait for UART
-	call	clear_LEDusb
+	bcf			LED_blue
 	bsf			PIE1,RCIE				; Interrupt for RS232
 	goto		surfloop_loop			; return to surface loop
 
@@ -39,7 +39,7 @@ uart_store_tissues:
 reset_decodata:
 	bcf			uart_reset_decodata				; clear flag
 	bcf			PIE1,RCIE						; No Interrupt for UART
-	call		set_LEDusb
+	bsf			LED_blue
 
 	call		deco_main_clear_tissue			; Reset Decodata
 	movlb		b'00000001'						; select ram bank 1
@@ -57,7 +57,7 @@ reset_decodata:
 	call		rs232_wait_tx				; wait for UART
 
 	bsf			oneminupdate				; set flag, so display will be updated at once
-	call		clear_LEDusb
+	bcf			LED_blue
 	bsf			PIE1,RCIE					; Interrupt for RS232
 	goto		surfloop_loop				; return to surface loop
 
@@ -65,12 +65,12 @@ reset_decodata:
 send_int_eeprom_b0:
 	bcf			uart_send_int_eeprom	; clear flag
 	bcf			PIE1,RCIE				; No Interrupt for UART
-	call		set_LEDusb
-
+	bsf			LED_blue
+	
 	clrf		EEADRH						; Point to Bank0
 	rcall		send_internal_eeprom1		; sends complete 1st. page of internal EEPROM
 
-	call		clear_LEDusb
+	bcf			LED_blue
 	bsf			PIE1,RCIE				; Interrupt for RS232
 	goto		surfloop_loop			; return to surface loop
 
@@ -78,14 +78,15 @@ send_int_eeprom_b0:
 send_int_eeprom_b1:
 	bcf			uart_send_int_eeprom2	; clear flag
 	bcf			PIE1,RCIE				; No Interrupt for UART
-	call		set_LEDusb
+	bsf			LED_blue
+
 
 	movlw		d'1'
 	movwf		EEADRH						; Point to Bank1
 	rcall		send_internal_eeprom1		; sends complete 2nd page of internal EEPROM
 	clrf		EEADRH						; Point to Bank0
 
-	call		clear_LEDusb
+	bcf			LED_blue
 	bsf			PIE1,RCIE				; Interrupt for RS232
 	goto		surfloop_loop			; return to surface loop
 
@@ -94,7 +95,7 @@ send_int_eeprom_b1:
 send_md2_hash:
 	bcf			uart_send_hash			; clear flag
 	bcf			PIE1,RCIE				; No Interrupt for UART
-	call		set_LEDusb
+	bsf			LED_blue
 
 	call		rs232_wait_tx					; wait for UART
 	movlw		softwareversion_x				; Softwareversion
@@ -112,7 +113,7 @@ send_md2_hash2:
 	decfsz		temp1,F
 	bra		send_md2_hash2					; loop 16 times
 
-	call		clear_LEDusb
+	bcf			LED_blue
 	bsf			PIE1,RCIE				; Interrupt for RS232
 	goto		surfloop_loop			; return to surface loop
 
@@ -121,7 +122,7 @@ send_md2_hash2:
 menu_interface:
 	bcf		dump_external_eeprom			; clear flag
 	bcf		PIE1,RCIE					; No Interrupt for UART
-	call	set_LEDusb
+	bsf		LED_blue
 	call	PLED_ClearScreen
 	call	PLED_topline_box
 	WIN_INVERT	.1					; Init new Wordprocessor	
@@ -223,7 +224,7 @@ menu_interface4:
 	DISPLAYTEXT	.20						; Done.
 
 	WAITMS	d'250'
-	call		clear_LEDusb
+	bcf			LED_blue
 	bsf			PIE1,RCIE					; Interrupt for RS232
 	goto		surfloop					; back to surfacemode
 

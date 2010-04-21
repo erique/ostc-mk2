@@ -86,7 +86,7 @@ set_marker:
 	btfsc		standalone_simulator	; Standalone Simualtor active?
 	bra			divemode_menu_simulator	; Yes, Show simulator menu!
 
-	call		set_LEDg			; LEDg on
+	bsf		LED_red					; LEDr on
 	movlw		d'6'				; Type of Alarm  (Manual Marker)
 	movwf		AlarmType			; Copy to Alarm Register
 	bsf			event_occured		; Set Event Flag

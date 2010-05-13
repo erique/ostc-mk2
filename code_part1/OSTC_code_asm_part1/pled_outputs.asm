@@ -25,14 +25,30 @@
 
 PLED_standard_color:
 	GETCUSTOM8	d'35'			; Standard output color
+	tstfsz	WREG				; =0?
+	bra		PLED_standard_color2
+	movlw	color_standard1		; Reset Color
+PLED_standard_color2:
 	call	PLED_set_color
 	return
 
 PLED_divemask_color:
-	GETCUSTOM8	d'36'			; Standard output color
+	GETCUSTOM8	d'36'			; Divemask output color
+	tstfsz	WREG				; =0?
+	bra		PLED_divemask_color2
+	movlw	color_divemask		; Reset Color
+PLED_divemask_color2:
 	call	PLED_set_color
 	return
 
+PLED_warnings_color:
+	GETCUSTOM8	d'37'			; Warnings output color
+	tstfsz	WREG				; =0?
+	bra		PLED_warnings_color2
+	movlw	color_warnings		; Reset Color
+PLED_warnings_color2:
+	call	PLED_set_color
+	return
 
 ostc_debug	macro debug_temp
 	movlw	debug_temp
@@ -809,14 +825,34 @@ PLED_active_gas_divemode:				; Displays current gas (e.g. 40/20) if a) He>0 or b
 	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
 	return								; Yes, No update and return!
 
+	WIN_INVERT	.0					; Init new Wordprocessor	
+	call	PLED_active_gas_divemode_show	; Show gas (Non-Inverted in all cases)
+
+	btfss	better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
+	return					; Done.
+
+; Check if Gas Output should blink when a better gas is available...
+	GETCUSTOM8	d'42'			; =1 if gas should blink
+	movwf	lo
+	movlw	d'1'
+	cpfseq	lo					; =1?
+	return						; No, Done.
+
+	btg		blinking_better_gas		; Toggle blink bit...
+	btfss	blinking_better_gas		; blink now?
+	return							; No, Done.
+	WIN_INVERT	.1					; Init new Wordprocessor	
+	call	PLED_active_gas_divemode_show	; Show gas (Non-Inverted in all cases)
+	WIN_INVERT	.0					; Init new Wordprocessor	
+	return							; Done.
+
+PLED_active_gas_divemode_show:
 	ostc_debug	's'		; Sends debug-information to screen if debugmode active
 ; gas
 	WIN_TOP		.192
 	WIN_LEFT	.65
 	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
-
 
 	movlw	d'100'						; 100% in the tank
 	movff	char_I_N2_ratio,lo			; minus N2
@@ -854,7 +890,7 @@ PLED_active_gas_divemode3:
 	movlw	'*'
 	movwf	POSTINC2
 	call	word_processor
-	bra		PLED_active_gas_divemode_exit
+	return
 
 PLED_active_gas_divemode4:
 	lfsr	FSR2,letter
@@ -870,23 +906,8 @@ PLED_active_gas_divemode4:
 	movwf	POSTINC2
 	bcf		leftbind
 	call	word_processor
+	return
 
-PLED_active_gas_divemode_exit:
-	btfss	better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
-	return					; Done.
-
-; Check if Gas Output should blink when a better gas is available...
-	GETCUSTOM8	d'42'			; =1 if gas should blink
-	movwf	lo
-	movlw	d'1'
-	cpfseq	lo					; =1?
-	return						; No, Done.
-
-	btg		blinking_better_gas		; Toggle blink bit...
-	btfss	blinking_better_gas		; blink now?
-	return							; No, Done.
-	call	PLED_active_gas_clear	; Blink once.
-	return							; Done.
 
 
 PLED_display_decotype_surface:
@@ -1078,8 +1099,7 @@ PLED_pre_dive_screen2_loop1:
 	bra		PLED_pre_dive_color_done
 
 PLED_pre_dive_white:
-	GETCUSTOM8	d'35'		;movlw	color_white	
-	call	PLED_set_color	; grey out inactive gases!
+	call	PLED_standard_color
 
 PLED_pre_dive_color_done:	
 	read_int_eeprom 	d'33'			; Read start gas (1-5)
@@ -1096,8 +1116,7 @@ PLED_pre_dive_screen2a:
 	call	word_processor	; No, display gas
 
 PLED_pre_dive_screen2b:
-	GETCUSTOM8	d'35'		;movlw	color_white	
-	call	PLED_set_color	; grey out inactive gases!
+	call		PLED_standard_color
 
 	movlw	d'5'			; list all four (remaining) gases
 	cpfseq	hi				; All gases shown?
@@ -1691,31 +1710,31 @@ update_batt_voltage2:
 	movff	WREG,box_temp+4		; column right (0-159)
 	call	PLED_frame
 
-; 3600-Vbatt
-	movlw	LOW		d'3600'
+; 4100-Vbatt
+	movlw	LOW		d'4100'
 	movwf	sub_a+0
-	movlw	HIGH	d'3600'
+	movlw	HIGH	d'4100'
 	movwf	sub_a+1
 	movff	batt_voltage+0,sub_b+0
 	movff	batt_voltage+1,sub_b+1
 	call	sub16				;  sub_c = sub_a - sub_b
-; Battery full (>3600mV?
+; Battery full (>4100mV?
 	btfsc	neg_flag
 	bra		update_batt_voltage2_full
 
-; Vbatt-3000
-	movlw	LOW		d'3000'
+; Vbatt-3500
+	movlw	LOW		d'3500'
 	movwf	sub_b+0
-	movlw	HIGH	d'3000'
+	movlw	HIGH	d'3500'
 	movwf	sub_b+1
 	movff	batt_voltage+0,sub_a+0
 	movff	batt_voltage+1,sub_a+1
 	call	sub16				;  sub_c = sub_a - sub_b
-; Battery lower then 3000mV?
+; Battery lower then 3500mV?
 	btfsc	neg_flag
 	bra		update_batt_voltage2_empty
 
-; Battery is between 3000 and 3600mV
+; Battery is between 3500 and 4100mV
 ; sub_c:2 is between 0 and 600	
 	movff	sub_c+0,xA+0
 	movff	sub_c+1,xA+1
@@ -1730,7 +1749,6 @@ update_batt_voltage2:
 	cpfsgt	wait_temp
 	movwf	wait_temp					; Minimum = 2
 
-
 update_batt_voltage2a:
 	GETCUSTOM8	d'35'			; Standard output color
 	movff	WREG,box_temp+0		; Data
@@ -1742,22 +1760,33 @@ update_batt_voltage2a:
 	movff	WREG,box_temp+3		; column left (0-159)
 	movlw	.33
 	movff	WREG,box_temp+4		; column right (0-159)
-	call	PLED_frame			; Empty cap
+	call	PLED_box			; Full Cap
 
+;	GETCUSTOM8	d'35'			; Standard output color
+;	movff	WREG,box_temp+0		; Data
+;	movlw	.181
+;	movff	WREG,box_temp+1		; row top (0-239)
+;	movlw	.187
+;	movff	WREG,box_temp+2		; row bottom (0-239)
+;	movlw	.31
+;	movff	WREG,box_temp+3		; column left (0-159)
+;	movlw	.33
+;	movff	WREG,box_temp+4		; column right (0-159)
+;	call	PLED_frame			; Empty cap
+;
 update_batt_voltage3:
-	GETCUSTOM8	d'34'		; Color battery
+	GETCUSTOM8	d'34'			; Color battery
 	movff	WREG,box_temp+0		; Color Data
-	movlw	.175
+	movlw	.176
 	movff	WREG,box_temp+1		; row top (0-239)
-	movlw	.193
+	movlw	.192
 	movff	WREG,box_temp+2		; row bottom (0-239)
 	movlw	.1
 	movff	WREG,box_temp+3		; column left (0-159)
 	movff	wait_temp,box_temp+4		; column right (0-159)
 	call	PLED_box
 
-	GETCUSTOM8	d'35'			; Standard output color
-	call	PLED_set_color
+	call		PLED_standard_color
 	return
 		
 update_batt_voltage2_empty:
@@ -1768,19 +1797,7 @@ update_batt_voltage2_empty:
 update_batt_voltage2_full:
 	movlw	d'30'
 	movwf	wait_temp
-
-	GETCUSTOM8	d'35'			; Standard output color
-	movff	WREG,box_temp+0		; Data
-	movlw	.181
-	movff	WREG,box_temp+1		; row top (0-239)
-	movlw	.187
-	movff	WREG,box_temp+2		; row bottom (0-239)
-	movlw	.31
-	movff	WREG,box_temp+3		; column left (0-159)
-	movlw	.33
-	movff	WREG,box_temp+4		; column right (0-159)
-	call	PLED_box			; Full Cap
-	bra		update_batt_voltage3
+	bra		update_batt_voltage2a
 
 PLED_convert_date:	; converts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 	read_int_eeprom d'91'			; Read date format (0=MMDDYY, 1=DDMMYY, 2=YYMMDD)
@@ -3192,37 +3209,36 @@ PLED_clear_custom_text:
 ;	return
 ;
 
-;PLED_gaschange_DEBUG:
-;	movlw	.008
-;	call	PLED_SetColumn
-;	movlw	.016
-;	call	PLED_SetRow
-;	lfsr	FSR2,letter
-;	movff	char_I_deco_He_ratio,lo
-;	output_8
-;	call	word_processor
-;
-;	movlw	.024
-;	call	PLED_SetRow
-;	lfsr	FSR2,letter
-;	movff	char_I_deco_N2_ratio,lo
-;	output_8
-;	call	word_processor
-;
-;	movlw	.032
-;	call	PLED_SetRow
-;	lfsr	FSR2,letter
-;	movff	char_I_deco_gas_change,lo
-;	output_8
-;	call	word_processor
-;
-;	movlw	.040
-;	call	PLED_SetRow
-;	lfsr	FSR2,letter
-;	movff	hi,lo
-;	output_8
-;	call	word_processor
-;	return
+PLED_gaschange_DEBUG:
+	WIN_LEFT	.0
+	WIN_TOP		.160
+	lfsr	FSR2,letter
+	movff	char_I_deco_He_ratio,lo
+	output_8
+	call	word_processor
+
+	WIN_LEFT	.25
+	WIN_TOP		.160
+	call	PLED_SetRow
+	lfsr	FSR2,letter
+	movff	char_I_deco_N2_ratio,lo
+	output_8
+	call	word_processor
+
+	WIN_LEFT	.50
+	WIN_TOP		.160
+	lfsr	FSR2,letter
+	movff	char_I_deco_gas_change,lo
+	output_8
+	call	word_processor
+
+	WIN_LEFT	.75
+	WIN_TOP		.160
+	lfsr	FSR2,letter
+	movff	hi,lo
+	output_8
+	call	word_processor
+	return
 
 
 PLED_MultiGF_deco_mask:

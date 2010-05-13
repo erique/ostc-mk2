@@ -704,4 +704,3 @@ custom_function_check_high_limit:			; Checks if CF (#WREG) is lower then limit (
 	btfss	neg_flag						; negative?
 	retlw	.255							; no
 	retlw	.0								; yes
-

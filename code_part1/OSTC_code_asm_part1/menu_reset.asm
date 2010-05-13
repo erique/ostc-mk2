@@ -254,7 +254,7 @@ reset_all_cf:
 #DEFINE	color_battery_surface		d'223'		; 8Bit		Color Battery sign: Cyan
 #DEFINE	color_standard1				d'255'		; 8Bit		Color Standard: White
 #DEFINE	color_divemask				d'224'		; 8Bit		Color Divemask: Red
-#DEFINE	HUD_style					d'0'		; 8Bit		OSTC Style
+#DEFINE	color_warnings				d'224'		; 8Bit		Color Warnings: Red
 
 #DEFINE	show_seconds_divemode		d'0'		; 1Bit 		=1 Show the seconds in Divemode
 #DEFINE	flip_display_default		d'0'		; 1Bit		=1 Flip Display
@@ -390,7 +390,7 @@ reset_all_cf_bank1:
 	movlw	color_divemask
 	rcall	reset_customfunction	; saves default and current value
 
-	movlw	HUD_style
+	movlw	color_warnings
 	rcall	reset_customfunction	; saves default and current value
 
 	movlw	show_seconds_divemode

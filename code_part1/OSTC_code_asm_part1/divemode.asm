@@ -1256,6 +1256,9 @@ end_dive2:
 	movlw	0xFB
 	call	write_external_eeprom
 	
+	btfsc	simulatormode_active		; Are we in simulator mode?
+	bra		change_logbook_offset2		; Yes, do not update history
+
 	; Increase total dive counter
 	read_int_eeprom 	d'2'		; Read byte (stored in EEDATA)
 	movff	EEDATA,temp1			; Low byte
@@ -1294,8 +1297,8 @@ change_logbook_offset1:
 	call	write_eeprom			; Highbyte 
 
 change_logbook_offset2:
-	bcf		simulatormode_active		; if we were in simulator mode
 	bcf		LED_blue
+	bcf		simulatormode_active		; if we were in simulator mode
 
 end_dive_common:
 	btfsc	restore_deco_data			; Restore decodata?

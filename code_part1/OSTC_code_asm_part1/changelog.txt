@@ -1,6 +1,13 @@
+New in 1.61 Beta:
+BETA Version - Do NOT use for diving!
+CHANGE: "Better Gas" now blinks more eye catching
+CHANGE: Battery symbol range changed (OSTC Mk.2 Only)
+NEW: Added CF37: Color# Warnings (OSTC Mk.2 Only)
+NEW: Color# = 0 (Black) is ignored
+BUGFIX: History not updated in Simulator mode
+
 New in 1.60 Stable:
 Stable release
-
 
 New in 1.56 Beta:
 BETA Version - Do NOT use for diving!

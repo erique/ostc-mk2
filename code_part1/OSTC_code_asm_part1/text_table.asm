@@ -60,7 +60,7 @@
 	DB	.4,.4,.10,.22,.22,.22	;t130,t131,t132,t133,134,135
 	DB	.20,.8,.10,.8,.8,.6		;t136;t137;t138;t139;t140;t141
 	DB	.6,.10,.8,.8,.4,.10		;t142;t143;t144;t145;t146;t147
-	DB	.14,.20,.10,.12,.10,.20	;t148;t149;t150;t151;t152;t153
+	DB	.12,.20,.10,.12,.10,.20	;t148;t149;t150;t151;t152;t153
 ; 32 Custom funtion descriptors with length 16
 	DB	.16,.16,.16,.16
 	DB	.16,.16,.16,.16
@@ -252,7 +252,7 @@
 	DB	.52,.96,.1,.15		;145		Cancel
 	DB	.52,.120,.1,.15		;146		OK!
 	DB	.100,.75,.1,.15		;147		Stopwatch
-	DB	.0,.0,.1,.15		;148
+	DB	.160,.125,.1,.15	;148		[12 Spaces...]
 	DB	.0,.8,.1,.15		;149
 	DB	.2,.39,.1,.15		;150
 	DB	.2,.48,.1,.15		;151
@@ -390,8 +390,8 @@
 	DB	.24,.2,.1,.15				;271
 	DB	.0,.35,.1,.15				;272
 	DB	.0,.65,.1,.15				;273
-	DB	.0,.125,.1,.15				;274
-	DB	.0,.155,.1,.15				;275
+	DB	.0,.95,.1,.15				;274
+	DB	.0,.125,.1,.15				;275
 	DB	.20,.95,.1,.15				;276
 
 	DB	.20,.65,.1,.15				;277
@@ -468,7 +468,7 @@
 	DA	"Deco Offset[dm]}"		;52
 	DA	"ppO2 low [cBar]}"		;53
 	DA	"ppO2 high[cBar]}"		;54
-	DA	"show ppO2[cBar]}"		;55
+	DA	"ppO2 show[cBar]}"		;55
 	DA	"sampling rate  }"		;56
 	DA	"Divisor Temp   }"		;57
 	DA	"Divisor Decodat}"		;58
@@ -476,7 +476,7 @@
 	DA	"Divisor ppO2	}"		;60
 	DA	"Divisor Debug  }"		;61
 	DA	"Divisor NotUse2}"		;62
-	DA	"show CNS    [%]}"		;63
+	DA	"CNS show    [%]}"		;63
 	DA	"Logbook offset }"		;64
 	DA	"Last Deco at[m]}"		;65
 	DA	"End Apnoe [min]}"		;66
@@ -563,7 +563,7 @@
 	DA	"Cancel}}"				;145	l=8
 	DA	"OK!}"					;146	l=4
 	DA	"Stopwat.}}"			;147	l=10
-	DA	"NOT USED!!!!!}"		;148	l=14
+	DA	":.........:}"			;148	l=12
 	DA	"NOT USED!!!!!!!!!!!}"	;149	l=20
 	DA	"Not used!}"			;150	l=10
 	DA	"Not used!!!}"			;151	l=12
@@ -583,11 +583,11 @@
 	DA	"not used       }"		;162
 	DA	"Avr. Depth [=1]}"		;163
 	DA	"Blink Gas  [=1]}"		;164
-	DA	"not used       }"		;165
-	DA	"not used       }"		;166
-	DA	"not used       }"		;167
-	DA	"not used       }"		;168
-	DA	"not used       }"		;169
+	DA	"DepthWarn[mBar]}"		;165
+	DA	"CNS warning [%]}"		;166
+	DA	"GF warning  [%]}"		;167
+	DA	"ppO2 warn[cBar]}"		;168
+	DA	"Vel.warn[m/min]}"		;169
 	DA	"not used       }"		;170
 	DA	"not used       }"		;171
 	DA	"not used       }"		;172

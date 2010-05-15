@@ -257,9 +257,16 @@ reset_all_cf:
 #DEFINE	color_warnings				d'224'		; 8Bit		Color Warnings: Red
 
 #DEFINE	show_seconds_divemode		d'0'		; 1Bit 		=1 Show the seconds in Divemode
-#DEFINE	flip_display_default		d'0'		; 1Bit		=1 Flip Display
-#DEFINE	use_ppo2_screen_default		d'0'		; 1Bit		=1 Use alternative outputs for ppO2 sensor
-#DEFINE	replace_temp_with_avr_depth d'0'		; 1Bit		=1 Show (resetable) average Depth instead of temperature
+#DEFINE	not_used_cf39_binary		d'0'		; 1Bit		=1 Flip Display
+#DEFINE	not_used_cf40_binary		d'0'		; 1Bit		=1 Use alternative outputs for ppO2 sensor
+#DEFINE	start_with_stopwatch		d'0'		; 1Bit		=1 start with stopwatch
+#DEFINE	blink_gas_divemode 			d'0'		; 1Bit		=1 Show (resetable) average Depth instead of temperature
+
+#DEFINE	color_warn_depth_mBar		d'13000'	; 15Bit		Warn depths
+#DEFINE	color_warn_cns_percent		d'101'		; 8Bit		Warn-%
+#DEFINE	color_warn_gf_percent		d'101'		; 8Bit		Warn-%
+#DEFINE	color_warn_ppo2_cbar		d'161'		; 8Bit		ppO2 warn
+#DEFINE	color_warn_celocity_mmin	d'15'		; 8Bit		warn at xx m/min
 
 	movlw	d'127'					; address of low byte of first custom function
 	movwf	EEADR
@@ -396,27 +403,36 @@ reset_all_cf_bank1:
 	movlw	show_seconds_divemode
 	rcall	reset_customfunction	; saves default and current value
 
-	movlw	flip_display_default
+	movlw	not_used_cf39_binary
 	rcall	reset_customfunction	; saves default and current value
 
-	movlw	use_ppo2_screen_default	
+	movlw	not_used_cf40_binary	
 	rcall	reset_customfunction	; saves default and current value
 
-	movlw	replace_temp_with_avr_depth	
+	movlw	start_with_stopwatch
 	rcall	reset_customfunction	; saves default and current value
 
-	movlw	d'0'
+	movlw	blink_gas_divemode	
 	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
+
+	movlw	HIGH	color_warn_depth_mBar
+	movwf	hi
+	bsf		hi,7					; 15Bit value
+	movlw	LOW		color_warn_depth_mBar
 	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
+
+	movlw	color_warn_cns_percent
 	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
+
+	movlw	color_warn_gf_percent
 	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
+
+	movlw	color_warn_ppo2_cbar
 	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
+
+	movlw	color_warn_celocity_mmin
 	rcall	reset_customfunction	; saves default and current value
+
 	movlw	d'0'
 	rcall	reset_customfunction	; saves default and current value
 	movlw	d'0'

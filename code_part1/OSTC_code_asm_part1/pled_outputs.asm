@@ -50,6 +50,100 @@ PLED_warnings_color2:
 	call	PLED_set_color
 	return
 
+PLED_color_code macro color_code_temp
+	movlw	color_code_temp
+	call	PLED_color_code1
+	endm
+
+PLED_color_code1:				; Color-codes the output, if required
+	movwf	debug_temp
+	dcfsnz	debug_temp,F
+	bra		PLED_color_code_depth		; CF43 [mBar], 16Bit
+	dcfsnz	debug_temp,F
+	bra		PLED_color_code_cns			; CF44 [%]
+	dcfsnz	debug_temp,F
+	bra		PLED_color_code_gf			; CF45 [%]
+	dcfsnz	debug_temp,F
+	bra		PLED_color_code_ppo2		; CF46 [cBar]
+	dcfsnz	debug_temp,F
+	bra		PLED_color_code_velocity	; CF47 [m/min]
+
+PLED_color_code_depth:
+	movff	hi,hi_temp
+	movff	lo,lo_temp
+	movff	rel_pressure+1,hi
+	movff	rel_pressure+0,lo
+	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
+	movff	lo,sub_a+0
+	movff	hi,sub_a+1
+	GETCUSTOM15	d'43'				; Depth warn [mBar]
+	movff	lo,sub_b+0
+	movff	hi,sub_b+1
+	call	sub16			;  sub_c = sub_a - sub_b
+	btfss	neg_flag
+	bra		PLED_color_code_depth2; Set to warning color
+	call	PLED_standard_color
+	movff	hi_temp,hi
+	movff	lo_temp,lo			; Restore hi, lo
+	return
+PLED_color_code_depth2:
+	call	PLED_warnings_color
+	movff	hi_temp,hi
+	movff	lo_temp,lo			; Restore hi, lo
+	return
+
+PLED_color_code_cns:
+	movff	char_O_CNS_fraction,lo
+	GETCUSTOM8	d'44'			; CNS Warn [%]
+	subwf	lo,W
+	btfsc	STATUS,C
+	bra		PLED_color_code_cns2		; Set to warning color
+	call	PLED_standard_color
+	return
+PLED_color_code_cns2:
+	call	PLED_warnings_color
+	return
+
+PLED_color_code_gf:
+	movff	char_O_gradient_factor,lo		; gradient factor
+	GETCUSTOM8	d'45'			; GF Warn [%]
+	subwf	lo,W
+	btfsc	STATUS,C
+	bra		PLED_color_code_gf2		; Set to warning color
+	call	PLED_standard_color
+	return
+PLED_color_code_gf2:
+	call	PLED_warnings_color
+	return
+
+PLED_color_code_ppo2:
+	movff	xC+0,sub_a+0
+	movff	xC+1,sub_a+1
+	GETCUSTOM8	d'46'			; ppO2 warn [cBar]
+	mullw	d'100'
+	movff	PRODL,sub_b+0
+	movff	PRODH,sub_b+1
+	call	sub16			;  sub_c = sub_a - sub_b
+	btfss	neg_flag
+	bra		PLED_color_code_ppo22; Set to warning color
+	call	PLED_standard_color
+	return
+PLED_color_code_ppo22:
+	call	PLED_warnings_color
+	return
+
+PLED_color_code_velocity:
+	movff	divA+0,lo
+	GETCUSTOM8	d'47'			; Velocity warn [m/min]
+	subwf	lo,W
+	btfsc	STATUS,C
+	bra		PLED_color_code_velocity2		; Set to warning color
+	call	PLED_standard_color
+	return
+PLED_color_code_velocity2:
+	call	PLED_warnings_color
+	return
+
 ostc_debug	macro debug_temp
 	movlw	debug_temp
 	call	ostc_debug1
@@ -330,7 +424,7 @@ PLED_display_deko2:
 	WIN_TOP		.145
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
-	call	PLED_standard_color
+	PLED_color_code		warn_gf		; Color-code Output
 	lfsr	FSR2,letter
 	movlw	'G'
 	movwf	POSTINC2
@@ -345,6 +439,7 @@ PLED_display_deko2:
 	movlw	' '
 	movwf	POSTINC2
 	call	word_processor
+	call	PLED_standard_color
 	return
 
 PLED_simulator_data:
@@ -391,7 +486,7 @@ PLED_display_velocity:
 	WIN_TOP		.90
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
-	call	PLED_standard_color
+	PLED_color_code		warn_velocity		; Color code output
 	lfsr	FSR2,letter
 	movlw	'-'
 	btfsc	neg_flag
@@ -401,6 +496,7 @@ PLED_display_velocity:
 	output_99
 	OUTPUTTEXT	d'83'			; m/min
 	call	word_processor
+	call	PLED_standard_color
 	bsf		pled_velocity_display
 	return
 
@@ -780,7 +876,7 @@ PLED_show_ppO2:					; Show ppO2
 	WIN_TOP		.120
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
-	call	PLED_standard_color
+	PLED_color_code		warn_ppo2		; Color-code output
 
 	lfsr	FSR2,letter
 	movlw	'p'
@@ -801,6 +897,7 @@ PLED_show_ppO2:					; Show ppO2
 	movlw	' '
 	movwf	POSTINC2
 	call	word_processor
+	call	PLED_standard_color
 	return
 
 PLED_show_ppO2_clear:					; Clear ppO2
@@ -1466,8 +1563,7 @@ PLED_depth:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_LARGE
 	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
-
+	PLED_color_code	warn_depth		; Color-code the output
 
 	movlw	HIGH	d'99'
 	movwf	sub_a+1
@@ -1495,8 +1591,7 @@ pled_depth3:
 	WIN_FONT 	FT_MEDIUM
 	WIN_TOP		.50
 	WIN_LEFT	.40
-	call	PLED_standard_color
-
+	PLED_color_code	warn_depth		; Color-code the output
 
 	movff	rel_pressure+1,hi
 	movff	rel_pressure+0,lo
@@ -1542,7 +1637,7 @@ depth_greater_99_84mtr:			; Display only in full meters
 	WIN_LEFT	.0
 	WIN_FONT 	FT_LARGE
 	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
+	PLED_color_code	warn_depth		; Color-code the output
 
 	bsf		ignore_digit4
 	bsf		leftbind
@@ -2961,7 +3056,6 @@ PLED_const_ppO2_value:
 	WIN_LEFT 	.65
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	call		PLED_standard_color
 
 	lfsr	FSR2,letter
 	movff	char_I_const_ppO2,lo
@@ -2970,6 +3064,7 @@ PLED_const_ppO2_value:
 	bra		PLED_const_ppO2_value2	; No, display Setpoint
 
 ; Yes, Display "Bail"
+	call		PLED_standard_color
 	OUTPUTTEXTH		d'263'			;"Bail"
 	call	word_processor
 	return
@@ -3038,12 +3133,14 @@ PLED_const_ppO2_value11:
 	movff		ppO2_setpoint_store,char_I_const_ppO2		; Restore Setpoint
 
 PLED_const_ppO2_value1a:
+	PLED_color_code		warn_ppo2		; Color-code output
 	movff	char_I_const_ppO2,lo
 	clrf	hi
 	bsf		leftbind
 	output_16dp	d'3'
 	bcf		leftbind
 	call	word_processor
+	call	PLED_standard_color
 	return
 
 PLED_show_leading_tissue:
@@ -3143,8 +3240,7 @@ PLED_display_cns:
 	WIN_TOP		.090
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
-	call	PLED_standard_color
-
+	PLED_color_code		warn_cns		; Color-code CNS output
 	
  	lfsr	FSR2,letter
 	movlw	'C'

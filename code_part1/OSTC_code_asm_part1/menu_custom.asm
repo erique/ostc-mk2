@@ -281,7 +281,7 @@ menu_custom_functions10b:
 	movff	EEDATA,hi
 	bcf		hi,7					; clear Bit 7 of value
 	output_16
-	movlw	'('
+	movlw	','
 	movwf	POSTINC2
 
 	movlw	'1'
@@ -294,10 +294,7 @@ menu_custom_functions10b:
 	movlw	'5'
 	btfsc	EEDATA,7				; 15Bit?
 	movwf	POSTINC2
-
 	movlw	'B'
-	movwf	POSTINC2
-	movlw	')'
 	movwf	POSTINC2
 	movlw	' '
 	movwf	POSTINC2

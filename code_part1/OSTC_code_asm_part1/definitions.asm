@@ -25,7 +25,7 @@
 #DEFINE	softwareversion_x		d'1'		; Software version  XX.YY
 #DEFINE	softwareversion_y		d'61'		; Software version  XX.YY
 
-#DEFINE	max_custom_number		d'41'		; Number of last used custom function
+#DEFINE	max_custom_number		d'47'		; Number of last used custom function
 
 #DEFINE	logbook_profile_version	0x20		; Do not touch!
 
@@ -57,6 +57,11 @@
 
 #DEFINE	plus_time_correction	d'42'
 
+#DEFINE	warn_depth		d'1'
+#DEFINE	warn_cns		d'2'
+#DEFINE	warn_gf			d'3'
+#DEFINE	warn_ppo2		d'4'
+#DEFINE warn_velocity	d'5'
 
 ;Configuration bits
 	CONFIG	OSC = IRCIO67        ;Internal oscillator block, port function on RA6 and RA7

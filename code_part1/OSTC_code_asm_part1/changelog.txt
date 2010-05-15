@@ -6,6 +6,12 @@ NEW: Added CF37: Color# Warnings (OSTC Mk.2 Only)
 NEW: Color# = 0 (Black) is ignored
 BUGFIX: History not updated in Simulator mode
 BUGFIX: Fixed-Setpoint (minimum) ppO2 limited to physically possible value
+NEW: Depth, CNS, GF, ppO2 and Velocity are Color-coded
+NEW: CF43: Depth [mBar] for color-code display
+NEW: CF44: CNS [%] for color-code display
+NEW: CF45: GF [%] for color-code display
+NEW: CF46: ppO2 [cBar] for color-code display
+NEW: CF47: Velocity [m/min] for color-code display
 
 New in 1.60 Stable:
 Stable release

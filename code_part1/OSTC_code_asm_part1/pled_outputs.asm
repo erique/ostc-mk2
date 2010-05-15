@@ -2983,20 +2983,58 @@ PLED_const_ppO2_value2:				; Display SetPoint
 	clrf		xB+1
 	;xA/xB=xC with xA as remainder 	
 	call		div16x16				; xC+0=p_amb/10
-	; char_I_const_ppO2 > p_amb/10 -> Not physically possible! -> Display actual value!
 
+	; char_I_const_ppO2 > p_amb/10 -> Not physically possible! -> Display actual value!
 	tstfsz	xC+1				; xC>255
 	setf	xC+0				; Yes, set xC+0 to 2,55bar ppO2
-	
+
 	movff		ppO2_setpoint_store,WREG
 	cpfslt		xC+0							; Setpoint value possible?
-	bra			PLED_const_ppO2_value1			; Yes!
+	bra			PLED_const_ppO2_value1			; Yes
 
 	movff		xC+0,char_I_const_ppO2			; No, Overwrite with actual value
 	bra			PLED_const_ppO2_value1a
 
 PLED_const_ppO2_value1:
+	; char_I_const_ppO2 < ppO2[Diluent] -> Not physically possible! -> Display actual value!
+	movff		amb_pressure+0,xA+0
+	movff		amb_pressure+1,xA+1
+	movlw		d'10'
+	movwf		xB+0
+	clrf		xB+1
+	call		div16x16				; xC=p_amb/10
+	movff		xC+0,xA+0
+	movff		xC+1,xA+1
+	movff		char_I_O2_ratio,xB+0
+	clrf		xB+1
+	call		mult16x16				; xC:2=char_I_O2_ratio * p_amb/10
 
+	movff		xC+0,sub_b+0
+	movff		xC+1,sub_b+1
+	movff		ppO2_setpoint_store,WREG; Setpoint
+	mullw		d'100'					; Setpoint*100
+	movff		PRODL,sub_a+0
+	movff		PRODH,sub_a+1
+	call		sub16					; sub_c = sub_a - sub_b
+
+	btfss		neg_flag
+	bra			PLED_const_ppO2_value11			; Value in range
+
+	; char_I_const_ppO2 < ppO2[Diluent] -> Not physically possible! -> Display actual value!
+
+	movff		xC+0,xA+0
+	movff		xC+1,xA+1
+	movlw		d'100'
+	movwf		xB+0
+	clrf		xB+1
+	call		div16x16				;xA/xB=xC with xA as remainder 	
+
+	movff		xC+0,char_I_const_ppO2			; No, Overwrite with actual value
+	bra			PLED_const_ppO2_value1a
+
+PLED_const_ppO2_value11:
+
+; Setpoint in possible limits
 	movff		ppO2_setpoint_store,char_I_const_ppO2		; Restore Setpoint
 
 PLED_const_ppO2_value1a:

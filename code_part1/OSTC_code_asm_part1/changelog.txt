@@ -5,6 +5,7 @@ CHANGE: Battery symbol range changed (OSTC Mk.2 Only)
 NEW: Added CF37: Color# Warnings (OSTC Mk.2 Only)
 NEW: Color# = 0 (Black) is ignored
 BUGFIX: History not updated in Simulator mode
+BUGFIX: Fixed-Setpoint (minimum) ppO2 limited to physically possible value
 
 New in 1.60 Stable:
 Stable release

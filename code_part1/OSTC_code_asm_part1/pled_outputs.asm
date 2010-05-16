@@ -23,30 +23,53 @@
 ; known bugs:
 ; ToDo:	More comments
 
-PLED_standard_color:
-	GETCUSTOM8	d'35'			; Standard output color
-	tstfsz	WREG				; =0?
-	bra		PLED_standard_color2
-	movlw	color_standard1		; Reset Color
-PLED_standard_color2:
-	call	PLED_set_color
-	return
-
 PLED_divemask_color:
 	GETCUSTOM8	d'36'			; Divemask output color
-	tstfsz	WREG				; =0?
-	bra		PLED_divemask_color2
-	movlw	color_divemask		; Reset Color
-PLED_divemask_color2:
-	call	PLED_set_color
-	return
+	bra		PLED_standard_color_0
 
 PLED_warnings_color:
 	GETCUSTOM8	d'37'			; Warnings output color
-	tstfsz	WREG				; =0?
-	bra		PLED_warnings_color2
-	movlw	color_warnings		; Reset Color
-PLED_warnings_color2:
+	bra		PLED_standard_color_0
+
+PLED_standard_color:
+	GETCUSTOM8	d'35'			; Standard output color
+PLED_standard_color_0:			; Common entry point
+	movwf	oled1_temp			; copy
+	movlw	d'0'
+	cpfseq	oled1_temp
+	bra		PLED_standard_color_1
+	bra		PLED_standard_color2
+PLED_standard_color_1:
+	movlw	d'4'
+	cpfseq	oled1_temp
+	bra		PLED_standard_color_2
+	bra		PLED_standard_color2
+PLED_standard_color_2:
+	movlw	d'8'
+	cpfseq	oled1_temp
+	bra		PLED_standard_color_3
+	bra		PLED_standard_color2
+PLED_standard_color_3:
+	movlw	d'192'
+	cpfseq	oled1_temp
+	bra		PLED_standard_color_4
+	bra		PLED_standard_color2
+PLED_standard_color_4:
+	movlw	d'196'
+	cpfseq	oled1_temp
+	bra		PLED_standard_color_5
+	bra		PLED_standard_color2
+PLED_standard_color_5:
+	movlw	d'200'
+	cpfseq	oled1_temp
+	bra		PLED_standard_color_6
+	bra		PLED_standard_color2
+PLED_standard_color_6:
+	movf	oled1_temp,W		; Color should be OK...
+	call	PLED_set_color
+	return
+PLED_standard_color2:
+	movlw	color_standard1		; Reset Color
 	call	PLED_set_color
 	return
 
@@ -650,7 +673,6 @@ PLED_menu_cursor:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
 
 	lfsr	FSR2,letter
 	movlw	0xB8
@@ -661,7 +683,6 @@ PLED_menu_cursor:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
 
 	lfsr	FSR2,letter
 	movlw	0xB8
@@ -672,7 +693,6 @@ PLED_menu_cursor:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
 
 	lfsr	FSR2,letter
 	movlw	0xB8
@@ -694,7 +714,6 @@ PLED_menu_cursor:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
 
 	lfsr	FSR2,letter
 	movlw	0xB8
@@ -719,7 +738,6 @@ PLED_menu_cursor:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
 
 	lfsr	FSR2,letter
 	movlw	0xB7

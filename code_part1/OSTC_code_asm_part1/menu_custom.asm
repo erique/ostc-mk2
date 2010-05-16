@@ -150,6 +150,8 @@ menu_custom_functions11:
 	WIN_INVERT	.0	; Init new Wordprocessor	
 
 menu_custom_functions1:
+	call	PLED_standard_color
+
 	movlw	d'1'
 	btfss	customfunction_page	; Use Page II...
 	movlw	d'0'

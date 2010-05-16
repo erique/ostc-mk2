@@ -3,7 +3,7 @@ BETA Version - Do NOT use for diving!
 CHANGE: "Better Gas" now blinks more eye catching
 CHANGE: Battery symbol range changed (OSTC Mk.2 Only)
 NEW: Added CF37: Color# Warnings (OSTC Mk.2 Only)
-NEW: Color# = 0 (Black) is ignored  (OSTC Mk.2 Only)
+NEW: Color# = 0,4,8,192,196 and 200 (Black or very dim) is ignored  (OSTC Mk.2 Only)
 BUGFIX: History not updated in Simulator mode
 BUGFIX: Fixed-Setpoint (minimum) ppO2 limited to physically possible value
 NEW: Depth, CNS, GF, ppO2 and Velocity are Color-coded (OSTC Mk.2 Only)

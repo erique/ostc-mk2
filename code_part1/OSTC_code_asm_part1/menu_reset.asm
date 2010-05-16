@@ -251,9 +251,9 @@ reset_all_cf:
 
 #DEFINE	GF_low_default				d'30'		; 8Bit		30%
 #DEFINE	GF_high_default				d'90'		; 8Bit		90%
-#DEFINE	color_battery_surface		d'223'		; 8Bit		Color Battery sign: Cyan
+#DEFINE	color_battery_surface		d'199'		; 8Bit		Color Battery sign: Deep blue
 #DEFINE	color_standard1				d'255'		; 8Bit		Color Standard: White
-#DEFINE	color_divemask				d'224'		; 8Bit		Color Divemask: Red
+#DEFINE	color_divemask				d'62'		; 8Bit		Color Divemask: Light green
 #DEFINE	color_warnings				d'224'		; 8Bit		Color Warnings: Red
 
 #DEFINE	show_seconds_divemode		d'0'		; 1Bit 		=1 Show the seconds in Divemode

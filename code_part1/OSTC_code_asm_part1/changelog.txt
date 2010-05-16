@@ -3,15 +3,16 @@ BETA Version - Do NOT use for diving!
 CHANGE: "Better Gas" now blinks more eye catching
 CHANGE: Battery symbol range changed (OSTC Mk.2 Only)
 NEW: Added CF37: Color# Warnings (OSTC Mk.2 Only)
-NEW: Color# = 0 (Black) is ignored
+NEW: Color# = 0 (Black) is ignored  (OSTC Mk.2 Only)
 BUGFIX: History not updated in Simulator mode
 BUGFIX: Fixed-Setpoint (minimum) ppO2 limited to physically possible value
-NEW: Depth, CNS, GF, ppO2 and Velocity are Color-coded
-NEW: CF43: Depth [mBar] for color-code display
-NEW: CF44: CNS [%] for color-code display
-NEW: CF45: GF [%] for color-code display
-NEW: CF46: ppO2 [cBar] for color-code display
-NEW: CF47: Velocity [m/min] for color-code display
+NEW: Depth, CNS, GF, ppO2 and Velocity are Color-coded (OSTC Mk.2 Only)
+NEW: CF43: Depth [mBar] for color-code display (OSTC Mk.2 Only)
+NEW: CF44: CNS [%] for color-code display (OSTC Mk.2 Only)
+NEW: CF45: GF [%] for color-code display (OSTC Mk.2 Only)
+NEW: CF46: ppO2 [cBar] for color-code display (OSTC Mk.2 Only)
+NEW: CF47: Velocity [m/min] for color-code display (OSTC Mk.2 Only)
+CHANGE: Change of color layout (OSTC Mk.2 Only)
 
 New in 1.60 Stable:
 Stable release

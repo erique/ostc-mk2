@@ -2382,9 +2382,10 @@ PLED_divemode_simulator_mask:
 PLED_decoplan_bargraph:
 	GETCUSTOM8	d'35'			; Standard output color
 	movff	WREG,box_temp+0			; Data
+	incf	win_top,F				; +1
 	movff	win_top,box_temp+1		; row top (0-239)
 	movff	win_top,box_temp+2		; 
-	movlw	d'20'
+	movlw	d'18'
 	addwf	box_temp+2,F			; row bottom (0-239)
 	movlw	.122
 	movff	WREG,box_temp+3			; column left (0-159)
@@ -2400,7 +2401,7 @@ PLED_decoplan_bargraph:
 	movff	WREG,box_temp+0			; Data
 	movff	win_top,box_temp+1		; row top (0-239)
 	movff	win_top,box_temp+2		; 
-	movlw	d'20'
+	movlw	d'18'
 	addwf	box_temp+2,F			; row bottom (0-239)
 	movff	lo,box_temp+3			; 
 	incf	box_temp+3,F			; column left (0-159)
@@ -2435,126 +2436,46 @@ PLED_decoplan:				; display the Decoplan
 	return
 
 PLED_decoplan1:
+	setf	temp5
+	movlw	.231
+	movwf	temp6			; row
+PLED_decoplan2:
+	movlw	d'25'
+	addwf	temp6,F
+	incf	temp5,F
+	call	PLED_decoplan_show_stop
+	movlw	d'5'			; 6 Stops...
+	cpfseq	temp5
+	bra		PLED_decoplan2
+	return
+
+PLED_decoplan_show_stop:
 	bsf		leftbind
 	WIN_LEFT	.100
-	movlw	.000
-	movff	WREG,win_top
-	movwf	hi								; copy for PLED_decoplan_bargraph
-	call	PLED_SetRow						; Set Row
-	lfsr	FSR2,letter		
-	movff	char_O_array_decodepth+0,lo		; Get Depth
-	movf	lo,w
-	btfsc	STATUS,Z						; =0
-	goto	PLED_decoplan_delete			; Yes, quit display		
-	output_8								; outputs into Postinc2!
-	movlw	'm'
-	movwf	POSTINC2
-	call	word_processor	
-	WIN_LEFT	.140
-	movlw	.000
-	movff	WREG,win_top
-	lfsr	FSR2,letter		
-	movff	char_O_array_decotime+0,lo		; Get length for this stop
-	output_99x								; outputs into Postinc2!
-	movlw	d'39'							;"'"
-	movwf	POSTINC2
-	call	word_processor	
-	call	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
+	movff	temp6,win_top
+	movff	temp6,hi						; copy for PLED_decoplan_bargraph
 
-	WIN_LEFT	.100
-	movlw	.025
-	movff	WREG,win_top
-	movwf	hi								; copy for PLED_decoplan_bargraph
-	call	PLED_SetRow						; Set Row
-	lfsr	FSR2,letter		
-	movff	char_O_array_decodepth+1,lo		; Get Depth
+	lfsr	FSR1,char_O_array_decodepth;+0
+	movf	temp5,W							; number of entry
+	movff	PLUSW1,lo
 	movf	lo,w
 	btfsc	STATUS,Z						; =0
 	goto	PLED_decoplan_delete			; Yes, quit display		
-	output_8								; outputs into Postinc2!
-	movlw	'm'
-	movwf	POSTINC2
-	call	word_processor	
-	WIN_LEFT	.140
-	movlw	.025
-	movff	WREG,win_top
-	lfsr	FSR2,letter		
-	movff	char_O_array_decotime+1,lo		; Get length for this stop
-	output_99x								; outputs into Postinc2!
-	movlw	d'39'							;"'"
-	movwf	POSTINC2
-	call	word_processor	
-	call	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
-	
-	WIN_LEFT	.100
-	movlw	.050
-	movff	WREG,win_top
-	movwf	hi								; copy for PLED_decoplan_bargraph
-	call	PLED_SetRow						; Set Row
-	lfsr	FSR2,letter		
-	movff	char_O_array_decodepth+2,lo		; Get Depth
-	movf	lo,w
-	btfsc	STATUS,Z						; =0
-	goto	PLED_decoplan_delete			; Yes, quit display		
-	output_8								; outputs into Postinc2!
-	movlw	'm'
-	movwf	POSTINC2
-	call	word_processor	
-	WIN_LEFT	.140
-	movlw	.050
-	movff	WREG,win_top
-	lfsr	FSR2,letter		
-	movff	char_O_array_decotime+2,lo		; Get length for this stop
-	output_99x								; outputs into Postinc2!
-	movlw	d'39'							;"'"
-	movwf	POSTINC2
-	call	word_processor	
-	call	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
 
-	WIN_LEFT	.100
-	movlw	.075
-	movff	WREG,win_top
-	movwf	hi								; copy for PLED_decoplan_bargraph
-	call	PLED_SetRow						; Set Row
 	lfsr	FSR2,letter		
-	movff	char_O_array_decodepth+3,lo		; Get Depth
-	movf	lo,w
-	btfsc	STATUS,Z						; =0
-	goto	PLED_decoplan_delete			; Yes, quit display		
 	output_8								; outputs into Postinc2!
 	movlw	'm'
 	movwf	POSTINC2
 	call	word_processor	
-	WIN_LEFT	.140
-	movlw	.075
-	movff	WREG,win_top
-	lfsr	FSR2,letter		
-	movff	char_O_array_decotime+3,lo		; Get length for this stop
-	output_99x								; outputs into Postinc2!
-	movlw	d'39'							;"'"
-	movwf	POSTINC2
-	call	word_processor	
-	call	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
 
-	WIN_LEFT	.100
-	movlw	.100
-	movff	WREG,win_top
-	movwf	hi								; copy for PLED_decoplan_bargraph
-	call	PLED_SetRow						; Set Row
-	lfsr	FSR2,letter		
-	movff	char_O_array_decodepth+4,lo		; Get Depth
-	movf	lo,w
-	btfsc	STATUS,Z						; =0
-	goto	PLED_decoplan_delete			; Yes, quit display		
-	output_8								; outputs into Postinc2!
-	movlw	'm'
-	movwf	POSTINC2
-	call	word_processor	
 	WIN_LEFT	.140
-	movlw	.100
-	movff	WREG,win_top
-	lfsr	FSR2,letter		
-	movff	char_O_array_decotime+4,lo		; Get length for this stop
+	movff	temp6,win_top
+
+	lfsr	FSR1,char_O_array_decotime;+0
+	movf	temp5,W							; number of entry
+	movff	PLUSW1,lo
+
+	lfsr	FSR2,letter	
 	output_99x								; outputs into Postinc2!
 	movlw	d'39'							;"'"
 	movwf	POSTINC2
@@ -2562,6 +2483,107 @@ PLED_decoplan1:
 	call	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
 	return
 
+;	WIN_LEFT	.100
+;	movlw	.025
+;	movff	WREG,win_top
+;	movwf	hi								; copy for PLED_decoplan_bargraph
+;	call	PLED_SetRow						; Set Row
+;	lfsr	FSR2,letter		
+;	movff	char_O_array_decodepth+1,lo		; Get Depth
+;	movf	lo,w
+;	btfsc	STATUS,Z						; =0
+;	goto	PLED_decoplan_delete			; Yes, quit display		
+;	output_8								; outputs into Postinc2!
+;	movlw	'm'
+;	movwf	POSTINC2
+;	call	word_processor	
+;	WIN_LEFT	.140
+;	movlw	.025
+;	movff	WREG,win_top
+;	lfsr	FSR2,letter		
+;	movff	char_O_array_decotime+1,lo		; Get length for this stop
+;	output_99x								; outputs into Postinc2!
+;	movlw	d'39'							;"'"
+;	movwf	POSTINC2
+;	call	word_processor	
+;	call	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
+;	
+;	WIN_LEFT	.100
+;	movlw	.050
+;	movff	WREG,win_top
+;	movwf	hi								; copy for PLED_decoplan_bargraph
+;	call	PLED_SetRow						; Set Row
+;	lfsr	FSR2,letter		
+;	movff	char_O_array_decodepth+2,lo		; Get Depth
+;	movf	lo,w
+;	btfsc	STATUS,Z						; =0
+;	goto	PLED_decoplan_delete			; Yes, quit display		
+;	output_8								; outputs into Postinc2!
+;	movlw	'm'
+;	movwf	POSTINC2
+;	call	word_processor	
+;	WIN_LEFT	.140
+;	movlw	.050
+;	movff	WREG,win_top
+;	lfsr	FSR2,letter		
+;	movff	char_O_array_decotime+2,lo		; Get length for this stop
+;	output_99x								; outputs into Postinc2!
+;	movlw	d'39'							;"'"
+;	movwf	POSTINC2
+;	call	word_processor	
+;	call	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
+;
+;	WIN_LEFT	.100
+;	movlw	.075
+;	movff	WREG,win_top
+;	movwf	hi								; copy for PLED_decoplan_bargraph
+;	call	PLED_SetRow						; Set Row
+;	lfsr	FSR2,letter		
+;	movff	char_O_array_decodepth+3,lo		; Get Depth
+;	movf	lo,w
+;	btfsc	STATUS,Z						; =0
+;	goto	PLED_decoplan_delete			; Yes, quit display		
+;	output_8								; outputs into Postinc2!
+;	movlw	'm'
+;	movwf	POSTINC2
+;	call	word_processor	
+;	WIN_LEFT	.140
+;	movlw	.075
+;	movff	WREG,win_top
+;	lfsr	FSR2,letter		
+;	movff	char_O_array_decotime+3,lo		; Get length for this stop
+;	output_99x								; outputs into Postinc2!
+;	movlw	d'39'							;"'"
+;	movwf	POSTINC2
+;	call	word_processor	
+;	call	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
+;
+;	WIN_LEFT	.100
+;	movlw	.100
+;	movff	WREG,win_top
+;	movwf	hi								; copy for PLED_decoplan_bargraph
+;	call	PLED_SetRow						; Set Row
+;	lfsr	FSR2,letter		
+;	movff	char_O_array_decodepth+4,lo		; Get Depth
+;	movf	lo,w
+;	btfsc	STATUS,Z						; =0
+;	goto	PLED_decoplan_delete			; Yes, quit display		
+;	output_8								; outputs into Postinc2!
+;	movlw	'm'
+;	movwf	POSTINC2
+;	call	word_processor	
+;	WIN_LEFT	.140
+;	movlw	.100
+;	movff	WREG,win_top
+;	lfsr	FSR2,letter		
+;	movff	char_O_array_decotime+4,lo		; Get length for this stop
+;	output_99x								; outputs into Postinc2!
+;	movlw	d'39'							;"'"
+;	movwf	POSTINC2
+;	call	word_processor	
+;	call	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
+;	return
+;
 PLED_gas_list:
 	ostc_debug	'm'		; Sends debug-information to screen if debugmode active
 
@@ -2672,7 +2694,8 @@ PLED_clear_divemode_menu:
 	movff	WREG,box_temp+0		; Data
 	movlw	.0
 	movff	WREG,box_temp+1		; row top (0-239)
-	movlw	.125
+;	movlw	.125
+	movlw	.185
 	movff	WREG,box_temp+2		; row bottom (0-239)
 	movlw	.082
 	movff	WREG,box_temp+3		; column left (0-159)
@@ -3394,49 +3417,91 @@ PLED_gaschange_DEBUG:
 
 
 PLED_MultiGF_deco_mask:
-;	movlw	0x30
-;	movwf	wait_temp
-;	movff	wait_temp,box_temp+1	; row
-;	movlw	0xAA
-;	movwf	wait_temp
-;	movff	wait_temp,box_temp+0	; color
-;	goto	DD_hline			; returns
-return
+	movlw	.0
+	movff	WREG,box_temp+0		; Data
+	movlw	.0
+	movff	WREG,box_temp+1		; row top (0-239)
+	movlw	.239
+	movff	WREG,box_temp+2		; row bottom (0-239)
+	movlw	.082
+	movff	WREG,box_temp+3		; column left (0-159)
+	movlw	.159	
+	movff	WREG,box_temp+4		; column right (0-159)
+	call	PLED_box
+	return
 	
 PLED_MultiGF_deco_all:
-return
-;	movff	char_O_actual_pointer,wait_temp
-;	movff	char_O_GF_low_pointer,waitms_temp
-;	movf	waitms_temp,F
-;		bz		PLED_MultiGF_no_deco
-;	movf	waitms_temp,W
-;	cpfsgt	wait_temp
-;		bra	PLED_MultiGF_actual_in_deco
-;	call	PLED_MultiGF_clear_behind_depth
-;	movff	char_O_GF_low_pointer,wait_temp
-;	incf	wait_temp,F
-;	bra		PLED_MultiGF_complete_list_only	; input wait_temp
-;PLED_MultiGF_actual_in_deco:
-;	call	PLED_MultiGF_gradient
-;	call	PLED_MultiGF_time_at_deco
-;	call	PLED_MultiGF_deco_depth_actual
-;	movff	char_O_actual_pointer,wait_temp		
-;PLED_MultiGF_complete_list_only:
-;	call	PLED_MultiGF_table				; input wait_temp
-;	return
+	movff	char_O_actual_pointer,wait_temp
+	movff	char_O_GF_low_pointer,waitms_temp
+	movf	waitms_temp,F
+		bz		PLED_MultiGF_no_deco
+	call	PLED_MultiGF_table				; input wait_temp
+	return
 
-;PLED_MultiGF_table:
+PLED_MultiGF_no_deco:
+	DISPLAYTEXT	d'242'			;"no deco"
+	return
+
+PLED_MultiGF_table:
+	movlw	d'9'
+	movwf	temp5			; number of stops
+	movlw	.231
+	movwf	temp6			; row
+	lfsr	FSR1,char_IO_deco_table+0
+
+PLED_MultiGF_table2:
+	movlw	d'25'
+	addwf	temp6,F
+	call	PLED_MultiGF_show_stop
+	decfsz	temp5,F
+	bra		PLED_MultiGF_table2
+	return
+
+PLED_MultiGF_show_stop:
+	bsf		leftbind
+	WIN_LEFT	.100
+	movff	temp6,win_top
+	movff	temp6,hi						; copy for PLED_decoplan_bargraph
+;	call	PLED_SetRow						; Set Row
+
+
+	movff	POSTINC1,lo		; Get Depth
+	movf	lo,w
+
+	lfsr	FSR2,letter	
+;	btfsc	STATUS,Z						; =0
+;	goto	PLED_decoplan_delete			; Yes, quit display		
+	output_8								; outputs into Postinc2!
+	movlw	'm'
+	movwf	POSTINC2
+	call	word_processor	
+	WIN_LEFT	.140
+	movff	temp6,win_top
+
+	movff	POSTINC1,lo		; Get length for this stop
+
+	lfsr	FSR2,letter		
+	output_99x								; outputs into Postinc2!
+	movlw	d'39'							;"'"
+	movwf	POSTINC2
+	call	word_processor	
+;	call	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
+	return
+
+
+
 ;	movlw	.043
 ;	movwf	temp5
 ;	movlw	.48	+ .8
 ;	movwf	temp6
 ;	movff	char_O_GF_low_pointer,wait_temp
+;
 ;PLED_MultiGF_loop:
 ;	decfsz	wait_temp,F
 ;	bra		PLED_MulitGF_nextentry
 ;
-;;	bra		PLED_MultiGF_calc_tissue_counter
-;;PLED_MGF_lp_calc_tis_counter:
+;	bra		PLED_MultiGF_calc_tissue_counter
+;PLED_MGF_lp_calc_tis_counter:
 ;
 ;PLED_MGF_lp_clear_rem_space:
 ;	lfsr	FSR2,letter	
@@ -3521,9 +3586,6 @@ return
 ;	movwf	grayvalue
 ;	bra		PLED_MultiGF_loop
 ;
-;PLED_MultiGF_no_deco:
-;	DISPLAYTEXT	d'242'			;"no deco"
-;	return
 ;
 ;PLED_MultiGF_depth:
 ;	lfsr	FSR2,letter

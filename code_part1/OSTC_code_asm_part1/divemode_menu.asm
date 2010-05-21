@@ -738,7 +738,7 @@ timeout_divemenu2a:
 	return
 	
 timeout_divemenu3:
-	call	PLED_MultiGF_deco_mask
+;	call	PLED_MultiGF_deco_mask
 
 	movff	char_O_deco_status,deco_status		; 
 	tstfsz	deco_status							; deco_status=0 if decompression calculation done

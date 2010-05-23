@@ -239,8 +239,6 @@ simulator_calc_deco:
 	WIN_INVERT	.0
 
 simulator_calc_deco_loop1:
-	movlw	d'30'
-	movwf	logbook_temp3					; 30x/Minute
 	call	PLED_simulator_data
 	
 ;	movlw	.011
@@ -260,6 +258,9 @@ simulator_calc_deco_loop1:
 simulator_calc_deco_loop2:
 	btg		LED_red
 
+	movlw	d'1'
+	movff	WREG,char_I_step_is_1min		; 1 minute mode
+
 	call	divemode_check_decogases			; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
 
@@ -267,8 +268,6 @@ simulator_calc_deco_loop2:
 	movlb	b'00000001'						; rambank 1 selected
 	ostc_debug	'C'		; Sends debug-information to screen if debugmode active
 	
-	decfsz	logbook_temp3,F
-	bra		simulator_calc_deco_loop2
 	decfsz	logbook_temp1,F
 	bra		simulator_calc_deco_loop1
 
@@ -295,9 +294,16 @@ simulator_calc_deco3:
 
 	movlw	d'5'							; Pre-Set Cursor to "Show Decoplan"
 	movwf	menupos
+
+	movlw	d'0'
+	movff	WREG,char_I_step_is_1min		; 2 second deco mode
+
 	bra		menu_simulator1					; Done.
 
 simulator_calc_deco2:
+	movlw	d'0'
+	movff	WREG,char_I_step_is_1min		; 2 second deco mode
+
 	call	divemode_check_decogases			; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
 

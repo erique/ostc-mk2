@@ -334,11 +334,14 @@
 	CBLOCK	0x200				;Bank 2
  int_O_tissue_for_debug:.32		; deco_main_debug copies pressure of tissue to this variable
  int_O_GF_spare____:2;					// 0x240
- int_O_GF_step:2;							// 0x242
+ int_O_GF_step:2;						// 0x242
  int_O_gtissue_limit:2;					// 0x244
  int_O_gtissue_press:2;					// 0x246
  int_O_limit_GF_low:2;					// 0x248
- int_O_gtissue_press_at_GF_low:2;			// 0x24A
+ int_O_gtissue_press_at_GF_low:2;		// 0x24A
+ unused_x24B;							// 0x24B
+ char_I_step_is_1min; 					// 0x24C 
+
 	ENDC
 	CBLOCK	0x24E				;Bank 2
  char_O_GF_low_pointer;					// 0x24E
@@ -365,10 +368,14 @@
  int_I_temp:2;						; 0x504
  char_I_temp;						; 0x506
  char_I_actual_ppO2;				; 0x507
- int_I_spare_3:2;
- int_I_spare_4:2;
- int_I_spare_5:2;
- int_I_spare_6:2;
+ char_I_deco_N2_ratio2;    			// 0x508 new in v.102
+ char_I_deco_He_ratio2;    			// 0x509 new in v.102
+ char_I_deco_N2_ratio3;    			// 0x50A new in v.102
+ char_I_deco_He_ratio3;    			// 0x50B new in v.102
+ char_I_deco_N2_ratio4;    			// 0x50C new in v.102
+ char_I_deco_He_ratio4;    			// 0x50D new in v.102
+ char_I_deco_N2_ratio5;    			// 0x50E new in v.102
+ char_I_deco_He_ratio5;    			// 0x50F new in v.102
  char_I_N2_ratio;					; 0x510
  char_I_He_ratio;					; 0x511
  char_I_saturation_multiplier;		; for conservatism/safety values 1.0 (no conservatism) to 1.5 (50% faster saturation
@@ -399,6 +406,11 @@
  char_O_diluent;					; 0x564 new in v.101 (C-Code), new in v109 (asm)
  char_O_CNS_fraction;				; 0x565	new in v.101
  char_O_relative_gradient_GF;		; 0x566	new in v.102
+ char_I_deco_gas_change2;   		// 0x567 new in v.102
+ char_I_deco_gas_change3;   		// 0x568 new in v.102
+ char_I_deco_gas_change4;   		// 0x569 new in v.102
+ char_I_deco_gas_change5;   		// 0x56A new in v.102 
+
 
 	ENDC
 

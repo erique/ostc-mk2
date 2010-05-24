@@ -238,9 +238,11 @@ simulator_calc_deco:
 	DISPLAYTEXT	.12							;" Wait.."
 	WIN_INVERT	.0
 
+	movlw	d'255'
+	movff	WREG,char_O_deco_status			; Reset Deco module
+
 simulator_calc_deco_loop1:
-	call	PLED_simulator_data
-	
+
 ;	movlw	.011
 ;	call	PLED_SetColumn
 ;	movlw	.009
@@ -254,12 +256,28 @@ simulator_calc_deco_loop1:
 ;	movwf	POSTINC2
 ;call	word_processor	
 
-	
-simulator_calc_deco_loop2:
-	btg		LED_red
+	call	divemode_check_decogases			; Checks for decogases and sets the gases
+	call	divemode_prepare_flags_for_deco
+
+	call	deco_main_calc_hauptroutine		; calc_tissue
+	movlb	b'00000001'						; rambank 1 selected
+
+	movff	char_O_deco_status,deco_status		; 
+	tstfsz	deco_status							; deco_status=0 if decompression calculation done
+	bra		simulator_calc_deco_loop1			; Not finished
 
 	movlw	d'1'
 	movff	WREG,char_I_step_is_1min		; 1 minute mode
+	movff	WREG,unused_x24B
+
+	movlw	d'255'
+	movff	WREG,char_O_deco_status			; Reset Deco module
+
+	
+simulator_calc_deco_loop2:
+	call	PLED_simulator_data
+
+	btg		LED_red
 
 	call	divemode_check_decogases			; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
@@ -269,7 +287,14 @@ simulator_calc_deco_loop2:
 	ostc_debug	'C'		; Sends debug-information to screen if debugmode active
 	
 	decfsz	logbook_temp1,F
-	bra		simulator_calc_deco_loop1
+	bra		simulator_calc_deco_loop2
+
+	movlw	d'0'
+	movff	WREG,char_I_step_is_1min		; 2 second deco mode
+	movff	WREG,unused_x24B
+
+	movlw	d'255'
+	movff	WREG,char_O_deco_status			; Reset Deco module
 
 	movff	char_O_deco_status,deco_status		; 
 	tstfsz	deco_status							; deco_status=0 if decompression calculation done
@@ -295,15 +320,9 @@ simulator_calc_deco3:
 	movlw	d'5'							; Pre-Set Cursor to "Show Decoplan"
 	movwf	menupos
 
-	movlw	d'0'
-	movff	WREG,char_I_step_is_1min		; 2 second deco mode
-
 	bra		menu_simulator1					; Done.
 
 simulator_calc_deco2:
-	movlw	d'0'
-	movff	WREG,char_I_step_is_1min		; 2 second deco mode
-
 	call	divemode_check_decogases			; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
 

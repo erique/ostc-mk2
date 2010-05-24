@@ -77,8 +77,8 @@ wait_start_pressure:
 	movlw	d'0'
 	movff	WREG,char_I_step_is_1min		; 2 second deco mode
 movff	WREG,unused_x24B
-;	call	deco_main_clear_tissue			;
-;	movlb	b'00000001'						; select ram bank 1
+	call	deco_main_clear_tissue			;
+	movlb	b'00000001'						; select ram bank 1
 	call	deco_main_calc_desaturation_time; calculate desaturation time
 	movlb	b'00000001'						; select ram bank 1
 	call	main_clear_CNS_fraction			; clear CNS

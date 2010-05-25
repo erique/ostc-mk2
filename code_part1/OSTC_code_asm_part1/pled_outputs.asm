@@ -3865,9 +3865,7 @@ PLED_MultiGF_show_stop:
 ;
 
 PLED_simdata_screen:			;Display Pre-Dive Screen
-
 	; List active gases/Setpoints
-
 	btfsc	FLAG_const_ppO2_mode		; in ppO2 mode?
 	bra		PLED_simdata_screen3		; Yes, display SetPoint/Sensor result list
 
@@ -3880,7 +3878,7 @@ PLED_simdata_screen2:
 	
 	movlw	d'2'
 	movwf	wait_temp			; here: stores eeprom address for gas list
-	movlw	d'0'
+	movlw	d'10'
 	movwf	waitms_temp		; here: stores row for gas list
 	clrf	hi					; here: Gas counter
 
@@ -3896,8 +3894,6 @@ PLED_simdata_screen2_loop:
 	output_8				; display gas number
 	movlw	':'
 	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
 	movff	wait_temp, EEADR; Gas #hi: %O2 - Set address in internal EEPROM
 	call	read_eeprom		; get byte (stored in EEDATA)
 	movff	EEDATA,lo		; copy to lo
@@ -3908,7 +3904,15 @@ PLED_simdata_screen2_loop:
 	call	read_eeprom		; get byte (stored in EEDATA)
 	movff	EEDATA,lo		; copy to lo
 	output_8				; outputs into Postinc2!
-	
+	movlw	' '
+	movwf	POSTINC2
+	movf	hi,W			; Gas number
+	addlw	d'27'			; -> Adress of change depth register
+	call	read_int_eeprom_1
+	movff	EEDATA,lo		; Change depth in m
+	output_99				; outputs into Postinc2!
+	movlw	'm'
+	movwf	POSTINC2
 	read_int_eeprom		d'27'	; read flag register
 	movff	hi,lo			; copy gas number
 PLED_simdata_screen2_loop1:
@@ -3927,23 +3931,16 @@ PLED_simdata_white:
 	call	PLED_standard_color
 
 PLED_simdata_color_done:	
-	read_int_eeprom 	d'33'			; Read start gas (1-5)
-	movf	EEDATA,W
-	cpfseq	hi				; Current Gas the active gas?
-	bra		PLED_simdata_screen2a
-	bra		PLED_simdata_screen2b
-
-PLED_simdata_screen2a:
 	movlw	d'25'
 	addwf	waitms_temp,F		; Increase row
 	WIN_LEFT	.0
 	movff	waitms_temp,win_top ; Set Row
-	call	word_processor	; No, display gas
+	call	word_processor		; display gas
 
 PLED_simdata_screen2b:
 	call		PLED_standard_color
 
-	movlw	d'5'			; list all four (remaining) gases
+	movlw	d'5'			; list all five gases
 	cpfseq	hi				; All gases shown?
 	bra		PLED_simdata_screen2_loop	; No
 	
@@ -3957,7 +3954,7 @@ PLED_simdata_screen3:
 	; list three SP in Gaslist
 	movlw	d'35'				; 36 = current SP position in EEPROM
 	movwf	wait_temp			; here: stores eeprom address for gas list
-	movlw	d'0'
+	movlw	d'10'
 	movwf	waitms_temp			; here: stores row for gas list
 	clrf 	temp5				; here: SP counter
 
@@ -4010,7 +4007,7 @@ PLED_simdata_screen3_loop:
 	movff	EEDATA, lo		; O2 ratio
 
 	WIN_LEFT	.0
-	WIN_TOP		.100
+	WIN_TOP		.110
 	lfsr	FSR2,letter		
 	movlw	'D'
 	movwf	POSTINC2

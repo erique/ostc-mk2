@@ -170,7 +170,12 @@ simulator_restore_tissue_data:
 	
 simulator_show_decoplan:
 	call	PLED_ClearScreen
+	call	PLED_simdata_screen
 	call	divemenu_see_decoplan
+	
+	WIN_INVERT	.1	; Init new Wordprocessor	
+	DISPLAYTEXT	.188		; Sim. Results:
+	WIN_INVERT	.0	; Init new Wordprocessor	
 	
 	bcf		switch_left
 	bcf		switch_right

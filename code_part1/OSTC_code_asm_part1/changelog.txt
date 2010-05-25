@@ -1,7 +1,9 @@
 New in 1.62 Beta:
 BETA Version - Do NOT use for diving!
 CHANGE: More space around divemode-menu 
-
+CHANGE: Disabled "Delete Dive" in logbook
+CHANGE: Simulated dives are no longer stored in the logbook
+NEW: Simulator is much faster now
 
 New in 1.61 Beta:
 BETA Version - Do NOT use for diving!

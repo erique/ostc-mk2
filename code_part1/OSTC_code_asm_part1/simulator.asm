@@ -110,7 +110,7 @@ simulator_inc_maxdepth:
 	bra		menu_simulator2
 
 simulator_startdive:
-	; Descent to -3m depth
+	; Descent to -15m depth
 	; Set standalone_simulator flag (Displays Simulator menu during simulation by pressing ENTER button)
 	; Clear standalone_simulator after (any) dive
 	bsf		simulatormode_active			; normal simulator mode
@@ -238,9 +238,6 @@ simulator_calc_deco:
 	DISPLAYTEXT	.12							;" Wait.."
 	WIN_INVERT	.0
 
-	movlw	d'255'
-	movff	WREG,char_O_deco_status			; Reset Deco module
-
 simulator_calc_deco_loop1:
 
 ;	movlw	.011
@@ -256,6 +253,7 @@ simulator_calc_deco_loop1:
 ;	movwf	POSTINC2
 ;call	word_processor	
 
+
 	call	divemode_check_decogases			; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
 
@@ -268,12 +266,10 @@ simulator_calc_deco_loop1:
 
 	movlw	d'1'
 	movff	WREG,char_I_step_is_1min		; 1 minute mode
-	movff	WREG,unused_x24B
 
 	movlw	d'255'
 	movff	WREG,char_O_deco_status			; Reset Deco module
 
-	
 simulator_calc_deco_loop2:
 	call	PLED_simulator_data
 
@@ -291,13 +287,13 @@ simulator_calc_deco_loop2:
 
 	movlw	d'0'
 	movff	WREG,char_I_step_is_1min		; 2 second deco mode
-	movff	WREG,unused_x24B
+;	movff	WREG,unused_x24B
 
 	movlw	d'255'
 	movff	WREG,char_O_deco_status			; Reset Deco module
 
-	movff	char_O_deco_status,deco_status		; 
-	tstfsz	deco_status							; deco_status=0 if decompression calculation done
+;	movff	char_O_deco_status,deco_status		; 
+;	tstfsz	deco_status							; deco_status=0 if decompression calculation done
 	bra		simulator_calc_deco2				; Not finished
 
 simulator_calc_deco3:

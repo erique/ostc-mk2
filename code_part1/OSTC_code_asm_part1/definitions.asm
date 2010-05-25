@@ -339,10 +339,12 @@
  int_O_gtissue_press:2;					// 0x246
  int_O_limit_GF_low:2;					// 0x248
  int_O_gtissue_press_at_GF_low:2;		// 0x24A
- unused_x24B;							// 0x24B
- char_I_step_is_1min; 					// 0x24C 
-
 	ENDC
+
+	CBLOCK	0x24C  
+ char_I_step_is_1min; 					// 0x24C 
+	ENDC
+	
 	CBLOCK	0x24E				;Bank 2
  char_O_GF_low_pointer;					// 0x24E
  char_O_actual_pointer;					// 0x24F

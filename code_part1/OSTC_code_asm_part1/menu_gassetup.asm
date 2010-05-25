@@ -28,6 +28,8 @@ menu_gassetup:
 	movwf	menupos
 
 menu_gassetup_prelist:
+	call	gassetup_sort_gaslist			; Sorts Gaslist according to change depth
+
 	call	PLED_ClearScreen
 	clrf	timeout_counter2
 	bcf		sleepmode
@@ -1115,4 +1117,51 @@ gassetup_show_ppO2:
 	movlw	' '
 	movwf	POSTINC2
 	call	word_processor
+	return
+
+
+gassetup_sort_gaslist:			; Sorts Gaslist according to change depth
+; EEPROM Locations of Gaslist
+; Gas1: 
+; O2 Default:4
+; He Default:5
+; O2 Current:6
+; He Current:7
+; Change: 28
+; Active: 27,0
+
+; Gas2: 
+; O2 Default:8
+; He Default:9
+; O2 Current:10
+; He Current:11
+; Change: 29
+; Active: 27,1
+
+; Gas3: 
+; O2 Default:12
+; He Default:13
+; O2 Current:14
+; He Current:15
+; Change: 30
+; Active: 27,2
+
+; Gas4: 
+; O2 Default:16
+; He Default:17
+; O2 Current:18
+; He Current:19
+; Change: 31
+; Active: 27,3
+
+; Gas5: 
+; O2 Default:20
+; He Default:21
+; O2 Current:22
+; He Current:23
+; Change: 32
+; Active: 27,4
+
+; First Gas: 33 (1-5)
+
 	return

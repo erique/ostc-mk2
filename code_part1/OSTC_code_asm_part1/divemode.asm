@@ -362,7 +362,6 @@ divemode_check_decogases2:
 	btfsc	hi,4					; Skip if clear -> Skip if inactive
 	movf	EEDATA,W
 	movff	WREG,char_I_deco_gas_change2
-		
 	return
 
 copy_decogas_info:
@@ -389,136 +388,12 @@ copy_decogas_info:
 	movff	EEDATA, POSTDEC1			; = N2!
 	return
 
-;; 1. Find active gas with deepest change depth < current depth
-;; 2. Set Decogas
-;
-;	movff	rel_pressure+0,xA+0			
-;	movff	rel_pressure+1,xA+1
-;	movlw	d'100'
-;	movwf	xB+0
-;	clrf	xB+1
-;	call	div16x16				; compute depth in full m -> result in xC+0
-;	clrf	lo						; clear depth for comparison
-;
-;; check gas1 
-;	read_int_eeprom		d'27'		; read flag register
-;	btfss	EEDATA,0				; check active flag
-;	bra		check_decogas2			; skip inactive gases!
-;	read_int_eeprom		d'28'		; read gas_change_depth
-;	movf	xC+0,W					; load depth in m into WREG
-;	cpfslt	EEDATA					; gas_change_depth > current depth?
-;	bra		check_decogas2			; W < EEDATA -> current depth lower then gas_change_depth
-;	
-;	movff	EEDATA,lo				; deepest gas_change_depth in lo
-;	movlw	d'1'
-;	movwf	hi						; Decogas # in hi (1-5)
-;
-;check_decogas2:
-;	read_int_eeprom		d'27'		; read flag register
-;	btfss	EEDATA,1				; check active flag
-;	bra		check_decogas3			; skip inactive gases!
-;	read_int_eeprom		d'29'		; read gas_change_depth
-;	movf	xC+0,W					; load depth in m into WREG
-;	cpfslt	EEDATA					; gas_change_depth > current depth?
-;	bra		check_decogas3			; W < EEDATA -> current depth lower then gas_change_depth
-;
-;	read_int_eeprom		d'29'		; read gas_change_depth
-;	movf	lo,W					; load current gas_change_depth into WREG
-;	cpfsgt	EEDATA					; last gas_change_depth > current gas_change_depth ?
-;	bra		check_decogas3			; W < lo -> last gas_change_depth > current gas_change_depth
-;	movff	EEDATA,lo				; deepest gas_change_depth in lo
-;	movlw	d'2'
-;	movwf	hi						; Decogas # in hi (1-5)
-;
-;check_decogas3:
-;	read_int_eeprom		d'27'		; read flag register
-;	btfss	EEDATA,2				; check active flag
-;	bra		check_decogas4			; skip inactive gases!
-;	read_int_eeprom		d'30'		; read gas_change_depth
-;	movf	xC+0,W					; load depth in m into WREG
-;	cpfslt	EEDATA					; gas_change_depth > current depth?
-;	bra		check_decogas4			; W < EEDATA -> current depth lower then gas_change_depth
-;
-;	read_int_eeprom		d'30'		; read gas_change_depth
-;	movf	lo,W					; load current gas_change_depth into WREG
-;	cpfsgt	EEDATA					; last gas_change_depth > current gas_change_depth ?
-;	bra		check_decogas4			; W < lo -> last gas_change_depth > current gas_change_depth
-;	movff	EEDATA,lo				; deepest gas_change_depth in lo
-;	movlw	d'3'
-;	movwf	hi						; Decogas # in hi (1-5)
-;
-;check_decogas4:
-;	read_int_eeprom		d'27'		; read flag register
-;	btfss	EEDATA,3				; check active flag
-;	bra		check_decogas5			; skip inactive gases!
-;	read_int_eeprom		d'31'		; read gas_change_depth
-;	movf	xC+0,W					; load depth in m into WREG
-;	cpfslt	EEDATA					; gas_change_depth > current depth?
-;	bra		check_decogas5			; W < EEDATA -> current depth lower then gas_change_depth
-;
-;	read_int_eeprom		d'31'		; read gas_change_depth
-;	movf	lo,W					; load current gas_change_depth into WREG
-;	cpfsgt	EEDATA					; last gas_change_depth > current gas_change_depth ?
-;	bra		check_decogas5			; W < lo -> last gas_change_depth > current gas_change_depth
-;	movff	EEDATA,lo				; deepest gas_change_depth in lo
-;	movlw	d'4'
-;	movwf	hi						; Decogas # in hi (1-5)
-;
-;check_decogas5:
-;	read_int_eeprom		d'27'		; read flag register
-;	btfss	EEDATA,4				; check active flag
-;	bra		check_decogas_done		; skip inactive gases!
-;	read_int_eeprom		d'32'		; read gas_change_depth
-;	movf	xC+0,W					; load depth in m into WREG
-;	cpfslt	EEDATA					; gas_change_depth > current depth?
-;	bra		check_decogas_done		; W < EEDATA -> current depth lower then gas_change_depth
-;
-;	read_int_eeprom		d'32'		; read gas_change_depth
-;	movf	lo,W					; load current gas_change_depth into WREG
-;	cpfsgt	EEDATA					; last gas_change_depth > current gas_change_depth ?
-;	bra		check_decogas_done		; W < lo -> last gas_change_depth > current gas_change_depth
-;	movff	EEDATA,lo				; deepest gas_change_depth in lo
-;	movlw	d'5'
-;	movwf	hi						; Decogas # in hi (1-5)
-;
-;check_decogas_done:
-;	ostc_debug	'E'		; Sends debug-information to screen if debugmode active
-;
-;	decf	hi,F						; Gas 0-4
-;	movff	lo, char_I_deco_gas_change	; copy change_depth
-;
-;	movf	hi,W						; Gas 0-4
-;	mullw	d'4'
-;	movf	PRODL,W			
-;	addlw	d'7'						; = address for He ratio
-;	movwf	EEADR
-;	call	read_eeprom					; Read He ratio
-;	movff	EEDATA,char_I_deco_He_ratio	; And copy into hold register
-;
-;
-;	movf	hi,W						; Gas 0-4
-;	mullw	d'4'
-;	movf	PRODL,W			
-;	addlw	d'6'						; = address for O2 ratio
-;	movwf	EEADR
-;	call	read_eeprom					; Read O2 ratio
-;	
-;	movff	char_I_deco_He_ratio, wait_temp	; copy into bank1 register
-;	bsf		STATUS,C					; Borrow bit
-;	movlw	d'100'						; 100%
-;	subfwb	wait_temp,W					; minus He
-;	bsf		STATUS,C					; Borrow bit
-;	subfwb	EEDATA,F					; minus O2
-;	movff	EEDATA, char_I_deco_N2_ratio	; = N2!
-;	bra		skip_decompression_gases
-;
 reset_decompression_gases:				; reset the deco gas while in NDL
 	ostc_debug	'F'		; Sends debug-information to screen if debugmode active
   	clrf	lo
  	movff	lo, char_I_deco_gas_change	; clear 
  	movff	lo, char_I_deco_N2_ratio	; clear
  	movff	lo, char_I_deco_He_ratio	; clear
-skip_decompression_gases:
 ;call	PLED_gaschange_DEBUG
 	return
 

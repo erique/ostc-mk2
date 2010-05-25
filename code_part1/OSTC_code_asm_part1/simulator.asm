@@ -64,10 +64,10 @@ menu_simulator_loop3:
 	goto	menu_simulator_do			; call submenu
 
 	btfss	menubit
-	goto	menu						; exit setup menu and return to main menu
+	goto	menu_simulator_exit
 
 	btfsc	sleepmode
-	goto	more_menu
+	goto	menu_simulator_exit
 
 	btfsc	divemode
 	goto	restart						; exit menu, restart and enter divemode
@@ -85,6 +85,7 @@ menu_simulator_do:						; calls submenu
 	bra		simulator_calc_deco
 	dcfsnz	menupos,F
 	bra		simulator_show_decoplan
+menu_simulator_exit:
 	movlw	d'4'
 	movwf	menupos
 	goto	more_menu2						; exit...

@@ -2782,7 +2782,7 @@ PLED_divemenu_cursor:
 ;;	DISPLAYTEXT	.132					;"Format"
 ;	return
 
-custom_warn_surfmode:
+custom_warn_surfmode:			; With CF in temp1
 	movlw	.0
 	movff	WREG,box_temp+0		; Data
 	movlw	.56
@@ -2812,7 +2812,7 @@ custom_warn_surfmode:
 	WIN_LEFT	.71
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.1					; Init new Wordprocessor
-	call		PLED_divemask_color	; Set Color for Divemode mask
+	call	PLED_warnings_color		; Set Color for Warning
  	lfsr	FSR2,letter
 	movlw	'C'
 	movwf	POSTINC2

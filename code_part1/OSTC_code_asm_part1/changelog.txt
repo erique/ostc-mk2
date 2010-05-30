@@ -5,7 +5,9 @@ CHANGE: Disabled "Delete Dive" in logbook
 CHANGE: Simulated dives are no longer stored in the logbook
 NEW: Simulator is much faster now
 NEW: New Simulation results screen
-
+BUGFIX: CF Warning displayed in Color# Warnings (OSTC Mk.2 only)
+NEW: Gas Setup sorts Gaslist
+NEW: Deco Code uses all Gases for forecast
 
 New in 1.61 Beta:
 BETA Version - Do NOT use for diving!

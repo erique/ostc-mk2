@@ -317,12 +317,12 @@
 
 	fatal_error_code			; holds error code value 
 
-	logbook_temp1				; Temp used in logbook display&Divemode
-	logbook_temp2				; Temp used in logbook display&Divemode
-	logbook_temp3				; Temp used in logbook display&Divemode
-	logbook_temp4				; Temp used in logbook display&Divemode
-	logbook_temp5				; Temp used in logbook display&Divemode
-	logbook_temp6				; Temp used in logbook display&Divemode
+	logbook_temp1				; Temp used in logbook display&Divemode&Gassetup
+	logbook_temp2				; Temp used in logbook display&Divemode&Gassetup
+	logbook_temp3				; Temp used in logbook display&Divemode&Gassetup
+	logbook_temp4				; Temp used in logbook display&Divemode&Gassetup
+	logbook_temp5				; Temp used in logbook display&Divemode&Gassetup
+	logbook_temp6				; Temp used in logbook display&Divemode&Gassetup
 	
 	convert_value_temp:3		; used in menu_battery_state_convert_date
 	box_temp:5

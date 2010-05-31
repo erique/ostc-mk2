@@ -316,17 +316,16 @@ calc_deko_divemode:
 	call	check_gas_change			; Checks if a better gas should be selected (by user)
 
 ; Check for decompression gases if in decomode
-divemode_check_decogases:					; CALLed from Simulator
 	btfss	dekostop_active
 	bra		reset_decompression_gases	; While in NDL, do not set deompression gas
 
+divemode_check_decogases:					; CALLed from Simulator
 ; Copy active gases to char_I_deco_N2_ratio and char_I_deco_He_ratio
 
 	clrf	hi						; # of gas (0-4)
 	; Gas0 is Start gas, do not copy
 	
 	lfsr	FSR1, char_I_deco_He_ratio5		; most shallow decogas
-	
 divemode_check_decogases2:
 	incf	hi,F						; increase
 	rcall	copy_decogas_info
@@ -339,29 +338,57 @@ divemode_check_decogases2:
 	read_int_eeprom		d'27'		; read flag register
 	movff	EEDATA,hi				; temp
 	
-	read_int_eeprom		d'28'		; read gas_change_depth Gas1
+	read_int_eeprom		d'29'		; read gas_change_depth Gas2
 	movlw	d'0'
 	btfsc	hi,1					; Skip if clear -> Skip if inactive
 	movf	EEDATA,W
 	movff	WREG,char_I_deco_gas_change5
 
-	read_int_eeprom		d'29'		; read gas_change_depth Gas2
+	read_int_eeprom		d'30'		; read gas_change_depth Gas3
 	movlw	d'0'
 	btfsc	hi,2					; Skip if clear -> Skip if inactive
 	movf	EEDATA,W
 	movff	WREG,char_I_deco_gas_change4
 
-	read_int_eeprom		d'30'		; read gas_change_depth Gas3
+	read_int_eeprom		d'31'		; read gas_change_depth Gas4
 	movlw	d'0'
 	btfsc	hi,3					; Skip if clear -> Skip if inactive
 	movf	EEDATA,W
 	movff	WREG,char_I_deco_gas_change3
 
-	read_int_eeprom		d'31'		; read gas_change_depth Gas1
+	read_int_eeprom		d'32'		; read gas_change_depth Gas5
 	movlw	d'0'
 	btfsc	hi,4					; Skip if clear -> Skip if inactive
 	movf	EEDATA,W
 	movff	WREG,char_I_deco_gas_change2
+
+; Debugger
+call	enable_rs232	
+	movff	char_I_deco_He_ratio5,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_N2_ratio5,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_He_ratio4,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_N2_ratio4,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_He_ratio3,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_N2_ratio3,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_He_ratio2,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_N2_ratio2,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_gas_change5,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_gas_change4,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_gas_change3,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_gas_change2,TXREG
+	call	rs232_wait_tx				; wait for UART
+
 	return
 
 copy_decogas_info:
@@ -391,9 +418,13 @@ copy_decogas_info:
 reset_decompression_gases:				; reset the deco gas while in NDL
 	ostc_debug	'F'		; Sends debug-information to screen if debugmode active
   	clrf	lo
- 	movff	lo, char_I_deco_gas_change	; clear 
- 	movff	lo, char_I_deco_N2_ratio	; clear
- 	movff	lo, char_I_deco_He_ratio	; clear
+	movff	lo,char_I_deco_gas_change5
+	movff	lo,char_I_deco_gas_change4
+	movff	lo,char_I_deco_gas_change3
+	movff	lo,char_I_deco_gas_change2
+; 	movff	lo, char_I_deco_gas_change	; clear 
+;	movff	lo, char_I_deco_N2_ratio	; clear
+;	movff	lo, char_I_deco_He_ratio	; clear
 ;call	PLED_gaschange_DEBUG
 	return
 

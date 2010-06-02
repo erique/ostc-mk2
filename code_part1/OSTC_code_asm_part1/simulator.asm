@@ -293,13 +293,10 @@ simulator_calc_deco_loop2:
 
 	movlw	d'0'
 	movff	WREG,char_I_step_is_1min		; 2 second deco mode
-;	movff	WREG,unused_x24B
 
 	movlw	d'255'
 	movff	WREG,char_O_deco_status			; Reset Deco module
 
-;	movff	char_O_deco_status,deco_status		; 
-;	tstfsz	deco_status							; deco_status=0 if decompression calculation done
 	bra		simulator_calc_deco2				; Not finished
 
 simulator_calc_deco3:
@@ -321,7 +318,6 @@ simulator_calc_deco3:
 
 	movlw	d'5'							; Pre-Set Cursor to "Show Decoplan"
 	movwf	menupos
-
 	bra		menu_simulator1					; Done.
 
 simulator_calc_deco2:

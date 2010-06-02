@@ -459,6 +459,10 @@ calc_deko_divemode2:
 
  	ostc_debug	'B'		; Sends debug-information to screen if debugmode active
 	call	divemode_prepare_flags_for_deco
+	
+	movlw	d'0'
+	movff	WREG,char_I_step_is_1min		; 2 second deco mode
+
 	call	deco_main_calc_hauptroutine		; calc_tissue
 	movlb	b'00000001'						; rambank 1 selected
 	ostc_debug	'C'		; Sends debug-information to screen if debugmode active

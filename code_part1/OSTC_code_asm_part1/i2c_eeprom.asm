@@ -189,7 +189,7 @@ get_free_EEPROM_location2c:
 	movlw		d'0'
 	addwfc		ext_ee_temp2,F
 	
-	btfsc		ext_ee_temp2,7			; 8000 reached?
+	btfsc		ext_ee_temp2,7			; 0x8000 reached?
 	bra			get_free_EEPROM_location3b	; yes
 	
 	bsf			SSPCON2, ACKEN		; no, send Ack

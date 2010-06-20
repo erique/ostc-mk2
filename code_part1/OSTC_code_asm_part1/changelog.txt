@@ -1,3 +1,7 @@
+New in 1.63 Beta:
+BETA Version - Do NOT use for diving!
+
+
 New in 1.62 Beta:
 BETA Version - Do NOT use for diving!
 CHANGE: More space around divemode-menu 

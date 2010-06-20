@@ -546,6 +546,9 @@ profile_display_loop:
 	movff		profile_temp+0,profile_temp2+0
 	movff		profile_temp+1,profile_temp2+1		; 16Bit x-scaler
 	incf		profile_temp2+1,F					
+	tstfsz		profile_temp2+0						; Must not be Zero
+	bra			profile_display_loop2				; Not Zero!
+	incf		profile_temp2+0,F					; Zero, Increase!
 
 profile_display_loop2:
 	rcall		profile_view_get_depth		; reads depth, ignores temp and profile data	-> hi, lo

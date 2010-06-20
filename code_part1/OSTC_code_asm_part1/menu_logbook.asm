@@ -302,15 +302,15 @@ display_profile_offset3:
 	call		I2CREAD2				; Skip Profile version
 	movff		SSPBUF,lo				; read month
 
-	movff		eeprom_address+0, EventByte		; Store current EEPROM position
-	movff		eeprom_address+1, ProfileFlagByte
+;	movff		eeprom_address+0, EventByte		; Store current EEPROM position
+;	movff		eeprom_address+1, ProfileFlagByte
 ; Offset to SamplingRate
 	incf_eeprom_address	d'32'				; Macro, that adds 8Bit to eeprom_address:2 with banking at 0x8000
 	call		I2CREAD						; Read Sampling rate
 	movff		SSPBUF,samplesecs_value		; Copy sampling rate
-
-	movff		EventByte, eeprom_address+0		; Re-Store current EEPROM position
-	movff		ProfileFlagByte, eeprom_address+1		; Re-Store current EEPROM position
+	decf_eeprom_address	d'32'				; Macro, that subtracts 8Bit from eeprom_address:2 with banking at 0x8000
+;	movff		EventByte, eeprom_address+0		; Re-Store current EEPROM position
+;	movff		ProfileFlagByte, eeprom_address+1		; Re-Store current EEPROM position
 
 ;display_profile2a:
 
@@ -560,6 +560,10 @@ profile_display_loop2:
 	call		div16x16					; xA/xB=xC
 	movlw		d'75'
 	addwf		xC+0,F						; add 75 pixel offset to result
+	
+btfsc		STATUS,C						; Ignore potential profile errors
+movff		apnoe_mins,xC+0
+
 	call		profile_display_fill		; In this column between this row (xC+0) and the last row (apnoe_mins)
 	movff		xC+0,apnoe_mins				; Store last row for fill routine
 	movf		xC+0,W
@@ -680,54 +684,56 @@ profile_view_get_depth:
 	return
 
 profile_view_get_depth_new1:
-	decfsz		divisor_deco,F				; Check divisor
-	bra			profile_view_get_depth_new1_1	; Divisor not zero...	
+;bra		profile_view_get_depth_new1_1		; Skip all data to ignore...
 
-;	tstfsz		timeout_counter2			; Any bytes to ignore
-;	bra			profile_view_get_depth_new2	; Yes (1-127)
-;	return									; No (0)
-
-	movff	logbook_temp2,divisor_deco		; Restore divisor value!
-; check for event byte and the extra informations
-	btfss		event_occured
-	bra			profile_view_get_depth_new2		; No event!
-	
-	call		I2CREAD2					; read event byte
-	decf		timeout_counter2,F			; Reduce number of bytes to ignore
-
-	movlw		d'0'						; Extra bytes to ignore because of event
-	btfsc		SSPBUF,4
-	addlw		d'2'						; two bytes for manual gas set
-	btfsc		SSPBUF,5
-	addlw		d'1'						; one byte for gas change
-	movwf		logbook_temp5				; store extra bytes to ignore
-
-	tstfsz		logbook_temp5				; Anything to ignore?
-	bra			profile_view_get_depth_new1_2	; Yes
-	bra			profile_view_get_depth_new2	; No, continue with normal routine
-
-profile_view_get_depth_new1_2:
-	call		I2CREAD2					; ignore byte
-	decf		timeout_counter2,F			; Reduce number of bytes to ignore
-	decfsz		logbook_temp5,F				; reduce extra bytes ignore counter
-	bra			profile_view_get_depth_new1_2	; loop
-
-profile_view_get_depth_new2:
-	movlw		d'4'							; Temp (2) and Deko (2) in the sample?
-	cpfseq		timeout_counter2
-	bra			profile_view_get_depth_new2_2	; No
-	; Yes, skip Temp!
-	call		I2CREAD2					; ignore byte
-	decf		timeout_counter2,F			; Reduce number of bytes to ignore
-	call		I2CREAD2					; ignore byte
-	decf		timeout_counter2,F			; Reduce number of bytes to ignore
-
-profile_view_get_depth_new2_2:
-	call		I2CREAD2					; ignore byte
-
-	decfsz		timeout_counter2,F			; reduce counter
-	bra			profile_view_get_depth_new2_2; Loop
-	return
+;	decfsz		divisor_deco,F				; Check divisor
+;	bra			profile_view_get_depth_new1_1	; Divisor not zero...	
+;
+;;	tstfsz		timeout_counter2			; Any bytes to ignore
+;;	bra			profile_view_get_depth_new2	; Yes (1-127)
+;;	return									; No (0)
+;
+;	movff	logbook_temp2,divisor_deco		; Restore divisor value!
+;; check for event byte and the extra informations
+;	btfss		event_occured
+;	bra			profile_view_get_depth_new2		; No event!
+;	
+;	call		I2CREAD2					; read event byte
+;	decf		timeout_counter2,F			; Reduce number of bytes to ignore
+;
+;	movlw		d'0'						; Extra bytes to ignore because of event
+;	btfsc		SSPBUF,4
+;	addlw		d'2'						; two bytes for manual gas set
+;	btfsc		SSPBUF,5
+;	addlw		d'1'						; one byte for gas change
+;	movwf		logbook_temp5				; store extra bytes to ignore
+;
+;	tstfsz		logbook_temp5				; Anything to ignore?
+;	bra			profile_view_get_depth_new1_2	; Yes
+;	bra			profile_view_get_depth_new2	; No, continue with normal routine
+;
+;profile_view_get_depth_new1_2:
+;	call		I2CREAD2					; ignore byte
+;	decf		timeout_counter2,F			; Reduce number of bytes to ignore
+;	decfsz		logbook_temp5,F				; reduce extra bytes ignore counter
+;	bra			profile_view_get_depth_new1_2	; loop
+;
+;profile_view_get_depth_new2:
+;	movlw		d'4'							; Temp (2) and Deko (2) in the sample?
+;	cpfseq		timeout_counter2
+;	bra			profile_view_get_depth_new2_2	; No
+;	; Yes, skip Temp!
+;	call		I2CREAD2					; ignore byte
+;	decf		timeout_counter2,F			; Reduce number of bytes to ignore
+;	call		I2CREAD2					; ignore byte
+;	decf		timeout_counter2,F			; Reduce number of bytes to ignore
+;
+;profile_view_get_depth_new2_2:
+;	call		I2CREAD2					; ignore byte
+;
+;	decfsz		timeout_counter2,F			; reduce counter
+;	bra			profile_view_get_depth_new2_2; Loop
+;	return
 
 profile_view_get_depth_new1_1:
 	tstfsz		timeout_counter2			; Any bytes to ignore

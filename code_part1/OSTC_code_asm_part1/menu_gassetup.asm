@@ -1254,11 +1254,11 @@ gassetup_sort_gaslist1b:
 	return
 
 gassetup_sort_sort:
-	clrf	logbook_temp2		; Gas (0-4)
-	clrf	logbook_temp1		; Here: Change depth in m
-	clrf	logbook_temp3		; Gas (0-4)
+	clrf	logbook_temp2			; Gas (0-4)
+	clrf	logbook_temp1			; Here: Change depth in m
+	clrf	logbook_temp3			; Gas (0-4)
 
-	lfsr	FSR2,letter+.20		; Change depths...
+	lfsr	FSR2,letter+.20			; Change depths...
 gassetup_sort_gaslist2:
 	movf	POSTINC2,W						; Get Change depth into WREG
 

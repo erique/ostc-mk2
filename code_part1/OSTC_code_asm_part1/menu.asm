@@ -26,7 +26,7 @@
 wait_switches:
 	bcf		switch_left
 	bcf		switch_right
-return
+	return
 
 ;	movlw	d'40'
 ;	btfss	button_delay_done		; Start counting?
@@ -64,6 +64,7 @@ return
 ;
 menu:
 	bcf		deco_mode_changed			; Clear flag (Description is only showed once)
+	bcf		LED_blue
 	movlw	d'1'
 	movwf	menupos
 menu2:

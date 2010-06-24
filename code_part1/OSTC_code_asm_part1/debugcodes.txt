@@ -49,4 +49,5 @@ S - Tissues copy start
 T - Tissue copy done.
 U - Average Depth Display updated
 V - Gauge mode Stopwatch updated
+W - CNS Surfacemode updated
 

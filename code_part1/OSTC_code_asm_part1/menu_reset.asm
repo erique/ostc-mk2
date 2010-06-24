@@ -229,7 +229,7 @@ reset_all_cf:
 #DEFINE	nofly_time_ratio			d'60'		; 8BIT		60%
 #DEFINE	gradient_factor_alarm1		d'100'		; 8Bit		100%
 
-#DEFINE	not_used_CF15				d'100'		; 8Bit		
+#DEFINE	cns_display_surface			d'10'		; 8Bit		10%
 #DEFINE	deco_distance_for_sim		d'10'		; 8Bit		1m
 #DEFINE	ppo2_warning_low			d'019'		; 8Bit		0.19 Bar
 #DEFINE	ppo2_warning_high			d'160'		; 8Bit		1.60 Bar
@@ -267,6 +267,8 @@ reset_all_cf:
 #DEFINE	color_warn_gf_percent		d'101'		; 8Bit		Warn-%
 #DEFINE	color_warn_ppo2_cbar		d'161'		; 8Bit		ppO2 warn
 #DEFINE	color_warn_celocity_mmin	d'15'		; 8Bit		warn at xx m/min
+
+#DEFINE	time_correction_value_default	d'42'	; 8Bit		Adds to Seconds on Midnight
 
 	movlw	d'127'					; address of low byte of first custom function
 	movwf	EEADR
@@ -322,7 +324,7 @@ reset_all_cf:
 	movlw	LOW		gradient_factor_alarm1
 	rcall	reset_customfunction	; saves default and current value
 
-	movlw	LOW		not_used_CF15
+	movlw	LOW		cns_display_surface
 	rcall	reset_customfunction	; saves default and current value
 	
 	movlw	LOW		deco_distance_for_sim
@@ -433,8 +435,9 @@ reset_all_cf_bank1:
 	movlw	color_warn_celocity_mmin
 	rcall	reset_customfunction	; saves default and current value
 
-	movlw	d'0'
+	movlw	time_correction_value_default
 	rcall	reset_customfunction	; saves default and current value
+
 	movlw	d'0'
 	rcall	reset_customfunction	; saves default and current value
 	movlw	d'0'

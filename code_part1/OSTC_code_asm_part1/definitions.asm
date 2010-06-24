@@ -25,7 +25,7 @@
 #DEFINE	softwareversion_x		d'1'		; Software version  XX.YY
 #DEFINE	softwareversion_y		d'63'		; Software version  XX.YY
 
-#DEFINE	max_custom_number		d'47'		; Number of last used custom function
+#DEFINE	max_custom_number		d'48'		; Number of last used custom function
 
 #DEFINE	logbook_profile_version	0x20		; Do not touch!
 
@@ -54,8 +54,6 @@
 #DEFINE	color_black b'00000000'
 #DEFINE	color_deepblue b'00000001'
 #DEFINE	color_grey	d'74'
-
-#DEFINE	plus_time_correction	d'42'
 
 #DEFINE	warn_depth		d'1'
 #DEFINE	warn_cns		d'2'
@@ -328,7 +326,7 @@
 	box_temp:5
 	win_color1_temp
 	win_color2_temp				; Backup color registers
-	
+	time_correction_value			; Adds to Seconds on midnight
 	ENDC
 
 	CBLOCK	0x200				;Bank 2

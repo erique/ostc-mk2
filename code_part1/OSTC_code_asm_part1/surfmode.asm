@@ -48,6 +48,7 @@ surfloop:
 	bra		surfloop1
 
 ; Startup tasks for decompression modes
+	call	PLED_display_cns_surface		; Update surface CNS display (If allowed by CF15)
 	call	PLED_desaturation_time			; display desaturation time
 	call	PLED_nofly_time					; display nofly time
 
@@ -203,6 +204,7 @@ update_surfloop60:
 	bra		update_surfloop60_2
 
 ; One Minute tasks for deco modes
+	call	PLED_display_cns_surface	; Update surface CNS display (If allowed by CF15)
 	call	PLED_nofly_time				; display nofly time
 	call	PLED_desaturation_time		; display desaturation time
 	btfsc	premenu						; Not when "Menu?" is displayed!

@@ -464,7 +464,7 @@
 	DA	"Desaturate x[%]}"		;48
 	DA	"NoFly Ratio [%]}"		;49
 	DA	"GF alarm 1  [%]}"		;50
-	DA	"not used       }"		;51
+	DA	"CNSshow surf[%]}"		;51
 	DA	"Deco Offset[dm]}"		;52
 	DA	"ppO2 low [cBar]}"		;53
 	DA	"ppO2 high[cBar]}"		;54
@@ -476,7 +476,7 @@
 	DA	"Divisor ppO2	}"		;60
 	DA	"Divisor Debug  }"		;61
 	DA	"Divisor NotUse2}"		;62
-	DA	"CNS show    [%]}"		;63
+	DA	"CNSshow dive[%]}"		;63
 	DA	"Logbook offset }"		;64
 	DA	"Last Deco at[m]}"		;65
 	DA	"End Apnoe [min]}"		;66
@@ -588,7 +588,7 @@
 	DA	"GF warning  [%]}"		;167
 	DA	"ppO2 warn[cBar]}"		;168
 	DA	"Vel.warn[m/min]}"		;169
-	DA	"not used       }"		;170
+	DA	"Time offset [s]}"		;170
 	DA	"not used       }"		;171
 	DA	"not used       }"		;172
 	DA	"not used       }"		;173

@@ -3301,6 +3301,42 @@ PLED_display_cns:
 	call	word_processor
 	return
 
+PLED_display_cns_surface:
+; Check if CNS should be displayed
+	movff	char_O_CNS_fraction,lo		; copy into bank1
+	GETCUSTOM8	d'15'					; cns_display_high_surfacemode
+	subwf	lo,W
+	btfss	STATUS,C
+	return								; Do not show...
+	; Show CNS
+
+	ostc_debug	'W'				; Sends debug-information to screen if debugmode active
+
+	WIN_TOP		.175
+	WIN_LEFT	.45
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0					; Init new Wordprocessor
+	PLED_color_code		warn_cns		; Color-code CNS output
+	
+ 	lfsr	FSR2,letter
+	movlw	'C'
+	movwf	POSTINC2
+	movlw	'N'
+	movwf	POSTINC2
+	movlw	'S'
+	movwf	POSTINC2
+	movlw	':'
+	movwf	POSTINC2
+	movff	char_O_CNS_fraction,lo
+	bsf		leftbind
+	output_8
+	bcf		leftbind
+	movlw	'%'
+	movwf	POSTINC2
+	call	word_processor
+	return
+
+
 PLED_custom_text:
 	read_int_eeprom	d'64'
 	movlw	d'1'

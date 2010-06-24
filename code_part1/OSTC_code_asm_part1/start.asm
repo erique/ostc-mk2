@@ -127,6 +127,8 @@ check_firmware_new:
 restart:
 	bcf		LED_red
 	bcf		LED_blue				; all LEDs off
+	GETCUSTOM8	d'48'				; time correction value
+	movff	WREG, time_correction_value	; store in Bank0 register
 
 	clrf	flag1					; clear all flags
 	clrf	flag2

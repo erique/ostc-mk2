@@ -1,6 +1,7 @@
 New in 1.63 Beta:
 BETA Version - Do NOT use for diving!
-
+CHANGE: CF15 defines threshold for CNS display in Surfacemode (OSTC MK.2 only)
+NEW: CF48 sets positive clock offset [seconds/24h], added at Midnight
 
 New in 1.62 Beta:
 BETA Version - Do NOT use for diving!

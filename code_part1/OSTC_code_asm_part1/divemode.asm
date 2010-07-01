@@ -1562,7 +1562,7 @@ diveloop_boot:
 	bcf		event_occured				; clear flag
 	bcf		depth_greater_100m			; clear flag
 	setf	last_diluent				; to be displayed after first calculation (range: 0 to 100 [%])
-	clrf	char_last_pointer
+;	clrf	char_last_pointer
 	bcf		dekostop_active	
 	bcf		is_bailout					;=1: CC mode, but bailout active!		
 	bcf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode

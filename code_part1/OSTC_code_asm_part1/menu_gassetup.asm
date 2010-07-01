@@ -29,7 +29,7 @@ menu_gassetup:
 
 menu_gassetup_prelist:
 	call	PLED_ClearScreen
-	call	gassetup_sort_gaslist			; Sorts Gaslist according to change depth
+call	gassetup_sort_gaslist			; Sorts Gaslist according to change depth
 	clrf	timeout_counter2
 	bcf		sleepmode
 	bcf		menubit2

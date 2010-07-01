@@ -152,6 +152,7 @@ simulator_save_tissue_data:
 	ostc_debug	'S'							; Sends debug-information to screen if debugmode active
 	call	main_push_tissues_to_vault
 	movlb	0x01							; Back to RAM Bank1
+	movff	char_O_CNS_fraction,temp7		; Store CNS
 	ostc_debug	'T'							; Sends debug-information to screen if debugmode active
 	return
 
@@ -160,6 +161,7 @@ simulator_restore_tissue_data:
 	ostc_debug	'S'							; Sends debug-information to screen if debugmode active
 	call	main_pull_tissues_from_vault
 	movlb	0x01						; Back to RAM Bank1
+	movff	temp7,char_O_CNS_fraction		; Reset CNS to real value
 	ostc_debug	'T'							; Sends debug-information to screen if debugmode active
 
 	ostc_debug	'G'		; Sends debug-information to screen if debugmode active

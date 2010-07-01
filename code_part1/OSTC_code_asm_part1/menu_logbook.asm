@@ -564,8 +564,8 @@ profile_display_loop2:
 	movlw		d'75'
 	addwf		xC+0,F						; add 75 pixel offset to result
 	
-btfsc		STATUS,C						; Ignore potential profile errors
-movff		apnoe_mins,xC+0
+	btfsc		STATUS,C						; Ignore potential profile errors
+	movff		apnoe_mins,xC+0
 
 	call		profile_display_fill		; In this column between this row (xC+0) and the last row (apnoe_mins)
 	movff		xC+0,apnoe_mins				; Store last row for fill routine

@@ -288,7 +288,7 @@
 	active_gas					; Holds number of active gas
 		
 	last_diluent				; backup of diluent percentage in const ppO2 mode
-	last_cns					; backup of last cns value
+;	last_cns					; backup of last cns value
 	last_ppO2_value				; last calculated ppO2 value
 
 ;	ontime_since_last_charge:2	; Ontime in minutes since last complete charge cycle
@@ -310,7 +310,7 @@
 	
 	temp5						; used in PLED_MultiGF,...
 	temp6						; used in PLED_MultiGF,...
-	char_last_pointer			; for MultiGF
+	temp7						; Used in Simulator
 	MultiGF_seconds				; Counter for seconds in Multi-GF mode
 
 	fatal_error_code			; holds error code value 
@@ -326,7 +326,7 @@
 	box_temp:5
 	win_color1_temp
 	win_color2_temp				; Backup color registers
-	time_correction_value			; Adds to Seconds on midnight
+	time_correction_value		; Adds to Seconds on midnight
 	ENDC
 
 	CBLOCK	0x200				;Bank 2

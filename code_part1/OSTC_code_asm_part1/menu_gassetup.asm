@@ -1218,7 +1218,7 @@ gassetup_sort_gaslist1b:
 	movwf	logbook_temp5
 	rcall	gassetup_sort_store
 	movff	logbook_temp1,EEDATA	; Change depth -> EEDATA
-	write_int_eeprom	d'32'		; Write Change Depth Gas 5
+	write_int_eeprom	d'122'		; Write Change Depth Gas 5
 
 	rcall	gassetup_sort_sort	; Sort!
 ; Done. Copy Gas #logbook_temp3 into EEPROM Place Gas 4
@@ -1226,7 +1226,7 @@ gassetup_sort_gaslist1b:
 	movwf	logbook_temp5
 	rcall	gassetup_sort_store
 	movff	logbook_temp1,EEDATA	; Change depth -> EEDATA
-	write_int_eeprom	d'31'		; Write Change Depth Gas 4
+	write_int_eeprom	d'121'		; Write Change Depth Gas 4
 
 	rcall	gassetup_sort_sort	; Sort!
 ; Done. Copy Gas #logbook_temp3 into EEPROM Place Gas 3
@@ -1234,7 +1234,7 @@ gassetup_sort_gaslist1b:
 	movwf	logbook_temp5
 	rcall	gassetup_sort_store
 	movff	logbook_temp1,EEDATA	; Change depth -> EEDATA
-	write_int_eeprom	d'30'		; Write Change Depth Gas 3
+	write_int_eeprom	d'120'		; Write Change Depth Gas 3
 
 	rcall	gassetup_sort_sort	; Sort!
 ; Done. Copy Gas #logbook_temp3 into EEPROM Place Gas 2
@@ -1242,7 +1242,7 @@ gassetup_sort_gaslist1b:
 	movwf	logbook_temp5
 	rcall	gassetup_sort_store
 	movff	logbook_temp1,EEDATA	; Change depth -> EEDATA
-	write_int_eeprom	d'29'		; Write Change Depth Gas 2
+	write_int_eeprom	d'119'		; Write Change Depth Gas 2
 
 	rcall	gassetup_sort_sort	; Sort!
 ; Done. Copy Gas #logbook_temp3 into EEPROM Place Gas 1
@@ -1250,7 +1250,7 @@ gassetup_sort_gaslist1b:
 	movwf	logbook_temp5
 	rcall	gassetup_sort_store
 	movff	logbook_temp1,EEDATA	; Change depth -> EEDATA
-	write_int_eeprom	d'28'		; Write Change Depth Gas 1
+	write_int_eeprom	d'118'		; Write Change Depth Gas 1
 	return
 
 gassetup_sort_sort:
@@ -1311,35 +1311,32 @@ gassetup_sort_store:
 	cpfseq	EEDATA					; Compare with EEDATA d'33'
 	bra		gassetup_sort_store2	; Was not first gas!
 	movff	logbook_temp5,EEDATA	; Copy new first gas
-	write_int_eeprom	d'33'		; Store
-	bsf		menubit2				; Done. Do change again.
+	write_int_eeprom	d'123'		; Store
+	bsf		menubit2				; Done. Do not change again.
 
 gassetup_sort_store2:
-;; Was Gas #logbook_temp3 active?
-;; Letter+26 holds active bits  25?
-;	movff	logbook_temp3,logbook_temp6	; Counter 0-4
-;	incf	logbook_temp6,F				; Counter 1-5
-;	movff	letter+.25, logbook_temp2	; No longer used
-;	read_int_eeprom		d'27'			; Active flag register
-;gassetup_sort_store3:
-;	rrcf	logbook_temp2,F				; Shift into Carry
-;	decfsz	logbook_temp6,F				; 1-5 x
-;	bra		gassetup_sort_store3		; Loop
-;; Carry now holds active bit of gas #logbook_temp3 (0-4)
-;
-;	movff	logbook_temp3,logbook_temp6	; Counter 0-4
-;	incf	logbook_temp6,F				; Counter 1-5
-;	clrf	logbook_temp2
-;gassetup_sort_store4:
-;	rlcf	logbook_temp2,F				; Shift into logbook_temp2
-;	decfsz	logbook_temp6,F				; 1-5 x
-;	bra		gassetup_sort_store4		; Loop
-;	movf	logbook_temp2
-;
-	
+; Was Gas #logbook_temp3 active?
+; Letter+26 holds active bits  25?
+	movff	logbook_temp3,logbook_temp6	; Counter 0-4
+	incf	logbook_temp6,F				; Counter 1-5
+	movff	letter+.25, logbook_temp2	; No longer used
+	read_int_eeprom		d'27'			; Active flag register
+gassetup_sort_store3:
+	rrcf	logbook_temp2,F				; Shift into Carry
+	decfsz	logbook_temp6,F				; 1-5 x
+	bra		gassetup_sort_store3		; Loop
+; Carry now holds active bit of gas #logbook_temp3 (0-4)
+
+	btfss	STATUS,C				; Was Gas active?
+	clrf	logbook_temp1			; No!, Clear change Depth to make it inactive for sorted list!
+
 	movf	logbook_temp5,W
 	mullw	d'4'
 	movff	PRODL,EEADR				; Point to EEPROM of Gas #logbook_temp5
+
+	movlw	d'90'					; +90 Offset to new... 
+	addwf	EEADR,F					; ..sorted list!
+
 	movff	POSTINC2,EEDATA			; O2 Default
 	call	write_eeprom			; store in internal EEPROM
 	incf	EEADR,F					; +1

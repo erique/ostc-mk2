@@ -3420,36 +3420,36 @@ PLED_clear_custom_text:
 ;	return
 ;
 
-PLED_gaschange_DEBUG:
-	WIN_LEFT	.0
-	WIN_TOP		.160
-	lfsr	FSR2,letter
-	movff	char_I_deco_He_ratio,lo
-	output_8
-	call	word_processor
-
-	WIN_LEFT	.25
-	WIN_TOP		.160
-	call	PLED_SetRow
-	lfsr	FSR2,letter
-	movff	char_I_deco_N2_ratio,lo
-	output_8
-	call	word_processor
-
-	WIN_LEFT	.50
-	WIN_TOP		.160
-	lfsr	FSR2,letter
-	movff	char_I_deco_gas_change,lo
-	output_8
-	call	word_processor
-
-	WIN_LEFT	.75
-	WIN_TOP		.160
-	lfsr	FSR2,letter
-	movff	hi,lo
-	output_8
-	call	word_processor
-	return
+;PLED_gaschange_DEBUG:
+;	WIN_LEFT	.0
+;	WIN_TOP		.160
+;	lfsr	FSR2,letter
+;	movff	char_I_deco_He_ratio,lo
+;	output_8
+;	call	word_processor
+;
+;	WIN_LEFT	.25
+;	WIN_TOP		.160
+;	call	PLED_SetRow
+;	lfsr	FSR2,letter
+;	movff	char_I_deco_N2_ratio,lo
+;	output_8
+;	call	word_processor
+;
+;	WIN_LEFT	.50
+;	WIN_TOP		.160
+;	lfsr	FSR2,letter
+;	movff	char_I_deco_gas_change,lo
+;	output_8
+;	call	word_processor
+;
+;	WIN_LEFT	.75
+;	WIN_TOP		.160
+;	lfsr	FSR2,letter
+;	movff	hi,lo
+;	output_8
+;	call	word_processor
+;	return
 
 
 PLED_MultiGF_deco_mask:

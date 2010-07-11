@@ -199,33 +199,34 @@ restart_set_modes_and_flags:		; "Call"ed from divemode, as well!
 	bcf		gauge_mode
 	bcf		FLAG_const_ppO2_mode
 	bcf		FLAG_apnoe_mode			
+
+; Pre-load modes for OC, GF 90/90 and no Aponoe or Gauge.
+	movlw	d'0'
+	movwf	wait_temp
+	movff	wait_temp,char_I_deco_model	; Clear Flagbyte 
+; Load GF values into RAM
+	movlw	d'90'
+	movwf	wait_temp
+	movff	wait_temp,char_I_GF_Lo_percentage
+	movff	wait_temp,char_I_GF_Hi_percentage		; Set to 90/90...
 	clrf	EEADRH
 	read_int_eeprom d'34'			; Read deco data	
 	movlw	d'1'					; Gauge mode
 	cpfseq	EEDATA
 	 bra	restart_3_test_ppO2_mode; check for ppO2 mode
 	bsf		gauge_mode				; Set flag for gauge mode
-	movlw	d'0'
-	movwf	wait_temp
-	movff	wait_temp,char_I_deco_model	; Clear Flagbyte 
 	return							; start in Surfacemode
 restart_3_test_ppO2_mode:
 	movlw	d'2'					; const ppO2 mode
 	cpfseq	EEDATA
 	 bra	restart_3_test_apnoe_mode; check for apnoe mode
 	bsf		FLAG_const_ppO2_mode	; Set flag for ppO2 mode
-	movlw	d'0'
-	movwf	wait_temp
-	movff	wait_temp,char_I_deco_model	; Clear Flagbyte 
 	return							; start in Surfacemode
 restart_3_test_apnoe_mode:
 	movlw	d'3'					; Apnoe mode
 	cpfseq	EEDATA
 	 bra	restart_4_test_gf_mode	; check for GF OC mode
 	bsf		FLAG_apnoe_mode			; Set flag for Apnoe Mode
-	movlw	d'0'
-	movwf	wait_temp
-	movff	wait_temp,char_I_deco_model	; Clear Flagbyte 
 	return							; start in Surfacemode
 restart_4_test_gf_mode:
 	movlw	d'4'					; GF OC mode
@@ -234,6 +235,11 @@ restart_4_test_gf_mode:
 	movlw	d'1'
 	movwf	wait_temp
 	movff	wait_temp,char_I_deco_model	; Set Flagbyte for GF method
+; Load GF values into RAM
+	GETCUSTOM8	d'32'			; GF low
+	movff		EEDATA,char_I_GF_Lo_percentage
+	GETCUSTOM8	d'33'			; GF high
+	movff		EEDATA,char_I_GF_Hi_percentage
 	return							; start in Surfacemode
 restart_5_test_gfO2_mode:
 	movlw	d'5'					; GF CC mode
@@ -243,6 +249,11 @@ restart_5_test_gfO2_mode:
 	movlw	d'1'
 	movwf	wait_temp
 	movff	wait_temp,char_I_deco_model	; Set Flagbyte for GF method
+; Load GF values into RAM
+	GETCUSTOM8	d'32'			; GF low
+	movff		EEDATA,char_I_GF_Lo_percentage
+	GETCUSTOM8	d'33'			; GF high
+	movff		EEDATA,char_I_GF_Hi_percentage
 	return							; start in Surfacemode
 
 startup_screen1:

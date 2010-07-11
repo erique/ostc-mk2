@@ -332,10 +332,10 @@ divemode_check_decogases2:
 	cpfseq	hi							; Gases 0-3 copied?
 	bra		divemode_check_decogases2	; No, Continue
 
-	read_int_eeprom		d'23'			; Read He ratio
+	read_int_eeprom		d'113'			; Read He ratio
 	movff	EEDATA,char_I_deco_He_ratio	; And copy into hold register
 
-	read_int_eeprom		d'22'			; Read O2 ratio
+	read_int_eeprom		d'112'			; Read O2 ratio
 	movff	char_I_deco_He_ratio, wait_temp			; copy into bank1 register
 	bsf		STATUS,C					; 
 	movlw	d'100'						; 100%
@@ -343,43 +343,26 @@ divemode_check_decogases2:
 	subfwb	EEDATA,F					; minus O2
 	movff	EEDATA, char_I_deco_N2_ratio; = N2!
 
-; Now, set change depth. Inactive gases get depth=0!
-
-	read_int_eeprom		d'27'		; read flag register
-	movff	EEDATA,hi				; temp
+; Now, set change depth. Inactive gases have depth=0!
 	
-	read_int_eeprom		d'28'		; read gas_change_depth Gas1
-	movlw	d'0'
-	btfsc	hi,0					; Skip if clear -> Skip if inactive
-	movf	EEDATA,W
-	movff	WREG,char_I_deco_gas_change5
+	read_int_eeprom		d'118'		; read gas_change_depth Gas1
+	movff	EEDATA,char_I_deco_gas_change5
 
-	read_int_eeprom		d'29'		; read gas_change_depth Gas2
-	movlw	d'0'
-	btfsc	hi,1					; Skip if clear -> Skip if inactive
-	movf	EEDATA,W
-	movff	WREG,char_I_deco_gas_change4
+	read_int_eeprom		d'119'		; read gas_change_depth Gas1
+	movff	EEDATA,char_I_deco_gas_change4
 
-	read_int_eeprom		d'30'		; read gas_change_depth Gas3
-	movlw	d'0'
-	btfsc	hi,2					; Skip if clear -> Skip if inactive
-	movf	EEDATA,W
-	movff	WREG,char_I_deco_gas_change3
+	read_int_eeprom		d'120'		; read gas_change_depth Gas1
+	movff	EEDATA,char_I_deco_gas_change3
 
-	read_int_eeprom		d'31'		; read gas_change_depth Gas4
-	movlw	d'0'
-	btfsc	hi,3					; Skip if clear -> Skip if inactive
-	movf	EEDATA,W
-	movff	WREG,char_I_deco_gas_change2
+	read_int_eeprom		d'121'		; read gas_change_depth Gas1
+	movff	EEDATA,char_I_deco_gas_change2
 
-	read_int_eeprom		d'32'		; read gas_change_depth Gas5
-	movlw	d'0'
-	btfsc	hi,4					; Skip if clear -> Skip if inactive
-	movf	EEDATA,W
-	movff	WREG,char_I_deco_gas_change
+	read_int_eeprom		d'122'		; read gas_change_depth Gas1
+	movff	EEDATA,char_I_deco_gas_change
+
 
 ; Debugger
-;call	enable_rs232	
+;	call	enable_rs232	
 ;	movff	char_I_deco_He_ratio5,TXREG
 ;	call	rs232_wait_tx				; wait for UART
 ;	movff	char_I_deco_N2_ratio5,TXREG
@@ -415,6 +398,9 @@ divemode_check_decogases2:
 copy_decogas_info:
 	movf	hi,W						; Gas 1-4
 	mullw	d'4'						; times 4...
+	movlw	d'90'						; +90 Offset to new... 
+	addwf	PRODL,F						; ..sorted list!
+
 	movf	PRODL,W						;
 	addlw	d'7'						; +7 = address for He ratio
 	movwf	EEADR
@@ -423,6 +409,9 @@ copy_decogas_info:
 
 	movf	hi,W						; Gas 1-4
 	mullw	d'4'						; times 4...
+	movlw	d'90'						; +90 Offset to new... 
+	addwf	PRODL,F						; ..sorted list!
+
 	movf	PRODL,W						;
 	addlw	d'6'						; +6 = address for O2 ratio
 	movwf	EEADR
@@ -444,9 +433,6 @@ reset_decompression_gases:				; reset the deco gas while in NDL
 	movff	lo,char_I_deco_gas_change3
 	movff	lo,char_I_deco_gas_change2
  	movff	lo, char_I_deco_gas_change	; clear 
-;	movff	lo, char_I_deco_N2_ratio	; clear
-;	movff	lo, char_I_deco_He_ratio	; clear
-;call	PLED_gaschange_DEBUG
 	return
 
 calc_deko_divemode2:
@@ -1596,12 +1582,12 @@ set_no_forced_stops:					; Init Deco list
 	clrf	POSTINC0
 	clrf	POSTINC0
 
-; Load GF values into RAM
-	GETCUSTOM8	d'32'			; GF low
-	movff		EEDATA,char_I_GF_Lo_percentage
-	GETCUSTOM8	d'33'			; GF high
-	movff		EEDATA,char_I_GF_Hi_percentage
-
+;; Load GF values into RAM - now done in start.asm!
+;	GETCUSTOM8	d'32'			; GF low
+;	movff		EEDATA,char_I_GF_Lo_percentage
+;	GETCUSTOM8	d'33'			; GF high
+;	movff		EEDATA,char_I_GF_Hi_percentage
+;
 ; Start with active Stopwatch?
 	bsf			stopwatch_active
 	GETCUSTOM8	d'41'			; =1: Start with active Stopwatch

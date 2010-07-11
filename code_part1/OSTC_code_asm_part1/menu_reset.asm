@@ -241,7 +241,7 @@ reset_all_cf:
 #DEFINE	sampling_divisor_tank		d'0'		; 8Bit		never
 #DEFINE	sampling_divisor_ppo2		d'0'		; 8Bit		never
 
-#DEFINE	sampling_divisor_deco2		d'12'		; 8Bit		/12
+#DEFINE	sampling_divisor_deco2		d'0'		; 8Bit		never
 #DEFINE	sampling_divisor_nyu2		d'0'		; 8Bit		never
 #DEFINE	cns_display_high			d'20'		; 8Bit		20%
 #DEFINE	logbook_offset				d'0'		; 15Bit		No Offset, but 15Bit value

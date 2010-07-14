@@ -3,7 +3,6 @@ BETA Version - Do NOT use for diving!
 CHANGE: Restored original Gas Setup
 CHANGE: CF25 (Deco Debug) default to 0
 
-
 New in 1.63 Beta:
 BETA Version - Do NOT use for diving!
 CHANGE: CF15 defines threshold for CNS display in Surfacemode (OSTC MK.2 only)

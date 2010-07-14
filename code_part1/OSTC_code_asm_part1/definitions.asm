@@ -310,7 +310,7 @@
 	
 	temp5						; used in PLED_MultiGF,...
 	temp6						; used in PLED_MultiGF,...
-	temp7						; Used in Simulator
+;	temp7						; Used in Simulator
 	MultiGF_seconds				; Counter for seconds in Multi-GF mode
 
 	fatal_error_code			; holds error code value 

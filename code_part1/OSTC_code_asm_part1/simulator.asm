@@ -167,6 +167,10 @@ simulator_restore_tissue_data:
 	movlb	b'00000001'						; select ram bank 1
 	call	calculate_noflytime				; Calc NoFly time
 	ostc_debug	'H'		; Sends debug-information to screen if debugmode active
+
+	; Calculate CNS	
+	call	main_calc_CNS_fraction		; calculate CNS
+	movlb	b'00000001'					; rambank 1 selected
 	return
 	
 simulator_show_decoplan:

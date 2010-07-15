@@ -1,7 +1,9 @@
 New in 1.65 Beta:
+This is the 1.70 Stable release candidate
 BETA Version - Do NOT use for diving!
 CHANGE: Restored original Gas Setup
 CHANGE: CF25 (Deco Debug) default to 0
+BUGFIX: Velocity warning (CF47) only for ascend
 
 New in 1.63 Beta:
 BETA Version - Do NOT use for diving!

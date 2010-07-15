@@ -29,7 +29,7 @@ menu_gassetup:
 
 menu_gassetup_prelist:
 	call	PLED_ClearScreen
-call	gassetup_sort_gaslist			; Sorts Gaslist according to change depth
+	call	gassetup_sort_gaslist			; Sorts Gaslist according to change depth
 	clrf	timeout_counter2
 	bcf		sleepmode
 	bcf		menubit2
@@ -1161,8 +1161,30 @@ gassetup_sort_gaslist:			; Sorts Gaslist according to change depth
 ; Change: 32
 ; Active: 27,4
 
-; Find deepest Gas
+; reset Change depths (Important for all users who upgrade from <1.60!)
+	clrf	EEADRH
+	clrf	EEDATA
+	write_int_eeprom		d'118'		; 
+	write_int_eeprom		d'119'		; 
+	write_int_eeprom		d'120'		; 
+	write_int_eeprom		d'121'		; 
+	write_int_eeprom		d'122'		; 
+	movlw	d'21'				; O2 Current
+	movwf	EEDATA	
+	write_int_eeprom		d'96'		; 
+	write_int_eeprom		d'100'		; 
+	write_int_eeprom		d'104'		; 
+	write_int_eeprom		d'108'		; 
+	write_int_eeprom		d'112'		; 
 
+	clrf	EEDATA				; He Current
+	write_int_eeprom		d'97'		; 
+	write_int_eeprom		d'101'		; 
+	write_int_eeprom		d'105'		; 
+	write_int_eeprom		d'109'		; 
+	write_int_eeprom		d'113'		; 
+
+; Find deepest Gas
 ; Copy all to RAM
 	movlw	d'3'
 	movwf	EEADR

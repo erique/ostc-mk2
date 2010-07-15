@@ -145,7 +145,7 @@ restart:
 	clrf	flag13
 	clrf	flag14
 	clrf	flag15
-
+	call	gassetup_sort_gaslist			; Sorts Gaslist according to change depth
 	call	PLED_boot				; PLED boot (Incl. Clear Screen!)
 	WIN_TOP		.0
 	WIN_LEFT	.0

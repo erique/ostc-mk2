@@ -322,8 +322,8 @@ calc_deko_divemode:
 divemode_check_decogases:					; CALLed from Simulator
 ; Copy active gases to char_I_deco_N2_ratio and char_I_deco_He_ratio
 
+	clrf	EEADRH
 	setf	hi						; # of gas (0-4)
-	
 	lfsr	FSR1, char_I_deco_He_ratio5		; most shallow decogas
 divemode_check_decogases2:
 	incf	hi,F						; increase (First time: hi=0)
@@ -393,6 +393,11 @@ divemode_check_decogases2:
 ;	call	rs232_wait_tx				; wait for UART
 ;	movff	char_I_deco_gas_change,TXREG
 ;	call	rs232_wait_tx				; wait for UART
+
+
+
+
+
 	return
 
 copy_decogas_info:

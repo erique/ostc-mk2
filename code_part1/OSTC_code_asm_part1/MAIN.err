@@ -1,4 +1,3 @@
-Warning[203] C:\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\MENU_GASSETUP.ASM 32 : Found opcode in column 1. (call)
 Warning[203] C:\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\DIVEMODE_MENU.ASM 411 : Found opcode in column 1. (bra)
 Message[301] C:\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\MAIN.ASM 136 : MESSAGE: (OSTC - diving computer code,  Copyright (C) 2009 HeinrichsWeikamp GbR)
 Message[301] C:\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\MAIN.ASM 137 : MESSAGE: (This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the)

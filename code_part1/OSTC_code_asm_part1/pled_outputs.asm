@@ -156,11 +156,14 @@ PLED_color_code_ppo22:
 	return
 
 PLED_color_code_velocity:
+	btfss	neg_flag			; Ignore for ascend!
+	bra		PLED_color_code_velocity1		; Skip check!
 	movff	divA+0,lo
 	GETCUSTOM8	d'47'			; Velocity warn [m/min]
 	subwf	lo,W
 	btfsc	STATUS,C
 	bra		PLED_color_code_velocity2		; Set to warning color
+PLED_color_code_velocity1:
 	call	PLED_standard_color
 	return
 PLED_color_code_velocity2:
@@ -210,12 +213,11 @@ ostc_debug1:
 
 
 PLED_resetdebugger:
-	bsf		LED_red
 	bcf		LED_blue
 	call	PLED_boot				; PLED boot
 	call	PLED_ClearScreen		; clean up OLED
-
 	call	PLED_standard_color
+	WIN_INVERT	.0					; Init new Wordprocessor
 
 	DISPLAYTEXT	.133
 	DISPLAYTEXT	.134

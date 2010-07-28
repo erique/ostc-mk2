@@ -35,6 +35,7 @@ menu_simulator1:
 	clrf	timeout_counter2
 	bsf		menubit
 	bsf		cursor
+	call	PLED_brightness_full			;max. brightness
 	call	PLED_ClearScreen
 	call	PLED_simulator_mask
 
@@ -147,32 +148,6 @@ simulator_startdive:
 	ostc_debug	'P'							; Sends debug-information to screen if debugmode active
 	goto	diveloop						; Start Divemode
 
-simulator_save_tissue_data:
-	bsf		restore_deco_data		; Set restore flag
-	ostc_debug	'S'							; Sends debug-information to screen if debugmode active
-	call	main_push_tissues_to_vault
-	movlb	0x01							; Back to RAM Bank1
-	ostc_debug	'T'							; Sends debug-information to screen if debugmode active
-	return
-
-simulator_restore_tissue_data:
-	bcf		restore_deco_data		; clear restore flag
-	ostc_debug	'S'							; Sends debug-information to screen if debugmode active
-	call	main_pull_tissues_from_vault
-	movlb	0x01						; Back to RAM Bank1
-	ostc_debug	'T'							; Sends debug-information to screen if debugmode active
-
-	ostc_debug	'G'		; Sends debug-information to screen if debugmode active
-	call	deco_main_calc_desaturation_time	; calculate desaturation time
-	movlb	b'00000001'						; select ram bank 1
-	call	calculate_noflytime				; Calc NoFly time
-	ostc_debug	'H'		; Sends debug-information to screen if debugmode active
-
-	; Calculate CNS	
-	call	main_calc_CNS_fraction		; calculate CNS
-	movlb	b'00000001'					; rambank 1 selected
-	return
-	
 simulator_show_decoplan:
 	call	PLED_ClearScreen
 	call	PLED_simdata_screen
@@ -283,6 +258,40 @@ simulator_calc_deco_loop1:
 simulator_calc_deco_loop2:
 	call	PLED_simulator_data
 
+; Debugger
+	call	enable_rs232	
+;	movff	char_I_deco_He_ratio5,TXREG
+;	call	rs232_wait_tx				; wait for UART
+;	movff	char_I_deco_N2_ratio5,TXREG
+;	call	rs232_wait_tx				; wait for UART
+;	movff	char_I_deco_He_ratio4,TXREG
+;	call	rs232_wait_tx				; wait for UART
+;	movff	char_I_deco_N2_ratio4,TXREG
+;	call	rs232_wait_tx				; wait for UART
+;	movff	char_I_deco_He_ratio3,TXREG
+;	call	rs232_wait_tx				; wait for UART
+;	movff	char_I_deco_N2_ratio3,TXREG
+;	call	rs232_wait_tx				; wait for UART
+;	movff	char_I_deco_He_ratio2,TXREG
+;	call	rs232_wait_tx				; wait for UART
+;	movff	char_I_deco_N2_ratio2,TXREG
+;	call	rs232_wait_tx				; wait for UART
+;	movff	char_I_deco_He_ratio,TXREG
+;	call	rs232_wait_tx				; wait for UART
+;	movff	char_I_deco_N2_ratio,TXREG
+;	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_gas_change5,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_gas_change4,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_gas_change3,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_gas_change2,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_gas_change,TXREG
+	call	rs232_wait_tx				; wait for UART
+;
+
 	btg		LED_red
 
 	call	divemode_check_decogases			; Checks for decogases and sets the gases
@@ -335,3 +344,30 @@ simulator_calc_deco2:
 	tstfsz	deco_status							; deco_status=0 if decompression calculation done
 	bra		simulator_calc_deco2				; Not finished
 	bra		simulator_calc_deco3				; finished!
+
+
+simulator_save_tissue_data:
+	bsf		restore_deco_data		; Set restore flag
+	ostc_debug	'S'							; Sends debug-information to screen if debugmode active
+	call	main_push_tissues_to_vault
+	movlb	0x01							; Back to RAM Bank1
+	ostc_debug	'T'							; Sends debug-information to screen if debugmode active
+	return
+
+simulator_restore_tissue_data:
+	bcf		restore_deco_data		; clear restore flag
+	ostc_debug	'S'							; Sends debug-information to screen if debugmode active
+	call	main_pull_tissues_from_vault
+	movlb	0x01						; Back to RAM Bank1
+	ostc_debug	'T'							; Sends debug-information to screen if debugmode active
+
+	ostc_debug	'G'		; Sends debug-information to screen if debugmode active
+	call	deco_main_calc_desaturation_time	; calculate desaturation time
+	movlb	b'00000001'						; select ram bank 1
+	call	calculate_noflytime				; Calc NoFly time
+	ostc_debug	'H'		; Sends debug-information to screen if debugmode active
+
+	; Calculate CNS	
+	call	main_calc_CNS_fraction		; calculate CNS
+	movlb	b'00000001'					; rambank 1 selected
+	return

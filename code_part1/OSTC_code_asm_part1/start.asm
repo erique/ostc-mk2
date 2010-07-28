@@ -176,9 +176,6 @@ restart_01:
 	write_int_eeprom	d'92'		; Store number of CF used in this firmware
 
 restart_1:
-;	btfss	pressure_refresh 		; Wait for pressure sensor...
-;	bra		restart_1				; loop until pressure and temp stable
-;
 
 ; Set Debug mode?
 	read_int_eeprom	d'39'

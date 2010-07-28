@@ -270,18 +270,16 @@ calc_deko_divemode:
 	btfsc	twosecupdate		; two seconds after the last call
 	bra		calc_deko_divemode2		; Yes, calculate and display deco data ("first second")
 
-	; Routines used in the "other second"
-
 	bsf		twosecupdate		; No, but next second!
+	; Routines used in the "other second"
 	call	calc_average_depth	; calculate average depth
 	call	calc_velocity		; calculate vertical velocity and display if > threshold (every two seconds)
 	
 	; calculate ppO2 in 0.1Bar (e.g. 150 = 1.50Bar ppO2)
 	movff		amb_pressure+0,xA+0
 	movff		amb_pressure+1,xA+1
-	movlw		LOW		d'10'
+	movlw		d'10'
 	movwf		xB+0
-	movlw		HIGH 	d'10'
 	clrf		xB+1
 	call		div16x16				; xC=p_amb/10
 	movff		xC+0,xA+0
@@ -291,9 +289,8 @@ calc_deko_divemode:
 	call		mult16x16				; char_I_O2_ratio * p_amb/10
 	movff		xC+0,xA+0
 	movff		xC+1,xA+1
-	movlw		LOW		d'100'
+	movlw		d'100'
 	movwf		xB+0
-	movlw		HIGH 	d'100'
 	clrf		xB+1
 	call		div16x16				; xC=(char_I_O2_ratio * p_amb/10)/100
 
@@ -312,7 +309,6 @@ calc_deko_divemode:
 	subwf	lo,W
 	btfsc	STATUS,C
 	call	PLED_display_cns			; Show CNS
-
 	call	check_gas_change			; Checks if a better gas should be selected (by user)
 
 ; Check for decompression gases if in decomode
@@ -321,20 +317,48 @@ calc_deko_divemode:
 
 divemode_check_decogases:					; CALLed from Simulator
 ; Copy active gases to char_I_deco_N2_ratio and char_I_deco_He_ratio
+	read_int_eeprom		d'97'			; Read He ratio
+	movff	EEDATA,char_I_deco_He_ratio5	; And copy into hold register
+	read_int_eeprom		d'96'			; Read O2 ratio
+	movff	char_I_deco_He_ratio5, wait_temp			; copy into bank1 register
+	bsf		STATUS,C					; 
+	movlw	d'100'						; 100%
+	subfwb	wait_temp,W					; minus He
+	subfwb	EEDATA,F					; minus O2
+	movff	EEDATA, char_I_deco_N2_ratio5; = N2!
 
-	clrf	EEADRH
-	setf	hi						; # of gas (0-4)
-	lfsr	FSR1, char_I_deco_He_ratio5		; most shallow decogas
-divemode_check_decogases2:
-	incf	hi,F						; increase (First time: hi=0)
-	rcall	copy_decogas_info
-	movlw	d'3'
-	cpfseq	hi							; Gases 0-3 copied?
-	bra		divemode_check_decogases2	; No, Continue
+	read_int_eeprom		d'101'			; Read He ratio
+	movff	EEDATA,char_I_deco_He_ratio4	; And copy into hold register
+	read_int_eeprom		d'100'			; Read O2 ratio
+	movff	char_I_deco_He_ratio4, wait_temp			; copy into bank1 register
+	bsf		STATUS,C					; 
+	movlw	d'100'						; 100%
+	subfwb	wait_temp,W					; minus He
+	subfwb	EEDATA,F					; minus O2
+	movff	EEDATA, char_I_deco_N2_ratio4; = N2!
+
+	read_int_eeprom		d'105'			; Read He ratio
+	movff	EEDATA,char_I_deco_He_ratio3	; And copy into hold register
+	read_int_eeprom		d'104'			; Read O2 ratio
+	movff	char_I_deco_He_ratio3, wait_temp			; copy into bank1 register
+	bsf		STATUS,C					; 
+	movlw	d'100'						; 100%
+	subfwb	wait_temp,W					; minus He
+	subfwb	EEDATA,F					; minus O2
+	movff	EEDATA, char_I_deco_N2_ratio3; = N2!
+
+	read_int_eeprom		d'109'			; Read He ratio
+	movff	EEDATA,char_I_deco_He_ratio2	; And copy into hold register
+	read_int_eeprom		d'108'			; Read O2 ratio
+	movff	char_I_deco_He_ratio2, wait_temp			; copy into bank1 register
+	bsf		STATUS,C					; 
+	movlw	d'100'						; 100%
+	subfwb	wait_temp,W					; minus He
+	subfwb	EEDATA,F					; minus O2
+	movff	EEDATA, char_I_deco_N2_ratio2; = N2!
 
 	read_int_eeprom		d'113'			; Read He ratio
 	movff	EEDATA,char_I_deco_He_ratio	; And copy into hold register
-
 	read_int_eeprom		d'112'			; Read O2 ratio
 	movff	char_I_deco_He_ratio, wait_temp			; copy into bank1 register
 	bsf		STATUS,C					; 
@@ -347,17 +371,13 @@ divemode_check_decogases2:
 	
 	read_int_eeprom		d'118'		; read gas_change_depth Gas1
 	movff	EEDATA,char_I_deco_gas_change5
-
-	read_int_eeprom		d'119'		; read gas_change_depth Gas1
+	read_int_eeprom		d'119'		; read gas_change_depth Gas2
 	movff	EEDATA,char_I_deco_gas_change4
-
-	read_int_eeprom		d'120'		; read gas_change_depth Gas1
+	read_int_eeprom		d'120'		; read gas_change_depth Gas3
 	movff	EEDATA,char_I_deco_gas_change3
-
-	read_int_eeprom		d'121'		; read gas_change_depth Gas1
+	read_int_eeprom		d'121'		; read gas_change_depth Gas4
 	movff	EEDATA,char_I_deco_gas_change2
-
-	read_int_eeprom		d'122'		; read gas_change_depth Gas1
+	read_int_eeprom		d'122'		; read gas_change_depth Gas5
 	movff	EEDATA,char_I_deco_gas_change
 
 
@@ -394,40 +414,6 @@ divemode_check_decogases2:
 ;	movff	char_I_deco_gas_change,TXREG
 ;	call	rs232_wait_tx				; wait for UART
 
-
-
-
-
-	return
-
-copy_decogas_info:
-	movf	hi,W						; Gas 1-4
-	mullw	d'4'						; times 4...
-	movlw	d'90'						; +90 Offset to new... 
-	addwf	PRODL,F						; ..sorted list!
-
-	movf	PRODL,W						;
-	addlw	d'7'						; +7 = address for He ratio
-	movwf	EEADR
-	call	read_eeprom					; Read He ratio
-	movff	EEDATA,INDF1				; And copy into hold register
-
-	movf	hi,W						; Gas 1-4
-	mullw	d'4'						; times 4...
-	movlw	d'90'						; +90 Offset to new... 
-	addwf	PRODL,F						; ..sorted list!
-
-	movf	PRODL,W						;
-	addlw	d'6'						; +6 = address for O2 ratio
-	movwf	EEADR
-	call	read_eeprom					; Read O2 ratio
-;	movff	EEDATA, char_I_O2_ratio		; O2 ratio
-	movff	POSTDEC1, wait_temp			; copy into bank1 register
-	bsf		STATUS,C					; 
-	movlw	d'100'						; 100%
-	subfwb	wait_temp,W					; minus He
-	subfwb	EEDATA,F					; minus O2
-	movff	EEDATA, POSTDEC1			; = N2!
 	return
 
 reset_decompression_gases:				; reset the deco gas while in NDL
@@ -437,7 +423,7 @@ reset_decompression_gases:				; reset the deco gas while in NDL
 	movff	lo,char_I_deco_gas_change4
 	movff	lo,char_I_deco_gas_change3
 	movff	lo,char_I_deco_gas_change2
- 	movff	lo, char_I_deco_gas_change	; clear 
+ 	movff	lo,char_I_deco_gas_change	; clear 
 	return
 
 calc_deko_divemode2:
@@ -1254,9 +1240,6 @@ end_dive2:
 	movlw	0xFB
 	call	write_external_eeprom
 	
-	btfsc	simulatormode_active		; Are we in simulator mode?
-	bra		change_logbook_offset2		; Yes, do not update history
-
 	; Increase total dive counter
 	read_int_eeprom 	d'2'		; Read byte (stored in EEDATA)
 	movff	EEDATA,temp1			; Low byte
@@ -1514,7 +1497,7 @@ calc_average_depth:
 	
 
 diveloop_boot:	
-		ostc_debug	'Q'		; Sends debug-information to screen if debugmode active
+	ostc_debug	'Q'		; Sends debug-information to screen if debugmode active
 	clrf	max_pressure+0				; clear some variables
 	clrf	max_pressure+1
 
@@ -1553,7 +1536,6 @@ diveloop_boot:
 	bcf		event_occured				; clear flag
 	bcf		depth_greater_100m			; clear flag
 	setf	last_diluent				; to be displayed after first calculation (range: 0 to 100 [%])
-;	clrf	char_last_pointer
 	bcf		dekostop_active	
 	bcf		is_bailout					;=1: CC mode, but bailout active!		
 	bcf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
@@ -1587,12 +1569,6 @@ set_no_forced_stops:					; Init Deco list
 	clrf	POSTINC0
 	clrf	POSTINC0
 
-;; Load GF values into RAM - now done in start.asm!
-;	GETCUSTOM8	d'32'			; GF low
-;	movff		EEDATA,char_I_GF_Lo_percentage
-;	GETCUSTOM8	d'33'			; GF high
-;	movff		EEDATA,char_I_GF_Hi_percentage
-;
 ; Start with active Stopwatch?
 	bsf			stopwatch_active
 	GETCUSTOM8	d'41'			; =1: Start with active Stopwatch
@@ -1636,7 +1612,7 @@ divemode1:
 	bcf		realdive
 	bsf		update_divetime				; set flag
 	btfss	simulatormode_active		; do not disable in simulator mode!					
-	call	disable_rs232				; Disable RS232 unless in external O2 Sensor mode
+	call	disable_rs232				; Disable RS232
 
 	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)
 	movff	EEDATA,active_gas			; Read start gas (1-5)
@@ -1664,15 +1640,5 @@ divemode1:
 	subfwb	EEDATA,F					; minus O2
 	movff	EEDATA, char_I_N2_ratio		; = N2!
 
-; New in 1.09 - DecoGas can be configured to achieve exact decompression proposal
- ; required variables
- ; These values are set when the OSTC is in decompression mode - will be done in routine "check_decogas"
- ; char_I_deco_gas_change;				; next gas change in meter
- ; char_I_deco_N2_ratio;				; next gas N2
- ; char_I_deco_He_ratio;				; next gas He
-  	clrf	lo
- 	movff	lo, char_I_deco_gas_change	; clear 
- 	movff	lo, char_I_deco_N2_ratio	; clear
- 	movff	lo, char_I_deco_He_ratio	; clear
 	bcf		multi_gf_display			; Do not display the multi-gf table screen
 	return

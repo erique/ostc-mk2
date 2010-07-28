@@ -175,8 +175,6 @@ surfloop_loop2:
 	goto	internal_eeprom_access_b1	; Yes!
 	btfsc	uart_send_hash				; Send MD2 hash values
 	goto	send_md2_hash				; Yes!
-	btfsc	uart_compensate_temp		; Enter temp. compensation routine?
-	goto	compensate_temperature		; Yes!
 	btfsc	uart_send_int_eeprom		; Send internal EEPROM BANK 0
 	goto	send_int_eeprom_b0			; Yes!
 	btfsc	uart_reset_decodata			; Reset Deco Data?

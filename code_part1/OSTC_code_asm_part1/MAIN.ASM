@@ -101,7 +101,6 @@ HighInt:
 #include	adc_rtc.asm			; A/D converter (battery control) and RTC init
 #include	temp_extrema.asm	; Takes care of the temperature extrema logger
 #include	sync_clock.asm		; syncs RTC with PC
-#include	tempcomp.asm		; extra temperature compensation
 #include	start.asm			; Startup and init, checks background debugger
 #include	simulator.asm		; Stand-alone simulator routines
 #include 	io.asm				; Low-Level I/O access

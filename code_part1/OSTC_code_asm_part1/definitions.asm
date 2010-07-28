@@ -23,7 +23,7 @@
 ;#DEFINE		NO_SENSOR_MODE			; uses Dummy values
 
 #DEFINE	softwareversion_x		d'1'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'65'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'70'		; Software version  XX.YY
 
 #DEFINE	max_custom_number		d'48'		; Number of last used custom function
 
@@ -190,7 +190,6 @@
 	dMSB
 	clock_count
 	ppO2_setpoint_store			; Actual setpoint
-;	temperature_correction		; additional temperature correction value
 	W1:2
 	W2:2
 	W3:2
@@ -587,7 +586,7 @@
 #DEFINE	output_to_postinc_only	flag9,6	;=1: Do not call wordprocessor in output
 #DEFINE	uart_send_hash			flag9,7	;=1: Send the MD2 hash via UART
 
-#DEFINE	uart_compensate_temp	flag10,0	;=1: Enter Temperature compensation routine
+;#DEFINE	free
 #DEFINE	uart_send_int_eeprom	flag10,1	;=1: Send internal EEPROM BANK 0
 #DEFINE	uart_reset_decodata		flag10,2	;=1: Reset deco data 
 #DEFINE	manual_gas_changed		flag10,3	;=1: Manual Gas changed during dive

@@ -1,35 +1,4 @@
-
-; OSTC - diving computer code
-; Copyright (C) 2008 HeinrichsWeikamp GbR
-
-;    This program is free software: you can redistribute it and/or modify
-;    it under the terms of the GNU General Public License as published by
-;    the Free Software Foundation, either version 3 of the License, or
-;    (at your option) any later version.
-
-;    This program is distributed in the hope that it will be useful,
-;    but WITHOUT ANY WARRANTY; without even the implied warranty of
-;    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;    GNU General Public License for more details.
-
-;    You should have received a copy of the GNU General Public License
-;    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
-; routine for extra temperature compensation
-; written by: Matthias Heinrichs, info@heinrichsweikamp.com
-; written: 01/12/08
-; last updated: 08/08/31
-; known bugs:
-; ToDo:
-
-; routine echoes the "f" command as ready signal
-; PC has to send 2 bytes containing the actual temperature in 0.1C
-; Byte1: low
-; Byte2: high
-
-
-compensate_temperature:	bcf		uart_compensate_temp		; clear flag	bcf		PIE1,RCIE					; no interrupt for UART;
+; OSTC - diving computer code; Copyright (C) 2008 HeinrichsWeikamp GbR;    This program is free software: you can redistribute it and/or modify;    it under the terms of the GNU General Public License as published by;    the Free Software Foundation, either version 3 of the License, or;    (at your option) any later version.;    This program is distributed in the hope that it will be useful,;    but WITHOUT ANY WARRANTY; without even the implied warranty of;    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the;    GNU General Public License for more details.;    You should have received a copy of the GNU General Public License;    along with this program.  If not, see <http://www.gnu.org/licenses/>.; routine for extra temperature compensation; written by: Matthias Heinrichs, info@heinrichsweikamp.com; written: 01/12/08; last updated: 08/08/31; known bugs:; ToDo:; routine echoes the "f" command as ready signal; PC has to send 2 bytes containing the actual temperature in 0.1C; Byte1: low; Byte2: highcompensate_temperature:	bcf		uart_compensate_temp		; clear flag	bcf		PIE1,RCIE					; no interrupt for UART;
 ;	call	set_LEDusb					; LEDusb ON;
 ;	bcf		PIR1,RCIF					; clear flag;
 ;;

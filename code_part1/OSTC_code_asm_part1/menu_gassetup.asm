@@ -1352,7 +1352,11 @@ gassetup_sort_store3:
 	btfss	STATUS,C				; Was Gas active?
 	clrf	logbook_temp1			; No!, Clear change Depth to make it inactive for sorted list!
 
-	movf	logbook_temp5,W
+;call	enable_rs232	
+;movff	logbook_temp1,TXREG
+;call	rs232_wait_tx				; wait for UART
+
+	movf	logbook_temp5,W			; 1-5
 	mullw	d'4'
 	movff	PRODL,EEADR				; Point to EEPROM of Gas #logbook_temp5
 

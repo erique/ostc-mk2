@@ -1092,29 +1092,31 @@ gassetup_show_ppO2:
 	WIN_LEFT	.55
 	WIN_TOP		.35
 	lfsr	FSR2,letter
-	movlw	'('
-	movwf	POSTINC2
-	movlw	'p'
-	movwf	POSTINC2
-	movlw	'p'
-	movwf	POSTINC2
-	movlw	'O'
-	movwf	POSTINC2
-	movlw	'2'
-	movwf	POSTINC2
-	movlw	':'
-	movwf	POSTINC2
+	OUTPUTTEXT 	d'149'		; (ppO2:
+;	movlw	'('
+;	movwf	POSTINC2
+;	movlw	'p'
+;	movwf	POSTINC2
+;	movlw	'p'
+;	movwf	POSTINC2
+;	movlw	'O'
+;	movwf	POSTINC2
+;	movlw	'2'
+;	movwf	POSTINC2
+;	movlw	':'
+;	movwf	POSTINC2
 	output_16dp	d'3'
-	movlw	'B'
-	movwf	POSTINC2
-	movlw	'a'
-	movwf	POSTINC2
-	movlw	'r'
-	movwf	POSTINC2
-	movlw	')'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
+	OUTPUTTEXT 	d'150'		; Bar: 
+;	movlw	'B'
+;	movwf	POSTINC2
+;	movlw	'a'
+;	movwf	POSTINC2
+;	movlw	'r'
+;	movwf	POSTINC2
+;	movlw	')'
+;	movwf	POSTINC2
+;	movlw	' '
+;	movwf	POSTINC2
 	call	word_processor
 	return
 
@@ -1324,17 +1326,17 @@ gassetup_sort_store:
 	movlw	d'0'
 	addwfc	FSR2H,F					; Point to Gas #logbook_temp3 (0-4)
 
-	btfsc	menubit2				; Change Start gas only 1x
-	bra		gassetup_sort_store2	; Skip
-; First Gas: 33 (1-5)
-; Was gas #logbook_temp3 first gas?
-	read_int_eeprom		d'33'		; Get old first gas (1-5)
-	incf	logbook_temp3,W			; Gas 1-5 -> WREG
-	cpfseq	EEDATA					; Compare with EEDATA d'33'
-	bra		gassetup_sort_store2	; Was not first gas!
-	movff	logbook_temp5,EEDATA	; Copy new first gas
-	write_int_eeprom	d'123'		; Store
-	bsf		menubit2				; Done. Do not change again.
+;	btfsc	menubit2				; Change Start gas only 1x
+;	bra		gassetup_sort_store2	; Skip
+;; First Gas: 33 (1-5)
+;; Was gas #logbook_temp3 first gas?
+;	read_int_eeprom		d'33'		; Get old first gas (1-5)
+;	incf	logbook_temp3,W			; Gas 1-5 -> WREG
+;	cpfseq	EEDATA					; Compare with EEDATA d'33'
+;	bra		gassetup_sort_store2	; Was not first gas!
+;	movff	logbook_temp5,EEDATA	; Copy new first gas
+;	write_int_eeprom	d'123'		; Store
+;	bsf		menubit2				; Done. Do not change again.
 
 gassetup_sort_store2:
 ; Was Gas #logbook_temp3 active?
@@ -1359,7 +1361,6 @@ gassetup_sort_store3:
 	movf	logbook_temp5,W			; 1-5
 	mullw	d'4'
 	movff	PRODL,EEADR				; Point to EEPROM of Gas #logbook_temp5
-
 	movlw	d'90'					; +90 Offset to new... 
 	addwf	EEADR,F					; ..sorted list!
 

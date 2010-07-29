@@ -115,43 +115,6 @@ write_eep2:
 	bcf		EECON1,WREN
 	return
 
-
-
-; RS232 Routines:
-;enable_rs232_19k2_tx:
-;	bsf		TRISC,6			; TX Pin 
-;	movlw	b'00100100'			; initialise serial port for 19200/8/N/1 BRGH=1
-;	movwf	TXSTA
-;	return	
-;
-;disable_rs232_19k2_tx:
-;	bcf		TRISC,6			; TX Pin 
-;	movlw	b'00000100'			; Only receiver mode, BRGH=1
-;	movwf	TXSTA
-;	bsf		PORTC,6				; TX PIN
-;	return	
-;
-;enable_rs232_19k2:
-;	bsf		TRISC,6			; TX Pin IO Ports must be input in order to activate the module
-;	bsf		TRISC,7			; RX Pin
-;				
-;	movlw	b'00100100'			; initialise serial port for 19200/8/N/1 BRGH=1
-;	movwf	TXSTA
-;	movlw	b'10000000'			
-;	movwf	RCSTA
-;	movlw	b'00001000'			; BRG16=1
-;	movwf	BAUDCON
-;	bsf		RCSTA,CREN				; Enable
-;	movlw	d'0'
-;	movwf	SPBRGH
-;	movlw	d'207'				; Take care of the baud rate when changing Fosc!
-;	movwf	SPBRG
-;	clrf	RCREG
-;	bcf		PIE1,RCIE			; disable interrupt for RS232
-;	clrf	PIR1
-;	return
-;
-
 enable_rs232:				;IO Ports must be input in order to activate the module
 	bsf		TRISC,6			; TX Pin
 	bsf		TRISC,7			; RX Pin

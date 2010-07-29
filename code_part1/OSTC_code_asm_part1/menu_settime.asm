@@ -156,7 +156,7 @@ set_time_done2:
 	
 set_time_done_loop	
 	btfss	onesecupdate
-	bra	set_time_done_loop
+	bra		set_time_done_loop
 	bcf		onesecupdate
 
 	call	set_date_refresh
@@ -229,23 +229,22 @@ set_time_next_or_exit5:
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 	return
 	
-
 add_hours_or_minutes_or_date:
 	bcf		switch_right
 	clrf	secs
 
 	btfsc	set_year
-	bra	add_year
+	bra		add_year
 
 	btfsc	set_day
-	bra	add_day
+	bra		add_day
 
 	btfsc	set_month
-	bra	add_month
+	bra		add_month
 
 	btfsc	set_minutes
-	bra	add_minutes
-; Also Stunden erhöhen
+	bra		add_minutes
+; Increase hours
 add_hours:
 	incf	hours,F
 	movlw	d'23'

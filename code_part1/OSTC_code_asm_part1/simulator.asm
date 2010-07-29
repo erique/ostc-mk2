@@ -260,26 +260,26 @@ simulator_calc_deco_loop2:
 
 ; Debugger
 	call	enable_rs232	
-;	movff	char_I_deco_He_ratio5,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio5,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_He_ratio4,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio4,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_He_ratio3,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio3,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_He_ratio2,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio2,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_He_ratio,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio,TXREG
-;	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_He_ratio5,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_N2_ratio5,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_He_ratio4,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_N2_ratio4,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_He_ratio3,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_N2_ratio3,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_He_ratio2,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_N2_ratio2,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_He_ratio,TXREG
+	call	rs232_wait_tx				; wait for UART
+	movff	char_I_deco_N2_ratio,TXREG
+	call	rs232_wait_tx				; wait for UART
 	movff	char_I_deco_gas_change5,TXREG
 	call	rs232_wait_tx				; wait for UART
 	movff	char_I_deco_gas_change4,TXREG

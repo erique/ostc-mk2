@@ -1,4 +1,3 @@
-
 ; OSTC - diving computer code
 ; Copyright (C) 2008 HeinrichsWeikamp GbR
 
@@ -19,7 +18,7 @@
 ; Displays from text_table_vx.asm
 ; written by: Matthias Heinrichs, info@heinrichsweikamp.com
 ; written: 10/30/05
-; last updated: 081215
+; last updated: 100730
 ; known bugs:
 ; ToDo:
 
@@ -78,43 +77,38 @@ displaytext1:
 	btfsc	displaytext_high		; Highbit set?
 	movlw	d'1'					; Yes!
 	movwf	xA+1					; Set High Bit
-	movlw	d'4'					; times 4 for adress
-	movwf	xB+0
-	clrf	xB+1
-	call	mult16x16				;xA*xB=xC
-	movf	xC+0,W
+
+	bcf		STATUS,C
+	rlcf	xA+0,F
+	rlcf	xA+1,F					; times 2 for adress
+
+	movlw	d'2'
+	addwf	xA+0,F
+	movlw	d'0'
+	addwfc	xA+1,F					; + 2
+
+	movf	xA+0,W
 	addwf	TBLPTRL,F				; set adress, data can be read
-	movf	xC+1,W
+	movf	xA+1,W
 	addwfc	TBLPTRH,F				; High byte, if required
 
 	TBLRD*+
-	movf	TABLAT,W
-	btfsc	output_to_postinc_only		; output to postinc only?
-	bra		displaytext1_1				; Yes
-	movff	WREG,win_leftx2
-
-displaytext1_1:
-	TBLRD*+
-	movf	TABLAT,W
-	btfsc	output_to_postinc_only	; output to postinc only?
-	bra		displaytext1_2			; Yes
-	movff	WREG,win_top
-
-displaytext1_2:
-	TBLRD*+
-	movf	TABLAT,W				; ScaleY
-	sublw	d'1'					; -1
-	movff	WREG,win_font			
+	btfss	output_to_postinc_only		; output to postinc only?
+	movff	TABLAT,win_leftx2			; No, write coordinates
 
 	TBLRD*+
-	movff	TABLAT,grayvalue		; grayvalue
+	btfss	output_to_postinc_only	; output to postinc only?
+	movff	TABLAT,win_top			; No, write coordinates
+
+	movlw	d'0'
+	movff	WREG,win_font			; Bank0 Variable...
 
 	clrf	textaddress+0
 	clrf	textaddress+1
-	clrf	TBLPTRL					; Set Pointer for textlength table 0x0100
+	clrf	TBLPTRH					; Set Pointer for textlength table
 	clrf	TBLPTRU
-	movlw	0x01
-	movwf	TBLPTRH
+	movlw	textlength_pointer_low
+	movwf	TBLPTRL
 	bra		displaytext1b
 
 displaytext1a:	
@@ -134,7 +128,6 @@ displaytext1b:
 
 displaytext2:						; copies text to wordprocessor
 	clrf	TBLPTRU
-
 	movlw	text_pointer_low
 	addwf	textaddress+0,W
 	movwf	TBLPTRL
@@ -142,7 +135,7 @@ displaytext2:						; copies text to wordprocessor
 	addwfc	textaddress+1,W
 	movwf	TBLPTRH
 
-	btfss	output_to_postinc_only		; output to postinc only?
+	btfss	output_to_postinc_only		; output to postinc2 only?
 	lfsr	FSR2,letter					; no!
 
 displaytext2a:
@@ -153,18 +146,15 @@ displaytext2a:
 	bra		display_text_exit
 
 displaytext3:
-	movf	TABLAT,W
-	movwf	POSTINC2
-	
+	movff	TABLAT,POSTINC2
+
 	TBLRD*+
 	movlw	'}'						; Text finished?
 	cpfseq	TABLAT
 	bra		displaytext4
 	bra		display_text_exit
 displaytext4:
-	movf	TABLAT,W
-	movwf	POSTINC2
-
+	movff	TABLAT,POSTINC2
 	bra		displaytext2a
 
 display_text_exit:

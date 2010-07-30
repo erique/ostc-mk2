@@ -126,7 +126,7 @@
 	b0_hi						; Temp (calculate_average)
 	average_divesecs:2			; Used for resetable average depth display
 	surface_interval:2			; Surface Interval [mins]
-	grayvalue					; 4 Bit Greyvalue
+;	grayvalue					; 4 Bit Greyvalue
 
 	draw_box_temp1
 	draw_box_temp2

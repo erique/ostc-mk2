@@ -1,3 +1,8 @@
+New in 1.70 Stable:
+Stable release
+BUGFIX: 
+
+
 New in 1.65 Beta:
 This is the 1.70 Stable release candidate
 BETA Version - Do NOT use for diving!

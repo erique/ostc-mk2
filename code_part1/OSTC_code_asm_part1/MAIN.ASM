@@ -73,7 +73,7 @@ HighInt:
 		movff	0x102,BSR					;restore BSR register
 		retfie
 
-		ORG	0x00100				; 
+;		ORG	0x00070				; 
 #include	text_table.asm		; includes textmacros
 #include	displaytext.asm		; sends texts to wordprocessor
 #include	math.asm			; mathematical functions

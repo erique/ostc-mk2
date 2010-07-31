@@ -333,33 +333,34 @@ I2CReset_2:
 	bcf			LED_red
 	ostc_debug	'O'		; Sends debug-information to screen if debugmode active
 	return
-I2C_TX:
-	movwf		i2c_temp2				; Data byte
-	bsf			SSPCON2,SEN			; Start condition
-	rcall		WaitMSSP
-	movlw		b'10010000'		; Bit0=0: WRITE, Bit0=1: READ
-	movwf		SSPBUF			; control byte
-	rcall		WaitMSSP	
-	rcall		I2C_WaitforACK
-	movff		i2c_temp2, SSPBUF		; Data Byte
-	rcall		WaitMSSP	
-	rcall		I2C_WaitforACK
-	bsf			SSPCON2,PEN			; Stop condition
-	rcall		WaitMSSP	
-	return
-I2C_RX:
-	bcf			PIR1,SSPIF
-	bsf			SSPCON2,SEN			; Start condition
-	rcall		WaitMSSP
-	movlw		b'10010001'		; Bit0=0: WRITE, Bit0=1: READ
-	movwf		SSPBUF			; control byte
-	rcall		WaitMSSP	
-	rcall		I2C_WaitforACK
-	bsf			SSPCON2, RCEN	; Enable recieve mode
-	rcall		WaitMSSP	
-	movff		SSPBUF,i2c_temp2	; Data Byte
-	bsf			SSPCON2,ACKEN		; Master acknowlegde
-	rcall		WaitMSSP	
-	bsf			SSPCON2,PEN			; Stop condition
-	rcall		WaitMSSP	
-	return
+
+;I2C_TX:
+;	movwf		i2c_temp2				; Data byte
+;	bsf			SSPCON2,SEN			; Start condition
+;	rcall		WaitMSSP
+;	movlw		b'10010000'		; Bit0=0: WRITE, Bit0=1: READ
+;	movwf		SSPBUF			; control byte
+;	rcall		WaitMSSP	
+;	rcall		I2C_WaitforACK
+;	movff		i2c_temp2, SSPBUF		; Data Byte
+;	rcall		WaitMSSP	
+;	rcall		I2C_WaitforACK
+;	bsf			SSPCON2,PEN			; Stop condition
+;	rcall		WaitMSSP	
+;	return
+;I2C_RX:
+;	bcf			PIR1,SSPIF
+;	bsf			SSPCON2,SEN			; Start condition
+;	rcall		WaitMSSP
+;	movlw		b'10010001'		; Bit0=0: WRITE, Bit0=1: READ
+;	movwf		SSPBUF			; control byte
+;	rcall		WaitMSSP	
+;	rcall		I2C_WaitforACK
+;	bsf			SSPCON2, RCEN	; Enable recieve mode
+;	rcall		WaitMSSP	
+;	movff		SSPBUF,i2c_temp2	; Data Byte
+;	bsf			SSPCON2,ACKEN		; Master acknowlegde
+;	rcall		WaitMSSP	
+;	bsf			SSPCON2,PEN			; Stop condition
+;	rcall		WaitMSSP	
+;	return

@@ -280,8 +280,8 @@ add_year:
 	movlw	d'20'					; calendar until 2020
 	cpfsgt	year
 	bra	set_time_refresh_x
-	movlw	d'8'
-	movwf	year					; Set Year to 2008
+	movlw	d'10'
+	movwf	year					; Set Year to 2010
 	
 set_time_refresh_x:
 	call	set_time_refresh

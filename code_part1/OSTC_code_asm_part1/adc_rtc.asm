@@ -1,4 +1,3 @@
-
 ; OSTC - diving computer code
 ; Copyright (C) 2008 HeinrichsWeikamp GbR
 
@@ -134,20 +133,14 @@ get_battery_voltage4:
 	movff	temperature+1,EEDATA
 	write_int_eeprom	d'46'
 	; Reset charge statistics
-	clrf	EEDATA					; last complete charge
-	write_int_eeprom	d'47'		
-	clrf	EEDATA					; last complete charge
-	write_int_eeprom	d'48'		
-	clrf	EEDATA					; last complete charge
-	write_int_eeprom	d'49'		
-	clrf	EEDATA					; total cycles
-	write_int_eeprom	d'50'		
-	clrf	EEDATA					; total cycles
-	write_int_eeprom	d'51'		
-	clrf	EEDATA					; total complete cycles
-	write_int_eeprom	d'52'		
-	clrf	EEDATA					; total complete cycles
-	write_int_eeprom	d'53'		
+	clrf	EEDATA
+	write_int_eeprom	d'47'		; last complete charge
+	write_int_eeprom	d'48'		; last complete charge
+	write_int_eeprom	d'49'		; last complete charge
+	write_int_eeprom	d'50'		; total cycles
+	write_int_eeprom	d'51'		; total cycles
+	write_int_eeprom	d'52'		; total complete cycles
+	write_int_eeprom	d'53'		; total complete cycles
 	; Reset temperature extremas
 	movff	temperature+0,EEDATA	; Reset mimimum extrema
 	write_int_eeprom	d'54'
@@ -232,9 +225,9 @@ RTCinit2:
 	movwf	mins
 	movlw	.12
 	movwf	hours
-	movlw	.23
+	movlw	.1
 	movwf	day
-	movlw	.4
+	movlw	.8
 	movwf	month
 	movlw	.10
 	movwf	year

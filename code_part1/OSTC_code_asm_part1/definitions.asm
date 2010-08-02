@@ -126,7 +126,6 @@
 	b0_hi						; Temp (calculate_average)
 	average_divesecs:2			; Used for resetable average depth display
 	surface_interval:2			; Surface Interval [mins]
-;	grayvalue					; 4 Bit Greyvalue
 
 	draw_box_temp1
 	draw_box_temp2
@@ -287,7 +286,6 @@
 	active_gas					; Holds number of active gas
 		
 	last_diluent				; backup of diluent percentage in const ppO2 mode
-;	last_cns					; backup of last cns value
 	last_ppO2_value				; last calculated ppO2 value
 
 ;	ontime_since_last_charge:2	; Ontime in minutes since last complete charge cycle
@@ -309,7 +307,6 @@
 	
 	temp5						; used in PLED_MultiGF,...
 	temp6						; used in PLED_MultiGF,...
-;	temp7						; Used in Simulator
 	MultiGF_seconds				; Counter for seconds in Multi-GF mode
 
 	fatal_error_code			; holds error code value 

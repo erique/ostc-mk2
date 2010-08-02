@@ -1,7 +1,7 @@
 New in 1.70 Stable:
 Stable release
-BUGFIX: 
-
+WARNING: This update will reset all Custom Functions!
+BUGFIX: Gas Changes for Simulator
 
 New in 1.65 Beta:
 This is the 1.70 Stable release candidate

@@ -206,10 +206,10 @@ simulator_calc_deco:
 	clrf	xB+1
 	call	mult16x16	;xA*xB=xC			; Depth in m*100
 
-	movlw	LOW		d'1000'
+	movf	amb_pressure+0,W
 	addwf	xC+0,F
-	movlw	HIGH	d'1000'
-	addwfc	xC+1,F							; Add 1000mBar
+	movf	amb_pressure+1,W
+	addwfc	xC+1,F							; Add ambient pressure
 	
 	movff	xC+0,sim_pressure+0
 	movff	xC+1,sim_pressure+1

@@ -563,7 +563,7 @@ PLED_clock:
 	;If > 0 display surface_interval:2 and clock changing every 5 seconds
 	;use timeout_counter for this
 	WIN_TOP		.50
-	WIN_LEFT	.0
+	WIN_LEFT	.1
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
@@ -832,7 +832,7 @@ PLED_temp_surfmode:
 	movff	temperature+0,last_temperature+0
 	movff	temperature+1,last_temperature+1
 	WIN_TOP		.100
-	WIN_LEFT	.0
+	WIN_LEFT	.1
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
@@ -1692,7 +1692,7 @@ PLED_clear_depth			; No, clear depth area and set flag
 PLED_desaturation_time:	
 	ostc_debug	'h'
 	WIN_TOP		.150
-	WIN_LEFT	.0
+	WIN_LEFT	.1
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
@@ -1720,7 +1720,7 @@ PLED_desaturation_time:
 PLED_nofly_time:	
 	ostc_debug	'g'
 	WIN_TOP		.125
-	WIN_LEFT	.0
+	WIN_LEFT	.1
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
@@ -1755,7 +1755,7 @@ update_surf_press:
 
 	ostc_debug	'b'		; Sends debug-information to screen if debugmode active
 	WIN_TOP		.25
-	WIN_LEFT	.0
+	WIN_LEFT	.1
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
@@ -1791,7 +1791,7 @@ update_batt_voltage:
 	bra		update_batt_voltage2	; No, show symbol
 
 	WIN_TOP		.175
-	WIN_LEFT	.0
+	WIN_LEFT	.1
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
@@ -1819,9 +1819,9 @@ update_batt_voltage2:
 	movff	WREG,box_temp+1		; row top (0-239)
 	movlw	.194
 	movff	WREG,box_temp+2		; row bottom (0-239)
-	movlw	.0
+	movlw	.1
 	movff	WREG,box_temp+3		; column left (0-159)
-	movlw	.31
+	movlw	.32
 	movff	WREG,box_temp+4		; column right (0-159)
 	call	PLED_frame
 
@@ -1859,10 +1859,11 @@ update_batt_voltage2:
 	call	div16x16					;xA/xB=xC with xA as remainder 	
 ; xC is between 0 and 30
 	movff	xC+0,wait_temp				;save value
+	incf	wait_temp,F					; +1
 
-	movlw	d'2'
+	movlw	d'3'
 	cpfsgt	wait_temp
-	movwf	wait_temp					; Minimum = 2
+	movwf	wait_temp					; Minimum = 3
 
 update_batt_voltage2a:
 	GETCUSTOM8	d'35'			; Standard output color
@@ -1871,9 +1872,9 @@ update_batt_voltage2a:
 	movff	WREG,box_temp+1		; row top (0-239)
 	movlw	.187
 	movff	WREG,box_temp+2		; row bottom (0-239)
-	movlw	.31
+	movlw	.32
 	movff	WREG,box_temp+3		; column left (0-159)
-	movlw	.33
+	movlw	.34
 	movff	WREG,box_temp+4		; column right (0-159)
 	call	PLED_box			; Full Cap
 
@@ -1896,7 +1897,7 @@ update_batt_voltage3:
 	movff	WREG,box_temp+1		; row top (0-239)
 	movlw	.192
 	movff	WREG,box_temp+2		; row bottom (0-239)
-	movlw	.1
+	movlw	.2
 	movff	WREG,box_temp+3		; column left (0-159)
 	movff	wait_temp,box_temp+4		; column right (0-159)
 	call	PLED_box
@@ -2013,7 +2014,7 @@ PLED_convert_date_short1:
 update_date:
 	ostc_debug	'd'
 	WIN_TOP		.75
-	WIN_LEFT	.0
+	WIN_LEFT	.1
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
@@ -2276,7 +2277,7 @@ PLED_stopwatch_show:
 PLED_serial:			; Writes OSTC #Serial and Firmware version in surfacemode
 	ostc_debug	'a'		; Sends debug-information to screen if debugmode active
 	WIN_TOP		.0
-	WIN_LEFT	.0
+	WIN_LEFT	.1
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
@@ -3345,7 +3346,7 @@ PLED_custom_text:
 	cpfseq	EEDATA						; Custom text active?
 	bra		PLED_clear_custom_text		; No, Delete row
 	WIN_TOP		.200
-	WIN_LEFT	.0
+	WIN_LEFT	.1
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call		PLED_divemask_color	; Set Color for Divemode mask

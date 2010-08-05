@@ -125,10 +125,10 @@ simulator_startdive:
 	clrf	xB+1
 	call	mult16x16	;xA*xB=xC			; Depth in m*100
 
-	movlw	LOW		d'1000'
+	movf	amb_pressure+0,W
 	addwf	xC+0,F
-	movlw	HIGH	d'1000'
-	addwfc	xC+1,F							; Add 1000mBar
+	movf	amb_pressure+1,W
+	addwfc	xC+1,F							; Add ambient pressure
 	
 	movff	xC+0,sim_pressure+0
 	movff	xC+1,sim_pressure+1
@@ -224,21 +224,6 @@ simulator_calc_deco:
 	WIN_INVERT	.0
 
 simulator_calc_deco_loop1:
-
-;	movlw	.011
-;	call	PLED_SetColumn
-;	movlw	.009
-;	call	PLED_SetRow
-;	lfsr	FSR2,letter
-;	movff	char_O_array_decodepth+0,lo		; Get Depth
-;	bsf		leftbind
-;	output_8
-;	bcf		leftbind
-;	movlw	' '
-;	movwf	POSTINC2
-;call	word_processor	
-
-
 	call	divemode_check_decogases			; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
 
@@ -257,40 +242,6 @@ simulator_calc_deco_loop1:
 
 simulator_calc_deco_loop2:
 	call	PLED_simulator_data
-
-; Debugger
-;	call	enable_rs232	
-;	movff	char_I_deco_He_ratio5,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio5,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_He_ratio4,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio4,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_He_ratio3,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio3,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_He_ratio2,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio2,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_He_ratio,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_gas_change5,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_gas_change4,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_gas_change3,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_gas_change2,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_gas_change,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;
 
 	btg		LED_red
 

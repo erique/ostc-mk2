@@ -1,5 +1,5 @@
 Warning[203] C:\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\DIVEMODE_MENU.ASM 411 : Found opcode in column 1. (bra)
-Message[301] C:\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\MAIN.ASM 135 : MESSAGE: (OSTC - diving computer code,  Copyright (C) 2009 HeinrichsWeikamp GbR)
+Message[301] C:\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\MAIN.ASM 135 : MESSAGE: (OSTC - diving computer code,  Copyright (C) 2010 HeinrichsWeikamp GbR)
 Message[301] C:\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\MAIN.ASM 136 : MESSAGE: (This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the)
 Message[301] C:\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\MAIN.ASM 137 : MESSAGE: (Free Software Foundation, either version 3 of the License, or (at your option) any later version.)
 Message[301] C:\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\MAIN.ASM 138 : MESSAGE: (This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY)

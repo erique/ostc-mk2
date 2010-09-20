@@ -1,3 +1,8 @@
+New in 1.71 Beta:
+BETA Version - Do NOT use for diving!
+BUGFIX: Custom text can be 23chars again
+BUGFIX: Simulator descends to exact depth
+
 New in 1.70 Stable:
 Stable release
 WARNING: This update will reset all Custom Functions!

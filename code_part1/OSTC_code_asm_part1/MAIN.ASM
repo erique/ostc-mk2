@@ -105,33 +105,15 @@ HighInt:
 #include	simulator.asm		; Stand-alone simulator routines
 #include 	io.asm				; Low-Level I/O access
 
-	ORG	0x0A000		; keep free for new c_code
-	nop
 
-	ORG deco_main_calc_hauptroutine
-	return			;Dummy
-	ORG deco_main_calc_without_deco
-	return			;Dummy
-	ORG deco_main_clear_tissue
-	return			;Dummy
-	ORG deco_main_calc_desaturation_time
-	return			;Dummy
-	ORG deco_main_calc_wo_deco_step_1_m
-	return			;Dummy
-	ORG deco_main_hash
-	return			;Dummy
-	ORG main_clear_CNS_fraction
-	return			;Dummy
-	ORG	main_calc_CNS_fraction
-	return			;Dummy
-	ORG	main_calc_CNS_decrease_15min
-	return			;Dummy	
-	ORG	main_push_tissues_to_vault
-	return			;Dummy
-	ORG	main_pull_tissues_from_vault
-	return			;Dummy
-	
-	
+	; Include C sub-routines automatically
+
+	ORG	0x09A00
+	#include 	ostc_part3_wordprocessor_NEW_CURSOR_9A00_to_B960_jump_in_B410.txt			; New C-Code
+
+	ORG	0x0C000		
+	#include	p2_deco_main_v110d.txt
+
     MESSG "OSTC - diving computer code,  Copyright (C) 2010 HeinrichsWeikamp GbR"
     MESSG "This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the"
     MESSG "Free Software Foundation, either version 3 of the License, or (at your option) any later version."

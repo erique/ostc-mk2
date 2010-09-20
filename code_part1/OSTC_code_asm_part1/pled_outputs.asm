@@ -3346,7 +3346,7 @@ PLED_custom_text:
 	cpfseq	EEDATA						; Custom text active?
 	bra		PLED_clear_custom_text		; No, Delete row
 	WIN_TOP		.200
-	WIN_LEFT	.1
+	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call		PLED_divemask_color	; Set Color for Divemode mask

@@ -48,6 +48,9 @@ diveloop_loop:		; The diveloop starts here
 	btfss	onesecupdate					; tasks any new second
 	bra		diveloop_loop2
 
+	btfss	premenu							; Is the divemode menu active?
+	call	PLED_diveclock					; No, show clock (If clock should be displayed)
+
 	btfsc	gauge_mode						; Only in gauge mode
 	bra		diveloop_loop1a					; One Second Tasks in Gauge mode
 	btfsc	FLAG_apnoe_mode					; Only in apnoe mode

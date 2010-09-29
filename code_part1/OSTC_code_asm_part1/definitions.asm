@@ -378,7 +378,7 @@
  char_I_desaturation_multiplier;	; for conservatism/safety values 0.66 (50% slower desaturation) to 1.0 (no conservatism); consveratism used in calc_tissue(), calc_tissue_step_1_min() and sim_tissue_1min()
  char_I_GF_Hi_percentage;			; 0x514
  char_I_GF_Lo_percentage;			; 0x515
- char_I_GF_Spare;				; 0x516
+ char_I_GF_Spare;					; 0x516
  char_I_deco_distance;				; 0x517
  char_I_const_ppO2;					; 0x518	new in v.101 (C-Code), new in v109 (asm)
  char_I_deco_ppO2_change;			; 0x519	new in v.101
@@ -446,7 +446,6 @@
 
 ; C-code Routines
 ; PART 3
-;#DEFINE main_wordprocessor					0x0B410
 #DEFINE main_wordprocessor					0x0B468
 
 ; C-code Routines

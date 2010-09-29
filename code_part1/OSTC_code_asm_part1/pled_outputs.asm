@@ -557,6 +557,31 @@ PLED_display_clear_common2:
 	WIN_FONT 	FT_SMALL
 	return
 
+PLED_diveclock:
+	GETCUSTOM8	d'39'			; =1: Show clock in Divemode
+	movwf	lo
+	movlw	d'1'
+	cpfseq	lo					; =1?
+	return						; No, Done.
+
+	btfsc	menubit	; is the Dive mode menu displayed?
+	return			; Yes
+
+	WIN_TOP		.2
+	WIN_LEFT	.64
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0					; Init new Wordprocessor
+	call	PLED_standard_color
+	lfsr	FSR2,letter
+	movff	hours,lo
+	output_99x
+	movlw	':'
+	movwf	POSTINC2
+	movff	mins,lo
+	output_99x
+	call	word_processor
+	return
+
 PLED_clock:
 	ostc_debug	'c'
 	

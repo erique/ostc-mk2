@@ -697,51 +697,31 @@ PLED_menu_cursor:
 	call	word_processor
 
 	WIN_TOP		.65
-	WIN_LEFT	.0
-	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
-
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
 	call	word_processor
 
 	WIN_TOP		.95
-	WIN_LEFT	.0
-	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
-
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
 	call	word_processor
 
 	WIN_TOP		.125
-	WIN_LEFT	.0
-	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
-
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
 	call	word_processor
 
 	WIN_TOP		.155
-	WIN_LEFT	.0
-	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
-
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
 	call	word_processor
 
 	WIN_TOP		.185
-	WIN_LEFT	.0
-	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
-
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
@@ -762,10 +742,6 @@ PLED_menu_cursor:
 	movlw	d'185'
 	
 	movff	WREG,win_top
-	WIN_LEFT	.0
-	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
-
 	lfsr	FSR2,letter
 	movlw	0xB7
 	movwf	POSTINC2
@@ -1276,11 +1252,11 @@ PLED_pre_dive_screen3:
 	movwf	wait_temp			; here: stores eeprom address for gas list
 	movlw	d'0'
 	movwf	waitms_temp			; here: stores row for gas list
-	clrf 	temp5				; here: SP counter
+	clrf 	temp6				; here: SP counter
 
 PLED_pre_dive_screen3_loop:
 	incf	wait_temp,F			; EEPROM address
-	incf	temp5,F			; Increase SP
+	incf	temp6,F			; Increase SP
 
 	movlw	d'25'
 	addwf	waitms_temp,F		; Increase row
@@ -1292,7 +1268,7 @@ PLED_pre_dive_screen3_loop:
 	movwf	POSTINC2
 	movlw	'P'
 	movwf	POSTINC2
-	movff	temp5,lo		; copy gas number
+	movff	temp6,lo		; copy gas number
 	output_8				; display gas number
 	movlw	':'
 	movwf	POSTINC2
@@ -1306,7 +1282,7 @@ PLED_pre_dive_screen3_loop:
 	call	word_processor	
 
 	movlw	d'3'		; list all three SP
-	cpfseq	temp5		; All gases shown?
+	cpfseq	temp6		; All gases shown?
 	bra		PLED_pre_dive_screen3_loop	;no
 
 	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)
@@ -2408,7 +2384,7 @@ PLED_divemode_simulator_mask:
 	return
 
 PLED_decoplan_bargraph:
-	GETCUSTOM8	d'35'			; Standard output color
+	GETCUSTOM8	d'35'				; Standard output color
 	movff	WREG,box_temp+0			; Data
 	incf	win_top,F				; +1
 	movff	win_top,box_temp+1		; row top (0-239)
@@ -2418,7 +2394,9 @@ PLED_decoplan_bargraph:
 	movlw	.122
 	movff	WREG,box_temp+3			; column left (0-159)
 	addwf	lo,F					; Add time offset
-	decf	lo,F					; minus one
+	btfsc	STATUS,C				; >255?
+	setf	lo						; limit to 255
+	decf	lo,F					; No, minus one
 	movlw	d'138'					; Limit length (16min)
 	cpfslt	lo
 	movwf	lo					
@@ -2441,16 +2419,173 @@ PLED_decoplan_bargraph:
 PLED_decoplan_delete:			; Delete unused rows
 	movlw	.0
 	movff	WREG,box_temp+0	; data 00, x0, 0y, xy clear, links, rechts, beide
-
-	movff	hi,box_temp+1	; row top (0-63)
-	movlw	.125
-	movff	WREG,box_temp+2	; row bottom (0-63)
+	movff	hi,box_temp+1	; row top (0-239)
+	movlw	.183
+	movff	WREG,box_temp+2	; row bottom (0-239)
 	movlw	.100
 	movff	WREG,box_temp+3	; column left (0-159)
 	movlw	.159	
 	movff	WREG,box_temp+4	; column right (0-159)
 	call	PLED_box				
+	bsf		last_ceiling_gf_shown		; Set flag
 	return
+
+PLED_decoplan_gf_page_current:
+	movlw	d'0'
+	cpfseq	temp8
+	bra		PLED_decoplan_gf_page_current0		; 
+	bra		PLED_decoplan_gf_page1				; =0, Display Page 1
+PLED_decoplan_gf_page_current0:
+	movlw	d'1'
+	cpfseq	temp8
+	bra		PLED_decoplan_gf_page_current1
+	bra		PLED_decoplan_gf_page2				; =1: Dispplay Page 2
+PLED_decoplan_gf_page_current1:
+	movlw	d'2'
+	cpfseq	temp8
+	bra		PLED_decoplan_gf_page4				; >2: Display Page 4
+	bra		PLED_decoplan_gf_page3				; =1: Dispplay Page 3
+
+PLED_decoplan_gf_page1:
+	ostc_debug	'n'		; Sends debug-information to screen if debugmode active
+
+	movff	char_O_array_decodepth+0,lo		; Get Depth
+	tstfsz	lo
+	bra		PLED_decoplan_gf_page1x
+	; No Deco, show "no Deco"
+	DISPLAYTEXT	d'239'						;"No Deco"
+	return
+
+PLED_decoplan_gf_page4:
+	; temp7 holds last displayed depth
+	; temp5 list entry
+	movlw	.231
+	movwf	temp6			; row
+	movff	temp5,temp9		; save
+	movff	temp7,temp10	; save
+PLED_decoplan_gf_page4y:
+	movlw	d'3'
+	addwf	temp7,F			; Add 3m for next stop
+	movlw	d'25'
+	addwf	temp6,F
+	incf	temp5,F
+	call	PLED_decoplan_show_stop_gf
+	movlw	d'23'			; Stops 18-23
+	cpfseq	temp5
+	bra		PLED_decoplan_gf_page4y
+	movff	temp9,temp5		; restore
+	movff	temp10,temp7		; restore
+	bsf		last_ceiling_gf_shown		; Set flag
+	return
+
+PLED_decoplan_gf_page3:
+	; temp7 holds last displayed depth
+	; temp5 list entry
+	movff	temp5,temp9		; save
+	movff	temp7,temp10	; save
+	movlw	.231
+	movwf	temp6			; row
+PLED_decoplan_gf_page3y:
+	movlw	d'3'
+	addwf	temp7,F			; Add 3m for next stop
+	movlw	d'25'
+	addwf	temp6,F
+	incf	temp5,F
+	call	PLED_decoplan_show_stop_gf
+	movlw	d'17'			; Stops 12-17
+	cpfseq	temp5
+	bra		PLED_decoplan_gf_page3y
+	movff	temp9,temp5		; restore
+	movff	temp10,temp7		; restore
+	return
+
+PLED_decoplan_gf_page2:
+	; temp7 holds last displayed depth
+	; temp5 list entry
+	movff	temp5,temp9		; save
+	movff	temp7,temp10	; save
+	movlw	.231
+	movwf	temp6			; row
+PLED_decoplan_gf_page2y:
+	movlw	d'3'
+	addwf	temp7,F			; Add 3m for next stop
+	movlw	d'25'
+	addwf	temp6,F
+	incf	temp5,F
+	call	PLED_decoplan_show_stop_gf
+	movlw	d'11'			; Stops 6-11
+	cpfseq	temp5
+	bra		PLED_decoplan_gf_page2y
+	movff	temp9,temp5		; restore
+	movff	temp10,temp7		; restore
+	return
+
+PLED_decoplan_gf_page1x:
+	clrf	temp8				; Page 0-3 of deco list
+	GETCUSTOM8	d'29'			; Last Deco in m
+	movwf	temp7				; Start with last stop
+	setf	temp5
+	movlw	.231
+	movwf	temp6			; row
+
+	; Show last stop manually
+	movlw	d'25'
+	addwf	temp6,F
+	incf	temp5,F
+	call	PLED_decoplan_show_stop_gf
+	GETCUSTOM8	d'29'			; Last Deco in m
+	movwf	temp7				; Last deco
+	movlw	d'3'
+	cpfsgt	temp3				; >3m?
+	bra		PLED_decoplan_gf_page1x_next_6m
+	movwf	temp7
+	bra		PLED_decoplan_gf_page1y
+
+PLED_decoplan_gf_page1x_next_6m:
+	movlw	d'6'
+	movwf	temp7
+PLED_decoplan_gf_page1y:
+	movlw	d'3'
+	addwf	temp7,F			; Add 3m for next stop
+	movlw	d'25'
+	addwf	temp6,F
+	incf	temp5,F
+	call	PLED_decoplan_show_stop_gf
+	movlw	d'5'			; 6 Stops...
+	cpfseq	temp5
+	bra		PLED_decoplan_gf_page1y
+	return
+
+PLED_decoplan_show_stop_gf:
+	bsf		leftbind
+	WIN_LEFT	.100
+	movff	temp6,win_top
+	movff	temp6,hi						; copy for PLED_decoplan_bargraph
+
+	movff	char_O_array_decodepth+0,WREG	; Ceiling
+	cpfslt	temp7							; Ceiling already displayed?
+	goto	PLED_decoplan_delete			; Yes, quit display	and RETURN	
+	movff	temp7,lo						; Decodepth
+
+	lfsr	FSR2,letter		
+	output_8								; outputs into Postinc2!
+	movlw	'm'
+	movwf	POSTINC2
+	call	word_processor	
+	WIN_LEFT	.140
+	movff	temp6,win_top
+	lfsr	FSR1,0x251
+	movf	temp5,W							; number of entry
+	movff	PLUSW1,lo
+	lfsr	FSR2,letter	
+	output_99x								; outputs into Postinc2!
+	movlw	d'39'							;"'"
+	movwf	POSTINC2
+	call	word_processor	
+	tstfsz	lo								; 0 min "Stop"?
+	rcall	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
+	return
+
 
 PLED_decoplan:				; display the Decoplan
 	ostc_debug	'n'		; Sends debug-information to screen if debugmode active
@@ -2459,7 +2594,7 @@ PLED_decoplan:				; display the Decoplan
 	tstfsz	lo
 	bra		PLED_decoplan1
 	; No Deco, show "no Deco"
-	call	PLED_clear_divemode_menu		; Clear Deco area
+;	call	PLED_clear_divemode_menu		; Clear Deco area
 	DISPLAYTEXT	d'239'						;"No Deco"
 	return
 
@@ -2508,110 +2643,11 @@ PLED_decoplan_show_stop:
 	movlw	d'39'							;"'"
 	movwf	POSTINC2
 	call	word_processor	
-	call	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
+	tstfsz	lo								; 0 min "Stop"?
+	rcall	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
 	return
 
-;	WIN_LEFT	.100
-;	movlw	.025
-;	movff	WREG,win_top
-;	movwf	hi								; copy for PLED_decoplan_bargraph
-;	call	PLED_SetRow						; Set Row
-;	lfsr	FSR2,letter		
-;	movff	char_O_array_decodepth+1,lo		; Get Depth
-;	movf	lo,w
-;	btfsc	STATUS,Z						; =0
-;	goto	PLED_decoplan_delete			; Yes, quit display		
-;	output_8								; outputs into Postinc2!
-;	movlw	'm'
-;	movwf	POSTINC2
-;	call	word_processor	
-;	WIN_LEFT	.140
-;	movlw	.025
-;	movff	WREG,win_top
-;	lfsr	FSR2,letter		
-;	movff	char_O_array_decotime+1,lo		; Get length for this stop
-;	output_99x								; outputs into Postinc2!
-;	movlw	d'39'							;"'"
-;	movwf	POSTINC2
-;	call	word_processor	
-;	call	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
-;	
-;	WIN_LEFT	.100
-;	movlw	.050
-;	movff	WREG,win_top
-;	movwf	hi								; copy for PLED_decoplan_bargraph
-;	call	PLED_SetRow						; Set Row
-;	lfsr	FSR2,letter		
-;	movff	char_O_array_decodepth+2,lo		; Get Depth
-;	movf	lo,w
-;	btfsc	STATUS,Z						; =0
-;	goto	PLED_decoplan_delete			; Yes, quit display		
-;	output_8								; outputs into Postinc2!
-;	movlw	'm'
-;	movwf	POSTINC2
-;	call	word_processor	
-;	WIN_LEFT	.140
-;	movlw	.050
-;	movff	WREG,win_top
-;	lfsr	FSR2,letter		
-;	movff	char_O_array_decotime+2,lo		; Get length for this stop
-;	output_99x								; outputs into Postinc2!
-;	movlw	d'39'							;"'"
-;	movwf	POSTINC2
-;	call	word_processor	
-;	call	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
-;
-;	WIN_LEFT	.100
-;	movlw	.075
-;	movff	WREG,win_top
-;	movwf	hi								; copy for PLED_decoplan_bargraph
-;	call	PLED_SetRow						; Set Row
-;	lfsr	FSR2,letter		
-;	movff	char_O_array_decodepth+3,lo		; Get Depth
-;	movf	lo,w
-;	btfsc	STATUS,Z						; =0
-;	goto	PLED_decoplan_delete			; Yes, quit display		
-;	output_8								; outputs into Postinc2!
-;	movlw	'm'
-;	movwf	POSTINC2
-;	call	word_processor	
-;	WIN_LEFT	.140
-;	movlw	.075
-;	movff	WREG,win_top
-;	lfsr	FSR2,letter		
-;	movff	char_O_array_decotime+3,lo		; Get length for this stop
-;	output_99x								; outputs into Postinc2!
-;	movlw	d'39'							;"'"
-;	movwf	POSTINC2
-;	call	word_processor	
-;	call	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
-;
-;	WIN_LEFT	.100
-;	movlw	.100
-;	movff	WREG,win_top
-;	movwf	hi								; copy for PLED_decoplan_bargraph
-;	call	PLED_SetRow						; Set Row
-;	lfsr	FSR2,letter		
-;	movff	char_O_array_decodepth+4,lo		; Get Depth
-;	movf	lo,w
-;	btfsc	STATUS,Z						; =0
-;	goto	PLED_decoplan_delete			; Yes, quit display		
-;	output_8								; outputs into Postinc2!
-;	movlw	'm'
-;	movwf	POSTINC2
-;	call	word_processor	
-;	WIN_LEFT	.140
-;	movlw	.100
-;	movff	WREG,win_top
-;	lfsr	FSR2,letter		
-;	movff	char_O_array_decotime+4,lo		; Get length for this stop
-;	output_99x								; outputs into Postinc2!
-;	movlw	d'39'							;"'"
-;	movwf	POSTINC2
-;	call	word_processor	
-;	call	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
-;	return
-;
+
 PLED_gas_list:
 	ostc_debug	'm'		; Sends debug-information to screen if debugmode active
 
@@ -3479,455 +3515,441 @@ PLED_clear_custom_text:
 ;	call	word_processor
 ;	return
 
-
-PLED_MultiGF_deco_mask:
-	movlw	.0
-	movff	WREG,box_temp+0		; Data
-	movlw	.0
-	movff	WREG,box_temp+1		; row top (0-239)
-	movlw	.239
-	movff	WREG,box_temp+2		; row bottom (0-239)
-	movlw	.082
-	movff	WREG,box_temp+3		; column left (0-159)
-	movlw	.159	
-	movff	WREG,box_temp+4		; column right (0-159)
-	call	PLED_box
-	return
-	
-PLED_MultiGF_deco_all:
-	movff	char_O_actual_pointer,wait_temp
-	movff	char_O_GF_low_pointer,waitms_temp
-	movf	waitms_temp,F
-		bz		PLED_MultiGF_no_deco
-	call	PLED_MultiGF_table				; input wait_temp
-	return
-
-PLED_MultiGF_no_deco:
-	DISPLAYTEXT	d'242'			;"no deco"
-	return
-
-PLED_MultiGF_table:
-	movlw	d'9'
-	movwf	temp5			; number of stops
-	movlw	.231
-	movwf	temp6			; row
-	lfsr	FSR1,char_IO_deco_table+0
-
-PLED_MultiGF_table2:
-	movlw	d'25'
-	addwf	temp6,F
-	call	PLED_MultiGF_show_stop
-	decfsz	temp5,F
-	bra		PLED_MultiGF_table2
-	return
-
-PLED_MultiGF_show_stop:
-	bsf		leftbind
-	WIN_LEFT	.100
-	movff	temp6,win_top
-	movff	temp6,hi						; copy for PLED_decoplan_bargraph
-;	call	PLED_SetRow						; Set Row
-
-
-	movff	POSTINC1,lo		; Get Depth
-	movf	lo,w
-
-	lfsr	FSR2,letter	
-;	btfsc	STATUS,Z						; =0
-;	goto	PLED_decoplan_delete			; Yes, quit display		
-	output_8								; outputs into Postinc2!
-	movlw	'm'
-	movwf	POSTINC2
-	call	word_processor	
-	WIN_LEFT	.140
-	movff	temp6,win_top
-
-	movff	POSTINC1,lo		; Get length for this stop
-
-	lfsr	FSR2,letter		
-	output_99x								; outputs into Postinc2!
-	movlw	d'39'							;"'"
-	movwf	POSTINC2
-	call	word_processor	
-;	call	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
-	return
-
-
-
-;	movlw	.043
-;	movwf	temp5
-;	movlw	.48	+ .8
-;	movwf	temp6
-;	movff	char_O_GF_low_pointer,wait_temp
 ;
-;PLED_MultiGF_loop:
-;	decfsz	wait_temp,F
-;	bra		PLED_MulitGF_nextentry
-;
-;	bra		PLED_MultiGF_calc_tissue_counter
-;PLED_MGF_lp_calc_tis_counter:
-;
-;PLED_MGF_lp_clear_rem_space:
-;	lfsr	FSR2,letter	
-;	movlw	' '
-;	movwf	POSTINC2
-;	movlw	' '
-;	movwf	POSTINC2
-;	movlw	' '
-;	movwf	POSTINC2
-;	movlw	' '
-;	movwf	POSTINC2
-;	movlw	' '
-;	movwf	POSTINC2
-;	movlw	' '
-;	movwf	POSTINC2
-;	movlw	.8
-;	subwf	temp6,F
-;	bnz		PLED_MultiGF_column_ok_space
-;	movlw	.21
-;	subwf	temp5,F
-;	bc		PLED_MultiGF_new_row_space
-;		return
-;PLED_MultiGF_new_row_space:
-;	movlw	.48
-;	movwf	temp6
-;PLED_MultiGF_column_ok_space:
-;	movf	temp5,W
-;	call	PLED_SetColumn
-;	movlw	.8
-;	subwf	temp6,W
-;	call	PLED_SetRow
-;	call	word_processor
-;	bra		PLED_MGF_lp_clear_rem_space
-;
-;PLED_MulitGF_nextentry:
-;	lfsr	FSR2,letter	
-;	movff	wait_temp,lo				; pointer to meter
-;	movf	lo,W
-;	rlncf	lo,F
-;	addwf	lo,F
-;	decfsz	wait_temp,W
-;		bra		PLED_MGF_skip_last_deco2 	
-;	movff	char_I_depth_last_deco,lo
-;PLED_MGF_skip_last_deco2:
-;	output_99
-;	movlw	0x02
-;	movwf	POSTINC2
-;	movlw	':'
-;	movwf	POSTINC2
-;	movlw	0x02
-;	movwf	POSTINC2
-;	lfsr	FSR0,0x250
-;	movf	wait_temp,W
-;	movff	PLUSW0,lo
-;	movlw	d'10'			; gray code
-;	tstfsz	lo
-;	movlw	 b'00001111'	; gray code
-;	movwf	grayvalue
-;	bsf		leftbind
-;	output_99
-;	bcf		leftbind
-;	movlw	' '
-;	movwf	POSTINC2
-;	movlw	.8
-;	subwf	temp6,F
-;	bnz		PLED_MultiGF_column_ok
-;	movlw	.21
-;	subwf	temp5,F
-;	bc		PLED_MultiGF_new_row
-;		return
-;PLED_MultiGF_new_row:
-;	movlw	.48
-;	movwf	temp6
-;PLED_MultiGF_column_ok:
-;	movf	temp5,W
-;	call	PLED_SetColumn
-;	movlw	.8
-;	subwf	temp6,W
-;	call	PLED_SetRow
-;	call	word_processor
-;	movlw	 b'00001111'	; gray code
-;	movwf	grayvalue
-;	bra		PLED_MultiGF_loop
-;
-;
-;PLED_MultiGF_depth:
-;	lfsr	FSR2,letter
-;	movff	rel_pressure+0,lo
-;	movff	rel_pressure+1,hi
-;	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
-;	bsf		leftbind
-;	bsf		ignore_digit5		; do not display 1cm depth
-;	output_16dp	d'3'
-;	bcf		leftbind
-;	movlw	.004
-;	movwf	wait_temp
-;	movff	wait_temp,0x086	; left
-;	movlw	.049
-;	movwf	wait_temp
-;	movff	wait_temp,0x087	; top
-;	movlw	.015
-;	movwf	wait_temp
-;	movff	wait_temp,0x088	; heightmax
-;	movff	dd_oled_brightness_offset,wait_temp
-;	movff	wait_temp,0x089	; oled_brightness_offset_const
-;	call	main_DD2_write_incon24
-;	movlb	b'00000001'				; Back to Bank1
+;PLED_MultiGF_deco_all:
+;	movff	char_O_actual_pointer,wait_temp
+;	movff	char_O_GF_low_pointer,waitms_temp
+;	movf	waitms_temp,F
+;		bz		PLED_MultiGF_no_deco
+;	call	PLED_MultiGF_table				; input wait_temp
 ;	return
 ;
-;PLED_MultiGF_deco_depth_actual:
+;PLED_MultiGF_no_deco:
+;	DISPLAYTEXT	d'242'			;"no deco"
+;	return
+;
+;PLED_MultiGF_table:
+;	movlw	d'9'
+;	movwf	temp5			; number of stops
+;	movlw	.231
+;	movwf	temp6			; row
+;	lfsr	FSR1,char_IO_deco_table+0
+;
+;PLED_MultiGF_table2:
+;	movlw	d'25'
+;	addwf	temp6,F
+;	call	PLED_MultiGF_show_stop
+;	decfsz	temp5,F
+;	bra		PLED_MultiGF_table2
+;	return
+;
+;PLED_MultiGF_show_stop:
+;	bsf		leftbind
+;	WIN_LEFT	.100
+;	movff	temp6,win_top
+;	movff	temp6,hi						; copy for PLED_decoplan_bargraph
+;;	call	PLED_SetRow						; Set Row
+;
+;
+;	movff	POSTINC1,lo		; Get Depth
+;	movf	lo,w
+;
 ;	lfsr	FSR2,letter	
-;	movff	char_O_actual_pointer,lo				; pointer to meter
-;	movf	lo,W
-;	rlncf	lo,F
-;	addwf	lo,F
-;	movff	char_O_actual_pointer,wait_temp			; test last_deco
-;	decfsz	wait_temp,F
-;		bra		PLED_MGF_skip_last_deco_depth 	
-;	movff	char_I_depth_last_deco,lo
-;PLED_MGF_skip_last_deco_depth:
-;	output_99
+;;	btfsc	STATUS,Z						; =0
+;;	goto	PLED_decoplan_delete			; Yes, quit display		
+;	output_8								; outputs into Postinc2!
 ;	movlw	'm'
 ;	movwf	POSTINC2
-;	movlw	' '
-;	movwf	POSTINC2
-;	movlw	.23
-;	call	PLED_SetColumn
-;	movlw	.57
-;	call	PLED_SetRow
-;	goto	word_processor
-;	
-;PLED_MultiGF_gradient:
-;	lfsr	FSR2,letter
-;	movff	char_O_gradient_factor,lo
-;	bsf		leftbind
-;	output_99
-;	bcf		leftbind
-;	movlw	'%'
-;	movwf	POSTINC2
-;	movlw	' '
-;	movwf	POSTINC2
-;	movlw	.23
-;	call	PLED_SetColumn
-;	movlw	.49
-;	call	PLED_SetRow
-;	goto	word_processor
+;	call	word_processor	
+;	WIN_LEFT	.140
+;	movff	temp6,win_top
 ;
-;PLED_MultiGF_time_at_deco:
-;	movlw	.045
-;	movwf	wait_temp
-;	movff	wait_temp,0x086	; left
-;	movlw	.050
-;	movwf	wait_temp
-;	movff	wait_temp,0x087	; top
-;	movlw	.015
-;	movwf	wait_temp
-;	movff	wait_temp,0x088	; heightmax
-;	movff	dd_oled_brightness_offset,wait_temp
-;	movff	wait_temp,0x089	; oled_brightness_offset_const
-;	lfsr	FSR2,letter
-;	lfsr	FSR0,0x250
-;	movff	char_O_actual_pointer,lo
-;	movf	lo,W
-;	movff	PLUSW0,lo
-;	bsf		leftbind
-;	output_99
-;	movlw	'<'				; Textmapping to "'"!
+;	movff	POSTINC1,lo		; Get length for this stop
+;
+;	lfsr	FSR2,letter		
+;	output_99x								; outputs into Postinc2!
+;	movlw	d'39'							;"'"
 ;	movwf	POSTINC2
-;	call	main_DD2_write_incon24
-;	movlb	b'00000001'				; Back to Bank1
+;	call	word_processor	
+;;	call	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
 ;	return
 ;
-;PLED_MultiGF_clear_behind_depth:
-;	movlw	0x01
-;	movwf	wait_temp
-;	movff	wait_temp,width	; font select left side before decpoint
-;	movff	wait_temp,box_temp+5	; font select right side decpoint and after
-;	movlw	.063
-;	movwf	wait_temp
-;	movff	wait_temp,box_temp+1	; bottom row 
-;	movlw	.020
-;	movwf	wait_temp
-;	movff	wait_temp,box_temp+2	; start column
-;	movlw	.063
-;	movwf	wait_temp
-;	movff	wait_temp,box_temp+3	; end column
-;	movlw	.051	
-;	movwf	wait_temp
-;	movff	wait_temp,box_temp+4	; start column dec point
-;	lfsr	FSR2,letter
-;;	call	DD_Main
-;	return
-;;	movlw	0x31
-;	movwf	wait_temp
-;	movff	wait_temp,box_temp+1	; row
-;	movlw	0x00
-;	movwf	wait_temp
-;	movff	wait_temp,box_temp+0	; color
-;	call	DD_hline
-;	return
 ;
-
-;PLED_MulitGF_nextentry_tissues:
-;	lfsr	FSR2,letter
-;	lfsr	FSR0,0x200
-;	rlncf	wait_temp,W
-;	movff	PLUSW0,lo
-;	addlw	.001
-;	movff	PLUSW0,hi
-;	output_16
-;	movlw	' '
-;	movwf	POSTINC2
-;	movlw	.8
-;	subwf	temp6,F
-;	bnz		PLED_MultiGF_column_ok_tissues
-;	movlw	 b'00001111'	; gray code
-;	movwf	grayvalue
-;	movlw	.21
-;	subwf	temp5,F
-;	bc		PLED_MultiGF_new_row_tissues
-;		return
-;PLED_MultiGF_new_row_tissues:
-;	movlw	.48
-;	movwf	temp6
-;PLED_MultiGF_column_ok_tissues:
-;	movf	temp5,W
-;	call	PLED_SetColumn
-;	movlw	.8
-;	subwf	temp6,W
-;	call	PLED_SetRow
-;	call	word_processor
-;	bra		PLED_MultiGF_loop_tissues
 ;
-
-;PLED_MultiGF_uart_out:
-;	call	rs232_wait_tx
-;; header ff ff
-;	movlw	0xff
-;	movwf	wait_temp
-;	movff	wait_temp,TXREG
-;	call	rs232_wait_tx
-;	movff	wait_temp,TXREG
-;	call	rs232_wait_tx
-;; 2sec counter
-;	movff	0x290,TXREG
-;	call	rs232_wait_tx
-;	movff	0x291,TXREG
-;	call	rs232_wait_tx
-;;	movff	,TXREG
-;; pres_respiration
-;	movff	amb_pressure,TXREG
-;	call	rs232_wait_tx
-;	movff	amb_pressure+1,TXREG
-;	call	rs232_wait_tx
-;; pres_surface
-;	movff	last_surfpressure,TXREG
-;	call	rs232_wait_tx
-;	movff	last_surfpressure+1,TXREG
-;	call	rs232_wait_tx
-;; tissue pres
-;	lfsr	FSR0,0x200
-;	movlw	.64
-;	movwf	wait_temp
-;pled_multigraf_tissue_uart_loop:
-;	movff	POSTINC0,TXREG
-;	call	rs232_wait_tx
-;	decfsz	wait_temp
-;		bra	pled_multigraf_tissue_uart_loop
-;; movff	,TXREG
-;; call	rs232_wait_tx
-;	return
-
-;PLED_MulitGF_nextentry_debug:
-;	lfsr	FSR2,letter
-;	movff	wait_temp,lo		
-;	output_99
-;	movlw	0x02
-;	movwf	POSTINC2
-;	movlw	':'
-;	movwf	POSTINC2
-;	movlw	0x02
-;	movwf	POSTINC2
-;	lfsr	FSR0,0x300
-;	movf	wait_temp,W			
-;	movff	PLUSW0,lo
-;	output_99
-;	movlw	' '
-;	movwf	POSTINC2
-;	movlw	.8
-;	subwf	temp6,F
-;	bnz		PLED_MultiGF_column_ok_debug
-;	movlw	 b'00001111'	; gray code
-;	movwf	grayvalue
-;	movlw	.21
-;	subwf	temp5,F
-;	bc		PLED_MultiGF_new_row_debug
-;		return
-;PLED_MultiGF_new_row_debug:
-;	movlw	.48
-;	movwf	temp6
-;PLED_MultiGF_column_ok_debug:
-;	movf	temp5,W
-;	call	PLED_SetColumn
-;	movlw	.8
-;	subwf	temp6,W
-;	call	PLED_SetRow
-;	call	word_processor
-;	bra		PLED_MultiGF_loop_debug
-
-;PLED_MultiGF_calc_tissue_counter:
-;	movlw	d'8'	; gray code
-;	movwf	grayvalue
-;	movff	0x290,lo		
-;	movff	0x291,hi		
-;	movlw	'('
-;	movwf	POSTINC2
-;	output_16
-;	movlw	')'
-;	movwf	POSTINC2
-;	movlw	.8
-;	subwf	temp6,F
-;	bnz		PLED_MGF_ok_col_calc_tis_cter
-;	movlw	 b'00001111'	; gray code
-;	movwf	grayvalue
-;	movlw	.21
-;	subwf	temp5,F
-;	bc		PLED_MGF_n_row_calc_tis_cter
-;		return
-;PLED_MGF_n_row_calc_tis_cter:
-;	movlw	.48
-;	movwf	temp6
-;PLED_MGF_ok_col_calc_tis_cter:
-;	movf	temp5,W
-;	call	PLED_SetColumn
-;	movlw	.8
-;	subwf	temp6,W
-;	call	PLED_SetRow
-;	call	word_processor
-;	bra		PLED_MGF_lp_calc_tis_counter
+;;	movlw	.043
+;;	movwf	temp5
+;;	movlw	.48	+ .8
+;;	movwf	temp6
+;;	movff	char_O_GF_low_pointer,wait_temp
+;;
+;;PLED_MultiGF_loop:
+;;	decfsz	wait_temp,F
+;;	bra		PLED_MulitGF_nextentry
+;;
+;;	bra		PLED_MultiGF_calc_tissue_counter
+;;PLED_MGF_lp_calc_tis_counter:
+;;
+;;PLED_MGF_lp_clear_rem_space:
+;;	lfsr	FSR2,letter	
+;;	movlw	' '
+;;	movwf	POSTINC2
+;;	movlw	' '
+;;	movwf	POSTINC2
+;;	movlw	' '
+;;	movwf	POSTINC2
+;;	movlw	' '
+;;	movwf	POSTINC2
+;;	movlw	' '
+;;	movwf	POSTINC2
+;;	movlw	' '
+;;	movwf	POSTINC2
+;;	movlw	.8
+;;	subwf	temp6,F
+;;	bnz		PLED_MultiGF_column_ok_space
+;;	movlw	.21
+;;	subwf	temp5,F
+;;	bc		PLED_MultiGF_new_row_space
+;;		return
+;;PLED_MultiGF_new_row_space:
+;;	movlw	.48
+;;	movwf	temp6
+;;PLED_MultiGF_column_ok_space:
+;;	movf	temp5,W
+;;	call	PLED_SetColumn
+;;	movlw	.8
+;;	subwf	temp6,W
+;;	call	PLED_SetRow
+;;	call	word_processor
+;;	bra		PLED_MGF_lp_clear_rem_space
+;;
+;;PLED_MulitGF_nextentry:
+;;	lfsr	FSR2,letter	
+;;	movff	wait_temp,lo				; pointer to meter
+;;	movf	lo,W
+;;	rlncf	lo,F
+;;	addwf	lo,F
+;;	decfsz	wait_temp,W
+;;		bra		PLED_MGF_skip_last_deco2 	
+;;	movff	char_I_depth_last_deco,lo
+;;PLED_MGF_skip_last_deco2:
+;;	output_99
+;;	movlw	0x02
+;;	movwf	POSTINC2
+;;	movlw	':'
+;;	movwf	POSTINC2
+;;	movlw	0x02
+;;	movwf	POSTINC2
+;;	lfsr	FSR0,0x250
+;;	movf	wait_temp,W
+;;	movff	PLUSW0,lo
+;;	movlw	d'10'			; gray code
+;;	tstfsz	lo
+;;	movlw	 b'00001111'	; gray code
+;;	movwf	grayvalue
+;;	bsf		leftbind
+;;	output_99
+;;	bcf		leftbind
+;;	movlw	' '
+;;	movwf	POSTINC2
+;;	movlw	.8
+;;	subwf	temp6,F
+;;	bnz		PLED_MultiGF_column_ok
+;;	movlw	.21
+;;	subwf	temp5,F
+;;	bc		PLED_MultiGF_new_row
+;;		return
+;;PLED_MultiGF_new_row:
+;;	movlw	.48
+;;	movwf	temp6
+;;PLED_MultiGF_column_ok:
+;;	movf	temp5,W
+;;	call	PLED_SetColumn
+;;	movlw	.8
+;;	subwf	temp6,W
+;;	call	PLED_SetRow
+;;	call	word_processor
+;;	movlw	 b'00001111'	; gray code
+;;	movwf	grayvalue
+;;	bra		PLED_MultiGF_loop
+;;
+;;
+;;PLED_MultiGF_depth:
+;;	lfsr	FSR2,letter
+;;	movff	rel_pressure+0,lo
+;;	movff	rel_pressure+1,hi
+;;	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
+;;	bsf		leftbind
+;;	bsf		ignore_digit5		; do not display 1cm depth
+;;	output_16dp	d'3'
+;;	bcf		leftbind
+;;	movlw	.004
+;;	movwf	wait_temp
+;;	movff	wait_temp,0x086	; left
+;;	movlw	.049
+;;	movwf	wait_temp
+;;	movff	wait_temp,0x087	; top
+;;	movlw	.015
+;;	movwf	wait_temp
+;;	movff	wait_temp,0x088	; heightmax
+;;	movff	dd_oled_brightness_offset,wait_temp
+;;	movff	wait_temp,0x089	; oled_brightness_offset_const
+;;	call	main_DD2_write_incon24
+;;	movlb	b'00000001'				; Back to Bank1
+;;	return
+;;
+;;PLED_MultiGF_deco_depth_actual:
+;;	lfsr	FSR2,letter	
+;;	movff	char_O_actual_pointer,lo				; pointer to meter
+;;	movf	lo,W
+;;	rlncf	lo,F
+;;	addwf	lo,F
+;;	movff	char_O_actual_pointer,wait_temp			; test last_deco
+;;	decfsz	wait_temp,F
+;;		bra		PLED_MGF_skip_last_deco_depth 	
+;;	movff	char_I_depth_last_deco,lo
+;;PLED_MGF_skip_last_deco_depth:
+;;	output_99
+;;	movlw	'm'
+;;	movwf	POSTINC2
+;;	movlw	' '
+;;	movwf	POSTINC2
+;;	movlw	.23
+;;	call	PLED_SetColumn
+;;	movlw	.57
+;;	call	PLED_SetRow
+;;	goto	word_processor
+;;	
+;;PLED_MultiGF_gradient:
+;;	lfsr	FSR2,letter
+;;	movff	char_O_gradient_factor,lo
+;;	bsf		leftbind
+;;	output_99
+;;	bcf		leftbind
+;;	movlw	'%'
+;;	movwf	POSTINC2
+;;	movlw	' '
+;;	movwf	POSTINC2
+;;	movlw	.23
+;;	call	PLED_SetColumn
+;;	movlw	.49
+;;	call	PLED_SetRow
+;;	goto	word_processor
+;;
+;;PLED_MultiGF_time_at_deco:
+;;	movlw	.045
+;;	movwf	wait_temp
+;;	movff	wait_temp,0x086	; left
+;;	movlw	.050
+;;	movwf	wait_temp
+;;	movff	wait_temp,0x087	; top
+;;	movlw	.015
+;;	movwf	wait_temp
+;;	movff	wait_temp,0x088	; heightmax
+;;	movff	dd_oled_brightness_offset,wait_temp
+;;	movff	wait_temp,0x089	; oled_brightness_offset_const
+;;	lfsr	FSR2,letter
+;;	lfsr	FSR0,0x250
+;;	movff	char_O_actual_pointer,lo
+;;	movf	lo,W
+;;	movff	PLUSW0,lo
+;;	bsf		leftbind
+;;	output_99
+;;	movlw	'<'				; Textmapping to "'"!
+;;	movwf	POSTINC2
+;;	call	main_DD2_write_incon24
+;;	movlb	b'00000001'				; Back to Bank1
+;;	return
+;;
+;;PLED_MultiGF_clear_behind_depth:
+;;	movlw	0x01
+;;	movwf	wait_temp
+;;	movff	wait_temp,width	; font select left side before decpoint
+;;	movff	wait_temp,box_temp+5	; font select right side decpoint and after
+;;	movlw	.063
+;;	movwf	wait_temp
+;;	movff	wait_temp,box_temp+1	; bottom row 
+;;	movlw	.020
+;;	movwf	wait_temp
+;;	movff	wait_temp,box_temp+2	; start column
+;;	movlw	.063
+;;	movwf	wait_temp
+;;	movff	wait_temp,box_temp+3	; end column
+;;	movlw	.051	
+;;	movwf	wait_temp
+;;	movff	wait_temp,box_temp+4	; start column dec point
+;;	lfsr	FSR2,letter
+;;;	call	DD_Main
+;;	return
+;;;	movlw	0x31
+;;	movwf	wait_temp
+;;	movff	wait_temp,box_temp+1	; row
+;;	movlw	0x00
+;;	movwf	wait_temp
+;;	movff	wait_temp,box_temp+0	; color
+;;	call	DD_hline
+;;	return
+;;
 ;
-
-;PLED_debug_deko:
-;	movlw	.009
-;	call	PLED_SetColumn
-;	movlw	.008
-;	call	PLED_SetRow
-;	lfsr	FSR2,letter
-;	movff	char_O_deco_status,lo
-;	output_8
-;	call	word_processor
+;;PLED_MulitGF_nextentry_tissues:
+;;	lfsr	FSR2,letter
+;;	lfsr	FSR0,0x200
+;;	rlncf	wait_temp,W
+;;	movff	PLUSW0,lo
+;;	addlw	.001
+;;	movff	PLUSW0,hi
+;;	output_16
+;;	movlw	' '
+;;	movwf	POSTINC2
+;;	movlw	.8
+;;	subwf	temp6,F
+;;	bnz		PLED_MultiGF_column_ok_tissues
+;;	movlw	 b'00001111'	; gray code
+;;	movwf	grayvalue
+;;	movlw	.21
+;;	subwf	temp5,F
+;;	bc		PLED_MultiGF_new_row_tissues
+;;		return
+;;PLED_MultiGF_new_row_tissues:
+;;	movlw	.48
+;;	movwf	temp6
+;;PLED_MultiGF_column_ok_tissues:
+;;	movf	temp5,W
+;;	call	PLED_SetColumn
+;;	movlw	.8
+;;	subwf	temp6,W
+;;	call	PLED_SetRow
+;;	call	word_processor
+;;	bra		PLED_MultiGF_loop_tissues
+;;
 ;
-;	movlw	.009
-;	call	PLED_SetColumn
-;	movlw	.016
-;	call	PLED_SetRow
-;	lfsr	FSR2,letter
-;	movff	char_O_array_decodepth+0,lo
-;	output_8
-;	call	word_processor
-;	return
+;;PLED_MultiGF_uart_out:
+;;	call	rs232_wait_tx
+;;; header ff ff
+;;	movlw	0xff
+;;	movwf	wait_temp
+;;	movff	wait_temp,TXREG
+;;	call	rs232_wait_tx
+;;	movff	wait_temp,TXREG
+;;	call	rs232_wait_tx
+;;; 2sec counter
+;;	movff	0x290,TXREG
+;;	call	rs232_wait_tx
+;;	movff	0x291,TXREG
+;;	call	rs232_wait_tx
+;;;	movff	,TXREG
+;;; pres_respiration
+;;	movff	amb_pressure,TXREG
+;;	call	rs232_wait_tx
+;;	movff	amb_pressure+1,TXREG
+;;	call	rs232_wait_tx
+;;; pres_surface
+;;	movff	last_surfpressure,TXREG
+;;	call	rs232_wait_tx
+;;	movff	last_surfpressure+1,TXREG
+;;	call	rs232_wait_tx
+;;; tissue pres
+;;	lfsr	FSR0,0x200
+;;	movlw	.64
+;;	movwf	wait_temp
+;;pled_multigraf_tissue_uart_loop:
+;;	movff	POSTINC0,TXREG
+;;	call	rs232_wait_tx
+;;	decfsz	wait_temp
+;;		bra	pled_multigraf_tissue_uart_loop
+;;; movff	,TXREG
+;;; call	rs232_wait_tx
+;;	return
 ;
-
+;;PLED_MulitGF_nextentry_debug:
+;;	lfsr	FSR2,letter
+;;	movff	wait_temp,lo		
+;;	output_99
+;;	movlw	0x02
+;;	movwf	POSTINC2
+;;	movlw	':'
+;;	movwf	POSTINC2
+;;	movlw	0x02
+;;	movwf	POSTINC2
+;;	lfsr	FSR0,0x300
+;;	movf	wait_temp,W			
+;;	movff	PLUSW0,lo
+;;	output_99
+;;	movlw	' '
+;;	movwf	POSTINC2
+;;	movlw	.8
+;;	subwf	temp6,F
+;;	bnz		PLED_MultiGF_column_ok_debug
+;;	movlw	 b'00001111'	; gray code
+;;	movwf	grayvalue
+;;	movlw	.21
+;;	subwf	temp5,F
+;;	bc		PLED_MultiGF_new_row_debug
+;;		return
+;;PLED_MultiGF_new_row_debug:
+;;	movlw	.48
+;;	movwf	temp6
+;;PLED_MultiGF_column_ok_debug:
+;;	movf	temp5,W
+;;	call	PLED_SetColumn
+;;	movlw	.8
+;;	subwf	temp6,W
+;;	call	PLED_SetRow
+;;	call	word_processor
+;;	bra		PLED_MultiGF_loop_debug
+;
+;;PLED_MultiGF_calc_tissue_counter:
+;;	movlw	d'8'	; gray code
+;;	movwf	grayvalue
+;;	movff	0x290,lo		
+;;	movff	0x291,hi		
+;;	movlw	'('
+;;	movwf	POSTINC2
+;;	output_16
+;;	movlw	')'
+;;	movwf	POSTINC2
+;;	movlw	.8
+;;	subwf	temp6,F
+;;	bnz		PLED_MGF_ok_col_calc_tis_cter
+;;	movlw	 b'00001111'	; gray code
+;;	movwf	grayvalue
+;;	movlw	.21
+;;	subwf	temp5,F
+;;	bc		PLED_MGF_n_row_calc_tis_cter
+;;		return
+;;PLED_MGF_n_row_calc_tis_cter:
+;;	movlw	.48
+;;	movwf	temp6
+;;PLED_MGF_ok_col_calc_tis_cter:
+;;	movf	temp5,W
+;;	call	PLED_SetColumn
+;;	movlw	.8
+;;	subwf	temp6,W
+;;	call	PLED_SetRow
+;;	call	word_processor
+;;	bra		PLED_MGF_lp_calc_tis_counter
+;;
+;
+;;PLED_debug_deko:
+;;	movlw	.009
+;;	call	PLED_SetColumn
+;;	movlw	.008
+;;	call	PLED_SetRow
+;;	lfsr	FSR2,letter
+;;	movff	char_O_deco_status,lo
+;;	output_8
+;;	call	word_processor
+;;
+;;	movlw	.009
+;;	call	PLED_SetColumn
+;;	movlw	.016
+;;	call	PLED_SetRow
+;;	lfsr	FSR2,letter
+;;	movff	char_O_array_decodepth+0,lo
+;;	output_8
+;;	call	word_processor
+;;	return
+;;
+;
 PLED_simdata_screen:			;Display Pre-Dive Screen
 	; List active gases/Setpoints
 	btfsc	FLAG_const_ppO2_mode		; in ppO2 mode?
@@ -4020,11 +4042,11 @@ PLED_simdata_screen3:
 	movwf	wait_temp			; here: stores eeprom address for gas list
 	movlw	d'10'
 	movwf	waitms_temp			; here: stores row for gas list
-	clrf 	temp5				; here: SP counter
+	clrf 	temp6				; here: SP counter
 
 PLED_simdata_screen3_loop:
 	incf	wait_temp,F			; EEPROM address
-	incf	temp5,F			; Increase SP
+	incf	temp6,F			; Increase SP
 
 	movlw	d'25'
 	addwf	waitms_temp,F		; Increase row
@@ -4036,7 +4058,7 @@ PLED_simdata_screen3_loop:
 	movwf	POSTINC2
 	movlw	'P'
 	movwf	POSTINC2
-	movff	temp5,lo		; copy gas number
+	movff	temp6,lo		; copy gas number
 	output_8				; display gas number
 	movlw	':'
 	movwf	POSTINC2
@@ -4050,7 +4072,7 @@ PLED_simdata_screen3_loop:
 	call	word_processor	
 
 	movlw	d'3'		; list all three SP
-	cpfseq	temp5		; All gases shown?
+	cpfseq	temp6		; All gases shown?
 	bra		PLED_simdata_screen3_loop	;no
 
 	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)

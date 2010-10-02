@@ -158,7 +158,7 @@ simulator_show_decoplan:
 	call	PLED_simdata_screen
 	call	divemenu_see_decoplan
 
-	call	enable_rs232
+call	enable_rs232
 	lfsr	FSR0,0x250
 	movlw	0x20
 	movwf	wait_temp
@@ -167,6 +167,7 @@ xy:						; Clear Deco list
 	call	rs232_wait_tx
 	decfsz	wait_temp,F
 	bra		xy
+	movff	char_O_array_decodepth+0,TXREG
 
 		
 	
@@ -174,9 +175,9 @@ xy:						; Clear Deco list
 	DISPLAYTEXT	.188		; Sim. Results:
 	WIN_INVERT	.0	; Init new Wordprocessor	
 	
+simulator_show_decoplan1:
 	bcf		switch_left
 	bcf		switch_right
-
 simulator_show_decoplan2:
 	btfss	onesecupdate
 	bra		simulator_show_decoplan3
@@ -189,11 +190,11 @@ simulator_show_decoplan2:
 	bcf		onesecupdate				; End of one second tasks
 
 simulator_show_decoplan3:
-	btfsc	switch_left
-	bra		simulator_show_decoplan4	; Quit display
-
 	btfsc	switch_right
 	bra		simulator_show_decoplan4	; Quit display
+
+	btfsc	switch_left
+	bra		simulator_show_decoplan5	; Quit display or new Decoplan-Page (GF Mode only)
 
 	btfsc	sleepmode
 	goto	more_menu
@@ -202,6 +203,22 @@ simulator_show_decoplan3:
 	goto	restart						; exit menu, restart and enter divemode
 
 	bra		simulator_show_decoplan2
+
+simulator_show_decoplan5:
+	btfsc	multi_gf_display			; Next Page in Multi-GF Screen?
+	bra		simulator_show_decoplan5_1	; Yes!
+simulator_show_decoplan5_0:
+
+	bcf		display_see_deco			; clear flag
+	bra		simulator_show_decoplan4	; Quit
+
+simulator_show_decoplan5_1:
+	incf	temp8,F
+	btfsc	last_ceiling_gf_shown		; last ceiling shown?
+	bra		simulator_show_decoplan5_0	; All done, clear and return
+
+	call	PLED_decoplan_gf_page_current	; Re-Draw Current page of GF Decoplan
+	bra		simulator_show_decoplan1	
 
 simulator_show_decoplan4:
 	movlw	d'5'

@@ -1292,9 +1292,11 @@ end_dive_common:
 	call	deco_main_gradient_array
 	movlb	b'00000001'					; select ram bank 1
 
+	btfss	restore_deco_data			; Restore decodata?
+	goto	surfloop					; and return to surfaceloop
+;new 1.71beta:
 	clrf	surface_interval+0
 	clrf	surface_interval+1		; Clear surface interval timer
-
 	goto	surfloop					; and return to surfaceloop
 
 timeout_divemode:

@@ -307,7 +307,10 @@
 	
 	temp5						; used in PLED_MultiGF,...
 	temp6						; used in PLED_MultiGF,...
-	MultiGF_seconds				; Counter for seconds in Multi-GF mode
+	temp7						; used in PLED_MultiGF,...
+	temp8						; used in PLED_MultiGF,...
+	temp9						; used in PLED_MultiGF,...
+	temp10						; used in PLED_MultiGF,...
 
 	fatal_error_code			; holds error code value 
 
@@ -582,7 +585,7 @@
 #DEFINE	output_to_postinc_only	flag9,6	;=1: Do not call wordprocessor in output
 #DEFINE	uart_send_hash			flag9,7	;=1: Send the MD2 hash via UART
 
-;#DEFINE	free
+#DEFINE	last_ceiling_gf_shown	flag10,0	;=1: Last stop already shown
 #DEFINE	uart_send_int_eeprom	flag10,1	;=1: Send internal EEPROM BANK 0
 #DEFINE	uart_reset_decodata		flag10,2	;=1: Reset deco data 
 #DEFINE	manual_gas_changed		flag10,3	;=1: Manual Gas changed during dive

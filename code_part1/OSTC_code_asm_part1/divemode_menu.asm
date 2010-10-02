@@ -402,27 +402,24 @@ divemenu_see_leading_tissue2:
 	
 divemenu_see_decoplan:
 	bsf		display_see_deco			; set flag
+	call	PLED_clear_divemode_menu	; Clear Menu
 	
 	read_int_eeprom	d'34'
 	movlw	d'3'
 	cpfsgt	EEDATA						; in multi-gf mode? Z16 GF OC=4 and Z16 GF CC=5
 	bra		divemenu_see_decoplan1		; No!
 
-bra		divemenu_see_decoplan1		; Show normal plan! ToDo: MultiGF Plan....
-
 	bsf		multi_gf_display			; Yes, display the multi-gf table screen
-	call	PLED_ClearScreen			; clean up OLED
-	call	PLED_MultiGF_deco_mask
+	bcf		last_ceiling_gf_shown		; Clear flag
 
 	movff	char_O_deco_status,deco_status		; 
 	tstfsz	deco_status							; deco_status=0 if decompression calculation done
 	return										; calculation not yet finished!
 
-	call	PLED_MultiGF_deco_all		; Display the new screen
+	call	PLED_decoplan_gf_page1			; Display the new screen
 	return
 	
 divemenu_see_decoplan1:	
-	call	PLED_clear_divemode_menu	; Clear Menu
 
 	movff	char_O_deco_status,deco_status		; 
 	tstfsz	deco_status							; deco_status=0 if decompression calculation done
@@ -432,8 +429,22 @@ divemenu_see_decoplan1:
 	return
 
 divemenu_see_decoplan2:
+	btfsc	multi_gf_display			; Next Page in Multi-GF Screen?
+	bra		divemenu_see_decoplan2_nextgf	; Yes!
+; No, remove outputs!
+divemenu_see_decoplan2_0:
 	bcf		display_see_deco			; clear flag
 	bra		timeout_divemenu2			; quit menu!
+
+divemenu_see_decoplan2_nextgf:
+	incf	temp8,F
+	btfsc	last_ceiling_gf_shown		; last ceiling shown?
+	bra		divemenu_see_decoplan2_0	; All done, clear and return
+
+	clrf	timeout_counter3			; Clear timeout Divemode menu
+	bra		timeout_divemenu3			; Display next page
+
+	
 
 divemenu_set_xgas2:
 	dcfsnz	menupos,F
@@ -709,9 +720,6 @@ timeout_divemenu2:					; quit divemode menu
 
 ; Restore some outputs
 	bcf		multi_gf_display			; Do not display the multi-gf table screen
-	call	PLED_ClearScreen			; Yes, clean up OLED first
-	call	PLED_temp_divemode			; Displays temperature
-	call	PLED_max_pressure			; Max. Depth
 	btfsc	dekostop_active
 	call	PLED_display_deko_mask		; clear nostop time, display decodata
 	btfss	dekostop_active
@@ -738,13 +746,10 @@ timeout_divemenu2a:
 	return
 	
 timeout_divemenu3:
-;	call	PLED_MultiGF_deco_mask
-
-	movff	char_O_deco_status,deco_status		; 
-	tstfsz	deco_status							; deco_status=0 if decompression calculation done
+	movff	char_O_deco_status,deco_status	; 
+	tstfsz	deco_status						; deco_status=0 if decompression calculation done
 	bra		timeout_divemenu1				; No, skip updating the decoplan
-
-	call	PLED_MultiGF_deco_all		; Display the new screen
+	call	PLED_decoplan_gf_page_current	; Re-Draw Current page of GF Decoplan
 	bra		timeout_divemenu1			; Check timeout
 	
 timeout_divemenu6:

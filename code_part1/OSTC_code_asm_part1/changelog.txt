@@ -3,6 +3,7 @@ BETA Version - Do NOT use for diving!
 BUGFIX: Custom text can be 23chars again
 BUGFIX: Simulator descends to exact depth
 NEW: Added CF39: =1 shows clock in divemode (OSTC Mk.2 only)
+BUGFIX: Surface Interval not afffected from Simulator
 
 
 New in 1.70 Stable:

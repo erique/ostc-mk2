@@ -70,7 +70,7 @@ output99:
 	movlw	d'99'
 	cpfslt	lo
 	movwf	lo							; Limit to 99
-	movff	lo, lo_temp		
+	movff	lo,lo_temp		
 	clrf	hi_temp
 	bcf		pre_zero_flag	; do not display leading zeros
 
@@ -88,6 +88,9 @@ LCD_val99_2:
 	RETURN
 
 output99x:
+	movlw	d'99'
+	cpfslt	lo
+	movwf	lo							; Limit to 99
 	movff	lo, lo_temp		
 	clrf	hi_temp
 	bsf		pre_zero_flag		; display leading zeros

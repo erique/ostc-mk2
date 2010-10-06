@@ -2386,6 +2386,7 @@ PLED_divemode_simulator_mask:
 PLED_decoplan_bargraph:
 	GETCUSTOM8	d'35'				; Standard output color
 	movff	WREG,box_temp+0			; Data
+	movff	hi,win_top
 	incf	win_top,F				; +1
 	movff	win_top,box_temp+1		; row top (0-239)
 	movff	win_top,box_temp+2		; 
@@ -2420,7 +2421,7 @@ PLED_decoplan_delete:			; Delete unused rows
 	movlw	.0
 	movff	WREG,box_temp+0	; data 00, x0, 0y, xy clear, links, rechts, beide
 	movff	hi,box_temp+1	; row top (0-239)
-	movlw	.183
+	movlw	.238
 	movff	WREG,box_temp+2	; row bottom (0-239)
 	movlw	.100
 	movff	WREG,box_temp+3	; column left (0-159)
@@ -2433,19 +2434,19 @@ PLED_decoplan_delete:			; Delete unused rows
 PLED_decoplan_gf_page_current:
 	movlw	d'0'
 	cpfseq	temp8
-	bra		PLED_decoplan_gf_page_current0		; 
-	bra		PLED_decoplan_gf_page1				; =0, Display Page 1
-PLED_decoplan_gf_page_current0:
-	movlw	d'1'
-	cpfseq	temp8
-	bra		PLED_decoplan_gf_page_current1
 	bra		PLED_decoplan_gf_page2				; =1: Dispplay Page 2
-PLED_decoplan_gf_page_current1:
-	movlw	d'2'
-	cpfseq	temp8
-	bra		PLED_decoplan_gf_page4				; >2: Display Page 4
-	bra		PLED_decoplan_gf_page3				; =1: Dispplay Page 3
-
+	bra		PLED_decoplan_gf_page1				; =0, Display Page 1
+;PLED_decoplan_gf_page_current0:
+;	movlw	d'1'
+;	cpfseq	temp8
+;	bra		PLED_decoplan_gf_page_current1
+;	bra		PLED_decoplan_gf_page2				; =1: Dispplay Page 2
+;PLED_decoplan_gf_page_current1:
+;	movlw	d'2'
+;	cpfseq	temp8
+;	bra		PLED_decoplan_gf_page4				; >2: Display Page 4
+;	bra		PLED_decoplan_gf_page3				; =1: Dispplay Page 3
+;
 PLED_decoplan_gf_page1:
 	ostc_debug	'n'		; Sends debug-information to screen if debugmode active
 
@@ -2456,54 +2457,54 @@ PLED_decoplan_gf_page1:
 	DISPLAYTEXT	d'239'						;"No Deco"
 	return
 
-PLED_decoplan_gf_page4:
-	; temp7 holds last displayed depth
-	; temp5 list entry
-	movlw	.231
-	movwf	temp6			; row
-	movff	temp5,temp9		; save
-	movff	temp7,temp10	; save
-PLED_decoplan_gf_page4y:
-	movlw	d'3'
-	addwf	temp7,F			; Add 3m for next stop
-	movlw	d'25'
-	addwf	temp6,F
-	incf	temp5,F
-	call	PLED_decoplan_show_stop_gf
-	movlw	d'23'			; Stops 18-23
-	cpfseq	temp5
-	bra		PLED_decoplan_gf_page4y
-	movff	temp9,temp5		; restore
-	movff	temp10,temp7		; restore
-	bsf		last_ceiling_gf_shown		; Set flag
-	return
-
-PLED_decoplan_gf_page3:
-	; temp7 holds last displayed depth
-	; temp5 list entry
-	movff	temp5,temp9		; save
-	movff	temp7,temp10	; save
-	movlw	.231
-	movwf	temp6			; row
-PLED_decoplan_gf_page3y:
-	movlw	d'3'
-	addwf	temp7,F			; Add 3m for next stop
-	movlw	d'25'
-	addwf	temp6,F
-	incf	temp5,F
-	call	PLED_decoplan_show_stop_gf
-	movlw	d'17'			; Stops 12-17
-	cpfseq	temp5
-	bra		PLED_decoplan_gf_page3y
-	movff	temp9,temp5		; restore
-	movff	temp10,temp7		; restore
-	return
+;PLED_decoplan_gf_page4:
+;	; temp7 holds last displayed depth
+;	; temp5 list entry
+;	movlw	.231
+;	movwf	temp6			; row
+;	movff	temp5,temp9		; save
+;	movff	temp7,temp10	; save
+;PLED_decoplan_gf_page4y:
+;	movlw	d'3'
+;	addwf	temp7,F			; Add 3m for next stop
+;	movlw	d'25'
+;	addwf	temp6,F
+;	incf	temp5,F
+;	call	PLED_decoplan_show_stop_gf
+;	movlw	d'23'			; Stops 18-23
+;	cpfseq	temp5
+;	bra		PLED_decoplan_gf_page4y
+;	movff	temp9,temp5		; restore
+;	movff	temp10,temp7		; restore
+;	bsf		last_ceiling_gf_shown		; Set flag
+;	return
+;
+;PLED_decoplan_gf_page3:
+;	; temp7 holds last displayed depth
+;	; temp5 list entry
+;	movff	temp5,temp9		; save
+;	movff	temp7,temp10	; save
+;	movlw	.231
+;	movwf	temp6			; row
+;PLED_decoplan_gf_page3y:
+;	movlw	d'3'
+;	addwf	temp7,F			; Add 3m for next stop
+;	movlw	d'25'
+;	addwf	temp6,F
+;	incf	temp5,F
+;	call	PLED_decoplan_show_stop_gf
+;	movlw	d'17'			; Stops 12-17
+;	cpfseq	temp5
+;	bra		PLED_decoplan_gf_page3y
+;	movff	temp9,temp5		; restore
+;	movff	temp10,temp7		; restore
+;	return
 
 PLED_decoplan_gf_page2:
 	; temp7 holds last displayed depth
 	; temp5 list entry
-	movff	temp5,temp9		; save
-	movff	temp7,temp10	; save
+;	movff	temp5,temp9		; save
+;	movff	temp7,temp10	; save
 	movlw	.231
 	movwf	temp6			; row
 PLED_decoplan_gf_page2y:
@@ -2513,11 +2514,12 @@ PLED_decoplan_gf_page2y:
 	addwf	temp6,F
 	incf	temp5,F
 	call	PLED_decoplan_show_stop_gf
-	movlw	d'11'			; Stops 6-11
+	movlw	d'15'			; the next 8 Stops...
 	cpfseq	temp5
 	bra		PLED_decoplan_gf_page2y
-	movff	temp9,temp5		; restore
-	movff	temp10,temp7		; restore
+;	movff	temp9,temp5		; restore
+;	movff	temp10,temp7		; restore
+	bsf		last_ceiling_gf_shown		; Set flag
 	return
 
 PLED_decoplan_gf_page1x:
@@ -2534,10 +2536,14 @@ PLED_decoplan_gf_page1x:
 	incf	temp5,F
 	call	PLED_decoplan_show_stop_gf
 	GETCUSTOM8	d'29'			; Last Deco in m
+movlb .1
 	movwf	temp7				; Last deco
-	movlw	d'3'
-	cpfsgt	temp3				; >3m?
+	movlw	d'4'
+	cpfslt	temp7				; >=3m?
+;	cpfslt	temp7				; >=3m?
 	bra		PLED_decoplan_gf_page1x_next_6m
+
+	movlw	d'3'
 	movwf	temp7
 	bra		PLED_decoplan_gf_page1y
 
@@ -2551,7 +2557,7 @@ PLED_decoplan_gf_page1y:
 	addwf	temp6,F
 	incf	temp5,F
 	call	PLED_decoplan_show_stop_gf
-	movlw	d'5'			; 6 Stops...
+	movlw	d'7'			; the next 7 Stops...
 	cpfseq	temp5
 	bra		PLED_decoplan_gf_page1y
 	return

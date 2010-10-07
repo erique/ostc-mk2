@@ -704,10 +704,10 @@ timeout_divemenu:
 	bra		timeout_divemenu3		; Yes...
 
 	movff	char_O_deco_status,deco_status		; 
-	tstfsz	deco_status							; deco_status=0 if decompression calculation done
-	bra		timeout_divemenu1				; No, skip updating the decoplan
+	tstfsz	deco_status				; deco_status=0 if decompression calculation done
+	bra		timeout_divemenu1		; No, skip updating the decoplan
 	
-	call	PLED_decoplan				; update the Decoplan
+	call	PLED_decoplan			; update the Decoplan
 	
 timeout_divemenu1:	
 	incf	timeout_counter3,F		; increase timeout_counter3
@@ -715,21 +715,21 @@ timeout_divemenu1:
 	cpfsgt	timeout_counter3		; ... longer then timeout_divemenu
 	return							; No!
 timeout_divemenu2:					; quit divemode menu
-	btfss	multi_gf_display			; Was the Multi-GF Table displayed?
-	bra		timeout_divemenu2a			; No, normal OLED rebuild
+	btfss	multi_gf_display		; Was the Multi-GF Table displayed?
+	bra		timeout_divemenu2a		; No, normal OLED rebuild
 
 ; Restore some outputs
-	bcf		multi_gf_display			; Do not display the multi-gf table screen
+	clrf	temp8					; Page 0-1 of deco list
 	btfsc	dekostop_active
-	call	PLED_display_deko_mask		; clear nostop time, display decodata
+	call	PLED_display_deko_mask	; clear nostop time, display decodata
 	btfss	dekostop_active
-	call	PLED_display_ndl_mask		;  Clear deco data, display nostop time
+	call	PLED_display_ndl_mask	;  Clear deco data, display nostop time
 
 timeout_divemenu2a:
-	bcf		multi_gf_display			; Do not display the multi-gf table screen
+	bcf		multi_gf_display		; Do not display the multi-gf table screen
 	bcf		menubit
 	bcf		premenu					; Yes, clear flags and menu, display dive time and mask again
-	call	PLED_active_gas_divemode	; Display gas, if required
+	call	PLED_active_gas_divemode; Display gas, if required
 	call	PLED_clear_divemode_menu; Clear dive mode menu
 	call	PLED_divemode_mask		; Display mask
 	call	PLED_divemins			; Display (new) divetime!

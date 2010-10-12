@@ -2508,6 +2508,7 @@ PLED_decoplan_gf_page1y:
 	bra		PLED_decoplan_gf_page1y
 	return
 
+
 PLED_decoplan_show_stop_gf:
 	bsf		leftbind
 	WIN_LEFT	.100

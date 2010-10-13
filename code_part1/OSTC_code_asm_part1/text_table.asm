@@ -50,7 +50,7 @@
 	DB	.14,.24					; t80, t81
 ; end of licence
 
-	DB	.10,.6,.8,.8,.10,.6		; t82, t83, t84, t85, t86, t87
+	DB	.10,.6,.8,.4,.10,.6		; t82, t83, t84, t85, t86, t87
 	DB	.12,.10,.8,.8,.8,.8		; t88, t89, t90, t91, t92, t93
 	DB	.6,.6,.4,.10,.12,.18	; t94, t95, t96, t97, t98, t99
 	DB	.10,.10,.10,.6,.10,.14	;t100,t101,t102,t103,t104,t105
@@ -190,7 +190,7 @@
 	DB	.102,.150	;82 Decostop
 	DB	.0,.0		;83
 	DB	.108,.216	;84	No Stop
-	DB	.108,.216	;85 Decosum
+	DB	.135,.216	;85 TTS
 	DB	.100,.0		;86 Divetime
 	DB	.0,.0		;87 Depth
 	DB	.0,.0		;88
@@ -501,7 +501,7 @@
 	DA	"Decostop}}"			;82		l=10
 	DA	"m/min}"				;83		l=6
 	DA	"No Stop}"				;84		l=8
-	DA	"Decosum}"				;85		l=8
+	DA	"TTS}"					;85		l=4
 	DA	"Divetime}}"			;86		l=10
 	DA	"Depth}"				;87		l=6
 	DA	"First Gas?}}"			;88		l=12

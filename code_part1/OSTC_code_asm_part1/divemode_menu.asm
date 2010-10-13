@@ -407,14 +407,14 @@ divemenu_see_decoplan:
 	read_int_eeprom	d'34'
 	movlw	d'3'
 	cpfsgt	EEDATA						; in multi-gf mode? Z16 GF OC=4 and Z16 GF CC=5
-	bra		divemenu_see_decoplan1		; No!
+	bra		divemenu_see_decoplan1		; No, standard ZH-L16
 
 	bsf		multi_gf_display			; Yes, display the multi-gf table screen
 	bcf		last_ceiling_gf_shown		; Clear flag
 
-	movff	char_O_deco_status,deco_status		; 
-	tstfsz	deco_status							; deco_status=0 if decompression calculation done
-	return										; calculation not yet finished!
+;	movff	char_O_deco_status,deco_status		; 
+;	tstfsz	deco_status							; deco_status=0 if decompression calculation done
+;	return										; calculation not yet finished!
 
 	call	PLED_decoplan_gf_page1			; Display the new screen
 	return
@@ -442,7 +442,7 @@ divemenu_see_decoplan2_nextgf:
 	bra		divemenu_see_decoplan2_0	; All done, clear and return
 
 	clrf	timeout_counter3			; Clear timeout Divemode menu
-	bra		timeout_divemenu3			; Display next page
+	bra		timeout_divemenu3x			; Display next page
 
 	
 
@@ -733,6 +733,7 @@ timeout_divemenu2a:
 	call	PLED_clear_divemode_menu; Clear dive mode menu
 	call	PLED_divemode_mask		; Display mask
 	call	PLED_divemins			; Display (new) divetime!
+	call	PLED_temp_divemode		; redraw temperature
 	clrf	timeout_counter3		; Also clear timeout
 	bcf		display_see_deco		; clear all display flags
 	bcf		display_see_l_tissue
@@ -749,6 +750,7 @@ timeout_divemenu3:
 	movff	char_O_deco_status,deco_status	; 
 	tstfsz	deco_status						; deco_status=0 if decompression calculation done
 	bra		timeout_divemenu1				; No, skip updating the decoplan
+timeout_divemenu3x:
 	call	PLED_decoplan_gf_page_current	; Re-Draw Current page of GF Decoplan
 	bra		timeout_divemenu1			; Check timeout
 	

@@ -158,17 +158,17 @@ simulator_show_decoplan:
 	call	PLED_simdata_screen
 	call	divemenu_see_decoplan
 
-call	enable_rs232
-	lfsr	FSR0,0x250
-	movlw	0x20
-	movwf	wait_temp
-xy:						; Clear Deco list
-	movff	POSTINC0,TXREG
-	call	rs232_wait_tx
-	decfsz	wait_temp,F
-	bra		xy
-	movff	char_O_array_decodepth+0,TXREG
-
+;call	enable_rs232
+;	lfsr	FSR0,0x250
+;	movlw	0x20
+;	movwf	wait_temp
+;xy:						; Clear Deco list
+;	movff	POSTINC0,TXREG
+;	call	rs232_wait_tx
+;	decfsz	wait_temp,F
+;	bra		xy
+;	movff	char_O_array_decodepth+0,TXREG
+;
 		
 	
 	WIN_INVERT	.1	; Init new Wordprocessor	

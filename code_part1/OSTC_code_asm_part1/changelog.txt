@@ -4,6 +4,8 @@ BUGFIX: Custom text can be 23chars again
 BUGFIX: Simulator descends to exact depth
 NEW: Added CF39: =1 shows clock in divemode (OSTC Mk.2 only)
 BUGFIX: Surface Interval not afffected from Simulator
+CHANGE: "Decosum" changed to "TTS" (Time to Surface)
+NEW: Up to 16 Deco Stops are displayed in Divemode and Simulator (GF Modes only)
 
 
 New in 1.70 Stable:

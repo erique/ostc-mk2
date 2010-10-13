@@ -97,6 +97,7 @@
 	ENDC
 ; the following is used by the C-code up to 0x0E0!!
 	CBLOCK	0x0E0				;Bank 0
+	gf_decolist_copy:.32
 	ENDC
 
 	CBLOCK	0x100				;Bank 1

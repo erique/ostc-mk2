@@ -156,6 +156,7 @@ simulator_startdive:
 simulator_show_decoplan:
 	call	PLED_ClearScreen
 	call	PLED_simdata_screen
+	call	divemode_copy_decolist				;copy gf_decolist (0x250:.32) to gf_decolist_copy (0x0E0:.32)
 	call	divemenu_see_decoplan
 
 ;call	enable_rs232
@@ -280,6 +281,7 @@ simulator_calc_deco_loop1:
 	movff	WREG,char_O_deco_status			; Reset Deco module
 
 simulator_calc_deco_loop2:
+	
 	call	PLED_simulator_data
 
 	btg		LED_red

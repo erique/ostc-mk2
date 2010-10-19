@@ -581,7 +581,7 @@
 	DA	"Color# Warnings}"		;159
 	DA	"Show secs. [=1]}"		;160
 	DA	"Dive clock [=1]}"		;161
-	DA	"not used       }"		;162
+	DA	"WarnCeiling[=1]}"		;162
 	DA	"Avr. Depth [=1]}"		;163
 	DA	"Blink Gas  [=1]}"		;164
 	DA	"DepthWarn[mBar]}"		;165

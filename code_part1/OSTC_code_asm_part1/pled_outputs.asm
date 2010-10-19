@@ -90,6 +90,34 @@ PLED_color_code1:				; Color-codes the output, if required
 	bra		PLED_color_code_ppo2		; CF46 [cBar]
 	dcfsnz	debug_temp,F
 	bra		PLED_color_code_velocity	; CF47 [m/min]
+	dcfsnz	debug_temp,F
+	bra		PLED_color_code_ceiling		; Show warning if CF41=1 and current depth>shown ceiling
+
+PLED_color_code_ceiling:
+	GETCUSTOM8	d'40'			; =1: Warn at all?
+	movwf	lo					
+	movlw	d'1'
+	cpfseq	lo					; =1?
+	bra		PLED_color_code_ceiling1	; No, Set to default color
+
+	movff	char_O_array_decodepth+0,lo	; Ceiling in m
+	decf	lo,F	; -1
+	movff	rel_pressure+1,xA+1
+	movff	rel_pressure+0,xA+0
+	movlw	LOW		d'100'
+	movwf	xB+0
+	clrf	xB+1						; Devide/100 -> xC+0 = Depth in m
+	call	div16x16					; xA/xB=xC with xA as remainder 	
+	movf	xC+0,W						; Depth in m
+	subwf	lo,W
+	btfsc	STATUS,C
+	bra		PLED_color_code_ceiling2	; Set to warning color
+PLED_color_code_ceiling1:
+	call	PLED_standard_color
+	return
+PLED_color_code_ceiling2:
+	call	PLED_warnings_color
+	return
 
 PLED_color_code_depth:
 	movff	hi,hi_temp
@@ -401,7 +429,7 @@ PLED_display_deko:
 	WIN_LEFT	.94
 	WIN_FONT 	FT_MEDIUM
 	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
+	PLED_color_code		warn_ceiling	; Color-code Output
 	lfsr	FSR2,letter
 	movff	char_O_array_decodepth+0,lo		; Ceiling in m
 	output_99

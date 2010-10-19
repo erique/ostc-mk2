@@ -258,7 +258,7 @@ reset_all_cf:
 
 #DEFINE	show_seconds_divemode		d'0'		; 1Bit 		=1 Show the seconds in Divemode
 #DEFINE	show_clock_divemode			d'0'		; 1Bit		=1 Show the clock in Divemode
-#DEFINE	not_used_cf40_binary		d'0'		; 1Bit		=1 Use alternative outputs for ppO2 sensor
+#DEFINE	warn_ceiling_divemode		d'1'		; 1Bit		=1 Warn ceiling violation in divemode
 #DEFINE	start_with_stopwatch		d'0'		; 1Bit		=1 start with stopwatch
 #DEFINE	blink_gas_divemode 			d'0'		; 1Bit		=1 Show (resetable) average Depth instead of temperature
 
@@ -408,7 +408,7 @@ reset_all_cf_bank1:
 	movlw	show_clock_divemode
 	rcall	reset_customfunction	; saves default and current value
 
-	movlw	not_used_cf40_binary	
+	movlw	warn_ceiling_divemode	
 	rcall	reset_customfunction	; saves default and current value
 
 	movlw	start_with_stopwatch

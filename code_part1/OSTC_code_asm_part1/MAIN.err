@@ -1,4 +1,4 @@
-Warning[203] C:\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\PLED_OUTPUTS.ASM 2534 : Found opcode in column 1. (incf)
+Warning[203] C:\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\PLED_OUTPUTS.ASM 2562 : Found opcode in column 1. (incf)
 Message[301] C:\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\MAIN.ASM 117 : MESSAGE: (OSTC - diving computer code,  Copyright (C) 2010 HeinrichsWeikamp GbR)
 Message[301] C:\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\MAIN.ASM 118 : MESSAGE: (This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the)
 Message[301] C:\MK2\CODE_PART1\OSTC_CODE_ASM_PART1\MAIN.ASM 119 : MESSAGE: (Free Software Foundation, either version 3 of the License, or (at your option) any later version.)

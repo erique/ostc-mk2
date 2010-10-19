@@ -60,6 +60,7 @@
 #DEFINE	warn_gf			d'3'
 #DEFINE	warn_ppo2		d'4'
 #DEFINE warn_velocity	d'5'
+#DEFINE warn_ceiling	d'6'
 
 ;Configuration bits
 	CONFIG	OSC = IRCIO67        ;Internal oscillator block, port function on RA6 and RA7

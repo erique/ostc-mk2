@@ -6,7 +6,7 @@ NEW: Added CF39: =1 shows clock in divemode (OSTC Mk.2 only)
 BUGFIX: Surface Interval not afffected from Simulator
 CHANGE: "Decosum" changed to "TTS" (Time to Surface)
 NEW: Up to 16 Deco Stops are displayed in Divemode and Simulator (GF Modes only)
-
+NEW: CF40 added (=1: Ceiling violation displayed in Color# Warnings (OSTC Mk.2 Only))
 
 New in 1.70 Stable:
 Stable release

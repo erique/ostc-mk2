@@ -134,7 +134,6 @@ surfloop_loop1:
 	call	timeout_premenu				; timeout premenu
 	call	set_leds_surfmode			; Sets Warning and No-Fly LEDs
 	call	custom_functions_check_surfmode	; Checks CF functions and displays warning symbol if something critical is wrong
-;	call	PLED_active_gas_surfmode	; Show start gas / SetPoint
 	call	PLED_display_decotype_surface	; Show deco mode
 	btfsc	enter_error_sleep			; Enter Fatal Error Routine?
 	call	fatal_error_sleep			; Yes (In Sleepmode_vxx.asm!)

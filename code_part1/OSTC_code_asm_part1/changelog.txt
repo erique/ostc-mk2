@@ -1,3 +1,7 @@
+New in 1.72 Beta:
+BETA Version - Do NOT use for diving!
+BUGFIX: TTS display while decoplan is displayed
+
 New in 1.71 Beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: Custom text can be 23chars again

@@ -2445,12 +2445,18 @@ PLED_decoplan_bargraph:
 	call	PLED_box
 	return
 
+PLED_decoplan_delete_gf:		; Delete unused rows
+	movlw	.238
+	movff	WREG,box_temp+2	; row bottom (0-239)
+	bra		PLED_decoplan_delete_common
+
 PLED_decoplan_delete:			; Delete unused rows
+	movlw	.184
+	movff	WREG,box_temp+2	; row bottom (0-239)
+PLED_decoplan_delete_common:
 	movlw	.0
 	movff	WREG,box_temp+0	; data 00, x0, 0y, xy clear, links, rechts, beide
 	movff	hi,box_temp+1	; row top (0-239)
-	movlw	.238
-	movff	WREG,box_temp+2	; row bottom (0-239)
 	movlw	.100
 	movff	WREG,box_temp+3	; column left (0-159)
 	movlw	.159	
@@ -2458,6 +2464,7 @@ PLED_decoplan_delete:			; Delete unused rows
 	call	PLED_box				
 	bsf		last_ceiling_gf_shown		; Set flag
 	return
+
 
 PLED_decoplan_gf_page_current:
 	movlw	d'0'
@@ -2545,7 +2552,7 @@ PLED_decoplan_show_stop_gf:
 
 	movff	char_O_array_decodepth+0,WREG	; Ceiling
 	cpfslt	temp7							; Ceiling already displayed?
-	goto	PLED_decoplan_delete			; Yes, quit display	and RETURN	
+	goto	PLED_decoplan_delete_gf			; Yes, quit display	and RETURN	
 	movff	temp7,lo						; Decodepth
 
 	lfsr	FSR2,letter		

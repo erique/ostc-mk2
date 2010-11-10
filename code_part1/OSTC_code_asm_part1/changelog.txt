@@ -1,6 +1,8 @@
 New in 1.72 Beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: TTS display while decoplan is displayed
+CHANGE: Stopwatch reset is blocked for one second after divemode menu exit (OSTC Mk.2 Only)
+NEW: Gas list is color-coded  in Color# Warnings if ppO2 of gas > CF18 (ppO2 High warning) (OSTC Mk.2 Only))
 
 New in 1.71 Beta:
 BETA Version - Do NOT use for diving!

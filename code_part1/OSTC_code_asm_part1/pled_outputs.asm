@@ -92,6 +92,39 @@ PLED_color_code1:				; Color-codes the output, if required
 	bra		PLED_color_code_velocity	; CF47 [m/min]
 	dcfsnz	debug_temp,F
 	bra		PLED_color_code_ceiling		; Show warning if CF41=1 and current depth>shown ceiling
+	dcfsnz	debug_temp,F
+	bra		PLED_color_code_gaslist		; Color-code current row in Gaslist (%O2 in "EEDATA")
+
+
+PLED_color_code_gaslist:				; %O2 in "EEDATA"
+	movff		amb_pressure+0,xA+0
+	movff		amb_pressure+1,xA+1
+	movlw		d'10'
+	movwf		xB+0
+	clrf		xB+1
+	call		div16x16				; xC=p_amb/10
+	movff		xC+0,xA+0
+	movff		xC+1,xA+1
+	movff		EEDATA,xB+0
+	clrf		xB+1
+	call		mult16x16				; EEDATA * p_amb/10
+
+	movff		xC+0,sub_b+0
+	movff		xC+1,sub_b+1
+	GETCUSTOM8	d'18'					; ppo2_warning_high
+	mullw		d'100'					; ppo2_warning_high*100
+	movff		PRODL,sub_a+0
+	movff		PRODH,sub_a+1
+	call		sub16					
+	btfss		neg_flag
+	bra			PLED_color_code_gaslist2; Not too high -> Standard Color!
+
+	call	PLED_warnings_color
+	return
+PLED_color_code_gaslist2:
+	call	PLED_standard_color
+	return
+
 
 PLED_color_code_ceiling:
 	GETCUSTOM8	d'40'			; =1: Warn at all?
@@ -2648,7 +2681,7 @@ PLED_gas_list:
 	movlw	d'2'
 	movwf	wait_temp			; here: stores eeprom address for gas list
 	movlw	d'231'
-	movwf	waitms_temp		; here: stores row for gas list
+	movwf	waitms_temp			; here: stores row for gas list
 	clrf	hi					; here: Gas counter
 
 PLED_gas_list_loop:
@@ -2677,8 +2710,11 @@ PLED_gas_list_loop:
 	call	read_eeprom		; get byte (stored in EEDATA)
 	movff	EEDATA,lo		; copy to lo
 	output_8				; outputs into Postinc2!
-	
-	
+
+	decf	EEADR,F			; Gas #hi: %O2 - Set address in internal EEPROM
+	call	read_eeprom		; get byte (stored in EEDATA)
+	PLED_color_code		warn_gas_in_gaslist		; Color-code output	(%O2 in "EEDATA")
+; Check if gas needs to be greyed-out (inactive)	
 	read_int_eeprom		d'27'	; read flag register
 	movff	hi,lo			; copy gas number
 PLED_gas_list_loop1:

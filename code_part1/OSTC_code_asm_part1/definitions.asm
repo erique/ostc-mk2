@@ -61,6 +61,8 @@
 #DEFINE	warn_ppo2		d'4'
 #DEFINE warn_velocity	d'5'
 #DEFINE warn_ceiling	d'6'
+#DEFINE	warn_gas_in_gaslist	d'7'
+
 
 ;Configuration bits
 	CONFIG	OSC = IRCIO67        ;Internal oscillator block, port function on RA6 and RA7
@@ -637,7 +639,7 @@
 #DEFINE	pre_dive_screen			flag15,2	;=1: Show predive screen instead of graphs
 #DEFINE	blinking_better_gas		flag15,3	;=1: Gas is currently blinking
 #DEFINE	display_see_l_tissue	flag15,4	;=1: Leading Tissue details are now displayed
-;free
+#DEFINE	lock_stopwatch_reset	flag15,5	;=1: Locks the Reset of the Stopwtach/Average depth for 1 second
 ;free
 #DEFINE	show_interval			flag15,7	;=1: Show Interval, =0: Show Clock in Surfacemode
 

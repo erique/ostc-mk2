@@ -86,13 +86,16 @@ set_marker:
 	btfsc		standalone_simulator	; Standalone Simualtor active?
 	bra			divemode_menu_simulator	; Yes, Show simulator menu!
 
-	bsf		LED_red					; LEDr on
+	bsf			LED_red				; LEDr on
 	movlw		d'6'				; Type of Alarm  (Manual Marker)
 	movwf		AlarmType			; Copy to Alarm Register
 	bsf			event_occured		; Set Event Flag
 
-	btfss	stopwatch_active			;  =1: Reset Average registers
+	btfss	stopwatch_active		;  =1: Reset Average registers
 	return
+	btfsc	lock_stopwatch_reset	; Reset locked?
+	return							; Yes, do not reset (now)...
+
 ; Maker Set, also reset average Depth....
 	clrf	average_depth_hold+0
 	clrf	average_depth_hold+1
@@ -744,6 +747,7 @@ timeout_divemenu2a:
 	bcf		display_set_simulator
 	bcf		switch_left				; and debounce switches
 	bcf		switch_right
+	bsf		lock_stopwatch_reset	; Lock the stopwatch reset for at least one second (Cleared in "calc_average_depth:")
 	return
 	
 timeout_divemenu3:

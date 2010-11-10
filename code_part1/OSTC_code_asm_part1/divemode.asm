@@ -518,7 +518,7 @@ store_dive_data:						; CF20 seconds gone
 	return								; Yes, discard everything
 
 	btfsc	header_stored				; Header already stored?
-	bra	store_dive_data2				; Yes, store only profile data
+	bra		store_dive_data2			; Yes, store only profile data
 	bsf		header_stored				; Store header
 	
 	movff	eeprom_address+0, eeprom_header_address+0	; store startposition
@@ -1480,6 +1480,7 @@ set_powersafe2:
 	return
 
 calc_average_depth:
+	bcf		lock_stopwatch_reset	; Un-Lock the stopwatch reset option
 	; 1. Add new 2xdepth to the Sum of depths registers
 	movff	rel_pressure+0,b0_lo
 	movff	rel_pressure+1,b0_hi
@@ -1533,7 +1534,7 @@ diveloop_boot:
 	clrf	average_depth_hold+1
 	clrf	average_depth_hold+2
 	clrf	average_depth_hold+3		; Clear average depth register
-	movlw	d'1'
+	movlw	d'2'
 	movwf	average_divesecs+0
 	clrf	average_divesecs+1
 
@@ -1553,6 +1554,7 @@ diveloop_boot:
 	clrf 	timeout_counter2			; Here: counts to six, then store deco data and temperature
 	clrf	AlarmType					; Clear all alarms
 	bcf		event_occured				; clear flag
+	bcf		lock_stopwatch_reset		; clear flag
 	bcf		depth_greater_100m			; clear flag
 	setf	last_diluent				; to be displayed after first calculation (range: 0 to 100 [%])
 	bcf		dekostop_active	

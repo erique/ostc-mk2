@@ -2378,19 +2378,21 @@ PLED_serial:			; Writes OSTC #Serial and Firmware version in surfacemode
 PLED_divemode_menu_mask_first:			; Write Divemode menu1 mask
 	ostc_debug	'o'		; Sends debug-information to screen if debugmode active
 	call	PLED_menu_clear			; clear "Menu?"
-	DISPLAYTEXT	.31					;"Show Deco"
 
 	btfsc	FLAG_const_ppO2_mode	; are we in ppO2 mode?
 	bra		PLED_divemode_menu_mask_first2
+
 ; in OC Mode
 	DISPLAYTEXT	.32					;"Gaslist"
-	DISPLAYTEXT	.122				; "Set Gas"
+	DISPLAYTEXT	.31					;"Decoplan"
+	DISPLAYTEXT	.122				;"Set Gas"
 	bra		PLED_divemode_menu_mask_first3
 
 PLED_divemode_menu_mask_first2:
 ; in CC Mode
-	DISPLAYTEXT	.238				; "SetPoint"
-	DISPLAYTEXT	.137				; "Bailout"
+	DISPLAYTEXT	.238				;"SetPoint"
+	DISPLAYTEXT	.31					;"Decoplan"
+	DISPLAYTEXT	.137				;"Bailout"
 
 PLED_divemode_menu_mask_first3:
 ; In all modes

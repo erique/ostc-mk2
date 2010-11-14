@@ -166,11 +166,12 @@ test_switches_divemode_menu3:
 
 	btfsc	divemode_menu_page			; Are we in the second menu page?
 	bra		test_switches_divemode_menu4; Yes, use second page items
+
 ; Options for Menu 1
 	dcfsnz	menupos,F
-	bra		divemenu_see_decoplan		; display the full decoplan
-	dcfsnz	menupos,F
 	bra		divemenu_set_gas			; Set gas sub-menu
+	dcfsnz	menupos,F
+	bra		divemenu_see_decoplan		; display the full decoplan
 	dcfsnz	menupos,F
 	bra		divemode_set_xgas			; Configure the extra gas / Select Bailout
 	dcfsnz	menupos,F

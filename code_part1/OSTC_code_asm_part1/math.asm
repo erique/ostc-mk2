@@ -67,13 +67,13 @@ invert_xC:
 sub16:
 ;  sub_c = sub_a - sub_b
 	bcf		neg_flag
-	movf   sub_b+0, w             	;  Get Value to be subtracted
-	subwf  sub_a+0, w             	;  Do the High Byte
-	movwf  sub_c+0
-	movf   sub_b+1, w               ;  Get the Value to be Subbed
-	subwfb sub_a+1, w
-	movwf  sub_c+1
-	btfss	STATUS,N
+	movf   	sub_b+0, W             	; Get Value to be subtracted
+	subwf  	sub_a+0, W             	; Do the High Byte
+	movwf  	sub_c+0
+	movf   	sub_b+1, W              ; Get the Value to be Subbed
+	subwfb 	sub_a+1, W
+	movwf  	sub_c+1
+	btfsc	STATUS,C
 	return							; result positve
 ;  sub_c = sub_a - sub_b
 	bsf		neg_flag				; result negative
@@ -81,11 +81,11 @@ sub16:
 	movff	sub_c+1,sub_b+1
 	setf	sub_a
 	setf	sub_a+1
-	movf   sub_b+0, w             	;  Get Value to be subtracted
-	subwf  sub_a+0, w             	;  Do the High Byte
-	movwf  sub_c+0
-	movf   sub_b+1, w               ;  Get the Value to be Subbed
-	subwfb  sub_a+1, w
+	movf   	sub_b+0, W             	;  Get Value to be subtracted
+	subwf  	sub_a+0, W             	;  Do the High Byte
+	movwf  	sub_c+0
+	movf   	sub_b+1, W               ;  Get the Value to be Subbed
+	subwfb  sub_a+1, W
 	movwf  	sub_c+1
     return        
 
@@ -272,7 +272,7 @@ isr_sub16:
 	movf   isr_sub_b+1, w               ;  Get the Value to be Subbed
 	subwfb isr_sub_a+1, w
 	movwf  isr_sub_c+1
-	btfss	STATUS,N
+	btfsc	STATUS,C
 	return							; result positve
 ;  sub_c = sub_a - sub_b
 	bsf		neg_flag_isr				; result negative

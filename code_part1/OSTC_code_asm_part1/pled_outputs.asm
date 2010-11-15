@@ -97,6 +97,7 @@ PLED_color_code1:				; Color-codes the output, if required
 
 
 PLED_color_code_gaslist:				; %O2 in "EEDATA"
+; Check very high ppO2 manually
 	movff		amb_pressure+0,xA+0
 	movff		amb_pressure+1,xA+1
 	movlw		d'10'
@@ -109,20 +110,23 @@ PLED_color_code_gaslist:				; %O2 in "EEDATA"
 	clrf		xB+1
 	call		mult16x16				; EEDATA * p_amb/10
 
-	movff		xC+0,sub_b+0
-	movff		xC+1,sub_b+1
-	GETCUSTOM8	d'18'					; ppo2_warning_high
-	mullw		d'100'					; ppo2_warning_high*100
-	movff		PRODL,sub_a+0
-	movff		PRODH,sub_a+1
-	call		sub16					
-	btfss		neg_flag
-	bra			PLED_color_code_gaslist2; Not too high -> Standard Color!
+	tstfsz		xC+2						; char_I_O2_ratio * p_amb/10 > 65536, ppO2>6,55Bar?
+	bra			PLED_color_code_gaslist1	; Yes, warn in warning color
 
-	call	PLED_warnings_color
+	movff		xC+0,sub_a+0
+	movff		xC+1,sub_a+1
+	GETCUSTOM8	d'46'					; color-code ppO2 warning [cBar]
+	mullw		d'100'					; ppo2_warning_high*100
+	movff		PRODL,sub_b+0
+	movff		PRODH,sub_b+1
+	call		sub16					;  sub_c = sub_a - sub_b	
+	btfss		neg_flag
+	bra			PLED_color_code_gaslist1; too high -> Warning Color!
+	call		PLED_standard_color
 	return
-PLED_color_code_gaslist2:
-	call	PLED_standard_color
+
+PLED_color_code_gaslist1:
+	call	PLED_warnings_color
 	return
 
 
@@ -201,9 +205,13 @@ PLED_color_code_gf2:
 	return
 
 PLED_color_code_ppo2:
+; Check very high ppO2 manually
+	tstfsz	xC+2					; char_I_O2_ratio * p_amb/10 > 65536, ppO2>6,55Bar?
+	bra		PLED_color_code_ppo22	; Yes, warn in warning color
+
 	movff	xC+0,sub_a+0
 	movff	xC+1,sub_a+1
-	GETCUSTOM8	d'46'			; ppO2 warn [cBar]
+	GETCUSTOM8	d'46'			; color-code ppO2 warning [cBar]
 	mullw	d'100'
 	movff	PRODL,sub_b+0
 	movff	PRODH,sub_b+1
@@ -958,7 +966,7 @@ PLED_show_ppO2:					; Show ppO2
 	WIN_TOP		.120
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
-	PLED_color_code		warn_ppo2		; Color-code output
+	PLED_color_code		warn_ppo2		; Color-code output (ppO2 stored in xC)
 
 	lfsr	FSR2,letter
 	movlw	'p'
@@ -971,16 +979,33 @@ PLED_show_ppO2:					; Show ppO2
 	movwf	POSTINC2
 	movlw	':'
 	movwf	POSTINC2
+
+; Check very high ppO2 manually
+	tstfsz		xC+2					; char_I_O2_ratio * p_amb/10 > 65536, ppO2>6,55Bar?
+	bra			PLED_show_ppO2_3		; Yes, display fixed Value!
+
 	movff	xC+0,lo
 	movff	xC+1,hi
 	bsf		ignore_digit4
 	output_16dp	d'1'
 	bcf		ignore_digit4
+PLED_show_ppO2_2:
 	movlw	' '
 	movwf	POSTINC2
 	call	word_processor
 	call	PLED_standard_color
 	return
+
+PLED_show_ppO2_3:
+	movlw	'>'
+	movwf	POSTINC2
+	movlw	'6'
+	movwf	POSTINC2
+	movlw	'.'
+	movwf	POSTINC2
+	movlw	'6'
+	movwf	POSTINC2
+	bra		PLED_show_ppO2_2
 
 PLED_show_ppO2_clear:					; Clear ppO2
 	movlw	d'10'

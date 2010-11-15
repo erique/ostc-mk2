@@ -816,6 +816,10 @@ check_ppO2_bail:						; In CC mode but bailout active!
 	clrf		xB+1
 	call		mult16x16				; char_I_O2_ratio * p_amb/10
 
+; Check very high ppO2 manually
+	tstfsz		xC+2					; char_I_O2_ratio * p_amb/10 > 65536, ppO2>6,55Bar?
+	bra			check_ppO2_bail2		; Yes, display Value!
+
 ; Check if ppO2 should be displayed
 	movff		xC+0,sub_b+0
 	movff		xC+1,sub_b+1
@@ -840,6 +844,8 @@ check_ppO2_bail:						; In CC mode but bailout active!
 	btfss		neg_flag
 	bra			check_ppO2_0		; Not too high
 
+check_ppO2_bail2:
+	bsf			ppO2_show_value		; set flag if required
 	bsf			ppO2_warn_value		; set flag 
 	movlw		d'5'				; Type of Alarm
 	movwf		AlarmType			; Copy to Alarm Register

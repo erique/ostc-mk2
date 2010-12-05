@@ -1,3 +1,9 @@
+New in 1.73 Beta:
+BETA Version - Do NOT use for diving!
+BUGFIX: Surface Interval not reset in repetitive dives
+CHANGE: "Max Depth" renamed to "Max."
+CHANGE: Max Depth>100m is now displayd in full meters only
+
 New in 1.72 Beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: TTS display while decoplan is displayed

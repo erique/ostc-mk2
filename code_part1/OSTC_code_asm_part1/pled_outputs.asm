@@ -385,7 +385,7 @@ PLED_resetdebugger_loop:
 
 PLED_divemode_mask:					; Displays mask in Dive-Mode
 	call		PLED_divemask_color	; Set Color for Divemode mask
-	DISPLAYTEXTH	.267		; Max Depth
+	DISPLAYTEXTH	.267		; Max.
 	DISPLAYTEXT		.86			; Divetime
 	DISPLAYTEXT		.87			; Depth
 	call	PLED_standard_color
@@ -938,7 +938,7 @@ PLED_temp_divemode:
 	movff	temperature+1,last_temperature+1
 
 	WIN_TOP		.216
-	WIN_LEFT	.65
+	WIN_LEFT	.50
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
@@ -1017,7 +1017,7 @@ PLED_show_ppO2_clear:					; Clear ppO2
 
 PLED_active_gas_clear:					; clears active gas!
 	WIN_TOP		.192
-	WIN_LEFT	.65
+	WIN_LEFT	.50
 	movlw	d'5'
 	movwf	temp1
 	bra		PLED_display_clear_common_y1; also returns!
@@ -1054,7 +1054,7 @@ PLED_active_gas_divemode_show:
 	ostc_debug	's'		; Sends debug-information to screen if debugmode active
 ; gas
 	WIN_TOP		.192
-	WIN_LEFT	.65
+	WIN_LEFT	.50
 	WIN_FONT 	FT_SMALL
 	call	PLED_standard_color
 
@@ -2130,21 +2130,22 @@ PLED_menu_clear:
 	return
 
 PLED_max_pressure:
-	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
-	return								; Yes, No update and return!
-
 	ostc_debug	'p'		; Sends debug-information to screen if debugmode active
+	movff	max_pressure+0,lo
+	movff	max_pressure+1,hi
+	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
 
+	movlw	.039
+	cpfslt	hi
+		bra		maxdepth_greater_99_84mtr
+
+; Display normal "xx.y"
+	lfsr	FSR2,letter
+	call	PLED_standard_color
 	WIN_TOP		.184
 	WIN_LEFT	.0
 	WIN_FONT 	FT_MEDIUM
 	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
-
-	lfsr	FSR2,letter
-	movff	max_pressure+0,lo
-	movff	max_pressure+1,hi
-	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
 	bsf		leftbind
 	bsf		ignore_digit5		; do not display 1cm depth
 	output_16dp	d'3'
@@ -2152,6 +2153,43 @@ PLED_max_pressure:
 	bcf		show_last3
 	call	word_processor
 	WIN_FONT 	FT_SMALL
+	return
+
+maxdepth_greater_99_84mtr:			; Display only in full meters
+	btfss	maxdepth_greater_100m	; Is max.depth>100m already?
+	call	PLED_clear_maxdepth		; No, clear maxdepth area and set flag
+	; max Depth is already in hi:lo
+	; Show max depth in Full meters
+	; That means ignore figure 4 and 5
+	lfsr	FSR2,letter
+	call	PLED_standard_color
+	WIN_TOP		.184
+	WIN_LEFT	.0
+	WIN_FONT 	FT_MEDIUM
+	WIN_INVERT	.0					; Init new Wordprocessor
+
+	bsf		ignore_digit4
+	bsf		leftbind
+	output_16
+	bcf		leftbind
+	call	word_processor
+	bcf		ignore_digit4
+	WIN_FONT 	FT_SMALL
+	return
+
+PLED_clear_maxdepth:
+	movlw	.0
+	movff	WREG,box_temp+0		; Data
+	movlw	.184
+	movff	WREG,box_temp+1		; row top (0-239)
+	movlw	.215
+	movff	WREG,box_temp+2		; row bottom (0-239)
+	movlw	.0
+	movff	WREG,box_temp+3		; column left (0-159)
+	movlw	.41
+	movff	WREG,box_temp+4		; column right (0-159)
+	call	PLED_box
+	bsf		maxdepth_greater_100m	; Set Flag
 	return
 
 PLED_divemins:
@@ -3211,7 +3249,7 @@ PLED_const_ppO2_value:
 	ostc_debug	'j'		; Sends debug-information to screen if debugmode active
 	
 	WIN_TOP		.168
-	WIN_LEFT 	.65
+	WIN_LEFT 	.50
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 

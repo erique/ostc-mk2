@@ -23,7 +23,7 @@
 ;#DEFINE		NO_SENSOR_MODE			; uses Dummy values
 
 #DEFINE	softwareversion_x		d'1'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'72'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'73'		; Software version  XX.YY
 
 #DEFINE	max_custom_number		d'48'		; Number of last used custom function
 
@@ -640,6 +640,6 @@
 #DEFINE	blinking_better_gas		flag15,3	;=1: Gas is currently blinking
 #DEFINE	display_see_l_tissue	flag15,4	;=1: Leading Tissue details are now displayed
 #DEFINE	lock_stopwatch_reset	flag15,5	;=1: Locks the Reset of the Stopwtach/Average depth for 1 second
-;free
+#DEFINE	maxdepth_greater_100m	flag15,6	;=1: Max Depth>100m
 #DEFINE	show_interval			flag15,7	;=1: Show Interval, =0: Show Clock in Surfacemode
 

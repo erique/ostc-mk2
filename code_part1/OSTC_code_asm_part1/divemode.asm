@@ -1054,7 +1054,10 @@ end_dive:
 	btfsc	simulatormode_active		; Are we in simulator mode?
 	goto	end_dive_common				; Yes, discard everything
 
-	; Dive finished (and longer then one minute or Apnoe timeout occured)
+	; Dive finished (and longer then one minute or Apnoe timeout occured and no simulated dive)
+;new 1.73beta:
+	clrf	surface_interval+0
+	clrf	surface_interval+1		; Clear surface interval timer
 
 	btfsc	FLAG_apnoe_mode			; Calc max. depth (again) for very short apnoe dives
 	rcall	apnoe_calc_maxdepth
@@ -1312,11 +1315,6 @@ end_dive_common:
 	call	deco_main_gradient_array
 	movlb	b'00000001'					; select ram bank 1
 
-	btfss	restore_deco_data			; Restore decodata?
-	goto	surfloop					; and return to surfaceloop
-;new 1.71beta:
-	clrf	surface_interval+0
-	clrf	surface_interval+1		; Clear surface interval timer
 	goto	surfloop					; and return to surfaceloop
 
 timeout_divemode:

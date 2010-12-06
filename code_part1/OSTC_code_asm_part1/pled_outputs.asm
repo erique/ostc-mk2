@@ -1965,18 +1965,6 @@ update_batt_voltage2a:
 	movff	WREG,box_temp+4		; column right (0-159)
 	call	PLED_box			; Full Cap
 
-;	GETCUSTOM8	d'35'			; Standard output color
-;	movff	WREG,box_temp+0		; Data
-;	movlw	.181
-;	movff	WREG,box_temp+1		; row top (0-239)
-;	movlw	.187
-;	movff	WREG,box_temp+2		; row bottom (0-239)
-;	movlw	.31
-;	movff	WREG,box_temp+3		; column left (0-159)
-;	movlw	.33
-;	movff	WREG,box_temp+4		; column right (0-159)
-;	call	PLED_frame			; Empty cap
-;
 update_batt_voltage3:
 	GETCUSTOM8	d'34'			; Color battery
 	movff	WREG,box_temp+0		; Color Data
@@ -1988,6 +1976,14 @@ update_batt_voltage3:
 	movff	WREG,box_temp+3		; column left (0-159)
 	movff	wait_temp,box_temp+4		; column right (0-159)
 	call	PLED_box
+
+    ; Then clear use EMPTY part of the battery
+    clrf    box_temp+0          ; Black background
+    movff   wait_temp,box_temp+3; Last filled column
+    incf    box_temp+3, BANKED  ; +1 -> first cleared one.
+    movlw   .31                 ; end of battery
+    movwf   box_temp+4
+    call    PLED_box
 
 	call		PLED_standard_color
 	return

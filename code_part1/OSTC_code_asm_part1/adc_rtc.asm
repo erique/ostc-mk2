@@ -23,12 +23,19 @@
 ; ToDo: 
 
 get_battery_voltage:			; starts ADC and waits until fnished
+  ; In MPLAB Sim mode (hardware emulation), use a DMCI slider to
+  ; directly set a 16 bit value in the range 0..1023
+  ; In normal mode, jut wait for the value to be ready:
+
+  ifndef TESTING
 	bsf		ADCON0,0			; power on ADC
 	nop
 	bsf		ADCON0,1			; start ADC
+	
 get_battery_voltage2:
 	btfsc	ADCON0,1			; Wait...
 	bra		get_battery_voltage2
+  endif
 
 ; 3.3V/1024=3,2227mV Input/Bit=9,6680mV Battery/Bit. 
 ; Example: 434*9,6680mV=4195,9mV Battery. 

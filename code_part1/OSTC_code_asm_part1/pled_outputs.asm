@@ -1500,11 +1500,11 @@ PLED_active_gas_surfmode2:
 PLED_active_gas_surfmode4:
 	lfsr	FSR2,letter
 	bsf		leftbind			; left orientated output
-	output_8					; O2 ratio is still in "lo"
+	output_99					; O2 ratio is still in "lo"
 	movlw	'/'
 	movwf	POSTINC2
 	movff	char_I_He_ratio,lo		; copy He ratio into lo
-	output_8
+	output_99
 	bcf		leftbind
 	call	word_processor
 	bra		PLED_active_gas_surfmode_exit
@@ -2660,7 +2660,7 @@ PLED_decoplan_show_stop_gf:
 	lfsr	FSR1,0x0E1						; Gf_decolist_copy
 	movf	temp5,W							; number of entry
 	movff	PLUSW1,lo						; Stop length
-incf	lo,F							; add one dummy minute
+	incf	lo,F							; add one dummy minute
 	lfsr	FSR2,letter	
 	output_99x								; outputs into Postinc2!
 	movlw	d'39'							;"'"

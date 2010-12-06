@@ -261,9 +261,12 @@ get_pressure_start2:
 	return
 
 get_pressure_value:
+#ifndef TESTING
+	; Use register injection instead when in MPLab Sim emulation...
 	rcall	get_2bytes_MS5535A
 	movff	dMSB,D1+1	
 	movff	dLSB,D1+0
+#endif
 	return
 
 get_temperature_start:
@@ -272,9 +275,12 @@ get_temperature_start:
 	bra		get_pressure_start2	; continue in "get_pressure"
 
 get_temperature_value:
+#ifndef TESTING
+	; Use register injection instead...
 	rcall	get_2bytes_MS5535A
 	movff	dMSB,D2+1
 	movff	dLSB,D2+0
+#endif
 	return
 
 get_calibration_data:
@@ -291,6 +297,28 @@ get_calibration_data:
 ;	cpfsgt	EEDATA						; EEDATA>200?
 ;	movff	EEDATA, temperature_correction	; No, Store for compensation
 ;	
+  ifdef TESTING
+    ; Get example calibration values (Intersema 5535B datasheet, p12).
+    movlw   LOW  .18556
+    movwf   W1+0
+    movlw   HIGH .18556
+    movwf   W1+1
+    
+    movlw   LOW  .49183
+    movwf   W1+0
+    movlw   HIGH .49183
+    movwf   W1+1
+    
+    movlw   LOW  .22354
+    movwf   W1+0
+    movlw   HIGH .22354
+    movwf   W1+1
+
+    movlw   LOW  .28083
+    movwf   W1+0
+    movlw   HIGH .28083
+    movwf   W1+1
+  else
 	rcall	reset_MS5535A
 	movlw	d'13'
 	movwf	clock_count
@@ -327,6 +355,7 @@ get_calibration_data:
 	rcall	get_2bytes_MS5535A
 	movff	dMSB,W4+1	
 	movff	dLSB,W4+0
+  endif
 
 ; calculate C1 (16Bit)
 	movff	W1+1, C1+1

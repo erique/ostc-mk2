@@ -70,6 +70,11 @@ decf_eeprom_address2:
 write_external_eeprom:				; data in WREG
 								; increase address eeprom_address+0:eeprom_address+1 after write
 								; with banking after 7FFF
+#ifdef TESTING
+	; When Simulating with MPLabSIM, there is no way to emulate external EEPROM...
+	return
+#endif
+
 	rcall		I2CWRITE			; writes WREG into EEPROM@eeprom_address
 	movlw		d'1'				; increase address
 	addwf		eeprom_address+0,F
@@ -84,6 +89,11 @@ write_external_eeprom:				; data in WREG
 	bsf			eeprom_overflow			; and set overflow bit
 	return
 write_external_eeprom_block:			; Writes a block of 64Byte (one page in external EEPROM without stop condition
+#ifdef TESTING
+	; When Simulating with MPLabSIM, there is no way to emulate external EEPROM...
+	return
+#endif
+
 	btfsc		eeprom_blockwrite		; Blockwrite continue?
 	rcall		I2CWRITE_BLOCK2
 	btfss		eeprom_blockwrite		; Blockwrite start?
@@ -124,6 +134,15 @@ I2CWRITE_BLOCK2:
 
 
 get_free_EEPROM_location:			; Searches 0xFD, 0xFD, 0xFE and sets Pointer to 0xFE
+
+#ifdef TESTING
+	; In testing mode, find 0x100 (internal EEPROM) as the first free location...
+	clrf 		eeprom_address+0		; Not found in entire EEPROM, set to address 0
+	movlw		0x1
+	movwf 		eeprom_address+1
+	return
+#endif
+
 	clrf		ext_ee_temp1		; low address counter
 	clrf		ext_ee_temp2		; high address counter
 	bcf			second_FD			; clear flags

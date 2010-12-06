@@ -396,8 +396,6 @@ PLED_ClearScreen:
 
 	bsf		oled_rs					; Data!
 
-	clrf	PORTD					; See Page 101 of OLED Driver IC Datasheet
-	
 	movlw	d'10'
 	movwf	draw_box_temp3
 PLED_ClearScreen2:
@@ -407,8 +405,11 @@ PLED_ClearScreen3:
 	clrf	draw_box_temp1				; 30*10*256=76800 Pixels -> Clear complete 240*320
 PLED_ClearScreen4:
 
+	clrf	PORTD					; Need to generate trace here too.
 	bcf		oled_rw
 	bsf		oled_rw					; Upper
+
+    clrf	PORTD					; Need to generate trace here too.
 	bcf		oled_rw
 	bsf		oled_rw					; Lower
 

@@ -27,6 +27,118 @@
 ; routines to reset custom function, gases and decompression values
 ; does not reset clock
 
+;=============================================================================
+; CF default values
+;
+
+; Macro to check values, and construct PROM CF default table.
+; If in types mode, set flags into hi. If not, clear it.
+CF_DEFAULT	macro	type, value
+			if ( type == CF_INT15 )
+				if (HIGH value) > .127
+					error "15bit default too big:", value
+				endif
+				DB		LOW value, 0x80 + (HIGH value)
+			else
+			    ; Basic sanity check for 8bit values:
+				if ( HIGH value ) > 0
+					error "8bit default too big:", value
+				endif
+				if (type==CF_BOOL) && (value > 1)
+					error "BOOL default too big:", value
+				endif
+                ifdef	NO_CF_TYPES
+				    DB		LOW value, HIGH value
+                else
+				    DB		LOW value, type
+                endif
+			endif
+			endm
+
+; resets all customfunctions to the following default values
+cf_default_table:
+    ;---- BANK0 custom function defaults -------------------------------------
+	CF_DEFAULT    CF_CENTI,	    d'100' 		; dive_threshold	        100cm
+	CF_DEFAULT    CF_CENTI,	    d'30' 		; surf_threshold        	30cm
+	CF_DEFAULT    CF_SEC,	    d'240' 		; diveloop_timeout      	240s
+	CF_DEFAULT    CF_SEC,	    d'120' 		; surfloop_timeout	        120s
+	CF_DEFAULT    CF_SEC,	    d'5' 		; premenu_timeout	        5s
+
+	CF_DEFAULT    CF_INT8, 	    d'7' 		; minimum_velocity		    7min/min
+	CF_DEFAULT    CF_INT15,	    d'1160' 	; pressure_offset_divemode	1160mBar
+	CF_DEFAULT    CF_INT15,	    d'1100' 	; max_surfpressure		    1100mBar
+	CF_DEFAULT    CF_PERCENT,	d'20' 		; min_gradient_factor		20%
+	CF_DEFAULT    CF_PERCENT,	d'20' 		; oxygen_threshold			20%
+
+	CF_DEFAULT    CF_SEC,	    d'30' 		; dive_menu_timeout		    30s
+	CF_DEFAULT    CF_PERCENT,   d'110' 		; saturation_multiplier		x1.10
+	CF_DEFAULT    CF_PERCENT,   d'90' 		; desaturation_multiplier	x0.90
+	CF_DEFAULT    CF_PERCENT,	d'60' 		; nofly_time_ratio			60%
+	CF_DEFAULT    CF_PERCENT,	d'100' 		; gradient_factor_alarm1	100%
+
+	CF_DEFAULT    CF_PERCENT,	d'10' 		; cns_display_surface		10%
+	CF_DEFAULT    CF_INT8,	    d'10' 		; deco_distance_for_sim		1m
+	CF_DEFAULT    CF_CENTI,     d'019' 		; ppo2_warning_low			0.19 Bar
+	CF_DEFAULT    CF_CENTI,     d'160' 		; ppo2_warning_high			1.60 Bar
+	CF_DEFAULT    CF_CENTI,     d'150' 		; ppo2_display_high			1.50 Bar
+    
+	CF_DEFAULT    CF_INT8,	    d'10' 		; sampling_rate				10s
+	CF_DEFAULT    CF_INT8,	    d'6' 		; sampling_divisor_temp		/6
+	CF_DEFAULT    CF_INT8,	    d'6' 		; sampling_divisor_deco		/6
+	CF_DEFAULT    CF_INT8,	    d'0' 		; sampling_divisor_tank		never
+	CF_DEFAULT    CF_INT8,	    d'0' 		; sampling_divisor_ppo2		never
+
+	CF_DEFAULT    CF_INT8,	    d'0' 		; sampling_divisor_deco2	never
+	CF_DEFAULT    CF_INT8,	    d'0' 		; sampling_divisor_nyu2		never
+	CF_DEFAULT    CF_PERCENT,	d'20' 		; cns_display_high			20%
+	CF_DEFAULT    CF_INT8,	    d'0' 		; logbook_offset			No Offset, but 15Bit value
+	CF_DEFAULT    CF_INT8,	    d'3' 		; last_deco_depth			3m
+
+	CF_DEFAULT    CF_SEC,	    d'10' 		; timeout_apnoe_mode		10min
+	CF_DEFAULT    CF_BOOL,	    d'0' 		; show_voltage_value		=1 Show value instead of symbol, =0 Show Symbol
+
+    ;---- BANK1 custom function defaults -------------------------------------
+	CF_DEFAULT    CF_PERCENT,	d'30' 		; GF_low_default			30%
+	CF_DEFAULT    CF_PERCENT,	d'90' 		; GF_high_default			90%
+	CF_DEFAULT    CF_COLOR,     d'199' 		; color_battery_surface		Color Battery sign: Deep blue
+	CF_DEFAULT    CF_COLOR,     d'255' 		; color_standard1			Color Standard: White
+	CF_DEFAULT    CF_COLOR,     d'62' 		; color_divemask			Color Divemask: Light green
+	CF_DEFAULT    CF_COLOR,     d'224' 		; color_warnings			Color Warnings: Red
+    
+	CF_DEFAULT    CF_BOOL,	    d'0' 		; show_seconds_divemode		=1 Show the seconds in Divemode
+	CF_DEFAULT    CF_BOOL,	    d'0' 		; show_clock_divemode		=1 Show the clock in Divemode
+	CF_DEFAULT    CF_BOOL,	    d'1' 		; warn_ceiling_divemode		=1 Warn ceiling violation in divemode
+	CF_DEFAULT    CF_BOOL, 	    d'0' 		; start_with_stopwatch		=1 start with stopwatch
+	CF_DEFAULT    CF_BOOL,	    d'0' 		; blink_gas_divemode 		=1 Show (resetable) average Depth instead of temperature
+    
+	CF_DEFAULT    CF_INT15,     d'13000' 	; color_warn_depth_mBar		Warn depths
+	CF_DEFAULT    CF_PERCENT,	d'101' 		; color_warn_cns_percent    Warn-%
+	CF_DEFAULT    CF_PERCENT,	d'101' 		; color_warn_gf_percent		Warn-%
+	CF_DEFAULT    CF_CENTI,     d'161' 		; color_warn_ppo2_cbar		ppO2 warn
+	CF_DEFAULT    CF_INT8,	    d'15' 		; color_warn_celocity_mmin	warn at xx m/min
+    
+	CF_DEFAULT    CF_SEC,	    d'42'   	; time_correction_value_default	Adds to Seconds on Midnight
+	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	                
+	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	                
+	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	                
+	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+;=============================================================================
+
 menu_reset:
 	movlw	d'1'
 	movwf	menupos
@@ -166,7 +278,6 @@ reset_start:
 	rcall	reset_customfunction	; saves default and current value for gas #6
 
 reset_all_cf:
-; resets all customfunctions to the following default values
 	movlw	d'1'
 	movwf	EEDATA
 	write_int_eeprom	d'33'		; reset start gas
@@ -211,270 +322,58 @@ reset_all_cf:
 	movwf	nofly_time+0			; Clear nofly time
 	clrf	nofly_time+1			; Clear nofly time
 
-#DEFINE dive_threshold				d'100'		; 8BIT 		100cm
-#DEFINE surf_threshold				d'30'		; 8BIT 		30cm
-#DEFINE diveloop_timeout    		d'240'		; 8BIT 		240s
-#DEFINE surfloop_timeout			d'120'		; 8BIT 		120s
-#DEFINE	premenu_timeout				d'5'		; 8BIT 		5s
-
-#DEFINE	minimum_velocity			d'7'		; 8BIT 		7min/min
-#DEFINE	pressure_offset_divemode	d'1160'		; 15BIT		1160mBar
-#DEFINE	max_surfpressure			d'1100'		; 15BIT		1100mBar
-#DEFINE	min_gradient_factor			d'20'		; 8Bit 		20%
-#DEFINE	oxygen_threshold			d'20'		; 8Bit 		20%
-
-#DEFINE	dive_menu_timeout			d'30'		; 8BIT 		30s
-#DEFINE	saturation_multiplier		d'110'		; 8BIT 		x1.1
-#DEFINE	desaturation_multiplier		d'90'		; 8BIT 		x0.9
-#DEFINE	nofly_time_ratio			d'60'		; 8BIT		60%
-#DEFINE	gradient_factor_alarm1		d'100'		; 8Bit		100%
-
-#DEFINE	cns_display_surface			d'10'		; 8Bit		10%
-#DEFINE	deco_distance_for_sim		d'10'		; 8Bit		1m
-#DEFINE	ppo2_warning_low			d'019'		; 8Bit		0.19 Bar
-#DEFINE	ppo2_warning_high			d'160'		; 8Bit		1.60 Bar
-#DEFINE	ppo2_display_high			d'150'		; 8Bit		1.50 Bar
-
-#DEFINE	sampling_rate				d'10'		; 8Bit		10s
-#DEFINE	sampling_divisor_temp		d'6'		; 8Bit		/6
-#DEFINE	sampling_divisor_deco		d'6'		; 8Bit		/6
-#DEFINE	sampling_divisor_tank		d'0'		; 8Bit		never
-#DEFINE	sampling_divisor_ppo2		d'0'		; 8Bit		never
-
-#DEFINE	sampling_divisor_deco2		d'0'		; 8Bit		never
-#DEFINE	sampling_divisor_nyu2		d'0'		; 8Bit		never
-#DEFINE	cns_display_high			d'20'		; 8Bit		20%
-#DEFINE	logbook_offset				d'0'		; 15Bit		No Offset, but 15Bit value
-#DEFINE	last_deco_depth				d'3'		; 8Bit		3m
-#DEFINE	timeout_apnoe_mode			d'10'		; 8Bit		10min
-#DEFINE	show_voltage_value			d'0'		; 1Bit		=1 Show value instead of symbol, =0 Show Symbol
-
-#DEFINE	GF_low_default				d'30'		; 8Bit		30%
-#DEFINE	GF_high_default				d'90'		; 8Bit		90%
-#DEFINE	color_battery_surface		d'199'		; 8Bit		Color Battery sign: Deep blue
-#DEFINE	color_standard1				d'255'		; 8Bit		Color Standard: White
-#DEFINE	color_divemask				d'62'		; 8Bit		Color Divemask: Light green
-#DEFINE	color_warnings				d'224'		; 8Bit		Color Warnings: Red
-
-#DEFINE	show_seconds_divemode		d'0'		; 1Bit 		=1 Show the seconds in Divemode
-#DEFINE	show_clock_divemode			d'0'		; 1Bit		=1 Show the clock in Divemode
-#DEFINE	warn_ceiling_divemode		d'1'		; 1Bit		=1 Warn ceiling violation in divemode
-#DEFINE	start_with_stopwatch		d'0'		; 1Bit		=1 start with stopwatch
-#DEFINE	blink_gas_divemode 			d'0'		; 1Bit		=1 Show (resetable) average Depth instead of temperature
-
-#DEFINE	color_warn_depth_mBar		d'13000'	; 15Bit		Warn depths
-#DEFINE	color_warn_cns_percent		d'101'		; 8Bit		Warn-%
-#DEFINE	color_warn_gf_percent		d'101'		; 8Bit		Warn-%
-#DEFINE	color_warn_ppo2_cbar		d'161'		; 8Bit		ppO2 warn
-#DEFINE	color_warn_celocity_mmin	d'15'		; 8Bit		warn at xx m/min
-
-#DEFINE	time_correction_value_default	d'42'	; 8Bit		Adds to Seconds on Midnight
-
+reset_all_cf_bank0:
+    clrf    EEADRH
 	movlw	d'127'					; address of low byte of first custom function
 	movwf	EEADR
-	clrf	hi						; only required once
-	movlw	LOW		dive_threshold	; 8Bit value
-	rcall	reset_customfunction	; saves default and current value
 
-	movlw	LOW		surf_threshold
-	rcall	reset_customfunction	; saves default and current value
+    movlw   LOW cf_default_table    ; Load PROM pointer.
+    movwf   TBLPTRL,A
+    movlw   HIGH cf_default_table
+    movwf   TBLPTRH,A
+    movlw   UPPER cf_default_table
+    movwf   TBLPTRU,A
 
-	movlw	LOW		diveloop_timeout
-	rcall	reset_customfunction	; saves default and current value
+cf_bank0_loop:
+	; Did we already read 32 (decimal) bytes ?
+	movf    TBLPTRL,W
+	sublw   LOW (cf_default_table+.64)
+	bz      reset_all_cf_bank1
 
-	movlw	LOW		surfloop_timeout
+    tblrd*+
+    movf    TABLAT, W               ; Low byte in WREG,
+    tblrd*+
+    movff   TABLAT, hi              ; High byte in hi
 	rcall	reset_customfunction	; saves default and current value
-
-	movlw	LOW		premenu_timeout
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	LOW		minimum_velocity
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	HIGH	pressure_offset_divemode
-	movwf	hi
-	bsf		hi,7					; 15Bit value
-	movlw	LOW		pressure_offset_divemode
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	HIGH	max_surfpressure
-	movwf	hi
-	bsf		hi,7					; 15Bit value
-	movlw	LOW		max_surfpressure
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	LOW		min_gradient_factor
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	LOW		oxygen_threshold
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	LOW		dive_menu_timeout
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	LOW		saturation_multiplier
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	LOW		desaturation_multiplier
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	LOW		nofly_time_ratio
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	LOW		gradient_factor_alarm1
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	LOW		cns_display_surface
-	rcall	reset_customfunction	; saves default and current value
-	
-	movlw	LOW		deco_distance_for_sim
-	rcall	reset_customfunction	; saves default and current value
-		
-	movlw	LOW		ppo2_warning_low
-	rcall	reset_customfunction	; saves default and current value
-	
-	movlw	LOW		ppo2_warning_high
-	rcall	reset_customfunction	; saves default and current value
-	
-	movlw	LOW		ppo2_display_high
-	rcall	reset_customfunction	; saves default and current value
-	
-	movlw	LOW		sampling_rate
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	LOW		sampling_divisor_temp
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	LOW		sampling_divisor_deco
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	LOW		sampling_divisor_tank
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	LOW		sampling_divisor_ppo2
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	LOW		sampling_divisor_deco2
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	LOW		sampling_divisor_nyu2
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	LOW		cns_display_high
-	rcall	reset_customfunction	; saves default and current value
-
-	clrf	hi	
-	bsf		hi,7					; 15Bit value
-	movlw	LOW		logbook_offset
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	LOW		last_deco_depth				
-	rcall	reset_customfunction	; saves default and current value
-	
-	movlw	LOW		timeout_apnoe_mode
-	rcall	reset_customfunction	; saves default and current value
-	
-	movlw	LOW		show_voltage_value
-	rcall	reset_customfunction	; saves default and current value
+	bra     cf_bank0_loop
 
 reset_all_cf_bank1:
 	movlw	d'1'
 	movwf	EEADRH					; EEPROM BANK 1 !!
 	movlw	d'127'					; address of low byte of first custom function
 	movwf	EEADR
-	clrf	hi						; only required once/bank
 	
-	movlw	LOW		GF_low_default
-	rcall	reset_customfunction	; saves default and current value
+cf_bank1_loop:
+	; Did we already read another 32 (decimal) bytes ?
+	movf    TBLPTRL,W
+	sublw   LOW (cf_default_table+.128)
+	bz     cf_bank1_end
 
-	movlw	LOW		GF_high_default
+    tblrd*+
+    movf    TABLAT, W               ; Low byte in WREG,
+    tblrd*+
+    movff   TABLAT, hi              ; High byte in hi
 	rcall	reset_customfunction	; saves default and current value
+	bra     cf_bank1_loop
 
-	movlw	color_battery_surface
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	color_standard1
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	color_divemask
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	color_warnings
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	show_seconds_divemode
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	show_clock_divemode
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	warn_ceiling_divemode	
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	start_with_stopwatch
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	blink_gas_divemode	
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	HIGH	color_warn_depth_mBar
-	movwf	hi
-	bsf		hi,7					; 15Bit value
-	movlw	LOW		color_warn_depth_mBar
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	color_warn_cns_percent
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	color_warn_gf_percent
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	color_warn_ppo2_cbar
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	color_warn_celocity_mmin
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	time_correction_value_default
-	rcall	reset_customfunction	; saves default and current value
-
-	movlw	d'0'
-	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
-	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
-	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
-	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
-	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
-	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
-	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
-	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
-	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
-	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
-	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
-	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
-	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
-	rcall	reset_customfunction	; saves default and current value
-	movlw	d'0'
-	rcall	reset_customfunction	; saves default and current value
-
+cf_bank1_end:
 	clrf	EEADRH					; EEPROM BANK 0 !
 	
-
 ;call	reset_external_eeprom	; delete profile memory
 	goto	restart					; all reset, quit to surfmode
 
+; Write the four bytes lo:hi:lo:(hi w/o type flags) into EEPROM
+; Don't change hi:lo values...
 reset_customfunction:
 	movwf	lo
 	incf	EEADR,F
@@ -487,10 +386,14 @@ reset_customfunction:
 	movff	lo, EEDATA					; Lowbyte current value
 	call	write_eeprom
 	incf	EEADR,F
-	bcf		hi,7						; This bit will only be written for the default value
 	movff	hi, EEDATA					; Highbyte current value
+#ifdef NO_CF_TYPES
+	bcf		EEDATA,7					; This bit will only be written for the default value
+#else
+	btfss	EEDATA,7					; A 15bit value ?
+	clrf	EEDATA						; Nope: clear type flag.
+#endif
 	call	write_eeprom
-	clrf	hi	
 	return
 	
 

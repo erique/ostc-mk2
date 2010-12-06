@@ -43,6 +43,19 @@
 ; get values with GETCUSTOM8	.x with x=0...32 for 8 Bit values (stored in WREG)
 ; or with GETCUSTOM15	.x with x=0...32 for 15 Bit values (stored in lo and hi)
 
+; [jDG] 2010-11-30 More fancy displsy of the various CF types
+; data types. When we do have a 8bit data (bit16=0), the high byte serves to
+; define the display format:
+
+CF_INT8		EQU	0	; Default display, 8 or 15 bits values.
+CF_PERCENT	EQU	1	; Displays 110%
+CF_DECI		EQU	2	; Displays 1.6
+CF_CENTI	EQU	3	; Displays 1.50
+CF_MILI		EQU	4	; Displays 1.015
+CF_BOOL		EQU	5	; Displays ON/OFF
+CF_SEC		EQU	6	; Displays 4:00
+CF_COLOR	EQU	7	; Display 240 plus a color watch (inverse video space)
+CF_INT15	EQU	0x80; Default display. Flag for 15bit, typeless values.
 
 GETCUSTOM8	macro	custom8
 	movlw	custom8
@@ -150,6 +163,23 @@ menu_custom_functions11:
 	WIN_INVERT	.0	; Init new Wordprocessor	
 
 menu_custom_functions1:
+
+#ifndef NO_CF_TYPES
+	;---- Clear color swatches area ------------------------------------------
+	; BEWARE: PLED_box reset the EEADRH register, so t should be
+    ; be done before setting CF page I/II...
+	clrf	WREG				; Black background
+	movff	WREG,box_temp+0		; Set color
+	movlw	.125
+	movff	WREG,box_temp+1		; row top (0-239)
+	movlw	.178
+	movff	WREG,box_temp+2		; row bottom (0-239)
+	movlw	.75
+	movff	WREG,box_temp+3		; column left (0-159)
+	movlw	.150
+	movff	WREG,box_temp+4		; column right (0-159)
+	call	PLED_box
+#endif
 	call	PLED_standard_color
 
 	movlw	d'1'
@@ -169,7 +199,7 @@ menu_custom_functions1:
 	btfsc	customfunction_page			; Add offset for display
 	movlw	d'32'
 	addwf	lo,F
-	movff	lo,apnoe_mins				; apnoe_mins used as temp for binary CFs
+	movff	lo, apnoe_mins     			; Copy use when NO_CF_TYPES
 				
 	output_99x
 	movlw	':'
@@ -182,47 +212,74 @@ menu_custom_functions1:
 	addwf	decodata+0,W				; add # of current custom function, place result in wreg
 	call	displaytext1				; shows descriptor
 
+	; Read defaults into hi:lo
+	movf	divemins+0,W
+	addlw	0x80
+	movwf	EEADR
+	call	read_eeprom					; Lowbyte
+	movff	EEDATA,lo
+	movf	divemins+0,W
+	addlw	0x81
+	movwf	EEADR
+	call	read_eeprom						; Highbyte
+	movff	EEDATA,hi
+
+#ifdef	NO_CF_TYPES
 	movlw	binary_cf1
 	subwf	apnoe_mins,W						; Binary cf?
-	btfsc	STATUS,Z
-	bra		menu_custom_functions10c			; Yes
+	bz		menu_custom_functions10c	; Yes
 
 	movlw	binary_cf2
 	subwf	apnoe_mins,W						; Binary cf?
-	btfsc	STATUS,Z
-	bra		menu_custom_functions10c			; Yes
+	bz		menu_custom_functions10c	; Yes
 
 	movlw	binary_cf3
 	subwf	apnoe_mins,W						; Binary cf?
-	btfsc	STATUS,Z
-	bra		menu_custom_functions10c			; Yes
+	bz		menu_custom_functions10c	; Yes
 
 	movlw	binary_cf4
 	subwf	apnoe_mins,W						; Binary cf?
-	btfsc	STATUS,Z
-	bra		menu_custom_functions10c			; Yes
+	bz		menu_custom_functions10c	; Yes
 
 	movlw	binary_cf5
 	subwf	apnoe_mins,W						; Binary cf?
-	btfsc	STATUS,Z
-	bra		menu_custom_functions10c			; Yes
+	bz		menu_custom_functions10c	; Yes
 
 	movlw	binary_cf6
 	subwf	apnoe_mins,W						; Binary cf?
-	btfsc	STATUS,Z
-	bra		menu_custom_functions10c			; Yes
+	bz		menu_custom_functions10c	; Yes
 
-
-	bra		menu_custom_functions10a			; Not a  binary CF selected
+	bra     menu_custom_functions10a    ; Not a binary CF...
+#else
+	movf	hi,W						; Is it a ON/OFF flag ?
+	xorlw	CF_BOOL
+	bnz		menu_custom_functions10a	; Not a  binary CF selected
+#endif
 
 menu_custom_functions10c:
-	movlw	d'1'
-	movwf	apnoe_mins					; Yes, set apnoe_mins to "1"
+	setf	apnoe_mins					; Yes, set apnoe_mins to 0xFF
+
+	WIN_LEFT 	.20
+	WIN_TOP		.65
+	lfsr	FSR2,letter					; Make a string of 8 spaces
+	movlw	' '
+	movwf	POSTINC2
+	movwf	POSTINC2
+	movwf	POSTINC2
+	movwf	POSTINC2
+	movwf	POSTINC2
+	movwf	POSTINC2
+	movwf	POSTINC2
+	movwf	POSTINC2
+	call	word_processor				; Clear +/- line
+
+	WIN_TOP		.95
+	call	word_processor				; Clear 1/10 line
 	bra		menu_custom_functions10b
 
 menu_custom_functions10a:
 	clrf	apnoe_mins					; Yes, clear apnoe_mins
-menu_custom_functions10b:
+
 	WIN_LEFT 	.20
 	WIN_TOP		.65
 	lfsr	FSR2,letter
@@ -266,69 +323,42 @@ menu_custom_functions10b:
 	movwf	POSTINC2
 	call	word_processor		
 
+menu_custom_functions10b:
 	WIN_LEFT 	.20
 	WIN_TOP		.125
 	lfsr	FSR2,letter
 	OUTPUTTEXT	d'89'				;"Default:"
-	
-	movf	divemins+0,W
-	addlw	0x80
-	movwf	EEADR
-	call	read_eeprom				; Lowbyte
-	movff	EEDATA,lo
-	movf	divemins+0,W
-	addlw	0x81
-	movwf	EEADR
-	call	read_eeprom				; Highbyte
-	movff	EEDATA,hi
-	bcf		hi,7					; clear Bit 7 of value
-	output_16
-	movlw	','
+	movlw	' '
 	movwf	POSTINC2
 
-	movlw	'1'
-	btfss	EEDATA,7				; 15Bit?
-	movlw	'8'						; 8Bit!
-	tstfsz  apnoe_mins				; apnoe_mins=0?
-	movlw	'1'						; No, 1Bit!
-	movwf	POSTINC2
-
-	movlw	'5'
-	btfsc	EEDATA,7				; 15Bit?
-	movwf	POSTINC2
-	movlw	'B'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	call	word_processor		
+	call	display_customfunction	; Typed display.
 
 	WIN_LEFT 	.20
 	WIN_TOP		.155
 	lfsr	FSR2,letter
 	OUTPUTTEXT	d'97'				; "Current:"
+	movlw	' '
+	movwf	POSTINC2
 
 	movf	divemins+0,W
 	addlw	0x82
 	movwf	EEADR
 	call	read_eeprom				; Lowbyte
 	movff	EEDATA,lo
+
 	movf	divemins+0,W
 	addlw	0x83
 	movwf	EEADR
 	call	read_eeprom				; Highbyte
+
+	btfss	hi,7					; A 15bit value ?
+	bra		menu_custom_functions1b	; No : keep types there !
+
 	movff	EEDATA,hi
-	output_16
-	movlw	' '
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	call	word_processor		
+	bsf		hi,7					; Mark it a 15bit value.
+
+menu_custom_functions1b:
+	call	display_customfunction
 
 menu_custom_functions1a:
 	DISPLAYTEXT	.11					; Exit
@@ -378,6 +408,136 @@ customfunctions3:
 	bcf		menubit3				; clear flag
 	bra		customfunctions_loop
 
+;-----------------------------------------------------------------------------
+; Input : hi:lo = data to display, with type embebed into hi
+;         FSR2  = current string pointer.
+; Trash : FSR1 (used to backup EEADRH and hi)
+
+display_customfunction:
+#ifndef NO_CF_TYPES
+	movff	EEADRH, FSR1H		; Backup...
+	movff	hi, FSR1L
+
+	;---- decode type --------------------------------------------------------
+	movf	hi,W				; Just set N/Z flags
+	bn		cf_type_0			; Keep 15bits value in old format.
+	bz		cf_type_99			; 8bit standard mode
+
+	; Jump table:
+	dcfsnz	hi
+	bra		cf_type_01
+	dcfsnz	hi
+	bra		cf_type_02
+	dcfsnz	hi
+	bra		cf_type_03
+	dcfsnz	hi
+	bra		cf_type_04
+	dcfsnz	hi
+	bra		cf_type_05
+	dcfsnz	hi
+	bra		cf_type_06
+	dcfsnz	hi
+	bra		cf_type_07
+	bra		cf_type_99			; Default to 8bit mode...
+
+cf_type_01:						; Type == 1 is percent mode
+	output_16dp	0				; NOTE : hi is already reseted...
+	movlw	'%'
+	movwf	POSTINC2
+	bra		cf_done
+
+cf_type_02:						; Type == 2 is deci mode.
+	output_16dp	4
+	bra		cf_done
+
+cf_type_03:						; Type == 3 is centi mode.
+	output_16dp	3
+	bra		cf_done
+
+cf_type_04:						; Type == 4 is mili mode
+	output_16dp	2
+	bra		cf_done
+
+cf_type_05:						; Type == 5 is on/off mode.
+	movf	lo,W				; Get flag value...
+	bz		cf_type_off
+	OUTPUTTEXT	d'130'			; ON
+	bra		cf_done
+cf_type_off:
+	OUTPUTTEXT	d'131'			; OFF
+	bra		cf_done
+
+cf_type_06:						; Type == 6 is mm:ss mode (... or hh:mm)
+	call	convert_time		; Convert to min:sec into hi:low.
+	movff	lo,wp_temp			; Save seconds,
+	movff	hi,lo				; Get minutes
+	output_8					; Print them
+	movlw	':'					; Separator
+	movwf	POSTINC2
+	movff	wp_temp,lo			; Get back seconds
+	output_99x					; lo in 2 digits with trailing zeros.
+	bra		cf_done
+
+cf_type_07:						; Type == 7 is Color swatch.
+	output_8
+
+	movf	lo,W				; Get color.
+	movff	WREG,box_temp+0		; Set color
+	movff	win_top,WREG		; BEWARE : this is a bank0 variable !
+	movff	WREG,box_temp+1		; row top (0-239)
+	addlw	.23
+	movff	WREG,box_temp+2		; row bottom (0-239)
+	movlw	.110
+	movff	WREG,box_temp+3		; column left (0-159)
+	movlw	.140	
+	movff	WREG,box_temp+4		; column right (0-159)
+
+	call	PLED_box
+	bra		cf_done				; W/o trailling spaces...
+
+cf_type_99:						; 8bit mode. Or unrecognized type...
+	clrf	hi
+
+cf_type_0:						; 15bit mode.
+	bcf		hi,7
+	output_16
+
+cf_done:
+	movff	FSR1L, hi			; Restore saved registers...
+	movff	FSR1H, EEADRH
+#else
+	bcf		hi,7				; clear Bit 7 of value
+	output_16
+
+	movff	win_top,WREG		; Get "Default:" line position (BANK0 !)
+	xorlw	.125				; This is the default value ?
+	bnz		cf_no_bits			; NO: skip bits for current value
+
+	movlw	','
+	movwf	POSTINC2
+
+	movlw	'1'
+	btfss	EEDATA,7			; 15Bit?
+	movlw	'8'					; 8Bit!
+	tstfsz  apnoe_mins			; apnoe_mins=0?
+	movlw	'1'					; No, 1Bit!
+	movwf	POSTINC2
+
+	movlw	'5'
+	btfsc	EEDATA,7			; 15Bit?
+	movwf	POSTINC2
+	movlw	'B'
+	movwf	POSTINC2
+
+cf_no_bits:
+	movlw	' '
+	movwf	POSTINC2
+	movwf	POSTINC2
+	movwf	POSTINC2
+#endif
+	goto	word_processor		
+
+;-----------------------------------------------------------------------------
 
 do_customfunction:
 	CLRF	EEADRH					
@@ -475,8 +635,7 @@ adjust_cfn_value:
 	call	read_eeprom				; Highbyte
 	movff	EEDATA,divemins+1		; Highbyte of default value
 
-	movlw	d'1'
-	cpfseq	apnoe_mins				; If apnoe_mins=1 then CF is binary
+	btfss	apnoe_mins,0			; If apnoe_mins=1 then CF is binary
 	bra		adjust_cfn_value1		; Not Binary
 
 	tstfsz	lo				; =0?
@@ -559,6 +718,11 @@ getcustom15_d3:
 	call	read_eeprom		; Highbyte
 	movff	EEDATA,hi
 	clrf	EEADRH
+#ifndef NO_CF_TYPES
+	btfss	hi,7			; Is it a 15bit value ?
+	clrf	hi				; NO: clear type flags.
+#endif
+	bcf		hi,7			; Always clear 15bit flag.
 	return					; return
 
 custom_functions_check_divemode:			;displays warning if a critical custom function is not set to default

@@ -31,13 +31,13 @@
 
 	#include	definitions.asm				; Defines, I/O Ports and variables
 
-		ORG     0x0000
+reset_v code     0x0000
 		goto	start						; Start!
 
-		ORG		0x0008
+inter_v	code	0x0008
 		bra		HighInt						;High Priority Interrups
 
-		ORG	0x0018							;Low Priority Interrups
+inter_asm	code	0x0018							;Low Priority Interrups
 ;	*** low priority interrupts not used
 		bra		HighInt						;High Priority Interrups
 
@@ -73,8 +73,11 @@ HighInt:
 		movff	0x102,BSR					;restore BSR register
 		retfie
 
-;		ORG	0x00070				; 
+;=============================================================================
 #include	text_table.asm		; includes textmacros
+
+;=============================================================================
+osct_asm	code
 #include	displaytext.asm		; sends texts to wordprocessor
 #include	math.asm			; mathematical functions
 #include 	wait.asm			; waitroutines
@@ -105,15 +108,29 @@ HighInt:
 #include	simulator.asm		; Stand-alone simulator routines
 #include 	io.asm				; Low-Level I/O access
 
+;=============================================================================
+#include	printf.asm			; jDG's compact printf test implementation.
+#ifdef TESTING
+	#include	aa_tests.asm	; And testing code.
+	#include	test_printf.asm	; Special font/colors page
+#endif
 
+;=============================================================================
+#ifdef AAFONTS
+	; New antialiased word processor and fonts
+	#include	aa_wordprocessor.asm ; ASM wordprocessor under tests.
+#else
 	; Include C sub-routines automatically
+p3_wp			code	0x09A00			; Mark segment name into the .map file
+;	#include 	p3_wordprocessor_9A00_BAFF_0B468.txt ; jDG's C-Code
+	#include 	ostc_part3_wordprocessor_NEW_CURSOR_9A00_to_B960_jump_in_B410.txt	; Christians fonts...
+#endif
 
-	ORG	0x09A00
-	#include 	ostc_part3_wordprocessor_NEW_CURSOR_9A00_to_B960_jump_in_B410.txt			; New C-Code
+;=============================================================================
+p2_deco	code	0x0C000			; Mark segment name into the .map file
+#include	p2_deco_main_v110d.txt
 
-	ORG	0x0C000		
-	#include	p2_deco_main_v110d.txt
-
+;=============================================================================
     MESSG "OSTC - diving computer code,  Copyright (C) 2010 HeinrichsWeikamp GbR"
     MESSG "This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the"
     MESSG "Free Software Foundation, either version 3 of the License, or (at your option) any later version."

@@ -88,6 +88,7 @@ write_external_eeprom:				; data in WREG
 	clrf		eeprom_address+1
 	bsf			eeprom_overflow			; and set overflow bit
 	return
+
 write_external_eeprom_block:			; Writes a block of 64Byte (one page in external EEPROM without stop condition
 #ifdef TESTING
 	; When Simulating with MPLabSIM, there is no way to emulate external EEPROM...

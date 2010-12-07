@@ -346,13 +346,13 @@ cf_bank0_loop:
     movff   TABLAT, hi              ; High byte in hi
 	rcall	reset_customfunction	; saves default and current value
 	bra     cf_bank0_loop
-
+	
 reset_all_cf_bank1:
 	movlw	d'1'
 	movwf	EEADRH					; EEPROM BANK 1 !!
 	movlw	d'127'					; address of low byte of first custom function
 	movwf	EEADR
-	
+
 cf_bank1_loop:
 	; Did we already read another 32 (decimal) bytes ?
 	movf    TBLPTRL,W
@@ -368,7 +368,7 @@ cf_bank1_loop:
 
 cf_bank1_end:
 	clrf	EEADRH					; EEPROM BANK 0 !
-	
+
 ;call	reset_external_eeprom	; delete profile memory
 	goto	restart					; all reset, quit to surfmode
 

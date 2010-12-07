@@ -50,12 +50,19 @@ WIN_COLOR	macro 	win_color_input
 
 word_processor:						; word_processor:
 	clrf	POSTINC2				; Required!
+
+  ifdef	AAFONTS
+	call	aa_wordprocessor
+	movlb	b'00000001'				; Back to Rambank1
+  else
 	movff	win_color2,win_color2_temp
 	movff	win_color1,win_color1_temp
 	call	main_wordprocessor		; C-Code
 	movlb	b'00000001'				; Back to Rambank1
 	movff	win_color2_temp,win_color2
 	movff	win_color1_temp,win_color1
+  endif
+
 	return
 
 ; -----------------------------
@@ -394,6 +401,7 @@ PLED_ClearScreen:
 	movlw	0x22					; Start Writing Data to GRAM
 	rcall	PLED_CmdWrite
 
+	; See Page 101 of OLED Driver IC Datasheet how to handle rs/rw clocks
 	bsf		oled_rs					; Data!
 
 	movlw	d'10'

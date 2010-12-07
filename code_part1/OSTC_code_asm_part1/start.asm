@@ -40,6 +40,12 @@ clear_rambank:
 	call	disable_rs232			; disable UART module
 	call	RTCinit					; reset RTC
 
+; Extra power-up testing jDG jDG jDG jDG
+	ifdef	TESTING
+		call 	test_menus
+	endif
+; DONE jDG jDG jDG jDG
+
 ; Air pressure compensation	after reset
 	call	get_calibration_data	; Get calibration data from pressure sensor
 
@@ -151,12 +157,9 @@ restart:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	movlw	0xFF
-	movwf	oled1_temp
-	movff	oled1_temp,win_color1
-	movlw	0xFF
-	movwf	oled1_temp
-	movff	oled1_temp,win_color2
+	setf	WREG
+	movff	WREG,win_color1			; Beware: win_color1 is bank0, and we are bank1 currently
+	movff	WREG,win_color2
 	call	I2CReset				; Just in Case any I2C device blocks the Bus
 	movff	last_surfpressure_30min+0,last_surfpressure+0		; Use 30min old airpressure 
 	movff	last_surfpressure_30min+1,last_surfpressure+1		; Use 30min old airpressure

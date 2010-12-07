@@ -35,6 +35,8 @@
 #DEFINE		FT_MEDIUM		.1
 #DEFINE		FT_LARGE		.2
 
+;#DEFINE		AAFONTS				; The nicer fonts (not working yet...)
+
 ; Define max. 5 Binary Custom Functions here (add more in menu_custom.asm)
 #DEFINE	binary_cf1				d'31'
 #DEFINE	binary_cf2				d'38'
@@ -42,9 +44,6 @@
 #DEFINE	binary_cf4				d'40'
 #DEFINE	binary_cf5				d'41'
 #DEFINE	binary_cf6				d'42'
-
-#DEFINE wp_fontwidth  .14
-#DEFINE wp_fontheight .24
 
 ; Color Definitions: 8Bit RGB b'RRRGGGBB'
 ;#DEFINE	color_red	b'11100000'
@@ -98,6 +97,17 @@
 	win_invert
 	wp_temp
 	ENDC
+  ifdef AAFONTS
+	CBLOCK
+	aa_flags					; Various flags for aa_wordprocessor
+	aa_width:2					; String width (more than 255...) !
+	aa_height					; String (and font) height
+	aa_bitlen					; Count of pixels when decoding bitmaps.
+	aa_start:2					; PROM ptr to start of encoded bitmap
+	aa_end:2					; and end of it.
+	aa_colorDiv:2				; Current color, divided by 2 or 4
+	ENDC
+  endif
 ; the following is used by the C-code up to 0x0E0!!
 	CBLOCK	0x0E0				;Bank 0
 	gf_decolist_copy:.32
@@ -327,10 +337,19 @@
 	
 	convert_value_temp:3		; used in menu_battery_state_convert_date
 	box_temp:5
+	time_correction_value		; Adds to Seconds on midnight
+
+	; [jDG] printf variable:
+	printf_len					; save TBLPTR during wordprocessor
+	ENDC
+
+  ifndef AAFONTS
+	CBLOCK
 	win_color1_temp
 	win_color2_temp				; Backup color registers
-	time_correction_value		; Adds to Seconds on midnight
 	ENDC
+  endif
+
 
 	CBLOCK	0x200				;Bank 2
  int_O_tissue_for_debug:.32		; deco_main_debug copies pressure of tissue to this variable
@@ -453,7 +472,9 @@
 
 ; C-code Routines
 ; PART 3
-#DEFINE main_wordprocessor					0x0B468
+  ifndef AAFONTS
+	#DEFINE main_wordprocessor					0x0B468
+  endif
 
 ; C-code Routines
 ; PART 2
@@ -640,6 +661,6 @@
 #DEFINE	blinking_better_gas		flag15,3	;=1: Gas is currently blinking
 #DEFINE	display_see_l_tissue	flag15,4	;=1: Leading Tissue details are now displayed
 #DEFINE	lock_stopwatch_reset	flag15,5	;=1: Locks the Reset of the Stopwtach/Average depth for 1 second
-#DEFINE	maxdepth_greater_100m	flag15,6	;=1: Max Depth>100m
+#DEFINE	maxdepth_greater_100m	flag15,6	;=1: Max Depth greater>100m
 #DEFINE	show_interval			flag15,7	;=1: Show Interval, =0: Show Clock in Surfacemode
 

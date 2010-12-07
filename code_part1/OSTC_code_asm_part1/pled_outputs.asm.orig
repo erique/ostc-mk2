@@ -69,7 +69,7 @@ PLED_standard_color_6:
 	call	PLED_set_color
 	return
 PLED_standard_color2:
-	movlw	0xFF		        ; Force full white.
+	movlw	0xFF        		; Reset Color
 	call	PLED_set_color
 	return
 
@@ -385,7 +385,7 @@ PLED_resetdebugger_loop:
 
 PLED_divemode_mask:					; Displays mask in Dive-Mode
 	call		PLED_divemask_color	; Set Color for Divemode mask
-	DISPLAYTEXTH	.267		; Max.
+	DISPLAYTEXTH	.267		; Max Depth
 	DISPLAYTEXT		.86			; Divetime
 	DISPLAYTEXT		.87			; Depth
 	call	PLED_standard_color
@@ -938,7 +938,7 @@ PLED_temp_divemode:
 	movff	temperature+1,last_temperature+1
 
 	WIN_TOP		.216
-	WIN_LEFT	.50
+	WIN_LEFT	.65
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
@@ -1017,7 +1017,7 @@ PLED_show_ppO2_clear:					; Clear ppO2
 
 PLED_active_gas_clear:					; clears active gas!
 	WIN_TOP		.192
-	WIN_LEFT	.50
+	WIN_LEFT	.65
 	movlw	d'5'
 	movwf	temp1
 	bra		PLED_display_clear_common_y1; also returns!
@@ -1054,7 +1054,7 @@ PLED_active_gas_divemode_show:
 	ostc_debug	's'		; Sends debug-information to screen if debugmode active
 ; gas
 	WIN_TOP		.192
-	WIN_LEFT	.50
+	WIN_LEFT	.65
 	WIN_FONT 	FT_SMALL
 	call	PLED_standard_color
 
@@ -1867,8 +1867,14 @@ update_surf_press:
 	return
 
 update_batt_voltage_divemode:
+	movlw	-.20				; ~Centered between ppO2 warning and max depth...
+	movwf	hi,BANKED			; Use the hi variable to offset the battery in dive mode...
+	bra		update_battery_voltage1
 
 update_batt_voltage:
+	clrf	hi,BANKED			; No vertical offset...
+
+update_battery_voltage1:
 	ostc_debug	'f'
 
 	GETCUSTOM8	d'31'			; =1 if battery voltage should be visible
@@ -1900,17 +1906,6 @@ update_batt_voltage:
 	return
 	
 update_batt_voltage2:
-	GETCUSTOM8	d'35'			; Standard output color
-	movff	WREG,box_temp+0		; Data
-	movlw	.174
-	movff	WREG,box_temp+1		; row top (0-239)
-	movlw	.194
-	movff	WREG,box_temp+2		; row bottom (0-239)
-	movlw	.1
-	movff	WREG,box_temp+3		; column left (0-159)
-	movlw	.32
-	movff	WREG,box_temp+4		; column right (0-159)
-	call	PLED_frame
 
 ; 4100-Vbatt
 	movlw	LOW		d'4100'
@@ -1943,39 +1938,103 @@ update_batt_voltage2:
 	movlw	d'20'
 	movwf	xB+0
 	clrf	xB+1
-	call	div16x16					;xA/xB=xC with xA as remainder 	
+	call	div16x16			;xA/xB=xC with xA as remainder 	
 ; xC is between 0 and 30
-	movff	xC+0,wait_temp				;save value
-	incf	wait_temp,F					; +1
+	movff	xC+0,wait_temp		;save value
+	incf	wait_temp,F			; +1
 
 	movlw	d'3'
 	cpfsgt	wait_temp
-	movwf	wait_temp					; Minimum = 3
+	movwf	wait_temp			; Minimum = 3
+
+; Check if battery level is low...
+    movlw   d'7'                ; Blink threshold at 6/30 == 20% ???
+    cpfslt  wait_temp
+	bra		update_batt_clear	; black if WREG > 6
+
+update_batt_blink:
+	; Get BLINKING warning color, or black every other seconde:
+	GETCUSTOM8	d'37'			; WARNING color
+	btfss	secs,0,BANKED
+update_batt_clear:
+	clrf	WREG
+
+	movwf	box_temp+0,BANKED	; Data
+	movlw	.172
+	addwf	hi,W,BANKED
+	movwf	box_temp+1,BANKED	; row top (0-239)
+	movlw	.196
+	addwf	hi,W,BANKED
+	movwf	box_temp+2,BANKED	; row bottom (0-239)
+	movlw	.0
+	movwf	box_temp+3,BANKED	; column left (0-159)
+	movlw	.33
+	movwf	box_temp+4,BANKED	; column right (0-159)
+	call	PLED_box
+
+	movlw	.179
+	addwf	hi,W,BANKED
+	movwf	box_temp+1,BANKED	; row top (0-239)
+	movlw	.189
+	addwf	hi,W,BANKED
+	movwf	box_temp+2,BANKED	; row bottom (0-239)
+	movlw	.33
+	movwf	box_temp+3,BANKED	; column left (0-159)
+	movlw	.35
+	movwf	box_temp+4,BANKED	; column right (0-159)
+	call	PLED_box			; Full Cap
+
+	GETCUSTOM8	d'34'			; Color battery
+	movwf	box_temp+0,BANKED	; Color Data
+	movlw	.176
+	addwf	hi,W,BANKED
+	movwf	box_temp+1,BANKED   ; row top (0-239)
+	movlw	.192
+	addwf	hi,W,BANKED
+	movwf	box_temp+2,BANKED	; row bottom (0-239)
+	movlw	.2
+	movwf	box_temp+3,BANKED	; column left (0-159)
+	movff	wait_temp,box_temp+4; column right (0-159)
+	call	PLED_box
 
 update_batt_voltage2a:
 	GETCUSTOM8	d'35'			; Standard output color
-	movff	WREG,box_temp+0		; Data
-	movlw	.181
-	movff	WREG,box_temp+1		; row top (0-239)
-	movlw	.187
-	movff	WREG,box_temp+2		; row bottom (0-239)
+	movwf	box_temp+0,BANKED	; Data
+	movlw	.174
+	addwf	hi,W,BANKED
+	movwf	box_temp+1,BANKED	; row top (0-239)
+	movlw	.194
+	addwf	hi,W,BANKED
+	movwf	box_temp+2,BANKED	; row bottom (0-239)
+	movlw	.1
+	movwf	box_temp+3,BANKED	; column left (0-159)
 	movlw	.32
-	movff	WREG,box_temp+3		; column left (0-159)
+	movwf	box_temp+4,BANKED	; column right (0-159)
+	call	PLED_frame
+
+	movlw	.181
+	addwf	hi,W,BANKED
+	movwf	box_temp+1,BANKED	; row top (0-239)
+	movlw	.187
+	addwf	hi,W,BANKED
+	movwf	box_temp+2,BANKED	; row bottom (0-239)
+	movlw	.32
+	movwf	box_temp+3,BANKED	; column left (0-159)
 	movlw	.34
-	movff	WREG,box_temp+4		; column right (0-159)
+	movwf	box_temp+4,BANKED	; column right (0-159)
 	call	PLED_box			; Full Cap
 
+;	movlw	.181
+;	movff	WREG,box_temp+1		; row top (0-239)
+;	movlw	.187
+;	movff	WREG,box_temp+2		; row bottom (0-239)
+;	movlw	.31
+;	movff	WREG,box_temp+3		; column left (0-159)
+;	movlw	.33
+;	movff	WREG,box_temp+4		; column right (0-159)
+;	call	PLED_frame			; Empty cap
+;
 update_batt_voltage3:
-	GETCUSTOM8	d'34'			; Color battery
-	movff	WREG,box_temp+0		; Color Data
-	movlw	.176
-	movff	WREG,box_temp+1		; row top (0-239)
-	movlw	.192
-	movff	WREG,box_temp+2		; row bottom (0-239)
-	movlw	.2
-	movff	WREG,box_temp+3		; column left (0-159)
-	movff	wait_temp,box_temp+4		; column right (0-159)
-	call	PLED_box
 
 	call		PLED_standard_color
 	return
@@ -1983,12 +2042,12 @@ update_batt_voltage3:
 update_batt_voltage2_empty:
 	movlw	d'1'
 	movwf	wait_temp
-	bra		update_batt_voltage2a
+	bra		update_batt_blink
 
 update_batt_voltage2_full:
 	movlw	d'30'
 	movwf	wait_temp
-	bra		update_batt_voltage2a
+	bra		update_batt_clear
 
 PLED_convert_date:	; converts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 	read_int_eeprom d'91'			; Read date format (0=MMDDYY, 1=DDMMYY, 2=YYMMDD)
@@ -2118,22 +2177,21 @@ PLED_menu_clear:
 	return
 
 PLED_max_pressure:
+	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
+	return								; Yes, No update and return!
+
 	ostc_debug	'p'		; Sends debug-information to screen if debugmode active
-	movff	max_pressure+0,lo
-	movff	max_pressure+1,hi
-	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
 
-	movlw	.039
-	cpfslt	hi
-		bra		maxdepth_greater_99_84mtr
-
-; Display normal "xx.y"
-	lfsr	FSR2,letter
-	call	PLED_standard_color
 	WIN_TOP		.184
 	WIN_LEFT	.0
 	WIN_FONT 	FT_MEDIUM
 	WIN_INVERT	.0					; Init new Wordprocessor
+	call	PLED_standard_color
+
+	lfsr	FSR2,letter
+	movff	max_pressure+0,lo
+	movff	max_pressure+1,hi
+	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
 	bsf		leftbind
 	bsf		ignore_digit5		; do not display 1cm depth
 	output_16dp	d'3'
@@ -2141,43 +2199,6 @@ PLED_max_pressure:
 	bcf		show_last3
 	call	word_processor
 	WIN_FONT 	FT_SMALL
-	return
-
-maxdepth_greater_99_84mtr:			; Display only in full meters
-	btfss	maxdepth_greater_100m	; Is max.depth>100m already?
-	call	PLED_clear_maxdepth		; No, clear maxdepth area and set flag
-	; max Depth is already in hi:lo
-	; Show max depth in Full meters
-	; That means ignore figure 4 and 5
-	lfsr	FSR2,letter
-	call	PLED_standard_color
-	WIN_TOP		.184
-	WIN_LEFT	.0
-	WIN_FONT 	FT_MEDIUM
-	WIN_INVERT	.0					; Init new Wordprocessor
-
-	bsf		ignore_digit4
-	bsf		leftbind
-	output_16
-	bcf		leftbind
-	call	word_processor
-	bcf		ignore_digit4
-	WIN_FONT 	FT_SMALL
-	return
-
-PLED_clear_maxdepth:
-	movlw	.0
-	movff	WREG,box_temp+0		; Data
-	movlw	.184
-	movff	WREG,box_temp+1		; row top (0-239)
-	movlw	.215
-	movff	WREG,box_temp+2		; row bottom (0-239)
-	movlw	.0
-	movff	WREG,box_temp+3		; column left (0-159)
-	movlw	.41
-	movff	WREG,box_temp+4		; column right (0-159)
-	call	PLED_box
-	bsf		maxdepth_greater_100m	; Set Flag
 	return
 
 PLED_divemins:
@@ -3237,7 +3258,7 @@ PLED_const_ppO2_value:
 	ostc_debug	'j'		; Sends debug-information to screen if debugmode active
 	
 	WIN_TOP		.168
-	WIN_LEFT 	.50
+	WIN_LEFT 	.65
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 

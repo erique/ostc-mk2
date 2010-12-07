@@ -26,8 +26,9 @@
 ; Textlengths
 ; The length table helps to find the texts much faster
 
-#DEFINE	textlength_pointer_low		0x70
-	ORG 	0x00070					
+texts	code	0x00070
+
+textlength_pointer:
 	DB	.0,.18,.16,.24,.6,.6		; nu,  t1,  t2,  t3,  t4,  t5
 	DB	.8,.10,.10,.12,.6,.6		; t6,  t7,  t8,  t9,  t10, t11
 	DB	.8,.10,.6,.10,.6,.6			; t12, t13, t14, t15, t16, t17
@@ -87,7 +88,7 @@
 
 ; Text Bank2 (Texts 256-511):
 	DB	.2,.14,.14,.8,.8,.8		;t256;t257;t258;t259;t260;t261
-	DB	.6,.6,.6,.6,.10,.6		;t262;t263;t264;t265;t266;t267
+	DB	.6,.6,.6,.6,.10,.10		;t262;t263;t264;t265;t266;t267
 	DB	.4,.8,.4,.14,.20,.18	;t268;t269;t270;t271;t272;t273
 	DB	.20,.14,.10,.14,.12,.16	;t274;t275;t276;t277;t278;t279
 	DB	.14,.10,.10,.10,.14,.12	;t280;t281;t282;t283;t284;t285
@@ -96,11 +97,8 @@
 ; Textpositions
 ; Example: DB	.4,.2	; COLUMN=4,ROW=2
 
-; Textpositions pointer -4 !!
-#DEFINE	textpos_pointer_high	0x01
-#DEFINE	textpos_pointer_low		0xBC
-
-	ORG		0x001C0
+; Textpositions pointer
+textpos_pointer:
 	DB	.0,.0			;1 
 	DB	.0,.25			;2 
 	DB	.0,.2			;3
@@ -379,7 +377,7 @@
 	DB	.105,.35			;260
 	DB	.105,.35			;261
 	DB	.1,.1				;262
-	DB	.50,.168			;263 	Bail
+	DB	.65,.168			;263 	Bail
 	DB	.7,.48				;264
 	DB	.120,.135			;265
 	DB	.2,.39				;266
@@ -408,12 +406,8 @@
 
 	DB	.20,.155			;286
 
-; stores texts, texts must have even length and must end with "}"
-#DEFINE	text_pointer_high 	0x04
-#DEFINE	text_pointer_low	0x30
-	
-	ORG		0x00430
-	
+; stores texts, texts must have even length and must end with "}"	
+text_pointer:
 	DA	"Building MD2 Hash}"	;1 
 	DA	"Please Wait...}}"		;2 
 	DA	"HeinrichsWeikamp OSTC2}}";3
@@ -698,7 +692,7 @@
 	DA	"Air }}"				;264		l=6
 	DA	"Air  }"				;265		l=6
 	DA	"Calibrate}"			;266		l=10
-	DA	"Max.}}"				;267		l=6
+	DA	"Max Depth}"			;267		l=10
 	DA	"not}"					;268		l=4
 	DA	"found!}}"				;269		l=8
 	DA	"mV:}"					;270		l=4

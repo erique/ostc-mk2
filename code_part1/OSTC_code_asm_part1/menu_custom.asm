@@ -226,29 +226,29 @@ menu_custom_functions1:
 
 #ifdef	NO_CF_TYPES
 	movlw	binary_cf1
-	subwf	apnoe_mins,W						; Binary cf?
+	subwf	apnoe_mins,W				; Binary cf?
 	bz		menu_custom_functions10c	; Yes
 
 	movlw	binary_cf2
-	subwf	apnoe_mins,W						; Binary cf?
+	subwf	apnoe_mins,W				; Binary cf?
 	bz		menu_custom_functions10c	; Yes
 
 	movlw	binary_cf3
-	subwf	apnoe_mins,W						; Binary cf?
+	subwf	apnoe_mins,W				; Binary cf?
 	bz		menu_custom_functions10c	; Yes
 
 	movlw	binary_cf4
-	subwf	apnoe_mins,W						; Binary cf?
+	subwf	apnoe_mins,W				; Binary cf?
 	bz		menu_custom_functions10c	; Yes
 
 	movlw	binary_cf5
-	subwf	apnoe_mins,W						; Binary cf?
+	subwf	apnoe_mins,W				; Binary cf?
 	bz		menu_custom_functions10c	; Yes
 
 	movlw	binary_cf6
-	subwf	apnoe_mins,W						; Binary cf?
+	subwf	apnoe_mins,W				; Binary cf?
 	bz		menu_custom_functions10c	; Yes
-
+	
 	bra     menu_custom_functions10a    ; Not a binary CF...
 #else
 	movf	hi,W						; Is it a ON/OFF flag ?

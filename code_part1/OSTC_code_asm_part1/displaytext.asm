@@ -67,9 +67,9 @@ displaytext1:
 	movwf	EECON1
 
 	clrf	TBLPTRU
-	movlw	textpos_pointer_high
+	movlw	HIGH (textpos_pointer-4)
 	movwf	TBLPTRH
-	movlw	textpos_pointer_low			; base address -4 for position table
+	movlw	LOW (textpos_pointer-4)	; base address -4 for position table
 	movwf	TBLPTRL
 
 	movff	textnumber,xA+0
@@ -107,7 +107,7 @@ displaytext1:
 	clrf	textaddress+1
 	clrf	TBLPTRH					; Set Pointer for textlength table
 	clrf	TBLPTRU
-	movlw	textlength_pointer_low
+	movlw	LOW textlength_pointer
 	movwf	TBLPTRL
 	bra		displaytext1b
 
@@ -128,10 +128,10 @@ displaytext1b:
 
 displaytext2:						; copies text to wordprocessor
 	clrf	TBLPTRU
-	movlw	text_pointer_low
+	movlw	LOW text_pointer
 	addwf	textaddress+0,W
 	movwf	TBLPTRL
-	movlw	text_pointer_high		; Base address Texts
+	movlw	HIGH text_pointer		; Base address Texts
 	addwfc	textaddress+1,W
 	movwf	TBLPTRH
 

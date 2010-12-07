@@ -69,7 +69,7 @@ PLED_standard_color_6:
 	call	PLED_set_color
 	return
 PLED_standard_color2:
-	movlw	color_standard1		; Reset Color
+	movlw	0xFF		        ; Force full white.
 	call	PLED_set_color
 	return
 

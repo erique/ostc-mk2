@@ -57,7 +57,7 @@
 // C code (PART 2) for working OSTC experimental plattform
 //
 // history:
-//
+// 2010-12-1 : jDG Cleanups to a tighter code.
 
 
 // *********************
@@ -102,8 +102,7 @@
 #pragma udata bank0a=0x060
 // input
 volatile unsigned char wp_stringstore[26];
-volatile unsigned char wp_color1;
-volatile unsigned char wp_color2;
+volatile unsigned int  wp_color;
 volatile unsigned char wp_top;
 volatile unsigned char wp_leftx2;
 volatile unsigned char wp_font;
@@ -114,13 +113,13 @@ volatile unsigned char wp_txtptr;
 volatile unsigned char wp_char;
 volatile unsigned char	wp_command;
 volatile unsigned int	wp_data_16bit;
-volatile unsigned char	wp_data_8bit_one;
-volatile unsigned char	wp_data_8bit_two;
 volatile unsigned int	wp_start;
 volatile unsigned int	wp_end;
 volatile unsigned int	wp_i;
-volatile unsigned char 	wp_black;
 volatile unsigned char	wp_debug_U8;
+
+// Temporary used only inside the wordprocessor.c module
+static unsigned int wp_string_width = 0;
 
 
 // *************************
@@ -132,8 +131,6 @@ void main_calc_wordprocessor(void);
 
 void wp_write_command(void);
 void wp_write_data(void);
-void wp_write_black(void);
-void wp_write_color(void);
 void wp_set_window(void);
 void wp_set_char_font_small(void);
 void wp_set_char_font_medium(void);
@@ -163,8 +160,7 @@ void main(void)
 {
 	wp_top = 10;
 	wp_leftx2 = 10;
-	wp_color1 = 255;
-	wp_color2 = 255;
+	wp_color  = 0xFFFF;
 	wp_font   = 0;
 	wp_invert = 0;
 	wp_stringstore[0] = ' ';
@@ -226,7 +222,9 @@ rom const rom unsigned int wp_small_data[] =
 #pragma code main_wordprocessor = 0x0B468
 void main_wordprocessor(void)
 {
-	wordprocessor();
+	_asm
+	goto	wordprocessor
+	_endasm
 }
 
 // *********************
@@ -253,44 +251,64 @@ _endasm
 
 void wp_write_data(void)
 {
-	wp_data_8bit_one = wp_data_16bit >> 8;
-	wp_data_8bit_two = wp_data_16bit;
 _asm
 	bsf		oled_rs
-	movff	wp_data_8bit_one,PORTD
+	movff	wp_data_16bit+1,PORTD	// OLED commands are big endian...
 	bcf		oled_rw
 	bsf		oled_rw
-	movff	wp_data_8bit_two,PORTD
-	bcf		oled_rw
-	bsf		oled_rw
-_endasm
-}
-
-void wp_write_black(void)
-{
-_asm
-	movff	wp_black,PORTD
-	bcf		oled_rw
-	bsf		oled_rw
+	movff	wp_data_16bit+0,PORTD
 	bcf		oled_rw
 	bsf		oled_rw
 _endasm
 }
 
-void wp_write_color(void)
+//////////////////////////////////////////////////////////////////////////////
+
+void wp_char_width(void)
 {
-_asm
-	movff	wp_color1,PORTD
-	bcf		oled_rw
-	bsf		oled_rw
-	movff	wp_color2,PORTD
-	bcf		oled_rw
-	bsf		oled_rw
-_endasm
+	wp_string_width = 0;
+	for(wp_txtptr = 0; wp_txtptr < 26; wp_txtptr++)
+	{
+		wp_char = wp_stringstore[wp_txtptr];
+		if( wp_char == 0 ) break;
+
+		if(wp_font == 2)
+			wp_set_char_font_large();
+		else if(wp_font == 1)
+			wp_set_char_font_medium();
+		else
+			wp_set_char_font_small();
+
+		for(wp_i = wp_start; wp_i<wp_end;wp_i++)
+		{
+			wp_data_16bit = wp_i ^ 1;
+			if(wp_font == 2)
+				wp_temp_U8 = ((rom unsigned char*)wp_large_data)[wp_data_16bit];
+			else if(wp_font == 1)
+				wp_temp_U8 = ((rom unsigned char*)wp_medium_data)[wp_data_16bit];
+			else
+				wp_temp_U8 = ((rom unsigned char*)wp_small_data)[wp_data_16bit];
+
+			wp_temp_U8 = 1 + (wp_temp_U8 & 127);
+			wp_string_width += wp_temp_U8;
+		}
+	}
+
+	if(wp_font == 2)
+		wp_string_width /= WP_FONT_LARGE_HEIGHT;
+	else if(wp_font == 1)
+		wp_string_width /= WP_FONT_MEDIUM_HEIGHT;
+	else
+		wp_string_width /= WP_FONT_SMALL_HEIGHT;
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 void wp_set_window(void)
 {
+	// Compute string width (in pixels)
+	wp_char_width();
+
 	// x axis start ( 0 - 319)
 	wp_command = 0x35;
 	wp_write_command();
@@ -299,7 +317,7 @@ void wp_set_window(void)
 	// x axis end ( 0 - 319)
 	wp_command = 0x36;
 	wp_write_command();
-	wp_data_16bit = 319;
+	wp_data_16bit = wp_data_16bit + wp_string_width -1;
 	wp_write_data();
 	// y axis start + end ( 0 - 239 )
 	wp_command = 0x37;
@@ -368,6 +386,7 @@ void wp_set_char_font_large(void)
 	wp_start = wp_large_table[wp_char - '.'];
 	wp_end = wp_large_table[1 + wp_char - '.'];
 }
+
 void wordprocessor(void)
 {
 #define TOPLIMIT 230
@@ -378,30 +397,26 @@ void wordprocessor(void)
 	if(wp_leftx2 > LEFTLIMIT)
 		wp_leftx2 = LEFTLIMIT;
 
+	// FIX C18 Bug: avoid crash if TBLPTRU was set somewhere...
+	// Should be called once before first PROM read, ie. font
+	// definition access...
+	_asm
+	clrf TBLPTRU, ACCESS
+	_endasm
+
 	wp_set_window();
+
 	// access to GRAM
 	wp_command = 0x22;
 	wp_write_command();
 	_asm
 		bsf		oled_rs
 	_endasm
+
 	wp_txtptr = 0;
 	wp_char = wp_stringstore[wp_txtptr];
-/*
-_asm
-	lfsr 0x2,0x60
-	movff 0xfde,wp_char
-_endasm
-*/
-	if(!wp_char)
-	{
-		wp_char = ':';
-		wp_txtptr = 25;
-	}
-	_asm
-	clrf TBLPTRU, ACCESS
-	_endasm
-	while((wp_char) && (wp_txtptr < 26))
+
+	while( wp_char && (wp_txtptr < 26) )
 	{
 		if(wp_font == 2)
 			wp_set_char_font_large();
@@ -409,81 +424,40 @@ _endasm
 			wp_set_char_font_medium();
 		else
 			wp_set_char_font_small();
-		wp_black = 0;
+
 			for(wp_i = wp_start; wp_i<wp_end;wp_i++)
 			{
+			wp_data_16bit = wp_i ^ 1;
 				if(wp_font == 2)
-					wp_data_16bit = wp_large_data[wp_i / 2];
+				wp_temp_U8 = ((rom unsigned char*)wp_large_data)[wp_data_16bit];
 				else if(wp_font == 1)
-					wp_data_16bit = wp_medium_data[wp_i / 2];
+				wp_temp_U8 = ((rom unsigned char*)wp_medium_data)[wp_data_16bit];
 				else
-					wp_data_16bit = wp_small_data[wp_i / 2];
-				if(wp_i & 1)
-					wp_temp_U8 = wp_data_16bit & 0xFF;
+				wp_temp_U8 = ((rom unsigned char*)wp_small_data)[wp_data_16bit];
+
+			// Manage to get color (or black) into data_16:
+			if( wp_invert ) wp_temp_U8 ^= 128;
+			if( wp_temp_U8 & 128 )
+				wp_data_16bit = 0;
 				else
-					wp_temp_U8 = wp_data_16bit >> 8;
-				if((wp_temp_U8 & 128))
-				{
-					wp_temp_U8 -= 127;
-					if(wp_invert)
-					{
-						while(wp_temp_U8 > 0)
-						{
-							wp_temp_U8--;
-							wp_write_color();
-						}
-					}
-					else
+				wp_data_16bit = wp_color;
+
+			// Then send that to screen
+			wp_temp_U8 = 1 + (wp_temp_U8 & 127);
+			while(wp_temp_U8-- > 0)
 					{
 						_asm
-							movff	wp_black,PORTD
-						_endasm
-						while(wp_temp_U8 > 0)
-						{
-							wp_temp_U8--;
-							_asm
+					// wp selected color
+					movff 	wp_data_16bit+1,PORTD	// OLED is big endian. PIC is not.
 								bcf		oled_rw
 								bsf		oled_rw
+					movff 	wp_data_16bit+0,PORTD
 								bcf		oled_rw
 								bsf		oled_rw
 							_endasm
 						}
 					}
-				}
-				else
-				{
-					wp_temp_U8++;
-					if(wp_invert)
-					{
-						_asm
-							movff	wp_black,PORTD
-						_endasm
-						while(wp_temp_U8 > 0)
-						{
-							wp_temp_U8--;
-							_asm
-								bcf		oled_rw
-								bsf		oled_rw
-								bcf		oled_rw
-								bsf		oled_rw
-							_endasm
-						}
-					}
-					else
-					{
-						while(wp_temp_U8 > 0)
-						{
-							wp_temp_U8--;
-							wp_write_color();
-						}
-					}
-				}
-			}
-/*
-_asm
-	movff 0xfde,wp_char
-_endasm
-*/
+
 		wp_txtptr++;
 		wp_char = wp_stringstore[wp_txtptr];
 	}

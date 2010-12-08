@@ -88,7 +88,7 @@ textlength_pointer:
 
 ; Text Bank2 (Texts 256-511):
 	DB	.2,.14,.14,.8,.8,.8		;t256;t257;t258;t259;t260;t261
-	DB	.6,.6,.6,.6,.10,.10		;t262;t263;t264;t265;t266;t267
+	DB	.6,.6,.6,.6,.10,.6		;t262;t263;t264;t265;t266;t267
 	DB	.4,.8,.4,.14,.20,.18	;t268;t269;t270;t271;t272;t273
 	DB	.20,.14,.10,.14,.12,.16	;t274;t275;t276;t277;t278;t279
 	DB	.14,.10,.10,.10,.14,.12	;t280;t281;t282;t283;t284;t285
@@ -475,7 +475,7 @@ text_pointer:
 	DA	"Logbook offset }"		;64
 	DA	"Last Deco at[m]}"		;65
 	DA	"End Apnoe [min]}"		;66
-	DA	"Show Vbatt [=1]}"		;67
+	DA	"Show Batt. Volt}"		;67
 ;licence
 	DA	"This program is}"		;68		l=16
 	DA	"distributed in the}}"	;69		l=20
@@ -573,11 +573,11 @@ text_pointer:
 	DA	"Color# Standard}"		;157
 	DA	"Color# Divemask}"		;158
 	DA	"Color# Warnings}"		;159
-	DA	"Show secs. [=1]}"		;160
-	DA	"Dive clock [=1]}"		;161
-	DA	"WarnCeiling[=1]}"		;162
-	DA	"Avr. Depth [=1]}"		;163
-	DA	"Blink Gas  [=1]}"		;164
+	DA	"Divemode secs. }"		;160
+	DA	"Divemode clock }"		;161
+	DA	"Warn Ceiling   }"		;162
+	DA	"Average Depth  }"		;163
+	DA	"Blink BetterGas}"		;164
 	DA	"DepthWarn[mBar]}"		;165
 	DA	"CNS warning [%]}"		;166
 	DA	"GF warning  [%]}"		;167
@@ -692,7 +692,7 @@ text_pointer:
 	DA	"Air }}"				;264		l=6
 	DA	"Air  }"				;265		l=6
 	DA	"Calibrate}"			;266		l=10
-	DA	"Max Depth}"			;267		l=10
+	DA	"Max.}}"				;267		l=6
 	DA	"not}"					;268		l=4
 	DA	"found!}}"				;269		l=8
 	DA	"mV:}"					;270		l=4

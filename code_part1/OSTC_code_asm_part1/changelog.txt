@@ -1,3 +1,9 @@
+New in 1.73 Beta:
+BETA Version - Do NOT use for diving!
+NEW: Custom functions menu more comfortable
+BUGFIX: Surface interval now correct for repetitive dives
+CHANGE: Changes in divemode layout
+
 New in 1.72 Beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: TTS display while decoplan is displayed

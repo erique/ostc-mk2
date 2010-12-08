@@ -163,23 +163,6 @@ menu_custom_functions11:
 	WIN_INVERT	.0	; Init new Wordprocessor	
 
 menu_custom_functions1:
-
-#ifndef NO_CF_TYPES
-	;---- Clear color swatches area ------------------------------------------
-	; BEWARE: PLED_box reset the EEADRH register, so t should be
-    ; be done before setting CF page I/II...
-	clrf	WREG				; Black background
-	movff	WREG,box_temp+0		; Set color
-	movlw	.125
-	movff	WREG,box_temp+1		; row top (0-239)
-	movlw	.178
-	movff	WREG,box_temp+2		; row bottom (0-239)
-	movlw	.75
-	movff	WREG,box_temp+3		; column left (0-159)
-	movlw	.150
-	movff	WREG,box_temp+4		; column right (0-159)
-	call	PLED_box
-#endif
 	call	PLED_standard_color
 
 	movlw	d'1'
@@ -262,19 +245,12 @@ menu_custom_functions10c:
 	WIN_LEFT 	.20
 	WIN_TOP		.65
 	lfsr	FSR2,letter					; Make a string of 8 spaces
-	movlw	' '
-	movwf	POSTINC2
-	movwf	POSTINC2
-	movwf	POSTINC2
-	movwf	POSTINC2
-	movwf	POSTINC2
-	movwf	POSTINC2
-	movwf	POSTINC2
-	movwf	POSTINC2
+	call    cf_fill_line
 	call	word_processor				; Clear +/- line
 
 	WIN_TOP		.95
 	call	word_processor				; Clear 1/10 line
+	
 	bra		menu_custom_functions10b
 
 menu_custom_functions10a:
@@ -393,6 +369,14 @@ customfunctions_loop:
 
 customfunctions2:
 	incf	menupos,F
+	btfss   apnoe_mins,0            ; Are we editing a boolean value ?
+	bra     customfunctions2a       ; NO : don't skip lines 2/3.
+	
+	movlw   d'4'                    ; Just after increment,
+	cpfsgt  menupos                 ; Is current position < 4 ?
+	movwf   menupos                 ; NO: skip set to 4.
+
+customfunctions2a:
 	movlw	d'7'
 	cpfseq	menupos					; =7?
 	bra		customfunctions3		; No
@@ -444,28 +428,28 @@ cf_type_01:						; Type == 1 is percent mode
 	output_16dp	0				; NOTE : hi is already reseted...
 	movlw	'%'
 	movwf	POSTINC2
-	bra		cf_done
+	bra		cf_do_wp
 
 cf_type_02:						; Type == 2 is deci mode.
 	output_16dp	4
-	bra		cf_done
+	bra		cf_do_wp
 
 cf_type_03:						; Type == 3 is centi mode.
 	output_16dp	3
-	bra		cf_done
+	bra		cf_do_wp
 
 cf_type_04:						; Type == 4 is mili mode
 	output_16dp	2
-	bra		cf_done
+	bra		cf_do_wp
 
 cf_type_05:						; Type == 5 is on/off mode.
 	movf	lo,W				; Get flag value...
 	bz		cf_type_off
 	OUTPUTTEXT	d'130'			; ON
-	bra		cf_done
+	bra		cf_do_wp
 cf_type_off:
 	OUTPUTTEXT	d'131'			; OFF
-	bra		cf_done
+	bra		cf_do_wp
 
 cf_type_06:						; Type == 6 is mm:ss mode (... or hh:mm)
 	call	convert_time		; Convert to min:sec into hi:low.
@@ -476,10 +460,13 @@ cf_type_06:						; Type == 6 is mm:ss mode (... or hh:mm)
 	movwf	POSTINC2
 	movff	wp_temp,lo			; Get back seconds
 	output_99x					; lo in 2 digits with trailing zeros.
-	bra		cf_done
+	bra		cf_do_wp
 
 cf_type_07:						; Type == 7 is Color swatch.
 	output_8
+
+    call    cf_fill_line        ; it does less flickering when editing colors...
+	call    word_processor
 
 	movf	lo,W				; Get color.
 	movff	WREG,box_temp+0		; Set color
@@ -493,7 +480,7 @@ cf_type_07:						; Type == 7 is Color swatch.
 	movff	WREG,box_temp+4		; column right (0-159)
 
 	call	PLED_box
-	bra		cf_done				; W/o trailling spaces...
+	bra		cf_done				; wp already done. Skip it...
 
 cf_type_99:						; 8bit mode. Or unrecognized type...
 	clrf	hi
@@ -502,9 +489,24 @@ cf_type_0:						; 15bit mode.
 	bcf		hi,7
 	output_16
 
+cf_do_wp:                       ; Process by calling wordprocessor
+    call    cf_fill_line
+	call	word_processor
+
 cf_done:
-	movff	FSR1L, hi			; Restore saved registers...
+	movff	FSR1L, hi			; And restore saved registers before return.
 	movff	FSR1H, EEADRH
+	return
+
+cf_fill_line:                   ; Mattias: No flicker if u clear just what you need...
+	movf    FSR2L,W             ; How many chars lefts ?
+	sublw   (LOW letter) + .17  ; Remaining chars to fill: (letter + 21) - PTR
+	btfsc   STATUS,N            ; Add chars until none left...
+	return
+	movlw   ' '
+	movwf   POSTINC2
+	bra     cf_fill_line
+	
 #else
 	bcf		hi,7				; clear Bit 7 of value
 	output_16
@@ -534,8 +536,8 @@ cf_no_bits:
 	movwf	POSTINC2
 	movwf	POSTINC2
 	movwf	POSTINC2
-#endif
 	goto	word_processor		
+#endif
 
 ;-----------------------------------------------------------------------------
 
@@ -555,6 +557,7 @@ do_customfunction:
 	bra		restore_cfn_value
 	dcfsnz	menupos,F
 	bra		adjust_cfn_value
+
 exit_customfunctions:
 	movlw	d'2'					; Return to correct list entry
 	btfss	customfunction_page
@@ -562,7 +565,6 @@ exit_customfunctions:
 	movwf	menupos					; 
 	clrf	EEADRH					; Clear EEADRH !
 	goto	setup_menu2				; exit...
-
 
 next_customfunction:
 	incf	decodata+0

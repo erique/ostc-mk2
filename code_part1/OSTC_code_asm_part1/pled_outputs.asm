@@ -894,9 +894,6 @@ PLED_simulator_mask:
 	DISPLAYTEXT .11			; Exit
 	return
 	
-
-
-
 PLED_temp_surfmode:
 	ostc_debug	'e'
 	movff	temperature+0,last_temperature+0
@@ -2854,42 +2851,31 @@ PLED_divemenu_cursor:
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
+
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
 	call	word_processor
+
 	WIN_TOP		.25
-	WIN_LEFT	.85
-	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
 	call	word_processor
+
 	WIN_TOP		.50
-	WIN_LEFT	.85
-	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
 	call	word_processor
+
 	WIN_TOP		.75
-	WIN_LEFT	.85
-	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
 	call	word_processor
+
 	WIN_TOP		.100
-	WIN_LEFT	.85
-	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movlw	0xB8
 	movwf	POSTINC2
@@ -2908,10 +2894,6 @@ PLED_divemenu_cursor:
 	dcfsnz	temp1,F
 	movlw	d'100'
 	movff	WREG,win_top
-	WIN_LEFT	.85
-	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
 
 	lfsr	FSR2,letter
 	movlw	0xB7			; Arrow for menu

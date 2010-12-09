@@ -391,10 +391,10 @@ PLED_divemode_mask:					; Displays mask in Dive-Mode
 	call	PLED_standard_color
 	return
 
-PLED_clear_decoarea:
+PLED_clear_customview_divemode:
 	movlw	.0
 	movff	WREG,box_temp+0		; Data
-	movlw	.60
+	movlw	.168
 	movff	WREG,box_temp+1		; row top (0-239)
 	movlw	.239
 	movff	WREG,box_temp+2		; row bottom (0-239)
@@ -403,15 +403,27 @@ PLED_clear_decoarea:
 	movlw	.159	
 	movff	WREG,box_temp+4		; column right (0-159)
 	call	PLED_box
-	call	PLED_temp_divemode					; redraw temperature
-	call	PLED_active_gas_divemode			; redraw active Gas
+	return
+
+PLED_clear_decoarea:
+	movlw	.0
+	movff	WREG,box_temp+0		; Data
+	movlw	.54
+	movff	WREG,box_temp+1		; row top (0-239)
+	movlw	.168
+	movff	WREG,box_temp+2		; row bottom (0-239)
+	movlw	.090
+	movff	WREG,box_temp+3		; column left (0-159)
+	movlw	.159	
+	movff	WREG,box_temp+4		; column right (0-159)
+	call	PLED_box
 	return
 
 PLED_display_ndl_mask:
 	; Clear Dekostop and Dekosum
 	rcall	PLED_clear_decoarea	
 
-	call		PLED_divemask_color	; Set Color for Divemode mask
+	call	PLED_divemask_color	; Set Color for Divemode mask
 	DISPLAYTEXT		d'84'			; NoStop
 	call	PLED_standard_color
 
@@ -425,12 +437,12 @@ PLED_display_ndl_mask2:
 	return
 
 PLED_display_ndl:
-	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
-	return								; Yes, No update and return!
+	btfsc	menubit					; Divemode menu active?
+	return							; Yes, return
 
 	ostc_debug	'z'		; Sends debug-information to screen if debugmode active
 	
-	WIN_TOP		.185
+	WIN_TOP		.136
 	WIN_LEFT	.119
 	WIN_FONT 	FT_MEDIUM
 	WIN_INVERT	.0					; Init new Wordprocessor
@@ -454,11 +466,8 @@ PLED_display_deko_mask:
 	return
 
 PLED_display_deko:
-	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
-	return								; Yes, No update and return!
-
 	btfsc	menubit					; Divemode menu active?
-	bra		PLED_display_deko1		; Yes, do not display dekostop
+	bra		PLED_display_deko1		; Yes, do not display deco, only GF (if required)
 
 	ostc_debug	'y'		; Sends debug-information to screen if debugmode active
 ; deco stop word
@@ -466,7 +475,7 @@ PLED_display_deko:
 	DISPLAYTEXT	d'82'			; DEKOSTOP
 	call	PLED_standard_color
 
-	WIN_TOP		.118
+	WIN_TOP		.80
 	WIN_LEFT	.94
 	WIN_FONT 	FT_MEDIUM
 	WIN_INVERT	.0					; Init new Wordprocessor
@@ -483,13 +492,10 @@ PLED_display_deko:
 	call	word_processor
 	WIN_FONT 	FT_SMALL
 	
-PLED_display_deko1:
-	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
-	return								; Yes, No update and return!
-
+;PLED_display_deko1:
 	ostc_debug	'x'		; Sends debug-information to screen if debugmode active
 	
-	WIN_TOP		.185
+	WIN_TOP		.136
 	WIN_LEFT	.119
 	WIN_FONT 	FT_MEDIUM
 	WIN_INVERT	.0					; Init new Wordprocessor
@@ -505,6 +511,7 @@ PLED_display_deko1:
 	movwf	POSTINC2
 	call	word_processor
 
+PLED_display_deko1:
 	movff	char_O_gradient_factor,lo		; gradient factor
 	GETCUSTOM8	d'8'		; threshold for display
 	cpfslt	lo				; show value?
@@ -2300,40 +2307,33 @@ PLED_divemins_gauge:
 	WIN_FONT	FT_SMALL
 	return
 
-PLED_stopwatch_remove:
-	movlw	.0
-	movff	WREG,box_temp+0		; Data
-	movlw	.54
-	movff	WREG,box_temp+1		; row top (0-239)
-	movlw	.102
-	movff	WREG,box_temp+2		; row bottom (0-239)
-	movlw	.062
-	movff	WREG,box_temp+3		; column left (0-159)
-	movlw	.159	
-	movff	WREG,box_temp+4		; column right (0-159)
-	call	PLED_box
-	return
+;PLED_stopwatch_remove:
+;	movlw	.0
+;	movff	WREG,box_temp+0		; Data
+;	movlw	.54
+;	movff	WREG,box_temp+1		; row top (0-239)
+;	movlw	.102
+;	movff	WREG,box_temp+2		; row bottom (0-239)
+;	movlw	.062
+;	movff	WREG,box_temp+3		; column left (0-159)
+;	movlw	.159	
+;	movff	WREG,box_temp+4		; column right (0-159)
+;	call	PLED_box
+;	return
 	
 
 PLED_stopwatch_show:
-	btfsc	menubit						; Divemode menu active?
-	return								; Yes, No update and return!
-
 	ostc_debug	'V'		; Sends debug-information to screen if debugmode active
 	; Stopwatch
 
 	call		PLED_divemask_color	; Set Color for Divemode mask
-	DISPLAYTEXTH	d'283'			; Counter
+	DISPLAYTEXTH	d'283'			; Stopwatch
 	call	PLED_standard_color
 
-
-	WIN_TOP		.80
+	WIN_TOP		.192
 	WIN_LEFT	.110
 	WIN_FONT	FT_SMALL
 	call	PLED_standard_color
-
-
-
 
 	lfsr	FSR2,letter
 	movff	average_divesecs+0,lo				; Stopwatch
@@ -2362,8 +2362,8 @@ PLED_stopwatch_show:
 
 	ostc_debug	'U'				; Sends debug-information to screen if debugmode active
 
-	WIN_TOP		.80
-	WIN_LEFT	.62
+	WIN_TOP		.216
+	WIN_LEFT	.110
 	WIN_FONT	FT_SMALL
 	call	PLED_standard_color
 
@@ -2372,13 +2372,10 @@ PLED_stopwatch_show:
 	movff	avr_rel_pressure+0,lo
 	movff	avr_rel_pressure+1,hi
 	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
-	bsf		leftbind
 	bsf		ignore_digit5		; do not display 1cm depth
 	output_16dp	d'3'
 	bcf		leftbind
 	movlw	'm'
-	movwf	POSTINC2
-	movlw	' '
 	movwf	POSTINC2
 	call	word_processor
 	return

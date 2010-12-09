@@ -212,7 +212,7 @@ toggle_stopwatch:
 	bra		timeout_divemenu2			; quit menu!
 
 toggle_stopwatch2:
-	call	PLED_stopwatch_remove		; Remove Stopwatch Outputs
+	call	PLED_clear_customview_divemode	; Remove Stopwatch Outputs
 	bra		timeout_divemenu2			; quit menu!
 
 divemode_toggle_brightness:
@@ -737,7 +737,11 @@ timeout_divemenu2a:
 	call	PLED_clear_divemode_menu; Clear dive mode menu
 	call	PLED_divemode_mask		; Display mask
 	call	PLED_divemins			; Display (new) divetime!
-	call	PLED_temp_divemode		; redraw temperature
+	btfss	dekostop_active
+	call	PLED_display_ndl_mask
+	btfsc	dekostop_active
+	call	PLED_display_deko_mask
+
 	clrf	timeout_counter3		; Also clear timeout
 	bcf		display_see_deco		; clear all display flags
 	bcf		display_see_l_tissue

@@ -185,10 +185,10 @@ textpos_pointer:
 	DB	.0,.215		;81
 ; end of licence
 
-	DB	.102,.150	;82 Decostop
+	DB	.102,.54	;82 Decostop
 	DB	.0,.0		;83
-	DB	.108,.216	;84	No Stop
-	DB	.135,.216	;85 TTS
+	DB	.108,.112	;84	No Stop
+	DB	.135,.112	;85 TTS
 	DB	.100,.0		;86 Divetime
 	DB	.0,.0		;87 Depth
 	DB	.0,.0		;88
@@ -400,7 +400,7 @@ textpos_pointer:
 	
 	DB	.100,.50			;281
 	DB	.100,.0				;282
-	DB	.90,.54				;283	Stopwatch
+	DB	.90,.170			;283	Stopwatch
 	DB	.20,.95				;284
 	DB	.20,.125			;285
 

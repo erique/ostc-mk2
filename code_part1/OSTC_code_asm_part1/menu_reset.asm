@@ -19,7 +19,7 @@
 ; Menu "Reset all"
 ; written by: Matthias Heinrichs, info@heinrichsweikamp.com
 ; written: 10/30/05
-; last updated: 08/08/31
+; last updated: 10/12/08 by JD Gascuel at free.fr
 ; known bugs:
 ; ToDo: 
 
@@ -33,110 +33,151 @@
 
 ; Macro to check values, and construct PROM CF default table.
 ; If in types mode, set flags into hi. If not, clear it.
-CF_DEFAULT	macro	type, value
-			if ( type == CF_INT15 )
-				if (HIGH value) > .127
-					error "15bit default too big:", value
-				endif
-				DB		LOW value, 0x80 + (HIGH value)
-			else
-			    ; Basic sanity check for 8bit values:
-				if ( HIGH value ) > 0
-					error "8bit default too big:", value
-				endif
-				if (type==CF_BOOL) && (value > 1)
-					error "BOOL default too big:", value
-				endif
-                ifdef	NO_CF_TYPES
-				    DB		LOW value, HIGH value
-                else
-				    DB		LOW value, type
-                endif
-			endif
-			endm
+CF_DEFAULT	macro	type, default, min, max
+    noexpand
+    if (type) == CF_INT15
+    	if (HIGH (default)) > .127
+    		error "CF# 15bit default too big:", value
+    	endif
+    	if (min)>0 && (max>min)
+    	    error "CF# 15bit defaults cannot have both MIN & MAX flags"
+    	endif
+    
+        ifdef NO_CF_TYPES
+    		DB  LOW (default), HIGH(default) + 0x80
+    	else
+    		DB  LOW (default), HIGH(default) + 0x80
+    		if (min) > 0
+        		DB  LOW(min), HIGH(min)
+        	else
+        		DB  LOW(min), HIGH(min) + 0x80
+        	endif
+    	endif
+    else
+        ; Basic sanity check for 8bit values:
+    	if HIGH(default) > 0
+    		error "CF# 8bit default too big:", (default)
+    	endif
+    	if HIGH(min) > 0
+    		error "CF# 8bit min too big:", (min)
+    	endif
+    	if HIGH(max) > 0
+    		error "CF# 8bit max too big:", (max)
+    	endif
+    	if ((type)==CF_BOOL) && ( (default)>1 )
+    		error "CF# BOOL default too big:", (default)
+    	endif
+    	if ((type)==CF_BOOL) && ( (min)>0 || (max)>0 )
+    		error "CF# BOOL cannot have min/max"
+    	endif
+    
+        ifdef NO_CF_TYPES
+    	    DB  LOW(default), 0
+    	else
+            local typeFlags
+typeFlags   set type
+            if (min)>0
+typeFlags       set type + CF_MIN
+            endif
+            if (max)>(min)
+typeFlags       set typeFlags + CF_MAX
+            endif
+    	    DB  LOW(default), (typeFlags), LOW(min), LOW(max)
+        endif
+    endif
+    expand
+    endm
+
+; Starting at CF0
+CF_NUMBER   set     -1
 
 ; resets all customfunctions to the following default values
-cf_default_table:
+cf_default_table0:
     ;---- BANK0 custom function defaults -------------------------------------
-	CF_DEFAULT    CF_CENTI,	    d'100' 		; dive_threshold	        100cm
-	CF_DEFAULT    CF_CENTI,	    d'30' 		; surf_threshold        	30cm
-	CF_DEFAULT    CF_SEC,	    d'240' 		; diveloop_timeout      	240s
-	CF_DEFAULT    CF_SEC,	    d'120' 		; surfloop_timeout	        120s
-	CF_DEFAULT    CF_SEC,	    d'5' 		; premenu_timeout	        5s
+    ;                          DEFAULT   MIN     MAX
+	CF_DEFAULT    CF_CENTI,	    d'100', d'50',  d'250'  ; dive_threshold	        100cm
+	CF_DEFAULT    CF_CENTI,	    d'30',  d'10',  d'100'  ; surf_threshold        	30cm
+	CF_DEFAULT    CF_SEC,	    d'240', d'30',  d'240'  ; diveloop_timeout      	240s
+	CF_DEFAULT    CF_SEC,	    d'120', d'30',  d'240'  ; surfloop_timeout	        120s
+	CF_DEFAULT    CF_SEC,	    d'5',   d'1',   d'30'   ; premenu_timeout	        5s
 
-	CF_DEFAULT    CF_INT8, 	    d'7' 		; minimum_velocity		    7min/min
-	CF_DEFAULT    CF_INT15,	    d'1160' 	; pressure_offset_divemode	1160mBar
-	CF_DEFAULT    CF_INT15,	    d'1100' 	; max_surfpressure		    1100mBar
-	CF_DEFAULT    CF_PERCENT,	d'20' 		; min_gradient_factor		20%
-	CF_DEFAULT    CF_PERCENT,	d'20' 		; oxygen_threshold			20%
+	CF_DEFAULT    CF_INT8, 	    d'7',   d'3',   d'18'   ; minimum_velocity		    7min/min
+	CF_DEFAULT    CF_INT15,	    d'1160',d'950', 0    	; pressure_offset_divemode	1160mBar
+	CF_DEFAULT    CF_INT15,	    d'1100',d'1100', 0   	; max_surfpressure		    1100mBar
+	CF_DEFAULT    CF_PERCENT,	d'20',  d'1',  d'99'   ; min_gradient_factor		20%
+	CF_DEFAULT    CF_PERCENT,	d'20',  d'1',  d'20'	; oxygen_threshold			20%
 
-	CF_DEFAULT    CF_SEC,	    d'30' 		; dive_menu_timeout		    30s
-	CF_DEFAULT    CF_PERCENT,   d'110' 		; saturation_multiplier		x1.10
-	CF_DEFAULT    CF_PERCENT,   d'90' 		; desaturation_multiplier	x0.90
-	CF_DEFAULT    CF_PERCENT,	d'60' 		; nofly_time_ratio			60%
-	CF_DEFAULT    CF_PERCENT,	d'100' 		; gradient_factor_alarm1	100%
+	CF_DEFAULT    CF_SEC,	    d'30',  d'5',   d'30'   ; dive_menu_timeout		    30s
+	CF_DEFAULT    CF_PERCENT,   d'110', d'110', d'200' 	; saturation_multiplier		x1.10
+	CF_DEFAULT    CF_PERCENT,   d'90',  d'50',  d'90'   ; desaturation_multiplier	x0.90
+	CF_DEFAULT    CF_PERCENT,	d'60',  d'60',  d'100'	; nofly_time_ratio			60%
+	CF_DEFAULT    CF_PERCENT,	d'100', d'50',  d'100'  ; gradient_factor_alarm1	100%
 
-	CF_DEFAULT    CF_PERCENT,	d'10' 		; cns_display_surface		10%
-	CF_DEFAULT    CF_INT8,	    d'10' 		; deco_distance_for_sim		1m
-	CF_DEFAULT    CF_CENTI,     d'019' 		; ppo2_warning_low			0.19 Bar
-	CF_DEFAULT    CF_CENTI,     d'160' 		; ppo2_warning_high			1.60 Bar
-	CF_DEFAULT    CF_CENTI,     d'150' 		; ppo2_display_high			1.50 Bar
+	CF_DEFAULT    CF_PERCENT,	d'10',  d'01',  d'100'  ; cns_display_surface		10%
+	CF_DEFAULT    CF_DECI,	    d'10',  d'10',  d'100'	; deco_distance_for_sim		1m
+	CF_DEFAULT    CF_CENTI,     d'019', d'019', d'021'	; ppo2_warning_low			0.19 Bar
+	CF_DEFAULT    CF_CENTI,     d'160', d'100', d'160'  ; ppo2_warning_high			1.60 Bar
+	CF_DEFAULT    CF_CENTI,     d'150', d'100', d'150'	; ppo2_display_high			1.50 Bar
     
-	CF_DEFAULT    CF_INT8,	    d'10' 		; sampling_rate				10s
-	CF_DEFAULT    CF_INT8,	    d'6' 		; sampling_divisor_temp		/6
-	CF_DEFAULT    CF_INT8,	    d'6' 		; sampling_divisor_deco		/6
-	CF_DEFAULT    CF_INT8,	    d'0' 		; sampling_divisor_tank		never
-	CF_DEFAULT    CF_INT8,	    d'0' 		; sampling_divisor_ppo2		never
+	CF_DEFAULT    CF_INT8,	    d'10',  d'1',   d'120'   ; sampling_rate				10s
+	CF_DEFAULT    CF_INT8,	    d'6',   d'0',   d'15'   ; sampling_divisor_temp		/6
+	CF_DEFAULT    CF_INT8,	    d'6',   d'0',   d'15'   ; sampling_divisor_deco		/6
+	CF_DEFAULT    CF_INT8,	    d'0',   d'0',   d'15'   ; sampling_divisor_tank		never
+	CF_DEFAULT    CF_INT8,	    d'0',   d'0',   d'15'   ; sampling_divisor_ppo2		never
 
-	CF_DEFAULT    CF_INT8,	    d'0' 		; sampling_divisor_deco2	never
-	CF_DEFAULT    CF_INT8,	    d'0' 		; sampling_divisor_nyu2		never
-	CF_DEFAULT    CF_PERCENT,	d'20' 		; cns_display_high			20%
-	CF_DEFAULT    CF_INT8,	    d'0' 		; logbook_offset			No Offset, but 15Bit value
-	CF_DEFAULT    CF_INT8,	    d'3' 		; last_deco_depth			3m
+	CF_DEFAULT    CF_INT8,	    d'0',   d'0',   d'15'   ; sampling_divisor_deco2	never
+	CF_DEFAULT    CF_INT8,	    d'0',   d'0',   d'15'   ; sampling_divisor_nyu2		never
+	CF_DEFAULT    CF_PERCENT,	d'20',  d'5',   d'75'   ; cns_display_high			20%
+	CF_DEFAULT    CF_INT15,	    d'0',   d'0',   0 		; logbook_offset			No Offset, but 15Bit value
+	CF_DEFAULT    CF_INT8,	    d'3',   d'2',   d'6'	; last_deco_depth			3m
 
-	CF_DEFAULT    CF_SEC,	    d'10' 		; timeout_apnoe_mode		10min
-	CF_DEFAULT    CF_BOOL,	    d'0' 		; show_voltage_value		=1 Show value instead of symbol, =0 Show Symbol
+	CF_DEFAULT    CF_SEC,	    d'10',  d'1',   d'15'  ; timeout_apnoe_mode		10min
+	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; show_voltage_value		=1 Show value instead of symbol, =0 Show Symbol
 
     ;---- BANK1 custom function defaults -------------------------------------
-	CF_DEFAULT    CF_PERCENT,	d'30' 		; GF_low_default			30%
-	CF_DEFAULT    CF_PERCENT,	d'90' 		; GF_high_default			90%
-	CF_DEFAULT    CF_COLOR,     d'199' 		; color_battery_surface		Color Battery sign: Deep blue
-	CF_DEFAULT    CF_COLOR,     d'255' 		; color_standard1			Color Standard: White
-	CF_DEFAULT    CF_COLOR,     d'62' 		; color_divemask			Color Divemask: Light green
-	CF_DEFAULT    CF_COLOR,     d'224' 		; color_warnings			Color Warnings: Red
+cf_default_table1:
+    ;                          DEFAULT   MIN     MAX
+	CF_DEFAULT    CF_PERCENT,   d'30',  d'10',  d'90'   ; GF_low_default			30%
+	CF_DEFAULT    CF_PERCENT,   d'90', 	d'30',  d'95'   ; GF_high_default			90%
+	CF_DEFAULT    CF_COLOR,     d'199', 0,      0 		; color_battery_surface		Color Battery sign: Deep blue
+	CF_DEFAULT    CF_COLOR,     d'255', 0,      0 		; color_standard1			Color Standard: White
+	CF_DEFAULT    CF_COLOR,     d'62',  0,      0 		; color_divemask			Color Divemask: Light green
+	CF_DEFAULT    CF_COLOR,     d'224', 0,      0 		; color_warnings			Color Warnings: Red
     
-	CF_DEFAULT    CF_BOOL,	    d'0' 		; show_seconds_divemode		=1 Show the seconds in Divemode
-	CF_DEFAULT    CF_BOOL,	    d'0' 		; show_clock_divemode		=1 Show the clock in Divemode
-	CF_DEFAULT    CF_BOOL,	    d'1' 		; warn_ceiling_divemode		=1 Warn ceiling violation in divemode
-	CF_DEFAULT    CF_BOOL, 	    d'0' 		; start_with_stopwatch		=1 start with stopwatch
-	CF_DEFAULT    CF_BOOL,	    d'0' 		; blink_gas_divemode 		=1 Show (resetable) average Depth instead of temperature
+	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; show_seconds_divemode		=1 Show the seconds in Divemode
+	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; show_clock_divemode		=1 Show the clock in Divemode
+	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0       ; warn_ceiling_divemode		=1 Warn ceiling violation in divemode
+	CF_DEFAULT    CF_BOOL, 	    d'0',   0,      0       ; start_with_stopwatch		=1 start with stopwatch
+	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; blink_gas_divemode 		=1 Show (resetable) average Depth instead of temperature
     
-	CF_DEFAULT    CF_INT15,     d'13000' 	; color_warn_depth_mBar		Warn depths
-	CF_DEFAULT    CF_PERCENT,	d'101' 		; color_warn_cns_percent    Warn-%
-	CF_DEFAULT    CF_PERCENT,	d'101' 		; color_warn_gf_percent		Warn-%
-	CF_DEFAULT    CF_CENTI,     d'161' 		; color_warn_ppo2_cbar		ppO2 warn
-	CF_DEFAULT    CF_INT8,	    d'15' 		; color_warn_celocity_mmin	warn at xx m/min
+	CF_DEFAULT    CF_INT15,     d'13000', 0,    d'13000'; color_warn_depth_mBar		Warn depths
+	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'	; color_warn_cns_percent    Warn-%
+	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'  ; color_warn_gf_percent		Warn-%
+	CF_DEFAULT    CF_CENTI,     d'161', d'100', d'161'  ; color_warn_ppo2_cbar		ppO2 warn
+	CF_DEFAULT    CF_INT8,	    d'15',  d'7',   d'20'	; color_warn_celocity_mmin	warn at xx m/min
     
-	CF_DEFAULT    CF_SEC,	    d'42'   	; time_correction_value_default	Adds to Seconds on Midnight
-	CF_DEFAULT    CF_INT15,     0           ; UNUSED
-	CF_DEFAULT    CF_INT15,     0           ; UNUSED
-	CF_DEFAULT    CF_INT15,     0           ; UNUSED
-	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	CF_DEFAULT    CF_SEC,	    d'42',  d'0',   d'240'  ; time_correction_value_default	Adds to Seconds on Midnight
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+	CF_DEFAULT    CF_INT15,     0,      0,      0       ; UNUSED
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	                
-	CF_DEFAULT    CF_INT15,     0           ; UNUSED
-	CF_DEFAULT    CF_INT15,     0           ; UNUSED
-	CF_DEFAULT    CF_INT15,     0           ; UNUSED
-	CF_DEFAULT    CF_INT15,     0           ; UNUSED
-	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	                
-	CF_DEFAULT    CF_INT15,     0           ; UNUSED
-	CF_DEFAULT    CF_INT15,     0           ; UNUSED
-	CF_DEFAULT    CF_INT15,     0           ; UNUSED
-	CF_DEFAULT    CF_INT15,     0           ; UNUSED
-	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	                
-	CF_DEFAULT    CF_INT15,     0           ; UNUSED
-	CF_DEFAULT    CF_INT15,     0           ; UNUSED
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+cf_default_table2:
+
 ;=============================================================================
 
 menu_reset:
@@ -265,17 +306,17 @@ reset_start:
 	movwf	EEADR
 	clrf	hi						; He part (default for all gases: 0%)
 	movlw	d'21'					; O2 part (21%)
-	rcall	reset_customfunction	; saves default and current value for gas #1
+	rcall	reset_gas               ; saves default and current value for gas #1
 	movlw	d'21'					; O2 part (21%)
-	rcall	reset_customfunction	; saves default and current value for gas #2
+	rcall	reset_gas               ; saves default and current value for gas #2
 	movlw	d'21'					; O2 part (21%)
-	rcall	reset_customfunction	; saves default and current value for gas #3
+	rcall	reset_gas               ; saves default and current value for gas #3
 	movlw	d'21'					; O2 part (21%)
-	rcall	reset_customfunction	; saves default and current value for gas #4
+	rcall	reset_gas               ; saves default and current value for gas #4
 	movlw	d'21'					; O2 part (21%)
-	rcall	reset_customfunction	; saves default and current value for gas #5
+	rcall	reset_gas               ; saves default and current value for gas #5
 	movlw	d'21'					; O2 part (21%)
-	rcall	reset_customfunction	; saves default and current value for gas #6
+	rcall	reset_gas               ; saves default and current value for gas #6
 
 reset_all_cf:
 	movlw	d'1'
@@ -327,23 +368,19 @@ reset_all_cf_bank0:
 	movlw	d'127'					; address of low byte of first custom function
 	movwf	EEADR
 
-    movlw   LOW cf_default_table    ; Load PROM pointer.
+    movlw   LOW cf_default_table0    ; Load PROM pointer.
     movwf   TBLPTRL,A
-    movlw   HIGH cf_default_table
+    movlw   HIGH cf_default_table0
     movwf   TBLPTRH,A
-    movlw   UPPER cf_default_table
+    movlw   UPPER cf_default_table0
     movwf   TBLPTRU,A
 
 cf_bank0_loop:
-	; Did we already read 32 (decimal) bytes ?
+	; Did we already read 32 (decimal) words or double-words (with types) ?
 	movf    TBLPTRL,W
-	sublw   LOW (cf_default_table+.64)
+	sublw   LOW (cf_default_table1)
 	bz      reset_all_cf_bank1
 
-    tblrd*+
-    movf    TABLAT, W               ; Low byte in WREG,
-    tblrd*+
-    movff   TABLAT, hi              ; High byte in hi
 	rcall	reset_customfunction	; saves default and current value
 	bra     cf_bank0_loop
 	
@@ -352,17 +389,13 @@ reset_all_cf_bank1:
 	movwf	EEADRH					; EEPROM BANK 1 !!
 	movlw	d'127'					; address of low byte of first custom function
 	movwf	EEADR
-
+	
 cf_bank1_loop:
-	; Did we already read another 32 (decimal) bytes ?
+	; Did we already read another 32 (decimal) words or double-words ?
 	movf    TBLPTRL,W
-	sublw   LOW (cf_default_table+.128)
-	bz     cf_bank1_end
+	sublw   LOW (cf_default_table2)
+	bz      cf_bank1_end
 
-    tblrd*+
-    movf    TABLAT, W               ; Low byte in WREG,
-    tblrd*+
-    movff   TABLAT, hi              ; High byte in hi
 	rcall	reset_customfunction	; saves default and current value
 	bra     cf_bank1_loop
 
@@ -372,30 +405,40 @@ cf_bank1_end:
 ;call	reset_external_eeprom	; delete profile memory
 	goto	restart					; all reset, quit to surfmode
 
-; Write the four bytes lo:hi:lo:(hi w/o type flags) into EEPROM
-; Don't change hi:lo values...
+; Write WREG:lo twice, w/o any type clearing, pre-incrementing EEADR
+reset_gas:
+    movwf   lo
+    rcall   reset_eeprom_value      ; First pair
+    goto    reset_eeprom_value      ; Second pair.
+
 reset_customfunction:
-	movwf	lo
+    tblrd*+
+    movff   TABLAT, lo              ; Low byte in lo,
+    tblrd*+
+    movff   TABLAT, hi              ; High byte in hi
+
+  ifndef NO_CF_TYPES
+    tblrd*+                         ; Skip advanced min/max values.
+    tblrd*+
+    btfss   hi,7                    ; In EEPROM, just clear all types,
+    clrf    hi                      ; to keep external program compat (jdivelog etc.)
+    bcf     hi,7
+  endif
+
+    ; Manage the default/value tuple
+    rcall   reset_eeprom_value      ; First pair, untouched.
+    bcf     hi,7                    ; Just clear type bit.
+    bra    reset_eeprom_value       ; Second pair, cleared
+
+; Write the two bytes lo:hi into EEPROM
+reset_eeprom_value:
 	incf	EEADR,F
-	movff	lo, EEDATA					; Lowbyte Defaul value
+	movff	lo, EEDATA				; Lowbyte Defaul value
 	call	write_eeprom
+
 	incf	EEADR,F
-	movff	hi, EEDATA					; Highbyte default value
-	call	write_eeprom
-	incf	EEADR,F
-	movff	lo, EEDATA					; Lowbyte current value
-	call	write_eeprom
-	incf	EEADR,F
-	movff	hi, EEDATA					; Highbyte current value
-#ifdef NO_CF_TYPES
-	bcf		EEDATA,7					; This bit will only be written for the default value
-#else
-	btfss	EEDATA,7					; A 15bit value ?
-	clrf	EEDATA						; Nope: clear type flag.
-#endif
-	call	write_eeprom
-	return
-	
+	movff	hi, EEDATA				; Highbyte default value
+	goto    write_eeprom
 
 reset_external_eeprom:				; deletes complete external eeprom!
 	clrf	eeprom_address+0

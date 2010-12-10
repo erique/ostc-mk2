@@ -335,8 +335,9 @@ customfunctions_loop:
 
 customfunctions2:
 	incf	menupos,F
-	btfss   apnoe_mins,0            ; Are we editing a boolean value ?
-	bra     customfunctions2a       ; NO : don't skip lines 2/3.
+	movf    cf_type,W               ; Are we editing a boolean value ?
+	xorlw   CF_BOOL
+	bnz     customfunctions2a       ; NO : don't skip lines 2/3.
 	
 	movlw   d'4'                    ; Just after increment,
 	cpfsgt  menupos                 ; Is current position < 4 ?

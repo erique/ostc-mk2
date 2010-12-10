@@ -2391,6 +2391,14 @@ PLED_serial:			; Writes OSTC #Serial and Firmware version in surfacemode
 
 
 	lfsr	FSR2,letter
+	movlw   0x85                        ; New aa_font_28 5 grays HW logo.
+	movwf   POSTINC2
+	movlw   0x86
+	movwf   POSTINC2
+	movlw   ' '
+	movwf   POSTINC2
+	movwf   POSTINC2
+	
 	OUTPUTTEXTH		d'262'			; "OSTC "
 	clrf	EEADRH
 	clrf	EEADR				; Get Serial number LOW
@@ -2417,6 +2425,7 @@ PLED_serial:			; Writes OSTC #Serial and Firmware version in surfacemode
 	bsf		leftbind
 	output_99x
 	bcf		leftbind
+	
 	call	word_processor
 	return
 

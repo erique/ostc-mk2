@@ -24,6 +24,7 @@ aa_font28_block:
 			DB	'°', 0x82
 			DB	'¤', 0x83
 			DB	0xB7,0x7F		; Cursor...
+			DB	0xB8,0x84		; Cursor...
 			DB	0				; End of translation table
 			DB	aa_font28_firstChar			; To be substracted
 			DB	aa_font28_chars				; Max value
@@ -69,6 +70,8 @@ aa_font90_block:
 ;
 #include	"aa_font90_idx.inc"
 #include	"aa_font90.inc"
+
+;=============================================================================
 ; Make sure this is coherent...
 	if aa_font90_nbbits != 3
 		error SMALL fount should be encoded with 3bits anti-aliasing...

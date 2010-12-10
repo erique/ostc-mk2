@@ -1,9 +1,9 @@
 ;==========================================================================
-; Font index exported mar. nov. 30 2010 by FontIO.cpp 57 2010-11-24 23:24:47Z gascuel $ 
+; Font index exported ven. dÈc. 10 2010 by FontIO.cpp 57 2010-11-24 23:24:47Z gascuel $ 
 ;==========================================================================
-aa_font28_chars		EQU	.99
+aa_font28_chars		EQU	.102
 aa_font28_firstChar	EQU	'!'
-aa_font28_lastChar	EQU	'É'
+aa_font28_lastChar	EQU	'Ü'
 ;
 aa_font28_idx:
 			DW	aa_font28_bits + 0x0000	; ! mark
@@ -105,4 +105,7 @@ aa_font28_idx:
 			DW	aa_font28_bits + 0x0CE2	; Å 81
 			DW	aa_font28_bits + 0x0D09	; Ç 82
 			DW	aa_font28_bits + 0x0D22	; É 83
-			DW	aa_font28_bits + 0x0D53	; END OF INDEX
+			DW	aa_font28_bits + 0x0D53	; Ñ 84
+			DW	aa_font28_bits + 0x0D6A	; Ö 85
+			DW	aa_font28_bits + 0x0DEF	; Ü 86
+			DW	aa_font28_bits + 0x0E3A	; END OF INDEX

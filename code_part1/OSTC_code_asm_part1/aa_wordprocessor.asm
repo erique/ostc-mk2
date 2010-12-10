@@ -59,12 +59,6 @@ aa_char_setup:
 			; SMALL font -----------------------------------------------------
 			; Font SMALL character folding...
 aa_char_0:
-;			movlw	0x7E				; Skip chars between ~ and ¡
-;			cpfsgt	PRODL,A				; Compare with char;
-;			bra		aa_char_01
-;			movlw	-.34				; substract 34 (decimal!)
-;			addwf	PRODL,F,A			; put back to PRODL
-;aa_char_01:
 			movlw	LOW aa_font28_block
 			movwf	TBLPTRL,A
 			movlw	HIGH aa_font28_block
@@ -96,6 +90,7 @@ aa_char_3:
 			movlw	UPPER aa_font28_block
 			movwf	TBLPTRU,A
 
+            ; Proceed to character substitutions
 aa_char_30:
 			tblrd*+						; Read FROM char
 			movf	TABLAT,W			; Get it, and set Z,N
@@ -107,6 +102,7 @@ aa_char_30:
 			movff	TABLAT, PRODL		; make substitution
 			bra		aa_char_30			; Loop.
 
+            ; Make sure char is in the available range
 aa_char_32:
 			tblrd*+						; Read first char
 			movf	TABLAT,W			; get it.
@@ -117,7 +113,8 @@ aa_char_32:
 			tblrd*+						; Read default char
 			cpfslt	PRODL				; if char > WREG ?
 			movff	TABLAT,PRODL		; replace PRODL
-aa_char_33:
+
+            ; Decode font height and anti-aliasing mode
 			clrf	aa_flags,BANKED		; Default to no AA
 			tblrd*+						; Read font height + AA flag
 			movf	TABLAT,W			; into WREG
@@ -127,6 +124,7 @@ aa_char_34
 			andlw	0x7F				; Keep just font height,
 			movwf	aa_height,BANKED	; then save it (its a register)
 
+            ; Set PROM pointer to the char index
 			movf	PRODL,W				; Read back char
 			mullw	2					; PROD = 2*(char - base), TBLPTR=idx
 			movf	PRODL,W
@@ -134,6 +132,7 @@ aa_char_34
 			movf	PRODH,W
 			addwfc	TBLPTRH,F			; and high byte.
 
+            ; Read start and stop pointers
 			tblrd*+						; aa_start = PROM16(*tblptr++)
 			movff	TABLAT,aa_start		; Read low byte
 			tblrd*+

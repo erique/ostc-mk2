@@ -22,6 +22,7 @@
 ; known bugs:
 ; ToDo: clean up!
 
+
 convert_time:							; converts hi:lo in minutes to hours (hi) and minutes (lo)
 	movff	lo,xA+0						; divide by 60...
 	movff	hi,xA+1						; 

@@ -35,7 +35,7 @@
 #DEFINE		FT_MEDIUM		.1
 #DEFINE		FT_LARGE		.2
 
-;#DEFINE		AAFONTS				; The nicer fonts (not working yet...)
+#DEFINE		AAFONTS				; The nicer fonts (not working yet...)
 
 ; Define max. 5 Binary Custom Functions here (add more in menu_custom.asm)
 #DEFINE	binary_cf1				d'31'

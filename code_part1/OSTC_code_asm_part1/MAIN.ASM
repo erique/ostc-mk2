@@ -47,6 +47,8 @@ HighInt:
 		
 		movff	STATUS,status_temp			;save STATUS register
 		movff	WREG,wreg_temp				;save working register
+		movff   PRODL,prod_temp+0
+		movff   PRODH,prod_temp+1
 
 		movf	PORTB,W						;move portb into latch register
 
@@ -68,6 +70,8 @@ HighInt:
 		btfsc	INTCON3,INT1IF				; switch right
 		call	schalter_rechts
 
+		movff   prod_temp+1,PRODH
+		movff   prod_temp+0,PRODL
 		movff	wreg_temp,WREG				;restore working register
 		movff	status_temp,STATUS			;restore STATUS register
 		movff	0x102,BSR					;restore BSR register

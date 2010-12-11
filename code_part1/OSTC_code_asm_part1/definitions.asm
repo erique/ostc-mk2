@@ -117,6 +117,7 @@
 	wreg_temp					;variables used for context saving during ISR 
 	status_temp					
 	bsr_temp					
+	prod_temp:2                 ;Trashed by isr_mult16x16, for sensor compensations
 
 	secs						;realtime clock
 	mins
@@ -338,9 +339,6 @@
 	convert_value_temp:3		; used in menu_battery_state_convert_date
 	box_temp:5
 	time_correction_value		; Adds to Seconds on midnight
-
-	; [jDG] printf variable:
-	printf_len					; save TBLPTR during wordprocessor
 	ENDC
 
   ifndef AAFONTS

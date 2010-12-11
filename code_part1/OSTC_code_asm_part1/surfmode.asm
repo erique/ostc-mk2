@@ -133,6 +133,7 @@ surfloop_loop1:
 	call	update_batt_voltage			; display battery voltage
 	call	timeout_premenu				; timeout premenu
 	call	set_leds_surfmode			; Sets Warning and No-Fly LEDs
+	call    check_customfunctions       ; Checks CF functions and displays warning symbol if something critical is wrong
 	call	PLED_display_decotype_surface	; Show deco mode
 	btfsc	enter_error_sleep			; Enter Fatal Error Routine?
 	call	fatal_error_sleep			; Yes (In Sleepmode.asm!)

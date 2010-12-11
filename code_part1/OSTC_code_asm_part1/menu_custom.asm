@@ -360,8 +360,12 @@ customfunctions3:
 	bra		customfunctions_loop
 
 ;-----------------------------------------------------------------------------
-; Read default value (into hi:lo), cf_type, and cf_min/cf_max if any.
+; Read default value, type, and constraints
 ;
+; Input: customfunction_page, cf32_x4
+; Output: hi:lo, cf_type, cf_min, cf_max.
+; Trashes: TBLPTR
+
 cf_read_default:
     movlw   LOW(cf_default_table0)      ; Get 24bit PROM pointer. SKIP 
     movwf   TBLPTRL
@@ -745,3 +749,110 @@ adjust_cfn_value3:
 	movlw	d'5'
 	movwf	menupos
 	bra		menu_custom_functions1	    ; also debounces switches
+
+;-----------------------------------------------------------------------------
+; Check all CF values that have max and min constraints.
+; Input: cf_checker_counter.
+; Output: Pop warning with the first CF number if bad.
+;        cf_checker_counter incremented.
+; Trashes: TBLPTR, EEADR, PROD
+
+check_customfunctions:
+    movf    cf_checker_counter,W        ; Get current CF to ckeck
+
+    ; Setup cf32_x4 and cf page bit:
+    rlcf    WREG                        ; x4
+    rlcf    WREG
+    bcf     customfunction_page
+    btfsc   WREG,7   
+    bsf     customfunction_page
+    andlw   4*.31
+    movwf   cf32_x4
+    
+    ; Do the check
+    rcall   check_one_cf
+    btfsc   WREG,7
+    bra     check_cf_ok
+    
+    ; Went wrong: pop the warning
+    movwf   temp1
+    call    custom_warn_surfmode
+    
+    ; Increment counter (modulo 64)
+check_cf_ok:
+    movlw   1
+    addwf   cf_checker_counter,W
+    andlw   .63
+    movwf   cf_checker_counter
+    return
+
+; Check one CF value ---------------------------------------------------------
+check_one_cf:
+    rcall   cf_read_default             ; Sets hi:lo, cf_type, cf_min, cf_max.
+    
+    movf    cf_type,W                   ; MIN or MAX set ?
+    andlw   (CF_MIN + CF_MAX)
+    bnz     check_cf_check              ; yes: do something.
+    retlw   -1                          ; no: no problem there.
+
+; It does have bound:
+check_cf_check:
+    movf    cf32_x4,W                    ; Compute current CF number
+    rrncf   WREG                        ; Div 4
+    rrncf   WREG
+    btfsc   customfunction_page         ; Upper page ?
+    addlw   .32                         ; just add 32.
+    movwf   TABLAT                      ; saved to return error, if any.
+
+    btfss   cf_type,7                   ; 15 or 8 bit value ?
+    bra     cf_check_8bit
+    
+; Do a 15bit check
+    rcall   getcustom15_1               ; Read into hi:lo
+
+    movf    cf_min,W                    ; Compute (bound-value) -> hi:lo
+    subwf   lo,F
+    movf    cf_max,W
+    subwfb  hi,F
+
+    movf    lo,W                        ; Is it a 0 result ?
+    iorwf   hi,W
+    bnz     cf_15_not_equal             ; NO: check sign.
+    retlw   -1                          ; YES: then it is ok.
+
+cf_15_not_equal:
+    btfss   cf_type,CF_MIN_BIT          ; Checking min or max ?
+    btg     hi,6                        ; exchange wanted sign
+    
+    setf    WREG                        ; -1 for return w/o error
+    btfss   hi,6                        ; Is sign correct ?
+    movf    TABLAT,W                    ; NO: get back failed CF number
+    return                              ; and return that.    
+
+; Do a 8bit check
+cf_check_8bit:
+    rcall   getcustom8_1                ; Read into WREG
+    movwf   lo                          ; Save it.
+
+    btfss   cf_type,CF_MIN_BIT
+    bra     check_no_min
+    
+    cpfsgt  cf_min                      ; Compare to cf_min
+    bra     check_no_min
+
+    movf    TABLAT,W                    ; NO: get back failed CF number
+    return
+
+check_no_min:
+    btfss   cf_type,CF_MAX_BIT
+    bra     check_no_max
+    
+    movf    lo,W                        ; Compute value-max
+    cpfslt  cf_max
+    bra     check_no_max
+
+    movf    TABLAT,W                    ; NO: get back failed CF number
+    return
+
+check_no_max:                           ; Then everything was ok...
+    retlw   -1

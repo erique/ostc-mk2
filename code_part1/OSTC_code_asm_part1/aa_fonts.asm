@@ -1,17 +1,28 @@
 ;=============================================================================
 ;
-; file   aa_fonts.asm
-; brief  Font-data for the (futurly anti-aliased) word processor
-; author JD Gascuel.
+;    File aa_fonts.asm
 ;
-; copyright (c) 2010, JD Gascuel. All rights reserved.
-; $Id$
+;    Font-data for the anti-aliased word processor
+;
+;    This program is free software: you can redistribute it and/or modify
+;    it under the terms of the GNU General Public License as published by
+;    the Free Software Foundation, either version 3 of the License, or
+;    (at your option) any later version.
+;
+;    This program is distributed in the hope that it will be useful,
+;    but WITHOUT ANY WARRANTY; without even the implied warranty of
+;    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;    GNU General Public License for more details.
+;
+;    You should have received a copy of the GNU General Public License
+;    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;
+;    Copyright (c) 2010, JD Gascuel.
 ;=============================================================================
 ; HISTORY
 ;  2010-11-23 : [jDG] Creation with the original 1.72 fonts repacked.
-;
-; BUGS:
-;
+;  2010-12-01 : [jDG] Adding 3bits antialiased fonts.
+;=============================================================================
 
 ; Original fonts where byte swapped in PROM memory, but the repacked don't...
 ; AA_BYTE_SWAP		EQU	1
@@ -23,16 +34,17 @@ aa_font28_block:
 			DB	'²', 0x81
 			DB	'°', 0x82
 			DB	'¤', 0x83
-			DB	0xB7,0x7F		; Cursor...
-			DB	0xB8,0x84		; Cursor...
+			DB	0xB7,0x7F		        ; Cursor
+			DB	0xB8,0x84		        ; Dimmed cursor.
 			DB	0				; End of translation table
 			DB	aa_font28_firstChar			; To be substracted
 			DB	aa_font28_chars				; Max value
-			DB	0x83-aa_font28_firstChar	; replace by ? when out.
+			DB	0x83-aa_font28_firstChar; replace by ¤ when unknown.
 			DB	aa_font28_height + 0x80
 ;
 #include	"aa_font28_idx.inc"				; SHOULD FOLLOW !
 #include	"aa_font28.inc"
+aa_font28_end:
 ; Make sure this is coherent...
 	if aa_font28_nbbits != 3
 		error SMALL fount should be encoded with anti-aliasing...
@@ -53,6 +65,7 @@ aa_font48_block:
 ;
 #include	"aa_font48_idx.inc"
 #include	"aa_font48.inc"
+aa_font48_end:
 ; Make sure this is coherent...
 	if aa_font48_nbbits != 3
 		error MEDIUM fount should be encoded with 3bits anti-aliasing...
@@ -70,9 +83,10 @@ aa_font90_block:
 ;
 #include	"aa_font90_idx.inc"
 #include	"aa_font90.inc"
-
-;=============================================================================
+aa_font90_end:
 ; Make sure this is coherent...
 	if aa_font90_nbbits != 3
 		error SMALL fount should be encoded with 3bits anti-aliasing...
 	endif
+
+;=============================================================================

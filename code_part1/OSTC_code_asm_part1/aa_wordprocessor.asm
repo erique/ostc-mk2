@@ -1,16 +1,31 @@
 ;=============================================================================
 ;
-; file   aa_wordprocessor.asm
-; brief  Anti-aliased word processor
-; author JD Gascuel.
+;    File aa_wordprocessor.asm
 ;
-; copyright (c) 2010, JD Gascuel. All rights reserved.
-; $Id: aa_wordprocessor.asm 72 2010-11-29 22:45:12Z gascuel $
+;    Anti-aliased word processor
+;
+;    This program is free software: you can redistribute it and/or modify
+;    it under the terms of the GNU General Public License as published by
+;    the Free Software Foundation, either version 3 of the License, or
+;    (at your option) any later version.
+;
+;    This program is distributed in the hope that it will be useful,
+;    but WITHOUT ANY WARRANTY; without even the implied warranty of
+;    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;    GNU General Public License for more details.
+;
+;    You should have received a copy of the GNU General Public License
+;    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;
+;    Copyright (c) 2010, JD Gascuel.
 ;=============================================================================
 ; HISTORY
 ;  2010-11-22 : [jDG] Creation.
+;  2010-12-01 : [jDG] Adding 3bits antialiased fonts.
 ;
-; BUGS : None known yet...
+; BUGS :
+;  * If the three fonts are not in the same half of the PROM memory, TBLPTRU
+;    will be badly set, and font48 or font90 will display giberish...
 ;=============================================================================
 ;
 ; MEMORY FOOTPRINT:
@@ -266,21 +281,20 @@ AA_DATA_WRITE_PROD	macro
 ; Trashed: PROD
 ;
 aa_box_cmd:
+			AA_CMD_WRITE	0x35		; this is the left border
 			movf	win_leftx2,W,BANKED	; Compute left = 2*leftx2
 			mullw	2
-			AA_CMD_WRITE	0x35		; this is the left border
 			AA_DATA_WRITE_PROD
 
 			movf	aa_width,W,BANKED	; right = left + width - 1
 			addwf	PRODL,F,A
 			movf	aa_width+1,W,BANKED
 			addwfc	PRODH,F,A
+			AA_CMD_WRITE	0x36		; Write and the right border
 			decf	PRODL,F,A			; decrement result
 			bc		aa_box_cmd_1		; No borrow (/Carry) ? skip propagating.
 			decf	PRODH,F,A
 aa_box_cmd_1:			
-
-			AA_CMD_WRITE	0x36		; Write and the right border
 			AA_DATA_WRITE_PROD
 
 			movf	win_top,W,BANKED	; Write top / bottom window
@@ -289,16 +303,18 @@ aa_box_cmd_1:
 			decf	WREG,A
 			movwf	PRODL,A				; And PRODL is later...
 			AA_CMD_WRITE	0x37
+			nop
+			nop
 			AA_DATA_WRITE_PROD
 
+			AA_CMD_WRITE	0x20
 			movf	win_leftx2,W,BANKED	; Start ptr left
 			mullw	2
-			AA_CMD_WRITE	0x20
 			AA_DATA_WRITE_PROD
 
+			AA_CMD_WRITE	0x21
 			movf	win_top,W,BANKED	; Start ptr top
 			mullw	1					; Load into PRODH:L
-			AA_CMD_WRITE	0x21
 			AA_DATA_WRITE_PROD
 
 			return

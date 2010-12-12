@@ -48,9 +48,6 @@ diveloop_loop:		; The diveloop starts here
 	btfss	onesecupdate					; tasks any new second
 	bra		diveloop_loop2
 
-	btfss	premenu							; Is the divemode menu active?
-	call	PLED_diveclock					; No, show clock (If clock should be displayed)
-
 	btfsc	gauge_mode						; Only in gauge mode
 	bra		diveloop_loop1a					; One Second Tasks in Gauge mode
 	btfsc	FLAG_apnoe_mode					; Only in apnoe mode
@@ -68,9 +65,6 @@ diveloop_loop1a:
 	btfss	premenu						; Is the divemode menu active?
 	call	PLED_divemins					; display (new) divetime!
 	call	timeout_divemode				; dive finished? This routine sets the required flags
-
-	btfsc	stopwatch_active				;  =1: Show Average Depth instead of Temperature
-	call	PLED_stopwatch_show			; Show stopwatch only in Average mode
 
 	btfsc	twosecupdate					; two seconds after the last call
 	bra		diveloop_loop1a2					; Common Tasks
@@ -110,9 +104,7 @@ diveloop_loop1x:
 	call	set_leds_divemode				; Sets warnings, if required. Also Sets buzzer
 	btfsc	enter_error_sleep				; Enter Fatal Error Routine?
 	call	fatal_error_sleep				; Yes (In Sleepmode_vxx.asm!)
-
-	btfsc	stopwatch_active				;  =1: Show Average Depth instead of Temperature
-	call	PLED_stopwatch_show				; Show stopwatch only in Average mode
+	call	customview_second				; Do every-second tasks for the custom view area
 
 	bcf		onesecupdate					; one seconds update done
 
@@ -138,7 +130,6 @@ diveloop_loop2:
 diveloop_loop2a:
 	bcf		update_divetime				; clear flag
 
-
 diveloop_loop3:
 	btfss	menubit							; Divemode menu active?
 	call	test_switches_divemode			; No, Check switches normal
@@ -158,6 +149,9 @@ diveloop_loop3:
 
 	btfsc	store_sample					; store new sample?
 	call	store_dive_data					; Store profile data
+
+	btfsc	toggle_customview				; Next view?
+	call	customview_toggle				; Yes, show next customview (and delete this flag)
 
 	btfsc	menubit							; Sleep only with inactive menu...
 	bra		diveloop_loop4
@@ -237,15 +231,11 @@ apnoe_calc_maxdepth:
 	return
 
 set_leds_divemode:
-	bcf		LED_red							; LEDy OFF
 	movff	char_O_gradient_factor,lo		; gradient factor absolute
 
 	GETCUSTOM8	d'14'		; threshold for LED warning
 	cpfslt	lo				; 
 	call	warn_gf1		; show warning, set flags
-
-	btfsc	ppO2_warn_value	; warn because of too high ppO2?
-	bsf		LED_red			; Yes
 
 	movff	char_I_deco_model,lo
 		decfsz	lo,W		; jump over return if char_I_deco_model == 1
@@ -257,13 +247,9 @@ set_leds_divemode:
 	cpfslt	lo				; 
 	call	warn_gf1		; show warning, set flags
 
-	btfsc	ppO2_warn_value	; warn because of too high ppO2?
-	bsf		LED_red			; Yes
-
 	return
 
 warn_gf1:
-	bsf			LED_red			; LED Yellow on
 	movlw		d'2'			; Type of Alarm
 	movwf		AlarmType		; Copy to Alarm Register
 	bsf			event_occured	; Set Event Flag
@@ -511,8 +497,6 @@ calc_deko_divemode3:
 store_dive_data:						; CF20 seconds gone
 	bcf		store_sample				; update only any CF20 seconds
 	bsf		update_divetime				; update divemins every CF20 seconds
-
-	bcf		LED_red						; LEDr off (Marker)
 
 	btfsc	simulatormode_active		; Are we in simulator mode?
 	return								; Yes, discard everything
@@ -1401,6 +1385,7 @@ update_divemode60:					; update any minute
 	call	set_powersafe				; red LED blinking if battery is low
 	call	PLED_max_pressure			; No, use normal max. depth
 	call	check_temp_extrema			; check for new temperature extremas
+	call	customview_minute			; Do every-minute tasks for the custom view area
 	bcf		oneminupdate
 	return
 
@@ -1553,6 +1538,8 @@ diveloop_boot:
 	clrf	apnoe_secs
 	clrf	divemins+0
 	clrf	divemins+1
+	clrf	menupos3
+	bcf		menu3_active
 	clrf	divesecs
 	clrf	samplesecs
 	clrf	apnoe_timeout_counter		; timeout in minutes

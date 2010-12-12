@@ -34,7 +34,7 @@ textlength_pointer:
 	DB	.8,.10,.6,.10,.6,.6			; t12, t13, t14, t15, t16, t17
 	DB	.8,.8,.6,.14,.6,.6			; t18, t19, t20, t21, t22, t23
 	DB	.10,.10,.8,.20,.12,.10		; t24, t25, t26, t27, t28, t29
-	DB	.6,.10,.8,.6,.6,.6			; t30, t31, t32, t33, t34, t35
+	DB	.10,.10,.8,.10,.6,.6		; t30, t31, t32, t33, t34, t35
 ; 32 Custom funtion descriptors with length 16
 	DB	.16,.16,.16,.16
 	DB	.16,.16,.16,.16
@@ -61,8 +61,8 @@ textlength_pointer:
 	DB	.6,.6,.6,.6,.8,.8		;t124,t125,t126,t127,t128,129
 	DB	.4,.4,.10,.22,.22,.22	;t130,t131,t132,t133,134,135
 	DB	.20,.8,.10,.8,.8,.6		;t136;t137;t138;t139;t140;t141
-	DB	.6,.10,.8,.8,.4,.10		;t142;t143;t144;t145;t146;t147
-	DB	.12,.8,.6,.12,.10,.20	;t148;t149;t150;t151;t152;t153
+	DB	.6,.10,.8,.8,.4,.6		;t142;t143;t144;t145;t146;t147
+	DB	.12,.8,.6,.8,.10,.20	;t148;t149;t150;t151;t152;t153
 ; 32 Custom funtion descriptors with length 16
 	DB	.16,.16,.16,.16
 	DB	.16,.16,.16,.16
@@ -84,14 +84,14 @@ textlength_pointer:
 	DB	.20,.20,.10,.10,.10,.8	;t234;t235;t236;t237;t238;t239
 	DB	.8,.8,.8,.14,.6,.20		;t240;t241;t242;t243;t244;t245
 	DB	.16,.10,.16,.12,.6,.6	;t246;t247;t248;t249;t250;t251
-	DB	.6,.6,.6,.8				;t252;t253;t254;t255
+	DB	.6,.6,.6,.6				;t252;t253;t254;t255
 
 ; Text Bank2 (Texts 256-511):
 	DB	.2,.14,.14,.8,.8,.8		;t256;t257;t258;t259;t260;t261
 	DB	.6,.6,.6,.6,.10,.6		;t262;t263;t264;t265;t266;t267
 	DB	.4,.8,.4,.14,.20,.18	;t268;t269;t270;t271;t272;t273
 	DB	.20,.14,.10,.14,.12,.16	;t274;t275;t276;t277;t278;t279
-	DB	.14,.10,.10,.10,.14,.12	;t280;t281;t282;t283;t284;t285
+	DB	.14,.10,.12,.10,.14,.12	;t280;t281;t282;t283;t284;t285
 	DB	.16						;t286
 
 ; Textpositions
@@ -128,10 +128,10 @@ textpos_pointer:
 	DB	.14,.2			;27
 	DB	.40,.2			;28
 	DB	.50,.2			;29
-	DB	.20,.35			;30
+	DB	.100,.50		;30	; SetMarker
 	DB	.100,.25		;31	; Decoplan
 	DB	.100,.0			;32	; Gaslist
-	DB	.100,.75		;33
+	DB	.100,.50		;33	; ResetAvr
 	DB	.100,.100		;34
 	DB	.0,.0			;35
 
@@ -225,7 +225,7 @@ textpos_pointer:
 	DB	.0,.36		;119
 	DB	.0,.45		;120
 	DB	.0,.54		;121
-	DB	.100,.50	;122
+	DB	.100,.125	;122		Gas 6.. (Divemode menu)
 	DB	.100,.25	;123
 	DB	.100,.50	;124
 	DB	.100,.75	;125
@@ -240,7 +240,7 @@ textpos_pointer:
 	DB	.10,.25		;134
 	DB	.10,.50		;135
 	DB	.10,.75		;136		/Debug Intro
-	DB	.100,.50	;137		Bailout
+	DB	.100,.75	;137		Bailout
 	DB	.85,.125	;138
 	DB	.105,.120	;139		Descent
 	DB	.105,.60	;140		Surface
@@ -250,11 +250,11 @@ textpos_pointer:
 	DB	.60,.2		;144
 	DB	.52,.96		;145		Cancel
 	DB	.52,.120	;146		OK!
-	DB	.100,.75	;147		Stopwatch
+	DB	.20,.35		;147		More (Gas Setup)
 	DB	.160,.125	;148		[12 Spaces...]
 	DB	.0,.8		;149
 	DB	.2,.39		;150
-	DB	.2,.48		;151
+	DB	.108,.216	;151		Marker?
 	DB	.85,.125	;152
 	DB	.20,.65		;153
 ; 32 Custom funtion descriptors with Column=5, row=8, Y-scale=1, greyvalue=15
@@ -353,7 +353,7 @@ textpos_pointer:
 	DB	.100,.0				;238   	SetPoint
 	DB	.100,.0				;239 	No Deco (non-GF)
 	DB	.100,.0				;240
-	DB	.100,.25			;241	Display
+	DB	.100,.75			;241	Display (Divemode Menu)
 	DB	.100,.0				;242	No Deco (GF)
 	DB	.2,.12				;243
 	DB	.100,.100			;244	Exit
@@ -367,7 +367,7 @@ textpos_pointer:
 	DB	.100,.75			;252
 	DB	.100,.100			;253
 	DB	.100,.0				;254    Divemode_Simulator_Menu
-	DB	.100,.50				;255	free
+	DB	.131,.170			;255	Time
 	
 ; Text Bank2 (Texts 256-511):
 	DB	.0,.0 				;256	
@@ -399,7 +399,7 @@ textpos_pointer:
 	DB	.20,.155			;280
 	
 	DB	.100,.50			;281
-	DB	.100,.0				;282
+	DB	.90,.170			;282	Lead Tiss.
 	DB	.90,.170			;283	Stopwatch
 	DB	.20,.95				;284
 	DB	.20,.125			;285
@@ -437,33 +437,33 @@ text_pointer:
 	DA	"Custom Functions I}}"	;27		l=20
 	DA	"Reset Menu}}"			;28		l=12
 	DA	"Set Time:}"			;29
-	DA	"More}}"				;30		l=6
+	DA	"SetMarker}"			;30		l=10
 	DA	"Decoplan}}"			;31
 	DA	"Gaslist}"				;32 	l=8
-	DA	"More}}"				;33		l=6
+	DA	"ResetAvr}}"			;33		l=10
 	DA	"Exit}}"				;34
 	DA	"NoFly}"				;35		l=6
 ; 32 custom function descriptors with length=16!
-	DA	"Start Dive [cm]}"		;36		l=16
-	DA	"End Dive   [cm]}"		;37
-	DA	"End Delay   [s]}"		;38
-	DA	"Power Off   [s]}"		;39
-	DA	"Pre-menu    [s]}"		;40
+	DA	"Start Dive  [m]}"		;36		l=16
+	DA	"End Dive    [m]}"		;37
+	DA	"End Delay [min]}"		;38
+	DA	"Power Off [min]}"		;39
+	DA	"Pre-menu  [min]}"		;40
 	DA	"velocity[m/min]}"		;41
 	DA	"Wake-up  [mBar]}"		;42
 	DA	"max.Surf.[mBar]}"		;43
 	DA	"GF display  [%]}"		;44
 	DA	"min. O2 Dis.[%]}"		;45
-	DA	"Dive menus  [s]}"		;46
+	DA	"Dive menus[min]}"		;46
 	DA	"Saturate x  [%]}"		;47
 	DA	"Desaturate x[%]}"		;48
 	DA	"NoFly Ratio [%]}"		;49
 	DA	"GF alarm 1  [%]}"		;50
 	DA	"CNSshow surf[%]}"		;51
-	DA	"Deco Offset[dm]}"		;52
-	DA	"ppO2 low [cBar]}"		;53
-	DA	"ppO2 high[cBar]}"		;54
-	DA	"ppO2 show[cBar]}"		;55
+	DA	"Deco Offset [m]}"		;52
+	DA	"ppO2 low  [Bar]}"		;53
+	DA	"ppO2 high [Bar]}"		;54
+	DA	"ppO2 show [Bar]}"		;55
 	DA	"sampling rate  }"		;56
 	DA	"Divisor Temp   }"		;57
 	DA	"Divisor Decodat}"		;58
@@ -474,8 +474,8 @@ text_pointer:
 	DA	"CNSshow dive[%]}"		;63
 	DA	"Logbook offset }"		;64
 	DA	"Last Deco at[m]}"		;65
-	DA	"End Apnoe [min]}"		;66
-	DA	"Show Batt. Volt}"		;67
+	DA	"End Apnoe   [h]}"		;66
+	DA	"Show Batt.Volts}"		;67
 ;licence
 	DA	"This program is}"		;68		l=16
 	DA	"distributed in the}}"	;69		l=20
@@ -532,7 +532,7 @@ text_pointer:
 	DA	"Lowest at:}}"			;119	l=12
 	DA	"Tmin:}"				;120	l=6
 	DA	"Tmax:}"				;121	l=6
-	DA	"Set Gas}"				;122	l=8
+	DA	"Gas 6..}"				;122	l=8
 	DA	"O2 +}}"				;123	l=6
 	DA	"O2 -}}"				;124	l=6
 	DA	"He +}}"				;125	l=6
@@ -557,11 +557,11 @@ text_pointer:
 	DA	"Menu 2:}"				;144	l=8
 	DA	"Cancel}}"				;145	l=8
 	DA	"OK!}"					;146	l=4
-	DA	"Stopwat.}}"			;147	l=10
+	DA	"More}}"				;147	l=6
 	DA	":.........:}"			;148	l=12
 	DA	"(ppO2:}}"				;149	l=8
 	DA	"Bar) }"				;150	l=6
-	DA	"Not used!!!}"			;151	l=12
+	DA	"Marker?}"				;151	l=8
 	DA	"L16-GF OC}"			;152	l=10
 	DA	"Custom FunctionsII}}"	;153	l=20
 
@@ -574,16 +574,16 @@ text_pointer:
 	DA	"Color# Divemask}"		;158
 	DA	"Color# Warnings}"		;159
 	DA	"Divemode secs. }"		;160
-	DA	"Divemode clock }"		;161
+	DA	"not used       }"		;161
 	DA	"Warn Ceiling   }"		;162
 	DA	"Average Depth  }"		;163
 	DA	"Blink BetterGas}"		;164
 	DA	"DepthWarn[mBar]}"		;165
 	DA	"CNS warning [%]}"		;166
 	DA	"GF warning  [%]}"		;167
-	DA	"ppO2 warn[cBar]}"		;168
+	DA	"ppO2 warn [Bar]}"		;168
 	DA	"Vel.warn[m/min]}"		;169
-	DA	"Time offset [s]}"		;170
+	DA	"Time offset/day}"		;170
 	DA	"not used       }"		;171
 	DA	"not used       }"		;172
 	DA	"not used       }"		;173
@@ -663,11 +663,11 @@ text_pointer:
 	DA	"Not found}"			;237		l=10
 	DA	"SetPoint}}"			;238	 	l=10
 	DA	"No Deco}"				;239		l=8
-	DA	"Graphs}}"				;240		l=8
+	DA	"unused }"				;240		l=8
 	DA	"Display}"				;241		l=8
 	DA	"No deco}"				;242		l=8
 	DA	"Search module}"		;243		l=14
-	DA	"Exit}}"				;244		l=6
+	DA	"unuse}"				;244		l=6
 	DA	"Reset CF,Gas & Deco}"	;245		l=20
 	DA	"Disable module}}"		;246		l=16
 	DA	"Simulator}"			;247		l=10
@@ -678,7 +678,7 @@ text_pointer:
 	DA	"+10m}}"				;252		l=6
 	DA	"-10m}}"				;253		l=6
 	DA	"Exit}}"				;254		l=6
-	DA	"not use}"				;255		l=8
+	DA	"Time}}"				;255		l=6
 	
 ; Text Bank2 (Texts 256-511):
 	DA	"x}"					;256		l=2	
@@ -707,8 +707,8 @@ text_pointer:
 	DA	"Max. Depth:}"			;278		l=12
 	DA	"Calculate Deco}}"		;279		l=16
 	DA	"Show Decoplan}"		;280		l=14
-	DA	"Lead Tis}}"			;281		l=10
-	DA	"Lead Tis}}"			;282		l=10
+	DA	"unused   }"			;281		l=10
+	DA	"Lead Tiss.}}"			;282		l=12
 	DA	"Stopwatch}"			;283		l=10
 	DA	"Reset Logbook}"		;284		l=14
 	DA	"Reboot OSTC}"			;285		l=12

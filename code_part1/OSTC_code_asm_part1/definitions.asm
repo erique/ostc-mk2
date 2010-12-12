@@ -146,7 +146,7 @@
 	draw_box_temp2
 	draw_box_temp3
 	
-	flag1 						;Flag register 
+	flag1 						;Flag register 33
 	flag2 
 	flag3 
 	flag4 
@@ -189,7 +189,7 @@
 	timer1int_counter2 			;Timer 1 counter
 
 	uart1_temp					;RS232 temp variables
-	uart2_temp
+	uart2_temp;70
 
   	divA:2						;math routines
   	divB
@@ -207,7 +207,7 @@
 	W1:2
 	W2:2
 	W3:2
-	W4:2
+	W4:2	;100
 	C1:2
 	C2:2
 	C3:2
@@ -273,7 +273,7 @@
 
 	menupos						;cursor position
 	menupos2
-	menupos3
+	menupos3					;used in Logbook, Set Time and divemode
 
 	eeprom_address:2			;external EEPROM
 	eeprom_header_address:2
@@ -283,7 +283,7 @@
 	batt_voltage:2				;Battery voltage in mV
 
 	i2c_temp					;I²C timeout counter
-	i2c_temp2
+	i2c_temp2;200
 
 	sim_pressure:2				; hold simulated pressure in mBar if in Simulator mode
 
@@ -642,7 +642,7 @@
 #DEFINE	pled_velocity_display	flag13,4	;=1: Velocity is displayed 
 #DEFINE depth_greater_100m		flag13,5	;=1: Depth is greater then 100m
 #DEFINE	display_set_setpoint	flag13,6	;=1: SetPoint list active
-#DEFINE	divemode_menu_page		flag13,7	;=1: Use 2nd Page of Divemode Menu
+#DEFINE	toggle_customview		flag13,7	;=1: Next customview
 
 #DEFINE	enter_error_sleep		flag14,0	;=1: Sleep immediately displaying the error using LED codes
 #DEFINE	stopwatch_active		flag14,1	;=1: Show Stopwatch in Divemode
@@ -657,7 +657,7 @@
 #DEFINE	uart_store_tissue_data	flag15,1	;=1: Store tissue data for next simualted dive!
 #DEFINE	pre_dive_screen			flag15,2	;=1: Show predive screen instead of graphs
 #DEFINE	blinking_better_gas		flag15,3	;=1: Gas is currently blinking
-#DEFINE	display_see_l_tissue	flag15,4	;=1: Leading Tissue details are now displayed
+#DEFINE	menu3_active			flag15,4	;=1: menu entry three in divemode menu is active
 #DEFINE	lock_stopwatch_reset	flag15,5	;=1: Locks the Reset of the Stopwtach/Average depth for 1 second
 #DEFINE	maxdepth_greater_100m	flag15,6	;=1: Max Depth greater>100m
 #DEFINE	show_interval			flag15,7	;=1: Show Interval, =0: Show Clock in Surfacemode

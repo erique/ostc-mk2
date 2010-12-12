@@ -1,8 +1,10 @@
 New in 1.73 Beta:
 BETA Version - Do NOT use for diving!
-NEW: Custom functions menu more comfortable
+NEW: Anti-Alised fonts (OSTC MK.2 only)
+NEW: Removed CF39 - Clock moved into Customview area  (OSTC Mk.2 only)
+NEW: Custom functions menu more comfortable  (OSTC Mk.2 only)
 BUGFIX: Surface interval now correct for repetitive dives
-CHANGE: Changes in divemode layout
+CHANGE: Changes in divemode layout  (OSTC Mk.2 only)
 
 New in 1.72 Beta:
 BETA Version - Do NOT use for diving!

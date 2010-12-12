@@ -1,4 +1,3 @@
-
 ; OSTC - diving computer code
 ; Copyright (C) 2008 HeinrichsWeikamp GbR
 
@@ -57,9 +56,14 @@ test_switches_divemode2:
 	bcf		switch_left			; Also reactivate left button if there was a right press without prior left press
 	bcf		switch_right		; enable right button again
 
-	btfss	premenu
-	bra		set_marker			; No Pre-Menu displayed -> Set Markerflag!
+	btfsc	premenu
+	bra		test_switches_divemode2_2
 
+	bsf		toggle_customview	; Toggle customview (Cleared in divemode.asm)
+	btfsc	standalone_simulator	; Standalone Simualtor active?
+	bra		divemode_menu_simulator	; Yes, Show simulator menu!
+
+test_switches_divemode2_2:
 	btfss	FLAG_apnoe_mode		; In Apnoe mode?
 	bra		test_switches_divemode2a; No!
 	
@@ -74,7 +78,6 @@ test_switches_divemode2a:
 	call	PLED_clear_divemode_menu		; Clear dive mode menu area
 	call	PLED_divemode_menu_mask_first	; Write Divemode menu1 mask
 	bcf		display_set_simulator			; Clear Simulator-Menu flag
-	bcf		divemode_menu_page				; Start in Menu Page one
 	movlw	d'1'
 	movwf	menupos					; reset cursor in divemode menu
 	call	PLED_divemenu_cursor	; show cursor
@@ -82,20 +85,9 @@ test_switches_divemode2a:
 	bcf		switch_left				; Left button pressed!
 	return
 
-set_marker:
-	btfsc		standalone_simulator	; Standalone Simualtor active?
-	bra			divemode_menu_simulator	; Yes, Show simulator menu!
-
-	bsf			LED_red				; LEDr on
-	movlw		d'6'				; Type of Alarm  (Manual Marker)
-	movwf		AlarmType			; Copy to Alarm Register
-	bsf			event_occured		; Set Event Flag
-
-	btfss	stopwatch_active		;  =1: Reset Average registers
-	return
+reset_stopwatch:
 	btfsc	lock_stopwatch_reset	; Reset locked?
 	return							; Yes, do not reset (now)...
-
 ; Maker Set, also reset average Depth....
 	clrf	average_depth_hold+0
 	clrf	average_depth_hold+1
@@ -113,29 +105,39 @@ test_switches_divemode_menu:
 	btfss	switch_right
 	return
 
-	btfsc	display_see_l_tissue		; Is the leading tissue info screen active
-	bra		divemenu_see_leading_tissue2; Yes, quit menu
-
 	btfsc 	display_see_deco			; Is the Decoplan displayed?
 	bra		divemenu_see_decoplan2		; Yes, exit menu on left button press
 
-	btfsc 	display_set_graphs			; Is the Graph displayed?
-	bra		divemode_set_graphs2		; Yes, exit menu on right button press
-	
 	bcf		switch_right				; Left button pressed
 	clrf	timeout_counter3			; timout_divemenu!
 	incf	menupos,F
 
 ; Following routine configures the number of menu entries for the different modes
 	movlw	d'6'						; number of available gases+1, ; number of menu options+1
+	btfsc	display_set_gas				; Are we in the "Gaslist" menu?
+	movlw	d'7'						; Yes, Number of entries for this menu+1 = 7
 	btfsc	display_set_setpoint		; In SetPoint Menu?
-	movlw	d'4'						; Number of entries for this menu+1
-
+	movlw	d'5'						; Number of entries for this menu+1 = 5
 	cpfseq	menupos						; =limit?
 	bra		test_switches_divemode_menu1; No!
 	movlw	d'1'						; Yes, reset to position 1!
 	movwf	menupos
+
 test_switches_divemode_menu1:
+; Finally, check if menuposition 3 should be skipped (No customview with function displayed)
+
+	btfsc	display_set_gas				; Are we in the "Gaslist" or "SetPoint" menu?
+	bra		test_switches_divemode_menu1a	; Skip test for sub menus
+	btfsc	display_set_xgas				; Are we in the "Gaslist" or "SetPoint" menu?
+	bra		test_switches_divemode_menu1a	; Skip test for sub menus
+
+	movlw	d'3'
+	cpfseq	menupos						; At position 3?
+	bra		test_switches_divemode_menu1a; No
+	btfss	menu3_active				; Menu position 3 has functionality?
+	incf	menupos,F					; No, +1, skip to menuos=4
+
+test_switches_divemode_menu1a:
 	call	PLED_divemenu_cursor		; update cursor
 	return
 
@@ -146,8 +148,8 @@ test_switches_divemode_menu3:
 	bcf		premenu					; clear premenu flag
 	clrf	timeout_counter3
 
-	btfsc	display_see_l_tissue		; Is the leading tissue info screen active
-	bra		divemenu_see_leading_tissue2; Yes, quit menu
+;	btfsc	display_see_l_tissue		; Is the leading tissue info screen active
+;	bra		divemenu_see_leading_tissue2; Yes, quit menu
 
 	btfsc	display_set_gas				; Are we in the "Gaslist" or "SetPoint" menu?
 	bra		divemenu_set_gas2			; Yes, so set gas and exit menu
@@ -164,35 +166,39 @@ test_switches_divemode_menu3:
 	btfsc	display_set_simulator		; Are we in the Divemode Simulator menu?
 	goto	divemode_menu_simulator2	; Yes, so adjust depth or set and exit
 
-	btfsc	divemode_menu_page			; Are we in the second menu page?
-	bra		test_switches_divemode_menu4; Yes, use second page items
-
 ; Options for Menu 1
 	dcfsnz	menupos,F
 	bra		divemenu_set_gas			; Set gas sub-menu
 	dcfsnz	menupos,F
 	bra		divemenu_see_decoplan		; display the full decoplan
 	dcfsnz	menupos,F
-	bra		divemode_set_xgas			; Configure the extra gas / Select Bailout
+	bra		divemode_menu3				; Customview-function
 	dcfsnz	menupos,F
-	bra		divemenu_enter_second		; Enter second Menu page
+	bra		divemode_toggle_brightness	; Toggle OLED-Brightness
 	dcfsnz	menupos,F
 	bra		timeout_divemenu2			; Quit divemode menu
 	return
 
-test_switches_divemode_menu4:
-; Options for Menu 2
-	dcfsnz	menupos,F
-	bra		divemode_set_graphs			; Show saturation graphs
-	dcfsnz	menupos,F
-	bra		divemode_toggle_brightness	; Toggle OLED-Brightness
-	dcfsnz	menupos,F
-	bra		divemenu_see_leading_tissue	; Display details about leading tissue
-	dcfsnz	menupos,F
-	bra		toggle_stopwatch			; Toggle Stopwatch
-	dcfsnz	menupos,F
+divemode_menu3:
+	movff	menupos3,temp1		; copy
+	dcfsnz	temp1,F
+	bra		toggle_stopwatch			; Toggle Stopwatch/Average register
+	dcfsnz	temp1,F
+	bra		set_marker					; Set Marker
+	dcfsnz	temp1,F
+	bra		divemode_menu3_nothing		; clock...
+	dcfsnz	temp1,F
+	bra		divemode_menu3_nothing		; leading tissue...
+
+divemode_menu3_nothing:
 	bra		timeout_divemenu2			; Quit divemode menu
 	return
+
+set_marker:
+	movlw	d'6'				; Type of Alarm  (Manual Marker)
+	movwf	AlarmType			; Copy to Alarm Register
+	bsf		event_occured		; Set Event Flag
+	bra		timeout_divemenu2			; quit menu!
 
 toggle_stopwatch:
 	btg		stopwatch_active			; Toggle Flag
@@ -204,11 +210,10 @@ toggle_stopwatch:
 	clrf	average_depth_hold+1
 	clrf	average_depth_hold+2
 	clrf	average_depth_hold+3		; Clear average depth register
-	movlw	d'2'
+	movlw	d'3'
 	movwf	average_divesecs+0
 	clrf	average_divesecs+1
 	call	calc_average_depth
-	
 	bra		timeout_divemenu2			; quit menu!
 
 toggle_stopwatch2:
@@ -251,22 +256,9 @@ divemode_toggle_brightness3:
 	call	PLED_display_ndl_mask		;  Clear deco data, display nostop time
 	bra		timeout_divemenu2			; quit menu!
 
-divemenu_enter_second:
-	call	PLED_clear_divemode_menu		; Clear dive mode menu area
-	call	PLED_divemode_menu_mask_second	; Write Divemode menu1 mask
-	movlw	d'1'
-	movwf	menupos					; reset cursor to first item in divemode menu page two
-	bsf		divemode_menu_page		; Enter Menu Page two
-	call	PLED_divemenu_cursor	; show cursor
-	bcf		switch_right
-	bcf		switch_left				; Left button pressed!
-	return
-
 divemode_set_xgas:						; Set the extra gas...
-	btfsc	FLAG_const_ppO2_mode		; are we in ppO2 mode?
-	bra		divemenu_set_bailout		; Yes, so display Bailot list...
-
 	bsf		display_set_xgas			; Set Flag
+	bcf		display_set_gas				; Clear Flag
 	call	PLED_clear_divemode_menu	; Clear Menu
 
 	movff	char_I_O2_ratio, EEDATA		; Reset Gas6 to current gas
@@ -279,7 +271,6 @@ divemode_set_xgas:						; Set the extra gas...
 	movlw	d'1'
 	movwf	menupos						; reset cursor
 	call	PLED_divemenu_cursor		; update cursor
-
 	return
 
 divemode_menu_simulator:
@@ -290,7 +281,6 @@ divemode_menu_simulator:
 	bsf		display_set_simulator		; Set Flag
 	call	PLED_clear_divemode_menu	; Clear Menu
 	call	PLED_divemode_simulator_mask; Show mask
-	bcf		divemode_menu_page			; Start in Menu Page one
 	movlw	d'1'
 	movwf	menupos						; reset cursor
 	call	PLED_divemenu_cursor		; update cursor
@@ -394,16 +384,6 @@ divemode_set_graphs2:
 	bcf		display_set_graphs			; clear flag
 	bra		timeout_divemenu2			; quit menu!
 
-divemenu_see_leading_tissue:
-	bsf		display_see_l_tissue		; Set Flag
-	call	PLED_clear_divemode_menu	; Clear Menu
-	call	PLED_show_leading_tissue	; Show infos about leading tissue
-	return
-
-divemenu_see_leading_tissue2:
-	bcf		display_see_l_tissue		; Clear Flag
-	bra		timeout_divemenu2			; quit menu!
-	
 divemenu_see_decoplan:
 	bsf		display_see_deco			; set flag
 	call	PLED_clear_divemode_menu	; Clear Menu
@@ -447,8 +427,6 @@ divemenu_see_decoplan2_nextgf:
 
 	clrf	timeout_counter3			; Clear timeout Divemode menu
 	bra		timeout_divemenu3x			; Display next page
-
-	
 
 divemenu_set_xgas2:
 	dcfsnz	menupos,F
@@ -565,26 +543,16 @@ divemenu_set_xgas2_exit:
 	movff	EEDATA, char_I_N2_ratio		; = N2!
 	bsf		manual_gas_changed			; set event flag
 	bsf		event_occured				; set global event flag
+bsf		is_bailout					;=1: CC mode, but bailout active!		
+	clrf	lo							; clear Setpoint, PLED_const_ppO2_value now displayes "Bail"
+	movff	lo,char_I_const_ppO2		
 	bra		timeout_divemenu2			; quit underwater menu!
-
-divemenu_set_bailout:
-	bsf		display_set_gas				; set flag	
-	call	PLED_clear_divemode_menu	; Clear Menu
-
-	bcf		FLAG_const_ppO2_mode		; Delete Flag to show all bailouts
-	bsf		select_bailoutgas			; Set Flag for Bailout list
-	call	PLED_gas_list				; Display all 5 gases
-	bsf		FLAG_const_ppO2_mode		; Reset Flag
-
-	movlw	d'1'
-	movwf	menupos						; reset cursor
-	call	PLED_divemenu_cursor		; update cursor
-	return
 
 divemenu_set_gas:
 	btfsc	FLAG_const_ppO2_mode		; in ppO2 mode?
 	bra		divemenu_set_setpoint		; Yes, display SetPoint list
 
+divemenu_set_gas_2:
 	bsf		display_set_gas				; set flag	
 	call	PLED_clear_divemode_menu	; Clear Menu
 	call	PLED_gas_list				; Display all 5 gases
@@ -598,11 +566,11 @@ divemenu_set_setpoint:
 	bsf		display_set_gas				; set flag	
 
 	call	PLED_clear_divemode_menu	; Clear Menu
-	call	PLED_splist_start			; Display SetPoints and Sensor results
+	call	PLED_splist_start			; Display SetPoints
+	DISPLAYTEXT		d'137'				; Bailout (as a sub-menu)
 	movlw	d'1'
 	movwf	menupos						; reset cursor
 	call	PLED_divemenu_cursor		; update cursor
-	
 	return
 
 
@@ -612,12 +580,19 @@ divemenu_set_gas2:
 
 	btfss	FLAG_const_ppO2_mode		; are we in ppO2 mode?
 	bra		divemenu_set_gas2a			; no, choose gas
-	; Yes, so select SP 1-3 or Sensor mode
-	
+	; Yes, so select SP 1-3
 	bcf		is_bailout					;=1: CC mode, but bailout active!		
-	call	PLED_show_ppO2_clear; Clear ppO2 value
+	call	PLED_show_ppO2_clear		; Clear ppO2 value
 	
-divemenu_set_gas1:	
+divemenu_set_gas1:
+	movlw	d'4'				
+	cpfseq	menupos						; At the "Bailout" position?		
+	bra		divemenu_set_gas1b			; No, select SetPoint 1-3
+	bsf		select_bailoutgas			; Set Flag
+	bcf		display_set_setpoint		; Clear Flag
+	bra		divemenu_set_gas_2			; Configure the extra gas / Select Bailout
+
+divemenu_set_gas1b:
 	movlw	d'35'						; offset in memory
 	addwf	menupos,W					; add SP number 0-2
 	movwf	EEADR
@@ -627,38 +602,16 @@ divemenu_set_gas1:
 
 divemenu_set_gas1a:
 	bcf		display_set_setpoint		; Clear Display Flag
-; Now, Set correct Diluent (again)
-;	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)
-;	movff	EEDATA,active_gas			; Read start gas (1-5)
-;
-;	decf	active_gas,W				; Gas 0-4
-;	mullw	d'4'
-;	movf	PRODL,W			
-;	addlw	d'7'						; = address for He ratio
-;	movwf	EEADR
-;	call	read_eeprom					; Read He ratio
-;	movff	EEDATA,char_I_He_ratio		; And copy into hold register
-;	decf	active_gas,W				; Gas 0-4
-;	mullw	d'4'
-;	movf	PRODL,W			
-;	addlw	d'6'						; = address for O2 ratio
-;	movwf	EEADR
-;	call	read_eeprom					; Read O2 ratio
-;	movff	EEDATA, char_I_O2_ratio		; O2 ratio
-;	movff	char_I_He_ratio, wait_temp	; copy into bank1 register
-;	bsf		STATUS,C					; Borrow bit
-;	movlw	d'100'						; 100%
-;	subfwb	wait_temp,W					; minus He
-;	bsf		STATUS,C					; Borrow bit
-;	subfwb	EEDATA,F					; minus O2
-;	movff	EEDATA, char_I_N2_ratio		; = N2!
-;	call	PLED_active_gas_clear		; Clear gas in case of AIR (Will be redrawn)	
-	
 	bsf		stored_gas_changed			; set event flag
 	bsf		event_occured				; set global event flag
 	bra		timeout_divemenu2			; quit menu!
 
 divemenu_set_gas2a:
+	movlw	d'6'				
+	cpfseq	menupos						; At the "Gas 6.." position?		
+	bra		divemenu_set_gas2b			; No, select Gas1-5 (Stored in Menupos)
+	bra		divemode_set_xgas			; Configure the extra gas
+divemenu_set_gas2b:
 	bsf		is_bailout					;=1: CC mode, but bailout active!		
 	clrf	lo							; clear Setpoint, PLED_const_ppO2_value now displayes "Bail"
 	movff	lo,char_I_const_ppO2		
@@ -694,12 +647,9 @@ timeout_divemenu:
 	btfss	menubit					; is the Dive mode menu displayed?
 	return							; No
 
-	btfsc	display_see_l_tissue	; Are the leading tissue details displayed?
-	bra		timeout_divemenu7		; Yes, update them
 
 	btfsc	display_set_simulator	; Is the Simulator Mask active?
 	bra		timeout_divemenu6		; Yes, update Simulator mask
-
 	
 	btfss	display_see_deco		; Is the decoplan active?
 	bra		timeout_divemenu1		; No, skip updating the decoplan
@@ -741,10 +691,10 @@ timeout_divemenu2a:
 	call	PLED_display_ndl_mask
 	btfsc	dekostop_active
 	call	PLED_display_deko_mask
-
+	call	customview_mask			; Redraw current customview mask
 	clrf	timeout_counter3		; Also clear timeout
 	bcf		display_see_deco		; clear all display flags
-	bcf		display_see_l_tissue
+;	bcf		display_see_l_tissue
 	bcf		display_set_gas			
 	bcf		display_set_graphs
 	bcf		display_set_xgas
@@ -769,7 +719,7 @@ timeout_divemenu6:
 	call	PLED_divemenu_cursor		; update cursor
 	bra		timeout_divemenu1			; Check timeout
 	
-timeout_divemenu7:
-	; Update Leading tissue infos
-	call	PLED_show_leading_tissue	; Update infos about leading tissue	
-	bra		timeout_divemenu1			; Check timeout
+;timeout_divemenu7:
+;	; Update Leading tissue infos
+;	call	PLED_show_leading_tissue	; Update infos about leading tissue	
+;	bra		timeout_divemenu1			; Check timeout

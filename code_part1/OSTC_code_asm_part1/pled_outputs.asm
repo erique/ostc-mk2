@@ -633,18 +633,24 @@ PLED_display_clear_common2:
 	WIN_FONT 	FT_SMALL
 	return
 
+
 PLED_diveclock:
-	GETCUSTOM8	d'39'			; =1: Show clock in Divemode
-	movwf	lo
-	movlw	d'1'
-	cpfseq	lo					; =1?
-	return						; No, Done.
+	call		PLED_divemask_color	; Set Color for Divemode mask
+	DISPLAYTEXT		d'255'			; Clock
+	call	PLED_standard_color
 
-	btfsc	menubit	; is the Dive mode menu displayed?
-	return			; Yes
+PLED_diveclock2:
+;	GETCUSTOM8	d'39'			; =1: Show clock in Divemode
+;	movwf	lo
+;	movlw	d'1'
+;	cpfseq	lo					; =1?
+;	return						; No, Done.
 
-	WIN_TOP		.2
-	WIN_LEFT	.64
+;	btfsc	menubit	; is the Dive mode menu displayed?
+;	return			; Yes
+
+	WIN_TOP		.192
+	WIN_LEFT	.123
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
@@ -761,47 +767,22 @@ PLED_clock3:
 PLED_logbook_cursor:
 
 PLED_menu_cursor:
-	WIN_TOP		.35
+	movlw	.0
+	movff	WREG,box_temp+0		; Data
+	movlw	.35
+	movff	WREG,box_temp+1		; row top (0-239)
+	movlw	.239
+	movff	WREG,box_temp+2		; row bottom (0-239)
+	movlw	.0
+	movff	WREG,box_temp+3		; column left (0-159)
+	movlw	.16
+	movff	WREG,box_temp+4		; column right (0-159)
+	call	PLED_box
+
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
-
-	lfsr	FSR2,letter
-	movlw	0xB8
-	movwf	POSTINC2
-	call	word_processor
-
-	WIN_TOP		.65
-	lfsr	FSR2,letter
-	movlw	0xB8
-	movwf	POSTINC2
-	call	word_processor
-
-	WIN_TOP		.95
-	lfsr	FSR2,letter
-	movlw	0xB8
-	movwf	POSTINC2
-	call	word_processor
-
-	WIN_TOP		.125
-	lfsr	FSR2,letter
-	movlw	0xB8
-	movwf	POSTINC2
-	call	word_processor
-
-	WIN_TOP		.155
-	call	PLED_standard_color
-	lfsr	FSR2,letter
-	movlw	0xB8
-	movwf	POSTINC2
-	call	word_processor
-
-	WIN_TOP		.185
-	lfsr	FSR2,letter
-	movlw	0xB8
-	movwf	POSTINC2
-	call	word_processor
 
 	movff	menupos,temp1
 	dcfsnz	temp1,F
@@ -2307,29 +2288,14 @@ PLED_divemins_gauge:
 	WIN_FONT	FT_SMALL
 	return
 
-;PLED_stopwatch_remove:
-;	movlw	.0
-;	movff	WREG,box_temp+0		; Data
-;	movlw	.54
-;	movff	WREG,box_temp+1		; row top (0-239)
-;	movlw	.102
-;	movff	WREG,box_temp+2		; row bottom (0-239)
-;	movlw	.062
-;	movff	WREG,box_temp+3		; column left (0-159)
-;	movlw	.159	
-;	movff	WREG,box_temp+4		; column right (0-159)
-;	call	PLED_box
-;	return
-	
-
 PLED_stopwatch_show:
-	ostc_debug	'V'		; Sends debug-information to screen if debugmode active
 	; Stopwatch
-
 	call		PLED_divemask_color	; Set Color for Divemode mask
 	DISPLAYTEXTH	d'283'			; Stopwatch
-	call	PLED_standard_color
 
+PLED_stopwatch_show2:
+	call	PLED_standard_color
+	ostc_debug	'V'		; Sends debug-information to screen if debugmode active
 	WIN_TOP		.192
 	WIN_LEFT	.110
 	WIN_FONT	FT_SMALL
@@ -2439,29 +2405,19 @@ PLED_divemode_menu_mask_first:			; Write Divemode menu1 mask
 ; in OC Mode
 	DISPLAYTEXT	.32					;"Gaslist"
 	DISPLAYTEXT	.31					;"Decoplan"
-	DISPLAYTEXT	.122				;"Set Gas"
 	bra		PLED_divemode_menu_mask_first3
 
 PLED_divemode_menu_mask_first2:
 ; in CC Mode
 	DISPLAYTEXT	.238				;"SetPoint"
 	DISPLAYTEXT	.31					;"Decoplan"
-	DISPLAYTEXT	.137				;"Bailout"
 
 PLED_divemode_menu_mask_first3:
 ; In all modes
-	DISPLAYTEXT	.33					;"More"
+	call	customview_menu_entry3	; Show customview-dependent menu entry
+	DISPLAYTEXT	.241				;"Display"
 	DISPLAYTEXT	.34					;"Exit"
 	return							
-
-PLED_divemode_menu_mask_second:			; Write Divemode menu1 mask
-	ostc_debug	'o'		; Sends debug-information to screen if debugmode active
-	DISPLAYTEXT	.240				;"Graphs"
-	DISPLAYTEXT	.241				;"Display"
-	DISPLAYTEXTH .281				;"L. Tissue"
-	DISPLAYTEXT	.147				;"Stopwat."
-	DISPLAYTEXT	.244				;"Exit"
-	return
 
 PLED_divemode_set_xgas:				; Displayes the "Set Gas" menu
 	WIN_LEFT	.100
@@ -2788,8 +2744,10 @@ PLED_gas_list_loop1:
 	movlw	d'5'			; list all five gases
 	cpfseq	hi				; All gases shown?
 	bra		PLED_gas_list_loop	; No
-	
-	return							; No, return (OC mode)
+
+	DISPLAYTEXT	d'122'		; Gas 6..
+
+	return					;  return (OC mode)
 
 PLED_splist_start:	
 	WIN_LEFT	.100
@@ -2840,8 +2798,7 @@ PLED_clear_divemode_menu:
 	movff	WREG,box_temp+0		; Data
 	movlw	.0
 	movff	WREG,box_temp+1		; row top (0-239)
-;	movlw	.125
-	movlw	.185
+	movlw	.169
 	movff	WREG,box_temp+2		; row bottom (0-239)
 	movlw	.082
 	movff	WREG,box_temp+3		; column left (0-159)
@@ -2852,40 +2809,24 @@ PLED_clear_divemode_menu:
 
 PLED_divemenu_cursor:
 	ostc_debug	'l'		; Sends debug-information to screen if debugmode active
+
+	movlw	.0
+	movff	WREG,box_temp+0		; Data
+	movlw	.0
+	movff	WREG,box_temp+1		; row top (0-239)
+	movlw	.150
+	movff	WREG,box_temp+2		; row bottom (0-239)
+	movlw	.85
+	movff	WREG,box_temp+3		; column left (0-159)
+	movlw	.95	
+	movff	WREG,box_temp+4		; column right (0-159)
+	call	PLED_box
+
 	WIN_TOP		.0
 	WIN_LEFT	.85
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
-
-	lfsr	FSR2,letter
-	movlw	0xB8
-	movwf	POSTINC2
-	call	word_processor
-
-	WIN_TOP		.25
-	lfsr	FSR2,letter
-	movlw	0xB8
-	movwf	POSTINC2
-	call	word_processor
-
-	WIN_TOP		.50
-	lfsr	FSR2,letter
-	movlw	0xB8
-	movwf	POSTINC2
-	call	word_processor
-
-	WIN_TOP		.75
-	lfsr	FSR2,letter
-	movlw	0xB8
-	movwf	POSTINC2
-	call	word_processor
-
-	WIN_TOP		.100
-	lfsr	FSR2,letter
-	movlw	0xB8
-	movwf	POSTINC2
-	call	word_processor
 
 	movff	menupos,temp1
 	movlw	d'0'
@@ -2899,6 +2840,8 @@ PLED_divemenu_cursor:
 	movlw	d'75'
 	dcfsnz	temp1,F
 	movlw	d'100'
+	dcfsnz	temp1,F
+	movlw	d'125'
 	movff	WREG,win_top
 
 	lfsr	FSR2,letter
@@ -3316,10 +3259,12 @@ PLED_const_ppO2_value1a:
 	return
 
 PLED_show_leading_tissue:
+	call		PLED_divemask_color	; Set Color for Divemode mask
+	DISPLAYTEXTH	.282		; L. Tissue:
+PLED_show_leading_tissue_2:
 	call	deco_main_calc_desaturation_time	; calculate desaturation time
 	movlb	b'00000001'						; select ram bank 1
 
-	DISPLAYTEXTH	.282		; L. Tissue:
 	lfsr	FSR2,letter
 	movlw	'#'
 	movwf	POSTINC2
@@ -3350,8 +3295,8 @@ PLED_show_leading_tissue2:
 	movwf	POSTINC2
 	movlw	' '
 	movwf	POSTINC2
-	WIN_LEFT	.100
-	WIN_TOP		.25
+	WIN_LEFT	.95
+	WIN_TOP		.192
 	WIN_FONT	FT_SMALL
 	call	PLED_standard_color
 	call	word_processor
@@ -3368,10 +3313,9 @@ PLED_show_leading_tissue3:		; point to leading tissue...
 	movwf	POSTINC2
 	movlw	' '
 	movwf	POSTINC2
-	WIN_LEFT	.100
-	WIN_TOP		.50
+	WIN_LEFT	.95
+	WIN_TOP		.216
 	WIN_FONT	FT_SMALL
-	call	PLED_standard_color
 	call	word_processor
 	bcf		leftbind
 	return
@@ -3379,8 +3323,8 @@ PLED_show_leading_tissue3:		; point to leading tissue...
 PLED_topline_box_clear:			; Writes an empty box
 	movlw	.0
 	bra		PLED_topline_box2
-PLED_topline_box:				; Writes a filled box
-	GETCUSTOM8		d'35'
+PLED_topline_box:				; Writes a filled box...
+	GETCUSTOM8		d'35'		; ... with the standard color
 PLED_topline_box2:
 	movff	WREG,box_temp+0		; Data
 	movlw	.000

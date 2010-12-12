@@ -316,7 +316,7 @@ menu_gassetup_page1:
 
 menu_gassetup0:
 	call	PLED_ClearScreen
-	DISPLAYTEXT	.30			; More...
+	DISPLAYTEXT	.147		; More...
 	DISPLAYTEXT	.11			; Exit
 
 menu_gassetup1:

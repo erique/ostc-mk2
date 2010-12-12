@@ -114,7 +114,7 @@ cf_default_table0:
 	CF_DEFAULT    CF_PERCENT,	d'100', d'50',  d'100'  ; gradient_factor_alarm1	100%
 
 	CF_DEFAULT    CF_PERCENT,	d'10',  d'01',  d'100'  ; cns_display_surface		10%
-	CF_DEFAULT    CF_DECI,	    d'10',  d'10',  d'100'	; deco_distance_for_sim		1m
+	CF_DEFAULT    CF_DECI,	    d'10',  d'0',  	d'10'	; deco_distance_for_sim		1m
 	CF_DEFAULT    CF_CENTI,     d'019', d'019', d'021'	; ppo2_warning_low			0.19 Bar
 	CF_DEFAULT    CF_CENTI,     d'160', d'100', d'160'  ; ppo2_warning_high			1.60 Bar
 	CF_DEFAULT    CF_CENTI,     d'150', d'100', d'150'	; ppo2_display_high			1.50 Bar
@@ -145,12 +145,12 @@ cf_default_table1:
 	CF_DEFAULT    CF_COLOR,     d'224', 0,      0 		; color_warnings			Color Warnings: Red
     
 	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; show_seconds_divemode		=1 Show the seconds in Divemode
-	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; show_clock_divemode		=1 Show the clock in Divemode
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0       ; warn_ceiling_divemode		=1 Warn ceiling violation in divemode
 	CF_DEFAULT    CF_BOOL, 	    d'0',   0,      0       ; start_with_stopwatch		=1 start with stopwatch
 	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; blink_gas_divemode 		=1 Show (resetable) average Depth instead of temperature
     
-	CF_DEFAULT    CF_INT15,     d'13000', 0,    d'13000'; color_warn_depth_mBar		Warn depths
+	CF_DEFAULT    CF_INT15,     d'13000', 0,    0		; color_warn_depth_mBar		Warn depths
 	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'	; color_warn_cns_percent    Warn-%
 	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'  ; color_warn_gf_percent		Warn-%
 	CF_DEFAULT    CF_CENTI,     d'161', d'100', d'161'  ; color_warn_ppo2_cbar		ppO2 warn

@@ -35,40 +35,47 @@
 ; If in types mode, set flags into hi. If not, clear it.
 CF_DEFAULT	macro	type, default, min, max
     noexpand
+CFn set 1+CFn
     if (type) == CF_INT15
-    	if (HIGH (default)) > .127
-    		error "CF# 15bit default too big:", value
+    	if HIGH (default) > .127
+    		error CF#v(CFn) "15bit default too big: ", default
     	endif
     	if (min)>0 && (max>min)
-    	    error "CF# 15bit defaults cannot have both MIN & MAX flags"
+    	    error CF#v(CFn) "15bit defaults cannot have both MIN & MAX flags"
+    	endif
+    	if HIGH(min) > .127
+    	    error CF#v(CFn) "15bit MIN value too big: ", min
+    	endif
+    	if HIGH(max) > .127
+    	    error CF#v(CFn) "15bit MAX value too big: ", max
     	endif
     
         ifdef NO_CF_TYPES
     		DB  LOW (default), HIGH(default) + 0x80
     	else
     		DB  LOW (default), HIGH(default) + 0x80
-    		if (min) > 0
-        		DB  LOW(min), HIGH(min)
+    		if (max) > (min)
+        		DB  LOW(max), HIGH(max) + 0x80
         	else
-        		DB  LOW(min), HIGH(min) + 0x80
+        		DB  LOW(min), HIGH(min)
         	endif
     	endif
     else
         ; Basic sanity check for 8bit values:
     	if HIGH(default) > 0
-    		error "CF# 8bit default too big:", (default)
+    		error CF#v(CFn) "8bit default too big: ", default
     	endif
     	if HIGH(min) > 0
-    		error "CF# 8bit min too big:", (min)
+    		error CF#v(CFn) "8bit min too big: ", min
     	endif
     	if HIGH(max) > 0
-    		error "CF# 8bit max too big:", (max)
+    		error CF#v(CFn) "8bit max too big: ", max
     	endif
     	if ((type)==CF_BOOL) && ( (default)>1 )
-    		error "CF# BOOL default too big:", (default)
+    		error CF#v(CFn) "BOOL default too big: ", default
     	endif
     	if ((type)==CF_BOOL) && ( (min)>0 || (max)>0 )
-    		error "CF# BOOL cannot have min/max"
+    		error CF#v(CFn) "BOOL cannot have min/max"
     	endif
     
         ifdef NO_CF_TYPES
@@ -89,7 +96,7 @@ typeFlags       set typeFlags + CF_MAX
     endm
 
 ; Starting at CF0
-CF_NUMBER   set     -1
+CFn set     -1
 
 ; resets all customfunctions to the following default values
 cf_default_table0:
@@ -142,25 +149,24 @@ cf_default_table1:
 	CF_DEFAULT    CF_COLOR,     d'199', 0,      0 		; color_battery_surface		Color Battery sign: Deep blue
 	CF_DEFAULT    CF_COLOR,     d'255', 0,      0 		; color_standard1			Color Standard: White
 	CF_DEFAULT    CF_COLOR,     d'62',  0,      0 		; color_divemask			Color Divemask: Light green
-	CF_DEFAULT    CF_COLOR,     d'224', 0,      0 		; color_warnings			Color Warnings: Red
     
+	CF_DEFAULT    CF_COLOR,     d'224', 0,      0 		; color_warnings			Color Warnings: Red
 	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; show_seconds_divemode		=1 Show the seconds in Divemode
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0       ; warn_ceiling_divemode		=1 Warn ceiling violation in divemode
 	CF_DEFAULT    CF_BOOL, 	    d'0',   0,      0       ; start_with_stopwatch		=1 start with stopwatch
-	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; blink_gas_divemode 		=1 Show (resetable) average Depth instead of temperature
     
+	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; blink_gas_divemode 		=1 Show (resetable) average Depth instead of temperature
 	CF_DEFAULT    CF_INT15,     d'13000', 0,    0		; color_warn_depth_mBar		Warn depths
 	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'	; color_warn_cns_percent    Warn-%
 	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'  ; color_warn_gf_percent		Warn-%
 	CF_DEFAULT    CF_CENTI,     d'161', d'100', d'161'  ; color_warn_ppo2_cbar		ppO2 warn
-	CF_DEFAULT    CF_INT8,	    d'15',  d'7',   d'20'	; color_warn_celocity_mmin	warn at xx m/min
     
+	CF_DEFAULT    CF_INT8,	    d'15',  d'7',   d'20'	; color_warn_celocity_mmin	warn at xx m/min
 	CF_DEFAULT    CF_SEC,	    d'42',  d'0',   d'240'  ; time_correction_value_default	Adds to Seconds on Midnight
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	CF_DEFAULT    CF_INT15,     0,      0,      0       ; UNUSED
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
-	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	                
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
@@ -174,6 +180,7 @@ cf_default_table1:
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	                
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 cf_default_table2:

@@ -543,7 +543,7 @@ divemenu_set_xgas2_exit:
 	movff	EEDATA, char_I_N2_ratio		; = N2!
 	bsf		manual_gas_changed			; set event flag
 	bsf		event_occured				; set global event flag
-bsf		is_bailout					;=1: CC mode, but bailout active!		
+    bsf		is_bailout					;=1: CC mode, but bailout active!		
 	clrf	lo							; clear Setpoint, PLED_const_ppO2_value now displayes "Bail"
 	movff	lo,char_I_const_ppO2		
 	bra		timeout_divemenu2			; quit underwater menu!

@@ -1,4 +1,3 @@
-
 ; OSTC - diving computer code
 ; Copyright (C) 2008 HeinrichsWeikamp GbR
 
@@ -423,6 +422,10 @@ display_customfunction:
 ; Inputs: cf_value, cf_min, cf_max (and cf_type to display min/max).
 ; Trashed: hi:lo while display min and max values.
 display_minmax:
+; Min/max unsupported for 15bit values yet...
+    btfsc   cf_type,7           ; A 15bit value ?
+    return
+
 	movff	EEADRH, FSR1H		; Backup...
 
 ; Display min line
@@ -756,6 +759,13 @@ adjust_cfn_value3:
 ; Trashes: TBLPTR, EEADR, PROD
 
 check_customfunctions:
+;   rcall   check_next_cf               ; Check 5 at a time...
+;   rcall   check_next_cf
+;   rcall   check_next_cf
+;   rcall   check_next_cf
+;
+;check_next_cf:
+
     movf    cf_checker_counter,W        ; Get current CF to ckeck
 
     ; Setup cf32_x4 and cf page bit:
@@ -805,12 +815,13 @@ check_cf_check:
     btfss   cf_type,7                   ; 15 or 8 bit value ?
     bra     cf_check_8bit
     
-; Do a 15bit check
+; Implement the 15bit check, even if not displayed...
     rcall   getcustom15_1               ; Read into hi:lo
 
     movf    cf_min,W                    ; Compute (bound-value) -> hi:lo
     subwf   lo,F
     movf    cf_max,W
+    bcf     WREG,7                      ; Clear min or max bit
     subwfb  hi,F
 
     movf    lo,W                        ; Is it a 0 result ?
@@ -819,7 +830,7 @@ check_cf_check:
     retlw   -1                          ; YES: then it is ok.
 
 cf_15_not_equal:
-    btfss   cf_type,CF_MIN_BIT          ; Checking min or max ?
+    btfss   cf_max,7                    ; Checking min or max ?
     btg     hi,6                        ; exchange wanted sign
     
     setf    WREG                        ; -1 for return w/o error

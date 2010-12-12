@@ -40,9 +40,9 @@ clear_rambank:
 	call	disable_rs232			; disable UART module
 	call	RTCinit					; reset RTC
 
-; Extra power-up testing jDG jDG jDG jDG
+; Extra power-up reset jDG jDG jDG jDG
 	ifdef	TESTING
-		call 	test_menus
+		call 	do_menu_reset_all2
 	endif
 ; DONE jDG jDG jDG jDG
 

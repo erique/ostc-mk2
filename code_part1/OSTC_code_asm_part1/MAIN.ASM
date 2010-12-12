@@ -82,6 +82,8 @@ HighInt:
 
 ;=============================================================================
 osct_asm	code
+#include    strings.inc
+
 #include	displaytext.asm		; sends texts to wordprocessor
 #include	math.asm			; mathematical functions
 #include 	wait.asm			; waitroutines
@@ -111,24 +113,19 @@ osct_asm	code
 #include	start.asm			; Startup and init, checks background debugger
 #include	simulator.asm		; Stand-alone simulator routines
 #include 	io.asm				; Low-Level I/O access
+#include    strings.asm         ; Basic string operations
 
 ;=============================================================================
-#include	printf.asm			; jDG's compact printf test implementation.
-#ifdef TESTING
-	#include	aa_tests.asm	; And testing code.
-	#include	test_printf.asm	; Special font/colors page
-#endif
+; Include C sub-routines automatically
 
-;=============================================================================
-#ifdef AAFONTS
+p3_wp			code	0x09A00			; Mark segment name into the .map file
+
+  ifdef AAFONTS
 	; New antialiased word processor and fonts
 	#include	aa_wordprocessor.asm ; ASM wordprocessor under tests.
-#else
-	; Include C sub-routines automatically
-p3_wp			code	0x09A00			; Mark segment name into the .map file
-;	#include 	p3_wordprocessor_9A00_BAFF_0B468.txt ; jDG's C-Code
+  else
 	#include 	ostc_part3_wordprocessor_NEW_CURSOR_9A00_to_B960_jump_in_B410.txt	; Christians fonts...
-#endif
+  endif
 
 ;=============================================================================
 p2_deco	code	0x0C000			; Mark segment name into the .map file

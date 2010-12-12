@@ -339,7 +339,6 @@
 	convert_value_temp:3		; used in menu_battery_state_convert_date
 	box_temp:5
 	time_correction_value		; Adds to Seconds on midnight
-	printf_len
 	ENDC
 
   ifndef AAFONTS

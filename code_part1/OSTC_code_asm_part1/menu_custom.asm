@@ -19,7 +19,7 @@
 ; Menu "Custom Functions", Custom Functions checker (Displays permanent warning if critical custom functions are altered)
 ; written by: Matthias Heinrichs, info@heinrichsweikamp.com
 ; written: 05/10/30
-; last updated: 08/08/31
+; last updated: 2010/12/11
 ; known bugs:
 ; ToDo: 
 
@@ -45,7 +45,8 @@
 
 ; [jDG] 2010-11-30 More fancy displsy of the various CF types
 ; data types. When we do have a 8bit data (bit16=0), the high byte serves to
-; define the display format:
+; define the display format. Also stores min/max bounds into the PROM table.
+; And provides surfacemode checking of all parameters.
 
 CF_INT8		EQU	0	; Default display, 8 or 15 bits values.
 CF_PERCENT	EQU	1	    ; Displays 110%
@@ -391,9 +392,6 @@ cf_read_default:
     bcf     hi,7                        ; clear 15bit flag
     
     movff   TABLAT,cf_type              ; type (high byte) --> cf_type
-    movlw   CF_MILI
-    btfsc   cf_type,7                   ; Display all 15bits as 1.234 floats.
-    movwf   cf_type
 
     tblrd*+
     movff   TABLAT,cf_min               ; Then get optional min/max

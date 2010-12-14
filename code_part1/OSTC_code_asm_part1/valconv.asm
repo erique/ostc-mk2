@@ -18,18 +18,14 @@
 ; converts hex values to dez values
 ; written by: Matthias Heinrichs, info@heinrichsweikamp.com
 ; written: 13/10/07
-; last updated: 5/11/07
+; 10/12/2010 jDG: optimize macro size.
+; last updated: 10/12/2010
 ; known bugs:
 ; ToDo: clean up!!!
 
 
 output_16_3 macro			; displays only last three figures from a 16Bit value (0-999)
-	clrf	ignore_digits
-	incf	ignore_digits,F
-	clrf	temp4
-	bsf		show_last3	
-	movf	temp4,W			; Temp4 stores position for decimal point
-	call 	output16
+	call 	output16_3_call
 	endm
 
 output_16dp macro temp4		; 16Bit with decimal point
@@ -38,33 +34,25 @@ output_16dp macro temp4		; 16Bit with decimal point
 	endm					
 
 output_16 macro				; 16Bit Normal
-	clrf	ignore_digits
-	incf	ignore_digits,F
-	clrf	temp4
-	movf	temp4,W			; Temp4 stores position for decimal point
-	call 	output16
+	call 	output16_call
 	endm
 
 output_8 macro				; 8 Bit Normal
-	clrf	ignore_digits
-	incf	ignore_digits,F
-	clrf	temp4
-	call output8
+	call output8_call
 	endm
 
 output_99 macro				; displays only last two figures from a 8Bit value (0-99)
-	clrf	ignore_digits
-	incf	ignore_digits,F
-	clrf	temp4
-	call 	output99
+	call 	output99_call
 	endm
 
 output_99x macro			; displays only last two figures from a 8Bit value with leading zero (00-99) 
+	call 	output99x_call
+	endm
+
+output99_call:
 	clrf	ignore_digits
 	incf	ignore_digits,F
 	clrf	temp4
-	call 	output99x
-	endm
 
 output99:
 	movlw	d'99'
@@ -87,7 +75,11 @@ LCD_val99_2:
 	rcall	DEC2ASCII
 	RETURN
 
-output99x:
+output99x_call:
+	clrf	ignore_digits
+	incf	ignore_digits,F
+	clrf	temp4
+
 	movlw	d'99'
 	cpfslt	lo
 	movwf	lo							; Limit to 99
@@ -96,6 +88,11 @@ output99x:
 	bsf		pre_zero_flag		; display leading zeros
 	bra		LCD_val99_2			
 	
+output8_call:	
+    clrf	ignore_digits
+	incf	ignore_digits,F
+	clrf	temp4
+
 output8
 	movff	lo, lo_temp		
 	clrf	hi_temp
@@ -107,11 +104,22 @@ output8
 	rcall	DEC2ASCII
 	bra		LCD_val99_2			
 
+output16_3_call:
+	clrf	ignore_digits
+	incf	ignore_digits,F
+	clrf	WREG
+	bra     output16
+
+output16_call:
+	clrf	ignore_digits
+	incf	ignore_digits,F
+	clrf	WREG
+
 output16
+	movwf	temp4           ; Passed from output16dp macro, cleared by others.
+
 	bcf		all_zeros_flag	; do not display any zero from here unless there was at least one figure /zero
 
-	movwf	temp4
-	
 	bsf		leading_zeros
 	incf	temp4,1
 	decfsz	temp4,F

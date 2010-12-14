@@ -423,15 +423,15 @@ display_customfunction:
 ; Trashed: hi:lo while display min and max values.
 display_minmax:
 ; Min/max unsupported for 15bit values yet...
-    btfsc   cf_type,7           ; A 15bit value ?
-    return
-
 	movff	EEADRH, FSR1H		; Backup...
 
 ; Display min line
     WIN_TOP  .65
     WIN_LEFT .100
     lfsr    FSR2, letter
+
+    btfsc   cf_type,7           ; A 15bit value ?
+    bra     cf_no_min           ; Don't display, hence clear line...
 
     btfss   cf_type, CF_MIN_BIT ; A min value exists ?
     bra     cf_no_min
@@ -460,6 +460,9 @@ cf_no_min:
     call    PLED_standard_color
     WIN_INVERT 0
     lfsr    FSR2, letter
+
+    btfsc   cf_type,7           ; A 15bit value ?
+    bra     cf_no_max           ; Don't display, hence clear line too...
 
     btfss   cf_type, CF_MAX_BIT ; A max value exists ?
     bra     cf_no_max
@@ -757,40 +760,61 @@ adjust_cfn_value3:
 ; Output: Pop warning with the first CF number if bad.
 ;        cf_checker_counter incremented.
 ; Trashes: TBLPTR, EEADR, PROD
+;
+; Note: the trick here is to do two sweep over the 64 CF values, to make sure
+;       they are all ok.
 
 check_customfunctions:
-;   rcall   check_next_cf               ; Check 5 at a time...
-;   rcall   check_next_cf
-;   rcall   check_next_cf
-;   rcall   check_next_cf
-;
-;check_next_cf:
-
-    movf    cf_checker_counter,W        ; Get current CF to ckeck
+    ; Did we finished the two sweeps ?
+    btfsc   cf_checker_counter,7        ; Already at position 128 ?
+    return                              ; YES: just do nothing.
 
     ; Setup cf32_x4 and cf page bit:
+    movf    cf_checker_counter,W
     rlcf    WREG                        ; x4
     rlcf    WREG
     bcf     customfunction_page
     btfsc   WREG,7   
-    bsf     customfunction_page
+    bsf     customfunction_page         ; Setup CF page bit.
     andlw   4*.31
     movwf   cf32_x4
     
     ; Do the check
     rcall   check_one_cf
-    btfsc   WREG,7
-    bra     check_cf_ok
+    iorwf   WREG                        ; Test return value.
+    bz      check_failed                ; 0 == FAILED.
     
-    ; Went wrong: pop the warning
-    movwf   temp1
-    call    custom_warn_surfmode
+    ; Passed: Simple loop until 128 is reached:
+    incf    cf_checker_counter          ; Next CF to check.
+    bra     check_customfunctions       ; And loop until 128 reached (ie twice)
     
-    ; Increment counter (modulo 64)
-check_cf_ok:
-    movlw   1
-    addwf   cf_checker_counter,W
-    andlw   .63
+check_failed:
+    movlw   .63                         ; Make sure number is back to range 0..63
+    andwf   cf_checker_counter,F
+
+    ; Went wrong: draw the warning line...
+	WIN_TOP		.200
+	WIN_LEFT	.80 - (6*.7)/2          ; Center 8 chars of width 14pix.
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.1					    ; Init new Wordprocessor
+	call    PLED_warnings_color
+	
+    lfsr    FSR2,letter
+    movlw   ' '
+    movwf   POSTINC2
+    movlw   'C'
+    movwf   POSTINC2
+    movlw   'F'
+    movwf   POSTINC2
+    movff   cf_checker_counter,lo
+    output_99x
+    movlw   ' '
+    movwf   POSTINC2
+    call    word_processor
+    
+    ; When failed, increment counter modulo 64, to restart checks.
+    incf    cf_checker_counter,W
+    andlw   .63                     ; Modulo 64
     movwf   cf_checker_counter
     return
 
@@ -798,19 +822,18 @@ check_cf_ok:
 check_one_cf:
     rcall   cf_read_default             ; Sets hi:lo, cf_type, cf_min, cf_max.
     
-    movf    cf_type,W                   ; MIN or MAX set ?
+    btfsc   cf_type,7                   ; A 15bit type ?
+    bra     check_cf_check              ; Then we have to check it...
+
+    movf    cf_type,W                   ; 8bit MIN or MAX set ?
     andlw   (CF_MIN + CF_MAX)
     bnz     check_cf_check              ; yes: do something.
-    retlw   -1                          ; no: no problem there.
+    retlw   -1                          ; no: no problem then.
 
 ; It does have bound:
 check_cf_check:
-    movf    cf32_x4,W                    ; Compute current CF number
-    rrncf   WREG                        ; Div 4
-    rrncf   WREG
-    btfsc   customfunction_page         ; Upper page ?
-    addlw   .32                         ; just add 32.
-    movwf   TABLAT                      ; saved to return error, if any.
+    movf    cf_checker_counter,W        ; Get current CF number
+    andlw   .63                         ; Keep range 0..63
 
     btfss   cf_type,7                   ; 15 or 8 bit value ?
     bra     cf_check_8bit
@@ -821,7 +844,7 @@ check_cf_check:
     movf    cf_min,W                    ; Compute (bound-value) -> hi:lo
     subwf   lo,F
     movf    cf_max,W
-    bcf     WREG,7                      ; Clear min or max bit
+    bcf     WREG,7                      ; Clear min/max bit
     subwfb  hi,F
 
     movf    lo,W                        ; Is it a 0 result ?
@@ -833,10 +856,9 @@ cf_15_not_equal:
     btfss   cf_max,7                    ; Checking min or max ?
     btg     hi,6                        ; exchange wanted sign
     
-    setf    WREG                        ; -1 for return w/o error
     btfss   hi,6                        ; Is sign correct ?
-    movf    TABLAT,W                    ; NO: get back failed CF number
-    return                              ; and return that.    
+    retlw   0                           ; NO: return failed.
+    retlw   -1                          ; YES: return passed.
 
 ; Do a 8bit check
 cf_check_8bit:
@@ -847,21 +869,14 @@ cf_check_8bit:
     bra     check_no_min
     
     cpfsgt  cf_min                      ; Compare to cf_min
-    bra     check_no_min
-
-    movf    TABLAT,W                    ; NO: get back failed CF number
-    return
+    bra     check_no_min                ; PASSED: continue.
+    retlw   0                           ; NO: return failed.
 
 check_no_min:
-    btfss   cf_type,CF_MAX_BIT
-    bra     check_no_max
+    btfss   cf_type,CF_MAX_BIT          ; Is there a MAX bound ?
+    retlw   -1                          ; No check: return OK.
     
     movf    lo,W                        ; Compute value-max
     cpfslt  cf_max
-    bra     check_no_max
-
-    movf    TABLAT,W                    ; NO: get back failed CF number
-    return
-
-check_no_max:                           ; Then everything was ok...
-    retlw   -1
+    retlw   -1                          ; Bound met: return OK.
+    retlw   0                           ; NO: return failed.

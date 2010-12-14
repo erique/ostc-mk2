@@ -98,8 +98,7 @@ surfloop3:
 	bcf		switch_right
 	call	PLED_active_gas_surfmode	; Show start gas / SetPoint
 	call	PLED_custom_text			; Displays custom text
-	movlw	d'1'						; next cf to check
-	movwf	cf_checker_counter			; 
+	clrf	cf_checker_counter			; next cf to check
 	ostc_debug	'G'						; Sends debug-information to screen if debugmode active
 	GETCUSTOM8	d'12'					; Desaturation multiplier %
 	movwf	wait_temp

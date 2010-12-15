@@ -596,7 +596,7 @@
 #DEFINE	FLAG_active_descent		flag8,3	;=1: A Descent in Apnoe mode is active
 #DEFINE	display_see_deco		flag8,4	;=1: Display decoplan in Divemode
 #DEFINE	display_set_gas			flag8,5	;=1: Display Gaslist menu in Divemode
-#DEFINE	display_set_graphs		flag8,6	;=1: Display "Display Menu" in Divemode
+;free flag8,6	;=1: 
 #DEFINE	rs232_recieve_overflow	flag8,7	;=1: An RS232 timeout overflow occoured
 
 #DEFINE	nofly_active			flag9,0	;=1: Do not fly!

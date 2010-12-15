@@ -148,17 +148,11 @@ test_switches_divemode_menu3:
 	bcf		premenu					; clear premenu flag
 	clrf	timeout_counter3
 
-;	btfsc	display_see_l_tissue		; Is the leading tissue info screen active
-;	bra		divemenu_see_leading_tissue2; Yes, quit menu
-
 	btfsc	display_set_gas				; Are we in the "Gaslist" or "SetPoint" menu?
 	bra		divemenu_set_gas2			; Yes, so set gas and exit menu
 
 	btfsc 	display_see_deco			; Is the Decoplan displayed?
 	bra		divemenu_see_decoplan2		; Yes, exit menu on right button press
-
-	btfsc 	display_set_graphs			; Is the Graph displayed?
-	bra		divemode_set_graphs2		; Yes, exit menu on right button press
 
 	btfsc	display_set_xgas			; Are we in the "Set Gas" menu?
 	bra		divemenu_set_xgas2			; Yes, so configure gas or set menu and exit menu
@@ -278,7 +272,8 @@ divemode_menu_simulator:
 	bcf		premenu					; clear premenu flag
 	bcf		switch_right
 	bcf		switch_left				; Left button pressed!
-	bsf		display_set_simulator		; Set Flag
+	bsf		display_set_simulator	; Set Flag
+	bsf		menu3_active			; So "+1" is accessible at all times
 	call	PLED_clear_divemode_menu	; Clear Menu
 	call	PLED_divemode_simulator_mask; Show mask
 	movlw	d'1'
@@ -372,18 +367,6 @@ divemode_menu_simulator_m1:
 	movwf	menupos						; reset cursor
 	bra		divemode_menu_simulator_common
 
-divemode_set_graphs:
-	bsf		display_set_graphs			; set flag
-	call	PLED_clear_divemode_menu	; Clear Menu
-	call	deco_main_calc_desaturation_time	; calculate desaturation time
-	movlb	b'00000001'						; select ram bank 1
-	call	PLED_saturation_graph_divemode	; Display saturation graph
-	return
-
-divemode_set_graphs2:
-	bcf		display_set_graphs			; clear flag
-	bra		timeout_divemenu2			; quit menu!
-
 divemenu_see_decoplan:
 	bsf		display_see_deco			; set flag
 	call	PLED_clear_divemode_menu	; Clear Menu
@@ -395,10 +378,6 @@ divemenu_see_decoplan:
 
 	bsf		multi_gf_display			; Yes, display the multi-gf table screen
 	bcf		last_ceiling_gf_shown		; Clear flag
-
-;	movff	char_O_deco_status,deco_status		; 
-;	tstfsz	deco_status							; deco_status=0 if decompression calculation done
-;	return										; calculation not yet finished!
 
 	call	PLED_decoplan_gf_page1			; Display the new screen
 	return
@@ -694,9 +673,7 @@ timeout_divemenu2a:
 	call	customview_mask			; Redraw current customview mask
 	clrf	timeout_counter3		; Also clear timeout
 	bcf		display_see_deco		; clear all display flags
-;	bcf		display_see_l_tissue
 	bcf		display_set_gas			
-	bcf		display_set_graphs
 	bcf		display_set_xgas
 	bcf		display_set_setpoint
 	bcf		display_set_simulator
@@ -718,8 +695,3 @@ timeout_divemenu6:
 	call	PLED_divemode_simulator_mask; Show mask
 	call	PLED_divemenu_cursor		; update cursor
 	bra		timeout_divemenu1			; Check timeout
-	
-;timeout_divemenu7:
-;	; Update Leading tissue infos
-;	call	PLED_show_leading_tissue	; Update infos about leading tissue	
-;	bra		timeout_divemenu1			; Check timeout

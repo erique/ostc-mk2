@@ -400,7 +400,7 @@ textpos_pointer:
 	
 	DB	.100,.50			;281
 	DB	.90,.170			;282	Lead Tiss.
-	DB	.90,.170			;283	Stopwatch
+	DB	.93,.170			;283	Stopwatch
 	DB	.20,.95				;284
 	DB	.20,.125			;285
 
@@ -677,7 +677,7 @@ text_pointer:
 	DA	"- 1m}}"				;251		l=6
 	DA	"+10m}}"				;252		l=6
 	DA	"-10m}}"				;253		l=6
-	DA	"Exit}}"				;254		l=6
+	DA	"Close}"				;254		l=6
 	DA	"Time}}"				;255		l=6
 	
 ; Text Bank2 (Texts 256-511):

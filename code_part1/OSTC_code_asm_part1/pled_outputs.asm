@@ -2449,7 +2449,7 @@ PLED_divemode_set_xgas:				; Displayes the "Set Gas" menu
 	return
 
 PLED_divemode_simulator_mask:
-	DISPLAYTEXT	.254			; EXIT
+	DISPLAYTEXT	.254			; Close
 	DISPLAYTEXT	.250			; + 1m
 	DISPLAYTEXT	.251			; - 1m
 	DISPLAYTEXT	.252			; +10m
@@ -2802,7 +2802,7 @@ PLED_clear_divemode_menu:
 	movff	WREG,box_temp+2		; row bottom (0-239)
 	movlw	.082
 	movff	WREG,box_temp+3		; column left (0-159)
-	movlw	.159	
+movlw	.160
 	movff	WREG,box_temp+4		; column right (0-159)
 	call	PLED_box
 	return

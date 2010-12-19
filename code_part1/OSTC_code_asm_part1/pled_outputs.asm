@@ -2194,7 +2194,6 @@ PLED_divemins2:
 	WIN_LEFT	.120
 	WIN_FONT	FT_MEDIUM
 	call	PLED_standard_color
-
 	call	word_processor
 	WIN_FONT	FT_SMALL
 	return

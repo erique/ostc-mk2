@@ -62,7 +62,7 @@ diveloop_loop:		; The diveloop starts here
 
 ; Tasks only for Gauge mode
 diveloop_loop1a:
-	btfss	premenu						; Is the divemode menu active?
+	btfss	premenu							; Is the divemode menu active?
 	call	PLED_divemins					; display (new) divetime!
 	call	timeout_divemode				; dive finished? This routine sets the required flags
 

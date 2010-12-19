@@ -107,6 +107,7 @@ output8
 output16_3_call:
 	clrf	ignore_digits
 	incf	ignore_digits,F
+	bsf		show_last3	
 	clrf	WREG
 	bra     output16
 

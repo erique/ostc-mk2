@@ -1,3 +1,9 @@
+New in 1.74 Beta:
+BETA Version - Do NOT use for diving!
+NEW: Added END (Equivalent narcotic depth) for GasSetup
+CHANGE: Limits for several Custom Functions
+BUGFIX: Realtime Simulator menu
+
 New in 1.73 Beta:
 BETA Version - Do NOT use for diving!
 NEW: Anti-Alised fonts (OSTC MK.2 only)

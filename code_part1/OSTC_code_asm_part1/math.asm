@@ -91,8 +91,7 @@ sub16:
     return        
 
 
-mult16x16:
-;xA*xB=xC
+mult16x16:		;xA*xB=xC
 	clrf    xC+2        	  ;  Clear the High-Order Bits
 	clrf    xC+3
 	movf    xA, w               ;  Do the "L" Multiplication first

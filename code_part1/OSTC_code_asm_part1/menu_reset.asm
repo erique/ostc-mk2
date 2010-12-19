@@ -111,7 +111,7 @@ cf_default_table0:
 	CF_DEFAULT    CF_INT8, 	    d'7',   d'3',   d'18'   ; minimum_velocity		    7min/min
 	CF_DEFAULT    CF_INT15,	    d'1160',d'950', 0    	; pressure_offset_divemode	1160mBar
 	CF_DEFAULT    CF_INT15,	    d'1100',d'1100', 0   	; max_surfpressure		    1100mBar
-	CF_DEFAULT    CF_PERCENT,	d'20',  d'1',  d'99'   ; min_gradient_factor		20%
+	CF_DEFAULT    CF_PERCENT,	d'20',  d'1',  d'99'   	; min_gradient_factor		20%
 	CF_DEFAULT    CF_PERCENT,	d'20',  d'1',  d'20'	; oxygen_threshold			20%
 
 	CF_DEFAULT    CF_SEC,	    d'30',  d'5',   d'30'   ; dive_menu_timeout		    30s
@@ -120,13 +120,13 @@ cf_default_table0:
 	CF_DEFAULT    CF_PERCENT,	d'60',  d'60',  d'100'	; nofly_time_ratio			60%
 	CF_DEFAULT    CF_PERCENT,	d'100', d'50',  d'100'  ; gradient_factor_alarm1	100%
 
-	CF_DEFAULT    CF_PERCENT,	d'10',  d'01',  d'100'  ; cns_display_surface		10%
+	CF_DEFAULT    CF_PERCENT,	d'10',  d'0',  	d'100'  ; cns_display_surface		10%
 	CF_DEFAULT    CF_DECI,	    d'10',  d'0',  	d'10'	; deco_distance_for_sim		1m
-	CF_DEFAULT    CF_CENTI,     d'019', d'019', d'021'	; ppo2_warning_low			0.19 Bar
-	CF_DEFAULT    CF_CENTI,     d'160', d'100', d'160'  ; ppo2_warning_high			1.60 Bar
-	CF_DEFAULT    CF_CENTI,     d'150', d'100', d'150'	; ppo2_display_high			1.50 Bar
+	CF_DEFAULT    CF_CENTI,     d'019', d'19', 	d'021'	; ppo2_warning_low			0.19 Bar
+	CF_DEFAULT    CF_CENTI,     d'160', d'0', 	d'160'  ; ppo2_warning_high			1.60 Bar
+	CF_DEFAULT    CF_CENTI,     d'150', d'0', 	d'150'	; ppo2_display_high			1.50 Bar
     
-	CF_DEFAULT    CF_INT8,	    d'10',  d'1',   d'120'   ; sampling_rate				10s
+	CF_DEFAULT    CF_INT8,	    d'10',  d'1',   d'120'  ; sampling_rate				10s
 	CF_DEFAULT    CF_INT8,	    d'6',   d'0',   d'15'   ; sampling_divisor_temp		/6
 	CF_DEFAULT    CF_INT8,	    d'6',   d'0',   d'15'   ; sampling_divisor_deco		/6
 	CF_DEFAULT    CF_INT8,	    d'0',   d'0',   d'15'   ; sampling_divisor_tank		never

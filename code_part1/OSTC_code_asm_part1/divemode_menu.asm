@@ -59,7 +59,7 @@ test_switches_divemode2:
 	btfsc	premenu
 	bra		test_switches_divemode2_2
 
-	bsf		toggle_customview	; Toggle customview (Cleared in divemode.asm)
+	bsf		toggle_customview	; Toggle customview (Cleared in customview.asm)
 	btfsc	standalone_simulator	; Standalone Simualtor active?
 	bra		divemode_menu_simulator	; Yes, Show simulator menu!
 

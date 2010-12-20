@@ -405,6 +405,20 @@ PLED_clear_customview_divemode:
 	call	PLED_box
 	return
 
+PLED_clear_customview_surfacemode:
+	movlw	.0
+	movff	WREG,box_temp+0		; Data
+	movlw	.25
+	movff	WREG,box_temp+1		; row top (0-239)
+	movlw	.121
+	movff	WREG,box_temp+2		; row bottom (0-239)
+	movlw	.82
+	movff	WREG,box_temp+3		; column left (0-159)
+	movlw	.159
+	movff	WREG,box_temp+4		; column right (0-159)
+	call	PLED_box
+	return
+
 PLED_clear_decoarea:
 	movlw	.0
 	movff	WREG,box_temp+0		; Data
@@ -2354,27 +2368,24 @@ PLED_serial:			; Writes OSTC #Serial and Firmware version in surfacemode
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
 
-
 	lfsr	FSR2,letter
-	movlw   0x85                        ; New aa_font_28 5 grays HW logo.
-	movwf   POSTINC2
-	movlw   0x86
-	movwf   POSTINC2
-	movlw   ' '
-	movwf   POSTINC2
-	movwf   POSTINC2
-	
 	OUTPUTTEXTH		d'262'			; "OSTC "
 	clrf	EEADRH
 	clrf	EEADR				; Get Serial number LOW
-	call	read_eeprom					; read byte
+	call	read_eeprom			; read byte
 	movff	EEDATA,lo
 	incf	EEADR,F				; Get Serial number HIGH
-	call	read_eeprom					; read byte
+	call	read_eeprom			; read byte
 	movff	EEDATA,hi
 
 	bsf		leftbind
 	output_16
+	movlw	' '
+	movwf	POSTINC2
+	movlw   0x85                        ; New aa_font_28 5 grays HW logo.
+	movwf   POSTINC2
+	movlw   0x86
+	movwf   POSTINC2
 	movlw	' '
 	movwf	POSTINC2
 	movlw	'V'
@@ -2390,7 +2401,6 @@ PLED_serial:			; Writes OSTC #Serial and Firmware version in surfacemode
 	bsf		leftbind
 	output_99x
 	bcf		leftbind
-	
 	call	word_processor
 	return
 

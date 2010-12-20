@@ -52,11 +52,6 @@ surfloop:
 	call	PLED_desaturation_time			; display desaturation time
 	call	PLED_nofly_time					; display nofly time
 
-	btfss	pre_dive_screen					; Show predive screen
-	call	PLED_tissue_saturation_graph	; no, display saturation graph
-	btfsc	pre_dive_screen					; Show predive screen
-	call	PLED_pre_dive_screen			; yes, display Pre-Dive Screen
-
 	call	PLED_active_gas_surfmode		; Show start gas
 	call	PLED_display_decotype_surface	; Show deco mode (ZH-L16, const. ppO2 or Multi-GF)
 
@@ -134,6 +129,7 @@ surfloop_loop1:
 	call	set_leds_surfmode			; Sets Warning and No-Fly LEDs
 	call    check_customfunctions       ; Checks CF functions and displays warning symbol if something critical is wrong
 	call	PLED_display_decotype_surface	; Show deco mode
+	call	surfcustomview_second		; Do every-second tasks for the custom view area
 	btfsc	enter_error_sleep			; Enter Fatal Error Routine?
 	call	fatal_error_sleep			; Yes (In Sleepmode.asm!)
 	bcf		onesecupdate				; every second tasks done
@@ -162,6 +158,10 @@ surfloop_loop2:
 	goto	diveloop					; Yes, switch into Divemode!
 	btfsc	sleepmode					; Sleepmode active?
 	goto	sleeploop					; Yes, switch into sleepmode!
+
+	btfsc	toggle_customview			; Next view?
+	call	surfcustomview_toggle		; Yes, show next customview (and delete this flag)
+
 ; Check for the different UART flags
 	btfsc	dump_external_eeprom		; Start interface (dumps EEPROM BANK 0 + additional data)?
 	goto	menu_interface				; Yes!
@@ -193,6 +193,7 @@ update_surfloop60:
 	call	check_temp_extrema			; check for new temperature extremas
 	call	PLED_custom_text			; Displays custom text
 	call	calc_surface_interval		; Increases Surface-Interval time
+	call	surfcustomview_minute		; Do every-minute tasks for the custom view area
 
 	btfsc	gauge_mode					; Ignore in gauge mode
 	bra		update_surfloop60_2
@@ -205,11 +206,6 @@ update_surfloop60:
 	call	PLED_desaturation_time		; display desaturation time
 	btfsc	premenu						; Not when "Menu?" is displayed!
 	bra		update_surfloop60_2
-
-	btfss	pre_dive_screen					; Show predive screen
-	call	PLED_tissue_saturation_graph	; no, display saturation graph
-	btfsc	pre_dive_screen					; Show predive screen
-	call	PLED_pre_dive_screen			; yes, display Pre-Dive Screen
 
 update_surfloop60_2:
 	call	nofly_timeout60				; checks if nofly time is > 0
@@ -408,11 +404,6 @@ timeout_premenu:
 	btfsc	FLAG_apnoe_mode
 	bra		timeout_premenu2		; Skip in Apnoe mode
 
-	btfss	pre_dive_screen					; Show predive screen
-	call	PLED_tissue_saturation_graph	; no, display saturation graph
-	btfsc	pre_dive_screen					; Show predive screen
-	call	PLED_pre_dive_screen			; yes, display Pre-Dive Screen
-
 timeout_premenu2:
 	call	update_surf_press		; rewrite serial number
 	call	PLED_serial				; rewrite serial number
@@ -454,13 +445,7 @@ test_switches_surfmode2:
 	return
 
 test_switches_surfmode4:
-	btg		pre_dive_screen
-
-	btfss	pre_dive_screen					; Show predive screen
-	call	PLED_tissue_saturation_graph	; no, display saturation graph
-	btfsc	pre_dive_screen					; Show predive screen
-	call	PLED_pre_dive_screen			; yes, display Pre-Dive Screen
-
+	bsf		toggle_customview	; Toggle customview (Cleared in customview.asm)
 	return
 
 timeout_surfmode:

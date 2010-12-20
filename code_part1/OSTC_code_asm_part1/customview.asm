@@ -68,13 +68,8 @@ customview_1sec_stopwatch:
 	return
 
 customview_1sec_marker:				; Do nothing extra
-	return
-
 customview_1sec_lead_tiss:			; Do nothing extra
-	return
-
-customview_1sec_clock:
-;	call	PLED_diveclock2
+customview_1sec_clock:				; Do nothing extra
 	return
 
 
@@ -103,7 +98,6 @@ customview_minute_marker:			; Do nothing extra
 customview_minute_stopwatch:		; Do nothing extra
 	return
 
-
 customview_toggle:		; Yes, show next customview (and delete this flag)
 	incf	menupos3,F			; Number of customview to show
 	movlw	d'5'				; Max number+1
@@ -130,21 +124,81 @@ customview_init_stopwatch:
 	call	PLED_stopwatch_show
 	bra		customview_toggle_exit	
 
-customview_init_marker:
-; Init Marker 
-	DISPLAYTEXT		d'151'					; Set Marker?
+customview_init_marker:					; Init Marker 
+	DISPLAYTEXT		d'151'				; Set Marker?
 	bra		customview_toggle_exit	
 
-customview_init_clock:
-; Init Clock
+customview_init_clock:					; Init Clock
 	call	PLED_diveclock
 	bra		customview_toggle_exit	
 
-customview_init_lead_tissue:
-; Show leading tissue
+customview_init_lead_tissue:			; Show leading tissue
 	call	PLED_show_leading_tissue
 	bra		customview_toggle_exit	
 
 customview_toggle_exit:
-	bcf		toggle_customview	; Clear flag
+	bcf		toggle_customview			; Clear flag
+	return
+
+
+
+surfcustomview_toggle:			; Yes, show next customview (and delete this flag)
+	incf	menupos3,F			; Number of customview to show
+	movlw	d'3'				; Max number+1
+	cpfseq	menupos3			; Max reached?
+	bra		surfcustomview_mask	; No, show
+	clrf	menupos3			; Reset to zero (Zero=no custom view)
+surfcustomview_mask:	
+	call	PLED_clear_customview_surfacemode
+	movff	menupos3,temp1		; Menupos3 holds number of customview function
+	dcfsnz	temp1,F
+	bra		surfcustomview_init_graphs			; Show the tissue graphs
+	dcfsnz	temp1,F
+	bra		surfcustomview_init_gaslist			; Show pre-dive gaslist/setpoint list
+;	bra		surfcustomview_init_nocustomview	; menupos3=0 -> No Customview
+surfcustomview_init_nocustomview:
+	bra		surfcustomview_toggle_exit	
+
+surfcustomview_init_graphs:
+	call	PLED_tissue_saturation_graph		; Draw the graphs
+	bra		surfcustomview_toggle_exit	
+
+surfcustomview_init_gaslist:
+	call	PLED_pre_dive_screen				; Show the Gaslist/Setpoint list
+	bra		surfcustomview_toggle_exit	
+
+surfcustomview_toggle_exit:
+	bcf		toggle_customview			; Clear flag
+
+
+
+
+surfcustomview_second:		; Do every-second tasks for the custom view area
+	movff	menupos3,temp1		; copy
+	dcfsnz	temp1,F
+	bra		surfcustomview_1sec_graphs		; Update the Graphs
+	dcfsnz	temp1,F
+	bra		surfcustomview_1sec_gaslist		; Update the Gaslist/SetPoint List
+	; Menupos3=0, do nothing
+	return
+	
+surfcustomview_1sec_graphs:				; Do nothing extra
+surfcustomview_1sec_gaslist:				; Do nothing extra
+	return
+
+
+surfcustomview_minute:		; Do every-minute tasks for the custom view area
+	movff	menupos3,temp1		; copy
+	dcfsnz	temp1,F
+	bra		surfcustomview_minute_graphs		; Update the Graphs
+	dcfsnz	temp1,F
+	bra		surfcustomview_minute_gaslist		; Update the Gaslist/SetPoint List
+	; Menupos3=0, do nothing
+	return
+
+surfcustomview_minute_graphs:
+	call	PLED_tissue_saturation_graph		; Draw/Update the graphs
+	return
+
+surfcustomview_minute_gaslist:					; Do nothing extra
 	return

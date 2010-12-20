@@ -2811,7 +2811,7 @@ PLED_clear_divemode_menu:
 	movff	WREG,box_temp+2		; row bottom (0-239)
 	movlw	.082
 	movff	WREG,box_temp+3		; column left (0-159)
-movlw	.160
+    movlw	.160
 	movff	WREG,box_temp+4		; column right (0-159)
 	call	PLED_box
 	return

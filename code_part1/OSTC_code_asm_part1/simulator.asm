@@ -159,6 +159,14 @@ simulator_show_decoplan:
 	call	divemode_copy_decolist				;copy gf_decolist (0x250:.32) to gf_decolist_copy (0x0E0:.32)
 	call	divemenu_see_decoplan
 
+	WIN_LEFT .0
+	WIN_TOP .160
+	STRCPY  "TTS: "
+	movff   char_O_ascenttime,lo
+ 	bcf		leftbind
+	output_8
+	STRCAT_PRINT    "' "
+
 ;call	enable_rs232
 ;	lfsr	FSR0,0x250
 ;	movlw	0x20

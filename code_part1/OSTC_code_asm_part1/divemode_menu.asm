@@ -23,8 +23,7 @@
 ; ToDo:
 
 
-test_switches_divemode:
-									; checks switches in divemode
+test_switches_divemode:				; checks switches in divemode
 	btfsc	switch_left
 	bra		test_switches_divemode2
 
@@ -61,9 +60,11 @@ test_switches_divemode2:
 	btfsc	menubit
 	bra		test_switches_divemode2_2	; Not in Premenu or Menu...
 
-	bsf		toggle_customview	; Toggle customview (Cleared in customview.asm)
-	btfsc	standalone_simulator	; Standalone Simualtor active?
-	bra		divemode_menu_simulator	; Yes, Show simulator menu!
+	bsf		toggle_customview			; Toggle customview (Cleared in customview.asm)
+
+	btfsc	standalone_simulator		; Standalone Simualtor active?
+	bra		divemode_menu_simulator		; Yes, Show simulator menu!
+	return
 
 test_switches_divemode2_2:
 	btfss	FLAG_apnoe_mode		; In Apnoe mode?

@@ -238,6 +238,8 @@ surfcustomview_minute_graphs:
 	return
 
 surfcustomview_minute_interval:
+	DISPLAYTEXT	d'189'							; Surface
+	DISPLAYTEXT	d'240'							; Interval:
 	call	PLED_interval						; Display the interval	
 	return
 

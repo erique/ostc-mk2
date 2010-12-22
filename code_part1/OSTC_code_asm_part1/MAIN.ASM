@@ -129,6 +129,11 @@ p3_wp			code	0x09A00			; Mark segment name into the .map file
   endif
 
 ;=============================================================================
+; (should be after aa_wordprocessor)
+#include    color_processor.asm ; Color image drawing.
+#include    dive_icons.asm      ; Draw dive type icons in surface mode.
+
+;=============================================================================
 p2_deco	code	0x0C000			; Mark segment name into the .map file
 #include	p2_deco_main_v110d.txt
 

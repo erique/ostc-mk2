@@ -130,6 +130,7 @@ surfloop_loop1:
 	call    check_customfunctions       ; Checks CF functions and displays warning symbol if something critical is wrong
 	call	PLED_display_decotype_surface	; Show deco mode
 	call	surfcustomview_second		; Do every-second tasks for the custom view area
+	call    dive_type_icons             ; Draw Air/Nitrox/Trimix color icon.
 	btfsc	enter_error_sleep			; Enter Fatal Error Routine?
 	call	fatal_error_sleep			; Yes (In Sleepmode.asm!)
 	bcf		onesecupdate				; every second tasks done

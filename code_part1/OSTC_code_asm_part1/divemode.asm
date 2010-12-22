@@ -1471,7 +1471,9 @@ set_powersafe2:
 	return
 
 calc_average_depth:
-	bcf		lock_stopwatch_reset	; Un-Lock the stopwatch reset option
+	btfsc	reset_average_depth		; Reset the Avewrage depth?
+	rcall	reset_average1			; Reset the resettable average depth
+
 	; 1. Add new 2xdepth to the Sum of depths registers
 	movff	rel_pressure+0,b0_lo
 	movff	rel_pressure+1,b0_hi
@@ -1506,6 +1508,16 @@ calc_average_depth:
 	movff	xC+1,avr_rel_pressure+1
 	return
 	
+reset_average1:
+	clrf	average_depth_hold+0
+	clrf	average_depth_hold+1
+	clrf	average_depth_hold+2
+	clrf	average_depth_hold+3		; Clear average depth register
+	movlw	d'2'
+	movwf	average_divesecs+0
+	clrf	average_divesecs+1
+	bcf		reset_average_depth			; Clear flag
+	return
 
 diveloop_boot:	
 	ostc_debug	'Q'		; Sends debug-information to screen if debugmode active
@@ -1520,14 +1532,6 @@ diveloop_boot:
 	movlw	d'0'
 	cpfsgt	EEDATA
 	call	PLED_brightness_full
-
-	clrf	average_depth_hold+0
-	clrf	average_depth_hold+1
-	clrf	average_depth_hold+2
-	clrf	average_depth_hold+3		; Clear average depth register
-	movlw	d'2'
-	movwf	average_divesecs+0
-	clrf	average_divesecs+1
 
 	movlw	d'1'
 	movwf	apnoe_max_pressure+0
@@ -1547,7 +1551,7 @@ diveloop_boot:
 	clrf 	timeout_counter2			; Here: counts to six, then store deco data and temperature
 	clrf	AlarmType					; Clear all alarms
 	bcf		event_occured				; clear flag
-	bcf		lock_stopwatch_reset		; clear flag
+	rcall	reset_average1				; Reset the resettable average depth
 	bcf		depth_greater_100m			; clear flag
 	setf	last_diluent				; to be displayed after first calculation (range: 0 to 100 [%])
 	bcf		dekostop_active	
@@ -1583,13 +1587,13 @@ set_no_forced_stops:					; Init Deco list
 	clrf	POSTINC0
 	clrf	POSTINC0
 
-; Start with active Stopwatch?
-	bsf			stopwatch_active
-	GETCUSTOM8	d'41'			; =1: Start with active Stopwatch
-	movwf		lo
-	movlw		d'1'
-	cpfseq		lo						; CF41=1?
-	bcf			stopwatch_active		; No!
+;; Start with active Stopwatch?
+;	bsf			stopwatch_active
+;	GETCUSTOM8	d'41'			; =1: Start with active Stopwatch
+;	movwf		lo
+;	movlw		d'1'
+;	cpfseq		lo						; CF41=1?
+;	bcf			stopwatch_active		; No!
 
 ; Init profile recording parameters	
 	GETCUSTOM8	d'20'			; sample rate

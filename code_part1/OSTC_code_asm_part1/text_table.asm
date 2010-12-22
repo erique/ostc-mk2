@@ -73,7 +73,7 @@ textlength_pointer:
 	DB	.16,.16,.16,.16
 	DB	.16,.16,.16,.16
 ; 32 Custom funtion descriptors with length 16
-	DB	.20,.14,.14,.14,.8,.8	;t186;t187;t188;t189;t190;t191
+	DB	.20,.14,.14,.8,.8,.8	;t186;t187;t188;t189;t190;t191
 	DB	.6,.20,.20,.20,.20,.20	;t192;t193;t194;t195;t196;t197
 	DB	.20,.20,.20,.20,.20,.20 ;t198......t203		
 	DB	.20,.20,.20,.20,.20,.20 ;t204......t209
@@ -82,7 +82,7 @@ textlength_pointer:
 	DB	.20,.20,.20,.20,.20,.20 ;t222......t227
 	DB	.20,.20,.20,.20,.20,.20 ;t228......t233
 	DB	.20,.20,.10,.10,.10,.8	;t234;t235;t236;t237;t238;t239
-	DB	.8,.8,.8,.14,.6,.20		;t240;t241;t242;t243;t244;t245
+	DB	.10,.8,.8,.14,.6,.20	;t240;t241;t242;t243;t244;t245
 	DB	.16,.10,.16,.12,.6,.6	;t246;t247;t248;t249;t250;t251
 	DB	.6,.6,.6,.6				;t252;t253;t254;t255
 
@@ -294,7 +294,7 @@ textpos_pointer:
 	DB	.13,.2			;186
 	DB	.20,.95			;187
 	DB	.0,.2			;188
-	DB	.2,.48			;189
+	DB	.90,.25			;189	Surface (Interval)
 	DB	.0,.0			;190
 	DB	.0,.0			;191
 	DB	.0,.0			;192
@@ -352,7 +352,7 @@ textpos_pointer:
 	DB	.2,.12				;237
 	DB	.100,.0				;238   	SetPoint
 	DB	.100,.0				;239 	No Deco (non-GF)
-	DB	.100,.0				;240
+	DB	.90,.50				;240	(Surface) Interval:
 	DB	.100,.75			;241	Display (Divemode Menu)
 	DB	.100,.0				;242	No Deco (GF)
 	DB	.2,.12				;243
@@ -605,7 +605,7 @@ text_pointer:
 	DA	"Custom Functions II}"	;186		l=20
 	DA	"Show License}}"		;187		l=14
 	DA	"Sim. Results:}"		;188		l=14
-	DA	"NOT USED!!!!!}"		;189		l=14
+	DA	"Surface}"				;189		l=8
 	DA	"ppO2 +}}"				;190		l=8
 	DA	"ppO2 -}}"				;191		l=8
 	DA	"Dil.}}"				;192		l=6
@@ -663,7 +663,7 @@ text_pointer:
 	DA	"Not found}"			;237		l=10
 	DA	"SetPoint}}"			;238	 	l=10
 	DA	"No Deco}"				;239		l=8
-	DA	"unused }"				;240		l=8
+	DA	"Interval:}"			;240		l=10
 	DA	"Display}"				;241		l=8
 	DA	"No deco}"				;242		l=8
 	DA	"Search module}"		;243		l=14

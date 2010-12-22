@@ -645,7 +645,7 @@
 #DEFINE	toggle_customview		flag13,7	;=1: Next customview
 
 #DEFINE	enter_error_sleep		flag14,0	;=1: Sleep immediately displaying the error using LED codes
-#DEFINE	stopwatch_active		flag14,1	;=1: Show Stopwatch in Divemode
+;unused	flag14,1	;=1: 
 #DEFINE	is_bailout				flag14,2	;=1: CC mode, but bailout active!
 #DEFINE	standalone_simulator	flag14,3	;=1: Standalone Simulator active
 #DEFINE	display_set_simulator	flag14,4	;=1: Show Divemode simulator menu
@@ -655,10 +655,10 @@
 
 #DEFINE	restore_deco_data		flag15,0	;=1: Restore Decodata after the dive from 0x380 buffer
 #DEFINE	uart_store_tissue_data	flag15,1	;=1: Store tissue data for next simualted dive!
-;unused flag15,2	;=1: 
+#DEFINE	reset_average_depth 	flag15,2	;=1: Average Depth will be resetted
 #DEFINE	blinking_better_gas		flag15,3	;=1: Gas is currently blinking
 #DEFINE	menu3_active			flag15,4	;=1: menu entry three in divemode menu is active
-#DEFINE	lock_stopwatch_reset	flag15,5	;=1: Locks the Reset of the Stopwtach/Average depth for 1 second
+;unused	flag15,5	;=1: 
 #DEFINE	maxdepth_greater_100m	flag15,6	;=1: Max Depth greater>100m
-#DEFINE	show_interval			flag15,7	;=1: Show Interval, =0: Show Clock in Surfacemode
+;unused			flag15,7	;=1: 
 

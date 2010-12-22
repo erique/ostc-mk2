@@ -680,89 +680,12 @@ PLED_diveclock2:
 
 PLED_clock:
 	ostc_debug	'c'
-	
-	;If > 0 display surface_interval:2 and clock changing every 5 seconds
-	;use timeout_counter for this
 	WIN_TOP		.50
 	WIN_LEFT	.1
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
-
 	lfsr	FSR2,letter
-
-	movff	surface_interval+0,lo
-	tstfsz	lo
-	bra		PLED_clock0				; Not Zero, switch between Interval and clock
-	movff	surface_interval+1,lo
-	tstfsz	lo
-	bra		PLED_clock0				; Not Zero, switch between Interval and clock
-	bra		PLED_clock3				; surface_interval=0, always display clock!
-
-PLED_clock0:
-	btfss	show_interval			; Show Interval?
-	bra		PLED_clock2				; No, display clock and reset counter
-
-PLED_clock1:
-	decfsz	timeout_counter,F		; =0?
-	bra		PLED_clock1a			; No...
-	bra		PLED_clock3				; Yes, display clock and reset counter
-
-PLED_clock1a:
-	bsf		show_interval
-	movlw	d'6'
-	cpfslt	timeout_counter			; f < w? -> timeout_counter>5?
-	rcall	PLED_clock_reload_timer	; No, reload counter
-
-	movff	surface_interval+0,lo
-	movff	surface_interval+1,hi
-	call	convert_time			; lo=mins, hi=hours
-
-	movf	hi,W
-	movff	lo,hi
-	movwf	lo					; exchange lo and hi
-
-	movlw	'I'
-	movwf	POSTINC2
-	movlw	'n'
-	movwf	POSTINC2
-	movlw	't'
-	movwf	POSTINC2
-	movlw	':'
-	movwf	POSTINC2
-	output_99x
-	movlw	':'
-	movwf	POSTINC2
-	movff	hi,lo
-	output_99x
-	movlw	' '
-	movwf	POSTINC2
-	call	word_processor
-	return
-
-PLED_clock_reload_timer:
-	bcf		show_interval
-	movlw	d'5'
-	movwf	timeout_counter
-	return
-
-PLED_interval_reload_timer:
-	bsf		show_interval
-	movlw	d'5'
-	movwf	timeout_counter
-	return
-
-PLED_clock2:
-	decfsz	timeout_counter,F		; =0?
-	bra		PLED_clock3				; No...
-	bra		PLED_clock1a			; Yes, display interval and reset counter
-
-PLED_clock3:
-	bcf		show_interval
-	movlw	d'6'
-	cpfslt	timeout_counter			; f < w? -> timeout_counter>5?
-	rcall	PLED_interval_reload_timer; No, reload counter
-
 	movff	hours,lo
 	output_99x
 	movlw	':'
@@ -777,6 +700,153 @@ PLED_clock3:
 	movwf	POSTINC2
 	call	word_processor
 	return
+
+PLED_interval:
+	WIN_TOP		.75
+	WIN_LEFT	.90
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0					; Init new Wordprocessor
+	call	PLED_standard_color
+	lfsr	FSR2,letter
+
+	movff	surface_interval+0,lo
+	movff	surface_interval+1,hi
+	call	convert_time			; lo=mins, hi=hours
+
+	movf	hi,W
+	movff	lo,hi
+	movwf	lo					; exchange lo and hi
+	output_99x
+	movlw	':'
+	movwf	POSTINC2
+	movff	hi,lo
+	output_99x
+	movlw	' '
+	movwf	POSTINC2
+	call	word_processor
+	return
+
+
+PLED_show_cf11_cf12_cf29:; Display saturations/desaturation multiplier and last deco in the customview field
+	WIN_TOP		.25
+	WIN_LEFT	.90
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0					; Init new Wordprocessor
+	call	PLED_standard_color
+	lfsr	FSR2,letter
+	GETCUSTOM8	d'11'
+	movwf	lo
+	movlw	'C'
+	movwf	POSTINC2
+	movlw	'F'
+	movwf	POSTINC2
+	movlw	'1'
+	movwf	POSTINC2
+	movlw	'1'
+	movwf	POSTINC2
+	movlw	':'
+	movwf	POSTINC2
+	bsf		leftbind
+	output_8
+	movlw	'%'
+	movwf	POSTINC2
+	call	word_processor
+
+	WIN_TOP		.50
+	lfsr	FSR2,letter
+	GETCUSTOM8	d'12'
+	movwf	lo
+	movlw	'C'
+	movwf	POSTINC2
+	movlw	'F'
+	movwf	POSTINC2
+	movlw	'1'
+	movwf	POSTINC2
+	movlw	'2'
+	movwf	POSTINC2
+	movlw	':'
+	movwf	POSTINC2
+	bsf		leftbind
+	output_8
+	movlw	'%'
+	movwf	POSTINC2
+	call	word_processor
+
+PLED_show_cf11_cf12_cf29_2:
+	WIN_TOP		.75
+	lfsr	FSR2,letter
+	GETCUSTOM8	d'29'
+	movwf	lo
+	movlw	'C'
+	movwf	POSTINC2
+	movlw	'F'
+	movwf	POSTINC2
+	movlw	'2'
+	movwf	POSTINC2
+	movlw	'9'
+	movwf	POSTINC2
+	movlw	':'
+	movwf	POSTINC2
+	bsf		leftbind
+	output_8
+	movlw	'm'
+	movwf	POSTINC2
+	call	word_processor
+	bcf		leftbind
+	return
+
+
+PLED_show_cf32_cf33_cf29:; Display GF_LOW, GF_HIGH and last deco in the customview field
+	WIN_TOP		.25
+	WIN_LEFT	.90
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0					; Init new Wordprocessor
+	call	PLED_standard_color
+	lfsr	FSR2,letter
+	GETCUSTOM8	d'32'
+	movwf	lo
+	movlw	'G'
+	movwf	POSTINC2
+	movlw	'F'
+	movwf	POSTINC2
+	movlw	'_'
+	movwf	POSTINC2
+	movlw	'l'
+	movwf	POSTINC2
+	movlw	'o'
+	movwf	POSTINC2
+	movlw	':'
+	movwf	POSTINC2
+	bsf		leftbind
+	output_8
+	movlw	'%'
+	movwf	POSTINC2
+	call	word_processor
+
+	WIN_TOP		.50
+	lfsr	FSR2,letter
+	GETCUSTOM8	d'33'
+	movwf	lo
+	movlw	'G'
+	movwf	POSTINC2
+	movlw	'F'
+	movwf	POSTINC2
+	movlw	'_'
+	movwf	POSTINC2
+	movlw	'h'
+	movwf	POSTINC2
+	movlw	'i'
+	movwf	POSTINC2
+	movlw	':'
+	movwf	POSTINC2
+	bsf		leftbind
+	output_8
+	movlw	'%'
+	movwf	POSTINC2
+	call	word_processor
+
+	bra		PLED_show_cf11_cf12_cf29_2		; Display CF29 in the third row and RETURN
+
 
 PLED_logbook_cursor:
 
@@ -1232,17 +1302,17 @@ show_decotype_surface6:
 	return
 
 PLED_pre_dive_screen:			;Display Pre-Dive Screen
-	movlw	.0
-	movff	WREG,box_temp+0		; Data
-	movlw	.25
-	movff	WREG,box_temp+1		; row top (0-239)
-	movlw	.120
-	movff	WREG,box_temp+2		; row bottom (0-239)
-	movlw	.82
-	movff	WREG,box_temp+3		; column left (0-159)
-	movlw	.159
-	movff	WREG,box_temp+4		; column right (0-159)
-	call	PLED_box
+;	movlw	.0
+;	movff	WREG,box_temp+0		; Data
+;	movlw	.25
+;	movff	WREG,box_temp+1		; row top (0-239)
+;	movlw	.120
+;	movff	WREG,box_temp+2		; row bottom (0-239)
+;	movlw	.82
+;	movff	WREG,box_temp+3		; column left (0-159)
+;	movlw	.159
+;	movff	WREG,box_temp+4		; column right (0-159)
+;	call	PLED_box
 
 	; List active gases/Setpoints
 
@@ -2911,23 +2981,23 @@ custom_warn_surfmode:			; With CF in temp1
 	call	PLED_standard_color
 	return
 
-PLED_saturation_graph_divemode:
-	ostc_debug	'h'		; Sends debug-information to screen if debugmode active
+;PLED_saturation_graph_divemode:
+;	ostc_debug	'h'		; Sends debug-information to screen if debugmode active
 PLED_tissue_saturation_graph:
 	ostc_debug	'i'		; Sends debug-information to screen if debugmode active
 
-; Clear graph area...
-	movlw	.0
-	movff	WREG,box_temp+0		; Data
-	movlw	.25
-	movff	WREG,box_temp+1		; row top (0-239)
-	movlw	.120
-	movff	WREG,box_temp+2		; row bottom (0-239)
-	movlw	.82
-	movff	WREG,box_temp+3		; column left (0-159)
-	movlw	.159
-	movff	WREG,box_temp+4		; column right (0-159)
-	call	PLED_box
+;; Clear graph area...
+;	movlw	.0
+;	movff	WREG,box_temp+0		; Data
+;	movlw	.25
+;	movff	WREG,box_temp+1		; row top (0-239)
+;	movlw	.120
+;	movff	WREG,box_temp+2		; row bottom (0-239)
+;	movlw	.82
+;	movff	WREG,box_temp+3		; column left (0-159)
+;	movlw	.159
+;	movff	WREG,box_temp+4		; column right (0-159)
+;	call	PLED_box
 
 ; Draw Frame
 	GETCUSTOM8	d'35'			; Standard output color

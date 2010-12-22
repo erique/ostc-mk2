@@ -1,8 +1,11 @@
 New in 1.74 Beta:
 BETA Version - Do NOT use for diving!
 NEW: Added END (Equivalent narcotic depth) for GasSetup
-CHANGE: Limits for several Custom Functions
+CHANGE: Limits for several Custom Functions  (OSTC MK.2 only)
 BUGFIX: Realtime Simulator menu
+NEW: Customview for Surfacemode (OSTC MK.2 only)
+NEW: Icon for Tank mix on Surface screen (OSTC MK.2 only)
+BUGFIX: Stopwatch Reset
 
 New in 1.73 Beta:
 BETA Version - Do NOT use for diving!

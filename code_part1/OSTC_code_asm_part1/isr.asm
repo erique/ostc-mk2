@@ -305,9 +305,9 @@ RTCisr:
 		bsf			store_sample			; ...and set bit for profile storage
 RTCisr1:		
 ; Increase re-setable average depth divetime counter
-		incf		average_divesecs+0,F	; increase divetime registers	
+		incf		average_divesecs+0,F	; increase stopwatch registers	
 		btfsc		STATUS,Z
-		incf		average_divesecs+1,F	; increase divetime registers	
+		incf		average_divesecs+1,F	; increase stopwatch registers	
 
 		btfss		divemode2				; displayed divetime is running?
 		bra			RTCisr2					; No (e.g. too shallow)

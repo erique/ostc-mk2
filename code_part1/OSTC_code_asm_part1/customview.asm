@@ -100,8 +100,8 @@ customview_minute_stopwatch:		; Do nothing extra
 
 customview_toggle:		; Yes, show next customview (and delete this flag)
 	incf	menupos3,F			; Number of customview to show
-	movlw	d'5'				; Max number+1
-	cpfseq	menupos3			; Max reached?
+	movlw	d'4'				; Max number
+	cpfsgt	menupos3			; Max reached?
 	bra		customview_mask		; No, show
 	clrf	menupos3			; Reset to zero (Zero=no custom view)
 customview_mask:	
@@ -144,8 +144,8 @@ customview_toggle_exit:
 
 surfcustomview_toggle:			; Yes, show next customview (and delete this flag)
 	incf	menupos3,F			; Number of customview to show
-	movlw	d'3'				; Max number+1
-	cpfseq	menupos3			; Max reached?
+	movlw	d'4'				; Max number
+	cpfsgt	menupos3			; Max reached?
 	bra		surfcustomview_mask	; No, show
 	clrf	menupos3			; Reset to zero (Zero=no custom view)
 surfcustomview_mask:	
@@ -155,6 +155,10 @@ surfcustomview_mask:
 	bra		surfcustomview_init_graphs			; Show the tissue graphs
 	dcfsnz	temp1,F
 	bra		surfcustomview_init_gaslist			; Show pre-dive gaslist/setpoint list
+	dcfsnz	temp1,F
+	bra		surfcustomview_init_interval		; Show the interval counter
+	dcfsnz	temp1,F
+	bra		surfcustomview_init_cfview			; Show the interval counter
 ;	bra		surfcustomview_init_nocustomview	; menupos3=0 -> No Customview
 surfcustomview_init_nocustomview:
 	bra		surfcustomview_toggle_exit	
@@ -165,6 +169,30 @@ surfcustomview_init_graphs:
 
 surfcustomview_init_gaslist:
 	call	PLED_pre_dive_screen				; Show the Gaslist/Setpoint list
+	bra		surfcustomview_toggle_exit	
+
+surfcustomview_init_interval:
+	DISPLAYTEXT	d'189'							; Surface
+	DISPLAYTEXT	d'240'							; Interval:
+	call	PLED_interval						; Display the interval
+	bra		surfcustomview_toggle_exit	
+
+surfcustomview_init_cfview:
+	read_int_eeprom		d'34'					; Get Decomode
+	incf	EEDATA,W							; +1 -> WREG
+	movwf	temp10
+	dcfsnz	temp10,F
+	call	PLED_show_cf11_cf12_cf29			; =0 (ZH-L16 OC)
+	dcfsnz	temp10,F
+	bra		surfcustomview_toggle_exit			; =1 (Gauge)
+	dcfsnz	temp10,F
+	call	PLED_show_cf11_cf12_cf29			; =2 (ZH-L16 CC)
+	dcfsnz	temp10,F
+	bra		surfcustomview_toggle_exit			; =3 (Apnoe)
+	dcfsnz	temp10,F
+	call	PLED_show_cf32_cf33_cf29			; =4 (L16-GF OC)
+	dcfsnz	temp10,F
+	call	PLED_show_cf32_cf33_cf29			; =5 (L16-GF CC)
 	bra		surfcustomview_toggle_exit	
 
 surfcustomview_toggle_exit:
@@ -179,11 +207,16 @@ surfcustomview_second:		; Do every-second tasks for the custom view area
 	bra		surfcustomview_1sec_graphs		; Update the Graphs
 	dcfsnz	temp1,F
 	bra		surfcustomview_1sec_gaslist		; Update the Gaslist/SetPoint List
+	dcfsnz	temp1,F
+	bra		surfcustomview_1sec_interval	; Update the Interval display
+	dcfsnz	temp1,F
+	bra		surfcustomview_1sec_cfview		; Update the critical cf view
 	; Menupos3=0, do nothing
 	return
-	
+surfcustomview_1sec_cfview:				; Do nothing extra
 surfcustomview_1sec_graphs:				; Do nothing extra
-surfcustomview_1sec_gaslist:				; Do nothing extra
+surfcustomview_1sec_gaslist:			; Do nothing extra
+surfcustomview_1sec_interval:			; Do nothing extra
 	return
 
 
@@ -193,6 +226,10 @@ surfcustomview_minute:		; Do every-minute tasks for the custom view area
 	bra		surfcustomview_minute_graphs		; Update the Graphs
 	dcfsnz	temp1,F
 	bra		surfcustomview_minute_gaslist		; Update the Gaslist/SetPoint List
+	dcfsnz	temp1,F
+	bra		surfcustomview_minute_interval		; Update the Interval display
+	dcfsnz	temp1,F
+	bra		surfcustomview_minute_cfview			; Update the critical cf view
 	; Menupos3=0, do nothing
 	return
 
@@ -200,5 +237,10 @@ surfcustomview_minute_graphs:
 	call	PLED_tissue_saturation_graph		; Draw/Update the graphs
 	return
 
+surfcustomview_minute_interval:
+	call	PLED_interval						; Display the interval	
+	return
+
 surfcustomview_minute_gaslist:					; Do nothing extra
+surfcustomview_minute_cfview:					; Do nothing extra
 	return

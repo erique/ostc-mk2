@@ -87,20 +87,6 @@ test_switches_divemode2a:
 	bcf		switch_left				; Left button pressed!
 	return
 
-reset_stopwatch:
-	btfsc	lock_stopwatch_reset	; Reset locked?
-	return							; Yes, do not reset (now)...
-; Maker Set, also reset average Depth....
-	clrf	average_depth_hold+0
-	clrf	average_depth_hold+1
-	clrf	average_depth_hold+2
-	clrf	average_depth_hold+3		; Clear average depth register
-	movlw	d'2'
-	movwf	average_divesecs+0
-	clrf	average_divesecs+1
-	call	calc_average_depth
-	return
-
 test_switches_divemode_menu:
 	btfsc	switch_left
 	bra		test_switches_divemode_menu3
@@ -197,23 +183,7 @@ set_marker:
 	bra		timeout_divemenu2			; quit menu!
 
 toggle_stopwatch:
-	btg		stopwatch_active			; Toggle Flag
-	
-	btfss	stopwatch_active			; Show Stopwatch?
-	bra		toggle_stopwatch2			; No, remove outputs
-
-	clrf	average_depth_hold+0
-	clrf	average_depth_hold+1
-	clrf	average_depth_hold+2
-	clrf	average_depth_hold+3		; Clear average depth register
-	movlw	d'3'
-	movwf	average_divesecs+0
-	clrf	average_divesecs+1
-	call	calc_average_depth
-	bra		timeout_divemenu2			; quit menu!
-
-toggle_stopwatch2:
-	call	PLED_clear_customview_divemode	; Remove Stopwatch Outputs
+	bsf		reset_average_depth			; Average Depth will be resetted in divemode.asm
 	bra		timeout_divemenu2			; quit menu!
 
 divemode_toggle_brightness:
@@ -681,7 +651,6 @@ timeout_divemenu2a:
 	bcf		display_set_simulator
 	bcf		switch_left				; and debounce switches
 	bcf		switch_right
-	bsf		lock_stopwatch_reset	; Lock the stopwatch reset for at least one second (Cleared in "calc_average_depth:")
 	return
 	
 timeout_divemenu3:

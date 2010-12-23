@@ -2575,7 +2575,7 @@ PLED_decoplan_delete_gf:		; Delete unused rows
 	bra		PLED_decoplan_delete_common
 
 PLED_decoplan_delete:			; Delete unused rows
-	movlw	.184
+	movlw	.171
 	movff	WREG,box_temp+2	; row bottom (0-239)
 PLED_decoplan_delete_common:
 	movlw	.0
@@ -2682,6 +2682,8 @@ PLED_decoplan_show_stop_gf:
 	lfsr	FSR2,letter		
 	output_99x								; outputs into Postinc2!
 	movlw	'm'
+	movwf	POSTINC2
+	movlw	' '
 	movwf	POSTINC2
 	call	word_processor	
 	WIN_LEFT	.140

@@ -1587,14 +1587,6 @@ set_no_forced_stops:					; Init Deco list
 	clrf	POSTINC0
 	clrf	POSTINC0
 
-;; Start with active Stopwatch?
-;	bsf			stopwatch_active
-;	GETCUSTOM8	d'41'			; =1: Start with active Stopwatch
-;	movwf		lo
-;	movlw		d'1'
-;	cpfseq		lo						; CF41=1?
-;	bcf			stopwatch_active		; No!
-
 ; Init profile recording parameters	
 	GETCUSTOM8	d'20'			; sample rate
 	movwf	samplesecs_value	; to avoid EEPROM access in the ISR

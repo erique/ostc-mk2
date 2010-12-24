@@ -405,7 +405,7 @@ PLED_clear_customview_divemode:
 	call	PLED_box
 	return
 
-PLED_clear_customview_surfacemode:
+PLED_clear_customview_surfmode:
 	movlw	.0
 	movff	WREG,box_temp+0		; Data
 	movlw	.25

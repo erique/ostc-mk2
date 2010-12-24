@@ -154,9 +154,9 @@ cf_default_table1:
 	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; show_seconds_divemode		=1 Show the seconds in Divemode
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0       ; warn_ceiling_divemode		=1 Warn ceiling violation in divemode
-	CF_DEFAULT    CF_BOOL, 	    d'0',   0,      0       ; start_with_stopwatch		=1 start with stopwatch
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
     
-	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; blink_gas_divemode 		=1 Show (resetable) average Depth instead of temperature
+	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; blink_gas_divemode 		=1 blink better gas
 	CF_DEFAULT    CF_INT15,     d'13000', 0,   d'13000' ; color_warn_depth_mBar		Warn depths
 	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'	; color_warn_cns_percent    Warn-%
 	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'  ; color_warn_gf_percent		Warn-%

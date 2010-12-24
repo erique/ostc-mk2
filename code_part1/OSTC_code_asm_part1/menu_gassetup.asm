@@ -885,6 +885,23 @@ make_first_gas:
 	movlw	d'33'
 	movwf	EEADR
 	call	write_eeprom			; store in internal EEPROM
+
+; Set First gas to "Active"
+	read_int_eeprom		d'27'		; read flag register
+	movff	decodata+0,lo			; selected gas 0-4
+	incf	lo,F
+	dcfsnz	lo,F
+	bsf		EEDATA,0
+	dcfsnz	lo,F
+	bsf		EEDATA,1
+	dcfsnz	lo,F
+	bsf		EEDATA,2
+	dcfsnz	lo,F
+	bsf		EEDATA,3
+	dcfsnz	lo,F
+	bsf		EEDATA,4
+	write_int_eeprom	d'27'		; write flag register
+
 	movlw	d'3'
 	movwf	menupos
 	bra		next_gas_page1
@@ -1160,30 +1177,8 @@ gassetup_show_ppO2:
 	WIN_TOP		.35
 	lfsr	FSR2,letter
 	OUTPUTTEXT 	d'149'		; (ppO2:
-;	movlw	'('
-;	movwf	POSTINC2
-;	movlw	'p'
-;	movwf	POSTINC2
-;	movlw	'p'
-;	movwf	POSTINC2
-;	movlw	'O'
-;	movwf	POSTINC2
-;	movlw	'2'
-;	movwf	POSTINC2
-;	movlw	':'
-;	movwf	POSTINC2
 	output_16dp	d'3'
 	OUTPUTTEXT 	d'150'		; Bar: 
-;	movlw	'B'
-;	movwf	POSTINC2
-;	movlw	'a'
-;	movwf	POSTINC2
-;	movlw	'r'
-;	movwf	POSTINC2
-;	movlw	')'
-;	movwf	POSTINC2
-;	movlw	' '
-;	movwf	POSTINC2
 	call	word_processor
 	return
 

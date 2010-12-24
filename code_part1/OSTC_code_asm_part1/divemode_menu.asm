@@ -211,16 +211,6 @@ divemode_toggle_brightness3:
 	call	PLED_depth					; Displays new depth...
 	call	PLED_max_pressure			; ...and max. depth
 
-	btfsc	FLAG_apnoe_mode				; Ignore in Apnoe mode
-	bra		timeout_divemenu2			; quit menu!
-	btfsc	gauge_mode					; Ignore in Gauge mode
-	bra		timeout_divemenu2			; quit menu!
-
-; Redraw Outputs in Deco modes
-	btfsc	dekostop_active
-	call	PLED_display_deko_mask		; clear nostop time, display decodata
-	btfss	dekostop_active
-	call	PLED_display_ndl_mask		;  Clear deco data, display nostop time
 	bra		timeout_divemenu2			; quit menu!
 
 divemode_set_xgas:						; Set the extra gas...
@@ -621,11 +611,17 @@ timeout_divemenu1:
 	cpfsgt	timeout_counter3		; ... longer then timeout_divemenu
 	return							; No!
 timeout_divemenu2:					; quit divemode menu
-	btfss	multi_gf_display		; Was the Multi-GF Table displayed?
-	bra		timeout_divemenu2a		; No, normal OLED rebuild
+;	btfss	multi_gf_display		; Was the Multi-GF Table displayed?
+;	bra		timeout_divemenu2a		; No, normal OLED rebuild
 
 ; Restore some outputs
 	clrf	temp8					; Page 0-1 of deco list
+
+	btfsc	FLAG_apnoe_mode				; Ignore in Apnoe mode
+	bra		timeout_divemenu2a			; skip!
+	btfsc	gauge_mode					; Ignore in Gauge mode
+	bra		timeout_divemenu2a			; skip!
+
 	btfsc	dekostop_active
 	call	PLED_display_deko_mask	; clear nostop time, display decodata
 	btfss	dekostop_active
@@ -639,10 +635,6 @@ timeout_divemenu2a:
 	call	PLED_clear_divemode_menu; Clear dive mode menu
 	call	PLED_divemode_mask		; Display mask
 	call	PLED_divemins			; Display (new) divetime!
-	btfss	dekostop_active
-	call	PLED_display_ndl_mask
-	btfsc	dekostop_active
-	call	PLED_display_deko_mask
 	call	customview_mask			; Redraw current customview mask
 	clrf	timeout_counter3		; Also clear timeout
 	bcf		display_see_deco		; clear all display flags

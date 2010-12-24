@@ -149,7 +149,7 @@ surfcustomview_toggle:			; Yes, show next customview (and delete this flag)
 	bra		surfcustomview_mask	; No, show
 	clrf	menupos3			; Reset to zero (Zero=no custom view)
 surfcustomview_mask:	
-	call	PLED_clear_customview_surfacemode
+	call	PLED_clear_customview_surfmode
 	movff	menupos3,temp1		; Menupos3 holds number of customview function
 	dcfsnz	temp1,F
 	bra		surfcustomview_init_graphs			; Show the tissue graphs

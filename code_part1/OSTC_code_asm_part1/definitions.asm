@@ -37,14 +37,6 @@
 
 #DEFINE		AAFONTS				; The nicer fonts (not working yet...)
 
-; Define max. 5 Binary Custom Functions here (add more in menu_custom.asm)
-#DEFINE	binary_cf1				d'31'
-#DEFINE	binary_cf2				d'38'
-#DEFINE	binary_cf3				d'39'
-#DEFINE	binary_cf4				d'40'
-#DEFINE	binary_cf5				d'41'
-#DEFINE	binary_cf6				d'42'
-
 ; Color Definitions: 8Bit RGB b'RRRGGGBB'
 ;#DEFINE	color_red	b'11100000'
 #DEFINE	color_blue	b'00000011'

@@ -282,7 +282,6 @@ ostc_debug1:
 
 
 PLED_resetdebugger:
-	bcf		LED_blue
 	call	PLED_boot				; PLED boot
 	call	PLED_ClearScreen		; clean up OLED
 	call	PLED_standard_color
@@ -299,6 +298,10 @@ PLED_resetdebugger:
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
 	lfsr	FSR2,letter
+	movff	temp10,lo
+	output_8		
+	movlw	' '
+	movwf	POSTINC2
 	movf	debug_char+0,W
 	movwf 	POSTINC2
 	movf	debug_char+1,W
@@ -377,10 +380,10 @@ PLED_resetdebugger:
 	output_8		
 	call	word_processor
 
+	bcf		switch_left	
 PLED_resetdebugger_loop:
 	btfss	switch_left
 	bra		PLED_resetdebugger_loop		; Loop
-	bcf		LED_red
 	return
 
 PLED_divemode_mask:					; Displays mask in Dive-Mode
@@ -649,20 +652,11 @@ PLED_display_clear_common2:
 
 
 PLED_diveclock:
-	call		PLED_divemask_color	; Set Color for Divemode mask
+	call	PLED_divemask_color	; Set Color for Divemode mask
 	DISPLAYTEXT		d'255'			; Clock
 	call	PLED_standard_color
 
 PLED_diveclock2:
-;	GETCUSTOM8	d'39'			; =1: Show clock in Divemode
-;	movwf	lo
-;	movlw	d'1'
-;	cpfseq	lo					; =1?
-;	return						; No, Done.
-
-;	btfsc	menubit	; is the Dive mode menu displayed?
-;	return			; Yes
-
 	WIN_TOP		.192
 	WIN_LEFT	.123
 	WIN_FONT 	FT_SMALL
@@ -2415,7 +2409,6 @@ PLED_stopwatch_show2:
 	WIN_LEFT	.110
 	WIN_FONT	FT_SMALL
 	call	PLED_standard_color
-
 
 	lfsr	FSR2,letter
 	movff	avr_rel_pressure+0,lo

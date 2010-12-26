@@ -160,7 +160,7 @@ test_switches_divemode_menu3:
 	bra		divemode_toggle_brightness	; Toggle OLED-Brightness
 	dcfsnz	menupos,F
 	bra		timeout_divemenu2			; Quit divemode menu
-	return
+	bra		timeout_divemenu2			; Quit divemode menu
 
 divemode_menu3:
 	movff	menupos3,temp1		; copy
@@ -175,7 +175,6 @@ divemode_menu3:
 
 divemode_menu3_nothing:
 	bra		timeout_divemenu2			; Quit divemode menu
-	return
 
 set_marker:
 	movlw	d'6'				; Type of Alarm  (Manual Marker)
@@ -246,7 +245,7 @@ divemode_menu_simulator:
 
 divemode_menu_simulator2:
 	dcfsnz	menupos,F
-	bra		timeout_divemenu2			; quit underwater menu!
+	bra		timeout_divemenu2			; close underwater menu!
 	dcfsnz	menupos,F
 	bra		divemode_menu_simulator_p1	; Adjust +1m
 	dcfsnz	menupos,F
@@ -260,20 +259,20 @@ divemode_menu_simulator2:
 divemode_menu_simulator_common:
 	call	PLED_divemode_simulator_mask		; Redraw Simualtor mask
 
-	; Check limits (140m and 0m)
-	movlw	LOW		d'15000'
+	; Check limits (130m and 0m)
+	movlw	LOW		d'14000'
 	movwf	sub_a+0
-	movlw	HIGH	d'15000'
+	movlw	HIGH	d'14000'
 	movwf	sub_a+1
 	movff	sim_pressure+0,sub_b+0
 	movff	sim_pressure+1,sub_b+1
 	call	sub16				; sub_c = sub_a - sub_b
 	btfss	neg_flag	
 	bra		divemode_menu_simulator_common2
-	; Too deep, limit to 140m
-	movlw	LOW		d'15000'
+	; Too deep, limit to 130m
+	movlw	LOW		d'14000'
 	movwf	sim_pressure+0
-	movlw	HIGH	d'15000'
+	movlw	HIGH	d'14000'
 	movwf	sim_pressure+1
 	return
 
@@ -616,6 +615,7 @@ timeout_divemenu2:					; quit divemode menu
 
 ; Restore some outputs
 	clrf	temp8					; Page 0-1 of deco list
+	call	PLED_clear_divemode_menu; Clear dive mode menu
 
 	btfsc	FLAG_apnoe_mode				; Ignore in Apnoe mode
 	bra		timeout_divemenu2a			; skip!
@@ -632,7 +632,6 @@ timeout_divemenu2a:
 	bcf		menubit
 	bcf		premenu					; Yes, clear flags and menu, display dive time and mask again
 	call	PLED_active_gas_divemode; Display gas, if required
-	call	PLED_clear_divemode_menu; Clear dive mode menu
 	call	PLED_divemode_mask		; Display mask
 	call	PLED_divemins			; Display (new) divetime!
 	call	customview_mask			; Redraw current customview mask

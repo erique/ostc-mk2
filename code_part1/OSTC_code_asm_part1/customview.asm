@@ -99,6 +99,7 @@ customview_minute_stopwatch:		; Do nothing extra
 	return
 
 customview_toggle:		; Yes, show next customview (and delete this flag)
+	ostc_debug	'X'		; Sends debug-information to screen if debugmode active
 	incf	menupos3,F			; Number of customview to show
 	movlw	d'4'				; Max number
 	cpfsgt	menupos3			; Max reached?
@@ -138,6 +139,7 @@ customview_init_lead_tissue:			; Show leading tissue
 
 customview_toggle_exit:
 	bcf		toggle_customview			; Clear flag
+	ostc_debug	'Y'		; Sends debug-information to screen if debugmode active
 	return
 
 

@@ -64,7 +64,8 @@ menu_gassetup_list:
 	movlw	':'
 	movwf	POSTINC2
 	
-	call	menu_gassetup_grey_inactive			; Sets Greyvalue for inactive gases
+	movf    decodata+0,W
+	call	PLED_grey_inactive_gas			; Sets Greyvalue for inactive gases
 	call	word_processor
 	WIN_LEFT	.40
 	movf	waitms_temp,W		; Load row into WREG
@@ -82,7 +83,8 @@ menu_gassetup_list:
 
 ; New v1.44se
 menu_gassetup_Tx:
-	call	menu_gassetup_grey_inactive			; Sets Greyvalue for inactive gases	
+	movf    decodata+0,W
+	call	PLED_grey_inactive_gas			; Sets Greyvalue for inactive gases	
 	call	word_processor
 
 	WIN_LEFT	.48
@@ -172,7 +174,8 @@ menu_gassetup_Err:
 
 ; Changed v1.44se
 menu_gassetup_list0:
-	call	menu_gassetup_grey_inactive			; Sets Greyvalue for inactive gases
+	movf    decodata+0,W
+	call	PLED_grey_inactive_gas			; Sets Greyvalue for inactive gases
 	call	word_processor
 
 	WIN_LEFT	.105
@@ -196,7 +199,8 @@ menu_gassetup_list0:
 	output_8
 	movlw	'm'
 	movwf	POSTINC2
-	call	menu_gassetup_grey_inactive			; Sets Greyvalue for inactive gases
+	movf    decodata+0,W
+	call	PLED_grey_inactive_gas			; Sets Greyvalue for inactive gases
 	call	word_processor	
 
 	call	PLED_standard_color
@@ -1125,29 +1129,6 @@ gassetup_write_Tx:
 	movwf	POSTINC2
 	return
 
-; New v1.44se
-menu_gassetup_grey_inactive:
-; Set Greyvalue to lower value when gas is inactive
-	read_int_eeprom		d'27'	; read flag register
-	movff	decodata+0,lo		; copy gas number 0-4
-	incf	lo,F				; 1-5
-menu_gassetup_list1:
-	rrcf	EEDATA			; roll flags into carry
-	decfsz	lo,F			; max. 5 times...
-	bra		menu_gassetup_list1
-	
-	btfss	STATUS,C		; test carry
-	bra		menu_gassetup_list1_grey
-
-	GETCUSTOM8	d'35'		;movlw	color_white	
-	call	PLED_set_color	; grey out inactive gases!
-	return
-
-menu_gassetup_list1_grey:
-	movlw	color_grey
-	call	PLED_set_color	; grey out inactive gases!
-	return
-	
 gassetup_show_ppO2:
 	movf	divemins+0,W
 	addlw	0x06

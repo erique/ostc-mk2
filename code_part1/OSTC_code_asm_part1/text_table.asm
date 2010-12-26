@@ -576,7 +576,7 @@ text_pointer:
 	DA	"Divemode secs. }"		;160
 	DA	"not used       }"		;161
 	DA	"Warn Ceiling   }"		;162
-	DA	"not used       }"		;163
+	DA	"Mix type icons }"		;163
 	DA	"Blink BetterGas}"		;164
 	DA	"DepthWarn[mBar]}"		;165
 	DA	"CNS warning [%]}"		;166

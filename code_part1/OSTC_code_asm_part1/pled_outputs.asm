@@ -1295,6 +1295,46 @@ show_decotype_surface6:
 	call	word_processor
 	return
 
+;-----------------------------------------------------------------------------
+; Set color to grey when gas is inactive
+; Inputs: WREG : gas# (0..4)
+; Trashes: lo
+; New v1.44se
+PLED_grey_inactive_gas:
+	movwf	lo		                    ; copy gas number 0-4
+	incf	lo,F				        ; 1-5
+
+    read_int_eeprom		d'33'       	; Get First gas (1-5)
+    movf    EEDATA,W            
+    subwf   lo,W                        ; Compare with current
+    bz      PLED_white_gas              ; First is always on.
+
+    movlw   .28-1                       ; Depth for gas# is at idx+28
+    addwf   lo,W
+    movwf   EEADR                       ; address in EEPROM.
+    call    read_eeprom                 ; Read depth
+    clrf    WREG                
+    cpfsgt  EEDATA                      ; is depth > 0 ?
+    bra     PLED_grey_gas
+
+	read_int_eeprom		d'27'	        ; read flag register
+PLED_grey_inactive_gas1:
+	rrcf	EEDATA			            ; roll flags into carry
+	decfsz	lo,F			            ; max. 5 times...
+	bra		PLED_grey_inactive_gas1
+	
+	bnc		PLED_grey_gas               ; test carry
+
+PLED_white_gas:
+	GETCUSTOM8	d'35'		            ;movlw	color_white	
+	goto	PLED_set_color	            ; grey out inactive gases!
+
+PLED_grey_gas:
+	movlw	color_grey
+	goto	PLED_set_color	            ; grey out inactive gases!
+
+;-----------------------------------------------------------------------------
+
 PLED_pre_dive_screen:			;Display Pre-Dive Screen
 ;	movlw	.0
 ;	movff	WREG,box_temp+0		; Data
@@ -1350,25 +1390,10 @@ PLED_pre_dive_screen2_loop:
 	call	read_eeprom		; get byte (stored in EEDATA)
 	movff	EEDATA,lo		; copy to lo
 	output_8				; outputs into Postinc2!
-	
-	read_int_eeprom		d'27'	; read flag register
-	movff	hi,lo			; copy gas number
-PLED_pre_dive_screen2_loop1:
-	rrcf	EEDATA			; roll flags into carry
-	decfsz	lo,F			; max. 5 times...
-	bra		PLED_pre_dive_screen2_loop1
-	
-	btfsc	STATUS,C		; test carry
-	bra		PLED_pre_dive_white
 
-	movlw	color_grey
-	call	PLED_set_color	; grey out inactive gases!
-	bra		PLED_pre_dive_color_done
+    decf    hi,W            ; Gas # in 0..4
+	call    PLED_grey_inactive_gas
 
-PLED_pre_dive_white:
-	call	PLED_standard_color
-
-PLED_pre_dive_color_done:	
 	read_int_eeprom 	d'33'			; Read start gas (1-5)
 	movf	EEDATA,W
 	cpfseq	hi				; Current Gas the active gas?
@@ -1383,8 +1408,6 @@ PLED_pre_dive_screen2a:
 	call	word_processor	; No, display gas
 
 PLED_pre_dive_screen2b:
-	call		PLED_standard_color
-
 	movlw	d'5'			; list all four (remaining) gases
 	cpfseq	hi				; All gases shown?
 	bra		PLED_pre_dive_screen2_loop	; No

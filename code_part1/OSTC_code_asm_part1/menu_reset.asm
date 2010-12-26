@@ -284,7 +284,7 @@ do_menu_reset_decodata2:
 	DISPLAYTEXT	.25					; "Reset..."
 	movff	amb_pressure+0,int_I_pres_respiration+0		; copy surface air pressure to deco routine
 	movff	amb_pressure+1,int_I_pres_respiration+1		
-	call	deco_main_clear_tissue	;
+	call	deco_clear_tissue
 	movlb	b'00000001'				; RAM Bank1 selected
 	goto	restart					; done. quit to surfmode
 
@@ -303,7 +303,7 @@ reset_start:
 ; reset deco data
 	movff	amb_pressure+0,int_I_pres_respiration+0		; copy surface air pressure to deco routine
 	movff	amb_pressure+1,int_I_pres_respiration+1		
-	call	deco_main_clear_tissue	;
+	call	deco_clear_tissue
 	movlb	b'00000001'				; RAM Bank1 selected
 
 ; reset gases

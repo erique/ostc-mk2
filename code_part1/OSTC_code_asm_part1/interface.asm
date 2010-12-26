@@ -41,11 +41,11 @@ reset_decodata:
 	bcf			PIE1,RCIE						; No Interrupt for UART
 	bsf			LED_blue
 
-	call		deco_main_clear_tissue			; Reset Decodata
+	call		deco_clear_tissue			; Reset Decodata
 	movlb		b'00000001'						; select ram bank 1
-	call		deco_main_calc_desaturation_time	; calculate desaturation time
+	call		deco_calc_desaturation_time	; calculate desaturation time
 	movlb		b'00000001'						; select ram bank 1
-	call		main_clear_CNS_fraction			; clear CNS
+	call		deco_clear_CNS_fraction			; clear CNS
 	movlb		b'00000001'						; select ram bank 1
 
 	movlw		d'1'

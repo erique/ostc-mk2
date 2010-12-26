@@ -101,7 +101,7 @@ surfloop3:
 	GETCUSTOM8	d'11'					; Saturation multiplier %
 	movwf	wait_temp
 	movff	wait_temp,char_I_saturation_multiplier
-	call	deco_main_calc_desaturation_time; calculate desaturation time
+	call	deco_calc_desaturation_time ; calculate desaturation time
 	movlb	b'00000001'					; select ram bank 1
 	ostc_debug	'H'						; Sends debug-information to screen if debugmode active
 
@@ -272,7 +272,7 @@ calc_deko_surfmode:
 	movwf	wait_temp
 	movff	wait_temp,char_I_desaturation_multiplier
 
-	call	deco_main_calc_wo_deco_step_1_m				; calculate deco in surface mode 
+	call	deco_calc_wo_deco_step_1_min    ; calculate deco in surface mode 
 	movlb	b'00000001'									; select ram bank 1
 	ostc_debug	'J'		; Sends debug-information to screen if debugmode active
 	bcf		LED_red

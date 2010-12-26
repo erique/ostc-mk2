@@ -275,7 +275,7 @@ simulator_calc_deco_loop1:
 	call	divemode_check_decogases			; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
 
-	call	deco_main_calc_hauptroutine		; calc_tissue
+	call	deco_calc_hauptroutine		    ; calc_tissue
 	movlb	b'00000001'						; rambank 1 selected
 
 	movff	char_O_deco_status,deco_status		; 
@@ -297,7 +297,7 @@ simulator_calc_deco_loop2:
 	call	divemode_check_decogases			; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
 
-	call	deco_main_calc_hauptroutine		; calc_tissue
+	call	deco_calc_hauptroutine		; calc_tissue
 	movlb	b'00000001'						; rambank 1 selected
 	ostc_debug	'C'		; Sends debug-information to screen if debugmode active
 	
@@ -337,7 +337,7 @@ simulator_calc_deco2:
 	call	divemode_check_decogases			; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
 
-	call	deco_main_calc_hauptroutine		; calc_tissue
+	call	deco_calc_hauptroutine		; calc_tissue
 	movlb	b'00000001'						; rambank 1 selected
 
 	movff	char_O_deco_status,deco_status		; 
@@ -349,7 +349,7 @@ simulator_calc_deco2:
 simulator_save_tissue_data:
 	bsf		restore_deco_data		; Set restore flag
 	ostc_debug	'S'							; Sends debug-information to screen if debugmode active
-	call	main_push_tissues_to_vault
+	call	deco_push_tissues_to_vault
 	movlb	0x01							; Back to RAM Bank1
 	ostc_debug	'T'							; Sends debug-information to screen if debugmode active
 	return
@@ -357,17 +357,17 @@ simulator_save_tissue_data:
 simulator_restore_tissue_data:
 	bcf		restore_deco_data		; clear restore flag
 	ostc_debug	'S'							; Sends debug-information to screen if debugmode active
-	call	main_pull_tissues_from_vault
+	call	deco_pull_tissues_from_vault
 	movlb	0x01						; Back to RAM Bank1
 	ostc_debug	'T'							; Sends debug-information to screen if debugmode active
 
 	ostc_debug	'G'		; Sends debug-information to screen if debugmode active
-	call	deco_main_calc_desaturation_time	; calculate desaturation time
+	call	deco_calc_desaturation_time	; calculate desaturation time
 	movlb	b'00000001'						; select ram bank 1
 	call	calculate_noflytime				; Calc NoFly time
 	ostc_debug	'H'		; Sends debug-information to screen if debugmode active
 
 	; Calculate CNS	
-	call	main_calc_CNS_fraction		; calculate CNS
+	call	deco_calc_CNS_fraction		; calculate CNS
 	movlb	b'00000001'					; rambank 1 selected
 	return

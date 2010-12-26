@@ -28,7 +28,7 @@
 ; AA_BYTE_SWAP		EQU	1
 
 ;---- SMALL font description and data ----------------------------------------
-aa_font28	code_pack
+aa_fonts	code_pack
 aa_font28_block:
 			DB	' ', 0x80		; Translate space
 			DB	'²', 0x81
@@ -51,7 +51,6 @@ aa_font28_end:
 	endif
 
 ;---- MEDIUM font description and data ---------------------------------------
-aa_font48	code_pack
 aa_font48_block:
 			DB	0x27, 0x3B					; ' char
 			DB	'"', 0x3C
@@ -72,7 +71,6 @@ aa_font48_end:
 	endif
 
 ;---- LARGE font description and data ----------------------------------------
-aa_font90	code_pack
 aa_font90_block:
 			DB	' ', 0x2F
 			DB	0

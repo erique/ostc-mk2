@@ -134,10 +134,6 @@ p3_wp			code	0x09A00			; Mark segment name into the .map file
 #include    dive_icons.asm      ; Draw dive type icons in surface mode.
 
 ;=============================================================================
-p2_deco	code	0x0C000			; Mark segment name into the .map file
-#include	p2_deco_main_v110d.txt
-
-;=============================================================================
     MESSG "OSTC - diving computer code,  Copyright (C) 2010 HeinrichsWeikamp GbR"
     MESSG "This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the"
     MESSG "Free Software Foundation, either version 3 of the License, or (at your option) any later version."

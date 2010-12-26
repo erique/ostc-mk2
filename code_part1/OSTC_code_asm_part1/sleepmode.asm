@@ -30,7 +30,7 @@ sleeploop1:
 	call	PLED_ClearScreen		; clear
 	DISPLAYTEXT	.1					; "Building MD2 hash"
 	DISPLAYTEXT	.2					; "Please wait..."
-	call	deco_main_hash			; calculate MD2 hash
+	call	deco_hash			    ; calculate MD2 hash
 	movlb	b'00000001'				; Back to Bank1
 sleeploop2:
 	call	PLED_DisplayOff			; display off
@@ -73,7 +73,7 @@ onemin_sleep:
 
 	call	check_temp_extrema		; Check for temperature extremas
 
-	call	main_calc_CNS_decrease_15min		; compute CNS decay in sleep only
+	call	deco_calc_CNS_decrease_15min		; compute CNS decay in sleep only
 	movlb	b'00000001'
 	movff	last_surfpressure_15min+0,last_surfpressure_30min+0	; save older airpressure
 	movff	last_surfpressure_15min+1,last_surfpressure_30min+1	; save older airpressure	
@@ -105,7 +105,7 @@ onemin_sleep2:
 	GETCUSTOM8	d'12'				; Desaturation multiplier %
 	movwf	wait_temp
 	movff	wait_temp,char_I_desaturation_multiplier
-	call	deco_main_calc_wo_deco_step_1_m				; "calc_tissue_sleep"
+	call	deco_calc_wo_deco_step_1_min	; "calc_tissue_sleep"
 	movlb	b'00000001'									; RAM Bank1 selected
 
 	bcf		oneminupdate			; all done

@@ -5,6 +5,8 @@
 // use the linker scripts provided with that product.
 
 LIBPATH .
+FILES "clib.lib"
+FILES "p18f4685.lib"
 
 CODEPAGE   NAME=page       START=0x0               END=0x17EFF
 CODEPAGE   NAME=idlocs     START=0x200000          END=0x200007       PROTECTED

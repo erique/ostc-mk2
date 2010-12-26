@@ -1,33 +1,28 @@
-
 // OSTC - diving computer code
 // Copyright (C) 2008 HeinrichsWeikamp GbR
-
+//
 //    This program is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
 //    the Free Software Foundation, either version 3 of the License, or
 //    (at your option) any later version.
-
+//
 //    This program is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //    GNU General Public License for more details.
-
+//
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
+//
 // File: 18f4685.lkr
 // Sample linker script for the PIC18F4685 processor
 // modified by chsw for ostc, Nov. 2007
 
 LIBPATH .
 
-//FILES c018i.o
-FILES clib.lib
-FILES p18f4685.lib
+FILES "clib.lib"
+FILES "p18f4685.lib"
 
-//CODEPAGE   NAME=vectors    START=0x0            END=0x29           PROTECTED
-//CODEPAGE   NAME=page       START=0x2A           END=0x17FFF
 CODEPAGE   NAME=page       START=0x0           END=0x17FFF
 CODEPAGE   NAME=idlocs     START=0x200000       END=0x200007       PROTECTED
 CODEPAGE   NAME=config     START=0x300000       END=0x30000D       PROTECTED
@@ -51,6 +46,7 @@ DATABANK   NAME=gpr12      START=0xC00          END=0xCFF
 DATABANK   NAME=sfr13      START=0xD00          END=0xDFF          PROTECTED
 DATABANK   NAME=sfr14      START=0xE00          END=0xEFF          PROTECTED
 DATABANK   NAME=sfr15      START=0xF00          END=0xF5F          PROTECTED
+
 ACCESSBANK NAME=accesssfr  START=0xF60          END=0xFFF          PROTECTED
 
 SECTION    NAME=CONFIG     ROM=config

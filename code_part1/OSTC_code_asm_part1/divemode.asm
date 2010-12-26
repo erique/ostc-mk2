@@ -289,7 +289,7 @@ calc_deko_divemode:
 	movff		char_I_const_ppO2, char_I_actual_ppO2	; copy last ppO2 to buffer register
 
 ; Calculate CNS	
-	call	main_calc_CNS_fraction		; calculate CNS
+	call	deco_calc_CNS_fraction		; calculate CNS
 	movlb	b'00000001'					; rambank 1 selected
 
 ; Check if CNS should be displayed
@@ -429,7 +429,7 @@ calc_deko_divemode2:
 	movlw	d'0'
 	movff	WREG,char_I_step_is_1min		; 2 second deco mode
 
-	call	deco_main_calc_hauptroutine		; calc_tissue
+	call	deco_calc_hauptroutine		; calc_tissue
 	movlb	b'00000001'						; rambank 1 selected
 	ostc_debug	'C'		; Sends debug-information to screen if debugmode active
 
@@ -1010,7 +1010,7 @@ calculate_noflytime2:
 	movwf	xB+0
 	movff	xB,char_I_temp
 	ostc_debug	'K'		; Sends debug-information to screen if debugmode active
-	call	main_calc_percentage
+	call	deco_calc_percentage
 	movlb	b'00000001'				; select ram bank 1
 	ostc_debug	'L'		; Sends debug-information to screen if debugmode active
 	movff	int_I_temp+0,xA+0
@@ -1052,7 +1052,7 @@ end_dive:
 	movff	wait_temp,char_I_desaturation_multiplier
 
 	ostc_debug	'G'		; Sends debug-information to screen if debugmode active
-	call	deco_main_calc_desaturation_time	; calculate desaturation time
+	call	deco_calc_desaturation_time	; calculate desaturation time
 	movlb	b'00000001'						; select ram bank 1
 	rcall	calculate_noflytime				; Calc NoFly time
 	ostc_debug	'H'		; Sends debug-information to screen if debugmode active
@@ -1293,7 +1293,7 @@ end_dive_common:
 	btfsc	restore_deco_data			; Restore decodata?
 	call	simulator_restore_tissue_data		; Yes!
 
-	call	deco_main_gradient_array
+	call	deco_gradient_array
 	movlb	b'00000001'					; select ram bank 1
 
 	btfss	restore_deco_data			; Restore decodata?

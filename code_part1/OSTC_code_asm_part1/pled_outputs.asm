@@ -3343,7 +3343,7 @@ PLED_show_leading_tissue:
 	call		PLED_divemask_color	; Set Color for Divemode mask
 	DISPLAYTEXTH	.282		; L. Tissue:
 PLED_show_leading_tissue_2:
-	call	deco_main_calc_desaturation_time	; calculate desaturation time
+	call	deco_calc_desaturation_time	; calculate desaturation time
 	movlb	b'00000001'						; select ram bank 1
 
 	lfsr	FSR2,letter

@@ -82,15 +82,11 @@ wait_start_pressure:
 
 	movlw	d'0'
 	movff	WREG,char_I_step_is_1min		; 2 second deco mode
-	call	deco_main_clear_tissue			;
-	movlb	b'00000001'						; select ram bank 1
-	call	deco_main_calc_desaturation_time; calculate desaturation time
-	movlb	b'00000001'						; select ram bank 1
-	call	main_clear_CNS_fraction			; clear CNS
-	movlb	b'00000001'						; select ram bank 1
+	call	deco_clear_tissue			    ;
+	call	deco_calc_desaturation_time     ; calculate desaturation time
+	call	deco_clear_CNS_fraction			; clear CNS
 	call	calc_deko_surfmode				; calculate desaturation every minute
-	movlb	b'00000001'						; select ram bank 1
-	call	deco_main_calc_wo_deco_step_1_m				; calculate deco in surface mode 
+	call	deco_calc_wo_deco_step_1_min	; calculate deco in surface mode 
 	movlb	b'00000001'									; select ram bank 1
 
 ; check firmware and reset Custom Functions after an update

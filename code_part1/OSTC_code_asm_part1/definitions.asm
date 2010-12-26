@@ -342,7 +342,7 @@
 
 
 	CBLOCK	0x200				;Bank 2
- int_O_tissue_for_debug:.32		; deco_main_debug copies pressure of tissue to this variable
+ int_O_tissue_for_debug:.32		; deco_debug copies pressure of tissue to this variable
  int_O_GF_spare____:2;					// 0x240
  int_O_GF_step:2;						// 0x242
  int_O_gtissue_limit:2;					// 0x244
@@ -468,23 +468,18 @@
 
 ; C-code Routines
 ; PART 2
-#DEFINE deco_main_calc_hauptroutine			0x10000
-#DEFINE deco_main_calc_without_deco			0x10020
-#DEFINE main_clear_CNS_fraction 			0x10030
-#DEFINE main_calc_CNS_decrease_15min		0x10034
-#DEFINE main_calc_percentage				0x10038
-#DEFINE deco_main_clear_tissue				0x10040
-#DEFINE main_calc_CNS_fraction				0x10050
-#DEFINE deco_main_calc_desaturation_time	0x10060
-#DEFINE deco_main_calc_wo_deco_step_1_m		0x10080
-#DEFINE deco_main_debug						0x100A0
-#DEFINE main_DD2_write_incon42				0x100B0
-#DEFINE main_DD2_write_incon24				0x100B4
-
-#DEFINE deco_main_gradient_array			0x100C0
-#DEFINE deco_main_hash						0x100E0
-#DEFINE main_push_tissues_to_vault			0x100C4
-#DEFINE main_pull_tissues_from_vault		0x100C8	
+    extern deco_calc_CNS_decrease_15min    
+    extern deco_calc_CNS_fraction
+    extern deco_calc_desaturation_time
+    extern deco_calc_hauptroutine
+    extern deco_calc_percentage
+    extern deco_calc_wo_deco_step_1_min
+    extern deco_clear_CNS_fraction
+    extern deco_clear_tissue
+    extern deco_gradient_array
+    extern deco_hash    
+    extern deco_pull_tissues_from_vault
+    extern deco_push_tissues_to_vault
 
 ;I/O Ports (I=Input, O=Output)
 #DEFINE	sensor_SDO			PORTA,1 ;O

@@ -102,6 +102,8 @@ aa_char_2:
 
 			; Execute font block ---------------------------------------------
 aa_char_3:
+            ; This is safe iff the three fonts are in the same code segment
+            ; (and that segment do not span the 64K edge...)
 			movlw	UPPER aa_font28_block
 			movwf	TBLPTRU,A
 

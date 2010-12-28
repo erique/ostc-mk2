@@ -255,6 +255,7 @@ static float  sim_pres_tissue_backup[32];
 
 #pragma udata bank8=0x800
 static char	  md_pi_subst[256];
+#define C_STACK md_pi_subst                     // Overlay C-code data stack here, too.
 
 #pragma udata bank9a=0x900
 // output:
@@ -467,7 +468,7 @@ void check_ndl(void)
 // -------------------------------
 // DBG - multi main during dive //
 // -------------------------------
-void check_dbg(char is_post_check)
+void check_dbg(static char is_post_check)
 {
 	temp_DBS = 0;
 	if( (DBG_N2_ratio != N2_ratio) || (DBG_He_ratio != He_ratio) )
@@ -746,26 +747,63 @@ void temp_tissue_safety(void)
 // ** for the asm code **
 // **********************
 // **********************
+
+void fillDataStack(void)
+{
+    _asm
+        LFSR    1,C_STACK
+        MOVLW   0xCC
+loop:   MOVWF   POSTINC1,0
+        TSTFSZ  FSR1L,0
+        BRA     loop
+
+        LFSR    1,C_STACK
+        LFSR    2,C_STACK
+        MOVLW   1
+        MOVWF   TBLPTRU,0
+    _endasm
+}
+
+// When calling C code from ASM context, the data stack pointer and
+// frames should be reset. Bank3 is dedicated to the stack (see the
+// .lkr script).
+#ifdef __DEBUG
+#   define RESET_C_STACK fillDataStack();
+#else
+#   define RESET_C_STACK    \
+    _asm                    \
+        LFSR    1, C_STACK  \
+        LFSR    2, C_STACK  \
+        MOVLW   1           \
+        MOVWF   TBLPTRU,0   \
+    _endasm
+#endif
+
+    
 void deco_calc_hauptroutine(void)
 {
+    RESET_C_STACK
     calc_hauptroutine();
     int_O_desaturation_time = 65535;
 }
 
 void deco_calc_without_deco(void)
 {
+    RESET_C_STACK
     calc_without_deco();
     deco_calc_desaturation_time();
 }
 
 void deco_clear_tissue(void)
 {
+    RESET_C_STACK
     clear_tissue();
     char_I_depth_last_deco	= 0;		// for compatibility with v.101pre_no_last_deco
 }
 
 void deco_calc_wo_deco_step_1_min(void)
 {
+    RESET_C_STACK
     calc_wo_deco_step_1_min();
     char_O_deco_status = 3; // surface new in v.102 overwrites value of calc_wo_deco_step_1_min
     deco_calc_desaturation_time();
@@ -773,7 +811,8 @@ void deco_calc_wo_deco_step_1_min(void)
 
 void deco_debug(void)
 {
-//debug();
+    RESET_C_STACK
+//  debug();
 }
 
 // ---------------
@@ -792,12 +831,6 @@ void clear_tissue(void)    // preload tissues with standard pressure for the giv
 	int_O_DBG_pre_bitfield = 0;
 	int_O_DBG_post_bitfield = 0;
 	char_O_NDL_at_20mtr = 255;
-
-_asm
-lfsr 1, 0x300 // C math routines shall use this variable bank
-movlw	0x01
-movwf	TBLPTRU,0
-_endasm
 
 // N2_ratio = (float)char_I_N2_ratio; // the 0.0002 of 0.7902 are missing with standard air
  N2_ratio = 0.7902; // N2_ratio / 100.0;
@@ -864,9 +897,6 @@ for (ci=16;ci<32;ci++)  // cycle through the 16 b"uhlmann tissues for Helium
 
 void calc_without_deco(void)
 {
-_asm
- lfsr 1, 0x300
-_endasm
  N2_ratio = 0.7902; // FIXED RATIO !! sum as stated in b"uhlmann
  pres_respiration = (float)int_I_pres_respiration / 1000.0; // assembler code uses different digit system
  pres_surface = (float)int_I_pres_surface / 1000.0;
@@ -1281,12 +1311,6 @@ void calc_hauptroutine_calc_ascend_to_deco(void)
 
 void calc_tissue(void)
 {
-_asm
-lfsr 1, 0x300
-movlw	0x01
-movwf	TBLPTRU,0
-_endasm
-
  char_O_gtissue_no = 255;
  pres_gtissue_limit = 0.0;
 
@@ -1549,13 +1573,6 @@ void sim_tissue_1min(void)
 temp_pres_gtissue_limit = 0.0;
 temp_gtissue_no = 255;
 
-_asm
-lfsr 1, 0x300
-movlw	0x01
-movwf	TBLPTRU,0
-_endasm
-
-
 for (ci=0;ci<16;ci++)
 {
 _asm
@@ -1672,12 +1689,6 @@ void sim_tissue_10min(void)
 {
 temp_pres_gtissue_limit = 0.0;
 temp_gtissue_no = 255;
-
-_asm
-lfsr 1, 0x300
-movlw	0x01
-movwf	TBLPTRU,0
-_endasm
 
 for (ci=0;ci<16;ci++)
 {
@@ -1920,6 +1931,7 @@ void calc_gradient_factor(void)
 
 void deco_gradient_array()
 {
+ RESET_C_STACK
  pres_respiration = (float)int_I_pres_respiration / 1000.0; // assembler code uses different digit system
 for (ci=0;ci<16;ci++)
 {
@@ -1948,11 +1960,8 @@ for (ci=0;ci<16;ci++)
 
 void deco_calc_desaturation_time(void)
 {
-_asm
-lfsr 1, 0x300
-movlw	0x01
-movwf	TBLPTRU,0
-_endasm
+    RESET_C_STACK
+
  N2_ratio = 0.7902; // FIXED sum as stated in b"uhlmann
  pres_surface = (float)int_I_pres_surface / 1000.0;
  temp_atem = N2_ratio * (pres_surface - 0.0627);
@@ -2085,9 +2094,7 @@ void calc_wo_deco_step_1_min(void)
 		flag_in_divemode = 0;
 		set_dbg_end_of_dive();
 	}
-_asm
- lfsr 1, 0x300
-_endasm
+
  N2_ratio = 0.7902; // FIXED, sum lt. buehlmann
  pres_respiration = (float)int_I_pres_respiration / 1000.0; // assembler code uses different digit system
  pres_surface = (float)int_I_pres_surface / 1000.0;
@@ -2114,12 +2121,6 @@ _endasm
 
 void calc_tissue_step_1_min(void)
 {
-_asm
-lfsr 1, 0x300
-movlw	0x01
-movwf	TBLPTRU,0
-_endasm
-
  char_O_gtissue_no = 255;
  pres_gtissue_limit = 0.0;
 
@@ -2250,6 +2251,7 @@ _endasm
 // ----------
 void deco_hash(void)
 {
+    RESET_C_STACK
 // init
  for (md_i=0;md_i<16;md_i++)
  {
@@ -2346,6 +2348,7 @@ _endasm
 
 void deco_clear_CNS_fraction(void)
 {
+    RESET_C_STACK
  CNS_fraction = 0.0;
  char_O_CNS_fraction = 0;
 } // void deco_clear_CNS_fraction(void)
@@ -2364,6 +2367,7 @@ void deco_clear_CNS_fraction(void)
 
 void deco_calc_CNS_fraction(void)
 {
+ RESET_C_STACK
  actual_ppO2 = (float)char_I_actual_ppO2 / 100.0;
 
  if (char_I_actual_ppO2 < 50)
@@ -2422,6 +2426,7 @@ void deco_calc_CNS_fraction(void)
 
 void deco_calc_CNS_decrease_15min(void)
 {
+    RESET_C_STACK    
  CNS_fraction =  0.890899 * CNS_fraction;
  char_O_CNS_fraction = (char)((CNS_fraction + 0.005)* 100.0);
 }// deco_calc_CNS_decrease_15min(void)
@@ -2437,6 +2442,7 @@ void deco_calc_CNS_decrease_15min(void)
 
 void deco_calc_percentage(void)
 {
+    RESET_C_STACK
  temp1 = (float)int_I_temp;
  temp2 = (float)char_I_temp / 100.0;
  temp3 = temp1 * temp2;
@@ -2445,12 +2451,14 @@ void deco_calc_percentage(void)
 
 void deco_push_tissues_to_vault(void)
 {
+    RESET_C_STACK
 	cns_vault = CNS_fraction;
 	for (ci=0;ci<32;ci++)
 		pres_tissue_vault[ci] = pres_tissue[ci];
 }
 void deco_pull_tissues_from_vault(void)
 {
+    RESET_C_STACK
 	CNS_fraction = cns_vault;
 	for (ci=0;ci<32;ci++)
 		pres_tissue[ci] = pres_tissue_vault[ci];

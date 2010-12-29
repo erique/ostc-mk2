@@ -781,7 +781,7 @@ PLED_more_menu_mask:
 	DISPLAYTEXT	.110		; Const. ppO2 Setup
 	DISPLAYTEXT	.113		; Battery Info
 	DISPLAYTEXT	.247		; Simulator
-
+	DISPLAYTEXTH .287		; Altimeter
 	DISPLAYTEXT .11			; Exit
 	return
 

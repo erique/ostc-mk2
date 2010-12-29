@@ -118,6 +118,7 @@ osct_asm	code
 #include	customview.asm		; Customview for divemode
 #include    strings.asm         ; Basic string operations
 
+#include    altimeter.asm
 ;=============================================================================
 #include    dive_icons.asm      ; Draw dive type icons in surface mode.
 

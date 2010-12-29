@@ -166,7 +166,11 @@ onesec_sleep1a:	; At least one button pressed....
 	bcf		switch_left
 	bcf		T0CON,TMR0ON				; Stop Timer 0
 	bcf		sleepmode				; wake up!
-	bsf		show_startup_screen		; 
+	bsf		show_startup_screen		;
+
+    ; Reset altimeter, so next averaging starts right over...
+	call    altimeter_reset
+
 	return
 	
 pressuretest_sleep_fast:				; Get pressure without averaging (Faster to save some power in sleep mode)

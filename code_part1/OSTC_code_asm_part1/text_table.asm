@@ -93,6 +93,7 @@ textlength_pointer:
 	DB	.20,.14,.10,.14,.12,.16	;t274;t275;t276;t277;t278;t279
 	DB	.14,.10,.12,.10,.14,.12	;t280;t281;t282;t283;t284;t285
 	DB	.16						;t286
+	DB  .10                     ;t287 Altimeter
 
 ; Textpositions
 ; Example: DB	.4,.2	; COLUMN=4,ROW=2
@@ -405,6 +406,7 @@ textpos_pointer:
 	DB	.20,.125			;285
 
 	DB	.20,.155			;286
+    DB  .20,.155            ;287    Altimeter
 
 ; stores texts, texts must have even length and must end with "}"	
 text_pointer:
@@ -584,7 +586,7 @@ text_pointer:
 	DA	"ppO2 warn [Bar]}"		;168
 	DA	"Vel.warn[m/min]}"		;169
 	DA	"Time offset/day}"		;170
-	DA	"not used       }"		;171
+	DA	"Show altimeter }"		;171
 	DA	"not used       }"		;172
 	DA	"not used       }"		;173
 	DA	"not used       }"		;174
@@ -713,3 +715,4 @@ text_pointer:
 	DA	"Reset Logbook}"		;284		l=14
 	DA	"Reboot OSTC}"			;285		l=12
 	DA	"Reset Decodata}}"		;286		l=16
+    DA	"Altimeter}"    		;287		l=10

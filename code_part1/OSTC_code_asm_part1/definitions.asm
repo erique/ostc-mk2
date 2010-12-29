@@ -73,6 +73,17 @@
 	CONFIG	LVP = OFF            ;Single-Supply ICSP disabled
 	CONFIG	STVREN = OFF         ;Stack full/underflow will not cause Reset
 
+    CBLOCK  0x800
+        c_code_data_stack:.64       ; Reserve space for C-code data space. Eg.when calling log.
+    endc
+
+    CBLOCK  0x3F0
+        pressureSum:2               ; Stabilize surface presure by a long averaging window [mbar]
+        pressureCount               ; Count of pressure values.
+        pressureAvg:2               ; save averaged pressure x16, for altimeter_menu
+        pressureRef:2               ; Pressure at sea level [mbar]
+        altitude:2                  ; Last computed altitude [m]
+    ENDC
 
 ;Variable definitions
 ; arrays are in hex size!! 20 = .032

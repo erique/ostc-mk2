@@ -171,14 +171,14 @@ more_menu3:
 more_menu_loop:
 	call	check_switches_menu
 
-	movlw	d'5'					; 5 items in "More Menu"
-	cpfseq	menupos
-	bra		more_menu_loop2
-	movlw	d'6'
-	movwf	menupos
-	call	PLED_menu_cursor
-
-more_menu_loop2:
+;	movlw	d'5'					; 5 items in "More Menu"
+;	cpfseq	menupos
+;	bra		more_menu_loop2
+;	movlw	d'6'
+;	movwf	menupos
+;	call	PLED_menu_cursor
+	
+;more_menu_loop2:
 	btfsc	menubit2
 	bra	do_more_menu						; call submenu
 
@@ -217,7 +217,7 @@ do_more_menu:								; calls submenu
 	dcfsnz	menupos,F
 	goto	menu_simulator
 	dcfsnz	menupos,F
-	goto	menu_simulator
+	goto	altimeter_menu
 	movlw	d'5'
 	movwf	menupos
 	bra		menu2						; exit...

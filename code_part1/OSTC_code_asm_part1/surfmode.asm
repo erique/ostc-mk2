@@ -146,6 +146,17 @@ surfloop_loop2:
 	call	PLED_temp_surfmode			; Displays temperature
 	btfsc	pressure_refresh			; new pressure available?
 	call	set_dive_modes				; tests if depth>threshold
+	
+	; jDG TESTS =========================
+	btfss	pressure_refresh			; new pressure available?
+	bra     surfloop_loop3
+	call    altimeter_calc
+    movf    menupos3,W                  ; Get customview status.
+    bnz     surfloop_loop3              ; Already used ?
+    call    altimeter_display
+surfloop_loop3:
+	; jDG TESTS =========================
+
 	bcf		pressure_refresh			; until new pressure is available
 
 ; One minute tasks for all modes

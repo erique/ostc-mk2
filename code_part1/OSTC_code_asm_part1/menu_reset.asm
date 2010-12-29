@@ -164,7 +164,7 @@ cf_default_table1:
     
 	CF_DEFAULT    CF_INT8,	    d'15',  d'7',   d'20'	; color_warn_celocity_mmin	warn at xx m/min
 	CF_DEFAULT    CF_SEC,	    d'42',  d'0',   d'240'  ; time_correction_value_default	Adds to Seconds on Midnight
-	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+	CF_DEFAULT    CF_BOOL,      d'1',   0,      0 		; CF#49 Show Altimeter in surface mode
 	CF_DEFAULT    CF_INT15,     0,      0,      0       ; UNUSED
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	                

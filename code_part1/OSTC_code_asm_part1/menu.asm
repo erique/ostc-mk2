@@ -490,15 +490,7 @@ show_salinity_value:
 	bsf		leftbind
 	output_16dp	d'3'
 	bcf		leftbind
-	movlw	'k'
-	movwf	POSTINC2
-	movlw	'g'
-	movwf	POSTINC2
-	movlw	'/'
-	movwf	POSTINC2
-	movlw	'l'
-	movwf	POSTINC2
-	call	word_processor
+	STRCAT_PRINT "kg/l"
 	return
 
 toggle_salinity_reset2:

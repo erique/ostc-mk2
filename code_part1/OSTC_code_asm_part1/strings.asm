@@ -144,3 +144,34 @@ start_common:
             VARARGS_GET8    win_top
         VARARGS_END
         return
+
+;=============================================================================
+
+box_std_block:                          ; Use standard color (CF#35)
+        call    PLED_standard_color
+        bra     box_common
+box_color_block:                        ; Use color from WREG
+        call	PLED_set_color
+        bra     box_common
+box_black_block:                        ; Use black color
+        clrf    WREG
+        movff   WREG,win_color1         ; Bank-safe addressing.
+        movff   WREG,win_color2
+box_common:
+        VARARGS_BEGIN
+            VARARGS_GET8    win_top
+            VARARGS_GET8    win_height
+            VARARGS_GET8    win_leftx2
+            VARARGS_GET8    win_width
+        VARARGS_END
+        goto    PLED_box
+
+box_frame_std:
+        call    PLED_standard_color
+        VARARGS_BEGIN
+            VARARGS_GET8    win_top
+            VARARGS_GET8    win_height
+            VARARGS_GET8    win_leftx2
+            VARARGS_GET8    win_width
+        VARARGS_END
+        goto    PLED_frame

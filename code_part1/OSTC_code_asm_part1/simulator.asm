@@ -161,6 +161,8 @@ simulator_show_decoplan:
 
 	WIN_LEFT .0
 	WIN_TOP .160
+	call    PLED_standard_color
+
 	STRCPY  "TTS: "
 	movff   char_O_ascenttime,lo
  	bcf		leftbind

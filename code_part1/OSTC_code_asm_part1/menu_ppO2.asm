@@ -56,14 +56,10 @@ menu_const_ppO21:
 	incf	lo,F				
 	bsf		leftbind
 	output_99
-	movlw	' '
-	movwf	POSTINC2
-	movlw	'('
-	movwf	POSTINC2
+	STRCAT  " ("
 	
 	OUTPUTTEXT	d'192'				; Dil.
-	movlw	' '
-	movwf	POSTINC2
+	PUTC	' '
 
 	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)
 	movff	EEDATA,active_gas			; Read start gas (1-5)
@@ -80,8 +76,7 @@ menu_const_ppO21:
 	bsf		leftbind
 	output_99
 
-	movlw	'/'
-	movwf	POSTINC2
+	PUTC	'/'
 
 	decf	active_gas,W				; Gas 0-4
 	mullw	d'4'
@@ -93,9 +88,7 @@ menu_const_ppO21:
 
 	bsf		leftbind
 	output_99
-	movlw	')'
-	movwf	POSTINC2
-	call	word_processor		
+	STRCAT_PRINT ")"
 
 
 	WIN_LEFT 	.20
@@ -112,15 +105,7 @@ menu_const_ppO21:
 	bsf		leftbind
 	output_16dp	d'3'
 	bcf		leftbind
-	movlw	'B'
-	movwf	POSTINC2
-	movlw	'a'
-	movwf	POSTINC2
-	movlw	'r'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	call	word_processor		
+	STRCAT_PRINT "Bar "
 
 	WIN_LEFT 	.20
 	WIN_TOP		.95
@@ -141,15 +126,7 @@ menu_const_ppO21:
 
 	lfsr	FSR2,letter
 	OUTPUTTEXT	.89			; "Default: "
-	movlw	'1'
-	movwf	POSTINC2
-	movlw	'.'
-	movwf	POSTINC2
-	movlw	'0'
-	movwf	POSTINC2
-	movlw	'0'
-	movwf	POSTINC2
-	call	word_processor		
+	STRCAT_PRINT "1.00"
 
 	DISPLAYTEXT	.11			; Exit
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!

@@ -178,11 +178,11 @@ menu_custom_functions11:
 	WIN_INVERT	.0	; Init new Wordprocessor	
 
 menu_custom_functions1:
-	call	PLED_standard_color
+	call	PLED_standard_color         ; Trash EEADRH...
 
-	movlw	d'1'
-	btfss	customfunction_page	; Use Page II...
-	movlw	d'0'
+	movlw	d'1'                        ; So restore it !
+	btfss	customfunction_page	        ; Use Page II ?
+	movlw	d'0'                        ; NO: this is page 1.
 	movwf	EEADRH
 
 	clrf	timeout_counter2
@@ -199,11 +199,7 @@ menu_custom_functions1:
 	addwf	lo,F
 
 	output_99x
-	movlw	':'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	call	word_processor
+	STRCAT_PRINT ": "
 
 	movf	customfunction_temp1,W		; start of custom function descriptors		
 	addwf	decodata+0,W				; add # of current custom function, place result in wreg
@@ -232,46 +228,19 @@ menu_custom_functions10c:
 menu_custom_functions10a:
 	WIN_LEFT 	.20
 	WIN_TOP		.65
-	lfsr	FSR2,letter
-	movlw	'+'
-	movwf	POSTINC2
-	movlw	'/'
-	movwf	POSTINC2
-	movlw	'-'
-	movwf	POSTINC2
-	movlw	':'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
+	STRCPY  "+/-: "
 	movlw	'+'
 	btfsc	first_FA
 	movlw	'-'
 	movwf	POSTINC2
 	call	word_processor		
 
-	WIN_LEFT 	.20
 	WIN_TOP		.95
-	lfsr	FSR2,letter
-	movlw	'1'
-	movwf	POSTINC2
-	movlw	'/'
-	movwf	POSTINC2
-	movlw	'1'
-	movwf	POSTINC2
-	movlw	'0'
-	movwf	POSTINC2
-	movlw	':'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	movlw	'1'
-	movwf	POSTINC2
+	STRCPY  "1/10: 1"
 	movlw	'0'
 	btfsc	second_FA
 	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	call	word_processor
+	STRCAT_PRINT " "
 
 menu_custom_functions10b:
 	WIN_LEFT 	.20
@@ -299,6 +268,7 @@ menu_custom_functions10b:
 	call	read_eeprom				; Highbyte
 	movff	EEDATA,hi
 
+	call    PLED_standard_color     ; Changed by color swatches, but trash EEADRH...
 	call	display_customfunction
 
 ; End of mask: min/max and the exit line...
@@ -411,9 +381,13 @@ display_customfunction:
 	movff	EEADRH, FSR1H		; Backup...
 
 	rcall   display_formated
+	incf    WREG                        ; Color swatch drawn ?
+	bz      display_customfunction_1    ; YES: skip line fill...
+	
     rcall   cf_fill_line
 	call	word_processor
 
+display_customfunction_1:
 	movff	FSR1H, EEADRH
 	return
 
@@ -443,10 +417,7 @@ display_minmax:
     WIN_INVERT  1
 cf_min_passed:
     
-    movlw   '>'                 ; A min value follows
-    movwf   POSTINC2
-    movlw   ' '
-    movwf   POSTINC2
+    STRCAT  "> "                ; A min value follows
     movff   cf_min, lo
     rcall   display_formated
 
@@ -474,10 +445,7 @@ cf_no_min:
     WIN_INVERT  1
 cf_max_passed:
     
-    movlw   '<'                 ; A max value follows
-    movwf   POSTINC2
-    movlw   ' '
-    movwf   POSTINC2
+    STRCAT  "< "                ; A max value follows
     movff   cf_max, lo
     rcall   display_formated
 
@@ -526,8 +494,7 @@ display_formated:
 cf_type_01:						; Type == 1 is CF_PERCENT mode
     bcf     leftbind
 	output_8
-	movlw	'%'
-	movwf	POSTINC2
+	PUTC    '%'
 	retlw   0
 
 cf_type_02:						; Type == 2 is CF_DECI mode.
@@ -559,33 +526,28 @@ cf_type_off:
 cf_type_06:						; Type == 6 is CF_SECS mode (mm:ss or hh:mm)
     clrf    hi
 	call	convert_time		; Convert to min:sec into hi:low.
-	movff	lo,wp_temp			; Save seconds,
+	movff	lo,TABLAT			; Save seconds for later.
 	movff	hi,lo				; Get minutes
     bsf     leftbind            ; Skip leading space(s).
 	output_8					; Print them
-	movlw	':'					; Separator
-	movwf	POSTINC2
-	movff	wp_temp,lo			; Get back seconds
+	PUTC	':'					; Separator
+	movff	TABLAT,lo			; Get back seconds
 	output_99x					; lo in 2 digits with trailing zeros.
 	retlw   0
 
 cf_type_07:						; Type == 7 is CF_COLOR swatch.
     bcf     leftbind            ; Keep leading space (better alignement)
 	output_8
-	movlw	' '
-	movwf	POSTINC2
-	call    word_processor
+	STRCAT_PRINT " "
 
 	movf	lo,W				; Get color.
-	movff	WREG,box_temp+0		; Set color
-	movff	win_top,WREG		; BEWARE : this is a bank0 variable !
-	movff	WREG,box_temp+1		; row top (0-239)
-	addlw	.23
-	movff	WREG,box_temp+2		; row bottom (0-239)
+	call    PLED_set_color
+	movlw	.23
+	movff	WREG,win_height		; row bottom (0-239)
 	movlw	.110
-	movff	WREG,box_temp+3		; column left (0-159)
-	movlw	.148	
-	movff	WREG,box_temp+4		; column right (0-159)
+	movff	WREG,win_leftx2		; column left (0-159)
+	movlw	.148-.110+1	
+	movff	WREG,win_width		; column right (0-159)
 
 	call	PLED_box
     retlw   -1  				; wp already done. Skip it...
@@ -606,8 +568,7 @@ cf_fill_line:                   ; Mattias: No flicker if u clear just what you n
 	sublw   (LOW letter) + .18  ; Remaining chars to fill: (letter + 18) - PTR
 	btfsc   STATUS,N            ; Add chars until none left...
 	return
-	movlw   ' '
-	movwf   POSTINC2
+	PUTC   ' '
 	bra     cf_fill_line
 
 ;-----------------------------------------------------------------------------
@@ -799,18 +760,10 @@ check_failed:
 	WIN_INVERT	.1					    ; Init new Wordprocessor
 	call    PLED_warnings_color
 	
-    lfsr    FSR2,letter
-    movlw   ' '
-    movwf   POSTINC2
-    movlw   'C'
-    movwf   POSTINC2
-    movlw   'F'
-    movwf   POSTINC2
+	STRCPY  " CF"
     movff   cf_checker_counter,lo
     output_99x
-    movlw   ' '
-    movwf   POSTINC2
-    call    word_processor
+    STRCAT_PRINT " "
     
     ; When failed, increment counter modulo 64, to restart checks.
     incf    cf_checker_counter,W

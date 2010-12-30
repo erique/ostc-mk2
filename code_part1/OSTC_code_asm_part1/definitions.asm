@@ -35,8 +35,6 @@
 #DEFINE		FT_MEDIUM		.1
 #DEFINE		FT_LARGE		.2
 
-#DEFINE		AAFONTS				; The nicer fonts (not working yet...)
-
 ; Color Definitions: 8Bit RGB b'RRRGGGBB'
 ;#DEFINE	color_red	b'11100000'
 #DEFINE	color_blue	b'00000011'
@@ -84,22 +82,13 @@
 	win_color1
 	win_color2
 	win_top
+	win_height					; String (and font) height
 	win_leftx2
+	win_width 					; String width (more than 255 for aa_wordprocessor !)
 	win_font
 	win_invert
-	wp_temp
 	ENDC
-  ifdef AAFONTS
-	CBLOCK
-	aa_flags					; Various flags for aa_wordprocessor
-	aa_width:2					; String width (more than 255...) !
-	aa_height					; String (and font) height
-	aa_bitlen					; Count of pixels when decoding bitmaps.
-	aa_start:2					; PROM ptr to start of encoded bitmap
-	aa_end:2					; and end of it.
-	aa_colorDiv:2				; Current color, divided by 2 or 4
-	ENDC
-  endif
+
 ; the following is used by the C-code up to 0x0E0!!
 	CBLOCK	0x0E0				;Bank 0
 	gf_decolist_copy:.32
@@ -126,18 +115,12 @@
 	textlength					
 	textaddress:2				
 
-	LastSetRow 
-	LastSetColumn
 	average_depth_hold:4		; Holds Sum of depths
 	b0_lo						; Temp (calculate_average)
 	b0_hi						; Temp (calculate_average)
 	average_divesecs:2			; Used for resetable average depth display
 	surface_interval:2			; Surface Interval [mins]
 
-	draw_box_temp1
-	draw_box_temp2
-	draw_box_temp3
-	
 	flag1 						;Flag register 33
 	flag2 
 	flag3 
@@ -181,7 +164,7 @@
 	timer1int_counter2 			;Timer 1 counter
 
 	uart1_temp					;RS232 temp variables
-	uart2_temp;70
+	uart2_temp                  ;70
 
   	divA:2						;math routines
   	divB
@@ -329,17 +312,8 @@
 	logbook_temp6				; Temp used in logbook display&Divemode&Gassetup
 	
 	convert_value_temp:3		; used in menu_battery_state_convert_date
-	box_temp:5
 	time_correction_value		; Adds to Seconds on midnight
 	ENDC
-
-  ifndef AAFONTS
-	CBLOCK
-	win_color1_temp
-	win_color2_temp				; Backup color registers
-	ENDC
-  endif
-
 
 	CBLOCK	0x200				;Bank 2
  int_O_tissue_for_debug:.32		; deco_debug copies pressure of tissue to this variable
@@ -422,8 +396,6 @@
  char_I_deco_gas_change3;   		// 0x568 new in v.102
  char_I_deco_gas_change4;   		// 0x569 new in v.102
  char_I_deco_gas_change5;   		// 0x56A new in v.102 
-
-
 	ENDC
 
 	CBLOCK	0x700				;Bank 7
@@ -458,13 +430,6 @@
 	CBLOCK	0x94A				;Bank 9
 	char_O_hash:.16			; MD2 hash values = d'16'
 	ENDC
-
-
-; C-code Routines
-; PART 3
-  ifndef AAFONTS
-	#DEFINE main_wordprocessor					0x0B468
-  endif
 
 ; C-code Routines
 ; PART 2

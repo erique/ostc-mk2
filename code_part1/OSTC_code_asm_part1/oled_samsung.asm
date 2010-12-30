@@ -47,104 +47,52 @@ WIN_COLOR	macro 	win_color_input
 			call	PLED_set_color
 			endm
 	
-
 word_processor:						; word_processor:
-	clrf	POSTINC2				; Required!
-
-  ifdef	AAFONTS
+	clrf	POSTINC2				; Required, to mark end of string.
 	call	aa_wordprocessor
 	movlb	b'00000001'				; Back to Rambank1
-  else
-	movff	win_color2,win_color2_temp
-	movff	win_color1,win_color1_temp
-	call	main_wordprocessor		; C-Code
-	movlb	b'00000001'				; Back to Rambank1
-	movff	win_color2_temp,win_color2
-	movff	win_color1_temp,win_color1
-  endif
-
 	return
 
 ; -----------------------------
 ; PLED_SetColumnPixel:
 ; -----------------------------
 PLED_SetColumnPixel:
-	movwf	LastSetColumn		; d'0' ... d'159'
-	movff	LastSetColumn,win_leftx2
+	movwf	win_leftx2		    ; d'0' ... d'159'
+	mullw   2                   ; Copy to POD, times 2.
+
 	movlw	0x21				; Start Address Vertical (.0 - .319)
 	rcall	PLED_CmdWrite
-	bcf		STATUS,C
-	rlcf	LastSetColumn,W		; x2 -> WREG
-	movlw	d'0'
-	btfsc	STATUS,C			; Result >255?
-	movlw	d'1'				; Yes: Upper=1!
-	rcall	PLED_DatWrite		; Upper
-	bcf		STATUS,C
-	rlcf	LastSetColumn,W		; x2 -> WREG
-	rcall	PLED_DatWrite		; Lower
-	return
+	bra     PLED_DataWrite_PROD
 
 ; -----------------------------
 ; PLED_SetRow:
+; Backup WREG --> win_top, for the next write pixel.
+; Setup OLED pixel horizontal address.
 ; -----------------------------
 PLED_SetRow:		
-	movwf	LastSetRow		; d'0' ... d'239'
-	movff	LastSetRow,win_top
+	movff  	WREG,win_top                ; d'0' ... d'239'
+	mullw   1                           ; Copy row to PRODH:L
 	movlw	0x20			; Horizontal Address START:END
 	rcall	PLED_CmdWrite
-	movlw	0x00
-	rcall	PLED_DatWrite		
-	movf	LastSetRow,W
-	rcall	PLED_DatWrite		
-	return
+	bra     PLED_DataWrite_PROD		
 
 ; -----------------------------
 ; PLED Write Two Pixel
 ; -----------------------------
+
 PLED_PxlWrite:
-	movlw	0x22					; Start Writing Data to GRAM
-	rcall	PLED_CmdWrite
-	bsf		oled_rs					; Data!
-	movff	win_color1,PORTD
-	bcf		oled_rw
-	bsf		oled_rw					; Upper
-	movff	win_color2,PORTD
-	bcf		oled_rw
-	bsf		oled_rw					; Lower
-
-; Reset Column+1
-	movlw	0x21				; Start Address Vertical (.0 - .319)
-	rcall	PLED_CmdWrite
-	bcf		STATUS,C
-	rlcf	LastSetColumn,W		; x2
-	movlw	d'0'
-	btfsc	STATUS,C			; Result >256?
-	movlw	d'1'				; Yes!
-	rcall	PLED_DatWrite		; Upper
-	bcf		STATUS,C
-	rlcf	LastSetColumn,F
-	incf	LastSetColumn,W		; x2
-	rcall	PLED_DatWrite		; Lower
-
-; Reset Row
-	movlw	0x20			; Horizontal Address START:END
-	rcall	PLED_CmdWrite
-	movlw	0x00
-	rcall	PLED_DatWrite		
-	movf	LastSetRow,W
-	rcall	PLED_DatWrite		
+    rcall   PLED_PxlWrite_Single        ; Write first pixel.
 
 ; Write 2nd Pixel on same row but one column to the right
-	movlw	0x22					; Start Writing Data to GRAM
+    movwf   win_leftx2,W                ; Increment column address.
+    mullw   2
+    incf    PRODL
+    clrf    WREG                        ; Does not reset CARRY...
+    addwfc  PRODH
+	movlw	0x21				; Start Address Vertical (.0 - .319)
 	rcall	PLED_CmdWrite
-	bsf		oled_rs					; Data!
-	movff	win_color1,PORTD
-	bcf		oled_rw
-	bsf		oled_rw					; Upper
-	movff	win_color2,PORTD
-	bcf		oled_rw
-	bsf		oled_rw					; Lower
-	return
+	rcall   PLED_DataWrite_PROD
+    ; Continue with PLED_PxlWrite_Single...
 
 ; -----------------------------
 ; PLED Write One Pixel
@@ -174,166 +122,101 @@ PLED_DisplayOff:
 	bcf		oled_nreset
 	return
 
-; -----------------------------
-; PLED FRAME (win_color1 and win_color2)
-; -----------------------------
+;=============================================================================
+; PLED_frame : draw a frame around current box with current color.
+; Inputs:  win_top, win_leftx2, win_height, win_width, win_color1, win_color2
+; Outputs: (none)
+; Trashed: WREG, PROD, aa_start:2, aa_end:2, win_leftx2, win_width:1
+
 PLED_frame: 
-	movf	box_temp+0,W
-	call	PLED_set_color
-	; draw right line from row top (box_temp+1) to row bottom (box_temp+2)
-	movff	box_temp+1,draw_box_temp1		; Store start row
-PLED_frame2:
-	movf	draw_box_temp1,W				; d'0' ... d'239'
-	rcall	PLED_SetRow						; Set Row
-	movf	box_temp+3,W					; d'0' ... d'159'
-	call	PLED_SetColumnPixel				; Set left column
-	rcall	PLED_PxlWrite_Single			; Write Pixel
-	incf	draw_box_temp1,F
-	movf	draw_box_temp1,W				; Copy to W
-	cpfseq	box_temp+2						; Done?
-	bra		PLED_frame2						; Not yet...
+    movff   win_top,aa_start+0              ; Backup everything.
+    movff   win_height,aa_start+1
+    movff   win_leftx2,aa_end+0
+    movff   win_width,aa_end+1
 
-	movf	draw_box_temp1,W				; d'0' ... d'239'
-	rcall	PLED_SetRow						; Set Row
-	movf	box_temp+3,W					; d'0' ... d'159'
-	call	PLED_SetColumnPixel				; Set left column
-	rcall	PLED_PxlWrite_Single			; Write Pixel
+    ;---- TOP line -----------------------------------------------------------
+    movlw   1                               ; row ~ height=1
+    movff   WREG,win_height
+    rcall   PLED_box
 
-	; draw left line from row top (box_temp+1) to row bottom (box_temp+2)
-	movff	box_temp+1,draw_box_temp1		; Store start row
-PLED_frame3:
-	movf	draw_box_temp1,W				; d'0' ... d'239'
-	rcall	PLED_SetRow						; Set Row
-	movf	box_temp+4,W					; d'0' ... d'159'
-	call	PLED_SetColumnPixel				; Set left column
-	rcall	PLED_PxlWrite_Single			; Write Pixel
-	incf	draw_box_temp1,F
-	movf	draw_box_temp1,W				; Copy to W
-	cpfseq	box_temp+2						; Done?
-	bra		PLED_frame3						; Not yet...
+    ;---- BOTTOM line --------------------------------------------------------
+    movff   aa_start+0,PRODL                ; Get back top,
+    movff   aa_start+1,WREG                 ; and height
+    addwf   PRODL,W                         ; top+height
+    decf    WREG                            ; top+height-1
+    movff   WREG,win_top                    ; top+height-1 --> top
+    rcall   PLED_box                        
 
-	movf	draw_box_temp1,W				; d'0' ... d'239'
-	rcall	PLED_SetRow						; Set Row
-	movf	box_temp+4,W					; d'0' ... d'159'
-	call	PLED_SetColumnPixel				; Set left column
-	rcall	PLED_PxlWrite_Single			; Write Pixel
+    ;---- LEFT column --------------------------------------------------------
+    movff   aa_start+0,win_top              ; Restore top/height.
+    movff   aa_start+1,win_height
+    movlw   1                               ; column ~ width=1
+    movff   WREG,win_width
+    rcall   PLED_box
 
-	; draw top line from box_temp+3 (0-159) to box_temp+4 (0-159)
-	movff	box_temp+3,draw_box_temp1		; Store start column
-PLED_frame4:
-	movf	draw_box_temp1,W				; d'0' ... d'159'
-	rcall	PLED_SetColumnPixel				; Set Column
-	movf	box_temp+1,W					; d'0' ... d'239'
-	rcall	PLED_SetRow						; Set Row
-	rcall	PLED_PxlWrite					; Write 2 Pixels
-	incf	draw_box_temp1,F
-	movf	draw_box_temp1,W
-	cpfseq	box_temp+4
-	bra		PLED_frame4
+    ;---- RIGHT column -------------------------------------------------------
+    movff   aa_end+0,WREG
+    movff   aa_end+1,PRODL
+    addwf   PRODL,W
+    decf    WREG
+    movff   WREG,win_leftx2
+    bra     PLED_box
 
-	; draw bottom line from box_temp+3 (0-159) to box_temp+4 (0-159)
-	movff	box_temp+3,draw_box_temp1		; Store start column
-PLED_frame5:
-	movf	draw_box_temp1,W				; d'0' ... d'159'
-	rcall	PLED_SetColumnPixel				; Set Column
-	movf	box_temp+2,W					; d'0' ... d'239'
-	rcall	PLED_SetRow						; Set Row
-	rcall	PLED_PxlWrite					; Write 2 Pixels
-	incf	draw_box_temp1,F
-	movf	draw_box_temp1,W
-	cpfseq	box_temp+4
-	bra		PLED_frame5
+;=============================================================================
+; PLED_box : fills current box with current color.
+; Inputs:  win_top, win_leftx2, win_height, win_width, win_color1, win_color2
+; Outputs: (none)
+; Trashed: WREG, PROD
 
-	call	PLED_standard_color
-
-	return
-
-; -----------------------------
-; PLED Box (win_color1 and win_color2)
-; -----------------------------
 PLED_box:
-	movf	box_temp+0,W
-	call	PLED_set_color
-; /Define Window
+    ;---- Define Window ------------------------------------------------------
 	movlw	0x35				; VerticalStartAddress HIGH:LOW
 	rcall	PLED_CmdWrite
-	movff	box_temp+3,draw_box_temp1
-	bcf		STATUS,C
-	rlcf	draw_box_temp1,W		; x2
-	movlw	d'0'
-	btfsc	STATUS,C			; Result >255?
-	movlw	d'1'				; Yes: Upper=1!
-	rcall	PLED_DatWrite		; Upper
-	bcf		STATUS,C
-	rlcf	draw_box_temp1,W		; x2 -> WREG
-	rcall	PLED_DatWrite		; Lower
+	movff	win_leftx2,WREG
+	mullw   2
+	rcall	PLED_DataWrite_PROD
 
 	movlw	0x36				; VerticalEndAddress HIGH:LOW
 	rcall	PLED_CmdWrite
-	movff	box_temp+4,draw_box_temp1
-	bcf		STATUS,C
-	rlcf	draw_box_temp1,W		; x2
-	movlw	d'0'
-	btfsc	STATUS,C			; Result >255?
-	movlw	d'1'				; Yes: Upper=1!
-	rcall	PLED_DatWrite		; Upper
-	bcf		STATUS,C
-	rlcf	draw_box_temp1,W		; x2 -> WREG
-	rcall	PLED_DatWrite		; Lower
+	movff   win_width,PRODL     ; Bank-safe addressing
+	movff	win_leftx2,WREG
+	addwf   PRODL,W             ; left+width
+	decf    WREG                ; left+width-1
+	mullw   2                   ; times 2 --> rightx2
+	rcall	PLED_DataWrite_PROD
 
 	movlw	0x37				; HorizontalAddress START:END
 	rcall	PLED_CmdWrite
-	movff	box_temp+1,draw_box_temp1
-	movf	draw_box_temp1,W
-	rcall	PLED_DatWrite		
-	movff	box_temp+2,draw_box_temp1
-	movf	draw_box_temp1,W
-	rcall	PLED_DatWrite		
+	movff	win_top,PRODH       ; Start row.
+	movff   win_height,PRODL    ; height
+    movf    PRODH,W
+    addwf   PRODL,F             ; top + height
+    decf    PRODL,F             ; top + height - 1 --> bottom.
+	rcall	PLED_DataWrite_PROD
 
+    ;---- Start pointer ------------------------------------------------------
 	movlw	0x20				; Start Address Horizontal (.0 - .239)
 	rcall	PLED_CmdWrite
-	movlw	0x00
-	rcall	PLED_DatWrite		
-	movff	box_temp+1,draw_box_temp1
-	movf	draw_box_temp1,W
-	rcall	PLED_DatWrite		
+	movff	win_top,WREG
+	mullw   1
+	rcall	PLED_DataWrite_PROD
 
 	movlw	0x21				; Start Address Vertical (.0 - .319)
 	rcall	PLED_CmdWrite
-	movff	box_temp+3,draw_box_temp1
-	bcf		STATUS,C
-	rlcf	draw_box_temp1,W		; x2
-	movlw	d'0'
-	btfsc	STATUS,C			; Result >255?
-	movlw	d'1'				; Yes: Upper=1!
-	rcall	PLED_DatWrite		; Upper
-	bcf		STATUS,C
-	rlcf	draw_box_temp1,W		; x2 -> WREG
-	rcall	PLED_DatWrite		; Lower
-; /Define Window
+	movff	win_leftx2,WREG
+	mullw   2
+	rcall	PLED_DataWrite_PROD
 
-; Fill Window
+    ;---- Fill Window --------------------------------------------------------
 	movlw	0x22					; Start Writing Data to GRAM
 	rcall	PLED_CmdWrite
 
-	movff	box_temp+1,draw_box_temp1
-	movff	box_temp+2,draw_box_temp2
-	movf	draw_box_temp1,W
-	subwf	draw_box_temp2,F			; X length
-	incf	draw_box_temp2,F
-
-	movff	box_temp+3,draw_box_temp1
-	movff	box_temp+4,draw_box_temp3
-	movf	draw_box_temp1,W
-	subwf	draw_box_temp3,F			; Y length/2
-
-	incf	draw_box_temp3,F			; Last pixel...
-
+	movff	win_height,PRODH
 	bsf		oled_rs					; Data!
 
-PLED_box2:
-	movff	draw_box_temp3,draw_box_temp1
-PLED_box3:
+PLED_box2:                          ; Loop height times
+	movff	win_width,PRODL
+PLED_box3:                          ; loop width times
 	movff	win_color1,PORTD
 	bcf		oled_rw
 	bsf		oled_rw					; Upper
@@ -348,55 +231,45 @@ PLED_box3:
 	bcf		oled_rw
 	bsf		oled_rw					; Lower
 
-	decfsz	draw_box_temp1,F
+	decfsz	PRODL,F
 	bra		PLED_box3
-	decfsz	draw_box_temp2,F
+	decfsz	PRODH,F
 	bra		PLED_box2
 
 	movlw	0x00					; NOP, to stop Address Update Counter
-	rcall	PLED_CmdWrite
+	bra     PLED_CmdWrite
 
-	call	PLED_standard_color
-	return
+;=============================================================================
+; PLED_ClearScreen: An optimized version of PLEX_box, for ful screen black.
+; Trashed: WREG, PROD
 
-; -----------------------------
-; PLED_ClearScreen:
-; -----------------------------
 PLED_ClearScreen:
 	movlw	0x35				; VerticalStartAddress HIGH:LOW
 	rcall	PLED_CmdWrite
-	movlw	0x00
-	rcall	PLED_DatWrite		
-	movlw	0x00
-	rcall	PLED_DatWrite		
+	mullw   0
+	rcall	PLED_DataWrite_PROD
 
 	movlw	0x36				; VerticalEndAddress HIGH:LOW
 	rcall	PLED_CmdWrite
 	movlw	0x01
-	rcall	PLED_DatWrite		
+	rcall	PLED_DataWrite		
 	movlw	0x3F
-	rcall	PLED_DatWrite		
+	rcall	PLED_DataWrite		
 
 	movlw	0x37				; HorizontalAddress START:END
 	rcall	PLED_CmdWrite
 	movlw	0x00
-	rcall	PLED_DatWrite		
+	rcall	PLED_DataWrite		
 	movlw	0xEF
-	rcall	PLED_DatWrite		
+	rcall	PLED_DataWrite		
 
 	movlw	0x20				; Start Address Horizontal (.0 - .239)
 	rcall	PLED_CmdWrite
-	movlw	0x00
-	rcall	PLED_DatWrite		
-	movlw	0x00
-	rcall	PLED_DatWrite		
+	rcall	PLED_DataWrite_PROD
 
 	movlw	0x21				; Start Address Vertical (.0 - .319)
 	rcall	PLED_CmdWrite
-	movlw	0x00
-	rcall	PLED_DatWrite		
-	movlw	0x00
-	rcall	PLED_DatWrite		
+	rcall	PLED_DataWrite_PROD
 
 	movlw	0x22					; Start Writing Data to GRAM
 	rcall	PLED_CmdWrite
@@ -404,14 +277,12 @@ PLED_ClearScreen:
 	; See Page 101 of OLED Driver IC Datasheet how to handle rs/rw clocks
 	bsf		oled_rs					; Data!
 
-	movlw	d'10'
-	movwf	draw_box_temp3
+	movlw	.160
+	movwf	PRODH
 PLED_ClearScreen2:
-	movlw	d'30'
-	movwf	draw_box_temp2
+	movlw	.240
+	movwf	PRODL
 PLED_ClearScreen3:
-	clrf	draw_box_temp1				; 30*10*256=76800 Pixels -> Clear complete 240*320
-PLED_ClearScreen4:
 
 	clrf	PORTD					; Need to generate trace here too.
 	bcf		oled_rw
@@ -421,18 +292,21 @@ PLED_ClearScreen4:
 	bcf		oled_rw
 	bsf		oled_rw					; Lower
 
-	decfsz	draw_box_temp1,F
-	bra		PLED_ClearScreen4
-	decfsz	draw_box_temp2,F
+	clrf	PORTD					; Need to generate trace here too.
+	bcf		oled_rw
+	bsf		oled_rw					; Upper
+
+    clrf	PORTD					; Need to generate trace here too.
+	bcf		oled_rw
+	bsf		oled_rw					; Lower
+
+	decfsz	PRODL,F
 	bra		PLED_ClearScreen3
-	decfsz	draw_box_temp3,F
+	decfsz	PRODH,F
 	bra		PLED_ClearScreen2
 
 	movlw	0x00					; NOP, to stop Address Update Counter
-	rcall	PLED_CmdWrite
-
-	return
-
+	bra     PLED_CmdWrite
 
 ; -----------------------------
 ; PLED Write Cmd via W
@@ -448,13 +322,21 @@ PLED_CmdWrite:
 ; PLED Write Display Data via W
 ; -----------------------------
 PLED_DataWrite:
+	bsf		oled_rs					; Data!
+	movwf	PORTD					; Move Data to PORTD
+	bcf		oled_rw
+	bsf		oled_rw
+	return
 
 ; -----------------------------
 ; PLED Data Cmd via W
 ; -----------------------------
-PLED_DatWrite:
+PLED_DataWrite_PROD:
 	bsf		oled_rs					; Data!
-	movwf	PORTD					; Move Data to PORTD
+	movff	PRODH,PORTD				; Move high byte to PORTD (OLED is bigendian)
+	bcf		oled_rw
+	bsf		oled_rw
+	movff	PRODL,PORTD				; Move low byte to PORTD
 	bcf		oled_rw
 	bsf		oled_rw
 	return
@@ -485,44 +367,44 @@ PLED_boot:
 	movlw	0x02				; RGB Interface Control (S6E63D6 Datasheet page 42)
 	rcall	PLED_CmdWrite
 	movlw	0x00				; X X X X X X X RM
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x00				; DM X RIM1 RIM0 VSPL HSPL EPL DPL
-	rcall	PLED_DatWrite		; System Interface: RIM is ignored, Internal Clock
+	rcall	PLED_DataWrite		; System Interface: RIM is ignored, Internal Clock
 
 	movlw	0x03				; Entry Mode (S6E63D6 Datasheet page 46)
 	rcall	PLED_CmdWrite
 	movlw	0x00				; =b'00000000' 	CLS MDT1 MDT0 	BGR 	X  	X  	X  	SS  65k Color
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	b'00110000'			; =b'00110000'	X  	X 	 I/D1 	I/D0 	X  	X  	X 	AM
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 
 	movlw	0x18
 	rcall	PLED_CmdWrite
 	movlw	0x00
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x28
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 
 	movlw	0xF8
 	rcall	PLED_CmdWrite
 	movlw	0x00
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x0F
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 
 	movlw	0xF9
 	rcall	PLED_CmdWrite
 	movlw	0x00
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x0F
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 
 	movlw	0x10
 	rcall	PLED_CmdWrite
 	movlw	0x00
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x00
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 
 ; Now Gamma settings...
 	rcall	PLED_brightness_full
@@ -537,9 +419,9 @@ PLED_boot:
 	movlw	0x05
 	rcall	PLED_CmdWrite
 	movlw	0x00
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x01
-	rcall	PLED_DatWrite			; Display ON
+	rcall	PLED_DataWrite			; Display ON
 	return
 
 
@@ -547,60 +429,60 @@ PLED_brightness_full:
 	movlw	0x70
 	rcall	PLED_CmdWrite
 	movlw	0x1F
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x00
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x71
 	rcall	PLED_CmdWrite
 	movlw	0x23
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x80
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x72
 	rcall	PLED_CmdWrite
 	movlw	0x2A
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x80
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 
 	movlw	0x73
 	rcall	PLED_CmdWrite
 	movlw	0x15
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x11
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x74
 	rcall	PLED_CmdWrite
 	movlw	0x1C
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x11
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 
 	movlw	0x75
 	rcall	PLED_CmdWrite
 	movlw	0x1B
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x15
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x76
 	rcall	PLED_CmdWrite
 	movlw	0x1A
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x15
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 
 	movlw	0x77
 	rcall	PLED_CmdWrite
 	movlw	0x1C
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x18
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x78
 	rcall	PLED_CmdWrite
 	movlw	0x21
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x15
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	
 	return
 
@@ -608,60 +490,60 @@ PLED_brightness_low:
 	movlw	0x70
 	rcall	PLED_CmdWrite
 	movlw	0x14
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x00
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x71
 	rcall	PLED_CmdWrite
 	movlw	0x17
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x00
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x72
 	rcall	PLED_CmdWrite
 	movlw	0x15
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x80
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 
 	movlw	0x73
 	rcall	PLED_CmdWrite
 	movlw	0x15
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x11
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x74
 	rcall	PLED_CmdWrite
 	movlw	0x14
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x0B
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 
 	movlw	0x75
 	rcall	PLED_CmdWrite
 	movlw	0x1B
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x15
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x76
 	rcall	PLED_CmdWrite
 	movlw	0x13
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x0E
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 
 	movlw	0x77
 	rcall	PLED_CmdWrite
 	movlw	0x1C
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x18
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x78
 	rcall	PLED_CmdWrite
 	movlw	0x15
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	movlw	0x0E
-	rcall	PLED_DatWrite
+	rcall	PLED_DataWrite
 	
 	return
 

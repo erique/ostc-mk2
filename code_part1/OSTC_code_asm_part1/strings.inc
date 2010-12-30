@@ -92,6 +92,14 @@ STRCAT  macro   string
         endm
 
 ;=============================================================================
+; A variant of STRCAT when there is just on char to output
+; Input/Output/Trashed : none.
+PUTC    macro   char
+        movlw   char
+        movwf   POSTINC2
+        endm
+
+;=============================================================================
 ; A variant of STRCPY that send the string to the word processor afterwards.
 ; Input/Output: see STRCPY.
 ; Trashed: See STRCPY + word_processor. In particular, switch RAM to Bank1 
@@ -143,3 +151,32 @@ WIN_LARGE_INVERT   macro   x, y
         call    start_large_invert_block
         DB      x, y
         endm
+
+;=============================================================================
+; A shortcut for PLED_box and PLED_frame call sequences.
+;
+; Erase a given screen area.
+WIN_BOX_BLACK macro   top, bottom, left, right
+        call    box_black_block
+        db      top, (bottom)-(top)+1, left, (right)-(left)+1
+        endm
+
+; Fill a given screen area with standard color (CF35).
+WIN_BOX_STD macro   top, bottom, left, right
+        call    box_std_block
+        db      top, (bottom)-(top)+1, left, (right)-(left)+1
+        endm
+
+; Fill a given screen area with color from WREG (8bits rrrgggbb)
+WIN_BOX_COLOR macro   top, bottom, left, right
+        call    box_color_block
+        db      top, (bottom)-(top)+1, left, (right)-(left)+1
+        endm
+
+; Draw a frame in standard color (CF35).
+WIN_FRAME_STD macro   top, bottom, left, right
+        call    box_frame_std
+        db      top, (bottom)-(top)+1, left, (right)-(left)+1
+        endm
+
+

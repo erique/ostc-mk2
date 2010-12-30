@@ -42,19 +42,14 @@ menu_battery_state:
 	movff	EEDATA,hi
 	bsf		leftbind
 	output_16
-	movlw	' '
-	movwf	POSTINC2
-	movlw	'('
-	movwf	POSTINC2
+	STRCAT  " ("
 	read_int_eeprom	d'52'	; Get complete cycles
 	movff	EEDATA,lo
 	read_int_eeprom	d'53'
 	movff	EEDATA,hi
 	bsf		leftbind
 	output_16
-	movlw	')'
-	movwf	POSTINC2
-	call	word_processor
+	STRCAT_PRINT  ")"
 
 	WIN_TOP		.65
 	lfsr	FSR2,letter
@@ -80,9 +75,7 @@ menu_battery_state:
 	bsf		leftbind
 	output_16dp	d'2'
 	bcf		leftbind
-	movlw	'V'
-	movwf	POSTINC2
-	call	word_processor
+	STRCAT_PRINT "V"
 
 	WIN_TOP		.125
 	lfsr	FSR2,letter
@@ -108,12 +101,7 @@ menu_battery_state:
 	bsf		leftbind			; left orientated output
 	output_16dp	d'2'
 	bcf		leftbind
-	movlw	'°'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	movlw	'('
-	movwf	POSTINC2
+	STRCAT  "° ("
 	read_int_eeprom	d'56'	; Month
 	movff	EEDATA,convert_value_temp+0
 	read_int_eeprom	d'57'	; Day
@@ -121,11 +109,7 @@ menu_battery_state:
 	read_int_eeprom	d'58'	; Year
 	movff	EEDATA,convert_value_temp+2
 	call		PLED_convert_date		; coverts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
-	movlw	')'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	call	word_processor
+	STRCAT_PRINT ") "
 
 	WIN_TOP		.185
 	lfsr	FSR2,letter
@@ -139,12 +123,7 @@ menu_battery_state:
 	bsf		leftbind			; left orientated output
 	output_16dp	d'2'
 	bcf		leftbind
-	movlw	'°'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	movlw	'('
-	movwf	POSTINC2
+	STRCAT  "° ("
 	read_int_eeprom	d'61'	; Month
 	movff	EEDATA,convert_value_temp+0
 	read_int_eeprom	d'62'	; Day
@@ -152,11 +131,7 @@ menu_battery_state:
 	read_int_eeprom	d'63'	; Year
 	movff	EEDATA,convert_value_temp+2
 	call	PLED_convert_date		; coverts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
-	movlw	')'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	call	word_processor
+	STRCAT_PRINT ") "
 	
 menu_battery_state5:
 	btfss	SWITCH2

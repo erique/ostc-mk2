@@ -87,9 +87,11 @@ osct_asm	code
 #include	displaytext.asm		; sends texts to wordprocessor
 #include	math.asm			; mathematical functions
 #include 	wait.asm			; waitroutines
+#include	oled_samsung.asm	; Attached in 80-System 8-Bit Mode
+#include	aa_wordprocessor.asm ; New antialiased word processor and fonts
+#include    color_processor.asm ; Color image drawing.
 #include	valconv.asm			; outputs to POSTINC2
 #include	eeprom_rs232.asm	; Internal EEPROM and RS232 Interface
-#include	oled_samsung.asm	; Attached in 80-System 8-Bit Mode
 #include	menu_custom.asm		; Menu "Custom FunctionsI" and "Custom FunctionsII"
 #include	menu.asm			; Main Menu and Setup Menu
 #include	menu_reset.asm		; Submenu "Reset"
@@ -117,21 +119,11 @@ osct_asm	code
 #include    strings.asm         ; Basic string operations
 
 ;=============================================================================
-; Include C sub-routines automatically
-
-p3_wp			code	0x09A00			; Mark segment name into the .map file
-
-  ifdef AAFONTS
-	; New antialiased word processor and fonts
-	#include	aa_wordprocessor.asm ; ASM wordprocessor under tests.
-  else
-	#include 	ostc_part3_wordprocessor_NEW_CURSOR_9A00_to_B960_jump_in_B410.txt	; Christians fonts...
-  endif
+#include    dive_icons.asm      ; Draw dive type icons in surface mode.
 
 ;=============================================================================
-; (should be after aa_wordprocessor)
-#include    color_processor.asm ; Color image drawing.
-#include    dive_icons.asm      ; Draw dive type icons in surface mode.
+; Extracted from p3_wordprocessor includes:
+#include	aa_fonts.asm
 
 ;=============================================================================
     MESSG "OSTC - diving computer code,  Copyright (C) 2010 HeinrichsWeikamp GbR"

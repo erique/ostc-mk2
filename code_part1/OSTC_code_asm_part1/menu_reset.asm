@@ -267,7 +267,9 @@ do_menu_reset_logbook:
 
 do_menu_reset_logbook2:
 	call	PLED_ClearScreen
-	DISPLAYTEXT	.25					; "Reset..."
+    setf    win_color1                  ; Make sure to display in white color.
+    setf    win_color2
+	DISPLAYTEXT	.25					    ; "Reset..."
 	call	reset_external_eeprom		; delete profile memory
 	bra		do_menu_reset_exit
 

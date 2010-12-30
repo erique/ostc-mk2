@@ -28,6 +28,9 @@
 ;
 ; Known bug:
 ;=============================================================================
+mixtype_icons   code
+
+;=============================================================================
 ; Display either Air, Nitrox, or Trimix icon (in surface mode).
 ; Inputs:  None: explore the gaz list.
 ; Ouputs:  None.
@@ -46,9 +49,9 @@ dive_type_icons:
 
             ;---- Common setup -----------------------------------------------
             movlw   .170
-            movff   WREG, img_top
+            movff   WREG, win_top
             movlw   .110
-            movff   WREG, img_left
+            movff   WREG, win_leftx2
             movlw   UPPER(dive_air_block)
             movwf   TBLPTRU
 
@@ -135,7 +138,7 @@ dive_trimix_icon:
             movwf   TBLPTRL
 
 dive_gaz_99:
-            rcall   color_image
+            call    color_image
             movlb   1                   ; Back to bank 1.
             return
 

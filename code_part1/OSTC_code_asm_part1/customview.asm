@@ -174,6 +174,7 @@ surfcustomview_init_gaslist:
 	bra		surfcustomview_toggle_exit	
 
 surfcustomview_init_interval:
+	call    PLED_standard_color
 	DISPLAYTEXT	d'189'							; Surface
 	DISPLAYTEXT	d'240'							; Interval:
 	call	PLED_interval						; Display the interval

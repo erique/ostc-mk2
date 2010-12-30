@@ -20,7 +20,8 @@
 ;    Copyright (c) 2010, JD Gascuel.
 ;=============================================================================
 ; HISTORY
-;  2010-12-13 : [jDG] Creation
+;  2010-12-13 : [jDG] Creation.
+;  2010-12-30 : [jDG] Revised to put temp into ACCESSRAM0
 ;
 ; RATIONALS: The OSTC have a nice color screen, and a std geek attitude impose
 ;            to show off ... ;-)
@@ -49,22 +50,17 @@
 ;     bf          is 16 pixels of color .11
 ;     F1 F2 F3 04 is 0x1235 pixels of color 0.
 ;
-;Temporary overlay (in bank 0)
-img_width   equ aa_width
-img_height  equ aa_height
-img_top     equ win_top
-img_left    equ win_leftx2
-img_pixelsL equ aa_start+0
-img_pixelsH equ aa_start+1
-img_pixelsU equ aa_end+0
-img_countL  equ aa_end+1
-img_countH  equ aa_colorDiv+0
-img_colors  equ aa_colorDiv+1
-colorTable  equ letter
-
-;-----------------------------------------------------------------------------
-; Make an entry in the link map.
-color_processor code
+;Temporary overlay (in bank 0), ACCESS area
+    CBLOCK  0x000
+        img_colors
+        img_width:2                     ; SHOULD be @1, because of aa_box_cmd
+        img_pixelsL
+        img_pixelsH
+        img_pixelsU
+        img_countL
+        img_countH
+        colorTable:.30
+    ENDC
 
 ;-----------------------------------------------------------------------------
 color_image:
@@ -74,7 +70,7 @@ color_image:
         tblrd*+                     
         movff   TABLAT,img_width
         tblrd*+
-        movff   TABLAT,img_height
+        movff   TABLAT,win_height
         tblrd*+
         movff   TABLAT,img_colors
         tblrd*+
@@ -91,8 +87,8 @@ get_colors_loop:
 
         ; Compute width * height * 2 : the number of pixels to write.
         clrf    img_pixelsU
-        movf    img_width,W             ; Compute number of pixels to draw
-        mulwf   img_height              ; 0 .. 160x240
+        movf    img_width,W,ACCESS      ; Compute number of pixels to draw
+        mulwf   win_height              ; 0 .. 160x240
         bcf     STATUS,C                ; BEWARE: milw does not reset carry flag !
         rlcf    PRODL                   ; x2 --> 0 .. 320x240, might by > 0xFFFF
         rlcf    PRODH
@@ -141,7 +137,7 @@ color_image_loop_count:
         xorlw   0xF0                    ; Get back index.
         swapf   WREG                    ; Get color index to lower bits.
         addwf   WREG                    ; x2
-        addlw   LOW(letter)             ; 0x60 + 2 * .15 < 0x80.
+        addlw   LOW(colorTable)         ; 0x60 + 2 * .15 < 0x80.
         movff   WREG,FSR2L
         movff   POSTINC2,PRODL
         movff   POSTINC2,PRODH

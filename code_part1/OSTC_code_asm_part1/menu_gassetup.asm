@@ -55,14 +55,12 @@ menu_gassetup_list:
 	movf	waitms_temp,W		; Load row into WREG
 	movff	WREG,win_top
 	lfsr	FSR2,letter
-	movlw	'G'
-	movwf	POSTINC2
+	PUTC	'G'
 	movff	decodata+0,lo		
 	incf	lo,F				
 	bsf		leftbind
 	output_99
-	movlw	':'
-	movwf	POSTINC2
+	PUTC	':'
 	
 	movf    decodata+0,W
 	call	PLED_grey_inactive_gas			; Sets Greyvalue for inactive gases
@@ -78,8 +76,7 @@ menu_gassetup_list:
 	decf	EEDATA,W			; 0-4
 	cpfseq	decodata+0			; =current displayed gas #?
 	bra		menu_gassetup_Tx	; no, do not display *
-	movlw	'*'					; display *
-	movwf	POSTINC2	
+	PUTC	'*'					; display *
 
 ; New v1.44se
 menu_gassetup_Tx:
@@ -107,8 +104,7 @@ menu_gassetup_Tx:
 	call	read_eeprom			; O2 value
 	movff	EEDATA,lo
 	output_8
-	movlw	'/'
-	movwf	POSTINC2
+	PUTC	'/'
 	incf	EEADR,F				; Gas #hi: %He - Set address in internal EEPROM
 	call	read_eeprom			; He value
 	movff	EEDATA,lo
@@ -135,12 +131,7 @@ menu_gassetup_Nx:
 
 ; New v1.44se
 menu_gassetup_O2:
-	movlw	'O'
-	movwf	POSTINC2
-	movlw	'2'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
+    STRCAT  "O2 "
 	output_8
 	bra 	menu_gassetup_list0
 
@@ -149,27 +140,13 @@ menu_gassetup_Air:
 	cpfseq	lo					; o2 = 21%
 	call menu_gassetup_Err
 
-	movlw	'A'
-	movwf	POSTINC2
-	movlw	'I'
-	movwf	POSTINC2
-	movlw	'R'
-	movwf	POSTINC2
-	movlw	' '		
-	movwf	POSTINC2
+    STRCAT  "AIR "
 	output_8
 	bra 	menu_gassetup_list0
 
 ; New v1.44se
 menu_gassetup_Err:
-	movlw	'E'
-	movwf	POSTINC2
-	movlw	'R'
-	movwf	POSTINC2
-	movlw	'R'
-	movwf	POSTINC2
-	movlw	' '		
-	movwf	POSTINC2
+    STRCAT  "ERR "
 	output_8
 
 ; Changed v1.44se
@@ -183,22 +160,14 @@ menu_gassetup_list0:
 	movff	WREG,win_top
 	lfsr	FSR2,letter
 
-	movlw	' '
-	movwf	POSTINC2
-	movlw	'i'
-	movwf	POSTINC2
-	movlw	'n'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
+    STRCAT  " in "
 	movf	decodata+0,W		; read current value 
 	addlw	d'28'				; offset in memory
 	movwf	EEADR
 	call	read_eeprom			; Low-value
 	movff	EEDATA,lo
 	output_8
-	movlw	'm'
-	movwf	POSTINC2
+    PUTC	'm'
 	movf    decodata+0,W
 	call	PLED_grey_inactive_gas			; Sets Greyvalue for inactive gases
 	call	word_processor	
@@ -332,15 +301,8 @@ menu_gassetup1:
 
 	WIN_TOP		.65
 	WIN_LEFT	.20
-	lfsr	FSR2,letter
-	movlw	'O'
-	movwf	POSTINC2
-	movlw	'2'
-	movwf	POSTINC2
-	movlw	':'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
+	
+	STRCPY  "O2: "
 
 	movf	divemins+0,W
 	addlw	0x06
@@ -348,20 +310,7 @@ menu_gassetup1:
 	call	read_eeprom		; O2 value
 	movff	EEDATA,lo
 	output_8
-	movlw	'%'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	movlw	'('
-	movwf	POSTINC2
-	movlw	'M'
-	movwf	POSTINC2
-	movlw	'O'
-	movwf	POSTINC2
-	movlw	'D'
-	movwf	POSTINC2
-	movlw	':'
-	movwf	POSTINC2
+	STRCAT  "% (MOD:"
 
 ; Show MOD in m
 	GETCUSTOM8 .18				; ppO2 warnvalue in WREG
@@ -383,46 +332,17 @@ menu_gassetup1:
 	subwfb	xC+1,F
 	movff	xC+1,hi
 	output_16
-	movlw	'm'
-	movwf	POSTINC2
-	movlw	')'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	call	word_processor	
+	STRCAT_PRINT  "m)  "
 
 	WIN_TOP		.95
-	lfsr	FSR2,letter
-	movlw	'H'
-	movwf	POSTINC2
-	movlw	'e'
-	movwf	POSTINC2
-	movlw	':'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
+	STRCPY  "He: "
 	movf	divemins+0,W
 	addlw	0x07
 	movwf	EEADR
 	call	read_eeprom		; He value
 	movff	EEDATA,lo
 	output_8
-	movlw	'%'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	movlw	'('
-	movwf	POSTINC2
-	movlw	'E'
-	movwf	POSTINC2
-	movlw	'N'
-	movwf	POSTINC2
-	movlw	'D'
-	movwf	POSTINC2
-	movlw	':'
-	movwf	POSTINC2
+	STRCAT  "% (END:"
 
 ; Show END in m
 	GETCUSTOM8 .18				; ppO2 warnvalue in WREG
@@ -473,29 +393,10 @@ menu_gassetup1:
 	subwfb	xC+1,F
 	movff	xC+1,hi
 	output_16
-	movlw	'm'
-	movwf	POSTINC2
-	movlw	')'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-
-	call	word_processor		
+	STRCAT_PRINT  "m)  "
 
 	WIN_TOP		.125
-	lfsr	FSR2,letter
-	movlw	'+'
-	movwf	POSTINC2
-	movlw	'/'
-	movwf	POSTINC2
-	movlw	'-'
-	movwf	POSTINC2
-	movlw	':'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
+	STRCPY  "+/-: "
 	movlw	'+'
 	btfsc	first_FA
 	movlw	'-'
@@ -511,19 +412,14 @@ menu_gassetup1:
 	call	read_eeprom		; Default O2 value
 	movff	EEDATA,lo
 	output_8
-	movlw	'/'
-	movwf	POSTINC2
+	PUTC	'/'
 	movf	divemins+0,W
 	addlw	0x05
 	movwf	EEADR
 	call	read_eeprom		; Default He value
 	movff	EEDATA,lo
 	output_8
-	movlw	' '
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	call	word_processor		
+	STRCAT_PRINT  "  "
 
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 	call	PLED_menu_cursor
@@ -774,12 +670,7 @@ active_gas_display:
 	bra		active_gas_display_end
 	
 active_gas_display_no:
-	movlw	' '					; three spaces instead of "Yes"
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
+	STRCAT  "   "                       ; three spaces instead of "Yes"
 
 active_gas_display_end:	
 	call	word_processor	
@@ -788,8 +679,7 @@ active_gas_display_end:
 	WIN_LEFT	.20
 	lfsr	FSR2,letter
 	OUTPUTTEXT	.88			; First Gas?
-	movlw	' '
-	movwf	POSTINC2
+	PUTC	' '
 
 	movlw	d'33'
 	movwf	EEADR
@@ -802,12 +692,7 @@ active_gas_display_end:
 	bra		menu_firstgas1
 
 menu_firstgas0:
-	movlw	' '
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
+	STRCAT  "   "           ; 3 spaces.
 
 menu_firstgas1:
 	call	word_processor			
@@ -985,11 +870,7 @@ gassetup_title_bar2:
 	incf	lo,F				
 	bsf		leftbind
 	output_99
-	movlw	':'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	call	word_processor
+	STRCAT_PRINT ": "
 	
 	WIN_TOP		.2
 	WIN_LEFT	.50
@@ -1014,8 +895,7 @@ gassetup_title_bar2:
 	call	read_eeprom			; O2 value
 	movff	EEDATA,lo
 	output_8					; Write O2
-	movlw	'/'
-	movwf	POSTINC2
+	PUTC	'/'
 	movf	divemins+0,W
 	addlw	0x07
 	movwf	EEADR
@@ -1047,12 +927,7 @@ gassetup_title_bar3:			; O2 Check
 
 ; New v1.44se
 gassetup_title_bar4:
-	movlw	'O'
-	movwf	POSTINC2
-	movlw	'2'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
+    STRCAT  "O2 "
 	output_8
 	bra 	gassetup_title_bar7
 
@@ -1061,72 +936,37 @@ gassetup_title_bar5:
 	cpfseq	lo					; o2 = 21%
 	bra 	gassetup_title_bar6
 
-	movlw	'A'
-	movwf	POSTINC2
-	movlw	'I'
-	movwf	POSTINC2
-	movlw	'R'
-	movwf	POSTINC2
-	movlw	' '		
-	movwf	POSTINC2
+    STRCAT  "AIR "
 	output_8
 	bra 	gassetup_title_bar7
 
 ; New v1.44se
 gassetup_title_bar6:		; ERROR
-	movlw	'E'
-	movwf	POSTINC2
-	movlw	'R'
-	movwf	POSTINC2
-	movlw	'R'
-	movwf	POSTINC2
-	movlw	' '		
-	movwf	POSTINC2
+    STRCAT  "ERR "
 	output_8
 	bra 	gassetup_title_bar7
 
 gassetup_title_bar7:
-	movlw	' '
-	movwf	POSTINC2
-	movlw	'i'
-	movwf	POSTINC2
-	movlw	'n'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
+    STRCAT  " in "
 	movf	decodata+0,W		; read current value 
 	addlw	d'28'				; offset in memory
 	movwf	EEADR
 	call	read_eeprom			; Low-value
 	movff	EEDATA,lo
 	output_8
-	movlw	'm'
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
+    STRCAT_PRINT  "m "
 
-	call	word_processor	
 	WIN_INVERT	.0	; Init new Wordprocessor	
 	return
 
 ; New v1.44se
 gassetup_write_Nx:
-	movlw	'N'
-	movwf	POSTINC2
-	movlw	'X'
-	movwf	POSTINC2
-	movlw	' '					
-	movwf	POSTINC2	
+    STRCAT  "NX "
 	return
 
 ; New v1.44se
 gassetup_write_Tx:
-	movlw	'T'
-	movwf	POSTINC2
-	movlw	'X'
-	movwf	POSTINC2
-	movlw	' '					
-	movwf	POSTINC2
+    STRCAT  "TX "
 	return
 
 gassetup_show_ppO2:

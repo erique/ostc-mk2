@@ -262,9 +262,7 @@ display_profile2:
 	call		PLED_display_wait_clear
 	WIN_TOP		.0
 	WIN_LEFT	.0
-	lfsr		FSR2,letter
-	movlw		'#'
-	movwf		POSTINC2
+	STRCPY      "#"
 
 	GETCUSTOM15	.28							; Logbook Offset -> lo, hi
 	tstfsz		lo							; lo=0?
@@ -294,8 +292,7 @@ display_profile_offset2:
 	output_99x							; # of dive
 
 display_profile_offset3:
-	movlw		' '
-	movwf		POSTINC2
+	PUTC		' '
 	call		I2CREAD2	
 	movff		SSPBUF,lo				; 
 
@@ -321,13 +318,11 @@ display_profile_offset3:
 	movff		SSPBUF,convert_value_temp+2
 	call		PLED_convert_date		; converts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 
-	movlw		' '
-	movwf		POSTINC2
+	PUTC		' '
 	call		I2CREAD2					; hour
 	movff		SSPBUF,lo
 	output_99x			
-	movlw		':'
-	movwf		POSTINC2
+	PUTC		':'
 	call		I2CREAD2					; Minute
 	movff		SSPBUF,lo
 	output_99x			
@@ -354,10 +349,7 @@ display_profile_offset3:
 
 	bsf		leftbind
 	output_16dp	d'3'						; max. depth
-	movlw		'm'
-	movwf		POSTINC2
-	movlw		' '
-	movwf		POSTINC2
+	STRCAT      "m "
 	call		I2CREAD2	
 	movff		SSPBUF,lo
 	call		I2CREAD2	
@@ -372,8 +364,7 @@ display_profile_offset3:
 
 	bsf		leftbind
 	output_16							; divetime minutes
-	movlw		d'39'
-	movwf		POSTINC2
+	PUTC		d'39'
 	call		I2CREAD2	
 	movff		SSPBUF,lo
 	movf		lo,W					; add seconds to total seconds
@@ -400,10 +391,7 @@ display_profile_offset3:
 
 	bsf		leftbind
 	output_99x							; divetime seconds
-	movlw		'"'
-	movwf		POSTINC2
-	movlw		' '
-	movwf		POSTINC2
+	STRCAT      "\" "
 	call		I2CREAD2	
 	movff		SSPBUF,lo
 	call		I2CREAD2	
@@ -412,11 +400,7 @@ display_profile_offset3:
 	movwf		ignore_digits
 	bsf		leftbind
 	output_16dp	d'2'						; temperature
-	movlw		'°'
-	movwf		POSTINC2
-	movlw		'C'		
-	movwf		POSTINC2
-	call		word_processor				; Display 2nd row of details
+	STRCAT_PRINT "°C"                   ; Display 2nd row of details
 
 	WIN_TOP		.50
 	WIN_LEFT	.05
@@ -428,29 +412,7 @@ display_profile_offset3:
 	movff		SSPBUF,hi
 	bsf		leftbind
 	output_16							; Air pressure before dive
-	movlw		'm'
-	movwf		POSTINC2
-	movlw		'b'
-	movwf		POSTINC2
-	movlw		'a'
-	movwf		POSTINC2
-	movlw		'r'
-	movwf		POSTINC2
-	movlw		' '
-	movwf		POSTINC2
-
-	movlw		'D'
-	movwf		POSTINC2
-	movlw		'e'
-	movwf		POSTINC2
-	movlw		's'
-	movwf		POSTINC2
-	movlw		'a'
-	movwf		POSTINC2
-	movlw		't'
-	movwf		POSTINC2
-	movlw		' '
-	movwf		POSTINC2
+	STRCAT      "mbar Desat "
 
 	call		I2CREAD2	
 	movff		SSPBUF,lo
@@ -462,8 +424,7 @@ display_profile_offset3:
 	movff		hi,lo
 	movwf		hi							; exchange lo and hi...
 	output_8								; Hours
-	movlw		':'
-	movwf		POSTINC2
+	PUTC		':'
 	movff		hi,lo						; Minutes
 	output_99x
 	bcf			leftbind
@@ -517,17 +478,7 @@ display_profile2d:
 	; Start Profile display
 	
 	movlw		color_deepblue
-	movff		WREG,box_temp+0		; Data
-	movlw		.75
-	movff		WREG,box_temp+1		; row top (0-239)
-	movlw		.239
-	movff		WREG,box_temp+2		; row bottom (0-239)
-	movlw		.0
-	movff		WREG,box_temp+3		; column left (0-159)
-	movlw		.159	
-	movff		WREG,box_temp+4		; column right (0-159)
-	call		PLED_box
-
+	WIN_BOX_COLOR   .75, .239, .0, .159	
 
 	call		I2CREAD2					; skip 0xFB		(Header-end)
 	clrf		timeout_counter2			; here: used as counter for depth readings
@@ -844,8 +795,7 @@ display_listdive1a:
 	lfsr		FSR2,letter
 	movff		divenumber,lo
 	output_99x								; # of dive
-	movlw		' '
-	movwf		POSTINC2
+	PUTC		' '
 	call		I2CREAD2	
 	movff		SSPBUF,lo
 	movlw		d'13'
@@ -861,13 +811,12 @@ display_listdive2:
 	movff		SSPBUF,convert_value_temp+1
 	call		I2CREAD2					; Year
 	movff		SSPBUF,convert_value_temp+2
-	call		PLED_convert_date_short		; converts into "DD/MM" or "MM/DD" or "MM/DD" in postinc2
+	call		PLED_convert_date_short		; converts into "DD/MM" or "MM/DD" or "MM/DD" in s
 
 
 	call		I2CREAD2					; hours (Skip)
 	call		I2CREAD2					; minutes (skip)
-	movlw		' '
-	movwf		POSTINC2
+	PUTC		' '
 	call		I2CREAD2					; Depth
 	movff		SSPBUF,lo
 	call		I2CREAD2	
@@ -875,20 +824,14 @@ display_listdive2:
 	bsf			leftbind
 	bsf			ignore_digit5				; Do not display 1cm figure
 	output_16dp	d'3'						; max. depth
-	movlw		'm'
-	movwf		POSTINC2
-	movlw		' '
-	movwf		POSTINC2
+	STRCAT      "m "
 	call		I2CREAD2	
 	movff		SSPBUF,lo
 	call		I2CREAD2	
 	movff		SSPBUF,hi
 	bsf			leftbind
 	output_16								; Divetime minutes
-	movlw		d'39'						; "'"
-	movwf		POSTINC2
-	
-	call		word_processor				; Display header-row in list
+	STRCAT_PRINT "'"                    ; Display header-row in list
 	return
 
 

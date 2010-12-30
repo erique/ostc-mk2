@@ -85,15 +85,10 @@ set_time_refresh:
 	lfsr	FSR2,letter
 	movff	hours,lo
 	output_99x
-	movlw	':'
-	movwf	POSTINC2
+	PUTC	':'
 	movff	mins,lo
 	output_99x
-	movlw	' '
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	call	word_processor
+	STRCAT_PRINT "  "
 
 set_date_refresh:
 	WIN_LEFT	.70
@@ -103,13 +98,8 @@ set_date_refresh:
 	movff	day,convert_value_temp+1
 	movff	year,convert_value_temp+2
 	call	PLED_convert_date		; converts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
-	movlw	' '
-	movwf	POSTINC2
-	movlw	' '
-	movwf	POSTINC2
-	call	word_processor
-	return
-
+	STRCAT_PRINT "  "
+    return
 
 set_time_done:				; Check date
 	movff	month,lo		; new month
@@ -166,17 +156,13 @@ set_time_done_loop
 	lfsr	FSR2,letter
 	movff	hours,lo
 	output_99x
-	movlw	':'
-	movwf	POSTINC2
+	PUTC	':'
 	movff	mins,lo
 	output_99x
-	movlw	':'
-	movwf	POSTINC2
+	PUTC	':'
 	movff	secs,lo
 	output_99x
-	movlw	' '
-	movwf	POSTINC2
-	call	word_processor
+	STRCAT_PRINT " "
 
 	decfsz	wait_temp,F
 	bra	set_time_done_loop
@@ -203,6 +189,7 @@ set_time_next_or_exit:
 	
 	WIN_LEFT	.32
 	WIN_TOP		.155
+    call    PLED_standard_color    
 	lfsr	FSR2,letter
 	OUTPUTTEXT	.94			; Set
 

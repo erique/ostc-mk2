@@ -341,14 +341,14 @@ divemenu_see_decoplan:
 	bsf		multi_gf_display			; Yes, display the multi-gf table screen
 	bcf		last_ceiling_gf_shown		; Clear flag
 
-	call	PLED_decoplan_gf_page1			; Display the new screen
+    clrf    decoplan_page               ; Starts on page 0
+	call	PLED_decoplan_gf			; Display the new screen
 	return
 	
 divemenu_see_decoplan1:	
-
-	movff	char_O_deco_status,deco_status		; 
-	tstfsz	deco_status							; deco_status=0 if decompression calculation done
-	return										; calculation not yet finished!
+    movff	char_O_deco_status,WREG
+    tstfsz	WREG                        ; deco_status=0 if decompression calculation done
+    return                              ; calculation not yet finished!
 	
 	call	PLED_decoplan				; display the Decoplan
 	return
@@ -362,7 +362,7 @@ divemenu_see_decoplan2_0:
 	bra		timeout_divemenu2			; quit menu!
 
 divemenu_see_decoplan2_nextgf:
-	incf	temp8,F
+	incf	decoplan_page,F
 	btfsc	last_ceiling_gf_shown		; last ceiling shown?
 	bra		divemenu_see_decoplan2_0	; All done, clear and return
 
@@ -588,7 +588,6 @@ timeout_divemenu:
 	btfss	menubit					; is the Dive mode menu displayed?
 	return							; No
 
-
 	btfsc	display_set_simulator	; Is the Simulator Mask active?
 	bra		timeout_divemenu6		; Yes, update Simulator mask
 	
@@ -598,8 +597,8 @@ timeout_divemenu:
 	btfsc	multi_gf_display		; display the multi-gf table screen?
 	bra		timeout_divemenu3		; Yes...
 
-	movff	char_O_deco_status,deco_status		; 
-	tstfsz	deco_status				; deco_status=0 if decompression calculation done
+	movff	char_O_deco_status,WREG
+	tstfsz	WREG                        ; deco_status=0 if decompression calculation done
 	bra		timeout_divemenu1		; No, skip updating the decoplan
 	
 	call	PLED_decoplan			; update the Decoplan
@@ -614,7 +613,7 @@ timeout_divemenu2:					; quit divemode menu
 ;	bra		timeout_divemenu2a		; No, normal OLED rebuild
 
 ; Restore some outputs
-	clrf	temp8					; Page 0-1 of deco list
+	clrf	decoplan_page           ; Page 0-1 of deco list
 	call	PLED_clear_divemode_menu; Clear dive mode menu
 
 	btfsc	FLAG_apnoe_mode				; Ignore in Apnoe mode
@@ -646,11 +645,11 @@ timeout_divemenu2a:
 	return
 	
 timeout_divemenu3:
-	movff	char_O_deco_status,deco_status	; 
-	tstfsz	deco_status						; deco_status=0 if decompression calculation done
+	movff	char_O_deco_status,WREG
+	tstfsz	WREG                        ; deco_status=0 if decompression calculation done
 	bra		timeout_divemenu1				; No, skip updating the decoplan
 timeout_divemenu3x:
-	call	PLED_decoplan_gf_page_current	; Re-Draw Current page of GF Decoplan
+	call	PLED_decoplan_gf            ; Re-Draw Current page of GF Decoplan
 	bra		timeout_divemenu1			; Check timeout
 	
 timeout_divemenu6:

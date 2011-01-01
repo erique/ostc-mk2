@@ -89,11 +89,6 @@
 	win_invert
 	ENDC
 
-; the following is used by the C-code up to 0x0E0!!
-	CBLOCK	0x0E0				;Bank 0
-	gf_decolist_copy:.32
-	ENDC
-
 	CBLOCK	0x100				;Bank 1
 	wreg_temp					;variables used for context saving during ISR 
 	status_temp					
@@ -267,8 +262,6 @@
 	
 	nofly_time:2				; No Fly time in Minutes (Calculated after Dive)
 	
-	deco_status					; =0 if decompression calculation done
-
 	cf_checker_counter			; counts custom functions to check for warning symbol
 	
 	char_I_O2_ratio				; 02 ratio
@@ -295,12 +288,8 @@
 	
 	switch_timeout				; used for hold-down count function
 	
-	temp5						; used in PLED_MultiGF,...
-	temp6						; used in PLED_MultiGF,...
-	temp7						; used in PLED_MultiGF,...
-	temp8						; used in PLED_MultiGF,...
-	temp9						; used in PLED_MultiGF,...
-	temp10						; used in PLED_MultiGF,...
+	decoplan_page				; used in PLED_MultiGF,...
+	temp10						; used in customview
 
 	fatal_error_code			; holds error code value 
 
@@ -334,7 +323,7 @@
  char_O_actual_pointer;					// 0x24F
 	ENDC
 	CBLOCK	0x250				;Bank 2
- char_IO_deco_table:.32;				// 0x250
+ char_O_deco_table:.32;				// 0x250
 	ENDC
 	CBLOCK	0x270				;Bank 2
  char_I_table_deco_done:.32;			// 0x270

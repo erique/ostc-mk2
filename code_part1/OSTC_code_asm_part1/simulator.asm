@@ -154,37 +154,29 @@ simulator_startdive:
 	goto	diveloop						; Start Divemode
 
 simulator_show_decoplan:
-	call	PLED_ClearScreen
-	call	PLED_simdata_screen
-	call	divemode_copy_decolist				;copy gf_decolist (0x250:.32) to gf_decolist_copy (0x0E0:.32)
-	call	divemenu_see_decoplan
+        call	PLED_ClearScreen
+        call	PLED_simdata_screen
+        call	divemenu_see_decoplan
+        
+        ; Display TTS, if any...
+        movff   char_O_ascenttime,WREG
+        iorwf   WREG
+        bz      simulator_decoplan_notts
 
-	WIN_LEFT .0
-	WIN_TOP .160
-	call    PLED_standard_color
+        WIN_LEFT .0
+        WIN_TOP .160
+        call    PLED_standard_color
+        
+        STRCPY  "TTS: "
+        movff   char_O_ascenttime,lo
+        bcf		leftbind
+        output_8
+        STRCAT_PRINT    "'"		
+simulator_decoplan_notts:
 
-	STRCPY  "TTS: "
-	movff   char_O_ascenttime,lo
- 	bcf		leftbind
-	output_8
-	STRCAT_PRINT    "' "
-
-;call	enable_rs232
-;	lfsr	FSR0,0x250
-;	movlw	0x20
-;	movwf	wait_temp
-;xy:						; Clear Deco list
-;	movff	POSTINC0,TXREG
-;	call	rs232_wait_tx
-;	decfsz	wait_temp,F
-;	bra		xy
-;	movff	char_O_array_decodepth+0,TXREG
-;
-		
-	
-	WIN_INVERT	.1	; Init new Wordprocessor	
-	DISPLAYTEXT	.188		; Sim. Results:
-	WIN_INVERT	.0	; Init new Wordprocessor	
+        WIN_INVERT	.1	                ; Init new Wordprocessor	
+        DISPLAYTEXT	.188		        ; Sim. Results:
+        WIN_INVERT	.0                  ; Init new Wordprocessor	
 	
 simulator_show_decoplan1:
 	bcf		switch_left
@@ -224,11 +216,11 @@ simulator_show_decoplan5_0:
 	bra		simulator_show_decoplan4	; Quit
 
 simulator_show_decoplan5_1:
-	incf	temp8,F
+	incf	decoplan_page,F
 	btfsc	last_ceiling_gf_shown		; last ceiling shown?
 	bra		simulator_show_decoplan5_0	; All done, clear and return
 
-	call	PLED_decoplan_gf_page_current	; Re-Draw Current page of GF Decoplan
+	call	PLED_decoplan_gf        	; Re-Draw Current page of GF Decoplan
 	bra		simulator_show_decoplan1	
 
 simulator_show_decoplan4:
@@ -269,6 +261,7 @@ simulator_calc_deco:
 
 	call	simulator_save_tissue_data		; Stores 32 floats "pre_tissue" into bank3
 
+	call	PLED_topline_box
 	WIN_INVERT	.1
 	DISPLAYTEXT	.12							;" Wait.."
 	WIN_INVERT	.0
@@ -280,8 +273,8 @@ simulator_calc_deco_loop1:
 	call	deco_calc_hauptroutine		    ; calc_tissue
 	movlb	b'00000001'						; rambank 1 selected
 
-	movff	char_O_deco_status,deco_status		; 
-	tstfsz	deco_status							; deco_status=0 if decompression calculation done
+	movff	char_O_deco_status,WREG
+	tstfsz	WREG                        ; deco_status=0 if decompression calculation done
 	bra		simulator_calc_deco_loop1			; Not finished
 
 	movlw	d'1'
@@ -342,8 +335,8 @@ simulator_calc_deco2:
 	call	deco_calc_hauptroutine		; calc_tissue
 	movlb	b'00000001'						; rambank 1 selected
 
-	movff	char_O_deco_status,deco_status		; 
-	tstfsz	deco_status							; deco_status=0 if decompression calculation done
+	movff	char_O_deco_status,WREG
+	tstfsz	WREG                        ; deco_status=0 if decompression calculation done
 	bra		simulator_calc_deco2				; Not finished
 	bra		simulator_calc_deco3				; finished!
 

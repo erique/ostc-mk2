@@ -19,7 +19,11 @@
 ; routines for display outputs
 ; written by: Matthias Heinrichs, info@heinrichsweikamp.com
 ; written: 15/01/05
-; last updated: 06/06/08
+;
+; History:
+; 2008-06-06 [MH] last updated
+; 2010-12-31 [jDG] Multi-page display for GF decoplan
+;
 ; known bugs:
 ; ToDo:	More comments
 
@@ -431,12 +435,12 @@ PLED_display_ndl:
 	return
 
 PLED_display_deko_mask:
-	rcall	PLED_clear_decoarea	
-; total deco time word
-	call		PLED_divemask_color	; Set Color for Divemode mask
-	DISPLAYTEXT	d'85'			; TTS
-	call	PLED_standard_color
-	return
+        rcall	PLED_clear_decoarea	
+        ; total deco time word
+        call		PLED_divemask_color	; Set Color for Divemode mask
+        DISPLAYTEXT	d'85'			; TTS
+        call	PLED_standard_color
+        return
 
 PLED_display_deko:
 	btfsc	menubit					; Divemode menu active?
@@ -1166,11 +1170,11 @@ PLED_pre_dive_screen3:
 	movwf	wait_temp			; here: stores eeprom address for gas list
 	movlw	d'0'
 	movwf	waitms_temp			; here: stores row for gas list
-	clrf 	temp6				; here: SP counter
+	clrf 	decoplan_index		; here: SP counter
 
 PLED_pre_dive_screen3_loop:
 	incf	wait_temp,F			; EEPROM address
-	incf	temp6,F			; Increase SP
+	incf	decoplan_index,F	; Increase SP
 
 	movlw	d'25'
 	addwf	waitms_temp,F		; Increase row
@@ -1178,7 +1182,7 @@ PLED_pre_dive_screen3_loop:
 	movff	waitms_temp,win_top ; Set Row
 	
 	STRCPY  "SP"
-	movff	temp6,lo		; copy gas number
+	movff	decoplan_index,lo   ; copy gas number
 	output_8				; display gas number
 	STRCAT  ": "
 	movff	wait_temp, EEADR; SP #hi position
@@ -1189,7 +1193,7 @@ PLED_pre_dive_screen3_loop:
 	call	word_processor	
 
 	movlw	d'3'		; list all three SP
-	cpfseq	temp6		; All gases shown?
+	cpfseq	decoplan_index      ; All gases shown?
 	bra		PLED_pre_dive_screen3_loop	;no
 
 	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)
@@ -2112,236 +2116,301 @@ PLED_divemode_set_xgas:				; Displayes the "Set Gas" menu
 	return
 
 PLED_divemode_simulator_mask:
-	DISPLAYTEXT	.254			; Close
-	DISPLAYTEXT	.250			; + 1m
-	DISPLAYTEXT	.251			; - 1m
-	DISPLAYTEXT	.252			; +10m
-	DISPLAYTEXT	.253			; -10m
-	return
+	    call    PLED_standard_color
+        DISPLAYTEXT	.254			; Close
+        DISPLAYTEXT	.250			; + 1m
+        DISPLAYTEXT	.251			; - 1m
+        DISPLAYTEXT	.252			; +10m
+        DISPLAYTEXT	.253			; -10m
+        return
 
 ;-----------------------------------------------------------------------------
-; Draw the bar graph used for deco stops (decoplan in simulator or dive).
-; Inputs: lo = minutes. range 1..many.
-PLED_decoplan_bargraph:
-    ; Common bargraph setup:
-	movf	hi,W                        ; hi+1 --> top (bank safe !)
-	incf    WREG
-	movff   WREG,win_top
-	movlw	d'18'+1                     ; 19 --> height (bank safe !)
-	movff   WREG,win_height
-	movlw	.122
-	movff	WREG,win_leftx2    			; column left (0-159)
-    
-    ; Draw used area (lo = minutes):
-	call    PLED_standard_color
-	movlw	d'16'                       ; Limit length (16min)
-	cpfslt	lo
-	movwf	lo					
-	movff	lo,win_width			    ; Bar width
-	tstfsz  lo                          ; Skip 0-size bar...
-	call	PLED_box
-
-    ; Clear unused area:
-	movlw	.0
-    movff   WREG,win_color1
-    movff   WREG,win_color2
-    movlw   .122                        ; (width+left-1)+1
-    addwf   lo,W
-    movff   WREG,win_leftx2             ; --> left
-    movf    lo,W
-    sublw   .16                         ; 16-left --> width
-    movff   WREG,win_width
-    tstfsz  WREG                        ; Skip 0-size bar.
-	goto	PLED_box
-
-;-----------------------------------------------------------------------------
-PLED_decoplan_delete_gf:		        ; Delete unused rows (GF model)
-PLED_decoplan_delete:			        ; Delete unused rows (OC model)
-	movlw	.171
-PLED_decoplan_delete_common:
-	movff	hi,win_top                  ; row top (0-239)
-	subwf   hi,W
-	negf    WREG
-	movff   WREG,win_height
-	movlw	.100
-	movff	WREG,win_leftx2             ; column left (0-159)
-	movlw	.60	
-	movff	WREG,win_width              ; area width (right-left+1, 0-159)
-    
-    clrf    WREG                        ; BG color is black.
-    movff   WREG,win_color1
-    movff   WREG,win_color2
-
-	bsf		last_ceiling_gf_shown		; Set flag
-	goto	PLED_box
-
-;-----------------------------------------------------------------------------
-PLED_decoplan_gf_page_current:
-	movlw	d'0'
-	cpfseq	temp8
-	bra		PLED_decoplan_gf_page2				; =1: Dispplay Page 2
-	bra		PLED_decoplan_gf_page1				; =0, Display Page 1
-
-PLED_decoplan_gf_page1:
-	ostc_debug	'n'		; Sends debug-information to screen if debugmode active
-
-	movff	char_O_array_decodepth+0,lo		; Get Depth
-	tstfsz	lo
-	bra		PLED_decoplan_gf_page1x
-	; No Deco, show "no Deco"
-	DISPLAYTEXT	d'239'						;"No Deco"
-	return
-
-PLED_decoplan_gf_page2:
-	; temp7 holds last displayed depth
-	; temp5 list entry
-	movff	temp5,temp9		; save
-	movff	temp7,temp10	; save
-	movlw	.231
-	movwf	temp6			; row
-PLED_decoplan_gf_page2y:
-	movlw	d'3'
-	addwf	temp7,F			; Add 3m for next stop
-	movlw	d'25'
-	addwf	temp6,F
-	incf	temp5,F
-	call	PLED_decoplan_show_stop_gf
-	movlw	d'15'			; the next 8 Stops...
-	cpfseq	temp5
-	bra		PLED_decoplan_gf_page2y
-	movff	temp9,temp5			; restore
-	movff	temp10,temp7		; restore
-	bsf		last_ceiling_gf_shown		; Set flag
-	return
-
-PLED_decoplan_gf_page1x:
-	clrf	temp8				; Page 0-3 of deco list
-	GETCUSTOM8	d'29'			; Last Deco in m
-	movwf	temp7				; Start with last stop
-	clrf	temp5
-	movlw	.231
-	movwf	temp6			; row
-
-	; Show last stop manually
-	movlw	d'25'
-	addwf	temp6,F
-	incf	temp5,F
-	call	PLED_decoplan_show_stop_gf
-	GETCUSTOM8	d'29'			; Last Deco in m
-	movwf	temp7				; Last deco
-	movlw	d'4'
-	cpfslt	temp7				; >=3m?
-	bra		PLED_decoplan_gf_page1x_next_6m
-
-	movlw	d'3'
-	movwf	temp7
-	bra		PLED_decoplan_gf_page1y
-
-PLED_decoplan_gf_page1x_next_6m:
-	movlw	d'6'
-	movwf	temp7
-	incf	temp5,F
-PLED_decoplan_gf_page1y:
-	movlw	d'3'
-	addwf	temp7,F			; Add 3m for next stop
-	movlw	d'25'
-	addwf	temp6,F
-	incf	temp5,F
-	call	PLED_decoplan_show_stop_gf
-	movlw	d'7'			; the next 7 Stops...
-	cpfseq	temp5
-	bra		PLED_decoplan_gf_page1y
-	return
-
-
-PLED_decoplan_show_stop_gf:
-	bsf		leftbind
-	WIN_LEFT	.100
-	call    PLED_standard_color
-	movff	temp6,win_top
-	movff	temp6,hi						; copy for PLED_decoplan_bargraph
-
-	movff	char_O_array_decodepth+0,WREG	; Ceiling
-	cpfslt	temp7							; Ceiling already displayed?
-	goto	PLED_decoplan_delete_gf			; Yes, quit display	and RETURN	
-	movff	temp7,lo						; Decodepth
-
-	lfsr	FSR2,letter		
-	output_99x								; outputs into Postinc2!
-	STRCAT_PRINT "m"
-
-	PUTC	' '
-	WIN_LEFT	.140
-	movff	temp6,win_top
-	lfsr	FSR1,0x0E0+1					; Gf_decolist_copy
-	movf	temp5,W							; number of entry
-	movff	PLUSW1,lo						; Stop length
-	incf	lo,F							; add one dummy minute
-	lfsr	FSR2,letter	
-	output_99x								; outputs into Postinc2!
-	STRCAT_PRINT "'"
-
-	rcall	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
-	return
-
-
-PLED_decoplan:				; display the Decoplan
-	ostc_debug	'n'		; Sends debug-information to screen if debugmode active
-
-	movff	char_O_array_decodepth+0,lo		; Get Depth
-	tstfsz	lo
-	bra		PLED_decoplan1
-	; No Deco, show "no Deco"
-	DISPLAYTEXT	d'239'						;"No Deco"
-	return
-
-PLED_decoplan1:
-	setf	temp5
-	movlw	.231
-	movwf	temp6			; row
-PLED_decoplan2:
-	movlw	d'25'
-	addwf	temp6,F
-	incf	temp5,F
-	call	PLED_decoplan_show_stop
-	movlw	d'5'			; 6 Stops...
-	cpfseq	temp5
-	bra		PLED_decoplan2
-	return
+; Draw a stop of the deco plan (simulator or dive).
+; Inputs: lo      = depth. Range 3m...93m
+;         hi      = minutes. range 1'..240'.
+;         win_top = line to draw on screen.
+; Trashed: hi, lo, win_height, win_leftx2, win_width, win_color*,
+;          WREG, PROD, TBLPTR TABLAT.
 
 PLED_decoplan_show_stop:
-	bsf		leftbind
-	WIN_LEFT	.100
-	call    PLED_standard_color
-	movff	temp6,win_top
-	movff	temp6,hi						; copy for PLED_decoplan_bargraph
+        ;---- Print depth ----------------------------------------------------
+        WIN_LEFT .100
+	    call    PLED_standard_color
+	    lfsr	FSR2,letter
+	    bsf     leftbind
+	    output_8					    ; outputs into Postinc2!
+        STRCAT_PRINT "m "
 
-	lfsr	FSR1,char_O_array_decodepth
-	movf	temp5,W							; number of entry
-	movff	PLUSW1,lo
-	movf	lo,w
-	btfsc	STATUS,Z						; =0
-	goto	PLED_decoplan_delete			; Yes, quit display		
+        ;---- Print duration -------------------------------------------------
+	    WIN_LEFT	.140
+	    lfsr	FSR2,letter
+	    
+	    movf    lo,W                    ; Swap hi & lo
+	    movff   hi,lo
+	    movwf   hi
 
-	lfsr	FSR2,letter		
-	output_8								; outputs into Postinc2!
-    STRCAT_PRINT "m "
+	    output_8					    ; Allow up to 240'
+        STRCAT_PRINT "'  "              ; 1 to 3 chars for depth.
 
-	WIN_LEFT	.140
-	movff	temp6,win_top
+	    movf    lo,W                    ; Swap back hi & lo
+	    movff   hi,lo
+	    movwf   hi
 
-	lfsr	FSR1,char_O_array_decotime;+0
-	movf	temp5,W							; number of entry
-	movff	PLUSW1,lo
+        ;---------------------------------------------------------------------
+        ; Draw the bar graph used for deco stops (decoplan in simulator or dive).
+        movff   win_top,WREG            ; Increment win_top (BANK SAFE)
+        incf    WREG
+        movff   WREG,win_top
+        movlw	d'18'+1                 ; 19 --> height (bank safe !)
+        movff   WREG,win_height
+        movlw	.122
+        movff	WREG,win_leftx2    		; column left (0-159)
+        
+        ; Draw used area (lo = minutes):
+        call    PLED_standard_color
+        movlw	d'16'                   ; Limit length (16min)
+        cpfslt	hi
+        movwf	hi
+        movff	hi,win_width			; Bar width
+        tstfsz  hi                      ; Skip 0-size bar...
+        call	PLED_box
 
-	lfsr	FSR2,letter	
-	output_99x								; outputs into Postinc2!
-    STRCAT_PRINT "'"
+        ; Clear unused area:
+        movlw	.0
+        movff   WREG,win_color1
+        movff   WREG,win_color2
+        movlw   .122                    ; (width+left-1)+1
+        addwf   hi,W
+        movff   WREG,win_leftx2         ; --> left
+        movf    hi,W
+        sublw   .16                     ; 16-left --> width
+        movff   WREG,win_width
+        tstfsz  WREG                    ; Skip 0-size bar.
+        call    PLED_box
+        
+        ; Restore win_top
+        movff   win_top,WREG            ; decf win_top (BANK SAFE)
+        decf    WREG
+        movff   WREG,win_top
+        return
 
-	rcall	PLED_decoplan_bargraph			; draws a box representing the decotime (stored in lo...) for this depth
-	return
+;-----------------------------------------------------------------------------
+; Clear unused area belw last stop
+; Inputs: win_top : last used area...
+PLED_decoplan_clear_bottom:
+        movff   win_top,WREG            ; Get back from bank0
+        btfsc   divemode                ; In dive mode ?
+        sublw   .170                    ; Yes: bottom row in divemode
+        btfss   divemode                ; In dive mode ?
+        sublw   .240                    ; No: bottom row in planning
+        movff   WREG,win_height
 
+        WIN_LEFT .82                    ; Full divemenu width
+        movlw   .160-.82+1
+        movff   WREG,win_width
 
+        clrf    WREG                    ; Fill with black
+        movff   WREG,win_color1
+        movff   WREG,win_color2
+        
+        goto	PLED_box
+
+;-----------------------------------------------------------------------------
+; Display the decoplan (simulator or divemode) for GF model
+; Inputs: char_O_deco_table (array of stop times, in minutes)
+;         decoplan_page = page number. Displays 5 stop by page.
+;
+decoplan_index  equ apnoe_mins          ; within each page
+decoplan_gindex equ apnoe_secs          ; global index
+decoplan_last   equ apnoe_max_pressure  ; Depth of last stop (CF#29)
+decoplan_max    equ apnoe_max_pressure+1; Number of lines per page. 7 in planning, 5 in diving.
+
+PLED_decoplan_gf:
+        ostc_debug	'n'		; Sends debug-information to screen if debugmode active
+
+        WIN_INVERT 0
+
+        ;---- Is there deco stops ? ------------------------------------------
+    	lfsr	FSR1,char_O_deco_table
+    	movlw   .1
+    	movf    PLUSW1,W                ; char_O_deco_table[1] --> WREG
+        bnz		PLED_decoplan_gf_1
+        
+        ;---- No Deco --------------------------------------------------------
+        call    PLED_standard_color
+        DISPLAYTEXT	d'239'              ;"No Deco"
+        bsf     last_ceiling_gf_shown
+        return
+
+PLED_decoplan_gf_1:
+    	GETCUSTOM8	d'29'			    ; Last decostop depth, in m
+        movwf	decoplan_last		    ; --> decoplan_last
+
+        movlw   .8                      ; 8 lines/page in decoplan
+        btfsc   divemode
+        movlw   .6                      ; 6 lines/page in divemode.
+        movwf   decoplan_max
+
+        movlw   .1
+        movwf   decoplan_index          ; Start with index = 1
+        clrf	WREG
+        movff	WREG,win_top            ; and row = 0
+
+        ; Read stop parameters, indexed by decoplan_index and decoplan_page
+        movf    decoplan_page,W         ; decoplan_gindex = 6*decoplan_page + decoplan_index
+        mulwf   decoplan_max
+        movf    decoplan_index,W
+        addwf   PRODL,W
+        movwf   decoplan_gindex         ; --> decoplan_gindex
+        
+        bcf     last_ceiling_gf_shown   ; Not finished yet...
+
+PLED_decoplan_gf_2:
+        btfsc   decoplan_gindex,5       ; Reached table length (32) ?
+        bra     PLED_decoplan_gf_99     ; YES: finished...
+
+        ; Compute new depth
+        movf    decoplan_gindex,W       ; depth = 3 * (global index)
+        mullw   .3                      ; --> PROD
+        movf    decoplan_last,W         ; depth < decoplan_last (CF#29) ?
+        cpfslt  PRODL
+        movf    PRODL,W                 ; NO: take depth, else keep decoplan_last.
+        movwf   lo                      ; --> lo
+
+        ; Read deepest depth from other bank.
+        movff   char_O_array_decodepth,WREG
+        xorwf   lo,W                    ; This is last stop ?
+        btfsc   STATUS,Z
+        bsf     last_ceiling_gf_shown   ; YES: mark for latter...
+
+        ; Read stop duration
+        movf    decoplan_gindex,W       ; index
+    	movff	PLUSW1,hi               ; char_O_deco_table[index] --> hi
+    	movf    hi,W                    ; time = zero ?
+    	bz      PLED_decoplan_gf_4      ; Do not display it: continue.
+
+        ; Display the stop line
+    	call	PLED_decoplan_show_stop
+
+        ; Next
+        movff   win_top,WREG            ; row: += 24
+	    addlw	.24
+        movff   WREG,win_top
+	    incf	decoplan_index,F        ; local index += 1
+PLED_decoplan_gf_4:
+	    incf	decoplan_gindex,F       ; global index += 1
+
+        btfsc   last_ceiling_gf_shown   ; Last one done ?
+        bra     PLED_decoplan_gf_99     ; YES: finished...
+
+        ; Max number of lines/page reached ?
+    	incf    decoplan_max,W          ; index+1 == max+1 ?
+    	cpfseq	decoplan_index
+    	bra		PLED_decoplan_gf_2      ; NO: loop
+
+    	; Check if next stop if end-of-list ?
+    	movlw   .3                      ; Next stop is lo + 3m
+    	addwf   lo,W
+    	xorwf   decoplan_last,W         ; == last stop ?
+    	bz      PLED_decoplan_gf_99     ; End of list...
+
+        ; Display the message "more..."
+        rcall   PLED_decoplan_clear_bottom  ; Clear from next line
+
+    	WIN_LEFT .130 - 7*3
+    	call    PLED_standard_color
+    	STRCPY_PRINT "more..."
+        bcf		last_ceiling_gf_shown	; More page to display...
+    	return
+
+PLED_decoplan_gf_99:
+        bsf		last_ceiling_gf_shown   ; Nothing more in table to display.
+        rcall   PLED_decoplan_clear_bottom  ; Clear from next line
+        return
+
+;-----------------------------------------------------------------------------
+; Display the decoplan (simulator or divemode) for ZHL-16c model
+PLED_decoplan:
+        ostc_debug	'n'		; Sends debug-information to screen if debugmode active
+        
+        WIN_INVERT 0
+
+        ;---- Is there deco information --------------------------------------
+    	lfsr	FSR0,char_O_array_decodepth
+	    lfsr	FSR1,char_O_array_decotime
+
+    	movf    INDF0,W
+        bnz		PLED_decoplan1
+        
+        ;---- No Deco --------------------------------------------------------
+        call    PLED_standard_color
+        DISPLAYTEXT	d'239'              ;"No Deco"
+        bsf     last_ceiling_gf_shown
+        return
+
+PLED_decoplan1:
+    	GETCUSTOM8	d'29'			    ; Last decostop depth, in m
+        movwf	decoplan_last		    ; --> decoplan_last
+
+        movlw   .6                      ; Max 6 lines in all modes.
+        movwf   decoplan_max
+        
+        clrf	decoplan_index          ; Starts with index = 0
+        clrf	WREG
+        movff	WREG,win_top            ; and row = 0
+
+PLED_decoplan2:
+        ; Read stop parameters, indexed by decoplan_index
+	    movf	decoplan_index,W
+	    movff	PLUSW0,lo               ; array_decodepth[index]
+	    movff	PLUSW1,hi               ; array_decotime[index]
+
+        ; 0 time == end-of-table.
+    	movf	hi,w
+    	bz      PLED_decoplan_0
+
+        call	PLED_decoplan_show_stop
+
+        movff   win_top,WREG            ; row += 24
+	    addlw	.24         
+        movff   WREG,win_top
+	    incf	decoplan_index,F        ; index += 1    
+
+        ; 6 Stops max...
+        movf    decoplan_max,W
+        cpfseq	decoplan_index
+        bra		PLED_decoplan2
+
+        ;---- Additional time in the decoplan ? ------------------------------
+        movf    decoplan_max,W          ; Read array_decotime[6]
+        movf    PLUSW1,W                ; set Z flag
+        movwf   lo                      ; and copy to lo
+        btfsc   STATUS,Z                ; Zero: nothing to add.
+        return
+        
+        WIN_LEFT .100
+        call    PLED_standard_color
+
+        STRCPY  "add:"
+        output_8
+        STRCAT_PRINT "'"
+        return
+
+PLED_decoplan_0:
+        ;---- Plan not finished to compute ? ---------------------------------
+	    decf	decoplan_index,W
+	    movf 	PLUSW0,W                ; array_decodepth[index-1]
+	    subwf   decoplan_last,W         ; == last stop depth ?
+	    bz      PLED_decoplan_99
+        
+        WIN_LEFT .100
+        call    PLED_standard_color
+        STRCPY_PRINT "..."
+
+PLED_decoplan_99:
+        return
+
+;-----------------------------------------------------------------------------
 PLED_gas_list:
 	ostc_debug	'm'		; Sends debug-information to screen if debugmode active
 
@@ -2414,11 +2483,11 @@ PLED_splist_start:
 	movwf	wait_temp			; here: stores eeprom address for gas list
 	movlw	d'231'
 	movwf	waitms_temp			; here: stores row for gas list
-	clrf 	temp5				; here: SP counter
+	clrf 	decoplan_index	    ; here: SP counter
 
 PLED_splist_loop:
 	incf	wait_temp,F			; EEPROM address
-	incf	temp5,F			; Increase SP
+	incf	decoplan_index,F	; Increase SP
 
 	movlw	d'25'
 	addwf	waitms_temp,F		; Increase row
@@ -2426,7 +2495,7 @@ PLED_splist_loop:
 	WIN_LEFT	.100
 	
 	STRCPY  "SP"
-	movff	temp5,lo		; copy gas number
+	movff	decoplan_index,lo	; copy gas number
 	output_8				; display gas number
     PUTC    ':'
 	movff	wait_temp, EEADR; SP #hi position
@@ -2437,7 +2506,7 @@ PLED_splist_loop:
 	call	word_processor	
 
 	movlw	d'3'		; list all three SP
-	cpfseq	temp5		; All gases shown?
+	cpfseq	decoplan_index          ; All gases shown?
 	bra		PLED_splist_loop	; No
 
 	bcf		leftbind
@@ -2982,11 +3051,11 @@ PLED_simdata_screen3:
 	movwf	wait_temp			; here: stores eeprom address for gas list
 	movlw	d'10'
 	movwf	waitms_temp			; here: stores row for gas list
-	clrf 	temp6				; here: SP counter
+	clrf 	decoplan_index		; here: SP counter
 
 PLED_simdata_screen3_loop:
 	incf	wait_temp,F			; EEPROM address
-	incf	temp6,F			; Increase SP
+	incf	decoplan_index,F    ; Increase SP
 
 	movlw	d'25'
 	addwf	waitms_temp,F		; Increase row
@@ -2994,7 +3063,7 @@ PLED_simdata_screen3_loop:
 	movff	waitms_temp,win_top ; Set Row
 	
 	STRCPY  "SP"
-	movff	temp6,lo		; copy gas number
+	movff	decoplan_index,lo   ; copy gas number
 	output_8				; display gas number
 	STRCAT  ": "
 	movff	wait_temp, EEADR; SP #hi position
@@ -3005,7 +3074,7 @@ PLED_simdata_screen3_loop:
 	call	word_processor	
 
 	movlw	d'3'		; list all three SP
-	cpfseq	temp6		; All gases shown?
+	cpfseq	decoplan_index		; All gases shown?
 	bra		PLED_simdata_screen3_loop	;no
 
 	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)

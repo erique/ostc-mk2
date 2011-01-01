@@ -433,11 +433,9 @@ calc_deko_divemode2:
 	movlb	b'00000001'						; rambank 1 selected
 	ostc_debug	'C'		; Sends debug-information to screen if debugmode active
 
-	movff	char_O_deco_status,deco_status		; 
-	tstfsz	deco_status							; deco_status=0 if decompression calculation done
-	return										; calculation not yet finished!
-
-	rcall	divemode_copy_decolist				;copy gf_decolist (0x250:.32) to gf_decolist_copy (0x0E0:.32)
+	movff	char_O_deco_status,WREG
+	tstfsz	WREG                        ; deco_status=0 if decompression calculation done
+	return                              ; calculation not yet finished!
 
 	movff	char_O_array_decodepth+0,wait_temp	; copy ceiling to temp register
 	tstfsz	wait_temp							; Ceiling<0m?
@@ -453,17 +451,7 @@ calc_deko_divemode2:
 	call	PLED_display_ndl				; display no deco limit
 	return
 
-divemode_copy_decolist:
-	;copy gf_decolist (0x250:.32) to gf_decolist_copy (0x0E0:.32)
-	lfsr	FSR0,0x250			; Source
-	lfsr	FSR1,0x0E0			; Target
-	movlw	d'24'				; Copy 24 stops
-	movwf	wait_temp			; Counter
-copy_gf_deco_list:
-	movff	POSTINC0,POSTINC1	; Copy Source to Target
-	decfsz	wait_temp,F			; All done?
-	bra		copy_gf_deco_list	; No, continue!
-	return
+;-----------------------------------------------------------------------------
 
 divemode_prepare_flags_for_deco:	
 	movff	amb_pressure+0,int_I_pres_respiration+0		; lo  and copy result to deco routine

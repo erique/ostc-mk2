@@ -237,10 +237,10 @@ PLED_box3:                          ; loop width times
 	bra		PLED_box2
 
 	movlw	0x00					; NOP, to stop Address Update Counter
-	bra     PLED_CmdWrite
+	bra     PLED_CmdWrite			; Returns...
 
 ;=============================================================================
-; PLED_ClearScreen: An optimized version of PLEX_box, for ful screen black.
+; PLED_ClearScreen: An optimized version of PLEX_box, for full screen black.
 ; Trashed: WREG, PROD
 
 PLED_ClearScreen:

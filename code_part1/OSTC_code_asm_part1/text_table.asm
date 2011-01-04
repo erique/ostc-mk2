@@ -399,7 +399,7 @@ textpos_pointer:
 	DB	.20,.125			;279
 	DB	.20,.155			;280
 	
-	DB	.100,.50			;281
+	DB	.93,.170			;281	Avr.Depth
 	DB	.90,.170			;282	Lead Tiss.
 	DB	.93,.170			;283	Stopwatch
 	DB	.20,.95				;284
@@ -587,10 +587,10 @@ text_pointer:
 	DA	"Vel.warn[m/min]}"		;169
 	DA	"Time offset/day}"		;170
 	DA	"Show altimeter }"		;171
-	DA	"not used       }"		;172
-	DA	"not used       }"		;173
-	DA	"not used       }"		;174
-	DA	"not used       }"		;175
+	DA	"Show Log-Marker}"		;172
+	DA	"Show Stopwatch }"		;173
+	DA	"ShowTissueGraph}"		;174
+	DA	"Show Lead.Tiss.}"		;175
 	DA	"not used       }"		;176
 	DA	"not used       }"		;177
 	DA	"not used       }"		;178
@@ -709,7 +709,7 @@ text_pointer:
 	DA	"Max. Depth:}"			;278		l=12
 	DA	"Calculate Deco}}"		;279		l=16
 	DA	"Show Decoplan}"		;280		l=14
-	DA	"unused   }"			;281		l=10
+	DA	"Avr.Depth}"			;281		l=10
 	DA	"Lead Tiss.}}"			;282		l=12
 	DA	"Stopwatch}"			;283		l=10
 	DA	"Reset Logbook}"		;284		l=14

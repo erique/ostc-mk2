@@ -28,40 +28,6 @@ wait_switches:
 	bcf		switch_right
 	return
 
-;	movlw	d'40'
-;	btfss	button_delay_done		; Start counting?
-;	movlw	d'200'
-;	movwf	switch_timeout
-;
-;wait_switches1:
-;	WAITMS	d'5'
-;	btfsc	SWITCH2
-;	bra		wait_switches2		; Check other switch
-;
-;	decfsz	switch_timeout,F
-;	bra		wait_switches1
-;	
-;	btfsc	SWITCH2
-;	bra		wait_switches3
-;	
-;	bsf		button_delay_done		; Start counting
-;	bsf		switch_left				; Set button flag
-;	bcf		switch_right			; only for the other button
-;;	bcf		LEDg
-;	return
-;
-;wait_switches2:
-;	btfss	SWITCH1
-;	bra		wait_switches1		; Wait 
-;	
-;	; Yes, both switches released before timeout...
-;wait_switches3:
-;	bcf		switch_left
-;	bcf		switch_right
-;	bcf		button_delay_done
-;	bcf		LED_red
-;	return
-;
 menu:
 	bcf		deco_mode_changed			; Clear flag (Description is only showed once)
 	bcf		LED_blue

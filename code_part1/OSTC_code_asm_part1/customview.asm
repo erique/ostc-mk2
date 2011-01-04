@@ -60,7 +60,13 @@ customview_second:		; Do every-second tasks for the custom view area
 	bra		customview_1sec_clock			; Update the Clock
 	dcfsnz	temp1,F
 	bra		customview_1sec_lead_tiss		; Update the leading tissue
+	dcfsnz	temp1,F
+	bra		customview_1sec_average			; Update the Average depth
 	; Menupos3=0, do nothing
+	return
+
+customview_1sec_average:
+	call	PLED_total_average_show2	; Update the figures only
 	return
 	
 customview_1sec_stopwatch:
@@ -83,6 +89,8 @@ customview_minute:		; Do every-minute tasks for the custom view area
 	bra		customview_minute_clock			; Update the Clock
 	dcfsnz	temp1,F
 	bra		customview_minute_lead_tiss		; Update the leading tissue
+	dcfsnz	temp1,F
+	bra		customview_minute_average		; Update the Average depth
 	; Menupos3=0, do nothing
 	return
 
@@ -96,12 +104,13 @@ customview_minute_lead_tiss:
 
 customview_minute_marker:			; Do nothing extra
 customview_minute_stopwatch:		; Do nothing extra
+customview_minute_average:			; Do nothing extra
 	return
 
 customview_toggle:		; Yes, show next customview (and delete this flag)
 	ostc_debug	'X'		; Sends debug-information to screen if debugmode active
 	incf	menupos3,F			; Number of customview to show
-	movlw	d'4'				; Max number
+	movlw	d'5'				; Max number
 	cpfsgt	menupos3			; Max reached?
 	bra		customview_mask		; No, show
 	clrf	menupos3			; Reset to zero (Zero=no custom view)
@@ -116,16 +125,29 @@ customview_mask:
 	bra		customview_init_clock			; Show the clock
 	dcfsnz	temp1,F
 	bra		customview_init_lead_tissue		; Show the leading tissue
+	dcfsnz	temp1,F
+	bra		customview_init_average			; Show Total average depth
 ;	bra		customview_init_nocustomview	; menupos3=0 -> No Customview
 customview_init_nocustomview:
 	bra		customview_toggle_exit	
 
+customview_init_average:
+	call	PLED_total_average_show		; Show Average with mask
+	bra		customview_toggle_exit	
+
 customview_init_stopwatch:
-; Init Stopwatch
-	call	PLED_stopwatch_show
+	GETCUSTOM8	d'51'					; Show Stopwatch? (=1 in WREG)
+	decfsz		WREG,F					; WREG=1?	
+	bra			customview_toggle		; No, use next Customview
+
+	call	PLED_stopwatch_show			; Init Stopwatch display
 	bra		customview_toggle_exit	
 
 customview_init_marker:					; Init Marker 
+	GETCUSTOM8	d'50'					; Show Marker? (=1 in WREG)
+	decfsz		WREG,F					; WREG=1?	
+	bra			customview_toggle		; No, use next Customview
+
 	DISPLAYTEXT		d'151'				; Set Marker?
 	bra		customview_toggle_exit	
 
@@ -134,8 +156,17 @@ customview_init_clock:					; Init Clock
 	bra		customview_toggle_exit	
 
 customview_init_lead_tissue:			; Show leading tissue
+	GETCUSTOM8	d'53'					; Show Lead Tissue? (=1 in WREG)
+	decfsz		WREG,F					; WREG=1?	
+	bra			customview_toggle		; No, use next Customview
+
 	call	PLED_show_leading_tissue
 	bra		customview_toggle_exit	
+
+;customview_init_graphs:					; Show tissue graph
+; 	GETCUSTOM8	d'52'					; Show Tissue Graph? (=1 in WREG)
+;	decfsz		WREG,F					; WREG=1?	
+;	bra			customview_toggle		; No, use next Customview
 
 customview_toggle_exit:
 	bcf		toggle_customview			; Clear flag
@@ -200,7 +231,8 @@ surfcustomview_init_cfview:
 
 surfcustomview_toggle_exit:
 	bcf		toggle_customview			; Clear flag
-
+	clrf	timeout_counter2			; Clear timeout
+	return
 
 
 

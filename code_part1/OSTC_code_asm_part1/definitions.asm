@@ -121,7 +121,8 @@
 	textlength					
 	textaddress:2				
 
-	average_depth_hold:4		; Holds Sum of depths
+	average_depth_hold:4		; Holds Sum of depths (Resettable)
+	average_depth_hold_total:4	; Holds Sum of depths (Non-Resettable)
 	b0_lo						; Temp (calculate_average)
 	b0_hi						; Temp (calculate_average)
 	average_divesecs:2			; Used for resetable average depth display
@@ -215,7 +216,8 @@
    	amb_pressure:2					; ambient pressure [mBar]
    	rel_pressure:2					; amb_pressure - surface pressure [mBar]
    	max_pressure:2					; Max. pressure for the dive [mBar]
-	avr_rel_pressure:2				; Average rel. pressure (Average depth) for the dive [mBar]
+	avr_rel_pressure:2				; Average rel. pressure (Average depth) for the dive [mBar], Resettable
+ 	avr_rel_pressure_total:2		; Average rel. pressure (Average depth) for the dive [mBar], Non-Resettable
    	last_pressure:2
   	temperature:2
   	last_temperature:2
@@ -296,8 +298,6 @@
 	apnoe_surface_secs			; Surface interval secs for Apnoe mode
 	customfunction_temp1		; start of custom function descriptors 
 	customfunction_temp2		; used in GETCUSTOM8 and GETCUSTOM15
-	
-	switch_timeout				; used for hold-down count function
 	
 	decoplan_page				; used in PLED_MultiGF,...
 	temp10						; used in customview

@@ -1274,6 +1274,8 @@ change_logbook_offset1:
 
 change_logbook_offset2:
 	bcf		LED_blue
+	clrf	surface_interval+0
+	clrf	surface_interval+1		; Clear surface interval timer
 
 end_dive_common:
 	bcf		simulatormode_active		; if we were in simulator mode
@@ -1284,11 +1286,6 @@ end_dive_common:
 	call	deco_gradient_array
 	movlb	b'00000001'					; select ram bank 1
 
-	btfss	restore_deco_data			; Restore decodata?
-	goto	surfloop					; and return to surfaceloop
-;new 1.71beta:
-	clrf	surface_interval+0
-	clrf	surface_interval+1		; Clear surface interval timer
 	goto	surfloop					; and return to surfaceloop
 
 timeout_divemode:
@@ -1464,7 +1461,7 @@ calc_average_depth:
 
 	; 1. Add new 2xdepth to the Sum of depths registers
 	movff	rel_pressure+0,b0_lo
-	movff	rel_pressure+1,b0_hi
+	movff	rel_pressure+1,b0_hi	; Buffer...
 
 	movf	b0_lo,w
 	addwf	average_depth_hold+0,F
@@ -1481,9 +1478,25 @@ calc_average_depth:
 	movlw	d'0'
 	addwfc	average_depth_hold+2,F
 	addwfc	average_depth_hold+3,F ; Will work up to 9999mBar*60*60*24=863913600mBar
+
+; Do the same for the _total registers (Non-Resettable)
+	movf	b0_lo,w
+	addwf	average_depth_hold_total+0,F
+	movf	b0_hi,w
+	addwfc	average_depth_hold_total+1,F
+	movlw	d'0'
+	addwfc	average_depth_hold_total+2,F
+	addwfc	average_depth_hold_total+3,F ; Will work up to 9999mBar*60*60*24=863913600mBar
+
+	movf	b0_lo,w
+	addwf	average_depth_hold_total+0,F
+	movf	b0_hi,w
+	addwfc	average_depth_hold_total+1,F
+	movlw	d'0'
+	addwfc	average_depth_hold_total+2,F
+	addwfc	average_depth_hold_total+3,F ; Will work up to 9999mBar*60*60*24=863913600mBar
 
 	; 2. Compute Average Depth on base of average_divesecs:2
-	
 	movff	average_divesecs+0,xB+0
 	movff	average_divesecs+1,xB+1		; Copy
 	movff	average_depth_hold+0,xC+0
@@ -1494,6 +1507,36 @@ calc_average_depth:
 	call	div32x16 	; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
 	movff	xC+0,avr_rel_pressure+0
 	movff	xC+1,avr_rel_pressure+1
+
+	; Compute Total Average Depth on base of divemins:2 and divesecs
+	movff	divemins+0,xA+0
+	movff	divemins+1,xA+1
+	movlw	d'60'
+	movwf	xB+0
+	clrf	xB+1
+	call	mult16x16				; xC:4=xA:2*xB:2
+	movf	divesecs,W
+	addwf	xC+0,F
+	movlw	d'0'
+	addwfc	xC+1,F
+	movlw	d'3'					; 2+1
+	btfss	divesecs,0				; divesecs even?
+	movlw	d'2'					; Yes, do not add +1
+	addwf	xC+0,F
+	movlw	d'0'
+	addwfc	xC+1,F
+	; Ignore xC+2 and xC+3. Total Average will only work up to divetime=1092:16
+	movff	xC+0,xB+0
+	movff	xC+1,xB+1		; Copy
+	movff	average_depth_hold_total+0,xC+0
+	movff	average_depth_hold_total+1,xC+1
+	movff	average_depth_hold_total+2,xC+2
+	movff	average_depth_hold_total+3,xC+3
+
+	call	div32x16 	; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
+	movff	xC+0,avr_rel_pressure_total+0
+	movff	xC+1,avr_rel_pressure_total+1
+
 	return
 	
 reset_average1:
@@ -1540,6 +1583,10 @@ diveloop_boot:
 	clrf	AlarmType					; Clear all alarms
 	bcf		event_occured				; clear flag
 	rcall	reset_average1				; Reset the resettable average depth
+	clrf	average_depth_hold_total+0
+	clrf	average_depth_hold_total+1
+	clrf	average_depth_hold_total+2
+	clrf	average_depth_hold_total+3	; Clear Non-Resettable Average
 	bcf		depth_greater_100m			; clear flag
 	setf	last_diluent				; to be displayed after first calculation (range: 0 to 100 [%])
 	bcf		dekostop_active	

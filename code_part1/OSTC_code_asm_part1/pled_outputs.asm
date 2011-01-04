@@ -867,7 +867,7 @@ PLED_temp_divemode:
 
 PLED_show_ppO2:					; Show ppO2
 	ostc_debug	't'		; Sends debug-information to screen if debugmode active
-	WIN_TOP		.120
+	WIN_TOP		.119
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	PLED_color_code		warn_ppo2		; Color-code output (ppO2 stored in xC)
@@ -1346,7 +1346,7 @@ PLED_confirmbox2:
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
 
-    STRCPY_PRINT "\xB7"
+    STRCPY_PRINT "\xB7"				; Cursor
 
 	bcf			sleepmode					; clear some flags
 	bcf			menubit2
@@ -2009,7 +2009,6 @@ PLED_stopwatch_show2:
     PUTC    ':'
 	movff	wait_temp,lo
 	output_99x
-	bcf		leftbind
 	call	word_processor
 
 	ostc_debug	'U'				; Sends debug-information to screen if debugmode active
@@ -2026,6 +2025,27 @@ PLED_stopwatch_show2:
 	bsf		ignore_digit5		; do not display 1cm depth
 	output_16dp	d'3'
 	bcf		leftbind
+	STRCAT_PRINT "m"
+	return
+
+PLED_total_average_show:
+	; Non-Resettable Average
+	call		PLED_divemask_color	; Set Color for Divemode mask
+	DISPLAYTEXTH	d'281'			; Avr.Depth
+
+PLED_total_average_show2:
+	WIN_TOP		.192
+	WIN_LEFT	.110
+	WIN_FONT	FT_SMALL
+	call	PLED_standard_color
+
+	lfsr	FSR2,letter
+	movff	avr_rel_pressure_total+0,lo
+	movff	avr_rel_pressure_total+1,hi
+	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
+	bsf		ignore_digit5		; do not display 1cm depth
+	bcf		leftbind
+	output_16dp	d'3'
 	STRCAT_PRINT "m"
 	return
 
@@ -2050,7 +2070,7 @@ PLED_serial:			; Writes OSTC #Serial and Firmware version in surfacemode
 
 	bsf		leftbind
 	output_16
-	STRCAT  " \x85\x86 V"
+	STRCAT  " \x85\x86 V"		; Scribble logo...
 	movlw	softwareversion_x
 	movwf	lo
 	bsf		leftbind
@@ -2541,14 +2561,8 @@ PLED_divemenu_cursor:
 	movlw	d'125'
 	movff	WREG,win_top
 
-    STRCPY_PRINT "\xB7"
+    STRCPY_PRINT "\xB7"				; Cursor
 	return
-
-;PLED_profileview_menu:
-;	DISPLAYTEXT	.127					;"Exit"
-;	DISPLAYTEXT	.128					;"Delete"
-;;	DISPLAYTEXT	.132					;"Format"
-;	return
 
 ;PLED_saturation_graph_divemode:
 ;	ostc_debug	'h'		; Sends debug-information to screen if debugmode active

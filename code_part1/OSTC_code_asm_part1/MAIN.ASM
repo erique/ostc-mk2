@@ -114,7 +114,6 @@ osct_asm	code
 #include	sync_clock.asm		; syncs RTC with PC
 #include	start.asm			; Startup and init, checks background debugger
 #include	simulator.asm		; Stand-alone simulator routines
-#include 	io.asm				; Low-Level I/O access
 #include	customview.asm		; Customview for divemode
 #include    strings.asm         ; Basic string operations
 

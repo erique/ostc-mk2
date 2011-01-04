@@ -24,6 +24,8 @@
 ;  2010-12-28 : [jDG] Use MPLAB Math and C libraries for FP32 computations.
 ;  2011-01-02 : [jDG] Edit reference pressure by 0.25 mbar.
 ;
+; Known bug: Simulator reset altitude and reference...
+
 altimeter_calc:
         movlb   HIGH(pressureAvg)
         
@@ -44,9 +46,6 @@ altimeter_reset:
         clrf    pressureSum+1
         clrf    pressureCount
 
-        clrf    altitude+0              ; Mark as not computed yet.
-        clrf    altitude+1
-
         movff   amb_pressure+0,pressureAvg+0    ; And init first average.
         movff   amb_pressure+1,pressureAvg+1
 
@@ -57,6 +56,8 @@ altimeter_reset_1:
         rlcf    pressureAvg+1
         decfsz  WREG
         bra     altimeter_reset_1
+        
+        rcall   compute_altitude
 
         movlb   1                       ; Back to normal bank1.
         return
@@ -210,6 +211,13 @@ compute_altitude:
 ; altitude.
 ;
 altimeter_menu:
+        movff   pressureRef+0,WREG     ; Make sure it is initialized...
+        movff   pressureRef+1,fA
+        iorwf   fA
+        bnz     altimeter_menu_1       ; Yes: skip reset...
+        rcall   altimeter_reset
+
+altimeter_menu_1:
         call    PLED_ClearScreen        ; Menu header.
         call    PLED_standard_color
     	call	PLED_topline_box

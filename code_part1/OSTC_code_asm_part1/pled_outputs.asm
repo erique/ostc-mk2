@@ -23,6 +23,7 @@
 ; History:
 ; 2008-06-06 [MH] last updated
 ; 2010-12-31 [jDG] Multi-page display for GF decoplan
+; 2011-01-04 [jDG] Saturation graphs in customview divemode
 ;
 ; known bugs:
 ; ToDo:	More comments
@@ -2511,7 +2512,7 @@ PLED_splist_loop:
 	return						; no, return
 
 PLED_clear_divemode_menu:
-    WIN_BOX_BLACK   .0, .169, .82, .160
+    WIN_BOX_BLACK   .0, .168, .82, .160
 	return
 
 PLED_divemenu_cursor:
@@ -2550,31 +2551,71 @@ PLED_divemenu_cursor:
 ;;	DISPLAYTEXT	.132					;"Format"
 ;	return
 
-;PLED_saturation_graph_divemode:
-;	ostc_debug	'h'		; Sends debug-information to screen if debugmode active
+
+;=============================================================================
+; Draw saturation graph, is surface mode or in dive mode.
+;
 PLED_tissue_saturation_graph:
 	ostc_debug	'i'		; Sends debug-information to screen if debugmode active
 
-;; Clear graph area...
-;   WIN_BOX_BLACK  .25, .120, .82, .159
+    ;---- Draw Frame ---------------------------------------------------------
+    btfsc   divemode
+    bra     PLED_tsg_1
+    
+    WIN_FRAME_STD   .25, .120, .82, .159    ; Surfmode
+    bra     PLED_tsg_2
+PLED_tsg_1:    
+    WIN_FRAME_STD   .169, .239, .90, .159   ; Divemode
+PLED_tsg_2:
 
-; Draw Frame
-    WIN_FRAME_STD   .25, .120, .82, .159
+    ;---- Draw grid ----------------------------------------------------------
+	movlw   color_grey
+    call	PLED_set_color
 
-; Draw N2 Tissues
+	movlw	.25+.1                      ; surfmode
+    btfsc   divemode
+    movlw   .169+.1                     ; divemode
+	movff	WREG,win_top
+	
+	movlw	.120-.25-.1                 ; surfmode
+    btfsc   divemode
+    movlw   .239-.169-.1                ; divemode
+	movff	WREG,win_height
+
+    movlw   1
+    movff   WREG,win_width
+
+    movlw   .122
+    movff   WREG,win_leftx2
+    call    PLED_box
+    movlw   .131
+    movff   WREG,win_leftx2
+    call    PLED_box
+    movlw   .140
+    movff   WREG,win_leftx2
+    call    PLED_box
+    movlw   .149
+    movff   WREG,win_leftx2
+    call    PLED_box
+    
+    ;---- Draw N2 Tissues ----------------------------------------------------
 	lfsr	FSR2, char_O_tissue_saturation+.000	; N2
 	movlw	d'16'
-	movwf	wait_temp		; 16 tissues
-	clrf	waitms_temp		; Row offset
+	movwf	wait_temp                   ; 16 tissues
+	clrf	waitms_temp                 ; Row offset
 
+    call    PLED_standard_color
 	movlw	.1
 	movff	WREG,win_height             ; row bottom (0-239)
-	movlw	.100
+	movlw	.82+.18                     ; surfmode
+    btfsc   divemode
+    movlw   .90+.10                     ; divemode
 	movff	WREG,win_leftx2             ; column left (0-159)
 
 PLED_tissue_saturation_graph3:
-
-	movlw	.28
+	movlw	.25+3                       ; surfmode: 3pix below top border
+    btfsc   divemode
+    movlw   .169+3                      ; divemode
 	addwf	waitms_temp,W
 	movff	WREG,win_top                ; row top (0-239)
 
@@ -2596,21 +2637,17 @@ PLED_tissue_saturation_graph3:
 	decfsz	wait_temp,F
 	bra		PLED_tissue_saturation_graph3
 
-; Draw He Tissues
+    ;---- Draw He Tissues ----------------------------------------------------
 	lfsr	FSR2, char_O_tissue_saturation+.016	; He
 	movlw	d'16'
-	movwf	wait_temp		; 16 tissues
-	clrf	waitms_temp		; Row offset
-
-;	movlw	.1
-;	movff	WREG,win_height             ; row bottom (0-239)
-;	movlw	.100
-;	movff	WREG,win_leftx2             ; column left (0-159)
-;   call    PLED_standard_color
+	movwf	wait_temp                   ; 16 tissues
+	clrf	waitms_temp                 ; Row offset
 
 PLED_tissue_saturation_graph2:
 
-	movlw	.86
+	movlw	.120-.33                    ; surfmode : 33pix above bottom border
+    btfsc   divemode
+    movlw   .239-.33                    ; divemode
 	addwf	waitms_temp,W
 	movff	WREG,win_top                ; row top (0-239)
 
@@ -2632,13 +2669,27 @@ PLED_tissue_saturation_graph2:
 	decfsz	wait_temp,F
 	bra		PLED_tissue_saturation_graph2
 
-; Draw Text
-	WIN_LEFT	.84
-	WIN_TOP		.32
+    ;---- Draw N2/He Text ----------------------------------------------------
+	movlw	.82+2                       ; surfmode: 2pix right of left border
+    btfsc   divemode
+    movlw   .90+2                       ; divemode
+    movff   WREG,win_leftx2
+
+	movlw	.25+7                       ; surfmode: 7pix below top border
+    btfsc   divemode
+    movlw   .169+7                      ; divemode
+    movff   WREG,win_top
 	STRCPY_PRINT  "N2"
 
-	WIN_TOP		.90
+	movlw	.120-.30                    ; surfmode: 30pix above bottom border
+    btfsc   divemode
+    movlw   .239-.30                    ; divemode
+    movff   WREG,win_top
 	STRCPY_PRINT  "He"
+	
+    ;---- Draw scale and O2[16]% ---------------------------------------------
+    btfsc   divemode
+    return
 
 	movff	char_O_gtissue_no,wait_temp			; used as temp
 
@@ -2650,16 +2701,16 @@ PLED_tissue_saturation_graph4:		; point to leading tissue...
 	decfsz	wait_temp,F			; count until zero
 	bra		PLED_tissue_saturation_graph4	;loop
 
-	lfsr	FSR2,letter
-	output_8
-	STRCAT  "% "
-
 	WIN_TOP		.62
 	WIN_FONT	FT_SMALL
-	call	word_processor
+	lfsr	FSR2,letter
+	bsf		leftbind
+	output_8
 	bcf		leftbind
 
-; Draw Scale
+	STRCAT_PRINT  "% "
+
+    ;---- Draw Scale ---------------------------------------------------------
     WIN_BOX_STD .73, .74, .121, .157
     WIN_BOX_STD .61, .84, .121, .122
     WIN_BOX_STD .65, .80, .130, .131
@@ -2667,6 +2718,8 @@ PLED_tissue_saturation_graph4:		; point to leading tissue...
     WIN_BOX_STD .65, .80, .148, .149
     WIN_BOX_STD .61, .84, .157, .158
 	return
+
+;=============================================================================
 
 PLED_startupscreen1:
 	call	PLED_topline_box

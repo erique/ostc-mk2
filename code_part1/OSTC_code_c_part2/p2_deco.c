@@ -689,8 +689,7 @@ void copy_deco_table_GF(void)
 {
 	if (char_I_deco_model == 1)
 	{
-		int_temp = 32;
-		for (ci=0;ci<int_temp;ci++)
+		for (ci=0;ci<32;ci++)
 			char_O_deco_table[ci] = internal_deco_table[ci];
 	}
 }		// copy_deco_table_GF
@@ -729,15 +728,12 @@ void update_internal_deco_table_GF(void)
 // outsourced in v.102
 void temp_tissue_safety(void)
 {
-	if (char_I_deco_model == 1)
-	{
-	}
-	else
+	if (char_I_deco_model != 1)
 	{
 		if (temp_tissue < 0.0)
-			temp_tissue = temp_tissue * float_desaturation_multiplier;
+			temp_tissue *= float_desaturation_multiplier;
  		else
-			temp_tissue = temp_tissue * float_saturation_multiplier;
+			temp_tissue *= float_saturation_multiplier;
 	}
 } // temp_tissue_safety
 
@@ -832,60 +828,60 @@ void clear_tissue(void)    // preload tissues with standard pressure for the giv
 	int_O_DBG_post_bitfield = 0;
 	char_O_NDL_at_20mtr = 255;
 
-// N2_ratio = (float)char_I_N2_ratio; // the 0.0002 of 0.7902 are missing with standard air
- N2_ratio = 0.7902; // N2_ratio / 100.0;
- pres_respiration = (float)int_I_pres_respiration / 1000.0;
-for (ci=0;ci<16;ci++)  // cycle through the 16 b"uhlmann tissues
-{
- pres_tissue[ci] =  N2_ratio * (pres_respiration -  0.0627) ;
-_asm
-movlw	0x02
-movwf	TBLPTRH,0
-movlb	4 // fuer ci
-movf ci,0,1
-addwf	ci,0,1
-addwf	ci,0,1
-addwf	ci,0,1
-addlw	0x80
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var_a+1
-TBLRDPOSTINC
-movff	TABLAT,var_a
-TBLRDPOSTINC
-movff	TABLAT,var_a+3
-TBLRD
-movff	TABLAT,var_a+2
-addlw	0x80
-movwf	TBLPTRL,0
-incf	TBLPTRH,1,0
-TBLRDPOSTINC
-movff	TABLAT,var_b+1
-TBLRDPOSTINC
-movff	TABLAT,var_b
-TBLRDPOSTINC
-movff	TABLAT,var_b+3
-TBLRD
-movff	TABLAT,var_b+2
-_endasm
+    // N2_ratio = (float)char_I_N2_ratio; // the 0.0002 of 0.7902 are missing with standard air
+    N2_ratio = 0.7902; // N2_ratio / 100.0;
+    pres_respiration = (float)int_I_pres_respiration / 1000.0;
+    for (ci=0;ci<16;ci++)  // cycle through the 16 b"uhlmann tissues
+    {
+        pres_tissue[ci] =  N2_ratio * (pres_respiration -  0.0627) ;
+        _asm
+        movlw	0x02
+        movwf	TBLPTRH,0
+        movlb	4 // fuer ci
+        movf ci,0,1
+        addwf	ci,0,1
+        addwf	ci,0,1
+        addwf	ci,0,1
+        addlw	0x80
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var_a+1
+        TBLRDPOSTINC
+        movff	TABLAT,var_a
+        TBLRDPOSTINC
+        movff	TABLAT,var_a+3
+        TBLRD
+        movff	TABLAT,var_a+2
+        addlw	0x80
+        movwf	TBLPTRL,0
+        incf	TBLPTRH,1,0
+        TBLRDPOSTINC
+        movff	TABLAT,var_b+1
+        TBLRDPOSTINC
+        movff	TABLAT,var_b
+        TBLRDPOSTINC
+        movff	TABLAT,var_b+3
+        TBLRD
+        movff	TABLAT,var_b+2
+        _endasm
+        
+        pres_tissue_limit[ci] = (pres_tissue[ci] - var_a) * var_b ;
+        // now update the guiding tissue
+        if (pres_tissue_limit[ci] < 0)
+            pres_tissue_limit[ci] = 0;
+    } // for 0 to 16
+    
+    for (ci=16;ci<32;ci++)  // cycle through the 16 b"uhlmann tissues for Helium
+    {
+        pres_tissue[ci] = 0.0;
+    }  // for
 
-pres_tissue_limit[ci] = (pres_tissue[ci] - var_a) * var_b ;
-// now update the guiding tissue
-if (pres_tissue_limit[ci] < 0)
-pres_tissue_limit[ci] = 0;
-} // for 0 to 16
-
-for (ci=16;ci<32;ci++)  // cycle through the 16 b"uhlmann tissues for Helium
-{
- pres_tissue[ci] = 0.0;
-}  // for
-
- clear_decoarray();
- char_O_deco_status = 0;
- char_O_nullzeit = 0;
- char_O_ascenttime = 0;
- char_O_gradient_factor = 0;
- char_O_relative_gradient_GF = 0;
+    clear_decoarray();
+    char_O_deco_status = 0;
+    char_O_nullzeit = 0;
+    char_O_ascenttime = 0;
+    char_O_gradient_factor = 0;
+    char_O_relative_gradient_GF = 0;
 } // clear_tissue(void)
 
 
@@ -897,23 +893,22 @@ for (ci=16;ci<32;ci++)  // cycle through the 16 b"uhlmann tissues for Helium
 
 void calc_without_deco(void)
 {
- N2_ratio = 0.7902; // FIXED RATIO !! sum as stated in b"uhlmann
- pres_respiration = (float)int_I_pres_respiration / 1000.0; // assembler code uses different digit system
- pres_surface = (float)int_I_pres_surface / 1000.0;
- temp_atem = N2_ratio * (pres_respiration - 0.0627); // 0.0627 is the extra pressure in the body
- temp2_atem = 0.0;
- temp_surface = pres_surface; // the b"uhlmann formula using temp_surface does apply to the pressure without any inert ratio
- float_desaturation_multiplier = char_I_desaturation_multiplier / 100.0;
- float_saturation_multiplier = char_I_saturation_multiplier / 100.0;
-
- calc_tissue();  // update the pressure in the 16 tissues in accordance with the new ambient pressure
-
- clear_decoarray();
- char_O_deco_status = 0;
- char_O_nullzeit = 0;
- char_O_ascenttime = 0;
- calc_gradient_factor();
-
+    N2_ratio = 0.7902; // FIXED RATIO !! sum as stated in b"uhlmann
+    pres_respiration = (float)int_I_pres_respiration / 1000.0; // assembler code uses different digit system
+    pres_surface = (float)int_I_pres_surface / 1000.0;
+    temp_atem = N2_ratio * (pres_respiration - 0.0627); // 0.0627 is the extra pressure in the body
+    temp2_atem = 0.0;
+    temp_surface = pres_surface; // the b"uhlmann formula using temp_surface does apply to the pressure without any inert ratio
+    float_desaturation_multiplier = char_I_desaturation_multiplier / 100.0;
+    float_saturation_multiplier = char_I_saturation_multiplier / 100.0;
+    
+    calc_tissue();  // update the pressure in the 16 tissues in accordance with the new ambient pressure
+    
+    clear_decoarray();
+    char_O_deco_status = 0;
+    char_O_nullzeit = 0;
+    char_O_ascenttime = 0;
+    calc_gradient_factor();
 } // calc_without_deco
 
 
@@ -954,9 +949,7 @@ void calc_hauptroutine(void)
 			if (char_O_deco_status == 3)
 				break;
 			char_O_deco_status = 0;
-//			char_O_lock_depth_list = 255;
 			calc_hauptroutine_calc_deco();
-//			build_debug_output();
 			break;
 		case 3:				// new dive
 			clear_decoarray();
@@ -977,14 +970,11 @@ void calc_hauptroutine(void)
  			if (char_O_deco_status > 15)		// can't go up to first deco, too deep to calculate in the given time slot
 			{
 				char_O_deco_status = 2;
-//				char_O_lock_depth_list = 255;
 			}
  			else
 			{
-//				char_O_lock_depth_list = lock_GF_depth_list;
 				calc_hauptroutine_calc_deco();
 			}
-//			build_debug_output();
 			break;
 	}
 	calc_ascenttime();
@@ -993,101 +983,101 @@ void calc_hauptroutine(void)
 
 void calc_hauptroutine_data_input(void)
 {
- pres_respiration = (float)int_I_pres_respiration / 1000.0;
- pres_surface = (float)int_I_pres_surface / 1000.0;
+    pres_respiration = (float)int_I_pres_respiration / 1000.0;
+    pres_surface = (float)int_I_pres_surface / 1000.0;
+    
+    N2_ratio = (float)char_I_N2_ratio / 100.0;; // the 0.0002 of 0.7902 are missing with standard air
+    He_ratio = (float)char_I_He_ratio / 100.0;;
+    deco_N2_ratio = (float)char_I_deco_N2_ratio / 100.0;
+    deco_He_ratio = (float)char_I_deco_He_ratio / 100.0;
+    deco_N2_ratio2 = (float)char_I_deco_N2_ratio2 / 100.0;
+    deco_He_ratio2 = (float)char_I_deco_He_ratio2 / 100.0;
+    deco_N2_ratio3 = (float)char_I_deco_N2_ratio3 / 100.0;
+    deco_He_ratio3 = (float)char_I_deco_He_ratio3 / 100.0;
+    deco_N2_ratio4 = (float)char_I_deco_N2_ratio4 / 100.0;
+    deco_He_ratio4 = (float)char_I_deco_He_ratio4 / 100.0;
+    deco_N2_ratio5 = (float)char_I_deco_N2_ratio5 / 100.0;
+    deco_He_ratio5 = (float)char_I_deco_He_ratio5 / 100.0;
+    float_deco_distance = (float)char_I_deco_distance / 100.0;
 
- N2_ratio = (float)char_I_N2_ratio / 100.0;; // the 0.0002 of 0.7902 are missing with standard air
- He_ratio = (float)char_I_He_ratio / 100.0;;
- deco_N2_ratio = (float)char_I_deco_N2_ratio / 100.0;
- deco_He_ratio = (float)char_I_deco_He_ratio / 100.0;
- deco_N2_ratio2 = (float)char_I_deco_N2_ratio2 / 100.0;
- deco_He_ratio2 = (float)char_I_deco_He_ratio2 / 100.0;
- deco_N2_ratio3 = (float)char_I_deco_N2_ratio3 / 100.0;
- deco_He_ratio3 = (float)char_I_deco_He_ratio3 / 100.0;
- deco_N2_ratio4 = (float)char_I_deco_N2_ratio4 / 100.0;
- deco_He_ratio4 = (float)char_I_deco_He_ratio4 / 100.0;
- deco_N2_ratio5 = (float)char_I_deco_N2_ratio5 / 100.0;
- deco_He_ratio5 = (float)char_I_deco_He_ratio5 / 100.0;
- float_deco_distance = (float)char_I_deco_distance / 100.0;
+    // ____________________________________________________
+    //
+    // _____________ G A S _ C H A N G E S ________________
+    // ____________________________________________________
+    
+    int_temp = (int_I_pres_respiration - int_I_pres_surface) + MBAR_REACH_GASCHANGE_AUTO_CHANGE_OFF;
+    
+    deco_gas_change = 0;
+    deco_gas_change2 = 0;
+    deco_gas_change3 = 0;
+    deco_gas_change4 = 0;
+    deco_gas_change5 = 0;
 
-// ____________________________________________________
-//
-// _____________ G A S _ C H A N G E S ________________
-// ____________________________________________________
+    if(char_I_deco_gas_change)
+    {
+        int_temp2 = ((int)char_I_deco_gas_change) * 100;
+        if(int_temp > int_temp2)
+        {
+        	deco_gas_change = (float)char_I_deco_gas_change / 9.995 + pres_surface;
+        	deco_gas_change += float_deco_distance;
+    	}
+    }
+    if(char_I_deco_gas_change2)
+    {
+        int_temp2 = ((int)char_I_deco_gas_change2) * 100;
+        if(int_temp > int_temp2)
+        {
+        	deco_gas_change2 = (float)char_I_deco_gas_change2 / 9.995 + pres_surface;
+        	deco_gas_change2 += float_deco_distance;
+    	}
+    }
+    if(char_I_deco_gas_change3)
+    {
+        int_temp2 = ((int)char_I_deco_gas_change3) * 100;
+        if(int_temp > int_temp2)
+        {
+        	deco_gas_change3 = (float)char_I_deco_gas_change3 / 9.995 + pres_surface;
+        	deco_gas_change3 += float_deco_distance;
+    	}
+    }
+    if(char_I_deco_gas_change4)
+    {
+        int_temp2 = ((int)char_I_deco_gas_change4) * 100;
+        if(int_temp > int_temp2)
+        {
+        	deco_gas_change4 = (float)char_I_deco_gas_change4 / 9.995 + pres_surface;
+        	deco_gas_change4 += float_deco_distance;
+    	}
+    }
+    if(char_I_deco_gas_change5)
+    {
+        int_temp2 = ((int)char_I_deco_gas_change5) * 100;
+        if(int_temp > int_temp2)
+        {
+        	deco_gas_change5 = (float)char_I_deco_gas_change5 / 9.995 + pres_surface;
+        	deco_gas_change5 += float_deco_distance;
+    	}
+    }
 
-int_temp = (int_I_pres_respiration - int_I_pres_surface) + MBAR_REACH_GASCHANGE_AUTO_CHANGE_OFF;
-
- deco_gas_change = 0;
- deco_gas_change2 = 0;
- deco_gas_change3 = 0;
- deco_gas_change4 = 0;
- deco_gas_change5 = 0;
-
- if(char_I_deco_gas_change)
- {
-	int_temp2 = ((int)char_I_deco_gas_change) * 100;
-	if(int_temp > int_temp2)
-	{
-		deco_gas_change = (float)char_I_deco_gas_change / 9.995 + pres_surface;
-		deco_gas_change += float_deco_distance;
- 	}
- }
- if(char_I_deco_gas_change2)
- {
-	int_temp2 = ((int)char_I_deco_gas_change2) * 100;
-	if(int_temp > int_temp2)
-	{
-		deco_gas_change2 = (float)char_I_deco_gas_change2 / 9.995 + pres_surface;
-		deco_gas_change2 += float_deco_distance;
- 	}
- }
- if(char_I_deco_gas_change3)
- {
-	int_temp2 = ((int)char_I_deco_gas_change3) * 100;
-	if(int_temp > int_temp2)
-	{
-		deco_gas_change3 = (float)char_I_deco_gas_change3 / 9.995 + pres_surface;
-		deco_gas_change3 += float_deco_distance;
- 	}
- }
- if(char_I_deco_gas_change4)
- {
-	int_temp2 = ((int)char_I_deco_gas_change4) * 100;
-	if(int_temp > int_temp2)
-	{
-		deco_gas_change4 = (float)char_I_deco_gas_change4 / 9.995 + pres_surface;
-		deco_gas_change4 += float_deco_distance;
- 	}
- }
- if(char_I_deco_gas_change5)
- {
-	int_temp2 = ((int)char_I_deco_gas_change5) * 100;
-	if(int_temp > int_temp2)
-	{
-		deco_gas_change5 = (float)char_I_deco_gas_change5 / 9.995 + pres_surface;
-		deco_gas_change5 += float_deco_distance;
- 	}
- }
-
- const_ppO2 = (float)char_I_const_ppO2 / 100.0;
- deco_ppO2_change = (float)char_I_deco_ppO2_change / 99.95 + pres_surface;
- deco_ppO2_change = deco_ppO2_change + float_deco_distance;
- deco_ppO2 = (float)char_I_deco_ppO2 / 100.0;
- float_desaturation_multiplier = char_I_desaturation_multiplier / 100.0;
- float_saturation_multiplier = char_I_saturation_multiplier / 100.0;
- GF_low = (float)char_I_GF_Low_percentage / 100.0;
- GF_high = (float)char_I_GF_High_percentage / 100.0;
- GF_delta = GF_high - GF_low;
-
- temp2 = (pres_respiration - pres_surface) / 0.29985;
- int_temp = (int)(temp2);
- if (int_temp < 0)
-	int_temp = 0;
- if (int_temp > 255)
-	int_temp = 255;
- char_O_actual_pointer = int_temp;
-
- temp_depth_last_deco = (int)char_I_depth_last_deco;
+    const_ppO2 = (float)char_I_const_ppO2 / 100.0;
+    deco_ppO2_change = (float)char_I_deco_ppO2_change / 99.95 + pres_surface;
+    deco_ppO2_change = deco_ppO2_change + float_deco_distance;
+    deco_ppO2 = (float)char_I_deco_ppO2 / 100.0;
+    float_desaturation_multiplier = char_I_desaturation_multiplier / 100.0;
+    float_saturation_multiplier = char_I_saturation_multiplier / 100.0;
+    GF_low = (float)char_I_GF_Low_percentage / 100.0;
+    GF_high = (float)char_I_GF_High_percentage / 100.0;
+    GF_delta = GF_high - GF_low;
+    
+    temp2 = (pres_respiration - pres_surface) / 0.29985;
+    int_temp = (int)(temp2);
+    if (int_temp < 0)
+        int_temp = 0;
+    if (int_temp > 255)
+        int_temp = 255;
+    char_O_actual_pointer = int_temp;
+    
+    temp_depth_last_deco = (int)char_I_depth_last_deco;
 }
 
 void calc_hauptroutine_update_tissues(void)
@@ -1311,120 +1301,120 @@ void calc_hauptroutine_calc_ascend_to_deco(void)
 
 void calc_tissue(void)
 {
- char_O_gtissue_no = 255;
- pres_gtissue_limit = 0.0;
+    char_O_gtissue_no = 255;
+    pres_gtissue_limit = 0.0;
+    
+    for (ci=0;ci<16;ci++)
+    {
+        _asm
+        movlw	0x02
+        movwf	TBLPTRH,0
+        movlb	4 // fuer ci
+        movf ci,0,1
+        addwf	ci,0,1
+        addwf	ci,0,1
+        addwf	ci,0,1
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var_e2secs+1 // the order is confussing
+        TBLRDPOSTINC
+        movff	TABLAT,var_e2secs	// low byte first, high afterwards
+        TBLRDPOSTINC
+        movff	TABLAT,var_e2secs+3
+        TBLRD
+        movff	TABLAT,var_e2secs+2
+        addlw	0x40
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var2_e2secs+1
+        TBLRDPOSTINC
+        movff	TABLAT,var2_e2secs
+        TBLRDPOSTINC
+        movff	TABLAT,var2_e2secs+3
+        TBLRD
+        movff	TABLAT,var2_e2secs+2
+        addlw	0x40
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var_a+1
+        TBLRDPOSTINC
+        movff	TABLAT,var_a
+        TBLRDPOSTINC
+        movff	TABLAT,var_a+3
+        TBLRD
+        movff	TABLAT,var_a+2
+        addlw	0x40
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var2_a+1
+        TBLRDPOSTINC
+        movff	TABLAT,var2_a
+        TBLRDPOSTINC
+        movff	TABLAT,var2_a+3
+        TBLRD
+        movff	TABLAT,var2_a+2
+        addlw	0x40
+        movwf	TBLPTRL,0
+        incf	TBLPTRH,1,0
+        TBLRDPOSTINC
+        movff	TABLAT,var_b+1
+        TBLRDPOSTINC
+        movff	TABLAT,var_b
+        TBLRDPOSTINC
+        movff	TABLAT,var_b+3
+        TBLRD
+        movff	TABLAT,var_b+2
+        addlw	0x40
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var2_b+1
+        TBLRDPOSTINC
+        movff	TABLAT,var2_b
+        TBLRDPOSTINC
+        movff	TABLAT,var2_b+3
+        TBLRD
+        movff	TABLAT,var2_b+2
+        _endasm
+        // the start values are the previous end values // write new values in temp
+    
+    	if(	(var_e2secs < 0.0000363)
+    		|| (var_e2secs > 0.00577)
+    		|| (var2_e2secs < 0.0000961)
+    		|| (var2_e2secs > 0.150)
+    		|| (var_a < 0.231)
+    		|| (var_a > 1.27)
+    		|| (var_b < 0.504)
+    		|| (var_b > 0.966)
+    		|| (var2_a < 0.510)
+    		|| (var2_a > 1.75)
+    		|| (var2_b < 0.423)
+    		|| (var2_b > 0.927)
+    		)
+    		int_O_DBG_pre_bitfield |= DBG_ZH16ERR;
 
-for (ci=0;ci<16;ci++)
-{
-_asm
-movlw	0x02
-movwf	TBLPTRH,0
-movlb	4 // fuer ci
-movf ci,0,1
-addwf	ci,0,1
-addwf	ci,0,1
-addwf	ci,0,1
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var_e2secs+1 // the order is confussing
-TBLRDPOSTINC
-movff	TABLAT,var_e2secs	// low byte first, high afterwards
-TBLRDPOSTINC
-movff	TABLAT,var_e2secs+3
-TBLRD
-movff	TABLAT,var_e2secs+2
-addlw	0x40
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var2_e2secs+1
-TBLRDPOSTINC
-movff	TABLAT,var2_e2secs
-TBLRDPOSTINC
-movff	TABLAT,var2_e2secs+3
-TBLRD
-movff	TABLAT,var2_e2secs+2
-addlw	0x40
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var_a+1
-TBLRDPOSTINC
-movff	TABLAT,var_a
-TBLRDPOSTINC
-movff	TABLAT,var_a+3
-TBLRD
-movff	TABLAT,var_a+2
-addlw	0x40
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var2_a+1
-TBLRDPOSTINC
-movff	TABLAT,var2_a
-TBLRDPOSTINC
-movff	TABLAT,var2_a+3
-TBLRD
-movff	TABLAT,var2_a+2
-addlw	0x40
-movwf	TBLPTRL,0
-incf	TBLPTRH,1,0
-TBLRDPOSTINC
-movff	TABLAT,var_b+1
-TBLRDPOSTINC
-movff	TABLAT,var_b
-TBLRDPOSTINC
-movff	TABLAT,var_b+3
-TBLRD
-movff	TABLAT,var_b+2
-addlw	0x40
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var2_b+1
-TBLRDPOSTINC
-movff	TABLAT,var2_b
-TBLRDPOSTINC
-movff	TABLAT,var2_b+3
-TBLRD
-movff	TABLAT,var2_b+2
-_endasm
- // the start values are the previous end values // write new values in temp
+        // N2
+        temp_tissue = (temp_atem - pres_tissue[ci]) * var_e2secs;
+        temp_tissue_safety();
+        pres_tissue[ci] = pres_tissue[ci] + temp_tissue;
+        
+        // He
+        temp_tissue = (temp2_atem - pres_tissue[ci+16]) * var2_e2secs;
+        temp_tissue_safety();
+        pres_tissue[ci+16] = pres_tissue[ci+16] + temp_tissue;
+        
+        temp_tissue = pres_tissue[ci] + pres_tissue[ci+16];
 
-	if(	(var_e2secs < 0.0000363)
-		|| (var_e2secs > 0.00577)
-		|| (var2_e2secs < 0.0000961)
-		|| (var2_e2secs > 0.150)
-		|| (var_a < 0.231)
-		|| (var_a > 1.27)
-		|| (var_b < 0.504)
-		|| (var_b > 0.966)
-		|| (var2_a < 0.510)
-		|| (var2_a > 1.75)
-		|| (var2_b < 0.423)
-		|| (var2_b > 0.927)
-		)
-		int_O_DBG_pre_bitfield |= DBG_ZH16ERR;
-
-// N2
- temp_tissue = (temp_atem - pres_tissue[ci]) * var_e2secs;
- temp_tissue_safety();
- pres_tissue[ci] = pres_tissue[ci] + temp_tissue;
-
-// He
- temp_tissue = (temp2_atem - pres_tissue[ci+16]) * var2_e2secs;
- temp_tissue_safety();
- pres_tissue[ci+16] = pres_tissue[ci+16] + temp_tissue;
-
- temp_tissue = pres_tissue[ci] + pres_tissue[ci+16];
-
- var_a = (var_a * pres_tissue[ci] + var2_a * pres_tissue[ci+16]) / temp_tissue;
- var_b = (var_b * pres_tissue[ci] + var2_b * pres_tissue[ci+16]) / temp_tissue;
- pres_tissue_limit[ci] = (temp_tissue - var_a) * var_b;
- if (pres_tissue_limit[ci] < 0)
-  pres_tissue_limit[ci] = 0;
- if (pres_tissue_limit[ci] > pres_gtissue_limit)
-  {
-  pres_gtissue_limit = pres_tissue_limit[ci];
-  char_O_gtissue_no = ci;
-  }//if
-} // for
+        var_a = (var_a * pres_tissue[ci] + var2_a * pres_tissue[ci+16]) / temp_tissue;
+        var_b = (var_b * pres_tissue[ci] + var2_b * pres_tissue[ci+16]) / temp_tissue;
+        pres_tissue_limit[ci] = (temp_tissue - var_a) * var_b;
+        if (pres_tissue_limit[ci] < 0)
+            pres_tissue_limit[ci] = 0;
+        if (pres_tissue_limit[ci] > pres_gtissue_limit)
+        {
+            pres_gtissue_limit = pres_tissue_limit[ci];
+            char_O_gtissue_no = ci;
+        }//if
+    } // for
 }//calc_tissue(void)
 
 // ----------------
@@ -1481,11 +1471,11 @@ void calc_nullzeit(void)
 // -------------------------
 void backup_sim_pres_tissue(void)
 {
-  for (x = 0;x<16;x++)
-  {
-   sim_pres_tissue_backup[x] = sim_pres_tissue[x];
-   sim_pres_tissue_backup[x+16] = sim_pres_tissue[x+16];
-  }
+    for (x = 0;x<16;x++)
+    {
+        sim_pres_tissue_backup[x] = sim_pres_tissue[x];
+        sim_pres_tissue_backup[x+16] = sim_pres_tissue[x+16];
+    }
 } // backup_sim
 
 // --------------------------
@@ -1493,11 +1483,11 @@ void backup_sim_pres_tissue(void)
 // --------------------------
 void restore_sim_pres_tissue(void)
 {
-  for (x = 0;x<16;x++)
-  {
-   sim_pres_tissue[x] = sim_pres_tissue_backup[x];
-   sim_pres_tissue[x+16] = sim_pres_tissue_backup[x+16];
-  }
+    for (x = 0;x<16;x++)
+    {
+        sim_pres_tissue[x] = sim_pres_tissue_backup[x];
+        sim_pres_tissue[x+16] = sim_pres_tissue_backup[x+16];
+    }
 } // restore_sim
 
 // ------------------
@@ -1506,35 +1496,36 @@ void restore_sim_pres_tissue(void)
 
 void calc_ascenttime(void)
 {
-if (pres_respiration > pres_surface)
- {
- switch (char_O_deco_status)
-  {
-  case 2:
-	char_O_ascenttime = 255;
-	break;
-  case 1:
-	break;
-  default:
-	temp1 = pres_respiration - pres_surface + 0.6; // + 0.6 hence 1 minute ascent time from a depth of 4 meter on
-	if (temp1 < 0)
-		temp1 = 0;
-	if (temp1 > 255)
-		temp1 = 255;
-    char_O_ascenttime = (char)temp1;
-
-	for(ci=0;ci<7;ci++)
-	{
-	x = char_O_ascenttime + char_O_array_decotime[ci];
-	if (x < char_O_ascenttime)
-		char_O_ascenttime = 255;
-	else
-		char_O_ascenttime = x;
-	}
-  }
- }
-else
- char_O_ascenttime = 0;
+    if (pres_respiration > pres_surface)
+    {
+        switch (char_O_deco_status)
+        {
+        case 2:
+            char_O_ascenttime = 255;
+            break;
+        case 1:
+            break;
+        default:
+            temp1 = pres_respiration - pres_surface + 0.6; // + 0.6 hence 1 minute ascent time from a depth of 4 meter on
+            if (temp1 < 0)
+                temp1 = 0;
+            if (temp1 > 255)
+                temp1 = 255;
+            char_O_ascenttime = (char)temp1;
+            
+            for(ci=0;ci<7;ci++)
+            {
+                x = char_O_ascenttime + char_O_array_decotime[ci];
+                if (x < char_O_ascenttime)
+                    char_O_ascenttime = 255;
+                else
+                    char_O_ascenttime = x;
+            }
+            break;
+        }
+    }
+    else
+        char_O_ascenttime = 0;
 } // calc_ascenttime()
 
 
@@ -1570,110 +1561,114 @@ void update_startvalues(void)
 
 void sim_tissue_1min(void)
 {
-temp_pres_gtissue_limit = 0.0;
-temp_gtissue_no = 255;
+    temp_pres_gtissue_limit = 0.0;
+    temp_gtissue_no = 255;
+    
+    for (ci=0;ci<16;ci++)
+    {
+        _asm
+        movlw	0x02
+        movwf	TBLPTRH,0
+        movlb	4 // fuer ci
+        movf ci,0,1
+        addwf	ci,0,1
+        addwf	ci,0,1
+        addwf	ci,0,1
+        addlw	0x80
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var_a+1
+        TBLRDPOSTINC
+        movff	TABLAT,var_a
+        TBLRDPOSTINC
+        movff	TABLAT,var_a+3
+        TBLRD
+        movff	TABLAT,var_a+2
+        addlw	0x40
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var2_a+1
+        TBLRDPOSTINC
+        movff	TABLAT,var2_a
+        TBLRDPOSTINC
+        movff	TABLAT,var2_a+3
+        TBLRD
+        movff	TABLAT,var2_a+2
+        addlw	0x40
+        movwf	TBLPTRL,0
+        incf	TBLPTRH,1,0
+        TBLRDPOSTINC
+        movff	TABLAT,var_b+1
+        TBLRDPOSTINC
+        movff	TABLAT,var_b
+        TBLRDPOSTINC
+        movff	TABLAT,var_b+3
+        TBLRD
+        movff	TABLAT,var_b+2
+        addlw	0x40
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var2_b+1
+        TBLRDPOSTINC
+        movff	TABLAT,var2_b
+        TBLRDPOSTINC
+        movff	TABLAT,var2_b+3
+        TBLRD
+        movff	TABLAT,var2_b+2
+        addlw	0xC0
+        movwf	TBLPTRL,0
+        incf	TBLPTRH,1,0
+        TBLRDPOSTINC
+        movff	TABLAT,var_e1min+1
+        TBLRDPOSTINC
+        movff	TABLAT,var_e1min
+        TBLRDPOSTINC
+        movff	TABLAT,var_e1min+3
+        TBLRD
+        movff	TABLAT,var_e1min+2
+        addlw	0x40
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var2_e1min+1
+        TBLRDPOSTINC
+        movff	TABLAT,var2_e1min
+        TBLRDPOSTINC
+        movff	TABLAT,var2_e1min+3
+        TBLRD
+        movff	TABLAT,var2_e1min+2
+        _endasm
+        
+        // N2
+        temp_tissue = (temp_atem - sim_pres_tissue[ci]) * var_e1min;
+        temp_tissue_safety();
+        sim_pres_tissue[ci] = sim_pres_tissue[ci] + temp_tissue;
+        
+        // He
+        temp_tissue = (temp2_atem - sim_pres_tissue[ci+16]) * var2_e1min;
+        temp_tissue_safety();
+        sim_pres_tissue[ci+16] = sim_pres_tissue[ci+16] + temp_tissue;
+        
+        // pressure limit
+        temp_tissue = sim_pres_tissue[ci] + sim_pres_tissue[ci+16];
+        var_a = (var_a * sim_pres_tissue[ci] + var2_a * sim_pres_tissue[ci+16]) / temp_tissue;
+        var_b = (var_b * sim_pres_tissue[ci] + var2_b * sim_pres_tissue[ci+16]) / temp_tissue;
+        sim_pres_tissue_limit[ci] = (temp_tissue - var_a) * var_b;
+        
+        if (sim_pres_tissue_limit[ci] < 0)
+            sim_pres_tissue_limit[ci] = 0;
+        if (sim_pres_tissue_limit[ci] > temp_pres_gtissue_limit)
+        {
+            temp_pres_gtissue = temp_tissue;
+            temp_pres_gtissue_limit = sim_pres_tissue_limit[ci];
+            temp_gtissue_no = ci;
+        }
+    } // for
 
-for (ci=0;ci<16;ci++)
-{
-_asm
-movlw	0x02
-movwf	TBLPTRH,0
-movlb	4 // fuer ci
-movf ci,0,1
-addwf	ci,0,1
-addwf	ci,0,1
-addwf	ci,0,1
-addlw	0x80
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var_a+1
-TBLRDPOSTINC
-movff	TABLAT,var_a
-TBLRDPOSTINC
-movff	TABLAT,var_a+3
-TBLRD
-movff	TABLAT,var_a+2
-addlw	0x40
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var2_a+1
-TBLRDPOSTINC
-movff	TABLAT,var2_a
-TBLRDPOSTINC
-movff	TABLAT,var2_a+3
-TBLRD
-movff	TABLAT,var2_a+2
-addlw	0x40
-movwf	TBLPTRL,0
-incf	TBLPTRH,1,0
-TBLRDPOSTINC
-movff	TABLAT,var_b+1
-TBLRDPOSTINC
-movff	TABLAT,var_b
-TBLRDPOSTINC
-movff	TABLAT,var_b+3
-TBLRD
-movff	TABLAT,var_b+2
-addlw	0x40
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var2_b+1
-TBLRDPOSTINC
-movff	TABLAT,var2_b
-TBLRDPOSTINC
-movff	TABLAT,var2_b+3
-TBLRD
-movff	TABLAT,var2_b+2
-addlw	0xC0
-movwf	TBLPTRL,0
-incf	TBLPTRH,1,0
-TBLRDPOSTINC
-movff	TABLAT,var_e1min+1
-TBLRDPOSTINC
-movff	TABLAT,var_e1min
-TBLRDPOSTINC
-movff	TABLAT,var_e1min+3
-TBLRD
-movff	TABLAT,var_e1min+2
-addlw	0x40
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var2_e1min+1
-TBLRDPOSTINC
-movff	TABLAT,var2_e1min
-TBLRDPOSTINC
-movff	TABLAT,var2_e1min+3
-TBLRD
-movff	TABLAT,var2_e1min+2
-_endasm
-// N2
- temp_tissue = (temp_atem - sim_pres_tissue[ci]) * var_e1min;
- temp_tissue_safety();
- sim_pres_tissue[ci] = sim_pres_tissue[ci] + temp_tissue;
-// He
- temp_tissue = (temp2_atem - sim_pres_tissue[ci+16]) * var2_e1min;
- temp_tissue_safety();
- sim_pres_tissue[ci+16] = sim_pres_tissue[ci+16] + temp_tissue;
-// pressure limit
- temp_tissue = sim_pres_tissue[ci] + sim_pres_tissue[ci+16];
- var_a = (var_a * sim_pres_tissue[ci] + var2_a * sim_pres_tissue[ci+16]) / temp_tissue;
- var_b = (var_b * sim_pres_tissue[ci] + var2_b * sim_pres_tissue[ci+16]) / temp_tissue;
- sim_pres_tissue_limit[ci] = (temp_tissue - var_a) * var_b;
-
- if (sim_pres_tissue_limit[ci] < 0)
-  sim_pres_tissue_limit[ci] = 0;
- if (sim_pres_tissue_limit[ci] > temp_pres_gtissue_limit)
-  {
-  temp_pres_gtissue = temp_tissue;
-  temp_pres_gtissue_limit = sim_pres_tissue_limit[ci];
-  temp_gtissue_no = ci;
-  }
-} // for
-  	temp_pres_gtissue_diff = temp_pres_gtissue_limit - temp_pres_gtissue;
-	temp_pres_gtissue_limit_GF_low = GF_low * temp_pres_gtissue_diff + temp_pres_gtissue;
-  	temp_pres_gtissue_limit_GF_low_below_surface = temp_pres_gtissue_limit_GF_low - pres_surface;
-	if (temp_pres_gtissue_limit_GF_low_below_surface < 0)
-		temp_pres_gtissue_limit_GF_low_below_surface = 0;
+    temp_pres_gtissue_diff = temp_pres_gtissue_limit - temp_pres_gtissue;
+    temp_pres_gtissue_limit_GF_low = GF_low * temp_pres_gtissue_diff + temp_pres_gtissue;
+    temp_pres_gtissue_limit_GF_low_below_surface = temp_pres_gtissue_limit_GF_low - pres_surface;
+    if (temp_pres_gtissue_limit_GF_low_below_surface < 0)
+        temp_pres_gtissue_limit_GF_low_below_surface = 0;
 } //sim_tissue_1min()
 
 //--------------------
@@ -1687,107 +1682,110 @@ _endasm
 
 void sim_tissue_10min(void)
 {
-temp_pres_gtissue_limit = 0.0;
-temp_gtissue_no = 255;
+    temp_pres_gtissue_limit = 0.0;
+    temp_gtissue_no = 255;
+    
+    for (ci=0;ci<16;ci++)
+    {
+        _asm
+        movlw	0x02
+        movwf	TBLPTRH,0
+        movlb	4 // fuer ci
+        movf ci,0,1
+        addwf	ci,0,1
+        addwf	ci,0,1
+        addwf	ci,0,1
+        addlw	0x80
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var_a+1
+        TBLRDPOSTINC
+        movff	TABLAT,var_a
+        TBLRDPOSTINC
+        movff	TABLAT,var_a+3
+        TBLRD
+        movff	TABLAT,var_a+2
+        addlw	0x40
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var2_a+1
+        TBLRDPOSTINC
+        movff	TABLAT,var2_a
+        TBLRDPOSTINC
+        movff	TABLAT,var2_a+3
+        TBLRD
+        movff	TABLAT,var2_a+2
+        addlw	0x40
+        movwf	TBLPTRL,0
+        incf	TBLPTRH,1,0
+        TBLRDPOSTINC
+        movff	TABLAT,var_b+1
+        TBLRDPOSTINC
+        movff	TABLAT,var_b
+        TBLRDPOSTINC
+        movff	TABLAT,var_b+3
+        TBLRD
+        movff	TABLAT,var_b+2
+        addlw	0x40
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var2_b+1
+        TBLRDPOSTINC
+        movff	TABLAT,var2_b
+        TBLRDPOSTINC
+        movff	TABLAT,var2_b+3
+        TBLRD
+        movff	TABLAT,var2_b+2
+        addlw	0xC0				// different to 1 min
+        movwf	TBLPTRL,0
+        incf	TBLPTRH,1,0
+        incf	TBLPTRH,1,0			// different to 1 min
+        TBLRDPOSTINC
+        movff	TABLAT,var_e1min+1
+        TBLRDPOSTINC
+        movff	TABLAT,var_e1min
+        TBLRDPOSTINC
+        movff	TABLAT,var_e1min+3
+        TBLRD
+        movff	TABLAT,var_e1min+2
+        addlw	0x40
+        movwf	TBLPTRL,0
+        //incf	TBLPTRH,1,0			// different to 1 min
+        TBLRDPOSTINC
+        movff	TABLAT,var2_e1min+1
+        TBLRDPOSTINC
+        movff	TABLAT,var2_e1min
+        TBLRDPOSTINC
+        movff	TABLAT,var2_e1min+3
+        TBLRD
+        movff	TABLAT,var2_e1min+2
+        _endasm
+        
+        // N2
+        temp_tissue = (temp_atem - sim_pres_tissue[ci]) * var_e1min;
+        temp_tissue_safety();
+        sim_pres_tissue[ci] = sim_pres_tissue[ci] + temp_tissue;
+        // He
+        temp_tissue = (temp2_atem - sim_pres_tissue[ci+16]) * var2_e1min;
+        temp_tissue_safety();
+        sim_pres_tissue[ci+16] = sim_pres_tissue[ci+16] + temp_tissue;
+        
+        // pressure limit
+        temp_tissue = sim_pres_tissue[ci] + sim_pres_tissue[ci+16];
+        var_a = (var_a * sim_pres_tissue[ci] + var2_a * sim_pres_tissue[ci+16]) / temp_tissue;
+        var_b = (var_b * sim_pres_tissue[ci] + var2_b * sim_pres_tissue[ci+16]) / temp_tissue;
 
-for (ci=0;ci<16;ci++)
-{
-_asm
-movlw	0x02
-movwf	TBLPTRH,0
-movlb	4 // fuer ci
-movf ci,0,1
-addwf	ci,0,1
-addwf	ci,0,1
-addwf	ci,0,1
-addlw	0x80
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var_a+1
-TBLRDPOSTINC
-movff	TABLAT,var_a
-TBLRDPOSTINC
-movff	TABLAT,var_a+3
-TBLRD
-movff	TABLAT,var_a+2
-addlw	0x40
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var2_a+1
-TBLRDPOSTINC
-movff	TABLAT,var2_a
-TBLRDPOSTINC
-movff	TABLAT,var2_a+3
-TBLRD
-movff	TABLAT,var2_a+2
-addlw	0x40
-movwf	TBLPTRL,0
-incf	TBLPTRH,1,0
-TBLRDPOSTINC
-movff	TABLAT,var_b+1
-TBLRDPOSTINC
-movff	TABLAT,var_b
-TBLRDPOSTINC
-movff	TABLAT,var_b+3
-TBLRD
-movff	TABLAT,var_b+2
-addlw	0x40
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var2_b+1
-TBLRDPOSTINC
-movff	TABLAT,var2_b
-TBLRDPOSTINC
-movff	TABLAT,var2_b+3
-TBLRD
-movff	TABLAT,var2_b+2
-addlw	0xC0				// different to 1 min
-movwf	TBLPTRL,0
-incf	TBLPTRH,1,0
-incf	TBLPTRH,1,0			// different to 1 min
-TBLRDPOSTINC
-movff	TABLAT,var_e1min+1
-TBLRDPOSTINC
-movff	TABLAT,var_e1min
-TBLRDPOSTINC
-movff	TABLAT,var_e1min+3
-TBLRD
-movff	TABLAT,var_e1min+2
-addlw	0x40
-movwf	TBLPTRL,0
-//incf	TBLPTRH,1,0			// different to 1 min
-TBLRDPOSTINC
-movff	TABLAT,var2_e1min+1
-TBLRDPOSTINC
-movff	TABLAT,var2_e1min
-TBLRDPOSTINC
-movff	TABLAT,var2_e1min+3
-TBLRD
-movff	TABLAT,var2_e1min+2
-_endasm
-// N2
- temp_tissue = (temp_atem - sim_pres_tissue[ci]) * var_e1min;
- temp_tissue_safety();
- sim_pres_tissue[ci] = sim_pres_tissue[ci] + temp_tissue;
-// He
- temp_tissue = (temp2_atem - sim_pres_tissue[ci+16]) * var2_e1min;
- temp_tissue_safety();
- sim_pres_tissue[ci+16] = sim_pres_tissue[ci+16] + temp_tissue;
-// pressure limit
-temp_tissue = sim_pres_tissue[ci] + sim_pres_tissue[ci+16];
- var_a = (var_a * sim_pres_tissue[ci] + var2_a * sim_pres_tissue[ci+16]) / temp_tissue;
- var_b = (var_b * sim_pres_tissue[ci] + var2_b * sim_pres_tissue[ci+16]) / temp_tissue;
+        sim_pres_tissue_limit[ci] = (temp_tissue - var_a) * var_b;
+        if (sim_pres_tissue_limit[ci] < 0)
+            sim_pres_tissue_limit[ci] = 0;
+        if (sim_pres_tissue_limit[ci] > temp_pres_gtissue_limit)
+        {
+            temp_pres_gtissue = temp_tissue;
+            temp_pres_gtissue_limit = sim_pres_tissue_limit[ci];
+            temp_gtissue_no = ci;
+        }
+    } // for
 
-sim_pres_tissue_limit[ci] = (temp_tissue - var_a) * var_b;
- if (sim_pres_tissue_limit[ci] < 0)
-  sim_pres_tissue_limit[ci] = 0;
- if (sim_pres_tissue_limit[ci] > temp_pres_gtissue_limit)
-  {
-  temp_pres_gtissue = temp_tissue;
-  temp_pres_gtissue_limit = sim_pres_tissue_limit[ci];
-  temp_gtissue_no = ci;
-  }
-} // for
   	temp_pres_gtissue_diff = temp_pres_gtissue_limit - temp_pres_gtissue;							// negative number
 	temp_pres_gtissue_limit_GF_low = GF_low * temp_pres_gtissue_diff + temp_pres_gtissue;
   	temp_pres_gtissue_limit_GF_low_below_surface = temp_pres_gtissue_limit_GF_low - pres_surface;
@@ -1803,19 +1801,19 @@ sim_pres_tissue_limit[ci] = (temp_tissue - var_a) * var_b;
 
 void clear_decoarray(void)
 {
-char_O_array_decodepth[0] = 0;
-char_O_array_decodepth[1] = 0;
-char_O_array_decodepth[2] = 0;
-char_O_array_decodepth[3] = 0;
-char_O_array_decodepth[4] = 0;
-char_O_array_decodepth[5] = 0;
-char_O_array_decotime[0] = 0;
-char_O_array_decotime[1] = 0;
-char_O_array_decotime[2] = 0;
-char_O_array_decotime[3] = 0;
-char_O_array_decotime[4] = 0;
-char_O_array_decotime[5] = 0;
-char_O_array_decotime[6] = 0;
+    char_O_array_decodepth[0] = 0;
+    char_O_array_decodepth[1] = 0;
+    char_O_array_decodepth[2] = 0;
+    char_O_array_decodepth[3] = 0;
+    char_O_array_decodepth[4] = 0;
+    char_O_array_decodepth[5] = 0;
+    char_O_array_decotime[0] = 0;
+    char_O_array_decotime[1] = 0;
+    char_O_array_decotime[2] = 0;
+    char_O_array_decotime[3] = 0;
+    char_O_array_decotime[4] = 0;
+    char_O_array_decotime[5] = 0;
+    char_O_array_decotime[6] = 0;
 } // clear_decoarray
 
 
@@ -1931,24 +1929,24 @@ void calc_gradient_factor(void)
 
 void deco_gradient_array()
 {
- RESET_C_STACK
- pres_respiration = (float)int_I_pres_respiration / 1000.0; // assembler code uses different digit system
-for (ci=0;ci<16;ci++)
-{
-	temp_tissue = pres_tissue[ci] + pres_tissue[ci+16];
-	temp1 = temp_tissue - pres_respiration;
-	temp2 = temp_tissue - pres_tissue_limit[ci];
-	temp2 = temp1/temp2;
-	temp2 = temp2 * 200; // because of output in (Double-)percentage
-	if (temp2 < 0)
-		temp2 = 0;
-	if (temp2 > 255)
-		temp2 = 255;
-	if (temp1 < 0)
- 		char_O_array_gradient_weighted[ci] = 0;
-	else
- 		char_O_array_gradient_weighted[ci] = (char)temp2;
-} // for
+    RESET_C_STACK
+    pres_respiration = (float)int_I_pres_respiration / 1000.0; // assembler code uses different digit system
+    for (ci=0;ci<16;ci++)
+    {
+    	temp_tissue = pres_tissue[ci] + pres_tissue[ci+16];
+    	temp1 = temp_tissue - pres_respiration;
+    	temp2 = temp_tissue - pres_tissue_limit[ci];
+    	temp2 = temp1/temp2;
+    	temp2 = temp2 * 200; // because of output in (Double-)percentage
+    	if (temp2 < 0)
+    		temp2 = 0;
+    	if (temp2 > 255)
+    		temp2 = 255;
+    	if (temp1 < 0)
+     		char_O_array_gradient_weighted[ci] = 0;
+    	else
+     		char_O_array_gradient_weighted[ci] = (char)temp2;
+    } // for
 } // deco_gradient_array
 
 
@@ -1962,121 +1960,121 @@ void deco_calc_desaturation_time(void)
 {
     RESET_C_STACK
 
- N2_ratio = 0.7902; // FIXED sum as stated in b"uhlmann
- pres_surface = (float)int_I_pres_surface / 1000.0;
- temp_atem = N2_ratio * (pres_surface - 0.0627);
- int_O_desaturation_time = 0;
- float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
+    N2_ratio = 0.7902; // FIXED sum as stated in b"uhlmann
+    pres_surface = (float)int_I_pres_surface / 1000.0;
+    temp_atem = N2_ratio * (pres_surface - 0.0627);
+    int_O_desaturation_time = 0;
+    float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
+    
+    for (ci=0;ci<16;ci++)
+    {
+        _asm
+        movlw	0x04
+        movwf	TBLPTRH,0
+        movlb	4 // fuer ci
+        movf ci,0,1
+        addwf	ci,0,1
+        addwf	ci,0,1
+        addwf	ci,0,1
+        addlw	0x80
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var_halftimes+1
+        TBLRDPOSTINC
+        movff	TABLAT,var_halftimes
+        TBLRDPOSTINC
+        movff	TABLAT,var_halftimes+3
+        TBLRD
+        movff	TABLAT,var_halftimes+2
+        addlw	0x40
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var2_halftimes+1
+        TBLRDPOSTINC
+        movff	TABLAT,var2_halftimes
+        TBLRDPOSTINC
+        movff	TABLAT,var2_halftimes+3
+        TBLRD
+        movff	TABLAT,var2_halftimes+2
+        _endasm
 
-for (ci=0;ci<16;ci++)
-{
-_asm
-movlw	0x04
-movwf	TBLPTRH,0
-movlb	4 // fuer ci
-movf ci,0,1
-addwf	ci,0,1
-addwf	ci,0,1
-addwf	ci,0,1
-addlw	0x80
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var_halftimes+1
-TBLRDPOSTINC
-movff	TABLAT,var_halftimes
-TBLRDPOSTINC
-movff	TABLAT,var_halftimes+3
-TBLRD
-movff	TABLAT,var_halftimes+2
-addlw	0x40
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var2_halftimes+1
-TBLRDPOSTINC
-movff	TABLAT,var2_halftimes
-TBLRDPOSTINC
-movff	TABLAT,var2_halftimes+3
-TBLRD
-movff	TABLAT,var2_halftimes+2
-_endasm
+        // saturation_time (for flight) and N2_saturation in multiples of halftime
+        // version v.100: 1.1 = 10 percent distance to totally clean (totally clean is not possible, would take infinite time )
+        // new in version v.101: 1.07 = 7 percent distance to totally clean (totally clean is not possible, would take infinite time )
+        // changes in v.101: 1.05 = 5 percent dist to totally clean is new desaturation point for display and noFly calculations
+        // N2
+        temp1 = 1.05 * temp_atem;
+        temp1 = temp1 - pres_tissue[ci];
+        temp2 = temp_atem - pres_tissue[ci];
+        if (temp2 >= 0.0)
+        {
+            temp1 = 0;
+            temp2 = 0;
+        }
+        else
+            temp1 = temp1 / temp2;
+         if (temp1 > 0.0)
+        {
+            temp1 = log(1.0 - temp1);
+            temp1 = temp1 / -0.6931; // temp1 is the multiples of half times necessary.
+            						 // 0.6931 is ln(2), because the math function log() calculates with a base of e not 2 as requested.
+            						 // minus because log is negative
+            temp2 = var_halftimes * temp1 / float_desaturation_multiplier; // time necessary (in minutes ) for complete desaturation (see comment about 10 percent) , new in v.101: float_desaturation_multiplier
+        }
+        else
+        {
+            temp1 = 0;
+            temp2 = 0;
+        }
 
-// saturation_time (for flight) and N2_saturation in multiples of halftime
-// version v.100: 1.1 = 10 percent distance to totally clean (totally clean is not possible, would take infinite time )
-// new in version v.101: 1.07 = 7 percent distance to totally clean (totally clean is not possible, would take infinite time )
-// changes in v.101: 1.05 = 5 percent dist to totally clean is new desaturation point for display and noFly calculations
-// N2
- temp1 = 1.05 * temp_atem;
- temp1 = temp1 - pres_tissue[ci];
- temp2 = temp_atem - pres_tissue[ci];
-  if (temp2 >= 0.0)
-	{
-	temp1 = 0;
-	temp2 = 0;
-	}
- else
-    temp1 = temp1 / temp2;
-  if (temp1 > 0.0)
-	{
-	temp1 = log(1.0 - temp1);
-	temp1 = temp1 / -0.6931; // temp1 is the multiples of half times necessary.
-							 // 0.6931 is ln(2), because the math function log() calculates with a base of e not 2 as requested.
-							 // minus because log is negative
-	temp2 = var_halftimes * temp1 / float_desaturation_multiplier; // time necessary (in minutes ) for complete desaturation (see comment about 10 percent) , new in v.101: float_desaturation_multiplier
-	}
- else
-	{
-	temp1 = 0;
-	temp2 = 0;
-	}
+        // He
+        temp3 = 0.1 - pres_tissue[ci+16];
+        if (temp3 >= 0.0)
+        {
+            temp3 = 0;
+            temp4 = 0;
+        }
+        else
+            temp3 = -1.0 * temp3 / pres_tissue[ci+16];
+        if (temp3 > 0.0)
+    	{
+        	temp3 = log(1.0 - temp3);
+        	temp3 = temp3 / -0.6931; // temp1 is the multiples of half times necessary.
+        							 // 0.6931 is ln(2), because the math function log() calculates with a base of e  not 2 as requested.
+        							 // minus because log is negative
+        	temp4 = var2_halftimes * temp3 / float_desaturation_multiplier; // time necessary (in minutes ) for "complete" desaturation, new in v.101 float_desaturation_multiplier
+    	}
+        else
+    	{
+        	temp3 = 0;
+        	temp4 = 0;
+    	}
 
-// He
- temp3 = 0.1 - pres_tissue[ci+16];
-if (temp3 >= 0.0)
-	{
-	temp3 = 0;
-	temp4 = 0;
-	}
- else
-    temp3 = -1.0 * temp3 / pres_tissue[ci+16];
-  if (temp3 > 0.0)
-	{
-	temp3 = log(1.0 - temp3);
-	temp3 = temp3 / -0.6931; // temp1 is the multiples of half times necessary.
-							 // 0.6931 is ln(2), because the math function log() calculates with a base of e  not 2 as requested.
-							 // minus because log is negative
-	temp4 = var2_halftimes * temp3 / float_desaturation_multiplier; // time necessary (in minutes ) for "complete" desaturation, new in v.101 float_desaturation_multiplier
-	}
- else
-	{
-	temp3 = 0;
-	temp4 = 0;
-	}
+        // saturation_time (for flight)
+        if (temp4 > temp2)
+            int_temp = (int)temp4;
+        else
+            int_temp = (int)temp2;
+         if(int_temp > int_O_desaturation_time)
+        	int_O_desaturation_time = int_temp;
 
-// saturation_time (for flight)
- if (temp4 > temp2)
-	 int_temp = (int)temp4;
- else
-	 int_temp = (int)temp2;
- if(int_temp > int_O_desaturation_time)
-	int_O_desaturation_time = int_temp;
-
-// N2 saturation in multiples of halftime for display purposes
- temp2 = temp1 * 20.0;  // 0 = 1/8, 120 = 0, 249 = 8
- temp2 = temp2 + 80.0; // set center
- if (temp2 < 0.0)
-	 temp2 = 0.0;
- if (temp2 > 255.0)
- 	 temp2 = 255.0;
- char_O_tissue_saturation[ci] = (char)temp2;
-// He saturation in multiples of halftime for display purposes
- temp4 = temp3 * 20.0;  // 0 = 1/8, 120 = 0, 249 = 8
- temp4 = temp4 + 80.0; // set center
- if (temp4 < 0.0)
-	 temp4 = 0.0;
- if (temp4 > 255.0)
- 	 temp4 = 255.0;
- char_O_tissue_saturation[ci+16] = (char)temp4;
-} // for
+        // N2 saturation in multiples of halftime for display purposes
+        temp2 = temp1 * 20.0;  // 0 = 1/8, 120 = 0, 249 = 8
+        temp2 = temp2 + 80.0; // set center
+        if (temp2 < 0.0)
+            temp2 = 0.0;
+        if (temp2 > 255.0)
+            temp2 = 255.0;
+        char_O_tissue_saturation[ci] = (char)temp2;
+        // He saturation in multiples of halftime for display purposes
+        temp4 = temp3 * 20.0;  // 0 = 1/8, 120 = 0, 249 = 8
+        temp4 = temp4 + 80.0; // set center
+        if (temp4 < 0.0)
+            temp4 = 0.0;
+        if (temp4 > 255.0)
+            temp4 = 255.0;
+        char_O_tissue_saturation[ci+16] = (char)temp4;
+    } // for
 } // deco_calc_desaturation_time
 
 
@@ -2095,21 +2093,21 @@ void calc_wo_deco_step_1_min(void)
 		set_dbg_end_of_dive();
 	}
 
- N2_ratio = 0.7902; // FIXED, sum lt. buehlmann
- pres_respiration = (float)int_I_pres_respiration / 1000.0; // assembler code uses different digit system
- pres_surface = (float)int_I_pres_surface / 1000.0;
- temp_atem = N2_ratio * (pres_respiration - 0.0627); // 0.0627 is the extra pressure in the body
- temp2_atem = 0.0;
- temp_surface = pres_surface; // the b"uhlmann formula using temp_surface does not use the N2_ratio
- float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
- float_saturation_multiplier = char_I_saturation_multiplier / 100.0;
-
- calc_tissue_step_1_min();  // update the pressure in the 16 tissues in accordance with the new ambient pressure
- clear_decoarray();
- char_O_deco_status = 0;
- char_O_nullzeit = 0;
- char_O_ascenttime = 0;
- calc_gradient_factor();
+    N2_ratio = 0.7902; // FIXED, sum lt. buehlmann
+    pres_respiration = (float)int_I_pres_respiration / 1000.0; // assembler code uses different digit system
+    pres_surface = (float)int_I_pres_surface / 1000.0;
+    temp_atem = N2_ratio * (pres_respiration - 0.0627); // 0.0627 is the extra pressure in the body
+    temp2_atem = 0.0;
+    temp_surface = pres_surface; // the b"uhlmann formula using temp_surface does not use the N2_ratio
+    float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
+    float_saturation_multiplier = char_I_saturation_multiplier / 100.0;
+    
+    calc_tissue_step_1_min();  // update the pressure in the 16 tissues in accordance with the new ambient pressure
+    clear_decoarray();
+    char_O_deco_status = 0;
+    char_O_nullzeit = 0;
+    char_O_ascenttime = 0;
+    calc_gradient_factor();
 
 } // calc_wo_deco_step_1_min(void)
 
@@ -2121,129 +2119,129 @@ void calc_wo_deco_step_1_min(void)
 
 void calc_tissue_step_1_min(void)
 {
- char_O_gtissue_no = 255;
- pres_gtissue_limit = 0.0;
+    char_O_gtissue_no = 255;
+    pres_gtissue_limit = 0.0;
+    
+    for (ci=0;ci<16;ci++)
+    {
+        _asm
+        movlw	0x02
+        movwf	TBLPTRH,0
+        movlb	4 // fuer ci
+        movf ci,0,1
+        addwf	ci,0,1
+        addwf	ci,0,1
+        addwf	ci,0,1
+        addlw	0x80
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var_a+1
+        TBLRDPOSTINC
+        movff	TABLAT,var_a
+        TBLRDPOSTINC
+        movff	TABLAT,var_a+3
+        TBLRD
+        movff	TABLAT,var_a+2
+        addlw	0x40
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var2_a+1
+        TBLRDPOSTINC
+        movff	TABLAT,var2_a
+        TBLRDPOSTINC
+        movff	TABLAT,var2_a+3
+        TBLRD
+        movff	TABLAT,var2_a+2
+        addlw	0x40
+        movwf	TBLPTRL,0
+        incf	TBLPTRH,1,0
+        TBLRDPOSTINC
+        movff	TABLAT,var_b+1
+        TBLRDPOSTINC
+        movff	TABLAT,var_b
+        TBLRDPOSTINC
+        movff	TABLAT,var_b+3
+        TBLRD
+        movff	TABLAT,var_b+2
+        addlw	0x40
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var2_b+1
+        TBLRDPOSTINC
+        movff	TABLAT,var2_b
+        TBLRDPOSTINC
+        movff	TABLAT,var2_b+3
+        TBLRD
+        movff	TABLAT,var2_b+2
+        addlw	0xC0
+        movwf	TBLPTRL,0
+        incf	TBLPTRH,1,0
+        TBLRDPOSTINC
+        movff	TABLAT,var_e1min+1
+        TBLRDPOSTINC
+        movff	TABLAT,var_e1min
+        TBLRDPOSTINC
+        movff	TABLAT,var_e1min+3
+        TBLRD
+        movff	TABLAT,var_e1min+2
+        addlw	0x40
+        movwf	TBLPTRL,0
+        TBLRDPOSTINC
+        movff	TABLAT,var2_e1min+1
+        TBLRDPOSTINC
+        movff	TABLAT,var2_e1min
+        TBLRDPOSTINC
+        movff	TABLAT,var2_e1min+3
+        TBLRD
+        movff	TABLAT,var2_e1min+2
+        _endasm
 
-for (ci=0;ci<16;ci++)
-{
-_asm
-movlw	0x02
-movwf	TBLPTRH,0
-movlb	4 // fuer ci
-movf ci,0,1
-addwf	ci,0,1
-addwf	ci,0,1
-addwf	ci,0,1
-addlw	0x80
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var_a+1
-TBLRDPOSTINC
-movff	TABLAT,var_a
-TBLRDPOSTINC
-movff	TABLAT,var_a+3
-TBLRD
-movff	TABLAT,var_a+2
-addlw	0x40
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var2_a+1
-TBLRDPOSTINC
-movff	TABLAT,var2_a
-TBLRDPOSTINC
-movff	TABLAT,var2_a+3
-TBLRD
-movff	TABLAT,var2_a+2
-addlw	0x40
-movwf	TBLPTRL,0
-incf	TBLPTRH,1,0
-TBLRDPOSTINC
-movff	TABLAT,var_b+1
-TBLRDPOSTINC
-movff	TABLAT,var_b
-TBLRDPOSTINC
-movff	TABLAT,var_b+3
-TBLRD
-movff	TABLAT,var_b+2
-addlw	0x40
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var2_b+1
-TBLRDPOSTINC
-movff	TABLAT,var2_b
-TBLRDPOSTINC
-movff	TABLAT,var2_b+3
-TBLRD
-movff	TABLAT,var2_b+2
-addlw	0xC0
-movwf	TBLPTRL,0
-incf	TBLPTRH,1,0
-TBLRDPOSTINC
-movff	TABLAT,var_e1min+1
-TBLRDPOSTINC
-movff	TABLAT,var_e1min
-TBLRDPOSTINC
-movff	TABLAT,var_e1min+3
-TBLRD
-movff	TABLAT,var_e1min+2
-addlw	0x40
-movwf	TBLPTRL,0
-TBLRDPOSTINC
-movff	TABLAT,var2_e1min+1
-TBLRDPOSTINC
-movff	TABLAT,var2_e1min
-TBLRDPOSTINC
-movff	TABLAT,var2_e1min+3
-TBLRD
-movff	TABLAT,var2_e1min+2
-_endasm
+        // N2 1 min
+        temp_tissue = (temp_atem - pres_tissue[ci]) * var_e1min;
+        temp_tissue_safety();
+        pres_tissue[ci] = pres_tissue[ci] + temp_tissue;
 
-// N2 1 min
- temp_tissue = (temp_atem - pres_tissue[ci]) * var_e1min;
- temp_tissue_safety();
- pres_tissue[ci] = pres_tissue[ci] + temp_tissue;
+        // He 1 min
+        temp_tissue = (temp2_atem - pres_tissue[ci+16]) * var2_e1min;
+        temp_tissue_safety();
+        pres_tissue[ci+16] = pres_tissue[ci+16] + temp_tissue;
 
-// He 1 min
- temp_tissue = (temp2_atem - pres_tissue[ci+16]) * var2_e1min;
- temp_tissue_safety();
- pres_tissue[ci+16] = pres_tissue[ci+16] + temp_tissue;
+        temp_tissue = pres_tissue[ci] + pres_tissue[ci+16];
+        var_a = (var_a * pres_tissue[ci] + var2_a * pres_tissue[ci+16]) / temp_tissue;
+        var_b = (var_b * pres_tissue[ci] + var2_b * pres_tissue[ci+16]) / temp_tissue;
+        pres_tissue_limit[ci] = (temp_tissue - var_a) * var_b;
+        if (pres_tissue_limit[ci] < 0)
+            pres_tissue_limit[ci] = 0;
+        if (pres_tissue_limit[ci] > pres_gtissue_limit)
+        {
+            pres_gtissue_limit = pres_tissue_limit[ci];
+            char_O_gtissue_no = ci;
+        }//if
 
- temp_tissue = pres_tissue[ci] + pres_tissue[ci+16];
- var_a = (var_a * pres_tissue[ci] + var2_a * pres_tissue[ci+16]) / temp_tissue;
- var_b = (var_b * pres_tissue[ci] + var2_b * pres_tissue[ci+16]) / temp_tissue;
- pres_tissue_limit[ci] = (temp_tissue - var_a) * var_b;
- if (pres_tissue_limit[ci] < 0)
-  pres_tissue_limit[ci] = 0;
- if (pres_tissue_limit[ci] > pres_gtissue_limit)
-  {
-  pres_gtissue_limit = pres_tissue_limit[ci];
-  char_O_gtissue_no = ci;
-  }//if
-
- if(!char_I_step_is_1min)
- {
-	 // gradient factor array for graphical display
-	 // display range is 0 to 250! in steps of 5 for 1 pixel
-	 // the display is divided in 6 blocks
-	 // -> double the gradient 100% = 200
-	 // tissue > respiration (entsaettigungsvorgang)
-	 // gradient ist wieviel prozent an limit von tissue aus
-	 // dh. 0% = respiration == tissue
-	 // dh. 100% = respiration == limit
-	 temp1 = temp_tissue - pres_respiration;
-	 temp2 = temp_tissue - pres_tissue_limit[ci];	// changed in v.102
-	 temp2 = temp1/temp2;
-	 temp2 = temp2 * 200; // because of output in (Double-)percentage
-	 if (temp2 < 0)
-	 	temp2 = 0;
-	 if (temp2 > 255)
-	 	temp2 = 255;
-	 if (temp1 < 0)
-	  char_O_array_gradient_weighted[ci] = 0;
-	 else
-	  char_O_array_gradient_weighted[ci] = (char)temp2;
- }
-} // for
+        if(!char_I_step_is_1min)
+        {
+            // gradient factor array for graphical display
+            // display range is 0 to 250! in steps of 5 for 1 pixel
+            // the display is divided in 6 blocks
+            // -> double the gradient 100% = 200
+            // tissue > respiration (entsaettigungsvorgang)
+            // gradient ist wieviel prozent an limit von tissue aus
+            // dh. 0% = respiration == tissue
+            // dh. 100% = respiration == limit
+            temp1 = temp_tissue - pres_respiration;
+            temp2 = temp_tissue - pres_tissue_limit[ci];	// changed in v.102
+            temp2 = temp1/temp2;
+            temp2 = temp2 * 200; // because of output in (Double-)percentage
+            if (temp2 < 0)
+            	temp2 = 0;
+            if (temp2 > 255)
+            	temp2 = 255;
+            if (temp1 < 0)
+                char_O_array_gradient_weighted[ci] = 0;
+            else
+                char_O_array_gradient_weighted[ci] = (char)temp2;
+        }
+    } // for
 } // calc wo deco 1min
 
 // ----------
@@ -2252,93 +2250,94 @@ _endasm
 void deco_hash(void)
 {
     RESET_C_STACK
-// init
- for (md_i=0;md_i<16;md_i++)
- {
-  md_state[md_i] = 0;
-  md_cksum[md_i] = 0;
- } // for md_i 16
+    
+    // init
+    for (md_i=0;md_i<16;md_i++)
+    {
+         md_state[md_i] = 0;
+         md_cksum[md_i] = 0;
+    } // for md_i 16
 
-_asm
- movlw	0x01
- movwf	TBLPTRU,0
- movlw	0x06
- movwf	TBLPTRH,0
- movlw	0x00
- movwf	TBLPTRL,0
-_endasm;
- for (md_i=0;md_i<127;md_i++)
- {
-_asm
- TBLRDPOSTINC
- movff	TABLAT,md_temp
-_endasm
-  md_pi_subst[md_i] = md_temp;
- } // for md_i 256
-_asm
- TBLRDPOSTINC
- movff	TABLAT,md_temp
-_endasm;
-  md_pi_subst[127] = md_temp;
- for (md_i=0;md_i<127;md_i++)
- {
-_asm
- TBLRDPOSTINC
- movff	TABLAT,md_temp
-_endasm
-  md_pi_subst[md_i+128] = md_temp;
- } // for md_i 256
-_asm
- TBLRD
- movff	TABLAT,md_temp
-_endasm
-  md_pi_subst[255] = md_temp;
-
-_asm
- movlw	0x00
- movwf	TBLPTRU,0
- movlw	0x00
- movwf	TBLPTRH,0
- movlw	0x00
- movwf	TBLPTRL,0
-_endasm
-// cycle buffers
-for (md_pointer=0x0000;md_pointer<0x17f3;md_pointer++)
-{
- md_t = 0;
- for (md_i=0;md_i<16;md_i++)
- {
-  if(md_pointer == 9)
-   md_temp = md_cksum[md_i];
-  else
-  {
-_asm
-  TBLRDPOSTINC
-  movff	TABLAT,md_temp
-_endasm
-  } // else
-  md_buffer[md_i] = md_temp;
-  md_state[md_i+16] = md_buffer[md_i];
-  md_state[md_i+32] = (unsigned char)(md_buffer[md_i] ^ md_state[md_i]);
- } // for md_i 16
-
- for (md_i=0;md_i<18;md_i++)
- {
-  for (md_j=0;md_j<48;md_j++)
-  {
-   md_state[md_j] = (unsigned char)(md_state[md_j] ^ md_pi_subst[md_t]);
-   md_t = md_state[md_j];
-  } // for md_j 48
-  md_t = (unsigned char)(md_t+1);
- } // for md_i 18
- md_t = md_cksum[15];
-
- for (md_i=0;md_i<16;md_i++)
- {
-  md_cksum[md_i] = (unsigned char)(md_cksum[md_i] ^ md_pi_subst[(md_buffer[md_i] ^ md_t)]);
-  md_t = md_cksum[md_i];
- } // for md_i 16
-} // for md_pointer
+    _asm
+    movlw	0x01
+    movwf	TBLPTRU,0
+    movlw	0x06
+    movwf	TBLPTRH,0
+    movlw	0x00
+    movwf	TBLPTRL,0
+    _endasm;
+    for (md_i=0;md_i<127;md_i++)
+    {
+        _asm
+        TBLRDPOSTINC
+        movff	TABLAT,md_temp
+        _endasm
+        md_pi_subst[md_i] = md_temp;
+    } // for md_i 256
+    _asm
+    TBLRDPOSTINC
+    movff	TABLAT,md_temp
+    _endasm;
+    md_pi_subst[127] = md_temp;
+    for (md_i=0;md_i<127;md_i++)
+    {
+        _asm
+        TBLRDPOSTINC
+        movff	TABLAT,md_temp
+        _endasm
+        md_pi_subst[md_i+128] = md_temp;
+    } // for md_i 256
+    _asm
+    TBLRD
+    movff	TABLAT,md_temp
+    _endasm
+    md_pi_subst[255] = md_temp;
+    
+    _asm
+     movlw	0x00
+     movwf	TBLPTRU,0
+     movlw	0x00
+     movwf	TBLPTRH,0
+     movlw	0x00
+     movwf	TBLPTRL,0
+    _endasm
+    // cycle buffers
+    for (md_pointer=0x0000;md_pointer<0x17f3;md_pointer++)
+    {
+        md_t = 0;
+        for (md_i=0;md_i<16;md_i++)
+        {
+            if(md_pointer == 9)
+                md_temp = md_cksum[md_i];
+            else
+            {
+                _asm
+                TBLRDPOSTINC
+                movff	TABLAT,md_temp
+                _endasm
+            } // else
+            md_buffer[md_i] = md_temp;
+            md_state[md_i+16] = md_buffer[md_i];
+            md_state[md_i+32] = (unsigned char)(md_buffer[md_i] ^ md_state[md_i]);
+        } // for md_i 16
+            
+        for (md_i=0;md_i<18;md_i++)
+        {
+            for (md_j=0;md_j<48;md_j++)
+            {
+                md_state[md_j] = (unsigned char)(md_state[md_j] ^ md_pi_subst[md_t]);
+                md_t = md_state[md_j];
+            } // for md_j 48
+            md_t = (unsigned char)(md_t+1);
+        } // for md_i 18
+        md_t = md_cksum[15];
+            
+        for (md_i=0;md_i<16;md_i++)
+        {
+            md_cksum[md_i] = (unsigned char)(md_cksum[md_i] ^ md_pi_subst[(md_buffer[md_i] ^ md_t)]);
+            md_t = md_cksum[md_i];
+        } // for md_i 16
+    } // for md_pointer
 } // void deco_hash(void)
 
 // ---------------------
@@ -2349,8 +2348,8 @@ _endasm
 void deco_clear_CNS_fraction(void)
 {
     RESET_C_STACK
- CNS_fraction = 0.0;
- char_O_CNS_fraction = 0;
+    CNS_fraction = 0.0;
+    char_O_CNS_fraction = 0;
 } // void deco_clear_CNS_fraction(void)
 
 
@@ -2367,51 +2366,52 @@ void deco_clear_CNS_fraction(void)
 
 void deco_calc_CNS_fraction(void)
 {
- RESET_C_STACK
- actual_ppO2 = (float)char_I_actual_ppO2 / 100.0;
+    RESET_C_STACK
+    actual_ppO2 = (float)char_I_actual_ppO2 / 100.0;
 
- if (char_I_actual_ppO2 < 50)
-  CNS_fraction = CNS_fraction;// no changes
- else if (char_I_actual_ppO2 < 60)
-  CNS_fraction = 1/(-54000.0 * actual_ppO2 + 54000.0) + CNS_fraction;
- else if (char_I_actual_ppO2 < 70)
-  CNS_fraction = 1/(-45000.0 * actual_ppO2 + 48600.0) + CNS_fraction;
- else if (char_I_actual_ppO2 < 80)
-  CNS_fraction = 1/(-36000.0 * actual_ppO2 + 42300.0) + CNS_fraction;
- else if (char_I_actual_ppO2 < 90)
-  CNS_fraction = 1/(-27000.0 * actual_ppO2 + 35100.0) + CNS_fraction;
- else if (char_I_actual_ppO2 < 110)
-  CNS_fraction = 1/(-18000.0 * actual_ppO2 + 27000.0) + CNS_fraction;
- else if (char_I_actual_ppO2 < 150)
-  CNS_fraction = 1/(-9000.0 * actual_ppO2 + 17100.0) + CNS_fraction;
- else if (char_I_actual_ppO2 < 160)
-  CNS_fraction = 1/(-22500.0 * actual_ppO2 + 37350.0) + CNS_fraction;
- else if (char_I_actual_ppO2 < 165)
-  CNS_fraction =  0.000755 + CNS_fraction; // Arieli et all.(2002): Modeling pulmonary and CNS O2 toxicity... Formula (A1) based on value for 1.55 and c=20
- else if (char_I_actual_ppO2 < 170)
-  CNS_fraction =  0.00102 + CNS_fraction; // example calculation: Sqrt((1.7/1.55)^20)*0.000404
- else if (char_I_actual_ppO2 < 175)
-  CNS_fraction =  0.00136 + CNS_fraction;
- else if (char_I_actual_ppO2 < 180)
-  CNS_fraction =  0.00180 + CNS_fraction;
- else if (char_I_actual_ppO2 < 185)
-  CNS_fraction =  0.00237 + CNS_fraction;
- else if (char_I_actual_ppO2 < 190)
-  CNS_fraction =  0.00310 + CNS_fraction;
- else if (char_I_actual_ppO2 < 195)
-  CNS_fraction =  0.00401 + CNS_fraction;
- else if (char_I_actual_ppO2 < 200)
-  CNS_fraction =  0.00517 + CNS_fraction;
- else if (char_I_actual_ppO2 < 230)
-  CNS_fraction =  0.0209 + CNS_fraction;
- else
-  CNS_fraction =  0.0482 + CNS_fraction; // value for 2.5
+    if (char_I_actual_ppO2 < 50)
+        CNS_fraction = CNS_fraction;// no changes
+    else if (char_I_actual_ppO2 < 60)
+        CNS_fraction = 1/(-54000.0 * actual_ppO2 + 54000.0) + CNS_fraction;
+    else if (char_I_actual_ppO2 < 70)
+        CNS_fraction = 1/(-45000.0 * actual_ppO2 + 48600.0) + CNS_fraction;
+    else if (char_I_actual_ppO2 < 80)
+        CNS_fraction = 1/(-36000.0 * actual_ppO2 + 42300.0) + CNS_fraction;
+    else if (char_I_actual_ppO2 < 90)
+        CNS_fraction = 1/(-27000.0 * actual_ppO2 + 35100.0) + CNS_fraction;
+    else if (char_I_actual_ppO2 < 110)
+        CNS_fraction = 1/(-18000.0 * actual_ppO2 + 27000.0) + CNS_fraction;
+    else if (char_I_actual_ppO2 < 150)
+        CNS_fraction = 1/(-9000.0 * actual_ppO2 + 17100.0) + CNS_fraction;
+    else if (char_I_actual_ppO2 < 160)
+        CNS_fraction = 1/(-22500.0 * actual_ppO2 + 37350.0) + CNS_fraction;
+    else if (char_I_actual_ppO2 < 165)
+        CNS_fraction =  0.000755 + CNS_fraction; // Arieli et all.(2002): Modeling pulmonary and CNS O2 toxicity... Formula (A1) based on value for 1.55 and c=20
+    else if (char_I_actual_ppO2 < 170)
+        CNS_fraction =  0.00102 + CNS_fraction; // example calculation: Sqrt((1.7/1.55)^20)*0.000404
+    else if (char_I_actual_ppO2 < 175)
+        CNS_fraction =  0.00136 + CNS_fraction;
+    else if (char_I_actual_ppO2 < 180)
+        CNS_fraction =  0.00180 + CNS_fraction;
+    else if (char_I_actual_ppO2 < 185)
+        CNS_fraction =  0.00237 + CNS_fraction;
+    else if (char_I_actual_ppO2 < 190)
+        CNS_fraction =  0.00310 + CNS_fraction;
+    else if (char_I_actual_ppO2 < 195)
+        CNS_fraction =  0.00401 + CNS_fraction;
+    else if (char_I_actual_ppO2 < 200)
+        CNS_fraction =  0.00517 + CNS_fraction;
+    else if (char_I_actual_ppO2 < 230)
+        CNS_fraction =  0.0209 + CNS_fraction;
+    else
+        CNS_fraction =  0.0482 + CNS_fraction; // value for 2.5
 
- if (CNS_fraction > 2.5)
-  CNS_fraction = 2.5;
- if (CNS_fraction < 0.0)
-  CNS_fraction = 0.0;
- char_O_CNS_fraction = (char)((CNS_fraction + 0.005)* 100.0);
+    if (CNS_fraction > 2.5)
+        CNS_fraction = 2.5;
+    if (CNS_fraction < 0.0)
+        CNS_fraction = 0.0;
+
+    char_O_CNS_fraction = (char)((CNS_fraction + 0.005)* 100.0);
 } // void deco_calc_CNS_fraction(void)
 
 // -------------------------------
@@ -2427,8 +2427,8 @@ void deco_calc_CNS_fraction(void)
 void deco_calc_CNS_decrease_15min(void)
 {
     RESET_C_STACK    
- CNS_fraction =  0.890899 * CNS_fraction;
- char_O_CNS_fraction = (char)((CNS_fraction + 0.005)* 100.0);
+    CNS_fraction =  0.890899 * CNS_fraction;
+    char_O_CNS_fraction = (char)((CNS_fraction + 0.005)* 100.0);
 }// deco_calc_CNS_decrease_15min(void)
 
 
@@ -2443,10 +2443,10 @@ void deco_calc_CNS_decrease_15min(void)
 void deco_calc_percentage(void)
 {
     RESET_C_STACK
- temp1 = (float)int_I_temp;
- temp2 = (float)char_I_temp / 100.0;
- temp3 = temp1 * temp2;
- int_I_temp = (int)temp3;
+    temp1 = (float)int_I_temp;
+    temp2 = (float)char_I_temp / 100.0;
+    temp3 = temp1 * temp2;
+    int_I_temp = (int)temp3;
 }
 
 void deco_push_tissues_to_vault(void)

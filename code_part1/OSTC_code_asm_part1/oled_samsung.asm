@@ -57,8 +57,8 @@ word_processor:						; word_processor:
 ; PLED_SetColumnPixel:
 ; -----------------------------
 PLED_SetColumnPixel:
-	movwf	win_leftx2		    ; d'0' ... d'159'
-	mullw   2                   ; Copy to POD, times 2.
+	movff	WREG,win_leftx2		 ; d'0' ... d'159'
+	mullw   2                   ; Copy to PROD, times 2.
 
 	movlw	0x21				; Start Address Vertical (.0 - .319)
 	rcall	PLED_CmdWrite
@@ -84,7 +84,9 @@ PLED_PxlWrite:
     rcall   PLED_PxlWrite_Single        ; Write first pixel.
 
 ; Write 2nd Pixel on same row but one column to the right
-    movwf   win_leftx2,W                ; Increment column address.
+	movff	win_top,WREG
+	rcall	PLED_SetRow					; Re-Set Row
+    movff  	win_leftx2,WREG             ; Increment column address.
     mullw   2
     incf    PRODL
     clrf    WREG                        ; Does not reset CARRY...

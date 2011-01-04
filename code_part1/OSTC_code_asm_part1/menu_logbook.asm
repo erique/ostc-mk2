@@ -583,6 +583,7 @@ profile_display_fill:		; In this column between this row (xC+0) and the last row
 	cpfseq	apnoe_mins				; xC+0 = apone_mins?
 	bra		profile_display_fill2	; No!
 	return
+
 profile_display_fill2:	
 	movf	xC+0,W
 	cpfsgt	apnoe_mins				; apnoe_mins>xC+0?
@@ -594,6 +595,7 @@ profile_display_fill_down2:			; Loop
 	decf		xC+1,F
 	movf		xC+1,W				; Row
 	call		PLED_SetRow			; 0...259
+
 	call		PLED_standard_color
 
 	call		PLED_PxlWrite_Single; Write one Pixel
@@ -608,6 +610,7 @@ profile_display_fill_up2:			; Loop
 	decf		xC+1,F
 	movf		xC+1,W				; Row
 	call		PLED_SetRow			; 0...259
+
 	call	PLED_standard_color
 
 	call		PLED_PxlWrite_Single; Write one Pixel

@@ -1164,6 +1164,7 @@ PLED_pre_dive_screen3:
 	WIN_LEFT	.90
 	WIN_FONT	FT_SMALL
 	bsf		leftbind
+	call    PLED_standard_color
 
 	; list three SP in Gaslist
 	movlw	d'35'				; 36 = current SP position in EEPROM
@@ -1201,17 +1202,13 @@ PLED_pre_dive_screen3_loop:
 	decf	active_gas,W				; Gas 0-4
 	mullw	d'4'
 	movf	PRODL,W			
-	addlw	d'7'						; = address for He ratio
-	movwf	EEADR
-	call	read_eeprom					; Read He ratio
-	movff	EEDATA,hi		; And copy into hold register
-	decf	active_gas,W				; Gas 0-4
-	mullw	d'4'
-	movf	PRODL,W			
 	addlw	d'6'						; = address for O2 ratio
 	movwf	EEADR
-	call	read_eeprom					; Read O2 ratio
-	movff	EEDATA, lo		; O2 ratio
+	call	read_eeprom                 ; Read O2 ratio
+	movff	EEDATA, lo                  ; O2 ratio
+	incf	EEADR,F                     ; = address for He
+	call	read_eeprom					; Read He ratio
+	movff	EEDATA,hi                   ; And copy into hold register
 
 	WIN_LEFT	.90
 	WIN_TOP		.100
@@ -2477,6 +2474,7 @@ PLED_splist_start:
 	WIN_LEFT	.100
 	WIN_FONT	FT_SMALL
 	bsf		leftbind
+	call    PLED_standard_color
 
 	; list three SP in Gaslist
 	movlw	d'35'				; 36 = current SP position in EEPROM

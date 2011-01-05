@@ -18,50 +18,61 @@
 ; Customviews for divemode
 ; written by: Matthias Heinrichs, info@heinrichsweikamp.com
 ; written: 101212
-; last updated: 101212
+; history:
+;   2010-12-12: [MH] last updated
+;   2011-01-04: [jDG] Saturation graphs in customview divemode
 ; known bugs:
 ; ToDo:
 
-customview_menu_entry3:		; Show the customview-dependent entry for the divemode menu
+;=============================================================================
+; Show the customview-dependent entry for the divemode menu
+;
+customview_menu_entry3:		
 	bcf		menu3_active	;=1: menu entry three in divemode menu is active
-	movff	menupos3,temp1		; copy
-	dcfsnz	temp1,F
-	bra		customview_menu3_stopwatch		; Show the stopwatch option in divemode menu
-	dcfsnz	temp1,F
-	bra		customview_menu3_marker			; Show the marker option in divemode menu
-	dcfsnz	temp1,F
-	bra		customview_menu3_clock			; Show the clock option in divemode menu
-	dcfsnz	temp1,F
-	bra		customview_menu3_lead_tiss		; Show the leading tissue option in divemode menu
+
+	movff	menupos3,WREG	            ; copy
+	dcfsnz	WREG,F
+	bra		customview_menu3_stopwatch  ; Show the stopwatch option in divemode menu
+	dcfsnz	WREG,F
+	bra		customview_menu3_marker     ; Show the marker option in divemode menu
+	dcfsnz	WREG,F
+	bra		customview_menu3_clock      ; Show the clock option in divemode menu
+	dcfsnz	WREG,F
+	bra		customview_menu3_lead_tiss  ; Show the leading tissue option in divemode menu
 	; Menupos3=0, do nothing
 	return
 
 customview_menu3_stopwatch:
-	bsf		menu3_active			; Set Flag
-	DISPLAYTEXT	.33					; ResetAvr
+	bsf		menu3_active                ; Set Flag
+	DISPLAYTEXT	.33                     ; ResetAvr
 	return
 
 customview_menu3_marker:
-	bsf		menu3_active			; Set Flag
-	DISPLAYTEXT	.30					; Set Marker
+	bsf		menu3_active                ; Set Flag
+	DISPLAYTEXT	.30                     ; Set Marker
 	return
 
-customview_menu3_clock:				; No menu entry
-customview_menu3_lead_tiss			; No menu entry
+customview_menu3_clock:                 ; No menu entry
+customview_menu3_lead_tiss              ; No menu entry
 	return
 
-customview_second:		; Do every-second tasks for the custom view area
-	movff	menupos3,temp1		; copy
+;=============================================================================
+; Do every-second tasks for the custom view area
+
+customview_second:                      
+	movff	menupos3,WREG               ; copy
+	dcfsnz	WREG,F
+	bra		customview_1sec_stopwatch   ; Update the Stopwatch
+	dcfsnz	WREG,F
+	bra		customview_1sec_marker      ; Update the Marker
+	dcfsnz	WREG,F
+	bra		customview_1sec_clock       ; Update the Clock
+	dcfsnz	WREG,F
+	bra		customview_1sec_lead_tiss   ; Update the leading tissue
 	dcfsnz	temp1,F
-	bra		customview_1sec_stopwatch		; Update the Stopwatch
-	dcfsnz	temp1,F
-	bra		customview_1sec_marker			; Update the Marker
-	dcfsnz	temp1,F
-	bra		customview_1sec_clock			; Update the Clock
-	dcfsnz	temp1,F
-	bra		customview_1sec_lead_tiss		; Update the leading tissue
-	dcfsnz	temp1,F
-	bra		customview_1sec_average			; Update the Average depth
+	bra		customview_1sec_average     ; Update the Average depth
+	dcfsnz	WREG,F
+	bra		customview_1sec_graphs      ; Update the leading tissue
 	; Menupos3=0, do nothing
 	return
 
@@ -70,64 +81,78 @@ customview_1sec_average:
 	return
 	
 customview_1sec_stopwatch:
-	call	PLED_stopwatch_show2	; Update figures only
+	call	PLED_stopwatch_show2        ; Update figures only
 	return
 
-customview_1sec_marker:				; Do nothing extra
-customview_1sec_lead_tiss:			; Do nothing extra
-customview_1sec_clock:				; Do nothing extra
+customview_1sec_marker:                 ; Do nothing extra
+customview_1sec_clock:                  ; Do nothing extra
+customview_1sec_lead_tiss:              ; Do nothing extra
+customview_1sec_graphs:                 ; Do nothing extra
 	return
 
+;=============================================================================
+; Do every-minute tasks for the custom view area
 
-customview_minute:		; Do every-minute tasks for the custom view area
-	movff	menupos3,temp1		; copy
-	dcfsnz	temp1,F
-	bra		customview_minute_stopwatch		; Update the Stopwatch
-	dcfsnz	temp1,F
-	bra		customview_minute_marker		; Update the Marker
-	dcfsnz	temp1,F
-	bra		customview_minute_clock			; Update the Clock
-	dcfsnz	temp1,F
-	bra		customview_minute_lead_tiss		; Update the leading tissue
+customview_minute:
+	movff	menupos3,WREG               ; copy
+	dcfsnz	WREG,F
+	bra		customview_minute_stopwatch ; Update the Stopwatch
+	dcfsnz	WREG,F
+	bra		customview_minute_marker    ; Update the Marker
+	dcfsnz	WREG,F
+	bra		customview_minute_clock     ; Update the Clock
+	dcfsnz	WREG,F
+	bra		customview_minute_lead_tiss ; Update the leading tissue
 	dcfsnz	temp1,F
 	bra		customview_minute_average		; Update the Average depth
+	dcfsnz	WREG,F
+	bra		customview_minute_graphs	; Update the graphs
 	; Menupos3=0, do nothing
 	return
 
 customview_minute_clock:
-	call	PLED_diveclock2			; Update the clock
+	call	PLED_diveclock2             ; Update the clock
 	return
 
 customview_minute_lead_tiss:
-	call	PLED_show_leading_tissue_2 ; Update the leading tissue
+	call	PLED_show_leading_tissue_2  ; Update the leading tissue
 	return
 
-customview_minute_marker:			; Do nothing extra
-customview_minute_stopwatch:		; Do nothing extra
+customview_minute_graphs:
+	call	PLED_tissue_saturation_graph
+	return
+
+customview_minute_marker:               ; Do nothing extra
+customview_minute_stopwatch:            ; Do nothing extra
 customview_minute_average:			; Do nothing extra
 	return
 
-customview_toggle:		; Yes, show next customview (and delete this flag)
+;=============================================================================
+; Yes, show next customview (and delete this flag)
+
+customview_toggle:		
 	ostc_debug	'X'		; Sends debug-information to screen if debugmode active
-	incf	menupos3,F			; Number of customview to show
-	movlw	d'5'				; Max number
-	cpfsgt	menupos3			; Max reached?
-	bra		customview_mask		; No, show
-	clrf	menupos3			; Reset to zero (Zero=no custom view)
+	incf	menupos3,F			            ; Number of customview to show
+	movlw	d'6'				; Max number
+	cpfsgt	menupos3			            ; Max reached?
+	bra		customview_mask		            ; No, show
+	clrf	menupos3			            ; Reset to zero (Zero=no custom view)
 customview_mask:	
 	call	PLED_clear_customview_divemode
-	movff	menupos3,temp1		; Menupos3 holds number of customview function
-	dcfsnz	temp1,F
+	movff	menupos3,WREG                   ; Menupos3 holds number of customview function
+	dcfsnz	WREG,F
 	bra		customview_init_stopwatch		; Show the Stopwatch
-	dcfsnz	temp1,F
+	dcfsnz	WREG,F
 	bra		customview_init_marker			; Show the Marker-Menu
-	dcfsnz	temp1,F
+	dcfsnz	WREG,F
 	bra		customview_init_clock			; Show the clock
-	dcfsnz	temp1,F
+	dcfsnz	WREG,F
 	bra		customview_init_lead_tissue		; Show the leading tissue
 	dcfsnz	temp1,F
 	bra		customview_init_average			; Show Total average depth
-;	bra		customview_init_nocustomview	; menupos3=0 -> No Customview
+	dcfsnz	WREG,F
+	bra		customview_init_graphs		    ; Show the graphs
+
 customview_init_nocustomview:
 	bra		customview_toggle_exit	
 
@@ -143,11 +168,12 @@ customview_init_stopwatch:
 	call	PLED_stopwatch_show			; Init Stopwatch display
 	bra		customview_toggle_exit	
 
-customview_init_marker:					; Init Marker 
+customview_init_marker:					; Init Marker
 	GETCUSTOM8	d'50'					; Show Marker? (=1 in WREG)
 	decfsz		WREG,F					; WREG=1?	
 	bra			customview_toggle		; No, use next Customview
 
+    call    PLED_standard_color
 	DISPLAYTEXT		d'151'				; Set Marker?
 	bra		customview_toggle_exit	
 
@@ -163,19 +189,21 @@ customview_init_lead_tissue:			; Show leading tissue
 	call	PLED_show_leading_tissue
 	bra		customview_toggle_exit	
 
-;customview_init_graphs:					; Show tissue graph
-; 	GETCUSTOM8	d'52'					; Show Tissue Graph? (=1 in WREG)
-;	decfsz		WREG,F					; WREG=1?	
-;	bra			customview_toggle		; No, use next Customview
+customview_init_graphs:					; Show tissue graph
+ 	GETCUSTOM8	d'52'					; Show Tissue Graph? (=1 in WREG)
+	decfsz		WREG,F					; WREG=1?	
+	call	PLED_tissue_saturation_graph
+	bra			customview_toggle		; No, use next Customview
 
 customview_toggle_exit:
 	bcf		toggle_customview			; Clear flag
-	ostc_debug	'Y'		; Sends debug-information to screen if debugmode active
+	ostc_debug	'Y'		                ; Sends debug-information to screen in debugmode
 	return
 
+;=============================================================================
+; Yes, show next customview (and delete this flag)
 
-
-surfcustomview_toggle:			; Yes, show next customview (and delete this flag)
+surfcustomview_toggle:
 	incf	menupos3,F			; Number of customview to show
 	movlw	d'4'				; Max number
 	cpfsgt	menupos3			; Max reached?
@@ -183,16 +211,16 @@ surfcustomview_toggle:			; Yes, show next customview (and delete this flag)
 	clrf	menupos3			; Reset to zero (Zero=no custom view)
 surfcustomview_mask:	
 	call	PLED_clear_customview_surfmode
-	movff	menupos3,temp1		; Menupos3 holds number of customview function
-	dcfsnz	temp1,F
+	movff	menupos3,WREG       ; Menupos3 holds number of customview function
+	dcfsnz	WREG,F
 	bra		surfcustomview_init_graphs			; Show the tissue graphs
-	dcfsnz	temp1,F
+	dcfsnz	WREG,F
 	bra		surfcustomview_init_gaslist			; Show pre-dive gaslist/setpoint list
-	dcfsnz	temp1,F
+	dcfsnz	WREG,F
 	bra		surfcustomview_init_interval		; Show the interval counter
-	dcfsnz	temp1,F
+	dcfsnz	WREG,F
 	bra		surfcustomview_init_cfview			; Show the interval counter
-;	bra		surfcustomview_init_nocustomview	; menupos3=0 -> No Customview
+
 surfcustomview_init_nocustomview:
 	bra		surfcustomview_toggle_exit	
 
@@ -234,36 +262,38 @@ surfcustomview_toggle_exit:
 	clrf	timeout_counter2			; Clear timeout
 	return
 
+;=============================================================================
+; Do every-second tasks for the custom view area
 
-
-surfcustomview_second:		; Do every-second tasks for the custom view area
-	movff	menupos3,temp1		; copy
-	dcfsnz	temp1,F
-	bra		surfcustomview_1sec_graphs		; Update the Graphs
-	dcfsnz	temp1,F
-	bra		surfcustomview_1sec_gaslist		; Update the Gaslist/SetPoint List
-	dcfsnz	temp1,F
-	bra		surfcustomview_1sec_interval	; Update the Interval display
-	dcfsnz	temp1,F
-	bra		surfcustomview_1sec_cfview		; Update the critical cf view
-	; Menupos3=0, do nothing
+surfcustomview_second:
+;	movff	menupos3,WREG               ; copy
+;	dcfsnz	WREG,F
+;	bra		surfcustomview_1sec_graphs		; Update the Graphs
+;	dcfsnz	WREG,F
+;	bra		surfcustomview_1sec_gaslist		; Update the Gaslist/SetPoint List
+;	dcfsnz	WREG,F
+;	bra		surfcustomview_1sec_interval	; Update the Interval display
+;	dcfsnz	WREG,F
+;	bra		surfcustomview_1sec_cfview		; Update the critical cf view
+;	; Menupos3=0, do nothing
+;	return
+;surfcustomview_1sec_cfview:				; Do nothing extra
+;surfcustomview_1sec_graphs:				; Do nothing extra
+;surfcustomview_1sec_gaslist:			; Do nothing extra
+;surfcustomview_1sec_interval:			; Do nothing extra
 	return
-surfcustomview_1sec_cfview:				; Do nothing extra
-surfcustomview_1sec_graphs:				; Do nothing extra
-surfcustomview_1sec_gaslist:			; Do nothing extra
-surfcustomview_1sec_interval:			; Do nothing extra
-	return
 
+;=============================================================================
 
 surfcustomview_minute:		; Do every-minute tasks for the custom view area
-	movff	menupos3,temp1		; copy
-	dcfsnz	temp1,F
+	movff	menupos3,WREG               ; copy
+	dcfsnz	WREG,F
 	bra		surfcustomview_minute_graphs		; Update the Graphs
-	dcfsnz	temp1,F
+	dcfsnz	WREG,F
 	bra		surfcustomview_minute_gaslist		; Update the Gaslist/SetPoint List
-	dcfsnz	temp1,F
+	dcfsnz	WREG,F
 	bra		surfcustomview_minute_interval		; Update the Interval display
-	dcfsnz	temp1,F
+	dcfsnz	WREG,F
 	bra		surfcustomview_minute_cfview			; Update the critical cf view
 	; Menupos3=0, do nothing
 	return

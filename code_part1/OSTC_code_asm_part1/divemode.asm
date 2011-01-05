@@ -165,17 +165,17 @@ diveloop_loop4:
 	bra		diveloop_loop					; Loop the divemode
 
 timeout_premenu_divemode:
-	incf	timeout_counter3,F		; Yes...
+	incf	timeout_counter3,F              ; Yes...
 
-	GETCUSTOM8	d'4'				; loads premenu_timeout into WREG
-	cpfsgt	timeout_counter3		; ... longer then premenu_timeout
-	return							; No!
+	GETCUSTOM8	d'4'                        ; loads premenu_timeout into WREG
+	cpfsgt	timeout_counter3                ; ... longer then premenu_timeout
+	return                                  ; No!
 
-	bcf		premenu					; Yes, so clear "Menu?" and clear pre_menu bit
-	call	PLED_menu_clear			; Remove "Menu?"
+	bcf		premenu                         ; Yes, so clear "Menu?" and clear pre_menu bit
+	call	PLED_menu_clear                 ; Remove "Menu?"
 	return
 
-divemode_apnoe_tasks:						; 1 sec. Apnoe tasks
+divemode_apnoe_tasks:                       ; 1 sec. Apnoe tasks
 	call	PLED_display_apnoe_descent		; Show descent timer
 
 	btfsc	divemode2						; Time running?

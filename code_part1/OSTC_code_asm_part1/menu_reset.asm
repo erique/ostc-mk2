@@ -138,7 +138,7 @@ cf_default_table0:
 	CF_DEFAULT    CF_INT15,	    d'0',   d'0',   0 		; logbook_offset			No Offset, but 15Bit value
 	CF_DEFAULT    CF_INT8,	    d'3',   d'2',   d'6'	; last_deco_depth			3m
 
-	CF_DEFAULT    CF_SEC,	    d'10',  d'1',   d'15'  ; timeout_apnoe_mode		10min
+	CF_DEFAULT    CF_SEC,	    d'10',  d'1',   d'15'   ; timeout_apnoe_mode		10min
 	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; show_voltage_value		=1 Show value instead of symbol, =0 Show Symbol
 
     ;---- BANK1 custom function defaults -------------------------------------
@@ -155,13 +155,13 @@ cf_default_table1:
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0       ; warn_ceiling_divemode		=1 Warn ceiling violation in divemode
 	CF_DEFAULT    CF_BOOL,      d'1',   0,      0 		; Show mix type is surfmode
-    
+
 	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; blink_gas_divemode 		=1 blink better gas
 	CF_DEFAULT    CF_INT15,     d'13000', 0,   d'13000' ; color_warn_depth_mBar		Warn depths
 	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'	; color_warn_cns_percent    Warn-%
 	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'  ; color_warn_gf_percent		Warn-%
 	CF_DEFAULT    CF_CENTI,     d'161', d'100', d'161'  ; color_warn_ppo2_cbar		ppO2 warn
-    
+
 	CF_DEFAULT    CF_INT8,	    d'15',  d'7',   d'20'	; color_warn_celocity_mmin	warn at xx m/min
 	CF_DEFAULT    CF_SEC,	    d'42',  d'0',   d'240'  ; time_correction_value_default	Adds to Seconds on Midnight
 	CF_DEFAULT    CF_BOOL,      d'1',   0,      0 		; CF#49 Show Altimeter in surface mode

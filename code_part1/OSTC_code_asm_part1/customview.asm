@@ -90,7 +90,6 @@ customview_1sec_lead_tiss:              ; Do nothing extra
 	return
 
 customview_1sec_graphs:                 ; Do nothing extra
-	call	PLED_tissue_saturation_graph
 	return
 
 ;=============================================================================
@@ -121,11 +120,15 @@ customview_minute_lead_tiss:
 	call	PLED_show_leading_tissue_2  ; Update the leading tissue
 	return
 
+customview_minute_graphs:
+	call	deco_calc_desaturation_time	; calculate desaturation time
+	movlb	b'00000001'						; select ram bank 1
+	call	PLED_tissue_saturation_graph
+	return
 
 customview_minute_marker:               ; Do nothing extra
 customview_minute_stopwatch:            ; Do nothing extra
 customview_minute_average:			; Do nothing extra
-customview_minute_graphs:
 	return
 
 ;=============================================================================
@@ -195,6 +198,8 @@ customview_init_graphs:					; Show tissue graph
 	decfsz		WREG,F					; WREG=1?	
 	bra			customview_toggle		; No, use next Customview
 
+	call	deco_calc_desaturation_time	; calculate desaturation time
+	movlb	b'00000001'						; select ram bank 1
 	call    PLED_tissue_saturation_graph
 	bra     customview_toggle_exit	
 customview_toggle_exit:

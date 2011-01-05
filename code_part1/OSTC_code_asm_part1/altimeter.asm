@@ -224,7 +224,7 @@ altimeter_menu_1:
     	WIN_INVERT	.1	; Init new Wordprocessor	
         WIN_FONT    .0
         WIN_LEFT    .80-7*7
-        WIN_TOP     .0
+        WIN_TOP     .1
         STRCPY_PRINT "Set Altimeter:"
 
         movlw       3                   ; Start menu on line 3.

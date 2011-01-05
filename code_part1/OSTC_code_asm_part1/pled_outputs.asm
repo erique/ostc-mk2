@@ -977,8 +977,8 @@ PLED_active_gas_divemode3:
 	
 							; Yes, display "Air" instead of 21/0
 	lfsr	FSR2,letter
-	OUTPUTTEXTH		d'264'			;"Air "
-	movlw	' '
+	OUTPUTTEXTH		d'264'			;"Air  "
+	clrf	WREG
 	btfsc	better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 	movlw	'*'
 	movwf	POSTINC2
@@ -992,7 +992,7 @@ PLED_active_gas_divemode4:
 	PUTC    '/'
 	movff	char_I_He_ratio,lo		; copy He ratio into lo
 	output_8
-	movlw	' '
+	clrf	WREG
 	btfsc	better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 	movlw	'*'
 	movwf	POSTINC2

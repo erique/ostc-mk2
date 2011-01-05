@@ -691,7 +691,7 @@ text_pointer:
 	DA	"YYMMDD}}"				;261		l=8
 	DA	"OSTC }"				;262		l=6
 	DA	"Bail}}"				;263		l=6 
-	DA	"Air }}"				;264		l=6
+	DA	"Air  }"				;264		l=6
 	DA	"Air  }"				;265		l=6
 	DA	"Calibrate}"			;266		l=10
 	DA	"Max.}}"				;267		l=6

@@ -863,7 +863,10 @@ PLED_temp_divemode:
 	bsf		leftbind			; left orientated output
 	output_16dp	d'2'
 	bcf		leftbind
-	STRCAT_PRINT  "° "
+    STRCAT "° "
+    clrf    WREG				; Allow up to 5 chars to avoid
+    movff   WREG,letter+5		; collision with sat graphs
+    call    word_processor
 	return
 
 PLED_show_ppO2:					; Show ppO2

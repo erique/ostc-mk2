@@ -2583,16 +2583,14 @@ PLED_tsg_1:
 PLED_tsg_2:
 
     ;---- Draw grid ----------------------------------------------------------
+    btfss   divemode
+    bra     PLED_no_graph_grid
+    
 	movlw   color_grey
     call	PLED_set_color
 
-	movlw	.25+.1                      ; surfmode
-    btfsc   divemode
     movlw   .169+.1                     ; divemode
 	movff	WREG,win_top
-	
-	movlw	.120-.25-.1                 ; surfmode
-    btfsc   divemode
     movlw   .239-.169-.1                ; divemode
 	movff	WREG,win_height
 
@@ -2611,6 +2609,7 @@ PLED_tsg_2:
     movlw   .149
     movff   WREG,win_leftx2
     call    PLED_box
+PLED_no_graph_grid:
     
     ;---- Draw N2 Tissues ----------------------------------------------------
 	lfsr	FSR2, char_O_tissue_saturation+.000	; N2
@@ -2623,7 +2622,7 @@ PLED_tsg_2:
 	movff	WREG,win_height             ; row bottom (0-239)
 	movlw	.82+.18                     ; surfmode
     btfsc   divemode
-    movlw   .90+.10                     ; divemode
+    movlw   .90+.18                     ; divemode
 	movff	WREG,win_leftx2             ; column left (0-159)
 
 PLED_tissue_saturation_graph3:
@@ -2641,10 +2640,14 @@ PLED_tissue_saturation_graph3:
 	rrcf	WREG                        ; And divide by 4
 	bcf		STATUS,C
 	rrcf	WREG
-	movff   WREG,win_width
-	movlw	d'57'                       ; limit display 
-	cpfslt	win_width                   ; skip if 157 (WREG) < box_temp+4
-	movwf	win_width
+	movwf   temp1
+
+	movlw	.57                         ; surfmode: max 57pix
+    btfsc   divemode
+	movlw	.57-8                       ; divemode: 8pix less...s
+	cpfslt	temp1                       ; skip if 57 (WREG) < win_width
+	movwf	temp1
+	movff   temp1,win_width
 
 	call	PLED_box	
 
@@ -2673,10 +2676,13 @@ PLED_tissue_saturation_graph2:
 	rrcf	WREG                        ; And divide by 4
 	bcf		STATUS,C
 	rrcf	WREG
-	movff   WREG,win_width
-	movlw	d'57'                       ; limit display 
-	cpfslt	win_width                   ; skip if 157 (WREG) < box_temp+4
-	movwf	win_width
+	movwf   temp1
+	movlw	.57                         ; surfmode: max 57pix
+    btfsc   divemode
+	movlw	.57-8                       ; divemode: 8pix less...s
+	cpfslt	temp1                       ; skip if 57 (WREG) < win_width
+	movwf	temp1
+	movff   temp1,win_width
 
 	call	PLED_box	
 

@@ -69,7 +69,7 @@ customview_second:
 	bra		customview_1sec_clock       ; Update the Clock
 	dcfsnz	WREG,F
 	bra		customview_1sec_lead_tiss   ; Update the leading tissue
-	dcfsnz	temp1,F
+	dcfsnz	WREG,F
 	bra		customview_1sec_average     ; Update the Average depth
 	dcfsnz	WREG,F
 	bra		customview_1sec_graphs      ; Update the leading tissue
@@ -87,7 +87,10 @@ customview_1sec_stopwatch:
 customview_1sec_marker:                 ; Do nothing extra
 customview_1sec_clock:                  ; Do nothing extra
 customview_1sec_lead_tiss:              ; Do nothing extra
+	return
+
 customview_1sec_graphs:                 ; Do nothing extra
+	call	PLED_tissue_saturation_graph
 	return
 
 ;=============================================================================
@@ -103,7 +106,7 @@ customview_minute:
 	bra		customview_minute_clock     ; Update the Clock
 	dcfsnz	WREG,F
 	bra		customview_minute_lead_tiss ; Update the leading tissue
-	dcfsnz	temp1,F
+	dcfsnz	WREG,F
 	bra		customview_minute_average		; Update the Average depth
 	dcfsnz	WREG,F
 	bra		customview_minute_graphs	; Update the graphs
@@ -118,13 +121,11 @@ customview_minute_lead_tiss:
 	call	PLED_show_leading_tissue_2  ; Update the leading tissue
 	return
 
-customview_minute_graphs:
-	call	PLED_tissue_saturation_graph
-	return
 
 customview_minute_marker:               ; Do nothing extra
 customview_minute_stopwatch:            ; Do nothing extra
 customview_minute_average:			; Do nothing extra
+customview_minute_graphs:
 	return
 
 ;=============================================================================
@@ -148,7 +149,7 @@ customview_mask:
 	bra		customview_init_clock			; Show the clock
 	dcfsnz	WREG,F
 	bra		customview_init_lead_tissue		; Show the leading tissue
-	dcfsnz	temp1,F
+	dcfsnz	WREG,F
 	bra		customview_init_average			; Show Total average depth
 	dcfsnz	WREG,F
 	bra		customview_init_graphs		    ; Show the graphs
@@ -192,9 +193,10 @@ customview_init_lead_tissue:			; Show leading tissue
 customview_init_graphs:					; Show tissue graph
  	GETCUSTOM8	d'52'					; Show Tissue Graph? (=1 in WREG)
 	decfsz		WREG,F					; WREG=1?	
-	call	PLED_tissue_saturation_graph
 	bra			customview_toggle		; No, use next Customview
 
+	call    PLED_tissue_saturation_graph
+	bra     customview_toggle_exit	
 customview_toggle_exit:
 	bcf		toggle_customview			; Clear flag
 	ostc_debug	'Y'		                ; Sends debug-information to screen in debugmode
@@ -217,7 +219,7 @@ surfcustomview_mask:
 	dcfsnz	WREG,F
 	bra		surfcustomview_init_gaslist			; Show pre-dive gaslist/setpoint list
 	dcfsnz	WREG,F
-	bra		surfcustomview_init_interval		; Show the interval counter
+	bra		surfcustomview_init_interval; Show the interval counter
 	dcfsnz	WREG,F
 	bra		surfcustomview_init_cfview			; Show the interval counter
 
@@ -225,7 +227,7 @@ surfcustomview_init_nocustomview:
 	bra		surfcustomview_toggle_exit	
 
 surfcustomview_init_graphs:
-	call	PLED_tissue_saturation_graph		; Draw the graphs
+	call	PLED_tissue_saturation_graph; Draw the graphs
 	bra		surfcustomview_toggle_exit	
 
 surfcustomview_init_gaslist:

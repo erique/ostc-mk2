@@ -128,7 +128,7 @@ customview_minute_graphs:
 
 customview_minute_marker:               ; Do nothing extra
 customview_minute_stopwatch:            ; Do nothing extra
-customview_minute_average:			; Do nothing extra
+customview_minute_average:				; Do nothing extra
 	return
 
 ;=============================================================================
@@ -136,8 +136,12 @@ customview_minute_average:			; Do nothing extra
 
 customview_toggle:		
 	ostc_debug	'X'		; Sends debug-information to screen if debugmode active
+	
+	btfsc	FLAG_apnoe_mode					; In Apnoe mode?
+	bra		customview_toggle_exit			; Yes, ignore custom view in divemode completely
+
 	incf	menupos3,F			            ; Number of customview to show
-	movlw	d'6'				; Max number
+	movlw	d'6'							; Max number
 	cpfsgt	menupos3			            ; Max reached?
 	bra		customview_mask		            ; No, show
 	clrf	menupos3			            ; Reset to zero (Zero=no custom view)
@@ -190,6 +194,9 @@ customview_init_lead_tissue:			; Show leading tissue
 	decfsz		WREG,F					; WREG=1?	
 	bra			customview_toggle		; No, use next Customview
 
+	btfsc		no_deco_customviews		; no-deco-mode-flag = 1
+	bra			customview_toggle		; Yes, use next Customview!
+
 	call	PLED_show_leading_tissue
 	bra		customview_toggle_exit	
 
@@ -197,6 +204,9 @@ customview_init_graphs:					; Show tissue graph
  	GETCUSTOM8	d'52'					; Show Tissue Graph? (=1 in WREG)
 	decfsz		WREG,F					; WREG=1?	
 	bra			customview_toggle		; No, use next Customview
+
+	btfsc		no_deco_customviews		; no-deco-mode-flag = 1
+	bra			customview_toggle		; Yes, use next Customview!
 
 	call	deco_calc_desaturation_time	; calculate desaturation time
 	movlb	b'00000001'						; select ram bank 1
@@ -232,10 +242,16 @@ surfcustomview_init_nocustomview:
 	bra		surfcustomview_toggle_exit	
 
 surfcustomview_init_graphs:
+	btfsc	no_deco_customviews				; no-deco-mode-flag = 1
+	bra		surfcustomview_toggle			; Yes, use next Customview!
+
 	call	PLED_tissue_saturation_graph; Draw the graphs
 	bra		surfcustomview_toggle_exit	
 
 surfcustomview_init_gaslist:
+	btfsc	no_deco_customviews				; no-deco-mode-flag = 1
+	bra		surfcustomview_toggle			; Yes, use next Customview!
+
 	call	PLED_pre_dive_screen				; Show the Gaslist/Setpoint list
 	bra		surfcustomview_toggle_exit	
 
@@ -286,8 +302,8 @@ surfcustomview_second:
 ;	return
 ;surfcustomview_1sec_cfview:				; Do nothing extra
 ;surfcustomview_1sec_graphs:				; Do nothing extra
-;surfcustomview_1sec_gaslist:			; Do nothing extra
-;surfcustomview_1sec_interval:			; Do nothing extra
+;surfcustomview_1sec_gaslist:				; Do nothing extra
+;surfcustomview_1sec_interval:				; Do nothing extra
 	return
 
 ;=============================================================================
@@ -301,7 +317,7 @@ surfcustomview_minute:		; Do every-minute tasks for the custom view area
 	dcfsnz	WREG,F
 	bra		surfcustomview_minute_interval		; Update the Interval display
 	dcfsnz	WREG,F
-	bra		surfcustomview_minute_cfview			; Update the critical cf view
+	bra		surfcustomview_minute_cfview		; Update the critical cf view
 	; Menupos3=0, do nothing
 	return
 

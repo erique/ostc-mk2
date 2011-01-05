@@ -198,6 +198,7 @@ restart_set_modes_and_flags:		; "Call"ed from divemode, as well!
 	bcf		FLAG_apnoe_mode			
 
 ; Pre-load modes for OC, GF 90/90 and no Aponoe or Gauge.
+	bcf		no_deco_customviews		; Clear no-deco-mode-flag
 	movlw	d'0'
 	movwf	wait_temp
 	movff	wait_temp,char_I_deco_model	; Clear Flagbyte 
@@ -212,6 +213,7 @@ restart_set_modes_and_flags:		; "Call"ed from divemode, as well!
 	cpfseq	EEDATA
 	 bra	restart_3_test_ppO2_mode; check for ppO2 mode
 	bsf		gauge_mode				; Set flag for gauge mode
+	bsf		no_deco_customviews		; Set no-deco-mode-flag
 	return							; start in Surfacemode
 restart_3_test_ppO2_mode:
 	movlw	d'2'					; const ppO2 mode
@@ -224,6 +226,7 @@ restart_3_test_apnoe_mode:
 	cpfseq	EEDATA
 	 bra	restart_4_test_gf_mode	; check for GF OC mode
 	bsf		FLAG_apnoe_mode			; Set flag for Apnoe Mode
+	bsf		no_deco_customviews		; Set no-deco-mode-flag
 	return							; start in Surfacemode
 restart_4_test_gf_mode:
 	movlw	d'4'					; GF OC mode
@@ -246,7 +249,7 @@ restart_5_test_gfO2_mode:
 	movlw	d'1'
 	movwf	wait_temp
 	movff	wait_temp,char_I_deco_model	; Set Flagbyte for GF method
-; Load GF values into RAM
+	; Load GF values into RAM
 	GETCUSTOM8	d'32'			; GF low
 	movff		EEDATA,char_I_GF_Lo_percentage
 	GETCUSTOM8	d'33'			; GF high

@@ -25,7 +25,7 @@
 #DEFINE	softwareversion_x		d'1'		; Software version  XX.YY
 #DEFINE	softwareversion_y		d'75'		; Software version  XX.YY
 
-#DEFINE	max_custom_number		d'48'		; Number of last used custom function
+#DEFINE	max_custom_number		d'53'		; Number of last used custom function
 
 #DEFINE	logbook_profile_version	0x20		; Do not touch!
 
@@ -610,7 +610,7 @@
 #DEFINE	reset_average_depth 	flag15,2	;=1: Average Depth will be resetted
 #DEFINE	blinking_better_gas		flag15,3	;=1: Gas is currently blinking
 #DEFINE	menu3_active			flag15,4	;=1: menu entry three in divemode menu is active
-;unused	flag15,5	;=1: 
+#DEFINE no_deco_customviews		flag15,5	;=1: Selected mode is Apnoe or Gauge
 #DEFINE	maxdepth_greater_100m	flag15,6	;=1: Max Depth greater>100m
 ;unused			flag15,7	;=1: 
 

@@ -1,3 +1,8 @@
+New in 1.76 Beta:
+BETA Version - Do NOT use for diving!
+
+
+
 New in 1.75 Beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: Decomask in Gauge mode removed

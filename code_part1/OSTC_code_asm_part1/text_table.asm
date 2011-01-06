@@ -83,7 +83,7 @@ textlength_pointer:
 	DB	.20,.20,.20,.20,.20,.20 ;t228......t233
 	DB	.20,.20,.10,.10,.10,.8	;t234;t235;t236;t237;t238;t239
 	DB	.10,.8,.8,.6,.6,.20		;t240;t241;t242;t243;t244;t245
-	DB	.16,.10,.16,.12,.6,.6	;t246;t247;t248;t249;t250;t251
+	DB	.10,.10,.16,.12,.6,.6	;t246;t247;t248;t249;t250;t251
 	DB	.6,.6,.6,.6				;t252;t253;t254;t255
 
 ; Text Bank2 (Texts 256-511):
@@ -359,8 +359,8 @@ textpos_pointer:
 	DB	.120,.0				;243	beta
 	DB	.100,.100			;244	Exit
 	DB	.20,.65				;245
-	DB	.2,.30				;246
-	DB	.20,.125			;247		Simulator
+	DB	.50,.145			;246	LowBatt!
+	DB	.20,.125			;247	Simulator
 	DB	.30,.2				;248
 	DB	.20,.35				;249
 	DB	.100,.25			;250	Divemode_Simulator_Menu
@@ -671,7 +671,7 @@ text_pointer:
 	DA	"beta}}"				;243		l=6
 	DA	"unuse}"				;244		l=6
 	DA	"Reset CF,Gas & Deco}"	;245		l=20
-	DA	"Disable module}}"		;246		l=16
+	DA	"LowBatt!}}"			;246		l=10
 	DA	"Simulator}"			;247		l=10
 	DA	"OSTC Simulator}}"		;248		l=16
 	DA	"Start Dive}}"			;249		l=12

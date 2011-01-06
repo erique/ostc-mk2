@@ -1568,7 +1568,8 @@ PLED_desaturation_time2:
 PLED_nofly_time:	
 	movff		nofly_time+0,lo			
 	movff		nofly_time+1,hi					; Copy
-	tstfsz		lo								; =0?
+	movlw		d'1'	
+	cpfseq		lo								; =1?
 	bra			PLED_nofly_time2				; No!
 	tstfsz		hi								; =0?
 	bra			PLED_nofly_time2				; No!
@@ -1625,6 +1626,10 @@ update_surf_press:
 	return
 
 update_batt_voltage_divemode:
+	call	PLED_warnings_color
+	DISPLAYTEXT		d'246'		; LowBatt!
+	call	PLED_standard_color
+	return
 
 update_batt_voltage:
 	ostc_debug	'f'

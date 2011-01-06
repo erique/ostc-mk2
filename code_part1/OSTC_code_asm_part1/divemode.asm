@@ -96,7 +96,7 @@ diveloop_loop1c:
 diveloop_loop1x:
 	call	timeout_divemode				; dive finished? This routine sets the required flags
 	btfsc	low_battery_state				; If battery is low, then...
-	call	update_batt_voltage_divemode	; Display Battery Symbol/Voltage!
+	call	update_batt_voltage_divemode	; Display Battery Warning Text
 	btfsc	premenu							; is Menu? displayed?
 	call	timeout_premenu_divemode		; No, so check for timeout premenu
 	btfsc	menubit							; is the Dive mode menu displayed?

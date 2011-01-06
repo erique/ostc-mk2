@@ -341,8 +341,9 @@ reset_all_cf:
 	write_int_eeprom	d'39'		; Disable Debugbode
 	clrf	EEDATA
 	write_int_eeprom	d'90'		; Disable Brightness offset? (Dim=1, Normal = 0)
-	clrf	EEDATA
-	write_int_eeprom	d'91'		; Reset Date format to MM/DD/YY
+
+	movlw	d'1'
+	write_int_eeprom	d'91'		; Reset Date format to DD.MM.YY
 
 	movlw	d'100'
 	write_int_eeprom	d'26'		; Salinity default: 1.00 kg/l

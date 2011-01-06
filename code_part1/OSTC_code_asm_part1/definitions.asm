@@ -25,10 +25,12 @@
 #DEFINE	softwareversion_x		d'1'		; Software version  XX.YY
 #DEFINE	softwareversion_y		d'76'		; Software version  XX.YY
 
+#DEFINE softwareversion_beta 	1 			; (and 0 for release) 
+
 #DEFINE	max_custom_number		d'53'		; Number of last used custom function
 
-#DEFINE	logbook_profile_version	0x20		; Do not touch!
 
+#DEFINE	logbook_profile_version	0x20		; Do not touch!
 #DEFINE	T0CON_debounce	b'00000000'					; Timer0 Switch Debounce
 
 #DEFINE		FT_SMALL		.0

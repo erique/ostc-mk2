@@ -1531,6 +1531,15 @@ PLED_clear_depth			; No, clear depth area and set flag
 	return
 
 PLED_desaturation_time:	
+	movff		int_O_desaturation_time+0,lo
+	movff		int_O_desaturation_time+1,hi		; Copy
+	tstfsz		lo									; =0?
+	bra			PLED_desaturation_time2				; No!
+	tstfsz		hi									; =0?
+	bra			PLED_desaturation_time2				; No!
+	return											; Do not display Desat
+	
+PLED_desaturation_time2:
 	ostc_debug	'h'
 	WIN_TOP		.150
 	WIN_LEFT	.1
@@ -1557,6 +1566,15 @@ PLED_desaturation_time:
 	return
 
 PLED_nofly_time:	
+	movff		nofly_time+0,lo			
+	movff		nofly_time+1,hi					; Copy
+	tstfsz		lo								; =0?
+	bra			PLED_nofly_time2				; No!
+	tstfsz		hi								; =0?
+	bra			PLED_nofly_time2				; No!
+	return
+
+PLED_nofly_time2:
 	ostc_debug	'g'
 	WIN_TOP		.125
 	WIN_LEFT	.1
@@ -1717,7 +1735,7 @@ PLED_convert_date:	; converts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in pos
 	bsf		leftbind
 	output_99x
 	bcf		leftbind
-	PUTC    '/'
+	PUTC    '.'
 	movff	convert_value_temp+1,lo			;day
 	bra 	PLED_convert_date1_common		;year
 
@@ -1731,14 +1749,14 @@ PLED_convert_date1:
 	bsf		leftbind
 	output_99x
 	bcf		leftbind
-	PUTC    '/'
+	PUTC    '.'
 	movff	convert_value_temp+0,lo			;month
 
 PLED_convert_date1_common:
 	bsf		leftbind
 	output_99x
 	bcf		leftbind
-	PUTC    '/'
+	PUTC    '.'
 	movff	convert_value_temp+2,lo			;year
 	bsf		leftbind
 	output_99x
@@ -1750,12 +1768,12 @@ PLED_convert_date2:
 	bsf		leftbind
 	output_99x
 	bcf		leftbind
-    PUTC    '/'
+    PUTC    '.'
 	movff	convert_value_temp+0,lo			;month
 	bsf		leftbind
 	output_99x
 	bcf		leftbind
-    PUTC    '/'
+    PUTC    '.'
 	movff	convert_value_temp+1,lo			;day
 	bsf		leftbind
 	output_99x
@@ -1772,7 +1790,7 @@ PLED_convert_date_short_common:
 	bsf		leftbind
 	output_99x
 	bcf		leftbind
-    PUTC    '/'
+    PUTC    '.'
 	movff	convert_value_temp+1,lo			;day
 	bsf		leftbind
 	output_99x
@@ -1789,7 +1807,7 @@ PLED_convert_date_short1:
 	bsf		leftbind
 	output_99x
 	bcf		leftbind
-    PUTC    '/'
+    PUTC    '.'
 	movff	convert_value_temp+0,lo			;month
 	bsf		leftbind
 	output_99x
@@ -2085,8 +2103,15 @@ PLED_serial:			; Writes OSTC #Serial and Firmware version in surfacemode
 	bsf		leftbind
 	output_99x
 	bcf		leftbind
-	
 	call	word_processor
+
+	movlw	softwareversion_beta			; =1: Beta, =0: Release
+	decfsz	WREG,F
+	return									; Release version -> Return
+
+	call	PLED_warnings_color
+	DISPLAYTEXT		d'243'			; beta
+	call	PLED_standard_color
 	return
 
 PLED_divemode_menu_mask_first:			; Write Divemode menu1 mask

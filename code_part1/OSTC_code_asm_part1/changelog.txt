@@ -1,6 +1,7 @@
 New in 1.76 Beta:
 BETA Version - Do NOT use for diving!
-
+NEW: "beta" is shown for beta versions
+CHANGE: NoFly and Desaturation time only visible when > 0
 
 
 New in 1.75 Beta:

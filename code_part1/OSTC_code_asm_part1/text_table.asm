@@ -82,7 +82,7 @@ textlength_pointer:
 	DB	.20,.20,.20,.20,.20,.20 ;t222......t227
 	DB	.20,.20,.20,.20,.20,.20 ;t228......t233
 	DB	.20,.20,.10,.10,.10,.8	;t234;t235;t236;t237;t238;t239
-	DB	.10,.8,.8,.14,.6,.20	;t240;t241;t242;t243;t244;t245
+	DB	.10,.8,.8,.6,.6,.20		;t240;t241;t242;t243;t244;t245
 	DB	.16,.10,.16,.12,.6,.6	;t246;t247;t248;t249;t250;t251
 	DB	.6,.6,.6,.6				;t252;t253;t254;t255
 
@@ -356,7 +356,7 @@ textpos_pointer:
 	DB	.90,.50				;240	(Surface) Interval:
 	DB	.100,.75			;241	Display (Divemode Menu)
 	DB	.100,.0				;242	No Deco (GF)
-	DB	.2,.12				;243
+	DB	.120,.0				;243	beta
 	DB	.100,.100			;244	Exit
 	DB	.20,.65				;245
 	DB	.2,.30				;246
@@ -668,7 +668,7 @@ text_pointer:
 	DA	"Interval:}"			;240		l=10
 	DA	"Display}"				;241		l=8
 	DA	"No deco}"				;242		l=8
-	DA	"Search module}"		;243		l=14
+	DA	"beta}}"				;243		l=6
 	DA	"unuse}"				;244		l=6
 	DA	"Reset CF,Gas & Deco}"	;245		l=20
 	DA	"Disable module}}"		;246		l=16

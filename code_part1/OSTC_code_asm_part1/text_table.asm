@@ -576,7 +576,7 @@ text_pointer:
 	DA	"Color# Divemask}"		;158
 	DA	"Color# Warnings}"		;159
 	DA	"Divemode secs. }"		;160
-	DA	"not used       }"		;161
+	DA	"Adjust fixed SP}"		;161
 	DA	"Warn Ceiling   }"		;162
 	DA	"Mix type icons }"		;163
 	DA	"Blink BetterGas}"		;164

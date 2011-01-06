@@ -6,12 +6,15 @@ NEW: Altimeter (OSTC MK.2 only)
 BUGFIX: Timeout reset in Customview  (OSTC MK.2 only)
 BUGFIX: Surface Interval
 NEW: Non-Resettable Average Depth (OSTC MK.2 only)
-NEW: CF41: Mix Type Icons in Surfacemode
-NEW: CF49: Show Altimeter in Surfacemode
-NEW: CF50: Show LogMarker in Divemode/Customview
-NEW: CF51: Show Stopwatch in Divemode/Customview
-NEW: CF52: Show Tissue Graph in Divemode/Customview
-NEW: CF53: Show Leading Tissue in Divemode/Customview
+NEW: CF41: Mix Type Icons in Surfacemode (OSTC MK.2 only)
+NEW: CF49: Show Altimeter in Surfacemode (OSTC MK.2 only)
+NEW: CF50: Show LogMarker in Divemode/Customview (OSTC MK.2 only)
+NEW: CF51: Show Stopwatch in Divemode/Customview (OSTC MK.2 only)
+NEW: CF52: Show Tissue Graph in Divemode/Customview (OSTC MK.2 only)
+NEW: CF53: Show Leading Tissue in Divemode/Customview (OSTC MK.2 only)
+NEW: CF39: Adjust fixed SetPoint if Diluent ppO2 > SetPoint (OSTC MK.2 only)
+BUGFIX: Custom view for Apnoe mode disabled
+BUGFIX: Custom view for Gauge mode adjusted
 
 New in 1.74 Beta:
 BETA Version - Do NOT use for diving!

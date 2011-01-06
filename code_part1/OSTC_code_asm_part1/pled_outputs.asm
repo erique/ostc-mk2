@@ -2862,10 +2862,13 @@ PLED_const_ppO2_value1:
 	call		div16x16				;xA/xB=xC with xA as remainder 	
 
 	movff		xC+0,char_I_const_ppO2			; No, Overwrite with actual value
-	bra			PLED_const_ppO2_value1a
+	
+	GETCUSTOM8	d'39'							; Adjust fixed SP?
+	dcfsnz		WREG,F
+	bra			PLED_const_ppO2_value1a			; Yes!
+	; Do not adjust -> restore original SetPoint
 
 PLED_const_ppO2_value11:
-
 ; Setpoint in possible limits
 	movff		ppO2_setpoint_store,char_I_const_ppO2		; Restore Setpoint
 

@@ -975,7 +975,14 @@ PLED_active_gas_divemode3:
 							; Yes, display "Air" instead of 21/0
 	lfsr	FSR2,letter
 	OUTPUTTEXTH		d'264'			;"Air  "
-	clrf	WREG
+	PUTC	' '
+    clrf    WREG				; Allow up to 5 chars to avoid
+    movff   WREG,letter+5		; collision with sat graphs
+	bcf		leftbind
+	call	word_processor
+	return
+
+	movlw	' '
 	btfsc	better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 	movlw	'*'
 	movwf	POSTINC2
@@ -989,7 +996,15 @@ PLED_active_gas_divemode4:
 	PUTC    '/'
 	movff	char_I_He_ratio,lo		; copy He ratio into lo
 	output_8
-	clrf	WREG
+	PUTC	' '
+    clrf    WREG				; Allow up to 5 chars to avoid
+    movff   WREG,letter+5		; collision with sat graphs
+	bcf		leftbind
+	call	word_processor
+	return
+
+
+	movlw	' '
 	btfsc	better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 	movlw	'*'
 	movwf	POSTINC2

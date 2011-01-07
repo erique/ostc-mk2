@@ -18,9 +18,11 @@
 ; hardware routines for S6E6D6 Samsung OLED Driver IC
 ; written by: Matthias Heinrichs, info@heinrichsweikamp.com
 ; written: 090801
-; last updated: 090830
-; known bugs:
-; ToDo: Optimise PLED_box calls
+; History:
+; 2009-08-30: [MH] last updated.
+; 2011-01-07: [jDG] Added flip_screen option
+; known bugs: pixel-write (loogbok curves) not done yet...
+; ToDo:
 
 WIN_FONT 	macro	win_font_input
 			movlw	win_font_input
@@ -46,29 +48,31 @@ WIN_COLOR	macro 	win_color_input
 			movlw	win_color_input
 			call	PLED_set_color
 			endm
-	
+
+;=============================================================================
+
 word_processor:						; word_processor:
-	clrf	POSTINC2				; Required, to mark end of string.
-	call	aa_wordprocessor
-	movlb	b'00000001'				; Back to Rambank1
-	return
+    clrf	POSTINC2				; Required, to mark end of string.
+    call	aa_wordprocessor
+    movlb	b'00000001'				; Back to Rambank1
+    return
 
-; -----------------------------
+;=============================================================================
 ; PLED_SetColumnPixel:
-; -----------------------------
+;
 PLED_SetColumnPixel:
-	movff	WREG,win_leftx2		 ; d'0' ... d'159'
-	mullw   2                   ; Copy to PROD, times 2.
+	movff	WREG,win_leftx2             ; d'0' ... d'159'
+	mullw   2                           ; Copy to PROD, times 2.
 
-	movlw	0x21				; Start Address Vertical (.0 - .319)
+	movlw	0x21				        ; Start Address Vertical (.0 - .319)
 	rcall	PLED_CmdWrite
 	bra     PLED_DataWrite_PROD
 
-; -----------------------------
+;=============================================================================
 ; PLED_SetRow:
 ; Backup WREG --> win_top, for the next write pixel.
 ; Setup OLED pixel horizontal address.
-; -----------------------------
+;
 PLED_SetRow:		
 	movff  	WREG,win_top                ; d'0' ... d'239'
 	mullw   1                           ; Copy row to PRODH:L
@@ -76,9 +80,9 @@ PLED_SetRow:
 	rcall	PLED_CmdWrite
 	bra     PLED_DataWrite_PROD		
 
-; -----------------------------
+;=============================================================================
 ; PLED Write Two Pixel
-; -----------------------------
+;
 
 PLED_PxlWrite:
     rcall   PLED_PxlWrite_Single        ; Write first pixel.
@@ -125,28 +129,168 @@ PLED_DisplayOff:
 	return
 
 ;=============================================================================
+; Fast macros to write to OLED display.
+; Adding a call/return adds 3 words and a pipeline flush, hence make it
+; nearly twice slower...
+;
+; Input	 : commande as macro parameter.
+; Output : NONE
+; Trash  : WREG
+;
+AA_CMD_WRITE macro cmd
+		movlw	cmd
+		rcall   PLED_CmdWrite
+;		bcf		oled_rs				    ; Cmd mode
+;		movwf	PORTD,A
+;		bcf		oled_rw				    ; Tick the clock
+;		bsf		oled_rw
+		endm
+;
+; Input	 : PRODH:L as 16bits data.
+; Output : NONE
+; Trash  : NONE
+;
+AA_DATA_WRITE_PROD	macro
+        rcall   PLED_DataWrite_PROD
+;		bsf		oled_rs				    ; Data mode
+;		movff	PRODH,PORTD			    ; NOTE: OLED is BIGENDIAN!
+;		bcf		oled_rw				    ; Tick the clock
+;		bsf		oled_rw
+;		movff	PRODL,PORTD
+;		bcf		oled_rw				    ; Tick the clock
+;		bsf		oled_rw
+		endm
+
+;=============================================================================
+; Output OLED Window Address commands.
+; Inputs : win_top, win_leftx2, win_height, aa_width.
+; Output : PortD commands.
+; Trashed: PROD
+;
+PLED_box_write:
+		movff	win_leftx2,WREG         ; Compute left = 2*leftx2 --> PROD
+		mullw	2
+
+        movff   win_flags,WREG          ; BEWARE: bank0 bit-test
+    	btfsc   WREG,0                  ; 180° rotation ?
+    	bra     PLED_box_flip_H         ; YES: 
+
+        ;---- Normal horizontal window ---------------------------------------
+        ; Output 0x35 left,
+        ;        0x36 right ==  left + width - 1.
+		AA_CMD_WRITE	0x35		    ; this is the left border
+		AA_DATA_WRITE_PROD              ; Output left
+		AA_CMD_WRITE	0x21            ; Also the horizontal first pix coord.
+		AA_DATA_WRITE_PROD
+		
+		movf	aa_width+0,W,ACCESS	    ; right = left + width - 1
+		addwf	PRODL,F
+		movf	aa_width+1,W,ACCESS
+		addwfc	PRODH,F
+		decf	PRODL,F,A			    ; decrement result
+		btfss   STATUS,C
+		decf	PRODH,F,A
+
+		AA_CMD_WRITE	0x36		    ; Write and the right border
+		AA_DATA_WRITE_PROD
+
+		bra     PLED_box_noflip_H
+
+        ;---- Flipped horizontal window --------------------------------------
+PLED_box_flip_H:
+        ; Output 0x36 flipped(left)  = 319-left
+        ;        0x35 flipped(right) = 319-right = 320 - left - width
+        movf    PRODL,W                 ; 16bits 319 - PROD --> PROD
+        sublw   LOW(.319)               ; 319-W --> W
+        movwf   PRODL
+        movf    PRODH,W
+        btfss   STATUS,C                ; Borrow = /CARRY
+        incf    WREG
+        sublw   HIGH(.319)
+        movwf   PRODH
+		AA_CMD_WRITE	0x36		    ; this is the left border
+		AA_DATA_WRITE_PROD              ; Output left
+		AA_CMD_WRITE	0x21
+		AA_DATA_WRITE_PROD
+
+        movf    aa_width+0,W            ; 16bits PROD - width --> PROD
+        subwf   PRODL,F                 ; PRODL - WREG --> PRODL
+        movf    aa_width+1,W
+        subwfb  PRODH,F
+        infsnz  PRODL                   ; PROD+1 --> PROD
+        incf    PRODH
+		AA_CMD_WRITE	0x35		    ; this is the left border
+		AA_DATA_WRITE_PROD              ; Output left
+
+PLED_box_noflip_H:
+        movff   win_flags,WREG          ; BEWARE: bank0 bit-test
+    	btfsc   WREG,0                  ; 180° rotation ?
+    	bra     PLED_box_flip_V
+
+        ;---- Normal vertical window -----------------------------------------
+        ; Output 0x37 (top) (bottom)
+		movff	win_top,PRODH           ; top --> PRODH (first byte)
+		movff   win_height,WREG
+		addwf   PRODH,W
+		decf	WREG
+		movwf	PRODL                   ; top+height-1 --> PRODL (second byte)
+
+		AA_CMD_WRITE	0x37
+		AA_DATA_WRITE_PROD
+
+        movff   PRODH,PRODL
+        clrf    PRODH                   ; Start pixel V coord == top.
+		AA_CMD_WRITE	0x20
+		AA_DATA_WRITE_PROD
+
+		return
+
+        ;---- Flipped vertical window ----------------------------------------
+        ; Output 0x37 flipped(bottom) = 239-bottom = 240 - top - height
+        ;             flipped(top)    = 239-top
+PLED_box_flip_V:
+		movff   win_top,PRODL
+		movff   win_height,WREG
+		addwf   PRODL,W
+		sublw   .240                    ; 240 - top - height
+		movwf   PRODH                   ; First byte
+
+		movf	PRODL,W
+		sublw   .239                    ; 249-top
+		movwf   PRODL                   ; --> second byte.
+
+		AA_CMD_WRITE	0x37
+		AA_DATA_WRITE_PROD
+
+        clrf    PRODH                   ; Start pixel V coord.
+		AA_CMD_WRITE	0x20
+		AA_DATA_WRITE_PROD
+
+		return
+
+;=============================================================================
 ; PLED_frame : draw a frame around current box with current color.
 ; Inputs:  win_top, win_leftx2, win_height, win_width, win_color1, win_color2
 ; Outputs: (none)
 ; Trashed: WREG, PROD, aa_start:2, aa_end:2, win_leftx2, win_width:1
 
-PLED_frame: 
-    movff   win_top,aa_start+0              ; Backup everything.
+PLED_frame:
+    movff   win_top,aa_start+0          ; Backup everything.
     movff   win_height,aa_start+1
     movff   win_leftx2,aa_end+0
     movff   win_width,aa_end+1
 
     ;---- TOP line -----------------------------------------------------------
-    movlw   1                               ; row ~ height=1
+    movlw   1                           ; row ~ height=1
     movff   WREG,win_height
     rcall   PLED_box
 
     ;---- BOTTOM line --------------------------------------------------------
-    movff   aa_start+0,PRODL                ; Get back top,
-    movff   aa_start+1,WREG                 ; and height
-    addwf   PRODL,W                         ; top+height
-    decf    WREG                            ; top+height-1
-    movff   WREG,win_top                    ; top+height-1 --> top
+    movff   aa_start+0,PRODL             ; Get back top,
+    movff   aa_start+1,WREG              ; and height
+    addwf   PRODL,W                      ; top+height
+    decf    WREG                         ; top+height-1
+    movff   WREG,win_top                 ; top+height-1 --> top
     rcall   PLED_box                        
 
     ;---- LEFT column --------------------------------------------------------
@@ -172,74 +316,46 @@ PLED_frame:
 
 PLED_box:
     ;---- Define Window ------------------------------------------------------
-	movlw	0x35				; VerticalStartAddress HIGH:LOW
-	rcall	PLED_CmdWrite
-	movff	win_leftx2,WREG
-	mullw   2
-	rcall	PLED_DataWrite_PROD
-
-	movlw	0x36				; VerticalEndAddress HIGH:LOW
-	rcall	PLED_CmdWrite
-	movff   win_width,PRODL     ; Bank-safe addressing
-	movff	win_leftx2,WREG
-	addwf   PRODL,W             ; left+width
-	decf    WREG                ; left+width-1
-	mullw   2                   ; times 2 --> rightx2
-	rcall	PLED_DataWrite_PROD
-
-	movlw	0x37				; HorizontalAddress START:END
-	rcall	PLED_CmdWrite
-	movff	win_top,PRODH       ; Start row.
-	movff   win_height,PRODL    ; height
-    movf    PRODH,W
-    addwf   PRODL,F             ; top + height
-    decf    PRODL,F             ; top + height - 1 --> bottom.
-	rcall	PLED_DataWrite_PROD
-
-    ;---- Start pointer ------------------------------------------------------
-	movlw	0x20				; Start Address Horizontal (.0 - .239)
-	rcall	PLED_CmdWrite
-	movff	win_top,WREG
-	mullw   1
-	rcall	PLED_DataWrite_PROD
-
-	movlw	0x21				; Start Address Vertical (.0 - .319)
-	rcall	PLED_CmdWrite
-	movff	win_leftx2,WREG
-	mullw   2
-	rcall	PLED_DataWrite_PROD
+	movff	win_width,WREG
+	bcf     STATUS,C
+	rlcf    WREG
+	movwf   aa_width
+	movlw   0
+	rlcf    WREG
+	movwf   aa_width+1
+	rcall   PLED_box_write
 
     ;---- Fill Window --------------------------------------------------------
-	movlw	0x22					; Start Writing Data to GRAM
+	movlw	0x22					        ; Start Writing Data to GRAM
 	rcall	PLED_CmdWrite
 
-	movff	win_height,PRODH
-	bsf		oled_rs					; Data!
+	movff	win_width,PRODH
+	bsf		oled_rs					        ; Data!
 
-PLED_box2:                          ; Loop height times
-	movff	win_width,PRODL
-PLED_box3:                          ; loop width times
+PLED_box2:                                  ; Loop height times
+	movff	win_height,PRODL
+PLED_box3:                                  ; loop width times
 	movff	win_color1,PORTD
 	bcf		oled_rw
-	bsf		oled_rw					; Upper
+	bsf		oled_rw					        ; Upper
 	movff	win_color2,PORTD
 	bcf		oled_rw
-	bsf		oled_rw					; Lower
+	bsf		oled_rw					        ; Lower
 
 	movff	win_color1,PORTD
 	bcf		oled_rw
-	bsf		oled_rw					; Upper
+	bsf		oled_rw					        ; Upper
 	movff	win_color2,PORTD
 	bcf		oled_rw
-	bsf		oled_rw					; Lower
+	bsf		oled_rw					        ; Lower
 
 	decfsz	PRODL,F
 	bra		PLED_box3
 	decfsz	PRODH,F
 	bra		PLED_box2
 
-	movlw	0x00					; NOP, to stop Address Update Counter
-	bra     PLED_CmdWrite			; Returns...
+	movlw	0x00					        ; NOP, to stop Address Update Counter
+	bra     PLED_CmdWrite                   ; returns...
 
 ;=============================================================================
 ; PLED_ClearScreen: An optimized version of PLEX_box, for full screen black.
@@ -375,9 +491,15 @@ PLED_boot:
 
 	movlw	0x03				; Entry Mode (S6E63D6 Datasheet page 46)
 	rcall	PLED_CmdWrite
-	movlw	0x00				; =b'00000000' 	CLS MDT1 MDT0 	BGR 	X  	X  	X  	SS  65k Color
+	movlw	0x00				; CLS MDT1 MDT0 	BGR 	X  	X  	X  	SS  65k Color
 	rcall	PLED_DataWrite
-	movlw	b'00110000'			; =b'00110000'	X  	X 	 I/D1 	I/D0 	X  	X  	X 	AM
+
+	; Change direction for block-writes of pixels
+    lfsr    FSR0,win_flags
+	btfss   INDF0,0             ; BANK-SAFE bit test.
+	movlw	b'00110000'			; [normal]  X  	X 	 I/D1 	I/D0 	X  	X  	X 	AM
+	btfsc   INDF0,0
+    movlw   b'00000000'         ; [flipped] X  	X 	 I/D1 	I/D0 	X  	X  	X 	AM
 	rcall	PLED_DataWrite
 
 	movlw	0x18

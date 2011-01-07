@@ -53,7 +53,7 @@
 ;Temporary overlay (in bank 0), ACCESS area
     CBLOCK  0x000
         img_colors
-        img_width:2                     ; SHOULD be @1, because of aa_box_cmd
+        img_width:2                     ; SHOULD be @1, because of PLED_box_write
         img_pixelsL
         img_pixelsH
         img_pixelsU
@@ -64,7 +64,7 @@
 
 ;-----------------------------------------------------------------------------
 color_image:
-        movlb   HIGH(img_width)         ; Switch to bank 0.
+        movlb   HIGH(win_height)        ; Switch to bank 0.
 
         ;---- Get image parameters -------------------------------------------
         tblrd*+                     
@@ -100,7 +100,7 @@ get_colors_loop:
         clrf    img_width+1             ; x2 on width, for the true box size.
         rlcf    img_width+0
         rlcf    img_width+1
-        call    aa_box_cmd
+        call    PLED_box_write
         AA_CMD_WRITE 0x22
 
         ;---- Decode pixels --------------------------------------------------

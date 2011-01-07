@@ -84,20 +84,19 @@ PLED_color_code macro color_code_temp
 	endm
 
 PLED_color_code1:				; Color-codes the output, if required
-	movwf	debug_temp
-	dcfsnz	debug_temp,F
+	dcfsnz	WREG
 	bra		PLED_color_code_depth		; CF43 [mBar], 16Bit
-	dcfsnz	debug_temp,F
+	dcfsnz	WREG
 	bra		PLED_color_code_cns			; CF44 [%]
-	dcfsnz	debug_temp,F
+	dcfsnz	WREG
 	bra		PLED_color_code_gf			; CF45 [%]
-	dcfsnz	debug_temp,F
+	dcfsnz	WREG
 	bra		PLED_color_code_ppo2		; CF46 [cBar]
-	dcfsnz	debug_temp,F
+	dcfsnz	WREG
 	bra		PLED_color_code_velocity	; CF47 [m/min]
-	dcfsnz	debug_temp,F
+	dcfsnz	WREG
 	bra		PLED_color_code_ceiling		; Show warning if CF41=1 and current depth>shown ceiling
-	dcfsnz	debug_temp,F
+	dcfsnz	WREG
 	bra		PLED_color_code_gaslist		; Color-code current row in Gaslist (%O2 in "EEDATA")
 
 
@@ -244,20 +243,18 @@ PLED_color_code_velocity2:
 	call	PLED_warnings_color
 	return
 
-ostc_debug	macro debug_temp
-	movlw	debug_temp
+ostc_debug	macro value
+	movlw	value
 	call	ostc_debug1
 	endm
 
 ostc_debug1:
-	movwf	debug_temp
-
 	movff	debug_char+4,debug_char+5		; Save for background debugger
 	movff	debug_char+3,debug_char+4
 	movff	debug_char+2,debug_char+3
 	movff	debug_char+1,debug_char+2
 	movff	debug_char+0,debug_char+1
-	movff	debug_temp,debug_char+0
+	movff	WREG,debug_char+0
 
 	btfss	debug_mode				; Are we in debugmode?
 	return							; No, return!

@@ -520,10 +520,11 @@ profile_display_loop2:
 
 	call		profile_display_fill		; In this column between this row (xC+0) and the last row (apnoe_mins)
 	movff		xC+0,apnoe_mins				; Store last row for fill routine
+	incf		timeout_counter3,F
+
 	movf		xC+0,W
 	call		PLED_SetRow					; 0...259
 
-	incf		timeout_counter3,F
 	movf		timeout_counter3,W
 	call		PLED_SetColumnPixel			; pixel x2
 	call		PLED_standard_color
@@ -593,12 +594,13 @@ profile_display_fill_down:			; Fill downwards from apone_mins to xC+0!
 	movff		apnoe_mins,xC+1		; Copy
 profile_display_fill_down2:			; Loop	
 	decf		xC+1,F
+
 	movf		xC+1,W				; Row
 	call		PLED_SetRow			; 0...259
 
 	call		PLED_standard_color
-
 	call		PLED_PxlWrite_Single; Write one Pixel
+
 	movf		xC+0,W
 	cpfseq		xC+1				; Loop until xC+1=xC+0
 	bra			profile_display_fill_down2
@@ -608,12 +610,13 @@ profile_display_fill_up:			; Fill upwards from xC+0 to apone_mins!
 	movff		xC+0,xC+1			; Copy
 profile_display_fill_up2:			; Loop	
 	decf		xC+1,F
+
 	movf		xC+1,W				; Row
 	call		PLED_SetRow			; 0...259
 
-	call	PLED_standard_color
-
+	call	    PLED_standard_color
 	call		PLED_PxlWrite_Single; Write one Pixel
+
 	movf		apnoe_mins,W
 	cpfseq		xC+1				; Loop until xC+1=apnoe_mins
 	bra			profile_display_fill_up2

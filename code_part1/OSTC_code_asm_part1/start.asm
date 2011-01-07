@@ -133,6 +133,9 @@ restart:
 	GETCUSTOM8	d'48'				; time correction value
 	movff	WREG, time_correction_value	; store in Bank0 register
 
+	GETCUSTOM8	d'63'				; OLED flip_screen flag(s).
+	movff	WREG,win_flags          ; store in Bank0 register
+
 	clrf	flag1					; clear all flags
 	clrf	flag2
 	clrf	flag3
@@ -148,8 +151,8 @@ restart:
 	clrf	flag13
 	clrf	flag14
 	clrf	flag15
-	call	gassetup_sort_gaslist			; Sorts Gaslist according to change depth
-	call	PLED_boot				; PLED boot (Incl. Clear Screen!)
+	call	gassetup_sort_gaslist       ; Sorts Gaslist according to change depth
+	call	PLED_boot                   ; PLED boot (Incl. Clear Screen!)
 	WIN_TOP		.0
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL

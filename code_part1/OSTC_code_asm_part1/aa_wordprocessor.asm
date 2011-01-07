@@ -59,7 +59,7 @@
         	aa_bitlen					; Count of pixels when decoding bitmaps.
         	aa_start:2					; PROM ptr to start of encoded bitmap
         	aa_end:2					; and end of it.
-        	aa_colorDiv:2				; Current color, divided by 2 or 4
+        	aa_temp:2				; Current color, divided by 2 or 4
     ENDC
 
 ; Flags allocation:
@@ -254,82 +254,6 @@ aa_string_width99:
 		return
 
 ;------------------------------------------------------------------------------
-; Fast macros to write to OLED display.
-; Adding a call/return adds 3 words and a pipeline flush, hence make it
-; nearly twice slower...
-;
-; Input	 : commande as macro parameter.
-; Output : NONE
-; Trash  : WREG
-;
-AA_CMD_WRITE macro cmd
-		movlw	cmd
-		rcall   PLED_CmdWrite
-;		bcf		oled_rs				    ; Cmd mode
-;		movwf	PORTD,A
-;		bcf		oled_rw				    ; Tick the clock
-;		bsf		oled_rw
-		endm
-;
-; Input	 : PRODH:L as 16bits data.
-; Output : NONE
-; Trash  : NONE
-;
-AA_DATA_WRITE_PROD	macro
-        rcall   PLED_DataWrite_PROD
-;		bsf		oled_rs				    ; Data mode
-;		movff	PRODH,PORTD			    ; NOTE: OLED is BIGENDIAN!
-;		bcf		oled_rw				    ; Tick the clock
-;		bsf		oled_rw
-;		movff	PRODL,PORTD
-;		bcf		oled_rw				    ; Tick the clock
-;		bsf		oled_rw
-		endm
-
-;------------------------------------------------------------------------------
-; Output OLED Window Address commands.
-; Inputs : win_top, win_leftx2, win_height, aa_width.
-; Output : PortD commands.
-; Trashed: PROD
-;
-aa_box_cmd:
-		movf	win_leftx2,W,BANKED	    ; Compute left = 2*leftx2
-		mullw	2
-		AA_CMD_WRITE	0x35		    ; this is the left border
-		AA_DATA_WRITE_PROD
-
-		movf	aa_width+0,W,ACCESS	    ; right = left + width - 1
-		addwf	PRODL,F,A
-		movf	aa_width+1,W,ACCESS
-		addwfc	PRODH,F,A
-		decf	PRODL,F,A			    ; decrement result
-		bc		aa_box_cmd_1		    ; No borrow (/Carry) ? skip propagating.
-		decf	PRODH,F,A
-aa_box_cmd_1:			
-		AA_CMD_WRITE	0x36		    ; Write and the right border
-		AA_DATA_WRITE_PROD
-
-		movf	win_top,W,BANKED	    ; Write top / bottom window
-		movwf	PRODH,A				    ; (remember PRODH output first)
-		addwf	win_height,W,BANKED
-		decf	WREG,A
-		movwf	PRODL,A				    ; And PRODL is later...
-		AA_CMD_WRITE	0x37
-		AA_DATA_WRITE_PROD
-
-		movf	win_top,W,BANKED	    ; Start ptr top
-		mullw	1					    ; Load into PRODH:L
-		AA_CMD_WRITE	0x20
-		AA_DATA_WRITE_PROD
-
-		movf	win_leftx2,W,BANKED	    ; Start ptr left
-		mullw	2
-		AA_CMD_WRITE	0x21
-		AA_DATA_WRITE_PROD
-
-		return
-
-;------------------------------------------------------------------------------
 ; Decode a compressed char.
 ; Inputs	aa_start, aa_end, win_height, win_invert, win_color1, win_color2
 ; Output	none
@@ -396,34 +320,34 @@ aa_decode_10:
 		clrf	PRODL				    ; We will accumulate result here...
 		clrf	PRODH
 
-		; Take color div 2 into aa_colorDiv. Max red = 15/31
+		; Take color div 2 into aa_temp. Max red = 15/31
 		rrcf	win_color1,W,BANKED	    ; xRRRRxGG
 		andlw	b'01111011'			    ; 0RRRR0GG (don't change C)
-		movwf	aa_colorDiv+0,ACCESS
+		movwf	aa_temp+0,ACCESS
 		rrcf	win_color2,W,BANKED	    ; GGGxBBBB
 		andlw	b'11101111'			    ; GGG0BBBB
-		movwf	aa_colorDiv+1,ACCESS
+		movwf	aa_temp+1,ACCESS
 
 		btfss	aa_color_half,ACCESS
 		bra		aa_decode_12
 
-		movff	aa_colorDiv+0,PRODH	    ; Add color/2 if bit set.
-		movff	aa_colorDiv+1,PRODL	    ; OLED is big endian, so swap here.
+		movff	aa_temp+0,PRODH         ; Add color/2 if bit set.
+		movff	aa_temp+1,PRODL         ; OLED is big endian, so swap here.
 aa_decode_12:
 		btfss	aa_color_quart,ACCESS
 		bra		aa_decode_3
 
 		; Divide it once again by 2. Max red = 7/31.
-		rrcf	aa_colorDiv+0,W,ACCESS  ; xxRRRxxG
-		andlw	b'00111001'			    ; 00RRR00G (don't change C)
-		movwf	aa_colorDiv+0,ACCESS
-		rrcf	aa_colorDiv+1,W,ACCESS  ; GGGxxBBB
-		andlw	b'11100111'			    ; GGG00BBB
-		movwf	aa_colorDiv+1,ACCESS
+		rrcf	aa_temp+0,W,ACCESS      ; xxRRRxxG
+		andlw	b'00111001'             ; 00RRR00G (don't change C)
+		movwf	aa_temp+0,ACCESS
+		rrcf	aa_temp+1,W,ACCESS      ; GGGxxBBB
+		andlw	b'11100111'             ; GGG00BBB
+		movwf	aa_temp+1,ACCESS
 
-		movf	aa_colorDiv+1,W,ACCESS  ; Add color/4
+		movf	aa_temp+1,W,ACCESS      ; Add color/4
 		addwf	PRODL,F				    ; NOTE: 7/31+15/31=22/31,
-		movf	aa_colorDiv+0,W,ACCESS  ; hence composants won't overlap.
+		movf	aa_temp+0,W,ACCESS      ; hence composants won't overlap.
 		addwfc	PRODH,F				    ; In right order, to propagate carry.
 
 		bra		aa_decode_3			    ; Done.
@@ -470,7 +394,7 @@ aa_wordprocessor:
 		movlb	HIGH win_top            ; Switch to bank 0...
 
 		rcall	aa_string_width		    ; Set win_height, compute win_width
-		rcall	aa_box_cmd			    ; Use that for the box.
+		rcall	PLED_box_write		    ; Use that for the box.
 
 		; Restart the loop for each char to print
 		lfsr	FSR2, letter		    ; FSR2 pointer to start of string.

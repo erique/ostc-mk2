@@ -54,7 +54,6 @@
 #DEFINE warn_ceiling	d'6'
 #DEFINE	warn_gas_in_gaslist	d'7'
 
-
 ;Configuration bits
 	CONFIG	OSC = IRCIO67        ;Internal oscillator block, port function on RA6 and RA7
 	CONFIG	FCMEN = OFF          ;Fail-Safe Clock Monitor disabled
@@ -75,6 +74,8 @@
 	CONFIG	LVP = OFF            ;Single-Supply ICSP disabled
 	CONFIG	STVREN = OFF         ;Stack full/underflow will not cause Reset
 
+;=============================================================================
+
     CBLOCK  0x800
         c_code_data_stack:.64       ; Reserve space for C-code data space. Eg.when calling log.
     endc
@@ -94,12 +95,13 @@
 	letter:.026					;letter buffer
 	win_color1
 	win_color2
-	win_top
-	win_height					; String (and font) height
-	win_leftx2
-	win_width 					; String width (more than 255 for aa_wordprocessor !)
+	win_top                     ; Box/text position (0..239).
+	win_height					; Box/text height (1..240)
+	win_leftx2                  ; Box/text position (0..159)
+	win_width 					; box width (1..160)
 	win_font
 	win_invert
+	win_flags                   ; flip_screen flag, transparent fonts, etc...
 	ENDC
 
 	CBLOCK	0x100				;Bank 1
@@ -290,7 +292,6 @@
 ;	sleeptime_since_last_charge:2; Sleeptime in hours since last complete charge
 
 	debug_char:6				; For debugmode
-	debug_temp					; For debugmode
 	
 	apnoe_mins					; single descent minutes for Apnoe mode
 	apnoe_secs					; single descent seconds for Apnoe mode
@@ -477,6 +478,9 @@
 #DEFINE	oled_rs				PORTE,0 ;0
 #DEFINE	oled_nreset			PORTE,1 ;0
 #DEFINE	oled_e_nwr			PORTE,2 ;0
+
+; Bank0 flags
+#DEFINE win_flip_screen     win_flags,0 ; 180° rotation of the OLED screen.
 
 ; Flags
 #DEFINE	FLAG_scale			flag1,0	; Wordprocessor

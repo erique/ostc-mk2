@@ -356,7 +356,7 @@ textpos_pointer:
 	DB	.90,.50				;240	(Surface) Interval:
 	DB	.100,.75			;241	Display (Divemode Menu)
 	DB	.100,.0				;242	No Deco (GF)
-	DB	.120,.0				;243	beta
+	DB	.160-4*7,.0         ;243	beta, right binded to screen width.
 	DB	.100,.100			;244	Exit
 	DB	.20,.65				;245
 	DB	.50,.145			;246	LowBatt!

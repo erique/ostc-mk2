@@ -56,32 +56,39 @@ dive_type_icons:
             movwf   TBLPTRU
 
             ;---- Explore gas list -------------------------------------------
-            ; EEADR <-- gas# + 6
+            ; EEADR <-- 4*gas# + 6
             ; EEADR-2 = default O2%
             ; EEADR-1 = default He%
             ; EEADR+0 = current O2%
             ; EEADR+1 = current He%
             ; EEADR+4 = next gaz current O2%
             
-          	read_int_eeprom		d'27'	; read gas flag register --> hi
+            clrf    EEADRH              ; read gas flag register --> hi
+            movlw   .27
+            movwf   EEADR
+            call    read_eeprom
           	movff   EEDATA,hi
-            rrcf    hi                  ; Dummy shift first... why does it works ?
+          	rlcf    hi,F                ; Push a dummy bit.
           	setf    lo                  ; Start with gas# -1
 	        clrf    PRODL               ; =0 : no nitrox found yet.
-
-dive_type_loop:
-            incf    lo,F                ; Next gaz number.
 
             movlw   .33                 ; Read first gas #.
             movwf   EEADR
             call    read_eeprom
-            incf    lo,W                ; Current gas# 1..5
-            subwf   EEDATA,W            ; == first ?
-            bz      dive_type_loop_2    ; YES: analyse that gas !
-            
-            rrcf    hi                  ; Check next enabled flag ?
-            bnc     dive_type_loop_9    ; Disabled.
+            movff   EEDATA,PRODH        ; first --> PRODH (1..5)
 
+dive_type_loop:
+            incf    lo,F                ; Next gaz number. Range 0..4
+
+            rrcf    hi,F                ; Rotate BEFORE checking active gas!
+
+            incf    lo,W                ; Current gas# 1..5
+            subwf   PRODH,W             ; == first gas ?
+            bz      dive_type_loop_2    ; YES: analyse that gas !
+
+            btfss   hi,0                ; Is this gas enabled ?
+            bra     dive_type_loop_9    ; No: disabled.
+            
             movlw   .28                 ; Switch depth is at gas#+28
             addwf   lo,W
             movwf   EEADR               ; address in EEPROM.

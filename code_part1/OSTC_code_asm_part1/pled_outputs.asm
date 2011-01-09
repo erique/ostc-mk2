@@ -650,7 +650,7 @@ PLED_show_cf11_cf12_cf29:; Display saturations/desaturation multiplier and last 
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
-	STRCPY  "CF11:"
+	STRCPY  "BSat:"
 
 	GETCUSTOM8	d'11'
 	movwf	lo
@@ -659,7 +659,7 @@ PLED_show_cf11_cf12_cf29:; Display saturations/desaturation multiplier and last 
 	STRCAT_PRINT  "%"
 
 	WIN_TOP		.50
-	STRCPY  "CF12:"
+	STRCPY  "BDes:"
 
 	GETCUSTOM8	d'12'
 	movwf	lo
@@ -669,7 +669,7 @@ PLED_show_cf11_cf12_cf29:; Display saturations/desaturation multiplier and last 
 
 PLED_show_cf11_cf12_cf29_2:
 	WIN_TOP		.75
-    STRCPY  "CF29:"
+    STRCPY  "Last:"
 	GETCUSTOM8	d'29'
 	movwf	lo
 	bsf		leftbind

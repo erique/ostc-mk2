@@ -58,62 +58,100 @@ word_processor:						; word_processor:
     return
 
 ;=============================================================================
-; PLED_SetColumnPixel:
+; Macro to provides our own interface code.
 ;
-PLED_SetColumnPixel:
-	movff	WREG,win_leftx2             ; d'0' ... d'159'
-	mullw   2                           ; Copy to PROD, times 2.
+PIXEL_WRITE macro   colRegister, rowRegister
+        movff   colRegister,win_leftx2
+        movff   rowRegister,win_top
+        call    pixel_write
+        endm
 
-	movlw	0x21				        ; Start Address Vertical (.0 - .319)
-	rcall	PLED_CmdWrite
-	bra     PLED_DataWrite_PROD
+INIT_PIXEL_WROTE macro colRegister
+        movff   colRegister,win_leftx2
+        call    init_pixel_write
+        endm
 
-;=============================================================================
-; PLED_SetRow:
-; Backup WREG --> win_top, for the next write pixel.
-; Setup OLED pixel horizontal address.
-;
-PLED_SetRow:		
-	movff  	WREG,win_top                ; d'0' ... d'239'
-	mullw   1                           ; Copy row to PRODH:L
-	movlw	0x20			; Horizontal Address START:END
-	rcall	PLED_CmdWrite
-	bra     PLED_DataWrite_PROD		
+HALF_PIXEL_WRITE macro rowRegister
+        movff   rowRegister,win_top
+        call    half_pixel_write
+        endm
 
-;=============================================================================
-; PLED Write Two Pixel
-;
+;-----------------------------------------------------------------------------
+; Init for half_pixel_write
+; Set column register on OLED device, and current color.
+; Inputs: win_leftx2
+; Outputs: win_color:2
+; Trashed: WREG, PROD
+init_pixel_write:
+        movff   win_leftx2,WREG
+        mullw   2
+        rcall   pixel_write_col320      ; Start Address Vertical (.0 - .319)
+        goto    PLED_standard_color
+    
+;-----------------------------------------------------------------------------
+; Writes two half-pixels at position (win_top,win_leftx2)
+; Inputs: win_leftx2, win_top, win_color:2
+; Trashed: WREG, PROD
+pixel_write:
+        movff   win_leftx2,WREG
+        mullw   2
+        rcall   pixel_write_col320      ; Start Address Vertical (.0 - .319)
+        rcall   half_pixel_write        ; Write this half-one.
 
-PLED_PxlWrite:
-    rcall   PLED_PxlWrite_Single        ; Write first pixel.
+        movff   win_leftx2,WREG         ; Address of next one
+        mullw   2
+        infsnz  PRODL                   ; +1
+        incf    PRODH
+    	rcall   pixel_write_col320
+    	bra     half_pixel_write        ; Note: Cmd 0x20 is mandatory, because
+    	                                ; of the autoincrement going vertical
 
-; Write 2nd Pixel on same row but one column to the right
-	movff	win_top,WREG
-	rcall	PLED_SetRow					; Re-Set Row
-    movff  	win_leftx2,WREG             ; Increment column address.
-    mullw   2
-    incf    PRODL
-    clrf    WREG                        ; Does not reset CARRY...
-    addwfc  PRODH
-	movlw	0x21				; Start Address Vertical (.0 - .319)
-	rcall	PLED_CmdWrite
-	rcall   PLED_DataWrite_PROD
-    ; Continue with PLED_PxlWrite_Single...
+        ;---- Do the 16bit 319-X-->X, if needed, and send to OLED ------------
+pixel_write_col320:
+        movff   win_flags,WREG          ; BEWARE: bank0 bit-test
+        btfss   WREG,0                  ; 180° rotation ?
+        bra     pixel_write_noflip_H
 
-; -----------------------------
-; PLED Write One Pixel
-; -----------------------------
-PLED_PxlWrite_Single:
-	movlw	0x22					; Start Writing Data to GRAM
-	rcall	PLED_CmdWrite
-	bsf		oled_rs					; Data!
-	movff	win_color1, PORTD
-	bcf		oled_rw
-	bsf		oled_rw					; Upper
-	movff	win_color2, PORTD
-	bcf		oled_rw
-	bsf		oled_rw					; Lower
-	return
+        movf    PRODL,W                 ; 16bits 319 - PROD --> PROD
+        sublw   LOW(.319)               ; 319-W --> W
+        movwf   PRODL
+        movf    PRODH,W
+        btfss   STATUS,C                ; Borrow = /CARRY
+        incf    WREG
+        sublw   HIGH(.319)
+        movwf   PRODH
+
+pixel_write_noflip_H:
+    	movlw	0x21				    ; Start Address Vertical (.0 - .319)
+    	rcall	PLED_CmdWrite
+    	bra     PLED_DataWrite_PROD   
+
+;-----------------------------------------------------------------------------
+; Writes one half-pixel at position (win_top,win_leftx2).
+; Inputs: win_leftx2, win_top, win_color:2
+; Trashed: WREG, PROD
+half_pixel_write:
+    	movff  	win_top,WREG            ; d'0' ... d'239'
+
+        movff   win_flags,PRODL         ; BEWARE: bank0 bit-test
+    	btfsc   PRODL,0                 ; 180° rotation ?
+    	sublw   .239                    ; 239-Y --> Y
+
+    	mullw   1                       ; Copy row to PRODH:L
+    	movlw	0x20			        ; Horizontal Address START:END
+    	rcall	PLED_CmdWrite
+    	rcall   PLED_DataWrite_PROD
+    
+    	movlw	0x22					; Start Writing Data to GRAM
+    	rcall	PLED_CmdWrite
+    	bsf		oled_rs					; Data!
+    	movff	win_color1, PORTD
+    	bcf		oled_rw
+    	bsf		oled_rw					; Upper
+    	movff	win_color2, PORTD
+    	bcf		oled_rw
+    	bsf		oled_rw					; Lower
+    	return
 
 ; -----------------------------
 ; PLED Display Off

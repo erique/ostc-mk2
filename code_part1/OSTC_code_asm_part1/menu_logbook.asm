@@ -491,7 +491,8 @@ display_profile2d:
 	movlw		d'75'						; Zero-m row
 	movwf		apnoe_mins					; here: used for fill between rows
 	incf		timeout_counter3,W			; Init Column
-	call		PLED_SetColumnPixel			; pixel x2
+
+    INIT_PIXEL_WROTE timeout_counter3       ; pixel x2
 
 profile_display_loop:
 	movff		profile_temp+0,profile_temp2+0
@@ -522,13 +523,7 @@ profile_display_loop2:
 	movff		xC+0,apnoe_mins				; Store last row for fill routine
 	incf		timeout_counter3,F
 
-	movf		xC+0,W
-	call		PLED_SetRow					; 0...259
-
-	movf		timeout_counter3,W
-	call		PLED_SetColumnPixel			; pixel x2
-	call		PLED_standard_color
-	call		PLED_PxlWrite				; Write two pixels
+    PIXEL_WRITE timeout_counter3,xC+0       ; Set col(0..159) x row (0..239), put a std color pixel.
 
 profile_display_skip_loop1:					; skips readings!
 	dcfsnz		profile_temp2+0,F
@@ -595,11 +590,7 @@ profile_display_fill_down:			; Fill downwards from apone_mins to xC+0!
 profile_display_fill_down2:			; Loop	
 	decf		xC+1,F
 
-	movf		xC+1,W				; Row
-	call		PLED_SetRow			; 0...259
-
-	call		PLED_standard_color
-	call		PLED_PxlWrite_Single; Write one Pixel
+    HALF_PIXEL_WRITE    xC+1        ; Updates just row (0..239)
 
 	movf		xC+0,W
 	cpfseq		xC+1				; Loop until xC+1=xC+0
@@ -611,11 +602,7 @@ profile_display_fill_up:			; Fill upwards from xC+0 to apone_mins!
 profile_display_fill_up2:			; Loop	
 	decf		xC+1,F
 
-	movf		xC+1,W				; Row
-	call		PLED_SetRow			; 0...259
-
-	call	    PLED_standard_color
-	call		PLED_PxlWrite_Single; Write one Pixel
+    HALF_PIXEL_WRITE    xC+1        ; Updates just row (0..239)
 
 	movf		apnoe_mins,W
 	cpfseq		xC+1				; Loop until xC+1=apnoe_mins

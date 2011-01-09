@@ -49,78 +49,68 @@ menu_logbook1a:
 	clrf		divemins+1
 	call 		I2CReset					; Reset I2C Bus
 	call		get_free_EEPROM_location	; search from "here" backwards through the external memory
-	clrf		temp1						; max. 32KB
-	clrf		temp2
 
 	movlw		d'5'
 	movwf		menupos					; Here: stores current position on display (5-x)
-	
+
+;-----------------------------------------------------------------------------	
+; search external EEPROM backwards from eeprom_address
+; for 0xFA, 0xFA (store 1st. 0xFA position for next search)
+; read header data and display it
+; wait for user to confirm/exit
+; recopy data to search from here
+
 menu_logbook1b:
-									; search external EEPROM backwards from eeprom_address
-									; for 0xFA, 0xFA (store 1st. 0xFA position for next search)
-									; read header data and display it
-									; wait for user to confirm/exit
-									; recopy data to search from here
 	WIN_INVERT	.1
 	DISPLAYTEXT	.12						;" Wait.."
 	WIN_INVERT	.0
-	bcf		first_FA					; clear flags
-	bcf		second_FA
 
+    ;---- fast loop: check every other byte ----------------------------------
 menu_logbook2:
-	movlw		d'1'						; increase 16Bit value
-	addwf		divemins+0,F
-	movlw		d'0'
-	addwfc		divemins+1,F
+    infsnz      divemins+0,F            ; increase 16Bit value
+	incf        divemins+1,F
+    infsnz      divemins+0,F            ; increase 16Bit value, twice
+	incf        divemins+1,F
 
-	btfsc		divemins+1,7				; At 0x8000?
-	bra			menu_logbook_reset			; yes, restart (if not empty)
+	btfsc		divemins+1,7            ; At 0x8000?
+	bra			menu_logbook_reset      ; yes, restart (if not empty)
 
-	decf_eeprom_address	d'1'			; Macro, that subtracts 8Bit from eeprom_address:2 with banking at 0x8000
-	
+	decf_eeprom_address	d'2'			; +2 to eeprom address.
+
 	call		I2CREAD					; reads one byte (Slow! Better use Blockread!)
 
-	btfsc		first_FA					; 
-	bra			test_2nd_FA
-
-	bsf			first_FA					; Found 1st. 0xFA?
-	movlw		0xFA
+	movlw		0xFA                    ; That was a FA ?
 	cpfseq		SSPBUF
-	bcf			first_FA					; No, clear flag
-	bra			menu_logbook3				; and continue search
+    bra         menu_logbook2           ; No: continue the fast loop...
+    
+    ;---- Slow check : was it before or after that one ? ---------------------
 
-test_2nd_FA:
-	btfsc		second_FA
-	bra			test_FA_DONE
-
-	bsf			second_FA					; found 2nd 0xFA?
-	movlw		0xFA
-	cpfseq		SSPBUF
-	rcall		no_second_FA				; No, clear both flags!
-	bra			menu_logbook3				; and continue search
+ 	incf_eeprom_address	d'1'			; Been one step too far ?
+	call		I2CREAD					; reads one byte (Slow! Better use Blockread!)
+	movlw		0xFA                    ; That was a FA ?
+	xorwf		SSPBUF,W
+	bz          menu_loop_tooFar        ; Got it !
+	
+	decf_eeprom_address	d'2'			; Instead, not far enough ?
+	call		I2CREAD					; reads one byte (Slow! Better use Blockread!)
+    infsnz      divemins+0,F            ; Keep in sync (-1+2 == +1)
+	incf        divemins+1,F
+	movlw		0xFA                    ; It was the second FA ?
+	xorwf		SSPBUF,W
+	bz          test_FA_DONE
+    bra         menu_logbook2           ; No: continue the fast loop...
+   
+menu_loop_tooFar;
+    movlw       -.1                     ; Correct counter too,
+    addwf       divemins+0              ; by doing a 16bit decrement.
+    movlw       0
+    addwfc      divemins+1
 
 test_FA_DONE:							; Found 0xFA 0xFA!
 	movff		eeprom_address+0,eeprom_header_address+0	; store current address into temp register
 	movff		eeprom_address+1,eeprom_header_address+1	; we must continue search here later
-	incf		divenumber,F				; new header found, increase divenumber
-	bra			menu_logbook4				; Done with searching, display the header!
-
-no_second_FA:							; discard both flags!
-	bcf			second_FA					
-	bcf			first_FA			
-	return
-
-
-menu_logbook3:
-	movlw		d'1'						; increase global counter
-	addwf		temp1,F
-	movlw		d'0'
-	addwfc		temp2,F
-
-	btfsc		temp2,7					; 32KB searched?
-	bra			menu_logbook3b				; Yes
-	bra			menu_logbook2				; No, not now
-
+	incf		divenumber,F            ; new header found, increase divenumber
+	bra			menu_logbook4           ; Done with searching, display the header!
 
 menu_logbook3b:
 	btfss		logbook_page_not_empty			; Was there at least one dive?
@@ -138,7 +128,7 @@ menu_logbook_reset:
 
 menu_logbook4:
 	; Adjust eeprom_address to set pointer on first headerbyte
-	incf_eeprom_address	d'3'				; Macro, that adds 8Bit to eeprom_address:2 with banking at 0x8000
+	incf_eeprom_address	d'2'            ; Macro, that adds 8Bit to eeprom_address:2 with banking at 0x8000
 
 	btfss		logbook_profile_view			; Display profile (search routine is used in profileview, too)
 	bra			menu_logbook_display_loop		; No, display overwiev list
@@ -165,8 +155,6 @@ menu_logbook_display_loop:
 	movff		eeprom_header_address+1,decodata+1		
 	movff		divemins+0,max_pressure+0			
 	movff		divemins+1,max_pressure+1			
-	movff		temp1,logbook_temp6
-	movff		temp2,samplesecs					
 
 	movlw		d'3'
 	addwf		decodata+0,F
@@ -631,58 +619,6 @@ profile_view_get_depth:
 	return
 
 profile_view_get_depth_new1:
-;bra		profile_view_get_depth_new1_1		; Skip all data to ignore...
-
-;	decfsz		divisor_deco,F				; Check divisor
-;	bra			profile_view_get_depth_new1_1	; Divisor not zero...	
-;
-;;	tstfsz		timeout_counter2			; Any bytes to ignore
-;;	bra			profile_view_get_depth_new2	; Yes (1-127)
-;;	return									; No (0)
-;
-;	movff	logbook_temp2,divisor_deco		; Restore divisor value!
-;; check for event byte and the extra informations
-;	btfss		event_occured
-;	bra			profile_view_get_depth_new2		; No event!
-;	
-;	call		I2CREAD2					; read event byte
-;	decf		timeout_counter2,F			; Reduce number of bytes to ignore
-;
-;	movlw		d'0'						; Extra bytes to ignore because of event
-;	btfsc		SSPBUF,4
-;	addlw		d'2'						; two bytes for manual gas set
-;	btfsc		SSPBUF,5
-;	addlw		d'1'						; one byte for gas change
-;	movwf		logbook_temp5				; store extra bytes to ignore
-;
-;	tstfsz		logbook_temp5				; Anything to ignore?
-;	bra			profile_view_get_depth_new1_2	; Yes
-;	bra			profile_view_get_depth_new2	; No, continue with normal routine
-;
-;profile_view_get_depth_new1_2:
-;	call		I2CREAD2					; ignore byte
-;	decf		timeout_counter2,F			; Reduce number of bytes to ignore
-;	decfsz		logbook_temp5,F				; reduce extra bytes ignore counter
-;	bra			profile_view_get_depth_new1_2	; loop
-;
-;profile_view_get_depth_new2:
-;	movlw		d'4'							; Temp (2) and Deko (2) in the sample?
-;	cpfseq		timeout_counter2
-;	bra			profile_view_get_depth_new2_2	; No
-;	; Yes, skip Temp!
-;	call		I2CREAD2					; ignore byte
-;	decf		timeout_counter2,F			; Reduce number of bytes to ignore
-;	call		I2CREAD2					; ignore byte
-;	decf		timeout_counter2,F			; Reduce number of bytes to ignore
-;
-;profile_view_get_depth_new2_2:
-;	call		I2CREAD2					; ignore byte
-;
-;	decfsz		timeout_counter2,F			; reduce counter
-;	bra			profile_view_get_depth_new2_2; Loop
-;	return
-
-profile_view_get_depth_new1_1:
 	tstfsz		timeout_counter2			; Any bytes to ignore
 	bra			profile_view_get_depth_new3	; Yes (1-127)
 	return									; No (0)
@@ -702,8 +638,6 @@ exit_profileview:
 	movff		max_pressure+0,divemins+0
 	movff		max_pressure+1,divemins+1
 	movff		mintemp+0, divenumber
-	movff		logbook_temp6,temp1
-	movff		samplesecs,temp2
 	decf		divenumber,F
 	bcf			all_dives_shown
 
@@ -826,218 +760,3 @@ display_listdive2:
 	output_16								; Divetime minutes
 	STRCAT_PRINT "'"                    ; Display header-row in list
 	return
-
-
-;profileview_menu:
-;	movlw		d'1'
-;	movwf		menupos
-;profileview_menu1:	
-;	call		PLED_clear_divemode_menu
-;	call		PLED_profileview_menu		; Displays Menu
-;profileview_menu2:
-;	call		PLED_divemenu_cursor
-;	bcf			sleepmode					; clear some flags
-;	bcf			menubit2
-;	bcf			menubit3
-;	bcf			switch_right
-;	bcf			switch_left
-;	clrf		timeout_counter2
-;
-;profileview_menu_loop:
-;	call		check_switches_logbook
-;	
-;	btfsc		menubit3					; SET/MENU?
-;	bra			profileview_menu_move_cursor; Move Cursor
-;	btfsc		menubit2					; ENTER?
-;	bra			profileview_menu_do			; Do task
-;
-;	btfsc		onesecupdate
-;	call		timeout_surfmode			; timeout
-;	btfsc		onesecupdate
-;	call		set_dive_modes				; check, if divemode must be entered
-;	bcf			onesecupdate				; one second update
-;	btfsc		sleepmode					; Timeout?
-;	bra			exit_profileview			; back to list
-;	btfsc		divemode
-;	goto		restart						; Enter Divemode if required
-;
-;	bra			profileview_menu_loop		; wait for something to do
-;	
-;profileview_menu_do:
-;	dcfsnz		menupos,F
-;	bra			exit_profileview		; back to list, quit profileview menu
-;	dcfsnz		menupos,F
-;	bra			profileview_menu_delete	; Delete Dive from external EEPROM
-;;	dcfsnz		menupos,F
-;;	bra			profileview_menu_format	; Delete all Dives from external EEPROM
-;;
-;profileview_menu_move_cursor:
-;	incf		menupos,F
-;	movlw		d'3'						; number of menu options+1
-;	cpfseq		menupos						; =limit?
-;	bra			profileview_menu_move_cursor2	; No!
-;	movlw		d'1'							; Yes, reset to position 1!
-;	movwf		menupos
-;profileview_menu_move_cursor2:
-;	bra			profileview_menu2		; Return to Profile Menu, also updates cursor
-
-;profileview_menu_format:
-;	call		PLED_confirmbox				; Returns WREG=0 for Cancel (Or Timeout) and WREG=1 for OK!
-;
-;	movwf		menupos						; Used as temp
-;	tstfsz		menupos
-;	bra			profileview_menu_format_loop2		; Format now!
-;
-;	bra			exit_profileview		; back to list, quit profileview menu
-;
-;profileview_menu_format_loop2:			; Do now format!
-;	call		PLED_ClearScreen
-;	DISPLAYTEXT	.12						; "Wait.."
-;	call		reset_external_eeprom		; delete profile memory
-;	goto		menu						; Return to Menu
-
-;profileview_menu_delete:
-;	call		PLED_confirmbox				; Returns WREG=0 for Cancel (Or Timeout) and WREG=1 for OK!
-;	movwf		menupos						; Used as temp
-;	tstfsz		menupos
-;	bra			profileview_menu_delete_loop2		; Delete now!
-;
-;	bra			exit_profileview		; back to list, quit profileview menu
-;
-;profileview_menu_delete_loop2:	; Do now delete
-;	call		PLED_ClearScreen
-;	DISPLAYTEXT	.12				; "Wait.."
-;
-;; eeprom_address:2 is set to the second byte after the ending 0xFD 0xFD
-;; eeprom_address:2 - 1 -> set to the last byte after the 0xFD 0xFD of the current dive
-;
-;; Set pointer to Byte after the final "0xFD 0xFD"
-;	decf_eeprom_address	d'1'			; Macro, that subtracts 8Bit from eeprom_address:2 with banking at 0x8000
-;	movff		eeprom_address+0,divemins+0
-;	movff		eeprom_address+1,divemins+1			
-;
-;; eeprom_header_address:2 + 1 -> set to the first 0xFA of the 0xFA 0xFA start bytes of the header
-;	movlw		d'1'								; 
-;	addwf		eeprom_header_address+0,F
-;	movlw		d'0'
-;	addwfc		eeprom_header_address+1,F			; eeprom_header_address:2 + 1
-;	btfsc		eeprom_header_address+1,7			; at 7FFF?
-;	clrf		eeprom_header_address+0				; Yes, clear address (+0 first!)
-;	btfsc		eeprom_header_address+1,7			; at 7FFF?
-;	clrf		eeprom_header_address+1				; Yes, clear address
-;
-;	movff		divemins+0,eeprom_address+0
-;	movff		divemins+1,eeprom_address+1					; Read source
-;	call		I2CREAD										; reads one byte (Slow! Better use Blockread!)	
-;	movwf		profile_temp+0
-;	movlw		0xFE
-;	cpfseq		profile_temp+0
-;	bra			profileview_menu_delete_notlast				; we're not deleting the last dive....
-;
-;; Just move the 0xFE after the dive and delete the rest with 0xFF			
-;	movff		eeprom_header_address+0, eeprom_address+0
-;	movff		eeprom_header_address+1, eeprom_address+1	; Write target
-;	movlw		0xFE
-;	call		I2CWRITE									; Write the byte
-;
-;; Now, delete everything _between_ eeprom_header_address and divemins:2+2 with 0xFF
-;	movlw		d'1'								; 
-;	addwf		eeprom_header_address+0,F
-;	movlw		d'0'
-;	addwfc		eeprom_header_address+1,F			; eeprom_header_address:2 + 1
-;	btfsc		eeprom_header_address+1,7			; at 7FFF?
-;	clrf		eeprom_header_address+0				; Yes, clear address (+0 first!)
-;	btfsc		eeprom_header_address+1,7			; at 7FFF?
-;	clrf		eeprom_header_address+1				; Yes, clear address
-;
-;	movff		eeprom_header_address+0,eeprom_address+0
-;	movff		eeprom_header_address+1,eeprom_address+1
-;
-;	movlw		d'1'								; 
-;	addwf		divemins+0,F
-;	movlw		d'0'
-;	addwfc		divemins+1,F						; divemins:2 + 1
-;	btfss		divemins+1,7						; at 7FFF?
-;	bra			profileview_menu_delete_loop2a		; Skip
-;	clrf		divemins+0							; Yes, clear address
-;	clrf		divemins+1
-;
-;;	movff		eeprom_header_address+0,eeprom_address+0
-;;	movff		eeprom_header_address+1,eeprom_address+1
-;
-;
-;profileview_menu_delete_loop2a:	
-;	movlw		0xFF
-;	call		I2CWRITE							; Write the byte
-;
-;	incf_eeprom_address	d'1'				; Macro, that adds 8Bit to eeprom_address:2 with banking at 0x8000
-;
-;	movff		divemins+0,sub_a+0
-;	movff		divemins+1,sub_a+1
-;	movff		eeprom_address+0,sub_b+0
-;	movff		eeprom_address+1,sub_b+1
-;	call		sub16								; sub_c = sub_a - sub_b
-;	tstfsz		sub_c+0								; Done (Result=Zero?) ?
-;	bra			profileview_menu_delete_loop2a		; No, continue
-;	tstfsz		sub_c+1								; Done (Result=Zero?) ?
-;	bra			profileview_menu_delete_loop2a		; No, continue
-;	goto		menu_logbook						; Return to list when done deleting
-;
-;profileview_menu_delete_notlast:
-;; Move everything byte-wise from divemins:2 to eeprom_header_address:2 until 0xFD 0xFD 0xFE is found and were moved
-;	call		get_free_EEPROM_location			; Searches 0xFD, 0xFD, 0xFE and sets Pointer to 0xFE
-;
-;	incf_eeprom_address	d'2'				; Macro, that adds 8Bit to eeprom_address:2 with banking at 0x8000
-;	movff		eeprom_address+0,profile_temp+0		
-;	movff		eeprom_address+1,profile_temp+1	
-;; holds now address of 0xFE + 2 (Abort condition....)
-;	decf_eeprom_address	d'2'			; Macro, that subtracts 8Bit from eeprom_address:2 with banking at 0x8000
-;; holds now address of 0xFE again
-;	movff		eeprom_address+0,divemins+0
-;	movff		eeprom_address+1,divemins+1					; Copy to working read registers
-;
-;profileview_menu_delete_loop3:
-;	movff		divemins+0,eeprom_address+0
-;	movff		divemins+1,eeprom_address+1					; Read source
-;	call		I2CREAD										; reads one byte (Slow! Better use Blockread!)	
-;	movff		eeprom_header_address+0, eeprom_address+0
-;	movff		eeprom_header_address+1, eeprom_address+1	; Write target
-;	call		I2CWRITE									; Write the byte
-;
-;	movff		divemins+0,eeprom_address+0
-;	movff		divemins+1,eeprom_address+1					; Set to source again
-;	movlw		0xFF
-;	call		I2CWRITE									; Delete the source....
-;
-;	movlw		d'1'
-;	addwf		divemins+0,F							; Increase source (Divemins:2)
-;	movlw		d'0'
-;	addwfc		divemins+1,F
-;	btfsc		divemins+1,7						; at 0x8000?
-;	clrf		divemins+0							; Yes, clear address (+0 first!)
-;	btfsc		divemins+1,7						; at 0x8000?
-;	clrf		divemins+1							; Yes, clear address
-;
-;	movlw		d'1'								; Increase target (eeprom_header_address:2)
-;	addwf		eeprom_header_address+0,F
-;	movlw		d'0'
-;	addwfc		eeprom_header_address+1,F			; eeprom_header_address:2 + 1
-;	btfsc		eeprom_header_address+1,7			; at 7FFF?
-;	clrf		eeprom_header_address+0				; Yes, clear address (+0 first!)
-;	btfsc		eeprom_header_address+1,7			; at 7FFF?
-;	clrf		eeprom_header_address+1				; Yes, clear address
-;
-;	movff		divemins+0,sub_a+0
-;	movff		divemins+1,sub_a+1
-;	movff		profile_temp+0,sub_b+0
-;	movff		profile_temp+1,sub_b+1
-;	call		sub16								; sub_c = sub_a - sub_b
-;	tstfsz		sub_c+0								; Done (Result=Zero?) ?
-;	bra			profileview_menu_delete_loop3		; No, continue
-;	tstfsz		sub_c+1								; Done (Result=Zero?) ?
-;	bra			profileview_menu_delete_loop3		; No, continue
-;
-;	goto		menu_logbook								; Return to list when done deleting
-
-
-	

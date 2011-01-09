@@ -19,53 +19,45 @@
 ; ToDo: use 2nd 32KB from external EEPROM for something
 
 incf_eeprom_address	macro	ext_ee_temp1	; Will increase eeprom_address:2 with the 8Bit value "ext_ee_temp1" and takes
-	movlw	ext_ee_temp1					; care of bank switching at 0x8000
-	call 	incf_eeprom_address0
+    	movlw	ext_ee_temp1                ; care of bank switching at 0x8000
+    	call 	incf_eeprom_address0
 	endm
 
 incf_eeprom_address0:
-	movwf		ext_ee_temp1
-incf_eeprom_address1:
-	movlw		d'1'				; increase address
-	addwf		eeprom_address+0,F
-	movlw		d'0'
-	addwfc		eeprom_address+1,F
-	btfss		eeprom_address+1,7		; at address 8000?
-	bra			incf_eeprom_address2	; No, continue
-	
-	; Yes, clear eeprom_address:2
-	clrf		eeprom_address+0		; Clear eeprom address
-	clrf		eeprom_address+1
-	
-incf_eeprom_address2:
-	decfsz		ext_ee_temp1,F			; All done?
-	bra			incf_eeprom_address1	; No, continue
-	return								; Done.
+    	addwf		eeprom_address+0,F      ; increase address
+    	movlw		d'0'
+    	addwfc		eeprom_address+1,F
 
-decf_eeprom_address	macro	ext_ee_temp1	; Will decrease eeprom_address:2 with the 8Bit value "ext_ee_temp1" and takes
-	movlw	ext_ee_temp1					; care of bank switching at 0x8000
-	call 	decf_eeprom_address0
-	endm
+    	btfss		eeprom_address+1,7		; at address 8000?
+    	return                              ; No, continue
+    
+    	; Yes, clear eeprom_address:2
+    	clrf		eeprom_address+0		; Clear eeprom address
+    	clrf		eeprom_address+1
+    	return								; Done.
+
+;=============================================================================
+; Will decrease eeprom_address:2 with the 8Bit value "ext_ee_temp1" and takes
+; care of bank switching at 0x8000
+
+decf_eeprom_address	macro	ext_ee_temp1
+        movlw	ext_ee_temp1
+        call 	decf_eeprom_address0
+    endm
 
 decf_eeprom_address0:
-	movwf		ext_ee_temp1
-decf_eeprom_address1:
-	movlw		d'1'					; decrease address
-	subwf		eeprom_address+0,F
-	movlw		d'0'
-	subwfb		eeprom_address+1,F		
+        subwf		eeprom_address+0,F      ; decrease address: do a 16-8bits substract.
+        movlw		d'0'
+        subwfb		eeprom_address+1,F
 
-	btfss		eeprom_address+1,7		; at address 8000?
-	bra			decf_eeprom_address2	; No, continue
-	
-	movlw		b'01111111'					; yes, reset highbyte
-	movwf		eeprom_address+1
-	
-decf_eeprom_address2:
-	decfsz		ext_ee_temp1,F			; All done?
-	bra			decf_eeprom_address1	; No, continue
-	return								; Done.
+        btfss		eeprom_address+1,7		; at address 8000?
+        return                              ; No, done.
 
+        movlw		b'01111111'             ; yes, reset highbyte
+        movwf		eeprom_address+1
+    	return								; Done.
+
+;=============================================================================
 
 write_external_eeprom:				; data in WREG
 								; increase address eeprom_address+0:eeprom_address+1 after write

@@ -2228,29 +2228,17 @@ PLED_decoplan_show_stop:
         movff   WREG,win_height
         movlw	.122
         movff	WREG,win_leftx2    		; column left (0-159)
-        
-        ; Draw used area (lo = minutes):
+        movlw	.16
+        movff	WREG,win_width    		; column max width.
+
+        ; Draw used area (hi = minutes):
         call    PLED_standard_color
         movlw	d'16'                   ; Limit length (16min)
         cpfslt	hi
         movwf	hi
-        movff	hi,win_width			; Bar width
-        tstfsz  hi                      ; Skip 0-size bar...
+        movff	hi,win_bargraph         ; Active width, the rest is cleared.
         call	PLED_box
 
-        ; Clear unused area:
-        movlw	.0
-        movff   WREG,win_color1
-        movff   WREG,win_color2
-        movlw   .122                    ; (width+left-1)+1
-        addwf   hi,W
-        movff   WREG,win_leftx2         ; --> left
-        movf    hi,W
-        sublw   .16                     ; 16-left --> width
-        movff   WREG,win_width
-        tstfsz  WREG                    ; Skip 0-size bar.
-        call    PLED_box
-        
         ; Restore win_top
         movff   win_top,WREG            ; decf win_top (BANK SAFE)
         decf    WREG
@@ -2263,7 +2251,7 @@ PLED_decoplan_show_stop:
 PLED_decoplan_clear_bottom:
         movff   win_top,WREG            ; Get back from bank0
         btfsc   divemode                ; In dive mode ?
-        sublw   .170                    ; Yes: bottom row in divemode
+        sublw   .168                    ; Yes: bottom row in divemode
         btfss   divemode                ; In dive mode ?
         sublw   .240                    ; No: bottom row in planning
         movff   WREG,win_height
@@ -2662,15 +2650,20 @@ PLED_no_graph_grid:
 	movwf	wait_temp                   ; 16 tissues
 	clrf	waitms_temp                 ; Row offset
 
-    call    PLED_standard_color
 	movlw	.1
 	movff	WREG,win_height             ; row bottom (0-239)
 	movlw	.82+.18                     ; surfmode
     btfsc   divemode
     movlw   .90+.18                     ; divemode
 	movff	WREG,win_leftx2             ; column left (0-159)
+    movlw	.57                         ; surfmode: max width 57pix
+    btfsc   divemode
+	movlw	.57-8                       ; divemode: 8pix less...
+	movff   WREG,win_width
 
 PLED_tissue_saturation_graph3:
+    call    PLED_standard_color         ; Reset color foreach iteration
+
 	movlw	.25+3                       ; surfmode: 3pix below top border
     btfsc   divemode
     movlw   .169+3                      ; divemode
@@ -2687,12 +2680,10 @@ PLED_tissue_saturation_graph3:
 	rrcf	WREG
 	movwf   temp1
 
-	movlw	.57                         ; surfmode: max 57pix
-    btfsc   divemode
-	movlw	.57-8                       ; divemode: 8pix less...s
+	movff   win_width,WREG              ; Max width.
 	cpfslt	temp1                       ; skip if 57 (WREG) < win_width
 	movwf	temp1
-	movff   temp1,win_width
+	movff   temp1,win_bargraph
 
 	call	PLED_box	
 
@@ -2706,6 +2697,7 @@ PLED_tissue_saturation_graph3:
 	clrf	waitms_temp                 ; Row offset
 
 PLED_tissue_saturation_graph2:
+    call    PLED_standard_color         ; Reset color foreach iteration
 
 	movlw	.120-.33                    ; surfmode : 33pix above bottom border
     btfsc   divemode
@@ -2722,12 +2714,11 @@ PLED_tissue_saturation_graph2:
 	bcf		STATUS,C
 	rrcf	WREG
 	movwf   temp1
-	movlw	.57                         ; surfmode: max 57pix
-    btfsc   divemode
-	movlw	.57-8                       ; divemode: 8pix less...s
+
+	movff   win_width,WREG              ; Max width.
 	cpfslt	temp1                       ; skip if 57 (WREG) < win_width
 	movwf	temp1
-	movff   temp1,win_width
+	movff   temp1,win_bargraph
 
 	call	PLED_box	
 
@@ -2735,6 +2726,8 @@ PLED_tissue_saturation_graph2:
 	bra		PLED_tissue_saturation_graph2
 
     ;---- Draw N2/He Text ----------------------------------------------------
+    call    PLED_standard_color         ; Reset color after last iterarion.
+
 	movlw	.82+2                       ; surfmode: 2pix right of left border
     btfsc   divemode
     movlw   .90+2                       ; divemode

@@ -101,6 +101,7 @@
 	win_width 					; box width (1..160)
 	win_font
 	win_invert
+	win_bargraph                ; PLED_box swicth to black after this position (0..159).
 	win_flags                   ; flip_screen flag, transparent fonts, etc...
 	ENDC
 

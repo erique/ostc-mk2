@@ -357,43 +357,60 @@ PLED_box:
 	movff	win_width,WREG
 	bcf     STATUS,C
 	rlcf    WREG
-	movwf   aa_width
+	movwf   aa_width+0
 	movlw   0
 	rlcf    WREG
 	movwf   aa_width+1
 	rcall   PLED_box_write
 
     ;---- Fill Window --------------------------------------------------------
-	movlw	0x22					        ; Start Writing Data to GRAM
+	movlw	0x22                        ; Start Writing Data to GRAM
 	rcall	PLED_CmdWrite
 
-	movff	win_width,PRODH
-	bsf		oled_rs					        ; Data!
+	clrf	PRODH                       ; Column counter.
+	bsf		oled_rs                     ; Data!
 
-PLED_box2:                                  ; Loop height times
+PLED_box2:                              ; Loop height times
 	movff	win_height,PRODL
-PLED_box3:                                  ; loop width times
+    
+PLED_box3:                              ; loop width times
 	movff	win_color1,PORTD
 	bcf		oled_rw
-	bsf		oled_rw					        ; Upper
+	bsf		oled_rw                     ; Upper
 	movff	win_color2,PORTD
 	bcf		oled_rw
-	bsf		oled_rw					        ; Lower
+	bsf		oled_rw                     ; Lower
 
 	movff	win_color1,PORTD
 	bcf		oled_rw
-	bsf		oled_rw					        ; Upper
+	bsf		oled_rw                     ; Upper
 	movff	win_color2,PORTD
 	bcf		oled_rw
-	bsf		oled_rw					        ; Lower
+	bsf		oled_rw                     ; Lower
 
-	decfsz	PRODL,F
-	bra		PLED_box3
-	decfsz	PRODH,F
-	bra		PLED_box2
+	decfsz	PRODL,F                     ; row loop finished ?
+	bra		PLED_box3                   ; No: continue.
 
-	movlw	0x00					        ; NOP, to stop Address Update Counter
-	bra     PLED_CmdWrite                   ; returns...
+    incf    PRODH,F                     ; column count ++
+
+    movff   win_bargraph,WREG           ; current column == bargraph ?
+    cpfseq  PRODH
+    bra     PLED_box4                   ; No: just loop.
+
+    clrf    WREG                        ; Yes: switch to black
+    movff   WREG,win_color1
+    movff   WREG,win_color2
+PLED_box4:
+    movff   win_width,WREG
+    cpfseq  PRODH
+    bra     PLED_box2
+
+	movlw	0x00                        ; NOP, to stop window mode
+	rcall   PLED_CmdWrite
+	
+	setf    WREG                        ; Reset bargraph mode...
+	movff   WREG,win_bargraph
+	return
 
 ;=============================================================================
 ; PLED_ClearScreen: An optimized version of PLEX_box, for full screen black.
@@ -427,11 +444,11 @@ PLED_ClearScreen:
 	rcall	PLED_CmdWrite
 	rcall	PLED_DataWrite_PROD
 
-	movlw	0x22					; Start Writing Data to GRAM
+	movlw	0x22                ; Start Writing Data to GRAM
 	rcall	PLED_CmdWrite
 
 	; See Page 101 of OLED Driver IC Datasheet how to handle rs/rw clocks
-	bsf		oled_rs					; Data!
+	bsf		oled_rs             ; Data!
 
 	movlw	.160
 	movwf	PRODH
@@ -440,21 +457,21 @@ PLED_ClearScreen2:
 	movwf	PRODL
 PLED_ClearScreen3:
 
-	clrf	PORTD					; Need to generate trace here too.
+	clrf	PORTD               ; Need to generate trace here too.
 	bcf		oled_rw
-	bsf		oled_rw					; Upper
+	bsf		oled_rw             ; Upper
 
-    clrf	PORTD					; Need to generate trace here too.
+    clrf	PORTD               ; Need to generate trace here too.
 	bcf		oled_rw
-	bsf		oled_rw					; Lower
+	bsf		oled_rw             ; Lower
 
-	clrf	PORTD					; Need to generate trace here too.
+	clrf	PORTD               ; Need to generate trace here too.
 	bcf		oled_rw
-	bsf		oled_rw					; Upper
+	bsf		oled_rw             ; Upper
 
-    clrf	PORTD					; Need to generate trace here too.
+    clrf	PORTD               ; Need to generate trace here too.
 	bcf		oled_rw
-	bsf		oled_rw					; Lower
+	bsf		oled_rw             ; Lower
 
 	decfsz	PRODL,F
 	bra		PLED_ClearScreen3

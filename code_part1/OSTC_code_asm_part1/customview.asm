@@ -90,6 +90,14 @@ customview_1sec_lead_tiss:              ; Do nothing extra
 	return
 
 customview_1sec_graphs:                 ; Do nothing extra
+    decfsz  apnoe_mins                  ; 10 sec passed ?
+    return                              ; No: skip.
+    movlw   .10                         ; Yes: reset counter.
+    movwf   apnoe_mins
+
+	call	deco_calc_desaturation_time	; calculate desaturation time
+	movlb	b'00000001'						; select ram bank 1
+	call	PLED_tissue_saturation_graph
 	return
 
 ;=============================================================================
@@ -120,15 +128,10 @@ customview_minute_lead_tiss:
 	call	PLED_show_leading_tissue_2  ; Update the leading tissue
 	return
 
-customview_minute_graphs:
-	call	deco_calc_desaturation_time	; calculate desaturation time
-	movlb	b'00000001'						; select ram bank 1
-	call	PLED_tissue_saturation_graph
-	return
-
 customview_minute_marker:               ; Do nothing extra
 customview_minute_stopwatch:            ; Do nothing extra
 customview_minute_average:				; Do nothing extra
+customview_minute_graphs:
 	return
 
 ;=============================================================================
@@ -181,13 +184,13 @@ customview_init_marker:					; Init Marker
 	decfsz		WREG,F					; WREG=1?	
 	bra			customview_toggle		; No, use next Customview
 
-    call    PLED_standard_color
-	DISPLAYTEXT		d'151'				; Set Marker?
-	bra		customview_toggle_exit	
+    call        PLED_standard_color
+	DISPLAYTEXT d'151'				    ; Set Marker?
+	bra		    customview_toggle_exit	
 
 customview_init_clock:					; Init Clock
-	call	PLED_diveclock
-	bra		customview_toggle_exit	
+	call	    PLED_diveclock
+	bra		    customview_toggle_exit	
 
 customview_init_lead_tissue:			; Show leading tissue
 	GETCUSTOM8	d'53'					; Show Lead Tissue? (=1 in WREG)
@@ -197,8 +200,8 @@ customview_init_lead_tissue:			; Show leading tissue
 	btfsc		no_deco_customviews		; no-deco-mode-flag = 1
 	bra			customview_toggle		; Yes, use next Customview!
 
-	call	PLED_show_leading_tissue
-	bra		customview_toggle_exit	
+	call	    PLED_show_leading_tissue
+	bra		    customview_toggle_exit	
 
 customview_init_graphs:					; Show tissue graph
  	GETCUSTOM8	d'52'					; Show Tissue Graph? (=1 in WREG)
@@ -208,10 +211,15 @@ customview_init_graphs:					; Show tissue graph
 	btfsc		no_deco_customviews		; no-deco-mode-flag = 1
 	bra			customview_toggle		; Yes, use next Customview!
 
-	call	deco_calc_desaturation_time	; calculate desaturation time
-	movlb	b'00000001'						; select ram bank 1
-	call    PLED_tissue_saturation_graph
-	bra     customview_toggle_exit	
+    movlw       .1                      ; Draw next second.
+    movwf       apnoe_mins              ; 10sec counter.   
+
+	call	    deco_calc_desaturation_time	; calculate desaturation time
+	movlb	    b'00000001'             ; select ram bank 1
+	call	    PLED_tissue_saturation_graph
+
+	bra         customview_toggle_exit
+
 customview_toggle_exit:
 	bcf		toggle_customview			; Clear flag
 	ostc_debug	'Y'		                ; Sends debug-information to screen in debugmode
@@ -322,7 +330,9 @@ surfcustomview_minute:		; Do every-minute tasks for the custom view area
 	return
 
 surfcustomview_minute_graphs:
-	call	PLED_tissue_saturation_graph		; Draw/Update the graphs
+	call	deco_calc_desaturation_time         ; calculate desaturation time
+	movlb	b'00000001'                         ; select ram bank 1
+	call	PLED_tissue_saturation_graph        ; Draw/Update the graphs
 	return
 
 surfcustomview_minute_interval:

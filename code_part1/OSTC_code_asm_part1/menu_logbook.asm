@@ -89,22 +89,19 @@ menu_logbook2:
 	call		I2CREAD					; reads one byte (Slow! Better use Blockread!)
 	movlw		0xFA                    ; That was a FA ?
 	xorwf		SSPBUF,W
-	bz          menu_loop_tooFar        ; Got it !
+	bz          menu_loop_tooFar        ; Got both of them...
 	
-	decf_eeprom_address	d'2'			; Instead, not far enough ?
-	call		I2CREAD					; reads one byte (Slow! Better use Blockread!)
-    infsnz      divemins+0,F            ; Keep in sync (-1+2 == +1)
+    infsnz      divemins+0,F            ; Advance to the next byte.
 	incf        divemins+1,F
+	decf_eeprom_address	d'2'			; One step back, two steps forward.
+	call		I2CREAD					; reads one byte (Slow! Better use Blockread!)
 	movlw		0xFA                    ; It was the second FA ?
 	xorwf		SSPBUF,W
 	bz          test_FA_DONE
     bra         menu_logbook2           ; No: continue the fast loop...
    
 menu_loop_tooFar;
-    movlw       -.1                     ; Correct counter too,
-    addwf       divemins+0              ; by doing a 16bit decrement.
-    movlw       0
-    addwfc      divemins+1
+ 	decf_eeprom_address	d'1'			; So stays pointing at the second one.
 
 test_FA_DONE:							; Found 0xFA 0xFA!
 	movff		eeprom_address+0,eeprom_header_address+0	; store current address into temp register

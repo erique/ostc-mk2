@@ -980,8 +980,15 @@ PLED_active_gas_divemode3:
     movff   WREG,letter+5		; collision with sat graphs
 	bcf		leftbind
 	call	word_processor
+	rcall	PLED_active_gas_divemode_better_gas	; show *, if required
 	return
 
+PLED_active_gas_divemode_better_gas:
+	WIN_TOP		.192
+	WIN_LEFT	.42
+	WIN_FONT 	FT_SMALL
+	call	PLED_standard_color
+	lfsr	FSR2,letter
 	movlw	' '
 	btfsc	better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 	movlw	'*'
@@ -1001,18 +1008,8 @@ PLED_active_gas_divemode4:
     movff   WREG,letter+5		; collision with sat graphs
 	bcf		leftbind
 	call	word_processor
+	rcall	PLED_active_gas_divemode_better_gas	; show *, if required
 	return
-
-
-	movlw	' '
-	btfsc	better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
-	movlw	'*'
-	movwf	POSTINC2
-	bcf		leftbind
-	call	word_processor
-	return
-
-
 
 PLED_display_decotype_surface:
 	WIN_LEFT	.85

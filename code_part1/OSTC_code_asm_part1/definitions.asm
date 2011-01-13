@@ -604,7 +604,7 @@
 #DEFINE	toggle_customview		flag13,7	;=1: Next customview
 
 #DEFINE	enter_error_sleep		flag14,0	;=1: Sleep immediately displaying the error using LED codes
-;unused	flag14,1	;=1: 
+#DEFINE nsm						flag14,1	;=1: Do not sleep
 #DEFINE	is_bailout				flag14,2	;=1: CC mode, but bailout active!
 #DEFINE	standalone_simulator	flag14,3	;=1: Standalone Simulator active
 #DEFINE	display_set_simulator	flag14,4	;=1: Show Divemode simulator menu

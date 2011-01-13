@@ -51,6 +51,7 @@ sleeploop_loop:
 	btfss	sleepmode				; wake up? (This bit will be set in other routines)
 	goto	restart					; yes
 	nop
+	btfss	nsm
 	sleep							; Sleep until Timer1 will wake up the device
 	nop	
 	bra		sleeploop_loop			; do loop until someting happens

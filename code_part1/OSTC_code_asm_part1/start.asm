@@ -133,9 +133,6 @@ restart:
 	GETCUSTOM8	d'48'				; time correction value
 	movff	WREG, time_correction_value	; store in Bank0 register
 
-	GETCUSTOM8	d'63'				; OLED flip_screen flag(s).
-	movff	WREG,win_flags          ; store in Bank0 register
-
 	clrf	flag1					; clear all flags
 	clrf	flag2
 	clrf	flag3
@@ -151,6 +148,19 @@ restart:
 	clrf	flag13
 	clrf	flag14
 	clrf	flag15
+
+	bsf		flag1,0
+	clrf	EEADRH					; Reset EEADRH
+	read_int_eeprom	d'1'
+	movlw	.7
+	cpfsgt	EEDATA					; >2048?
+	bcf		flag1,0
+	movff	flag1,win_flags			; store in Bank0 register
+	clrf	flag1					; Clear flag1 (again)
+	movlw	.39
+	cpfslt	EEDATA					; >10000
+	bsf		nsm						; For hardware debugging
+
 	call	gassetup_sort_gaslist       ; Sorts Gaslist according to change depth
 	call	PLED_boot                   ; PLED boot (Incl. Clear Screen!)
 	WIN_TOP		.0

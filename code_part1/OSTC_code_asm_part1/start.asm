@@ -157,8 +157,8 @@ restart:
 	bcf		flag1,0
 	movff	flag1,win_flags			; store in Bank0 register
 	clrf	flag1					; Clear flag1 (again)
-	movlw	.39
-	cpfslt	EEDATA					; >10000
+	movlw	.0
+	cpfsgt	EEDATA					; >256
 	bsf		nsm						; For hardware debugging
 
 	call	gassetup_sort_gaslist       ; Sorts Gaslist according to change depth

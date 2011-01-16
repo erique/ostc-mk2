@@ -42,6 +42,8 @@ surfloop:
 	movff	last_surfpressure_30min+0,int_I_pres_surface+0			; copy surface air pressure to deco routine
 	movff	last_surfpressure_30min+1,int_I_pres_surface+1			; 30min old values 
 
+	clrf	menupos3					; Reset Custom views (Default: No custom view)
+
 	btfsc	gauge_mode					; Ignore in gauge mode
 	bra		surfloop1
 	btfsc	FLAG_apnoe_mode				; Ignore in Apnoe mode

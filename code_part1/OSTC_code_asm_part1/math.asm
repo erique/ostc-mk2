@@ -16,9 +16,10 @@
 
 
 ; Math routines
-; written by: Matthias Heinrichs, info@heinrichsweikamp.com
-; written: 10/30/05
-; last updated: 06/21/07
+; history:
+; 2005-10-30: Written by Matthias Heinrichs, info@heinrichsweikamp.com
+; 2007-06-21: MH last updated
+; 2011-01-19: Clean up of isr variante.
 ; known bugs:
 ; ToDo: clean up!
 
@@ -42,28 +43,6 @@ div16:
 	decfsz	divB
 	bra		div16
 	return
-
-div32:
-; xC=xC(32Bit)/2^divB (divB: 8Bit only!)
-	bcf		STATUS,C
-	rrcf	xC+3
-	rrcf	xC+2
-	rrcf	xC+1	
-	rrcf	xC+0
-	decfsz	divB
-	bra		div32
-	return
-
-invert_xC:
-	movf   xC+1, w 				; inverses xC+0:xC+1
-	sublw  0xFF
-	movwf  xC+1
-	movf   xC+0, w 
-	bcf		STATUS,C
-	sublw  0xFF
-	movwf  xC+0
-	return	
-
 
 sub16:
 ;  sub_c = sub_a - sub_b
@@ -231,75 +210,20 @@ div32x16_4
 	goto		div32x16_2
 	return
 
-  
-isr_div16:
-; divA=divA/2^divB (divB: 8Bit only!)
-	bcf		STATUS,C
-	rrcf	isr_divA+1
-	rrcf	isr_divA
-	decfsz	isr_divB
-	bra		isr_div16
-	return
-
-isr_div32:
-; xC=xC(32Bit)/2^divB (divB: 8Bit only!)
-	bcf		STATUS,C
-	rrcf	isr_xC+3
-	rrcf	isr_xC+2
-	rrcf	isr_xC+1	
-	rrcf	isr_xC+0
-	decfsz	isr_divB
-	bra		isr_div32
-	return
-
-isr_invert_xC:
-	movf   isr_xC+1, w 				; inverses xC+0:xC+1
-	sublw  0xFF
-	movwf  isr_xC+1
-	movf   isr_xC+0, w 
-	bcf		STATUS,C
-	sublw  0xFF
-	movwf  isr_xC+0
-	return	
-
-
-isr_sub16:
-;  sub_c = sub_a - sub_b
-	bcf		neg_flag_isr
-	movf   isr_sub_b+0, w             	;  Get Value to be subtracted
-	subwf  isr_sub_a+0, w             	;  Do the High Byte
-	movwf  isr_sub_c+0
-	movf   isr_sub_b+1, w               ;  Get the Value to be Subbed
-	subwfb isr_sub_a+1, w
-	movwf  isr_sub_c+1
-	btfsc	STATUS,C
-	return							; result positve
-;  sub_c = sub_a - sub_b
-	bsf		neg_flag_isr				; result negative
-	movff	isr_sub_c+0,isr_sub_b+0
-	movff	isr_sub_c+1,isr_sub_b+1
-	setf	isr_sub_a
-	setf	isr_sub_a+1
-	movf   isr_sub_b+0, w             	;  Get Value to be subtracted
-	subwf  isr_sub_a+0, w             	;  Do the High Byte
-	movwf  isr_sub_c+0
-	movf   isr_sub_b+1, w               ;  Get the Value to be Subbed
-	subwfb  isr_sub_a+1, w
-	movwf  	isr_sub_c+1
-    return        
-
-
+;=============================================================================
+; u16 * u16 --> 32bit multiply (xA * xB --> xC)
+; Used in interupt service routines, to compute temperature and pressure.
+;
 isr_mult16x16:
-;xA*xB=xC
 	clrf    isr_xC+2        	  ;  Clear the High-Order Bits
 	clrf    isr_xC+3
 	movf    isr_xA, w               ;  Do the "L" Multiplication first
 	mulwf   isr_xB
 	movf    PRODL, w            ;  Save result
-	movwf   isr_xC
+	movwf   isr_xC+0
 	movf    PRODH, w
 	movwf   isr_xC+1
-	movf    isr_xA, w               ;  Do the "I" Multiplication
+	movf    isr_xA+0, w               ;  Do the "I" Multiplication
 	mulwf   isr_xB+1
 	movf    PRODL, w            ;  Save the Most Significant Byte First
 	addwf   isr_xC+1, f
@@ -320,4 +244,70 @@ isr_mult16x16:
 	movf    PRODH, w
 	addwfc  isr_xC+3, f
 	return
-       
+
+;=============================================================================
+; 24bit shift, repeted WREG times.
+; Because we shift less than 8bits, and keep only C[2:1], we don't care what
+; bit is inserted...
+;
+isr_shift_C31:
+	rrcf    isr_xC+3,F                  ; Shift the three bytes...
+	rrcf    isr_xC+2,F
+	rrcf    isr_xC+1,F
+	decfsz  WREG
+	bra     isr_shift_C31
+	return
+
+;=============================================================================
+; s16 * s16 --> 32bit multiply (xA * xB --> xC)
+; Signed multiplication.
+; Code from... the Pic18F documentation ;-)
+isr_unsigned_mult16x16:
+        MOVF    isr_xA+0, W             ; Lowest is simply a[0] * b[0]
+        MULWF   isr_xB+0
+        MOVFF   PRODL, isr_xC+0
+        MOVFF   PRODH, isr_xC+1
+        ;
+        MOVF    isr_xA+1, W             ; And highest a[1] * b[1]
+        MULWF   isr_xB+1
+        MOVFF   PRODL, isr_xC+2
+        MOVFF   PRODH, isr_xC+3
+        ;
+        MOVF    isr_xA+0, W             ; Intermediates do propagate:
+        MULWF   isr_xB+1
+        MOVF    PRODL, W
+        ADDWF   isr_xC+1, F             ; Add cross products
+        MOVF    PRODH, W
+        ADDWFC  isr_xC+2, F             ; with propagated carry
+        CLRF    WREG
+        ADDWFC  isr_xC+3, F             ; on the three bytes.
+        ;
+        MOVF    isr_xA+1, W             ; And the second one, similarly.
+        MULWF   isr_xB+0
+        MOVF    PRODL, W
+        ADDWF   isr_xC+1, F             ; Add cross products
+        MOVF    PRODH, W
+        ADDWFC  isr_xC+2, F
+        CLRF    WREG
+        ADDWFC  isr_xC+3, F
+        return
+
+isr_signed_mult16x16:
+        rcall   isr_unsigned_mult16x16
+
+        ; Manage sign extension of operand B
+        BTFSS   isr_xB+1,7              ; Is B negatif ?
+        BRA     isr_signed_mult_checkA  ; No: check ARG1
+        MOVF    isr_xA+0, W             ; Yes: add -65536 * A
+        SUBWF   isr_xC+2, F
+        MOVF    isr_xA+1, W
+        SUBWFB  isr_xC+3, F
+        ; And of operand A
+isr_signed_mult_checkA
+        BTFSS   isr_xA+1, 7             ; Is A negatif ?
+        RETURN                          ; No: done
+        MOVF    isr_xB+0, W
+        SUBWF   isr_xC+2, F
+        MOVF    isr_xB+1, W
+        SUBWFB  isr_xC+3, F
+        RETURN

@@ -16,177 +16,142 @@
 
 
 ; routines for Intersema MS5535A, MS5541B and MS5541C
-; written by: Matthias Heinrichs, info@heinrichsweikamp.com
-; written: 9/26/05
-; last updated: 08/08/31
+; history:
+; 2005-09-26: Written by Matthias Heinrichs, info@heinrichsweikamp.com
+; 2008-08-21: MH last updated
+; 2011-01-19: jDG Clean up using true signed arithmetics.
 ; known bugs:
 ; ToDo: 
 
 ; with second order temperature compensation
 
 calculate_compensation:
-; calculate xdT
+    ; calculate UT1 = 8*C5 + 10000 (u16 range 10.000 .. +42.760)
 	clrf	isr_xA+1
 	movlw	d'8'
 	movwf	isr_xA+0
 	movff	C5+0,isr_xB+0
 	movff	C5+1,isr_xB+1
-	call	isr_mult16x16		;isr_xA*isr_xB=isr_xC
+	call	isr_unsigned_mult16x16      ;isr_xA*isr_xB=isr_xC
 	movlw   LOW		d'10000'
 	addwf   isr_xC+0, f
 	movlw   HIGH 	d'10000'
-	addwfc  isr_xC+1, f			;isr_xC= 8*C5 + 10000
-	movff	D2+0,isr_sub_a+0
-	movff	D2+1,isr_sub_a+1
-	movff	isr_xC+0,isr_sub_b+0
-	movff	isr_xC+1,isr_sub_b+1
-	call	isr_sub16	;  isr_sub_c = isr_sub_a - isr_sub_b
-	movff	isr_sub_c+0,xdT+0
-	movff	isr_sub_c+1,xdT+1
-
-; Second order temperature calculation
-	btfsc	neg_flag_isr		
-	bra		dTzero_yes
-;	dT>0
-	bcf		neg_flag_xdT
-	movff	xdT+0,isr_xA+0
-	movff	xdT+1,isr_xA+1
-	movff	xdT+0,isr_xB+0
-	movff	xdT+1,isr_xB+1
-	call	isr_mult16x16		;isr_xA*isr_xB=isr_xC
-	movlw	d'17'			; 2^17=(128*128)*8
-	movwf	isr_divB
-	call	isr_div32			; isr_xC=isr_xC(32Bit)/2^isr_divB (isr_divB: 8Bit only!)
-	movff	xdT+0,isr_sub_a+0
-	movff	xdT+1,isr_sub_a+1
-	movff	isr_xC+0,isr_sub_b+0
-	movff	isr_xC+1,isr_sub_b+1
-	call	isr_sub16	;  isr_sub_c = isr_sub_a - isr_sub_b
-	movff	isr_sub_c+0,xdT2+0
-	movff	isr_sub_c+1,xdT2+1
-	bra		OFF_calc			; Done
-		
-dTzero_yes:
-;	dT<0
-	bsf		neg_flag_xdT
-	movff	xdT+0,isr_xA+0
-	movff	xdT+1,isr_xA+1
-	movff	xdT+0,isr_xB+0
-	movff	xdT+1,isr_xB+1
-	call	isr_mult16x16		;isr_xA*isr_xB=isr_xC
-	movlw	d'15'			; 2^15=(128*128)*2
-	movwf	isr_divB
-	call	isr_div32			; isr_xC=isr_xC(32Bit)/2^isr_divB (isr_divB: 8Bit only!)
-
-	movf	xdT+0,W
-	addwf	isr_xC+0,F
-	movf	xdT+1,W
-	addwfc	isr_xC+1,F	
-	movff	isr_xC+0,xdT2+0
-	movff	isr_xC+1,xdT2+1
-
-OFF_calc:
-; calculate OFF
-	movff	C4+0,isr_sub_a
-	movff	C4+1,isr_sub_a+1
-	movlw	d'250'
-	movwf	isr_sub_b
-	clrf	isr_sub_b+1
-	call	isr_sub16				; (C4-250) - Sets neg_flag_isr!
-	movff	isr_sub_c,isr_xA
-	movff	isr_sub_c+1,isr_xA+1
-	movff	xdT+0,isr_xB
-	movff	xdT+0+1,isr_xB+1
-	call	isr_mult16x16			; (C4-250)*dT
-	movff	isr_xC+0,isr_divA
-	movff	isr_xC+1,isr_divA+1
-	movlw	d'12'
-	movwf	isr_divB
-	call	isr_div16				; [(C4-250)*dT]/2^12
-	movff	isr_divA+0,isr_xC+0	
-	movff	isr_divA+1,isr_xC+1			; isr_xC= {[(C4-250)*dT]/2^12}
-	btfss	neg_flag_isr			; neg_flag_isr=1?
-	bra		OFF_calc2			; Yes, do C2 - isr_xC
-								; no, so do C2 + isr_xC
-	movf	C2+0,W
-	addwf   isr_xC+0, f				
-	movf	C2+1,W
-	addwfc  isr_xC+1, f				; isr_xC= C2 + {[(C4-250)*dT/2^12]}
-OFF_calc3:	
-	movlw   LOW	d'10000'
-	addwf   isr_xC+0, f
-	movlw   HIGH d'10000'
-	addwfc  isr_xC+1, f				; isr_xC=[(C4-250)*dT/2^12] + 10000
-	movff	isr_xC+0,OFF+0
-	movff	isr_xC+1,OFF+1
-	bra		calculate_SENS		; Done with OFF
-
-OFF_calc2:	
-	movff	C2+0,isr_sub_a+0
-	movff	C2+1,isr_sub_a+1
-	movff	isr_xC+0,isr_sub_b+0
-	movff	isr_xC+1,isr_sub_b+1
-	call	isr_sub16	;  isr_sub_c = isr_sub_a - isr_sub_b
-						; isr_xC= C2 - {[(C4-250)*dT/2^12]}
-	movff	isr_sub_c+0,isr_xC+0
-	movff	isr_sub_c+1,isr_xC+1			; Done with OFF
-	bra		OFF_calc3
+	addwfc  isr_xC+1, f			        ;isr_xC= 8*C5 + 10000
 	
-calculate_SENS:
-	movff	C3+0, C3_temp+0
-	movff	C3+1, C3_temp+1
-	movlw   d'200'
-	addwf   C3_temp+0, f
-	movlw   d'0'
-	addwfc  C3_temp+1, f		; C3 no longer valid!
-	movff	C3_temp+0, isr_xA
-	movff	C3_temp+1, isr_xA+1
-	movff	xdT+0, isr_xB
-	movff	xdT+1, isr_xB+1
-	call	isr_mult16x16
-	movff	isr_xC+0,isr_divA
-	movff	isr_xC+1,isr_divA+1
-	movlw	d'13'
-	movwf	isr_divB
-	call	isr_div16
-	movff	isr_divA,SENS+0
-	movff	isr_divA+1,SENS+1
-	movff	C1+0,isr_divA
-	movff	C1+1,isr_divA+1
-	movlw	d'1'
-	movwf	isr_divB
-	call	isr_div16
-	movf	isr_divA,W
-	addwf   SENS+0, f
-	movf	isr_divA+1,W
-	addwfc  SENS+1, f
-	movlw   d'184'
-	addwf   SENS+0, f
-	movlw   d'11'
-	addwfc  SENS+1, f
+	; xdT = D2 - UT1    (s16 range -11.400 .. +12.350)
+	movf   isr_xC+0,W                   ;  Get Value to be subtracted
+	subwf  D2+0,W             	        ;  Do the Low Byte
+	movwf  xdT+0
+	movf   isr_xC+1,W                   ;  Then the high byte.
+	subwfb D2+1,W
+	movwf  xdT+1
 
-; calculate amb_pressure
-	movff	D1+0,isr_sub_a
-	movff	D1+1,isr_sub_a+1
-	movff	OFF+0,isr_sub_b
-	movff	OFF+1,isr_sub_b+1
-	call	isr_sub16
-	movff	isr_sub_c,isr_xA
-	movff	isr_sub_c+1,isr_xA+1
-	movff	SENS+0,isr_xB
-	movff	SENS+1,isr_xB+1
-	call	isr_mult16x16
-	movlw	d'12'
-	movwf	isr_divB
-	call	isr_div32
-	btfsc	neg_flag_isr		; invert isr_xC+0 and isr_xC+1
-	call	isr_invert_xC
-	movlw   LOW 	d'1000'
-	addwf   isr_xC+0, f
-	movlw   HIGH 	d'1000'
-	addwfc  isr_xC+1, f
-	movff	isr_xC+0,amb_pressure+0
-	movff	isr_xC+1,amb_pressure+1
+    ; Second order temperature calculation
+    ; xdT/128 is in range -89..+96, hence signed 8bit. dT/128 = (2*dT)/256
+    rlcf    xdT+0,W                     ; put hit bit in carry.
+    rlcf    xdT+1,W                     ; inject in high byte.
+    movwf   isr_xA+0                    ; and put result in low byte.
+    clrf    isr_xA+1
+    btfsc   xdT+1,7                     ; If dT < 0
+    setf    isr_xA+1                    ; then signextend to -1
+	movff	isr_xA+0,isr_xB+0           ; copy A to B
+	movff	isr_xA+1,isr_xB+1
+	call	isr_signed_mult16x16        ; dT*dT --> xC (32 bits)
+
+	; dT >= 0: divide by 8, ie. 3 shifts rights.
+	; dT <  0: divide by 2, ie. 1 shifts rights.
+    movlw   .3
+	btfss	xdT+1,7                     ; Was dT negatif ?
+	movlw   .1
+calc_loop_1:
+    bcf     STATUS,C                    ;dT^2 is positiv, so injected zeros.
+    rrcf    isr_xC+1,F
+    rrcf    isr_xC+0,F
+    decfsz  WREG
+    bra     calc_loop_1
+
+    movf    isr_xC+0,W                  ; dT2 = dT - (dT/128)*(dT/128)/(2 ...or... 8)
+	subwf   xdT+0,W
+	movwf   xdT2+0
+	movf    isr_xC+1,W
+	subwfb  xdT+1,W
+	movwf   xdT2+1
+
+    ; Calculate OFF = C2 + ((C4-250)*dT2)/2^12 + 10000
+    ; (range +9.246 .. +18.887)
+	movlw   LOW(-.250)                  ; C4 - 250 --> A
+	addwf	C4+0,W
+	movwf   isr_xA+0
+	movlw   -1                          ; HIGH(- .250) is not hunderstood...
+	addwfc  C4+1,W
+	movwf   isr_xA+1
+	
+	movff   xdT2+0,isr_xB+0             ; dT2 --> B
+	movff   xdT2+1,isr_xB+1
+	call    isr_signed_mult16x16
+    movlw   .12-.8                      ; A 12bit shift = 1 byte + 4 bits.
+    call    isr_shift_C31
+
+    movlw   LOW(.10000)                 ; Add 10000
+    addwf   isr_xC+1,F
+    movlw   HIGH(.10000)
+    addwfc  isr_xC+2,F
+    
+    movf    C2+0,W                      ; Add C2, and save into OFF
+	addwf   isr_xC+1,W
+	movwf   OFF+0
+	movf	C2+1,W
+	addwfc  isr_xC+2,W
+	movwf   OFF+1
+
+    ; Calculate SENS = C1/2 + ((C3+200)*dT)/2^13 + 3000
+    movlw   LOW(.200)                   ; C3+200 --> A
+    addwf   C3+0,W
+    movwf   isr_xA+0
+    movlw   HIGH(.200)
+    addwfc  C3+1,W
+    movwf   isr_xA+1
+                                        ; B still contains dT2
+	call    isr_signed_mult16x16        ; A*B --> C
+    movlw   .13-.8                      ; A 13bit shift = 1 byte + 5 bits.
+    call    isr_shift_C31
+    
+    bcf     STATUS,C                    ; SENS = C1 / 2
+    rrcf    C1+1,W
+    movwf   SENS+1
+    rrcf    C1+0,W
+    movwf   SENS+0
+
+    movlw   LOW(.3000)                  ; Add 3000
+    addwf   isr_xC+1,F
+    movlw   HIGH(.3000)
+    addwfc  isr_xC+2,F
+
+    movf    isr_xC+1,W                  ; And sum into SENS
+    addwf   SENS+0,F
+    movf    isr_xC+2,W
+    addwfc  SENS+1,F
+
+    ; calculate amb_pressure = (sens * (d1-off))/2^12 + 1000
+    movf    OFF+0,W                      ; d1-off --> a
+    subwf   D1+0,W
+    movwf   isr_xA+0
+    movf    OFF+1,W
+    subwfb  D1+1,W
+    movwf   isr_xA+1
+
+	movff   SENS+0,isr_xB+0             ; sens --> b
+	movff   SENS+1,isr_xB+1
+	call    isr_signed_mult16x16
+    movlw   .12-.8                      ; a 12bit shift = 1 byte + 4 bits.
+    call    isr_shift_C31
+
+    movlw   LOW(.1000)                  ; add 1000, and save into amb_pressure
+    addwf   isr_xC+1,W
+    movwf   amb_pressure+0
+    movlw   HIGH(.1000)
+    addwfc  isr_xC+2,W
+    movwf   amb_pressure+1
 
 	btfss	simulatormode_active		; are we in simulator mode?
 	bra		calc_pressure_done			; no
@@ -195,60 +160,38 @@ calculate_SENS:
 	movff	sim_pressure+1,amb_pressure+1
 	
 calc_pressure_done:
+    ; calculate temp = 200 + dT*(C6+100)/2^11
+    movlw   LOW(.100)                   ; C6 + 100 --> A
+    addwf   C6+0,W
+    movwf   isr_xA+0
+    movlw   HIGH(.100)
+    addwfc  C6+1,W
+    movwf   isr_xA+1
 
-; calculate temp	
-	movff	C6+0, C3_temp+0
-	movff	C6+1, C3_temp+1
-	movlw   d'100'
-	addwf   C3_temp+0, f
-	movlw   d'0'
-	addwfc  C3_temp+1, f
-	movff	C3_temp+0,isr_xA+0
-	movff	C3_temp+1,isr_xA+1
-	movff	xdT2+0,isr_xB+0	
-	movff	xdT2+1,isr_xB+1
-	call	isr_mult16x16
-	movlw	d'11'
-	movwf	isr_divB
-	call	isr_div32
-	bcf		neg_temp				; Temperatur positive 
-	
-	btfsc	neg_flag_xdT			; was xdT negative?
-	bra		neg_sub_temp			; yes,  200 - dT*(....
-									; No, 200 + dT*(....
-;	movf	temperature_correction,W
-;	addlw   d'200'
-;	btfsc	STATUS,C
-;	incf	isr_xC+1,F
+    movff   xdT2+0,isr_xB+0             ; dT2 --> B
+    movff   xdT2+1,isr_xB+1
+	call    isr_signed_mult16x16        ; A*B
+    movlw   .11-.8                      ; A 12bit shift = 1 byte + 3 bits.
+    call    isr_shift_C31
 
-	movlw	d'200'
-	addwf   isr_xC+0, f
-	movlw   d'0'
-	addwfc  isr_xC+1, f
-	movff	isr_xC+0,temperature+0
-	movff	isr_xC+1,temperature+1
-	return			; done
+    movlw   LOW(.200)                   ; Add 200, and save into temperature
+    addwf   isr_xC+1,W
+    movwf   temperature+0
+    movlw   HIGH(.200)
+    addwfc  isr_xC+2,W
+    movwf   temperature+1
 
-neg_sub_temp:					; 200 - dT*(....
-;	movf	temperature_correction,W
-;	addlw   d'200'
-;	btfsc	STATUS,C
-;	decf	isr_xC+1,F
+    bcf     neg_temp
+    bnn     calc_pos_temp               ; Is Temp° negativ ?
+    
+    bsf     neg_temp                    ; Yes: set flag and store -temp
+    comf    temperature+1
+    negf    temperature+0
+    btfsc   STATUS,C
+    incf    temperature+1
 
-	movlw	d'200'
-neg_sub_temp3:
-	movwf	isr_sub_a+0
-	clrf	isr_sub_a+1
-	movff	isr_xC+0, isr_sub_b+0
-	movff	isr_xC+1, isr_sub_b+1
-	call	isr_sub16				; isr_sub_c = isr_sub_a - isr_sub_b
-	btfsc	neg_flag_isr			; below zero?
-	bsf		neg_temp			; temperature negative!
-
-	movff	isr_sub_c+0,temperature+0
-	movff	isr_sub_c+1,temperature+1
-	return			; Fertig mit allem
-
+calc_pos_temp:
+	return			                    ; Fertig mit allem
 
 get_pressure_start:
 	rcall	reset_MS5535A

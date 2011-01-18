@@ -144,7 +144,7 @@ cf_default_table0:
     ;---- BANK1 custom function defaults -------------------------------------
 cf_default_table1:
     ;                          DEFAULT   MIN     MAX
-	CF_DEFAULT    CF_PERCENT,   d'30',  d'10',  d'90'   ; GF_low_default			30%
+	CF_DEFAULT    CF_PERCENT,   d'30',  d'5',  	d'90'   ; GF_low_default			30%
 	CF_DEFAULT    CF_PERCENT,   d'90', 	d'30',  d'95'   ; GF_high_default			90%
 	CF_DEFAULT    CF_COLOR,     d'199', 0,      0 		; color_battery_surface		Color Battery sign: Deep blue
 	CF_DEFAULT    CF_COLOR,     d'255', 0,      0 		; color_standard1			Color Standard: White
@@ -164,7 +164,7 @@ cf_default_table1:
 
 	CF_DEFAULT    CF_INT8,	    d'15',  d'7',   d'20'	; color_warn_celocity_mmin	warn at xx m/min
 	CF_DEFAULT    CF_SEC,	    d'42',  d'0',   d'240'  ; time_correction_value_default	Adds to Seconds on Midnight
-	CF_DEFAULT    CF_BOOL,      d'1',   0,      0 		; CF#49 Show Altimeter in surface mode
+	CF_DEFAULT    CF_BOOL,      d'0',   0,      0 		; CF#49 Show Altimeter in surface mode
 	CF_DEFAULT    CF_BOOL,     	d'0',   0,      0       ; CF50 Show Log-Marker
 	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0 		; CF51 Show Stopwatch
 	                
@@ -336,16 +336,17 @@ reset_all_cf:
 	clrf	EEDATA
 	write_int_eeprom	d'35'		; Do not use O2 Sensor in CC Modes
 
-	movlw	d'0'
 	clrf	EEDATA
 	write_int_eeprom	d'39'		; Disable Debugbode
 	clrf	EEDATA
 	write_int_eeprom	d'90'		; Disable Brightness offset? (Dim=1, Normal = 0)
 
 	movlw	d'1'
+	movwf	EEDATA
 	write_int_eeprom	d'91'		; Reset Date format to DD.MM.YY
 
 	movlw	d'100'
+	movwf	EEDATA
 	write_int_eeprom	d'26'		; Salinity default: 1.00 kg/l
 
 	movlw	b'00011111'	

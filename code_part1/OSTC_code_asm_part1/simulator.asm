@@ -235,6 +235,7 @@ simulator_calc_deco:
 	bsf		simulatormode_active			; normal simulator mode
 	bsf		standalone_simulator			; Standalone Simulator active
 
+	movff	logbook_temp2,logbook_temp3		; store bottom time
 
 	movff	logbook_temp2,xA+0
 	clrf	xA+1
@@ -248,11 +249,6 @@ simulator_calc_deco:
 	movlw	HIGH	d'1000'
 	addwfc	xC+1,F							; add 1000mBar
 
-;	movf	amb_pressure+0,W
-;	addwf	xC+0,F
-;	movf	amb_pressure+1,W
-;	addwfc	xC+1,F							; Add ambient pressure
-;	
 	movff	xC+0,sim_pressure+0
 	movff	xC+1,sim_pressure+1
 
@@ -326,6 +322,7 @@ simulator_calc_deco3:
 
 	movlw	d'5'							; Pre-Set Cursor to "Show Decoplan"
 	movwf	menupos
+	movff	logbook_temp3,logbook_temp2		; restore bottom time
 	bra		menu_simulator1					; Done.
 
 simulator_calc_deco2:

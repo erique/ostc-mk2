@@ -9,7 +9,6 @@ NEW: "beta" is shown for beta versions
 CHANGE: NoFly and Desaturation time only visible when > 0
 CHANGE: "LowBatt!" Warning in Divemode
 
-
 New in 1.75 Beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: Decomask in Gauge mode removed

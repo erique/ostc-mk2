@@ -188,8 +188,8 @@ textpos_pointer:
 
 	DB	.102,.54	;82 Decostop
 	DB	.0,.0		;83
-	DB	.108,.112	;84	No Stop
-	DB	.135,.112	;85 TTS
+	DB	.108,.113	;84	No Stop
+	DB	.135,.113	;85 TTS
 	DB	.100,.0		;86 Divetime
 	DB	.0,.0		;87 Depth
 	DB	.0,.0		;88

@@ -235,7 +235,7 @@ simulator_calc_deco:
 	bsf		simulatormode_active			; normal simulator mode
 	bsf		standalone_simulator			; Standalone Simulator active
 
-	movff	logbook_temp2,logbook_temp3		; store bottom time
+	movff	logbook_temp1,logbook_temp3		; store bottom time
 
 	movff	logbook_temp2,xA+0
 	clrf	xA+1
@@ -322,7 +322,7 @@ simulator_calc_deco3:
 
 	movlw	d'5'							; Pre-Set Cursor to "Show Decoplan"
 	movwf	menupos
-	movff	logbook_temp3,logbook_temp2		; restore bottom time
+	movff	logbook_temp3,logbook_temp1		; restore bottom time
 	bra		menu_simulator1					; Done.
 
 simulator_calc_deco2:

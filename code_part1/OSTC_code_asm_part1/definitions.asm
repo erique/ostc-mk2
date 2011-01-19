@@ -23,9 +23,9 @@
 ;#DEFINE		NO_SENSOR_MODE			; uses Dummy values
 
 #DEFINE	softwareversion_x		d'1'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'80'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'81'		; Software version  XX.YY
 
-#DEFINE softwareversion_beta 	0 			; (and 0 for release) 
+#DEFINE softwareversion_beta 	1 			; (and 0 for release) 
 
 #DEFINE	max_custom_number		d'53'		; Number of last used custom function
 

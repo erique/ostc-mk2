@@ -1,7 +1,9 @@
-New in 1.77 Beta:
+New in 1.81 beta:
 BETA Version - Do NOT use for diving!
-BUGFIX: No Custom view in Surfacemode as default
 
+New in 1.80 Stable:
+Stable release
+BUGFIX: No Custom view in Surfacemode as default
 
 New in 1.76 Beta:
 BETA Version - Do NOT use for diving!

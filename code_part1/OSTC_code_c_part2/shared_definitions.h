@@ -99,6 +99,8 @@ VAR_UINT  (int_O_DBG_pre_bitfield);
 VAR_UINT  (int_O_DBG_post_bitfield);
 VAR_UCHAR (char_O_NDL_at_20mtr);
 
+TAB_UCHAR (char_O_hash, 16);
+
 #ifdef __18CXX
     //---- BANK 3 DATA -------------------------------------------------------
     // Gather all data ASM-code --> C-code

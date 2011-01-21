@@ -31,8 +31,9 @@
 
 	#include	definitions.asm				; Defines, I/O Ports and variables
 
+
 reset_v code     0x0000
-e		goto	start						; Start!
+        goto	start						; Start!
 
 inter_v	code	0x0008
 		bra		HighInt						;High Priority Interrups

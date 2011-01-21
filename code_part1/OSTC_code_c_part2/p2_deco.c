@@ -158,20 +158,20 @@ static float  			var_halftimes;
 static float  			var2_halftimes;
 static float			pres_gtissue_limit;
 static float			temp_pres_gtissue_limit;
-static float			actual_ppO2;						// new in v.102
+static float			actual_ppO2;                // new in v.102
 
-static float			pres_tissue[32];
+static float            pres_diluent;               // new in v.101
+static float            deco_diluent;               // new in v.101
+static float            const_ppO2;                 // new in v.101
+static float            deco_ppO2_change;           // new in v.101
+static float            deco_ppO2;                  // new in v.101
 
 //---- Bank 6 parameters -----------------------------------------------------
 #pragma udata bank6=0x600
 
+static float  pres_tissue[32];
 static float  pres_tissue_limit[16];
 static float  sim_pres_tissue_limit[16];
-static float  pres_diluent;			            // new in v.101
-static float  deco_diluent;			            // new in v.101
-static float  const_ppO2;				        // new in v.101
-static float  deco_ppO2_change;	            	// new in v.101
-static float  deco_ppO2;				        // new in v.101
 
 //---- Bank 7 parameters -----------------------------------------------------
 #pragma udata bank7=0x700
@@ -190,59 +190,58 @@ static char	  md_pi_subst[256];
 
 static char	  md_state[48];		        // DONT MOVE !! // has to be at the beginning of bank 9 for the asm code!!!
 
-// internal:
- static char            md_t;
- static char            md_buffer[16];
- static char            md_cksum[16];
- static char            md_i;
- static char            md_j;
- static char            md_temp;
- static unsigned int	md_pointer;
- static float			deco_N2_ratio;			// new in v.101
- static float			deco_He_ratio;			// new in v.101
- static float			calc_N2_ratio;			// new in v.101
- static float			calc_He_ratio;			// new in v.101
- static float			deco_gas_change;		// new in v.101
- static float			CNS_fraction;			// new in v.101
- static float			float_saturation_multiplier;		// new in v.101
- static float			float_desaturation_multiplier;		// new in v.101
- static float			float_deco_distance;	// new in v.101
- // internal, dbg:
- static unsigned char	DBG_char_I_deco_model;	// new in v.108
- static unsigned char	DBG_char_I_depth_last_deco;			// new in v.108
- static float			DBG_pres_surface;		// new in v.108
- static float			DBG_GF_low;				// new in v.108
- static float			DBG_GF_high;			// new in v.108
- static float			DBG_const_ppO2;			// new in v.108
- static float			DBG_deco_ppO2_change;	// new in v.108
- static float			DBG_deco_ppO2;			// new in v.108
- static float			DBG_deco_N2_ratio;		// new in v.108
- static float			DBG_deco_He_ratio;		// new in v.108
- static float			DBG_deco_gas_change;	// new in v.108
- static float			DBG_float_saturation_multiplier;	// new in v.108
- static float			DBG_float_desaturation_multiplier;	// new in v.108
- static float			DBG_float_deco_distance;			// new in v.108
- static float			DBG_deco_N2_ratio;		// new in v.108
- static float			DBG_deco_He_ratio;		// new in v.108
- static float			DBG_N2_ratio;			// new in v.108
- static float			DBG_He_ratio;			// new in v.108
- static char			flag_in_divemode;		// new in v.108
- static	int 			int_dbg_i;				// new in v.108
- static unsigned int 	temp_DBS;
+static char            md_t;
+static char            md_buffer[16];
+static unsigned char   md_i;
+static char            md_j;
+static char            md_temp;
+static unsigned int	md_pointer;
+static float			deco_N2_ratio;			// new in v.101
+static float			deco_He_ratio;			// new in v.101
+static float			calc_N2_ratio;			// new in v.101
+static float			calc_He_ratio;			// new in v.101
+static float			deco_gas_change;		// new in v.101
+static float			CNS_fraction;			// new in v.101
+static float			float_saturation_multiplier;		// new in v.101
+static float			float_desaturation_multiplier;		// new in v.101
+static float			float_deco_distance;	// new in v.101
 
- static float			deco_gas_change2;		// new in v.109
- static float			deco_gas_change3;		// new in v.109
- static float			deco_gas_change4;		// new in v.109
- static float			deco_gas_change5;		// new in v.109
+// internal, dbg:
+static unsigned char	DBG_char_I_deco_model;	// new in v.108
+static unsigned char	DBG_char_I_depth_last_deco;			// new in v.108
+static float			DBG_pres_surface;		// new in v.108
+static float			DBG_GF_low;				// new in v.108
+static float			DBG_GF_high;			// new in v.108
+static float			DBG_const_ppO2;			// new in v.108
+static float			DBG_deco_ppO2_change;	// new in v.108
+static float			DBG_deco_ppO2;			// new in v.108
+static float			DBG_deco_N2_ratio;		// new in v.108
+static float			DBG_deco_He_ratio;		// new in v.108
+static float			DBG_deco_gas_change;	// new in v.108
+static float			DBG_float_saturation_multiplier;	// new in v.108
+static float			DBG_float_desaturation_multiplier;	// new in v.108
+static float			DBG_float_deco_distance;			// new in v.108
+static float			DBG_deco_N2_ratio;		// new in v.108
+static float			DBG_deco_He_ratio;		// new in v.108
+static float			DBG_N2_ratio;			// new in v.108
+static float			DBG_He_ratio;			// new in v.108
+static char			    flag_in_divemode;		// new in v.108
+static	int 			int_dbg_i;				// new in v.108
+static unsigned int 	temp_DBS;
 
- static float			deco_N2_ratio2;			// new in v.109
- static float			deco_N2_ratio3;			// new in v.109
- static float			deco_N2_ratio4;			// new in v.109
- static float			deco_N2_ratio5;			// new in v.109
- static float			deco_He_ratio2;			// new in v.109
- static float			deco_He_ratio3;			// new in v.109
- static float			deco_He_ratio4;			// new in v.109
- static float			deco_He_ratio5;			// new in v.109
+static float			deco_gas_change2;		// new in v.109
+static float			deco_gas_change3;		// new in v.109
+static float			deco_gas_change4;		// new in v.109
+static float			deco_gas_change5;		// new in v.109
+
+static float			deco_N2_ratio2;			// new in v.109
+static float			deco_N2_ratio3;			// new in v.109
+static float			deco_N2_ratio4;			// new in v.109
+static float			deco_N2_ratio5;			// new in v.109
+static float			deco_He_ratio2;			// new in v.109
+static float			deco_He_ratio3;			// new in v.109
+static float			deco_He_ratio4;			// new in v.109
+static float			deco_He_ratio5;			// new in v.109
 
 // ***********************
 // ***********************
@@ -696,7 +695,6 @@ loop:   MOVWF   POSTINC1,0
     _endasm
 #endif
 
-    
 void deco_calc_hauptroutine(void)
 {
     RESET_C_STACK
@@ -741,7 +739,6 @@ void deco_debug(void)
 
 void clear_tissue(void)    // preload tissues with standard pressure for the given ambient pressure
 {
-
 	flag_in_divemode = 0;
 	int_O_DBS_bitfield = 0;
 	int_O_DBS2_bitfield = 0;
@@ -752,50 +749,28 @@ void clear_tissue(void)    // preload tissues with standard pressure for the giv
     // N2_ratio = (float)char_I_N2_ratio; // the 0.0002 of 0.7902 are missing with standard air
     N2_ratio = 0.7902; // N2_ratio / 100.0;
     pres_respiration = (float)int_I_pres_respiration / 1000.0;
-    for (ci=0;ci<16;ci++)  // cycle through the 16 b"uhlmann tissues
-    {
-        pres_tissue[ci] =  N2_ratio * (pres_respiration -  0.0627) ;
-        _asm
-        movlw	0x02
-        movwf	TBLPTRH,0
-        movlb	4 // fuer ci
-        movf ci,0,1
-        addwf	ci,0,1
-        addwf	ci,0,1
-        addwf	ci,0,1
-        addlw	0x80
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var_a+1
-        TBLRDPOSTINC
-        movff	TABLAT,var_a
-        TBLRDPOSTINC
-        movff	TABLAT,var_a+3
-        TBLRD
-        movff	TABLAT,var_a+2
-        addlw	0x80
-        movwf	TBLPTRL,0
-        incf	TBLPTRH,1,0
-        TBLRDPOSTINC
-        movff	TABLAT,var_b+1
-        TBLRDPOSTINC
-        movff	TABLAT,var_b
-        TBLRDPOSTINC
-        movff	TABLAT,var_b+3
-        TBLRD
-        movff	TABLAT,var_b+2
-        _endasm
-        
-        pres_tissue_limit[ci] = (pres_tissue[ci] - var_a) * var_b ;
-        // now update the guiding tissue
-        if (pres_tissue_limit[ci] < 0)
-            pres_tissue_limit[ci] = 0;
-    } // for 0 to 16
     
-    for (ci=16;ci<32;ci++)  // cycle through the 16 b"uhlmann tissues for Helium
+    _asm
+        movlw 1
+        movwf TBLPTRU,0
+    _endasm
+    for(ci=0;ci<16;ci++)
     {
-        pres_tissue[ci] = 0.0;
-    }  // for
+        overlay float p;
+        // cycle through the 16 b"uhlmann tissues
+        p = N2_ratio * (pres_respiration -  0.0627) ;
+        pres_tissue[ci] = p;
+        
+        var_a = ((rom float*)a_N2)[ci];
+        var_b = ((rom float*)b_N2)[ci];
+        p = (p - var_a) * var_b ;
+        if( p < 0.0 )
+            p = 0.0;
+        pres_tissue_limit[ci] = p;
+
+        // cycle through the 16 b"uhlmann tissues for Helium
+        pres_tissue[ci+16] = 0.0;
+    } // for 0 to 16
 
     clear_decoarray();
     char_O_deco_status = 0;
@@ -1230,8 +1205,8 @@ void calc_tissue(void)
         _asm
         movlw	0x02
         movwf	TBLPTRH,0
-        movlb	4 // fuer ci
-        movf ci,0,1
+        movlb	5 // fuer ci
+        movf    ci,0,1
         addwf	ci,0,1
         addwf	ci,0,1
         addwf	ci,0,1
@@ -1490,8 +1465,8 @@ void sim_tissue_1min(void)
         _asm
         movlw	0x02
         movwf	TBLPTRH,0
-        movlb	4 // fuer ci
-        movf ci,0,1
+        movlb	5 // fuer ci
+        movf    ci,0,1
         addwf	ci,0,1
         addwf	ci,0,1
         addwf	ci,0,1
@@ -1611,8 +1586,8 @@ void sim_tissue_10min(void)
         _asm
         movlw	0x02
         movwf	TBLPTRH,0
-        movlb	4 // fuer ci
-        movf ci,0,1
+        movlb	5 // fuer ci
+        movf    ci,0,1
         addwf	ci,0,1
         addwf	ci,0,1
         addwf	ci,0,1
@@ -1863,8 +1838,8 @@ void deco_calc_desaturation_time(void)
         _asm
         movlw	0x04
         movwf	TBLPTRH,0
-        movlb	4 // fuer ci
-        movf ci,0,1
+        movlb	5 // fuer ci
+        movf    ci,0,1
         addwf	ci,0,1
         addwf	ci,0,1
         addwf	ci,0,1
@@ -2019,8 +1994,8 @@ void calc_tissue_step_1_min(void)
         _asm
         movlw	0x02
         movwf	TBLPTRH,0
-        movlb	4 // fuer ci
-        movf ci,0,1
+        movlb	5 // fuer ci
+        movf    ci,0,1
         addwf	ci,0,1
         addwf	ci,0,1
         addwf	ci,0,1
@@ -2120,10 +2095,10 @@ void deco_hash(void)
     RESET_C_STACK
     
     // init
-    for (md_i=0;md_i<16;md_i++)
+    for(md_i=0;md_i<16;md_i++)
     {
          md_state[md_i] = 0;
-         md_cksum[md_i] = 0;
+         char_O_hash[md_i] = 0;
     } // for md_i 16
 
     _asm
@@ -2134,7 +2109,7 @@ void deco_hash(void)
     movlw	0x00
     movwf	TBLPTRL,0
     _endasm;
-    for (md_i=0;md_i<127;md_i++)
+    for(md_i=0;md_i<=255;md_i++)
     {
         _asm
         TBLRDPOSTINC
@@ -2142,24 +2117,6 @@ void deco_hash(void)
         _endasm
         md_pi_subst[md_i] = md_temp;
     } // for md_i 256
-    _asm
-    TBLRDPOSTINC
-    movff	TABLAT,md_temp
-    _endasm;
-    md_pi_subst[127] = md_temp;
-    for (md_i=0;md_i<127;md_i++)
-    {
-        _asm
-        TBLRDPOSTINC
-        movff	TABLAT,md_temp
-        _endasm
-        md_pi_subst[md_i+128] = md_temp;
-    } // for md_i 256
-    _asm
-    TBLRD
-    movff	TABLAT,md_temp
-    _endasm
-    md_pi_subst[255] = md_temp;
     
     _asm
      movlw	0x00
@@ -2176,7 +2133,7 @@ void deco_hash(void)
         for (md_i=0;md_i<16;md_i++)
         {
             if(md_pointer == 9)
-                md_temp = md_cksum[md_i];
+                md_temp = char_O_hash[md_i];
             else
             {
                 _asm
@@ -2198,12 +2155,12 @@ void deco_hash(void)
             } // for md_j 48
             md_t = (unsigned char)(md_t+1);
         } // for md_i 18
-        md_t = md_cksum[15];
+        md_t = char_O_hash[15];
             
         for (md_i=0;md_i<16;md_i++)
         {
-            md_cksum[md_i] = (unsigned char)(md_cksum[md_i] ^ md_pi_subst[(md_buffer[md_i] ^ md_t)]);
-            md_t = md_cksum[md_i];
+            char_O_hash[md_i] = (unsigned char)(char_O_hash[md_i] ^ md_pi_subst[(md_buffer[md_i] ^ md_t)]);
+            md_t = char_O_hash[md_i];
         } // for md_i 16
     } // for md_pointer
 } // void deco_hash(void)
@@ -2332,3 +2289,4 @@ void deco_pull_tissues_from_vault(void)
 		pres_tissue[ci] = pres_tissue_vault[ci];
 }
 
+void main() {}

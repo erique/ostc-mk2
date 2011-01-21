@@ -86,162 +86,167 @@ c_code_data_stack   EQU 0x800           ; Reserve space for C-code data space. E
 ;Variable definitions
 ; arrays are in hex size!! 20 = .032
 
-	CBLOCK	0x060				;Bank 0
-	letter:.026					;letter buffer
-	win_color1
-	win_color2
-	win_top                     ; Box/text position (0..239).
-	win_height					; Box/text height (1..240)
-	win_leftx2                  ; Box/text position (0..159)
-	win_width 					; box width (1..160)
-	win_font
-	win_invert
-	win_bargraph                ; PLED_box swicth to black after this position (0..159).
-	win_flags                   ; flip_screen flag, transparent fonts, etc...
-	
-    pressureSum:2               ; Stabilize surface presure by a long averaging window [mbar]
-    pressureCount               ; Count of pressure values.
-    pressureAvg:2               ; save averaged pressure x16, for altimeter_menu
-    pressureRef:2               ; Pressure at sea level [mbar]
-    altitude:2                  ; Last computed altitude [m]
-	
-	ENDC
+;=============================================================================
+; BANK0 data
+;
+bank0           udata 0x060     ;Bank 0
+letter          res .26         ;letter buffer
+win_color1      res 1
+win_color2      res 1
+win_top         res 1           ; Box/text position (0..239).
+win_height      res 1           ; Box/text height (1..240)
+win_leftx2      res 1           ; Box/text position (0..159)
+win_width       res 1           ; box width (1..160)
+win_font        res 1
+win_invert      res 1
+win_bargraph    res 1           ; PLED_box swicth to black after this position (0..159).
+win_flags       res 1           ; flip_screen flag, transparent fonts, etc...
 
-	CBLOCK	0x100				;Bank 1
-	wreg_temp					;variables used for context saving during ISR 
-	status_temp					
-	bsr_temp					
-	prod_temp:2                 ;Trashed by isr_mult16x16, for sensor compensations
+pressureSum     res 2           ; Stabilize surface presure by a long averaging window [mbar]
+pressureCount   res 1           ; Count of pressure values.
+pressureAvg     res 2           ; save averaged pressure x16, for altimeter_menu
+pressureRef     res 2           ; Pressure at sea level [mbar]
+altitude        res 2           ; Last computed altitude [m]
 
-	secs						;realtime clock
-	mins
-	hours
-	day
-	month
-	year
+;=============================================================================
+; BANK1 data
+;
+bank1 udata 0x100               ;Bank 1
 
-	waitms_temp					;variables required for wait routines
-	wait_temp				 	; " + used to copy data to c code + used for temp/testing
-								; never use wait_temp in interrupt routines (isr) and never call any wait routine in interrupts
+wreg_temp       res 1           ;variables used for context saving during ISR 
+status_temp     res 1
+bsr_temp        res 1
+prod_temp       res 2           ;Trashed by isr_mult16x16, for sensor compensations
 
-	textnumber					;for textdisplay and textlookup
-	textlength					
-	textaddress:2				
+secs            res 1           ;realtime clock
+mins            res 1
+hours           res 1
+day             res 1
+month           res 1
+year            res 1
 
-	average_depth_hold:4		; Holds Sum of depths (Resettable)
-	average_depth_hold_total:4	; Holds Sum of depths (Non-Resettable)
-	b0_lo						; Temp (calculate_average)
-	b0_hi						; Temp (calculate_average)
-	average_divesecs:2			; Used for resetable average depth display
-	surface_interval:2			; Surface Interval [mins]
+waitms_temp     res 1           ;variables required for wait routines
+wait_temp       res 1           ; " + used to copy data to c code + used for temp/testing
+                                ; never use wait_temp in interrupt routines (isr) and never call any wait routine in interrupts
 
-	flag1 						;Flag register 33
-	flag2 
-	flag3 
-	flag4 
-	flag5 ; has to be exacly here, is modified by c-code (no sensor int) 
-	flag6 
-	flag7 
-	flag8
-	flag9
-	flag10
-	flag11
-	flag12
-	flag13
-	flag14
-	flag15
+textnumber      res 1           ;for textdisplay and textlookup
+textlength      res 1
+textaddress     res 2				
 
-	oled1_temp					;Temp variables for display output
-	oled2_temp		
-	oled3_temp	
-	oled4_temp					; Used in "Displaytext"
+average_depth_hold  res 4       ; Holds Sum of depths (Resettable)
+average_depth_hold_total res 4  ; Holds Sum of depths (Non-Resettable)
+b0_lo           res 1           ; Temp (calculate_average)
+b0_hi           res 1           ; Temp (calculate_average)
+average_divesecs    res 2       ; Used for resetable average depth display
+surface_interval    res 2       ; Surface Interval [mins]
 
-	lo							;bin to dec conversion routine
-	hi
-	lo_temp
-	hi_temp
-	temp3						;								used in valconv math
-	temp4						;								used in valconv math
-	ignore_digits
+flag1           res 1           ;Flag register 33
+flag2           res 1
+flag3           res 1
+flag4           res 1
+flag5           res 1           ; has to be exacly here, is modified by c-code (no sensor int) 
+flag6           res 1
+flag7           res 1
+flag8           res 1
+flag9           res 1
+flag10          res 1
+flag11          res 1
+flag12          res 1
+flag13          res 1
+flag14          res 1
+flag15          res 1
 
-	temp1						;Multipurpose Temp variables 	used in valconv math
-	temp2						;								used in valconv math
+oled1_temp      res 1           ; Temp variables for display output
+oled2_temp  	res 1
+oled3_temp      res 1
+oled4_temp      res 1           ; Used in "Displaytext"
 
-	ext_ee_temp1				; External EEPROM Temp 1		used in I2C EEPROM
-	ext_ee_temp2				; External EEPROM Temp 2		used in I2C EEPROM
+lo              res 1           ; bin to dec conversion routine
+hi              res 1
+lo_temp         res 1
+hi_temp         res 1
+temp3           res 1           ; used in valconv math
+temp4           res 1           ; used in valconv math
+ignore_digits   res 1
 
-	isr1_temp					;ISR temp variables
-	isr2_temp	
-  	isr3_temp:2
+temp1           res 1           ; Multipurpose Temp variables 	used in valconv math
+temp2           res 1           ; used in valconv math
 
-	timer1int_counter1			;Timer 1 counter
-	timer1int_counter2 			;Timer 1 counter
+ext_ee_temp1    res 1           ; External EEPROM Temp 1		used in I2C EEPROM
+ext_ee_temp2    res 1           ; External EEPROM Temp 2		used in I2C EEPROM
 
-	uart1_temp					;RS232 temp variables
-	uart2_temp                  ;70
+isr1_temp       res 1           ; ISR temp variables
+isr2_temp       res 1
+isr3_temp       res 2
 
-  	divA:2						;math routines
-  	divB
-	xC:4
-	xA:2
-	xB:2
-  	sub_c:2
-  	sub_a:2
-  	sub_b:2
+timer1int_counter1  res 1       ;Timer 1 counter
+timer1int_counter2  res 1       ;Timer 1 counter
 
-	dLSB						;Pressure sensor interface 
-	dMSB
-	clock_count
-	ppO2_setpoint_store			; Actual setpoint
-	W1:2
-	W2:2
-	W3:2
-	W4:2	;100
-	C1:2
-	C2:2
-	C3:2
-	C4:2
-	C5:2
-	C6:2
-	D1:2
-	D2:2
+uart1_temp      res 1           ;RS232 temp variables
+uart2_temp      res 1           ;70
 
-  	isr_divA:2
- 	isr_divB
-	isr_xC:4
-	isr_xA:2
-	isr_xB:2
-  	isr_sub_c:2
-  	isr_sub_a:2
-  	isr_sub_b:2
+divA            res 2			;math routines
+divB            res 1
+xC              res 4
+xA              res 2
+xB              res 2
+sub_c           res 2
+sub_a           res 2
+sub_b           res 2
 
-  	xdT:2
-  	xdT2:2
-  	OFF:2
-  	SENS:2
-   	amb_pressure:2					; ambient pressure [mBar]
-   	rel_pressure:2					; amb_pressure - surface pressure [mBar]
-   	max_pressure:2					; Max. pressure for the dive [mBar]
-	avr_rel_pressure:2				; Average rel. pressure (Average depth) for the dive [mBar], Resettable
- 	avr_rel_pressure_total:2		; Average rel. pressure (Average depth) for the dive [mBar], Non-Resettable
-   	last_pressure:2
-  	temperature:2
-  	last_temperature:2
-  	temperature_temp:2
-  	Dx:2
+dLSB            res 1           ;Pressure sensor interface 
+dMSB            res 1
+clock_count     res 1
+ppO2_setpoint_store res 1       ; Actual setpoint
 
-	last_surfpressure:2			;Divemode
-	last_surfpressure_15min:2
-	last_surfpressure_30min:2
-	divemins:2					;Minutes
-	divesecs					;seconds
-	samplesecs					; counts the seconds until the next sample is stored in divemode
-	samplesecs_value			; holds the CF20 value
-	decodata:2					;Deco data
-	mintemp:2					;min temperature
-	ProfileFlagByte				; stores number of addional bytes per sample
-	EventByte					; Stores the Event type plus flags	
-	AlarmType					; 0= No Alarm
+; Pressure/Temperatuse sensor data
+W1              res 2           ; Raw (packed) calibration data
+W2              res 2
+W3              res 2
+W4              res 2	        ; 100
+C1              res 2           ; Decoded calibration data
+C2              res 2
+C3              res 2
+C4              res 2
+C5              res 2
+C6              res 2
+D1              res 2           ; raw pressure
+D2              res 2           ; raw temperature
+
+isr_divA        res 2           ; Data for ISR math subroutines
+isr_divB        res 1
+isr_xC          res 4
+isr_xA          res 2
+isr_xB          res 2
+
+xdT             res 2           ; Tmp for temperature compensation (in ISR)
+xdT2            res 2
+OFF             res 2
+SENS            res 2
+
+amb_pressure    res 2           ; ambient pressure [mBar]
+rel_pressure    res 2		    ; amb_pressure - surface pressure [mBar]
+max_pressure    res 2           ; Max. pressure for the dive [mBar]
+avr_rel_pressure res 2          ; Average rel. pressure (Average depth) for the dive [mBar], Resettable
+avr_rel_pressure_total res 2    ; Average rel. pressure (Average depth) for the dive [mBar], Non-Resettable
+last_pressure   res 2
+temperature     res 2
+last_temperature res 2
+temperature_temp res 2
+Dx              res 2
+
+last_surfpressure       res 2   ; Divemode
+last_surfpressure_15min res 2
+last_surfpressure_30min res 2
+divemins                res 2   ; Minutes
+divesecs                res 1   ; seconds
+samplesecs              res 1   ; counts the seconds until the next sample is stored in divemode
+samplesecs_value        res 1   ; holds the CF20 value
+decodata                res 2   ; Deco data
+mintemp                 res 2   ; min temperature
+ProfileFlagByte         res 1   ; stores number of addional bytes per sample
+EventByte               res 1   ; Stores the Event type plus flags	
+AlarmType               res 1   ; 0= No Alarm
 								; 1= SLOW
 								; 2= DecoStop missed
 								; 3= DeepStop missed
@@ -249,110 +254,74 @@ c_code_data_stack   EQU 0x800           ; Reserve space for C-code data space. E
 								; 5= ppO2 High Warning
 								; 6= manual marker
 
-	divisor_temperature			; divisors for profile storage
-	divisor_deco
-	divisor_tank
-	divisor_ppo2
-	divisor_deco_debug
-	divisor_nuy2
+divisor_temperature     res 1   ; divisors for profile storage
+divisor_deco            res 1
+divisor_tank            res 1
+divisor_ppo2            res 1
+divisor_deco_debug      res 1
+divisor_nuy2            res 1
 
-	timeout_counter				;Timeout counter variables
-	timeout_counter2
-	timeout_counter3			;pre-menu timeout counter
+timeout_counter         res 1   ; Timeout counter variables
+timeout_counter2        res 1
+timeout_counter3        res 1   ; pre-menu timeout counter
 
-	menupos						;cursor position
-	menupos2
-	menupos3					;used in Logbook, Set Time and divemode
+menupos                 res 1   ; cursor position
+menupos2                res 1
+menupos3                res 1   ; used in Logbook, Set Time and divemode
 
-	eeprom_address:2			;external EEPROM
-	eeprom_header_address:2
+eeprom_address          res 2   ; external EEPROM
+eeprom_header_address   res 2
 
-	divenumber					;Logbook
+divenumber              res 1   ; Logbook
 
-	batt_voltage:2				;Battery voltage in mV
+batt_voltage            res 2   ; Battery voltage in mV
 
-	i2c_temp					;I²C timeout counter
-	i2c_temp2;200
+i2c_temp                res 1   ; I²C timeout counter
+i2c_temp2               res 1   ; 200
 
-	sim_pressure:2				; hold simulated pressure in mBar if in Simulator mode
+sim_pressure            res 2   ; hold simulated pressure in mBar if in Simulator mode
 
-	profile_temp:2				; temp variable for profile view
-	profile_temp2:2				; temp variable for profile view
-	
-	nofly_time:2				; No Fly time in Minutes (Calculated after Dive)
-	
-	cf_checker_counter			; counts custom functions to check for warning symbol
-	
-	char_I_O2_ratio				; 02 ratio
+profile_temp            res 2   ; temp variable for profile view
+profile_temp2           res 2   ; temp variable for profile view
 
-	active_gas					; Holds number of active gas
-		
-	last_diluent				; backup of diluent percentage in const ppO2 mode
-	last_ppO2_value				; last calculated ppO2 value
+nofly_time              res 2   ; No Fly time in Minutes (Calculated after Dive)
 
-;	ontime_since_last_charge:2	; Ontime in minutes since last complete charge cycle
-;	sleeptime_since_last_charge:2; Sleeptime in hours since last complete charge
+cf_checker_counter      res 1   ; counts custom functions to check for warning symbol
 
-	debug_char:6				; For debugmode
-	
-	apnoe_mins					; single descent minutes for Apnoe mode
-	apnoe_secs					; single descent seconds for Apnoe mode
-	apnoe_max_pressure:2		; Max. Pressure in Apnoe mode
-	apnoe_timeout_counter		; counts minutes for apnoe timeout
-	apnoe_surface_mins			; Surface interval mins for Apnoe mode
-	apnoe_surface_secs			; Surface interval secs for Apnoe mode
-	customfunction_temp1		; start of custom function descriptors 
-	customfunction_temp2		; used in GETCUSTOM8 and GETCUSTOM15
-	
-	decoplan_page				; used in PLED_MultiGF,...
-	temp10						; used in customview
+char_I_O2_ratio         res 1   ; 02 ratio
 
-	fatal_error_code			; holds error code value 
+active_gas              res 1   ; Holds number of active gas
 
-	logbook_temp1				; Temp used in logbook display&Divemode&Gassetup
-	logbook_temp2				; Temp used in logbook display&Divemode&Gassetup
-	logbook_temp3				; Temp used in logbook display&Divemode&Gassetup
-	logbook_temp4				; Temp used in logbook display&Divemode&Gassetup
-	logbook_temp5				; Temp used in logbook display&Divemode&Gassetup
-	logbook_temp6				; Temp used in logbook display&Divemode&Gassetup
-	
-	convert_value_temp:3		; used in menu_battery_state_convert_date
-	time_correction_value		; Adds to Seconds on midnight
-	ENDC
+last_diluent            res 1   ; backup of diluent percentage in const ppO2 mode
+last_ppO2_value         res 1   ; last calculated ppO2 value
 
-	CBLOCK	0x700				;Bank 7
-; variables used exclusively in dd:
-	dd_temp_BSR ; has to be first in bank7
-	temp_pointer_row
-	temp_pointer_column
-	temp2_pointer_row
-	temp2_pointer_column
-	temp_selected_char
-	temp_font_HIGH
-	temp_font_LOW
-	temp_font_height
-	temp2_font_height
-	temp_font_width
-	temp2_font_width
-	temp_diff_font_width
-	temp2_diff_font_width
-	temp_font_offset_left
-	temp_font_offset_right
-	temp_pos
-	DDflag
-	dd_oled_brightness_offset		; value will be subtracted from "dd_grayvalue" in dd_font2display_vxxx.asm
-	dd_grayvalue
-	dd2_temp
-	dd3_temp
-	dd_pos_decpoint
-	dd_grayvalue_temp
-	dd_grayvalue_temp2
-	ENDC
+debug_char              res 6    ; For debugmode
 
-	CBLOCK	0x94A				;Bank 9
-	char_O_hash:.16			; MD2 hash values = d'16'
-	ENDC
+apnoe_mins              res 1   ; single descent minutes for Apnoe mode
+apnoe_secs              res 1   ; single descent seconds for Apnoe mode
+apnoe_max_pressure      res 2   ; Max. Pressure in Apnoe mode
+apnoe_timeout_counter   res 1   ; counts minutes for apnoe timeout
+apnoe_surface_mins      res 1   ; Surface interval mins for Apnoe mode
+apnoe_surface_secs      res 1   ; Surface interval secs for Apnoe mode
+customfunction_temp1    res 1   ; start of custom function descriptors 
+customfunction_temp2    res 1   ; used in GETCUSTOM8 and GETCUSTOM15
 
+decoplan_page           res 1   ; used in PLED_MultiGF,...
+temp10                  res 1   ; used in customview
+
+fatal_error_code        res 1   ; holds error code value 
+
+logbook_temp1           res 1   ; Temp used in logbook display&Divemode&Gassetup
+logbook_temp2           res 1   ; Temp used in logbook display&Divemode&Gassetup
+logbook_temp3           res 1   ; Temp used in logbook display&Divemode&Gassetup
+logbook_temp4           res 1   ; Temp used in logbook display&Divemode&Gassetup
+logbook_temp5           res 1   ; Temp used in logbook display&Divemode&Gassetup
+logbook_temp6           res 1   ; Temp used in logbook display&Divemode&Gassetup
+
+convert_value_temp      res 3    ; used in menu_battery_state_convert_date
+time_correction_value   res 1   ; Adds to Seconds on midnight
+
+;=============================================================================
 ; C-code Routines
 ; PART 2
     extern deco_calc_CNS_decrease_15min    
@@ -367,7 +336,9 @@ c_code_data_stack   EQU 0x800           ; Reserve space for C-code data space. E
     extern deco_pull_tissues_from_vault
     extern deco_push_tissues_to_vault
 
+;=============================================================================
 ;I/O Ports (I=Input, O=Output)
+;
 #DEFINE	sensor_SDO			PORTA,1 ;O
 #DEFINE	oled_rw				PORTA,2 ;0
 #DEFINE	oled_hv				PORTA,3 ;O

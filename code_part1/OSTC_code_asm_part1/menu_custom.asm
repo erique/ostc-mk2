@@ -66,11 +66,11 @@ CF_INT15	EQU	0x80; Default display. Flag for 15bit, typeless values.
 
 ; Overlay our tmp data with some unused variables. But use more
 ; meaningfull labels...
-cf32_x4     EQU divemins+0      ; CF# modulus 32, time 4.
-cf_type     EQU divemins+1      ; Type of the edited CF
-cf_value    EQU divesecs
-cf_min      EQU apnoe_mins
-cf_max      EQU apnoe_secs
+#define cf32_x4     divemins+0      ; CF# modulus 32, time 4.
+#define cf_type     divemins+1      ; Type of the edited CF
+#define cf_value    divesecs
+#define cf_min      apnoe_mins
+#define cf_max      apnoe_secs
             
 GETCUSTOM8	macro	custom8
 	movlw	custom8
@@ -565,7 +565,7 @@ cf_type_neg:					; 15bit mode.
 
 cf_fill_line:                   ; Mattias: No flicker if u clear just what you need...
 	movf    FSR2L,W             ; How many chars lefts ?
-	sublw   (LOW letter) + .18  ; Remaining chars to fill: (letter + 18) - PTR
+	sublw   letter + .18        ; Remaining chars to fill: (letter + 18) - PTR
 	btfsc   STATUS,N            ; Add chars until none left...
 	return
 	PUTC   ' '

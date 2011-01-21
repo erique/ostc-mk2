@@ -1183,11 +1183,11 @@ PLED_pre_dive_screen3:
 	movwf	wait_temp			; here: stores eeprom address for gas list
 	movlw	d'0'
 	movwf	waitms_temp			; here: stores row for gas list
-	clrf 	decoplan_index		; here: SP counter
+	clrf 	apnoe_mins          ; here: SP counter
 
 PLED_pre_dive_screen3_loop:
 	incf	wait_temp,F			; EEPROM address
-	incf	decoplan_index,F	; Increase SP
+	incf	apnoe_mins,F	    ; Increase SP
 
 	movlw	d'25'
 	addwf	waitms_temp,F		; Increase row
@@ -1195,18 +1195,18 @@ PLED_pre_dive_screen3_loop:
 	movff	waitms_temp,win_top ; Set Row
 	
 	STRCPY  "SP"
-	movff	decoplan_index,lo   ; copy gas number
-	output_8				; display gas number
+	movff	apnoe_mins,lo       ; copy gas number
+	output_8			        ; display gas number
 	STRCAT  ": "
-	movff	wait_temp, EEADR; SP #hi position
-	call	read_eeprom		; get byte (stored in EEDATA)
-	movff	EEDATA,lo		; copy to lo
+	movff	wait_temp, EEADR    ; SP #hi position
+	call	read_eeprom		    ; get byte (stored in EEDATA)
+	movff	EEDATA,lo		    ; copy to lo
 	clrf	hi
-	output_16dp	d'3'		; outputs into Postinc2!
+	output_16dp	d'3'		    ; outputs into Postinc2!
 	call	word_processor	
 
-	movlw	d'3'		; list all three SP
-	cpfseq	decoplan_index      ; All gases shown?
+	movlw	d'3'		        ; list all three SP
+	cpfseq	apnoe_mins          ; All gases shown?
 	bra		PLED_pre_dive_screen3_loop	;no
 
 	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)
@@ -2267,10 +2267,10 @@ PLED_decoplan_clear_bottom:
 ; Inputs: char_O_deco_table (array of stop times, in minutes)
 ;         decoplan_page = page number. Displays 5 stop by page.
 ;
-decoplan_index  equ apnoe_mins          ; within each page
-decoplan_gindex equ apnoe_secs          ; global index
-decoplan_last   equ apnoe_max_pressure  ; Depth of last stop (CF#29)
-decoplan_max    equ apnoe_max_pressure+1; Number of lines per page. 7 in planning, 5 in diving.
+#define decoplan_index  apnoe_mins          ; within each page
+#define decoplan_gindex apnoe_secs          ; global index
+#define decoplan_last   apnoe_max_pressure  ; Depth of last stop (CF#29)
+#define decoplan_max    apnoe_max_pressure+1; Number of lines per page. 7 in planning, 5 in diving.
 
 PLED_decoplan_gf:
         ostc_debug	'n'		; Sends debug-information to screen if debugmode active

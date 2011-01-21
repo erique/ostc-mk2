@@ -1,363 +1,290 @@
-
-// OSTC - diving computer code
-// Copyright (C) 2008 HeinrichsWeikamp GbR
-
-//    This program is free software: you can redistribute it and/or modify
-//    it under the terms of the GNU General Public License as published by
-//    the Free Software Foundation, either version 3 of the License, or
-//    (at your option) any later version.
-
-//    This program is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//    GNU General Public License for more details.
-
-//    You should have received a copy of the GNU General Public License
-//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
-/*
-INHALT
-------
-{ unsigned int *rom e2secs[];
-{ unsigned int *rom a_N2[];
-{ unsigned int *rom b_N2[];
-{ unsigned int *rom t05[]; formated:  und zwar t05 * -1.0 / ln(2) 
-{ unsigned int *rom e1min[];
-{ unsigned int *rom ht[]; t05 unmodified
-*/
-
-
-rom const unsigned int e2secs[] =
-{ 
-// N2
-  0x07BB, 0xBC3B, 0xD0FF, 0x3C3B, 0xF80C, 0xF23A, 0x4997, 0xA33A
-, 0xE93A, 0x603A, 0x0418, 0x1E3A, 0x9009, 0xDF39, 0x014C, 0x9D39
-, 0xE53E, 0x5E39, 0x3AED, 0x2539, 0x338D, 0x0139, 0xC6BA, 0xCA38
-, 0x82DC, 0x9E38, 0x844D, 0x7838, 0x9F9D, 0x4238, 0x34AC, 0x1838
-// He
-, 0xA3C9, 0x783C, 0x45BD, 0xF93B, 0xCC02, 0xA03B, 0x3E44, 0x583B
-, 0x6223, 0x143B, 0x31FA, 0xD03A, 0xA46D, 0x933A, 0xDDFB, 0x4F3A
-, 0x03F8, 0x123A, 0x8D71, 0xDB39, 0xAB55, 0xAB39, 0x7712, 0x8639
-, 0xEA1E, 0x5239, 0x2C54, 0x2439, 0x37B2, 0x0039, 0xDADB, 0xC938
-/*
-Die e2secs Werte in float Notation:
-5.7596E-03,  und zwar  1 - 2^(-2sec/t05)
-2.8839E-03,
-1.8467e-03,
-1.2481e-03,
-8.5537E-04,
-6.0308E-04,
-4.2541E-04, 
-3.0002E-04,
-2.1195E-04,
-1.5824E-04,
-1.2355E-04,
-9.6669E-05,
-7.5751E-05,
-5.92E-05,
-4.64E-05,
-3.64E-05
-// e 2 sec He
-sim_pres_tissue_limit[0] = 0.01518479275;
-sim_pres_tissue_limit[1] = 0.007621439546;
-sim_pres_tissue_limit[2] = 0.004883145696;
-sim_pres_tissue_limit[3] = 0.003299965996;
-sim_pres_tissue_limit[4] = 0.002260409686;
-sim_pres_tissue_limit[5] = 0.00159437032;
-sim_pres_tissue_limit[6] = 0.001124788578;
-sim_pres_tissue_limit[7] = 0.0007933953673;
-sim_pres_tissue_limit[8] = 0.0005606414716;
-sim_pres_tissue_limit[9] = 0.0004185553604;
-sim_pres_tissue_limit[10] =0.0003267948866;
-sim_pres_tissue_limit[11] =0.0002557222899;
-sim_pres_tissue_limit[12] =0.0002003867723;
-sim_pres_tissue_limit[13] =0.0001567161546;
-sim_pres_tissue_limit[14] =0.0001227342122;
-sim_pres_tissue_limit[15] =9.625377675E-5
-*/
-};
-
-rom const unsigned int a_N2[] =
-{
-// N2
-   0x6744, 0xA13F, 0x0000, 0x803F, 0xED9E, 0x5C3F, 0x5396, 0x413F
- , 0x52B8, 0x1E3F, 0xCE19, 0x013F, 0xC1CA, 0xE13E, 0xCDCC, 0xCC3E
- , 0x0000, 0xC03E, 0x3333, 0xB33E, 0x39B4, 0xA83E, 0x91ED, 0x9C3E
- , 0xE926, 0x913E, 0xCBA1, 0x853E, 0xB6F3, 0x7D3E, 0xE948, 0x6E3E
-// He
- , 0xF706, 0xDF3F, 0x2506, 0xB13F, 0x2E90, 0x983F, 0xC7DC, 0x853F
- , 0x3108, 0x6C3F, 0x4A0C, 0x523F, 0x0C02, 0x3B3F, 0x8273, 0x263F
- , 0xEC51, 0x183F, 0xB6F3, 0x0D3F, 0x5986, 0x083F, 0xA1D6, 0x043F
- , 0x34A2, 0x043F, 0x6F81, 0x043F, 0x3867, 0x043F, 0xE10B, 0x033F
-
-/*
-// a of N2
-sim_pres_tissue[0] = 1.2599;
-sim_pres_tissue[1] = 1.0;
-sim_pres_tissue[2] = 0.8618;
-sim_pres_tissue[3] = 0.7562;
-sim_pres_tissue[4] = 0.6200;
-sim_pres_tissue[5] = 0.5043;
-sim_pres_tissue[6] = 0.4410;
-sim_pres_tissue[7] = 0.4000;
-sim_pres_tissue[8] = 0.3750;
-sim_pres_tissue[9] = 0.3500;
-sim_pres_tissue[10] = 0.3295;
-sim_pres_tissue[11] = 0.3065;
-sim_pres_tissue[12] = 0.2835;
-sim_pres_tissue[13] = 0.2610;
-sim_pres_tissue[14] = 0.2480;
-sim_pres_tissue[15] = 0.2327;
-// a of He
-sim_pres_tissue[16] = 1742.4 / 1000.0;
-sim_pres_tissue[17] = 1383.0 / 1000.0;
-sim_pres_tissue[18] = 1191.9 / 1000.0;
-sim_pres_tissue[19] = 1045.8 / 1000.0;
-sim_pres_tissue[20] = 9220. / 10000.0;
-sim_pres_tissue[21] = 8205. / 10000.0;
-sim_pres_tissue[22] = 7305. / 10000.0;
-sim_pres_tissue[23] = 6502. / 10000.0;
-sim_pres_tissue[24] = 5950. / 10000.0;
-sim_pres_tissue[25] = 5545. / 10000.0;
-sim_pres_tissue[26] = 5333. / 10000.0;
-sim_pres_tissue[27] = 5189. / 10000.0;
-sim_pres_tissue[28] = 5181. / 10000.0;
-sim_pres_tissue[29] = 5176. / 10000.0;
-sim_pres_tissue[30] = 5172. / 10000.0;
-sim_pres_tissue[31] = 5119. / 10000.0;
-*/
-};
-
-rom const unsigned int b_N2[] =
-{
-// N2
-0xAE47,  0x013F,  0x27C2,  0x263F,  0x19E2,  0x383F,  0xEC51,  0x483F,
-0x8E06,  0x503F,  0x10E9,  0x573F,  0x728A,  0x5E3F,  0x9318,  0x643F,
-0x55C1,  0x683F,  0x4D15,  0x6C3F,  0x0091,  0x6E3F,  0x80B7,  0x703F,
-0x789C,  0x723F,  0x8F53,  0x743F,  0xABCF,  0x753F,  0xE71D,  0x773F
-// He
-, 0x1058, 0xD93E, 0x8A1F, 0x133F, 0x5917, 0x273F, 0xA7E8, 0x383F
-, 0x6519, 0x423F, 0xFFB2, 0x4B3F, 0x41F1, 0x533F, 0xF1F4, 0x5A3F
-, 0xE02D, 0x603F, 0xB3EA, 0x633F, 0xBD52, 0x663F, 0xD044, 0x683F
-, 0xF085, 0x693F, 0x11C7, 0x6A3F, 0x88F4, 0x6B3F, 0x363C, 0x6D3F
-
-/*
- 5050, Werte sind Einheitslos. 5050 ist in float als 0.5050
- 6514,
- 7222,
- 7825,
- 8126,
- 8434,
- 8693,
- 8910,
- 9092,
- 9222,
- 9319,
- 9403,
- 9477,
- 9544,
- 9602,
- 9653
-// b
-sim_pres_tissue[16] = 0.4245;
-sim_pres_tissue[17] = 0.5747;
-sim_pres_tissue[18] = 0.6527;
-sim_pres_tissue[19] = 0.7223;
-sim_pres_tissue[20] = 0.7582;
-sim_pres_tissue[21] = 0.7957;
-sim_pres_tissue[22] = 0.8279;
-sim_pres_tissue[23] = 0.8553;
-sim_pres_tissue[24] = 0.8757;
-sim_pres_tissue[25] = 0.8903;
-sim_pres_tissue[26] = 0.8997;
-sim_pres_tissue[27] = 0.9073;
-sim_pres_tissue[28] = 0.9122;
-sim_pres_tissue[29] = 0.9171;
-sim_pres_tissue[30] = 0.9217;
-sim_pres_tissue[31] = 0.9267;
-*/
-};
-
-rom const unsigned int t05[] =
-{
-// N2
-  0x3BAA, 0xB8C0, 0x3BAA, 0x38C1, 0xFE44, 0x90C1, 0xD484, 0xD5C1
-, 0xA2CF, 0x1BC2, 0x5805, 0x5DC2, 0x3BAD, 0x9CC2, 0xCF2C, 0xDEC2
-, 0xF640, 0x1DC3, 0x2BA2, 0x52C3, 0x59E4, 0x86C3, 0xED66, 0xACC3
-, 0xD002, 0xDCC3, 0xABA9, 0x0CC4, 0x939D, 0x33C4, 0x2007, 0x65C4
-// He
-, 0x0B6C, 0x0BC0, 0x0B6C, 0x8BC0, 0x98E7, 0xD9C0, 0xDC59, 0x21C1
-, 0xBDAD, 0x6BC1, 0x2E1F, 0xA7C1, 0xBFF2, 0xECC1, 0xC7FC, 0x27C2
-, 0x93C1, 0x6DC2, 0xA33E, 0x9FC2, 0xDEF7, 0xCBC2, 0x4455, 0x02C3
-, 0x0C54, 0x26C3, 0x9EAE, 0x54C3, 0x55C9, 0x87C3, 0x2225, 0xADC3
-/*
-4, und zwar 4.0 * -1.0 / ln(2) ...
-8,
-12,
-18,
-27,
-39,
-55,
-77,
-109,
-146,
-187,
-239,
-305,
-390,
-498,
-635
-// He; t05 * -1 /ln(2)
-pres_tissue[16] = -2.178469512;
-pres_tissue[17] = -4.356939024;
-pres_tissue[18] = -6.809520594;
-pres_tissue[19] = -10.08443834;
-pres_tissue[20] = -14.72991637;
-pres_tissue[21] = -20.89022419;
-pres_tissue[22] = -29.61852919;
-pres_tissue[23] = -41.99685264;
-pres_tissue[24] = -59.43903569;
-pres_tissue[25] = -79.62233931;
-pres_tissue[26] = -101.9841124;
-pres_tissue[27] = -130.33307;
-pres_tissue[28] = -166.3283113;
-pres_tissue[29] = -212.6821029;
-pres_tissue[30] = -271.5729145;
-pres_tissue[31] = -346.2900907;
-*/
-};
-
-// ab hier bei Speicher 0x4100
-rom const unsigned int e1min[] =
-{ // N2
-0x0EEC, 0x223E, 0xC9F9, 0xA93D, 0xA8F2, 0x5C3D, 0x8AA0, 0x163D
-, 0x23A1, 0xCF3C, 0x89EC, 0x923C, 0x9AD0, 0x4F3C, 0x52D3, 0x123C
-, 0x26B7, 0xCF3B, 0x3A33, 0x9B3B, 0x7B78, 0x723B, 0xC0CA, 0x3D3B
-, 0xD7C4, 0x143B, 0x58BF, 0xE83A, 0xA54E, 0xB63A, 0x0AFF, 0x8E3A
-// He
-, 0xBE78, 0xBC3E, 0x9001, 0x523E, 0x71DB, 0x0B3E, 0x3757, 0xC13D
-, 0x186C, 0x863D, 0x2274, 0x3F3D, 0xBAFB, 0x073D, 0x1AC2, 0xC03C
-, 0x44AB, 0x883C, 0x107C, 0x4C3C, 0x0EDE, 0x1F3C, 0x9174, 0xFA3B
-, 0xBB6A, 0xC43B, 0x6CB5, 0x993B, 0x57E0, 0x703B, 0x8FFA, 0x3C3B 
-/*
-Die e1min Werte in float Notation:
-  und zwar  1 - 2^(-1/t05)
-c_2[0] = 0.1591036;
-c_2[1] = 0.08299596;
-c_2[2] = 0.053942353;
-c_2[3] = 0.036774196;
-c_2[4] = 0.02534539;
-c_2[5] = 0.017935055;
-c_2[6] = 0.012684012;
-c_2[7] = 8.961515534E-3;
-c_2[8] = 6.338971845E-3;
-c_2[9] = 4.73633146E-3;
-c_2[10] = 3.699808187E-3;
-c_2[11] = 2.89599589E-3;
-c_2[12] = 2.270033275E-3;
-c_2[13] = 1.775722E-3;
-c_2[14] = 1.390893611E-3;
-c_2[15] = 1.090974815E-3;
-// e 1 ´min He
-pres_tissue[0] = 0.368108684;
-pres_tissue[1] = 0.2050840824;
-pres_tissue[2] = 0.1365792957;
-pres_tissue[3] = 0.09440463235;
-pres_tissue[4] = 0.06563586265;
-pres_tissue[5] = 0.04674161154;
-pres_tissue[6] = 0.03319905126;
-pres_tissue[7] = 0.02353005571;
-pres_tissue[8] = 0.0166832282;
-pres_tissue[9] = 0.01248075064;
-pres_tissue[10] = 0.009757532198;
-pres_tissue[11] = 0.007643290133;
-pres_tissue[12] = 0.005994168431;
-pres_tissue[13] = 0.004690816669;
-pres_tissue[14] = 0.003675481163;
-pres_tissue[15] = 0.002883586737;
-*/
-};
-
-rom const unsigned int ht[] =
-{
-// N2
-0x0000, 0x8040, 0x0000, 0x0041, 0x0000, 0x4841, 0x0000, 0x9441
-, 0x0000, 0xD841, 0x3333, 0x1942, 0x3333, 0x5942, 0x0000, 0x9A42
-, 0x0000, 0xDA42, 0x0000, 0x1243, 0x0000, 0x3B43, 0x0000, 0x6F43
-, 0x0080, 0x9843, 0x0000, 0xC343, 0x0000, 0xF943, 0x00C0, 0x1E44
-// He
-, 0xAE47, 0xC13F, 0xAE47, 0x4140, 0x3D0A, 0x9740, 0x14AE, 0xDF40
-, 0x295C, 0x2341, 0x14AE, 0x6741, 0x713D, 0xA441, 0x48E1, 0xE841
-, 0xCDCC, 0x2442, 0x8FC2, 0x5C42, 0x4861, 0x8D42, 0x14AE, 0xB442
-, 0x7B94, 0xE642, 0x856B, 0x1343, 0x713D, 0x3C43, 0xAE07, 0x7043
-/*
-He:
-sim_pres_tissue[0] = 1.51;
-sim_pres_tissue[1] = 3.02;
-sim_pres_tissue[2] = 4.72;
-sim_pres_tissue[3] = 6.99;
-sim_pres_tissue[4] =10.21;
-sim_pres_tissue[5] =14.48;
-sim_pres_tissue[6] =20.53;
-sim_pres_tissue[7] =29.11;
-sim_pres_tissue[8] =41.20;
-sim_pres_tissue[9] =55.19;
-sim_pres_tissue[10] =70.69;
-sim_pres_tissue[11] =90.34;
-sim_pres_tissue[12] =115.29;
-sim_pres_tissue[13] =147.42;
-sim_pres_tissue[14] =188.24;
-sim_pres_tissue[15] =240.03;
-*/
-};
-
-rom const unsigned int e10min[] =
-{
-// N2
-  0xBEBE, 0x523F, 0x855D, 0x143F, 0xEEEE, 0xD93E, 0x4CFE, 0x9F3E
-, 0x99D9, 0x673E, 0x2785, 0x293E, 0xAD6E, 0xF53D, 0x044E, 0xB03D
-, 0x8D5C, 0x7C3D, 0xCDEA, 0x3D3D, 0xB00B, 0x153D, 0x232C, 0xEA3C
-, 0x9612, 0xB83C, 0x6E4F, 0x903C, 0x8276, 0x623C, 0x9FDE, 0x313C
-// He
-, 0xE066, 0x7D3F, 0xC635, 0x663F, 0x7C0D, 0x453F, 0xEA07, 0x213F
-, 0x0953, 0xFC3E, 0xB5C4, 0xC23E, 0x1CB5, 0x923E, 0xA5F8, 0x583E
-, 0xBC90, 0x1E3E, 0x9EB7, 0xF13D, 0xC348, 0xBF3D, 0x4942, 0x973D
-, 0xD400, 0x6F3D, 0x6921, 0x3C3D, 0xF514, 0x143D, 0x982E, 0xE93C
-/*
-He: 10 min
-sim_pres_tissue[0] = 0.989851;
-sim_pres_tissue[1] = 0.899258;
-sim_pres_tissue[2] = 0.769737;
-sim_pres_tissue[3] = 0.629027;
-sim_pres_tissue[4] = 0.492821;
-sim_pres_tissue[5] = 0.380407;
-sim_pres_tissue[6] = 0.286538;
-sim_pres_tissue[7] = 0.211886;
-sim_pres_tissue[8] = 0.154849;
-sim_pres_tissue[9] = 0.118026;
-sim_pres_tissue[10] =0.0934005;
-sim_pres_tissue[11] =0.0738569;
-sim_pres_tissue[12] =0.0583504;
-sim_pres_tissue[13] =0.0459303;
-sim_pres_tissue[14] =0.0361528;
-sim_pres_tissue[15] =0.0284646;
-N2: 10 min
-sim_pres_tissue[16] = 0.823223;
-sim_pres_tissue[17] = 0.579552;
-sim_pres_tissue[18] = 0.425651;
-sim_pres_tissue[19] = 0.312487;
-sim_pres_tissue[20] = 0.226416;
-sim_pres_tissue[21] = 0.165547;
-sim_pres_tissue[22] = 0.11984;
-sim_pres_tissue[23] = 0.0860863;
-sim_pres_tissue[24] = 0.0616117;
-sim_pres_tissue[25] = 0.0463665;
-sim_pres_tissue[26] = 0.0363881;
-sim_pres_tissue[27] = 0.0285855;
-sim_pres_tissue[28] = 0.0224698;
-sim_pres_tissue[29] = 0.017616;
-sim_pres_tissue[30] = 0.0138222;
-sim_pres_tissue[31] = 0.0108563;
-*/
-};
+// **************************************************************
+// OSTC - diving computer code
+// Copyright (C) 2008 HeinrichsWeikamp GbR
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// HISTORY
+// 2011-01-20; jDG Cleanup addressing.
+//
+// **************************************************************
+
+rom const float buhlmann_a[32] =
+{	// ??? Data ZH-L16A, from Tauchmedizin 1995 ???
+//---a for N2 ----------------------------------------------------------------
+	1.2599,		/// WARNING ZH-L16c-1990 gives different values: 1.3318
+	1.0000,		/// ... 1.0048
+	0.8618,		/// ... 0.8653
+	0.7562,		/// ... 0.7520
+	0.6200,		/// ... 0.6194
+	0.5043,		/// ... 0.5043
+	0.4410,		/// ... 0.4396
+	0.4000,		/// ... 0.3977
+	0.3750,		/// ... 0.3701
+	0.3500,		/// ... 0.3456
+	0.3295,		/// ... 0.3269
+	0.3065,		/// ... 0.3065
+	0.2835,		/// ... 0.2848
+	0.2610,		/// ... 0.2622
+	0.2480,		/// ... 0.2486
+	0.2327,		/// ... 0.2341
+//---- a of He ---------------------------------------------------------------
+	1.7424,		/// ... 1,7443
+	1.3830,		/// ... 1,3800
+	1.1919,		/// ... 1,1879
+	1.0458,		/// ... 1,0455
+	.9220,		/// ... 0,9211
+	.8205,		/// ... 0,8232
+	.7305,		/// ... 0,7321
+	.6502,		/// ... 0,6508
+	.5950,		/// ... 0,5981
+	.5545,		/// ... 0,5568
+	.5333,		/// ... 0,5285
+	.5189,		/// ... 0,5178
+	.5181,		/// ... 0,5137
+	.5176,		/// ... 0,5196
+	.5172,		/// ... 0,5150
+	.5119		/// ... 0,5109
+};
+
+rom const float buhlmann_b[] =
+{
+//---- b for N2 --------------------------------------------------------------
+	0.5050, 	/// WARNING ZH-L16c gives a different value: 0.5241
+	0.6514,		/// All the other values matches ZH-L16c-1990
+	0.7222,
+	0.7825,
+	0.8126,
+	0.8434,
+	0.8693,
+	0.8910,
+	0.9092,
+	0.9222,
+	0.9319,
+	0.9403,
+	0.9477,
+	0.9544,
+	0.9602,
+	0.9653,
+//---- b for He --------------------------------------------------------------
+	0.4245,
+	0.5747,
+	0.6527,
+	0.7223,
+	0.7582,
+	0.7957,
+	0.8279,
+	0.8553,
+	0.8757,
+	0.8903,
+	0.8997,
+	0.9073,
+	0.9122,
+	0.9171,
+	0.9217,
+	0.9267
+};
+
+rom const float buhlmann_t05[] =
+{
+//---- half-life for N2 ------------------------------------------------------
+	-5.77078,		// 4 min * -1/ln(2)
+	-11.54156,
+	-17.31234,
+	-25.96851,
+	-38.95277,
+	-56.26511,
+	-79.34823,
+	-111.08752,
+	-157.25376,
+	-210.63348,
+	-269.78397,
+	-344.80411,
+	-440.02199,
+	-562.65107,
+	-718.46213,
+	-916.11135,		// 635 min * -1/ln(2)
+//---- half-life for He ------------------------------------------------------
+	-2.178469512,	// 1.51 min * -1/ln(2)
+	-4.356939024,
+	-6.809520594,
+	-10.08443834,
+	-14.72991637,
+	-20.89022419,
+	-29.61852919,
+	-41.99685264,
+	-59.43903569,
+	-79.62233931,
+	-101.9841124,
+	-130.33307,
+	-166.3283113,
+	-212.6821029,
+	-271.5729145,
+	-346.2900907	// 240,03 * -1/ln(2)
+};
+
+rom const float buhlmann_ht[] =
+{
+//---- N2 --------------------------------------------------------------------
+	4,			// Compartiment length, in minute, for nitrogen.
+	8,
+	12,
+	18,
+	27,
+	39,
+	55,
+	77,
+	109,
+	146,
+	187,
+	239,
+	305,
+	390,
+	498,
+	635,
+//---- He --------------------------------------------------------------------
+	1.51,		// Compartiment half-life, in minute, for helium.
+	3.02,
+	4.72,
+	6.99,
+	10.21,
+	14.48,
+	20.53,
+	29.11,
+	41.20,
+	55.19,
+	70.69,
+	90.34,
+	115.29,
+	147.42,
+	188.24,
+	240.03
+};
+
+rom const float e2secs[] =
+{ 
+//---- N2 --------------------------------------------------------------------
+	5.7596E-03,  // und zwar  1 - 2^(-2sec/HT)
+	2.8839E-03,
+	1.8467e-03,
+	1.2481e-03,
+	8.5537E-04,
+	6.0308E-04,
+	4.2541E-04, 
+	3.0002E-04,
+	2.1195E-04,
+	1.5824E-04,
+	1.2355E-04,
+	9.6669E-05,
+	7.5751E-05,
+	5.92E-05,
+	4.64E-05,
+	3.64E-05,
+//---- He --------------------------------------------------------------------
+	0.01518479275,
+	0.007621439546,
+	0.004883145696,
+	0.003299965996,
+	0.002260409686,
+	0.00159437032,
+	0.001124788578,
+	0.0007933953673,
+	0.0005606414716,
+	0.0004185553604,
+	0.0003267948866,
+	0.0002557222899,
+	0.0002003867723,
+	0.0001567161546,
+	0.0001227342122,
+	9.625377675E-5
+};
+
+rom const float e1min[] =
+{
+//---- N2 --------------------------------------------------------------------
+	0.1591036,			// Integration constant for 1 minute,
+	0.08299596,			// ie. 1 - 2^(-1/ht)
+	0.053942353,
+	0.036774196,
+	0.02534539,
+	0.017935055,
+	0.012684012,
+	8.961515534E-3,
+	6.338971845E-3,
+	4.73633146E-3,	
+	3.699808187E-3,
+	2.89599589E-3,
+	2.270033275E-3,
+	1.775722E-3,
+	1.390893611E-3,
+	1.090974815E-3,
+//---- e 1min He -------------------------------------------------------------
+	0.368108684,
+	0.2050840824,
+	0.1365792957,
+	0.09440463235,
+	0.06563586265,
+	0.04674161154,
+	0.03319905126,
+	0.02353005571,
+	0.0166832282,
+	0.01248075064,
+	0.009757532198,
+	0.007643290133,
+	0.005994168431,
+	0.004690816669,
+	0.003675481163,
+	0.002883586737
+};
+
+rom const float e10min[] =
+{
+//---- N2 --------------------------------------------------------------------
+// Die 10 min Werte in float Notation:
+//  und zwar 1 - 2^(-10/ht)
+	0.823223,			// 1 - 2^(-10/4.0)
+	0.579552,
+	0.425651,
+	0.312487,
+	0.226416,
+	0.165547,
+	0.11984,
+	0.0860863,
+	0.0616117,
+	0.0463665,
+	0.0363881,
+	0.0285855,
+	0.0224698,
+	0.017616,
+	0.0138222,
+	0.0108563,
+//---- He --------------------------------------------------------------------
+	0.989851,
+	0.899258,
+	0.769737,
+	0.629027,
+	0.492821,
+	0.380407,
+	0.286538,
+	0.211886,
+	0.154849,
+	0.118026,
+	0.0934005,
+	0.0738569,
+	0.0583504,
+	0.0459303,
+	0.0361528,
+	0.0284646,
+};
+

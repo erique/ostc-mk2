@@ -144,18 +144,14 @@ static float			temp_surface;
 static float			N2_ratio;
 static float			He_ratio;
 static float			temp_ratio;
-static float 			var_a;
-static float 			var2_a;
-static float 			var_b;
-static float 			var2_b;
-static float 			var_t05nc;
-static float 			var2_t05nc;
-static float  			var_e2secs;
-static float  			var2_e2secs;
-static float  			var_e1min;
-static float  			var2_e1min;
-static float  			var_halftimes;
-static float  			var2_halftimes;
+static float 			var_N2_a;
+static float 			var_N2_b;
+static float 			var_He_a;
+static float 			var_He_b;
+static float  			var_N2_e;
+static float  			var_He_e;
+static float  			var_N2_halftime;
+static float  			var_He_halftime;
 static float			pres_gtissue_limit;
 static float			temp_pres_gtissue_limit;
 static float			actual_ppO2;                // new in v.102
@@ -249,10 +245,10 @@ static float			deco_He_ratio5;			// new in v.109
 // ***********************
 // ***********************
 
-#pragma romdata tables = 0x10200
-#include	"p2_tables.romdata" 		// new table for deco_main_v.101 (var_a modified)
+#pragma romdata buhlmann_tables = 0x010200  // Needs to be in UPPER bank.
+#include	"p2_tables.romdata" 		// new table for deco_main_v.101 (var_N2_a modified)
 
-#pragma romdata tables2 = 0x10600
+#pragma romdata hash_tables = 0x010600  // Address fixed by ASM access...
 rom const rom unsigned int md_pi[] =
 {
     0x292E, 0x43C9, 0xA2D8, 0x7C01, 0x3D36, 0x54A1, 0xECF0, 0x0613
@@ -441,10 +437,82 @@ void check_post_dbg(void)
 	check_dbg(1);
 }
 
-// -------------------------
+//////////////////////////////////////////////////////////////////////////////
+// read buhlmann tables for compatriment ci
+// If mode == 0 : 2sec interval
+//            1 : 1 min interval
+//            2 : 10 min interval.
+// TODO: an assembleur version of the table reads...
+static void read_buhlmann_compartment(static char mode)
+{
+    var_N2_a = buhlmann_a[ci];
+    var_N2_b = buhlmann_b[ci];
+    var_He_a = buhlmann_a[ci + 16];
+    var_He_b = buhlmann_b[ci + 16];
+    // Check reading consistency:
+	if(	(var_N2_a < 0.231)
+	 || (var_N2_a > 1.27)
+	 || (var_N2_b < 0.504)
+	 || (var_N2_b > 0.966)
+	 || (var_He_a < 0.510)
+	 || (var_He_a > 1.75)
+	 || (var_He_b < 0.423)
+	 || (var_He_b > 0.927)
+    )
+        int_O_DBG_pre_bitfield |= DBG_ZH16ERR;
+
+    // Integration intervals.
+    switch(mode)
+    {
+    case 0: //---- 2 sec -----------------------------------------------------
+        var_N2_e = e2secs[ci];
+        var_He_e = e2secs[ci + 16];
+
+        // Check reading consistency:
+    	if(	(var_N2_e < 0.0000363)
+    	 || (var_N2_e > 0.00577)
+    	 || (var_He_e < 0.0000961)
+    	 || (var_He_e > 0.150)
+        )
+            int_O_DBG_pre_bitfield |= DBG_ZH16ERR;
+
+        break;
+
+    case 1: //---- 1 min -----------------------------------------------------
+        var_N2_e = e1min[ci];
+        var_He_e = e1min[ci + 16];
+
+        // Check reading consistency:
+    	if(	(var_N2_e < 1.09E-3)
+    	 || (var_N2_e > 0.1592)
+    	 || (var_He_e < 0.00288)
+    	 || (var_He_e > 0.3682)
+        )
+            int_O_DBG_pre_bitfield |= DBG_ZH16ERR;
+
+        break;
+
+    case 2: //---- 10 min ----------------------------------------------------
+        var_N2_e = e10min[ci];
+        var_He_e = e10min[ci + 16];
+
+        // Check reading consistency:
+    	if(	(var_N2_e < 0.01085)
+    	 || (var_N2_e > 0.82323)
+    	 || (var_He_e < 0.02846)
+    	 || (var_He_e > 0.98986)
+        )
+            int_O_DBG_pre_bitfield |= DBG_ZH16ERR;
+
+        break;
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // calc_next_decodepth_GF //
-// -------------------------
+//
 // new in v.102
+//
 void calc_nextdecodepth_GF(void)
 {
 // INPUT, changing during dive:
@@ -733,7 +801,7 @@ void deco_debug(void)
 // ---------------
 // CLEAR tissue //
 // ---------------
-// optimized in v.101 (var_a)
+// optimized in v.101 (var_N2_a)
 
 #pragma code p2_deco_suite = 0x10700
 
@@ -756,14 +824,13 @@ void clear_tissue(void)    // preload tissues with standard pressure for the giv
     _endasm
     for(ci=0;ci<16;ci++)
     {
-        overlay float p;
         // cycle through the 16 b"uhlmann tissues
-        p = N2_ratio * (pres_respiration -  0.0627) ;
+        overlay float p = N2_ratio * (pres_respiration -  0.0627);
         pres_tissue[ci] = p;
         
-        var_a = ((rom float*)a_N2)[ci];
-        var_b = ((rom float*)b_N2)[ci];
-        p = (p - var_a) * var_b ;
+        read_buhlmann_compartment(0);
+
+        p = (p - var_N2_a) * var_N2_b ;
         if( p < 0.0 )
             p = 0.0;
         pres_tissue_limit[ci] = p;
@@ -1202,107 +1269,23 @@ void calc_tissue(void)
     
     for (ci=0;ci<16;ci++)
     {
-        _asm
-        movlw	0x02
-        movwf	TBLPTRH,0
-        movlb	5 // fuer ci
-        movf    ci,0,1
-        addwf	ci,0,1
-        addwf	ci,0,1
-        addwf	ci,0,1
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var_e2secs+1 // the order is confussing
-        TBLRDPOSTINC
-        movff	TABLAT,var_e2secs	// low byte first, high afterwards
-        TBLRDPOSTINC
-        movff	TABLAT,var_e2secs+3
-        TBLRD
-        movff	TABLAT,var_e2secs+2
-        addlw	0x40
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var2_e2secs+1
-        TBLRDPOSTINC
-        movff	TABLAT,var2_e2secs
-        TBLRDPOSTINC
-        movff	TABLAT,var2_e2secs+3
-        TBLRD
-        movff	TABLAT,var2_e2secs+2
-        addlw	0x40
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var_a+1
-        TBLRDPOSTINC
-        movff	TABLAT,var_a
-        TBLRDPOSTINC
-        movff	TABLAT,var_a+3
-        TBLRD
-        movff	TABLAT,var_a+2
-        addlw	0x40
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var2_a+1
-        TBLRDPOSTINC
-        movff	TABLAT,var2_a
-        TBLRDPOSTINC
-        movff	TABLAT,var2_a+3
-        TBLRD
-        movff	TABLAT,var2_a+2
-        addlw	0x40
-        movwf	TBLPTRL,0
-        incf	TBLPTRH,1,0
-        TBLRDPOSTINC
-        movff	TABLAT,var_b+1
-        TBLRDPOSTINC
-        movff	TABLAT,var_b
-        TBLRDPOSTINC
-        movff	TABLAT,var_b+3
-        TBLRD
-        movff	TABLAT,var_b+2
-        addlw	0x40
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var2_b+1
-        TBLRDPOSTINC
-        movff	TABLAT,var2_b
-        TBLRDPOSTINC
-        movff	TABLAT,var2_b+3
-        TBLRD
-        movff	TABLAT,var2_b+2
-        _endasm
-        // the start values are the previous end values // write new values in temp
-    
-    	if(	(var_e2secs < 0.0000363)
-    		|| (var_e2secs > 0.00577)
-    		|| (var2_e2secs < 0.0000961)
-    		|| (var2_e2secs > 0.150)
-    		|| (var_a < 0.231)
-    		|| (var_a > 1.27)
-    		|| (var_b < 0.504)
-    		|| (var_b > 0.966)
-    		|| (var2_a < 0.510)
-    		|| (var2_a > 1.75)
-    		|| (var2_b < 0.423)
-    		|| (var2_b > 0.927)
-    		)
-    		int_O_DBG_pre_bitfield |= DBG_ZH16ERR;
+        read_buhlmann_compartment(0);   // 2 sec mode.
 
         // N2
-        temp_tissue = (temp_atem - pres_tissue[ci]) * var_e2secs;
+        temp_tissue = (temp_atem - pres_tissue[ci]) * var_N2_e;
         temp_tissue_safety();
         pres_tissue[ci] = pres_tissue[ci] + temp_tissue;
-        
+
         // He
-        temp_tissue = (temp2_atem - pres_tissue[ci+16]) * var2_e2secs;
+        temp_tissue = (temp2_atem - pres_tissue[ci+16]) * var_He_e;
         temp_tissue_safety();
         pres_tissue[ci+16] = pres_tissue[ci+16] + temp_tissue;
-        
+
         temp_tissue = pres_tissue[ci] + pres_tissue[ci+16];
 
-        var_a = (var_a * pres_tissue[ci] + var2_a * pres_tissue[ci+16]) / temp_tissue;
-        var_b = (var_b * pres_tissue[ci] + var2_b * pres_tissue[ci+16]) / temp_tissue;
-        pres_tissue_limit[ci] = (temp_tissue - var_a) * var_b;
+        var_N2_a = (var_N2_a * pres_tissue[ci] + var_He_a * pres_tissue[ci+16]) / temp_tissue;
+        var_N2_b = (var_N2_b * pres_tissue[ci] + var_He_b * pres_tissue[ci+16]) / temp_tissue;
+        pres_tissue_limit[ci] = (temp_tissue - var_N2_a) * var_N2_b;
         if (pres_tissue_limit[ci] < 0)
             pres_tissue_limit[ci] = 0;
         if (pres_tissue_limit[ci] > pres_gtissue_limit)
@@ -1462,93 +1445,23 @@ void sim_tissue_1min(void)
     
     for (ci=0;ci<16;ci++)
     {
-        _asm
-        movlw	0x02
-        movwf	TBLPTRH,0
-        movlb	5 // fuer ci
-        movf    ci,0,1
-        addwf	ci,0,1
-        addwf	ci,0,1
-        addwf	ci,0,1
-        addlw	0x80
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var_a+1
-        TBLRDPOSTINC
-        movff	TABLAT,var_a
-        TBLRDPOSTINC
-        movff	TABLAT,var_a+3
-        TBLRD
-        movff	TABLAT,var_a+2
-        addlw	0x40
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var2_a+1
-        TBLRDPOSTINC
-        movff	TABLAT,var2_a
-        TBLRDPOSTINC
-        movff	TABLAT,var2_a+3
-        TBLRD
-        movff	TABLAT,var2_a+2
-        addlw	0x40
-        movwf	TBLPTRL,0
-        incf	TBLPTRH,1,0
-        TBLRDPOSTINC
-        movff	TABLAT,var_b+1
-        TBLRDPOSTINC
-        movff	TABLAT,var_b
-        TBLRDPOSTINC
-        movff	TABLAT,var_b+3
-        TBLRD
-        movff	TABLAT,var_b+2
-        addlw	0x40
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var2_b+1
-        TBLRDPOSTINC
-        movff	TABLAT,var2_b
-        TBLRDPOSTINC
-        movff	TABLAT,var2_b+3
-        TBLRD
-        movff	TABLAT,var2_b+2
-        addlw	0xC0
-        movwf	TBLPTRL,0
-        incf	TBLPTRH,1,0
-        TBLRDPOSTINC
-        movff	TABLAT,var_e1min+1
-        TBLRDPOSTINC
-        movff	TABLAT,var_e1min
-        TBLRDPOSTINC
-        movff	TABLAT,var_e1min+3
-        TBLRD
-        movff	TABLAT,var_e1min+2
-        addlw	0x40
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var2_e1min+1
-        TBLRDPOSTINC
-        movff	TABLAT,var2_e1min
-        TBLRDPOSTINC
-        movff	TABLAT,var2_e1min+3
-        TBLRD
-        movff	TABLAT,var2_e1min+2
-        _endasm
-        
+        read_buhlmann_compartment(1);       // 1 minute interval
+
         // N2
-        temp_tissue = (temp_atem - sim_pres_tissue[ci]) * var_e1min;
+        temp_tissue = (temp_atem - sim_pres_tissue[ci]) * var_N2_e;
         temp_tissue_safety();
         sim_pres_tissue[ci] = sim_pres_tissue[ci] + temp_tissue;
         
         // He
-        temp_tissue = (temp2_atem - sim_pres_tissue[ci+16]) * var2_e1min;
+        temp_tissue = (temp2_atem - sim_pres_tissue[ci+16]) * var_He_e;
         temp_tissue_safety();
         sim_pres_tissue[ci+16] = sim_pres_tissue[ci+16] + temp_tissue;
         
         // pressure limit
         temp_tissue = sim_pres_tissue[ci] + sim_pres_tissue[ci+16];
-        var_a = (var_a * sim_pres_tissue[ci] + var2_a * sim_pres_tissue[ci+16]) / temp_tissue;
-        var_b = (var_b * sim_pres_tissue[ci] + var2_b * sim_pres_tissue[ci+16]) / temp_tissue;
-        sim_pres_tissue_limit[ci] = (temp_tissue - var_a) * var_b;
+        var_N2_a = (var_N2_a * sim_pres_tissue[ci] + var_He_a * sim_pres_tissue[ci+16]) / temp_tissue;
+        var_N2_b = (var_N2_b * sim_pres_tissue[ci] + var_He_b * sim_pres_tissue[ci+16]) / temp_tissue;
+        sim_pres_tissue_limit[ci] = (temp_tissue - var_N2_a) * var_N2_b;
         
         if (sim_pres_tissue_limit[ci] < 0)
             sim_pres_tissue_limit[ci] = 0;
@@ -1571,7 +1484,7 @@ void sim_tissue_1min(void)
 // sim_tissue_10min //
 //--------------------
 
-// Attention!! uses var_e1min und var2_e1min to load 10min data !!!
+// Attention!! uses var_N2_e und var_He_e to load 10min data !!!
 // is identical to sim_tissue_1min routine except for the different load of those variables
 
 // optimized in v.101
@@ -1583,95 +1496,23 @@ void sim_tissue_10min(void)
     
     for (ci=0;ci<16;ci++)
     {
-        _asm
-        movlw	0x02
-        movwf	TBLPTRH,0
-        movlb	5 // fuer ci
-        movf    ci,0,1
-        addwf	ci,0,1
-        addwf	ci,0,1
-        addwf	ci,0,1
-        addlw	0x80
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var_a+1
-        TBLRDPOSTINC
-        movff	TABLAT,var_a
-        TBLRDPOSTINC
-        movff	TABLAT,var_a+3
-        TBLRD
-        movff	TABLAT,var_a+2
-        addlw	0x40
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var2_a+1
-        TBLRDPOSTINC
-        movff	TABLAT,var2_a
-        TBLRDPOSTINC
-        movff	TABLAT,var2_a+3
-        TBLRD
-        movff	TABLAT,var2_a+2
-        addlw	0x40
-        movwf	TBLPTRL,0
-        incf	TBLPTRH,1,0
-        TBLRDPOSTINC
-        movff	TABLAT,var_b+1
-        TBLRDPOSTINC
-        movff	TABLAT,var_b
-        TBLRDPOSTINC
-        movff	TABLAT,var_b+3
-        TBLRD
-        movff	TABLAT,var_b+2
-        addlw	0x40
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var2_b+1
-        TBLRDPOSTINC
-        movff	TABLAT,var2_b
-        TBLRDPOSTINC
-        movff	TABLAT,var2_b+3
-        TBLRD
-        movff	TABLAT,var2_b+2
-        addlw	0xC0				// different to 1 min
-        movwf	TBLPTRL,0
-        incf	TBLPTRH,1,0
-        incf	TBLPTRH,1,0			// different to 1 min
-        TBLRDPOSTINC
-        movff	TABLAT,var_e1min+1
-        TBLRDPOSTINC
-        movff	TABLAT,var_e1min
-        TBLRDPOSTINC
-        movff	TABLAT,var_e1min+3
-        TBLRD
-        movff	TABLAT,var_e1min+2
-        addlw	0x40
-        movwf	TBLPTRL,0
-        //incf	TBLPTRH,1,0			// different to 1 min
-        TBLRDPOSTINC
-        movff	TABLAT,var2_e1min+1
-        TBLRDPOSTINC
-        movff	TABLAT,var2_e1min
-        TBLRDPOSTINC
-        movff	TABLAT,var2_e1min+3
-        TBLRD
-        movff	TABLAT,var2_e1min+2
-        _endasm
-        
+        read_buhlmann_compartment(2);       // 10 minute interval
+
         // N2
-        temp_tissue = (temp_atem - sim_pres_tissue[ci]) * var_e1min;
+        temp_tissue = (temp_atem - sim_pres_tissue[ci]) * var_N2_e;
         temp_tissue_safety();
         sim_pres_tissue[ci] = sim_pres_tissue[ci] + temp_tissue;
         // He
-        temp_tissue = (temp2_atem - sim_pres_tissue[ci+16]) * var2_e1min;
+        temp_tissue = (temp2_atem - sim_pres_tissue[ci+16]) * var_He_e;
         temp_tissue_safety();
         sim_pres_tissue[ci+16] = sim_pres_tissue[ci+16] + temp_tissue;
         
         // pressure limit
         temp_tissue = sim_pres_tissue[ci] + sim_pres_tissue[ci+16];
-        var_a = (var_a * sim_pres_tissue[ci] + var2_a * sim_pres_tissue[ci+16]) / temp_tissue;
-        var_b = (var_b * sim_pres_tissue[ci] + var2_b * sim_pres_tissue[ci+16]) / temp_tissue;
+        var_N2_a = (var_N2_a * sim_pres_tissue[ci] + var_He_a * sim_pres_tissue[ci+16]) / temp_tissue;
+        var_N2_b = (var_N2_b * sim_pres_tissue[ci] + var_He_b * sim_pres_tissue[ci+16]) / temp_tissue;
 
-        sim_pres_tissue_limit[ci] = (temp_tissue - var_a) * var_b;
+        sim_pres_tissue_limit[ci] = (temp_tissue - var_N2_a) * var_N2_b;
         if (sim_pres_tissue_limit[ci] < 0)
             sim_pres_tissue_limit[ci] = 0;
         if (sim_pres_tissue_limit[ci] > temp_pres_gtissue_limit)
@@ -1766,7 +1607,7 @@ void update_decoarray()
 // -----------------------
 // calc_gradient_factor //
 // -----------------------
-// optimized in v.101 (var_a)
+// optimized in v.101 (var_N2_a)
 // new code in v.102
 
 void calc_gradient_factor(void)
@@ -1835,35 +1676,8 @@ void deco_calc_desaturation_time(void)
     
     for (ci=0;ci<16;ci++)
     {
-        _asm
-        movlw	0x04
-        movwf	TBLPTRH,0
-        movlb	5 // fuer ci
-        movf    ci,0,1
-        addwf	ci,0,1
-        addwf	ci,0,1
-        addwf	ci,0,1
-        addlw	0x80
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var_halftimes+1
-        TBLRDPOSTINC
-        movff	TABLAT,var_halftimes
-        TBLRDPOSTINC
-        movff	TABLAT,var_halftimes+3
-        TBLRD
-        movff	TABLAT,var_halftimes+2
-        addlw	0x40
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var2_halftimes+1
-        TBLRDPOSTINC
-        movff	TABLAT,var2_halftimes
-        TBLRDPOSTINC
-        movff	TABLAT,var2_halftimes+3
-        TBLRD
-        movff	TABLAT,var2_halftimes+2
-        _endasm
+        var_N2_halftime = buhlmann_ht[ci];
+        var_He_halftime = buhlmann_ht[ci + 16];
 
         // saturation_time (for flight) and N2_saturation in multiples of halftime
         // version v.100: 1.1 = 10 percent distance to totally clean (totally clean is not possible, would take infinite time )
@@ -1886,7 +1700,7 @@ void deco_calc_desaturation_time(void)
             temp1 = temp1 / -0.6931; // temp1 is the multiples of half times necessary.
             						 // 0.6931 is ln(2), because the math function log() calculates with a base of e not 2 as requested.
             						 // minus because log is negative
-            temp2 = var_halftimes * temp1 / float_desaturation_multiplier; // time necessary (in minutes ) for complete desaturation (see comment about 10 percent) , new in v.101: float_desaturation_multiplier
+            temp2 = var_N2_halftime * temp1 / float_desaturation_multiplier; // time necessary (in minutes ) for complete desaturation (see comment about 10 percent) , new in v.101: float_desaturation_multiplier
         }
         else
         {
@@ -1909,7 +1723,7 @@ void deco_calc_desaturation_time(void)
         	temp3 = temp3 / -0.6931; // temp1 is the multiples of half times necessary.
         							 // 0.6931 is ln(2), because the math function log() calculates with a base of e  not 2 as requested.
         							 // minus because log is negative
-        	temp4 = var2_halftimes * temp3 / float_desaturation_multiplier; // time necessary (in minutes ) for "complete" desaturation, new in v.101 float_desaturation_multiplier
+        	temp4 = var_He_halftime * temp3 / float_desaturation_multiplier; // time necessary (in minutes ) for "complete" desaturation, new in v.101 float_desaturation_multiplier
     	}
         else
     	{
@@ -1991,92 +1805,22 @@ void calc_tissue_step_1_min(void)
     
     for (ci=0;ci<16;ci++)
     {
-        _asm
-        movlw	0x02
-        movwf	TBLPTRH,0
-        movlb	5 // fuer ci
-        movf    ci,0,1
-        addwf	ci,0,1
-        addwf	ci,0,1
-        addwf	ci,0,1
-        addlw	0x80
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var_a+1
-        TBLRDPOSTINC
-        movff	TABLAT,var_a
-        TBLRDPOSTINC
-        movff	TABLAT,var_a+3
-        TBLRD
-        movff	TABLAT,var_a+2
-        addlw	0x40
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var2_a+1
-        TBLRDPOSTINC
-        movff	TABLAT,var2_a
-        TBLRDPOSTINC
-        movff	TABLAT,var2_a+3
-        TBLRD
-        movff	TABLAT,var2_a+2
-        addlw	0x40
-        movwf	TBLPTRL,0
-        incf	TBLPTRH,1,0
-        TBLRDPOSTINC
-        movff	TABLAT,var_b+1
-        TBLRDPOSTINC
-        movff	TABLAT,var_b
-        TBLRDPOSTINC
-        movff	TABLAT,var_b+3
-        TBLRD
-        movff	TABLAT,var_b+2
-        addlw	0x40
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var2_b+1
-        TBLRDPOSTINC
-        movff	TABLAT,var2_b
-        TBLRDPOSTINC
-        movff	TABLAT,var2_b+3
-        TBLRD
-        movff	TABLAT,var2_b+2
-        addlw	0xC0
-        movwf	TBLPTRL,0
-        incf	TBLPTRH,1,0
-        TBLRDPOSTINC
-        movff	TABLAT,var_e1min+1
-        TBLRDPOSTINC
-        movff	TABLAT,var_e1min
-        TBLRDPOSTINC
-        movff	TABLAT,var_e1min+3
-        TBLRD
-        movff	TABLAT,var_e1min+2
-        addlw	0x40
-        movwf	TBLPTRL,0
-        TBLRDPOSTINC
-        movff	TABLAT,var2_e1min+1
-        TBLRDPOSTINC
-        movff	TABLAT,var2_e1min
-        TBLRDPOSTINC
-        movff	TABLAT,var2_e1min+3
-        TBLRD
-        movff	TABLAT,var2_e1min+2
-        _endasm
+        read_buhlmann_compartment(1);       // 1 minute interval
 
         // N2 1 min
-        temp_tissue = (temp_atem - pres_tissue[ci]) * var_e1min;
+        temp_tissue = (temp_atem - pres_tissue[ci]) * var_N2_e;
         temp_tissue_safety();
         pres_tissue[ci] = pres_tissue[ci] + temp_tissue;
 
         // He 1 min
-        temp_tissue = (temp2_atem - pres_tissue[ci+16]) * var2_e1min;
+        temp_tissue = (temp2_atem - pres_tissue[ci+16]) * var_He_e;
         temp_tissue_safety();
         pres_tissue[ci+16] = pres_tissue[ci+16] + temp_tissue;
 
         temp_tissue = pres_tissue[ci] + pres_tissue[ci+16];
-        var_a = (var_a * pres_tissue[ci] + var2_a * pres_tissue[ci+16]) / temp_tissue;
-        var_b = (var_b * pres_tissue[ci] + var2_b * pres_tissue[ci+16]) / temp_tissue;
-        pres_tissue_limit[ci] = (temp_tissue - var_a) * var_b;
+        var_N2_a = (var_N2_a * pres_tissue[ci] + var_He_a * pres_tissue[ci+16]) / temp_tissue;
+        var_N2_b = (var_N2_b * pres_tissue[ci] + var_He_b * pres_tissue[ci+16]) / temp_tissue;
+        pres_tissue_limit[ci] = (temp_tissue - var_N2_a) * var_N2_b;
         if (pres_tissue_limit[ci] < 0)
             pres_tissue_limit[ci] = 0;
         if (pres_tissue_limit[ci] > pres_gtissue_limit)
@@ -2102,22 +1846,22 @@ void deco_hash(void)
     } // for md_i 16
 
     _asm
-    movlw	0x01
+    movlw	0x01            // md_pi address.
     movwf	TBLPTRU,0
     movlw	0x06
     movwf	TBLPTRH,0
     movlw	0x00
     movwf	TBLPTRL,0
     _endasm;
-    for(md_i=0;md_i<=255;md_i++)
-    {
+    md_i = 0;
+    do {
         _asm
         TBLRDPOSTINC
         movff	TABLAT,md_temp
         _endasm
-        md_pi_subst[md_i] = md_temp;
-    } // for md_i 256
-    
+        md_pi_subst[md_i++] = md_temp;
+    } while( md_i != 0 );
+
     _asm
      movlw	0x00
      movwf	TBLPTRU,0

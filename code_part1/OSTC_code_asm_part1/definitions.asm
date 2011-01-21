@@ -80,11 +80,9 @@
 #include "../OSTC_code_c_part2/shared_definitions.h"
 
 ;=============================================================================
-
-c_code_data_stack   EQU 0x800           ; Reserve space for C-code data space. Eg.when calling log.
-
-;Variable definitions
-; arrays are in hex size!! 20 = .032
+; Reserve space for C-code data space. Eg.when calling log.
+; Note: overlayed with md_hash temporary space.
+c_code_data_stack   EQU 0x800
 
 ;=============================================================================
 ; BANK0 data

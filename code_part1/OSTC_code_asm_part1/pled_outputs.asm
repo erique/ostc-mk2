@@ -2376,7 +2376,7 @@ PLED_decoplan_gf_99:
         return
 
 ;-----------------------------------------------------------------------------
-; Display the decoplan (simulator or divemode) for ZHL-16c model
+; Display the decoplan (simulator or divemode) for ZH-L16 model
 PLED_decoplan:
         ostc_debug	'n'		; Sends debug-information to screen if debugmode active
         

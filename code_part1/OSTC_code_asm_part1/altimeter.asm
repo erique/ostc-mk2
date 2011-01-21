@@ -29,10 +29,15 @@
 altimeter_calc:
         movlb   HIGH(pressureAvg)
         
-        movf    pressureRef+0,W         ; Already initialized ?
-        iorwf   pressureRef+1,W
-        bnz     altimeter_1             ; Yes...
-            
+        movlw   HIGH(4*.1100)           ; Is presure ref lower than 900mbar
+        cpfslt  pressureRef+1
+        bra     altimeter_1             ; No: ok it is valid...
+        
+        movlw   HIGH(4*.1100)           ; Is ref pressure bigger than 1100mbar ?
+        cpfsgt  pressureRef+1
+        bra     altimeter_1             ; No: ok it is valid...
+
+altimeter_0:            
         movlw   LOW(4*.1013+1)          ; Init see level at 1013,25 mbar.
         movwf   pressureRef+0
         movlw   HIGH(4*.1013+1)

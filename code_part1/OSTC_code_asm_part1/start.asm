@@ -218,8 +218,8 @@ restart_set_modes_and_flags:		; "Call"ed from divemode, as well!
 ; Load GF values into RAM
 	movlw	d'90'
 	movwf	wait_temp
-	movff	wait_temp,char_I_GF_Lo_percentage
-	movff	wait_temp,char_I_GF_Hi_percentage		; Set to 90/90...
+	movff	wait_temp,char_I_GF_Low_percentage
+	movff	wait_temp,char_I_GF_High_percentage		; Set to 90/90...
 	clrf	EEADRH
 	read_int_eeprom d'34'			; Read deco data	
 	movlw	d'1'					; Gauge mode
@@ -250,9 +250,9 @@ restart_4_test_gf_mode:
 	movff	wait_temp,char_I_deco_model	; Set Flagbyte for GF method
 ; Load GF values into RAM
 	GETCUSTOM8	d'32'			; GF low
-	movff		EEDATA,char_I_GF_Lo_percentage
+	movff		EEDATA,char_I_GF_Low_percentage
 	GETCUSTOM8	d'33'			; GF high
-	movff		EEDATA,char_I_GF_Hi_percentage
+	movff		EEDATA,char_I_GF_High_percentage
 	return							; start in Surfacemode
 restart_5_test_gfO2_mode:
 	movlw	d'5'					; GF CC mode
@@ -264,9 +264,9 @@ restart_5_test_gfO2_mode:
 	movff	wait_temp,char_I_deco_model	; Set Flagbyte for GF method
 	; Load GF values into RAM
 	GETCUSTOM8	d'32'			; GF low
-	movff		EEDATA,char_I_GF_Lo_percentage
+	movff		EEDATA,char_I_GF_Low_percentage
 	GETCUSTOM8	d'33'			; GF high
-	movff		EEDATA,char_I_GF_Hi_percentage
+	movff		EEDATA,char_I_GF_High_percentage
 	return							; start in Surfacemode
 
 startup_screen1:

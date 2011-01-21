@@ -63,6 +63,7 @@
 // 05/23/10 v109: 5 gas changes & 1 min timer
 // 07/13/10 v110: cns vault added
 // 12/25/10 v110: split in three files (deco.c, main.c, definitions.h)
+// 2011/01/20: [jDG] Create a common file included in ASM and C code.
 //
 //
 // literature:
@@ -85,33 +86,11 @@
 // ** V A R I A B L E S   D E F I N I T I O N S **
 // ***********************************************
 
+#include "../OSTC_code_c_part2/shared_definitions.h"
 
-#pragma udata bank2a=0x200
-// output:
-unsigned int	int_O_tissue_for_debug[32];
-unsigned int	int_O_GF_spare____;						// 0x240
-unsigned int	int_O_GF_step;							// 0x242
-unsigned int 	int_O_gtissue_limit;					// 0x244
-unsigned int 	int_O_gtissue_press;					// 0x246
-unsigned int 	int_O_limit_GF_low;						// 0x248
-unsigned int 	int_O_gtissue_press_at_GF_low;			// 0x24A
-unsigned char	char_I_step_is_1min;					// 0x24C
+//---- Bank 3 parameters -----------------------------------------------------
+#pragma udata bank4=0x400
 
-// ...
-#pragma udata bank2b=0x24E
-unsigned char	char_O_GF_low_pointer;					// 0x24E
-unsigned char	char_O_actual_pointer;					// 0x24F
-
-#pragma udata bank2c=0x250
-unsigned char	char_O_deco_table[32];					// 0x250
-
-#pragma udata bank2d=0x270
-unsigned char	char_I_table_deco_done[32];
-
-#pragma udata bank2e=0x290
-unsigned int 	int_O_calc_tissue_call_counter;			// 0x290
-
-// internal:
 static unsigned char 	lock_GF_depth_list;
 static float			temp_limit;
 static float			GF_low;
@@ -133,21 +112,18 @@ static unsigned char	temp_depth_GF_low_meter;
 static unsigned char	temp_depth_GF_low_number;
 static unsigned char	internal_deco_pointer;
 
-#pragma udata bank2f=0x2C8
 static unsigned char	internal_deco_table[32];			//  0x2C8
 static float			temp_pres_deco_GF_low;
 
-#pragma udata bank3a=0x300
 static char output[32];                 // used by the math routines
 
-#pragma udata bank3b=0x37C
 static float cns_vault;
 
-#pragma udata bank3c=0x380
 static float pres_tissue_vault[32];
 
- #pragma udata bank4a=0x400
-// internal:
+//---- Bank 5 parameters -----------------------------------------------------
+#pragma udata bank5=0x500
+
 static unsigned char	ci ; // don't move - used in _asm routines - if moved then modify movlb commands
 static unsigned char 	x;
 static unsigned int 	main_i_dummy;
@@ -184,62 +160,11 @@ static float			pres_gtissue_limit;
 static float			temp_pres_gtissue_limit;
 static float			actual_ppO2;						// new in v.102
 
-#pragma udata bank4b=0x480
 static float			pres_tissue[32];
 
-#pragma udata bank5=0x500
-// don't move positions in this bank, the registers are addressed directly from assembler code
-// input:
-unsigned int  int_I_pres_respiration;	        // 0x500
-unsigned int  int_I_pres_surface;		        // 0x502
-unsigned int  int_I_temp;				        // 0x504  new in v101
-unsigned char char_I_temp;			            // 0x506  new in v101
-unsigned char char_I_actual_ppO2;		        // 0x507
-unsigned char char_I_deco_N2_ratio2;            // 0x508 new in v.109
-unsigned char char_I_deco_He_ratio2;            // 0x509 new in v.109
-unsigned char char_I_deco_N2_ratio3;            // 0x50A new in v.109
-unsigned char char_I_deco_He_ratio3;            // 0x50B new in v.109
-unsigned char char_I_deco_N2_ratio4;            // 0x50C new in v.109
-unsigned char char_I_deco_He_ratio4;            // 0x50D new in v.109
-unsigned char char_I_deco_N2_ratio5;            // 0x50E new in v.109
-unsigned char char_I_deco_He_ratio5;            // 0x50F new in v.109
-unsigned char char_I_N2_ratio;		            // 0x510
-unsigned char char_I_He_ratio;		            // 0x511
-unsigned char char_I_saturation_multiplier;		// for conservatism/safety values 1.0 (no conservatism) to 1.5 (50% faster saturation
-unsigned char char_I_desaturation_multiplier; 	// for conservatism/safety values 0.66 (50% slower desaturation) to 1.0 (no conservatism)// consveratism used in calc_tissue(), calc_tissue_step_1_min() and sim_tissue_1min()
-unsigned char char_I_GF_High_percentage;        // 0x514	new in v.102
-unsigned char char_I_GF_Low_percentage;			// 0x515	new in v.102
-unsigned char char_I_spare;					    // 0x516
-unsigned char char_I_deco_distance;				// 0x517
-unsigned char char_I_const_ppO2;				// 0x518	new in v.101
-unsigned char char_I_deco_ppO2_change;			// 0x519	new in v.101
-unsigned char char_I_deco_ppO2;					// 0x51A	new in v.101
-unsigned char char_I_deco_gas_change;			// 0x51B	new in v.101
-unsigned char char_I_deco_N2_ratio;				// 0x51C	new in v.101
-unsigned char char_I_deco_He_ratio;				// 0x51D	new in v.101
-unsigned char char_I_depth_last_deco;			// 0x51E	new in v.101 unit: [m]
-unsigned char char_I_deco_model;				// 0x51F	new in v.102	( 1 = MultiGraF, sonst Std. mit (de-)saturation_multiplier)
+//---- Bank 6 parameters -----------------------------------------------------
+#pragma udata bank6=0x600
 
-// output:
-unsigned int  int_O_desaturation_time;			// 0x520
-unsigned char char_O_nullzeit;					// 0x522
-unsigned char char_O_deco_status;				// 0x523
-unsigned char char_O_array_decotime[7];			// 0x524
-unsigned char char_O_array_decodepth[6];		// 0x52B
-unsigned char char_O_ascenttime;				// 0x531
-unsigned char char_O_gradient_factor;			// 0x532
-unsigned char char_O_tissue_saturation[32];		// 0x533
-unsigned char char_O_array_gradient_weighted[16];	// 0x553
-unsigned char char_O_gtissue_no;				// 0x563
-unsigned char char_O_diluent;					// 0x564	new in v.101
-unsigned char char_O_CNS_fraction;				// 0x565	new in v.101
-unsigned char char_O_relative_gradient_GF;		// 0x566	new in v.102
-unsigned char char_I_deco_gas_change2;          // 0x567 new in v.109
-unsigned char char_I_deco_gas_change3;          // 0x568 new in v.109
-unsigned char char_I_deco_gas_change4;          // 0x569 new in v.109
-unsigned char char_I_deco_gas_change5;          // 0x56A new in v.109
-
-// internal:
 static float  pres_tissue_limit[16];
 static float  sim_pres_tissue_limit[16];
 static float  pres_diluent;			            // new in v.101
@@ -248,26 +173,22 @@ static float  const_ppO2;				        // new in v.101
 static float  deco_ppO2_change;	            	// new in v.101
 static float  deco_ppO2;				        // new in v.101
 
-#pragma udata bank6=0x600
-// internal:
-static float  sim_pres_tissue[32];
+//---- Bank 7 parameters -----------------------------------------------------
+#pragma udata bank7=0x700
+
+static float  sim_pres_tissue[32];              // 32 floats = 128 bytes.
 static float  sim_pres_tissue_backup[32];
 
+//---- Bank 8 parameters -----------------------------------------------------
 #pragma udata bank8=0x800
+
 static char	  md_pi_subst[256];
 #define C_STACK md_pi_subst                     // Overlay C-code data stack here, too.
 
+//---- Bank 9 parameters -----------------------------------------------------
 #pragma udata bank9a=0x900
-// output:
-static char	  md_state[48];		        // DONT MOVE !! // has to be at the beginning of bank 9 for the asm code!!!
 
-#pragma udata bank9b=0x930
-// output:
-unsigned int  int_O_DBS_bitfield;				// 0x930	new in v.108
-unsigned int  int_O_DBS2_bitfield;				// 0x932	new in v.108
-unsigned int  int_O_DBG_pre_bitfield;			// 0x934	new in v.108
-unsigned int  int_O_DBG_post_bitfield;			// 0x936	new in v.108
-unsigned char char_O_NDL_at_20mtr;				// 0x938	new in v.108 // 0xFF == undefined, max. 254
+static char	  md_state[48];		        // DONT MOVE !! // has to be at the beginning of bank 9 for the asm code!!!
 
 // internal:
  static char            md_t;
@@ -1921,35 +1842,6 @@ void calc_gradient_factor(void)
 	}
 } // calc_gradient
 
-// ---------------------------
-// deco_gradient_array //
-// ---------------------------
-// optimized in v.101 (var_a)
-// new code in v.102
-
-void deco_gradient_array()
-{
-    RESET_C_STACK
-    pres_respiration = (float)int_I_pres_respiration / 1000.0; // assembler code uses different digit system
-    for (ci=0;ci<16;ci++)
-    {
-    	temp_tissue = pres_tissue[ci] + pres_tissue[ci+16];
-    	temp1 = temp_tissue - pres_respiration;
-    	temp2 = temp_tissue - pres_tissue_limit[ci];
-    	temp2 = temp1/temp2;
-    	temp2 = temp2 * 200; // because of output in (Double-)percentage
-    	if (temp2 < 0)
-    		temp2 = 0;
-    	if (temp2 > 255)
-    		temp2 = 255;
-    	if (temp1 < 0)
-     		char_O_array_gradient_weighted[ci] = 0;
-    	else
-     		char_O_array_gradient_weighted[ci] = (char)temp2;
-    } // for
-} // deco_gradient_array
-
-
 // ------------------------------
 // deco_calc_desaturation_time //
 // ------------------------------
@@ -2217,30 +2109,6 @@ void calc_tissue_step_1_min(void)
             pres_gtissue_limit = pres_tissue_limit[ci];
             char_O_gtissue_no = ci;
         }//if
-
-        if(!char_I_step_is_1min)
-        {
-            // gradient factor array for graphical display
-            // display range is 0 to 250! in steps of 5 for 1 pixel
-            // the display is divided in 6 blocks
-            // -> double the gradient 100% = 200
-            // tissue > respiration (entsaettigungsvorgang)
-            // gradient ist wieviel prozent an limit von tissue aus
-            // dh. 0% = respiration == tissue
-            // dh. 100% = respiration == limit
-            temp1 = temp_tissue - pres_respiration;
-            temp2 = temp_tissue - pres_tissue_limit[ci];	// changed in v.102
-            temp2 = temp1/temp2;
-            temp2 = temp2 * 200; // because of output in (Double-)percentage
-            if (temp2 < 0)
-            	temp2 = 0;
-            if (temp2 > 255)
-            	temp2 = 255;
-            if (temp1 < 0)
-                char_O_array_gradient_weighted[ci] = 0;
-            else
-                char_O_array_gradient_weighted[ci] = (char)temp2;
-        }
     } // for
 } // calc wo deco 1min
 

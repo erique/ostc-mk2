@@ -1283,9 +1283,6 @@ end_dive_common:
 	btfsc	restore_deco_data			; Restore decodata?
 	call	simulator_restore_tissue_data		; Yes!
 
-	call	deco_gradient_array
-	movlb	b'00000001'					; select ram bank 1
-
 	goto	surfloop					; and return to surfaceloop
 
 timeout_divemode:

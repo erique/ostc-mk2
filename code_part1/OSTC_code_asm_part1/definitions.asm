@@ -17,6 +17,7 @@
 ; written by: Matthias Heinrichs, info@heinrichsweikamp.com
 ; written: 10/30/05
 ; last updated: 01/23/08
+; 2011/01/20: [jDG] Create a common file included in ASM and C code.
 ; known bugs:
 ; ToDo:
 
@@ -76,17 +77,11 @@
 
 ;=============================================================================
 
-    CBLOCK  0x800
-        c_code_data_stack:.64       ; Reserve space for C-code data space. Eg.when calling log.
-    endc
+#include "../OSTC_code_c_part2/shared_definitions.h"
 
-    CBLOCK  0x3F0
-        pressureSum:2               ; Stabilize surface presure by a long averaging window [mbar]
-        pressureCount               ; Count of pressure values.
-        pressureAvg:2               ; save averaged pressure x16, for altimeter_menu
-        pressureRef:2               ; Pressure at sea level [mbar]
-        altitude:2                  ; Last computed altitude [m]
-    ENDC
+;=============================================================================
+
+c_code_data_stack   EQU 0x800           ; Reserve space for C-code data space. Eg.when calling log.
 
 ;Variable definitions
 ; arrays are in hex size!! 20 = .032
@@ -103,6 +98,13 @@
 	win_invert
 	win_bargraph                ; PLED_box swicth to black after this position (0..159).
 	win_flags                   ; flip_screen flag, transparent fonts, etc...
+	
+    pressureSum:2               ; Stabilize surface presure by a long averaging window [mbar]
+    pressureCount               ; Count of pressure values.
+    pressureAvg:2               ; save averaged pressure x16, for altimeter_menu
+    pressureRef:2               ; Pressure at sea level [mbar]
+    altitude:2                  ; Last computed altitude [m]
+	
 	ENDC
 
 	CBLOCK	0x100				;Bank 1
@@ -318,89 +320,6 @@
 	time_correction_value		; Adds to Seconds on midnight
 	ENDC
 
-	CBLOCK	0x200				;Bank 2
- int_O_tissue_for_debug:.32		; deco_debug copies pressure of tissue to this variable
- int_O_GF_spare____:2;					// 0x240
- int_O_GF_step:2;						// 0x242
- int_O_gtissue_limit:2;					// 0x244
- int_O_gtissue_press:2;					// 0x246
- int_O_limit_GF_low:2;					// 0x248
- int_O_gtissue_press_at_GF_low:2;		// 0x24A
-	ENDC
-
-	CBLOCK	0x24C  
- char_I_step_is_1min; 					// 0x24C 
-	ENDC
-	
-	CBLOCK	0x24E				;Bank 2
- char_O_GF_low_pointer;					// 0x24E
- char_O_actual_pointer;					// 0x24F
-	ENDC
-	CBLOCK	0x250				;Bank 2
- char_O_deco_table:.32;				// 0x250
-	ENDC
-	CBLOCK	0x270				;Bank 2
- char_I_table_deco_done:.32;			// 0x270
-	ENDC
-	CBLOCK	0x290				;Bank 2
- int_O_calc_tissue_call_counter:2
-	ENDC
-	CBLOCK	0x380				;Bank 3
-	; some used in C code!
-	ENDC
-								
-	CBLOCK	0x500
-; used by deco_main c-code for data transfer with the asm code
-; input of c-code
- int_I_pres_respiration:2;			; 0x500
- int_I_pres_surface:2;				; 0x502
- int_I_temp:2;						; 0x504
- char_I_temp;						; 0x506
- char_I_actual_ppO2;				; 0x507
- char_I_deco_N2_ratio2;    			// 0x508 new in v.102
- char_I_deco_He_ratio2;    			// 0x509 new in v.102
- char_I_deco_N2_ratio3;    			// 0x50A new in v.102
- char_I_deco_He_ratio3;    			// 0x50B new in v.102
- char_I_deco_N2_ratio4;    			// 0x50C new in v.102
- char_I_deco_He_ratio4;    			// 0x50D new in v.102
- char_I_deco_N2_ratio5;    			// 0x50E new in v.102
- char_I_deco_He_ratio5;    			// 0x50F new in v.102
- char_I_N2_ratio;					; 0x510
- char_I_He_ratio;					; 0x511
- char_I_saturation_multiplier;		; for conservatism/safety values 1.0 (no conservatism) to 1.5 (50% faster saturation
- char_I_desaturation_multiplier;	; for conservatism/safety values 0.66 (50% slower desaturation) to 1.0 (no conservatism); consveratism used in calc_tissue(), calc_tissue_step_1_min() and sim_tissue_1min()
- char_I_GF_Hi_percentage;			; 0x514
- char_I_GF_Lo_percentage;			; 0x515
- char_I_GF_Spare;					; 0x516
- char_I_deco_distance;				; 0x517
- char_I_const_ppO2;					; 0x518	new in v.101 (C-Code), new in v109 (asm)
- char_I_deco_ppO2_change;			; 0x519	new in v.101
- char_I_deco_ppO2;					; 0x51A	new in v.101
- char_I_deco_gas_change;			; 0x51B	new in v.101
- char_I_deco_N2_ratio;				; 0x51C	new in v.101
- char_I_deco_He_ratio;				; 0x51D	new in v.101
- char_I_depth_last_deco;			; 0x51E	new in v.101
- char_I_deco_model;					; 0x51F	new in v.102
-; output of c-code:
- int_O_desaturation_time:2;			; 0x520
- char_O_nullzeit;					; 0x522
- char_O_deco_status;				; 0x523
- char_O_array_decotime:7;			; 0x524
- char_O_array_decodepth:6;			; 0x52B
- char_O_ascenttime;					; 0x531
- char_O_gradient_factor;			; 0x532
- char_O_tissue_saturation:.32;		; 0x533, He starts at 0x543
- char_O_array_gradient_weighted:.16 ; 0x553
- char_O_gtissue_no;					; 0x563
- char_O_diluent;					; 0x564 new in v.101 (C-Code), new in v109 (asm)
- char_O_CNS_fraction;				; 0x565	new in v.101
- char_O_relative_gradient_GF;		; 0x566	new in v.102
- char_I_deco_gas_change2;   		// 0x567 new in v.102
- char_I_deco_gas_change3;   		// 0x568 new in v.102
- char_I_deco_gas_change4;   		// 0x569 new in v.102
- char_I_deco_gas_change5;   		// 0x56A new in v.102 
-	ENDC
-
 	CBLOCK	0x700				;Bank 7
 ; variables used exclusively in dd:
 	dd_temp_BSR ; has to be first in bank7
@@ -444,7 +363,6 @@
     extern deco_calc_wo_deco_step_1_min
     extern deco_clear_CNS_fraction
     extern deco_clear_tissue
-    extern deco_gradient_array
     extern deco_hash    
     extern deco_pull_tissues_from_vault
     extern deco_push_tissues_to_vault

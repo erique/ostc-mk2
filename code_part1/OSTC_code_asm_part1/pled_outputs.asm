@@ -980,9 +980,9 @@ PLED_active_gas_divemode3:
     movff   WREG,letter+5		; collision with sat graphs
 	bcf		leftbind
 	call	word_processor
-;	rcall	PLED_active_gas_divemode_better_gas	; show *, if required
+;	rcall	PLED_active_better_gas	; show *, if required
 ;	return
-PLED_active_gas_divemode_better_gas:
+PLED_active_better_gas:
 	WIN_TOP		.192
 	WIN_LEFT	.43
 	WIN_FONT 	FT_SMALL
@@ -1007,7 +1007,7 @@ PLED_active_gas_divemode4:
     movff   WREG,letter+5		; collision with sat graphs
 	bcf		leftbind
 	call	word_processor
-	rcall	PLED_active_gas_divemode_better_gas	; show *, if required
+	rcall	PLED_active_better_gas	; show *, if required
 	return
 
 PLED_display_decotype_surface:

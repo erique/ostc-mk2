@@ -109,24 +109,25 @@ altimeter_display:
         WIN_FONT    .0
         call    PLED_standard_color
 
-        STRCPY  "Alt:"
+        STRCPY  "Alt: "
 
         movff   altitude+0,lo           ; BANK-SAFE read altitude
         movff   altitude+1,hi
-        movf    lo,W                    ; Is it zero (not computed yet) ?
-        iorwf   hi,W
-        bz      altimeter_2
+        btfss   hi,7                    ; Is altitude negativ ?
+        bra     altimeter_2             ; No: just print it
 
+        PUTC    '-'                     ; Yes: print the minus sign
+        comf    hi                      ; And do a 16bit 2-complement.
+        comf    lo
+        infsnz  lo
+        incf    hi
+
+altimeter_2:
         bsf     leftbind
         output_16
         bcf     leftbind
-        bra     altimeter_3
 
-altimeter_2:
-        STRCAT  "****"
-
-altimeter_3:
-        STRCAT_PRINT "m  "        
+        STRCAT_PRINT "m    "
         return
 
 ;=============================================================================
@@ -240,7 +241,7 @@ altimeter_menu_2:
         WIN_INVERT  .0
         WIN_LEFT    .20                 ; First line:
         WIN_TOP     .35
-        STRCPY      "Sea ref:"
+        STRCPY      "Sea ref: "
 
         movff       pressureRef+0, lo
         movff       pressureRef+1, hi
@@ -266,11 +267,22 @@ altimeter_menu_2:
         STRCAT_PRINT    "mbar  "
         
         WIN_TOP     .65                 ; Second line:
-        STRCPY      "Alt:"
+        STRCPY      "Alt: "
         movff       altitude+0, lo
         movff       altitude+1, hi
-        bcf         leftbind
+        btfss   hi,7                    ; Is altitude negativ ?
+        bra     altimeter_menu_3        ; No: just print it
+
+        PUTC    '-'                     ; Yes: print the minus sign
+        comf    hi                      ; And do a 16bit 2-complement.
+        comf    lo
+        infsnz  lo
+        incf    hi
+
+altimeter_menu_3:
+        bsf         leftbind
         output_16
+        bcf         leftbind
         STRCAT_PRINT    "m    "
 
         WIN_TOP     .95                 ; Action enable

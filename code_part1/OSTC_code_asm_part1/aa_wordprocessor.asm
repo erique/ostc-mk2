@@ -389,6 +389,7 @@ aa_decode_3:
 ; Inputs : letter : string to print (SHOULD BE NULL TERMINATED)
 ; Output : OLED commands on port D + clocks.
 ; 
+        global  aa_wordprocessor        ; Callable from C-code.
 aa_wordprocessor:
 		; Make sure context is well known
 		movlb	HIGH win_top            ; Switch to bank 0...

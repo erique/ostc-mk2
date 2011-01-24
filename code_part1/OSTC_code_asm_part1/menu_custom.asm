@@ -104,12 +104,13 @@ getcustom8_3:
 	clrf	EEADRH
 	return					; return
 
-GETCUSTOM15	macro	custom15
-	movlw	custom15
-	call	getcustom15_1
+GETCUSTOM15	macro	number
+	movlw	number
+	call	getcustom15
 	endm
 
-getcustom15_1:
+    global  getcustom15
+getcustom15:
 	; # number of requested custom function in wreg
 	movwf	customfunction_temp2
 	
@@ -792,7 +793,7 @@ check_cf_check:
     bra     cf_check_8bit
     
 ; Implement the 15bit check, even if not displayed...
-    rcall   getcustom15_1               ; Read into hi:lo
+    rcall   getcustom15                 ; Read into hi:lo
 
     movf    cf_min,W                    ; Compute (bound-value) -> hi:lo
     subwf   lo,F

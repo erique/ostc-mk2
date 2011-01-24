@@ -311,7 +311,7 @@ PLED_box_flip_V:
 ; Inputs:  win_top, win_leftx2, win_height, win_width, win_color1, win_color2
 ; Outputs: (none)
 ; Trashed: WREG, PROD, aa_start:2, aa_end:2, win_leftx2, win_width:1
-
+    global  PLED_frame
 PLED_frame:
     movff   win_top,aa_start+0          ; Backup everything.
     movff   win_height,aa_start+1
@@ -352,6 +352,7 @@ PLED_frame:
 ; Outputs: (none)
 ; Trashed: WREG, PROD
 
+    global  PLED_box
 PLED_box:
     ;---- Define Window ------------------------------------------------------
 	movff	win_width,WREG
@@ -416,6 +417,7 @@ PLED_box4:
 ; PLED_ClearScreen: An optimized version of PLEX_box, for full screen black.
 ; Trashed: WREG, PROD
 
+    global  PLED_ClearScreen
 PLED_ClearScreen:
 	movlw	0x35				; VerticalStartAddress HIGH:LOW
 	rcall	PLED_CmdWrite

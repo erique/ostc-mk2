@@ -149,7 +149,7 @@ restart:
 	clrf	flag14
 	clrf	flag15
 
-	bsf		flag1,0
+	bsf		flag1,0                 ; Should we set win_flip_screen ?
 	clrf	EEADRH					; Reset EEADRH
 	read_int_eeprom	d'1'
 	movlw	.7
@@ -159,7 +159,7 @@ restart:
 	clrf	flag1					; Clear flag1 (again)
 	movlw	.0
 	cpfsgt	EEDATA					; >256
-	bsf		nsm						; For hardware debugging
+	bsf		nsm						; NO-SLEEP-MODE : for hardware debugging
 
 	call	gassetup_sort_gaslist       ; Sorts Gaslist according to change depth
 	call	PLED_boot                   ; PLED boot (Incl. Clear Screen!)

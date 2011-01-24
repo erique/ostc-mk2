@@ -347,14 +347,14 @@ divemode_check_decogases:					; CALLed from Simulator
 	movff	EEDATA, char_I_deco_N2_ratio2; = N2!
 
 	read_int_eeprom		d'113'			; Read He ratio
-	movff	EEDATA,char_I_deco_He_ratio	; And copy into hold register
+	movff	EEDATA,char_I_deco_He_ratio1; And copy into hold register
 	read_int_eeprom		d'112'			; Read O2 ratio
-	movff	char_I_deco_He_ratio, wait_temp			; copy into bank1 register
+	movff	char_I_deco_He_ratio1, wait_temp			; copy into bank1 register
 	bsf		STATUS,C					; 
 	movlw	d'100'						; 100%
 	subfwb	wait_temp,W					; minus He
 	subfwb	EEDATA,F					; minus O2
-	movff	EEDATA, char_I_deco_N2_ratio; = N2!
+	movff	EEDATA, char_I_deco_N2_ratio1; = N2!
 
 ; Now, set change depth. Inactive gases have depth=0!
 	
@@ -367,7 +367,7 @@ divemode_check_decogases:					; CALLed from Simulator
 	read_int_eeprom		d'121'		; read gas_change_depth Gas4
 	movff	EEDATA,char_I_deco_gas_change2
 	read_int_eeprom		d'122'		; read gas_change_depth Gas5
-	movff	EEDATA,char_I_deco_gas_change
+	movff	EEDATA,char_I_deco_gas_change1
 
 
 ; Debugger
@@ -412,7 +412,7 @@ reset_decompression_gases:				; reset the deco gas while in NDL
 	movff	lo,char_I_deco_gas_change4
 	movff	lo,char_I_deco_gas_change3
 	movff	lo,char_I_deco_gas_change2
- 	movff	lo,char_I_deco_gas_change	; clear 
+ 	movff	lo,char_I_deco_gas_change1  ; clear 
 	return
 
 calc_deko_divemode2:

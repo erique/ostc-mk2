@@ -85,46 +85,20 @@
 // *************************
 // ** P R O T O T Y P E S **
 // *************************
-void calc_hauptroutine(void);
-void calc_tissue(void);
-void calc_nullzeit(void);
-void backup_sim_pres_tissue(void);
-void restore_sim_pres_tissue(void);
 
-void calc_without_deco(void);
-void clear_tissue(void);
-void calc_ascenttime(void);
-void update_startvalues(void);
-void clear_decoarray(void);
-void update_decoarray(void);
-void sim_tissue_1min(void);
-void sim_tissue_10min(void);
-void calc_gradient_factor(void);
-void calc_wo_deco_step_1_min(void);
-void calc_tissue_step_1_min(void);
-//void debug(void);
-void calc_percentage(void);
-void calc_hauptroutine_data_input(void);
-void calc_hauptroutine_update_tissues(void);
-void calc_hauptroutine_calc_deco(void);
-void calc_hauptroutine_calc_ascend_to_deco(void);
-//void build_debug_output(void);
-void calc_nextdecodepth_GF(void);
-void copy_deco_table_GF(void);
-void clear_internal_deco_table_GF(void);
-void update_internal_deco_table_GF(void);
+extern void calc_percentage(void);
+extern void deco_calc_hauptroutine(void);
+extern void deco_calc_without_deco(void);
+extern void deco_clear_tissue(void);
+extern void deco_calc_percentage(void);
+extern void deco_calc_wo_deco_step_1_min(void);
+extern void deco_debug(void);
+extern void deco_gradient_array(void);
+extern void deco_hash(void);
+extern void deco_calc_desaturation_time(void);
+extern void deco_calc_CNS_fraction(void);
+extern void deco_clear_CNS_fraction(void);
+extern void deco_push_tissues_to_vault(void);
+extern void deco_pull_tissues_from_vault(void);
 
-
-void deco_calc_hauptroutine(void);
-void deco_calc_without_deco(void);
-void deco_clear_tissue(void);
-void deco_calc_percentage(void);
-void deco_calc_wo_deco_step_1_min(void);
-void deco_debug(void);
-void deco_gradient_array(void);
-void deco_hash(void);
-void deco_calc_desaturation_time(void);
-void deco_calc_CNS_fraction(void);
-void deco_clear_CNS_fraction(void);
-void deco_push_tissues_to_vault(void);
-void deco_pull_tissues_from_vault(void);
+//////////////////////////////////////////////////////////////////////////////

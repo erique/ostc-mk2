@@ -46,10 +46,17 @@
 #ifdef __18CXX
     //------------------------------------------------------------------------
     // C-style declarations:
-#   define VAR_UCHAR(n)      unsigned char n
-#   define TAB_UCHAR(n,size) unsigned char n[size]
-#   define VAR_UINT(n)       unsigned  int n
-#   define TAB_UINT(n,size)  unsigned  int n[size]
+#   ifdef TEST_MAIN
+#       define VAR_UCHAR(n)      extern unsigned char n
+#       define TAB_UCHAR(n,size) extern unsigned char n[size]
+#       define VAR_UINT(n)       extern unsigned  int n
+#       define TAB_UINT(n,size)  extern unsigned  int n[size]
+#   else
+#       define VAR_UCHAR(n)      unsigned char n
+#       define TAB_UCHAR(n,size) unsigned char n[size]
+#       define VAR_UINT(n)       unsigned  int n
+#       define TAB_UINT(n,size)  unsigned  int n[size]
+#   endif
 #else
     ;-------------------------------------------------------------------------
     ; ASM-style declarations:
@@ -118,14 +125,6 @@ VAR_UINT  (int_I_pres_surface);            //
 VAR_UINT  (int_I_temp);                    // new in v101
 VAR_UCHAR (char_I_temp);                   // new in v101
 VAR_UCHAR (char_I_actual_ppO2);            // 
-VAR_UCHAR (char_I_deco_N2_ratio2);         // new in v.109
-VAR_UCHAR (char_I_deco_He_ratio2);         // new in v.109
-VAR_UCHAR (char_I_deco_N2_ratio3);         // new in v.109
-VAR_UCHAR (char_I_deco_He_ratio3);         // new in v.109
-VAR_UCHAR (char_I_deco_N2_ratio4);         // new in v.109
-VAR_UCHAR (char_I_deco_He_ratio4);         // new in v.109
-VAR_UCHAR (char_I_deco_N2_ratio5);         // new in v.109
-VAR_UCHAR (char_I_deco_He_ratio5);         // new in v.109
 VAR_UCHAR (char_I_N2_ratio);               //
 VAR_UCHAR (char_I_He_ratio);               //
 VAR_UCHAR (char_I_saturation_multiplier);  // for conservatism/safety values 1.0  no conservatism to 1.5  50% faster saturation
@@ -136,13 +135,43 @@ VAR_UCHAR (char_I_deco_distance);          //
 VAR_UCHAR (char_I_const_ppO2);             // new in v.101
 VAR_UCHAR (char_I_deco_ppO2_change);       // new in v.101
 VAR_UCHAR (char_I_deco_ppO2);              // new in v.101
-VAR_UCHAR (char_I_deco_gas_change);        // new in v.101
-VAR_UCHAR (char_I_deco_N2_ratio);          // new in v.101
-VAR_UCHAR (char_I_deco_He_ratio);          // new in v.101
 VAR_UCHAR (char_I_depth_last_deco);        // new in v.101 unit: [m]
-VAR_UCHAR (char_I_deco_model);             // new in v.102	  1 = MultiGraF, sonst Std. mit  de-saturation_multiplier
+VAR_UCHAR (char_I_deco_model);             // new in v.102. 0 == ZH-L16, 1 = ZH-L16-GF (Grandiant facttor)
 
+VAR_UCHAR (char_I_deco_gas_change1);       // new in v.101
 VAR_UCHAR (char_I_deco_gas_change2);       // new in v.109
 VAR_UCHAR (char_I_deco_gas_change3);       // new in v.109
 VAR_UCHAR (char_I_deco_gas_change4);       // new in v.109
 VAR_UCHAR (char_I_deco_gas_change5);       // new in v.109
+
+VAR_UCHAR (char_I_deco_N2_ratio1);         // new in v.101
+VAR_UCHAR (char_I_deco_He_ratio1);         // new in v.101
+VAR_UCHAR (char_I_deco_N2_ratio2);         // new in v.109
+VAR_UCHAR (char_I_deco_He_ratio2);         // new in v.109
+VAR_UCHAR (char_I_deco_N2_ratio3);         // new in v.109
+VAR_UCHAR (char_I_deco_He_ratio3);         // new in v.109
+VAR_UCHAR (char_I_deco_N2_ratio4);         // new in v.109
+VAR_UCHAR (char_I_deco_He_ratio4);         // new in v.109
+VAR_UCHAR (char_I_deco_N2_ratio5);         // new in v.109
+VAR_UCHAR (char_I_deco_He_ratio5);         // new in v.109
+
+#ifdef __18CXX
+//----------------------------------------------------------------------------
+// Access to various utilities defined in ASM-code.
+//
+// Note: Need to switch to BANK1 before calling most of them !
+extern unsigned char win_top, win_leftx2, win_font, win_invert;
+extern ram unsigned char letter[26];
+
+extern void PLED_ClearScreen(void);
+extern void PLED_standard_color(void);
+extern void PLED_warnings_color(void);
+extern void PLED_divemask_color(void);
+
+extern void PLED_box(void);
+extern void PLED_frame(void);
+extern void aa_wordprocessor(void);
+
+/// Set WREG color.
+extern void PLED_set_color(void);
+#endif

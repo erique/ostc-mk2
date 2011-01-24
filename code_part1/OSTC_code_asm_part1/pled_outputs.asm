@@ -28,14 +28,17 @@
 ; known bugs:
 ; ToDo:	More comments
 
+    global   PLED_divemask_color
 PLED_divemask_color:
 	GETCUSTOM8	d'36'			; Divemask output color
 	bra		PLED_standard_color_0
 
+    global  PLED_warnings_color
 PLED_warnings_color:
 	GETCUSTOM8	d'37'			; Warnings output color
 	bra		PLED_standard_color_0
 
+    global  PLED_standard_color
 PLED_standard_color:
 	GETCUSTOM8	d'35'			; Standard output color
 PLED_standard_color_0:			; Common entry point
@@ -132,7 +135,6 @@ PLED_color_code_gaslist:				; %O2 in "EEDATA"
 PLED_color_code_gaslist1:
 	call	PLED_warnings_color
 	return
-
 
 PLED_color_code_ceiling:
 	GETCUSTOM8	d'40'			; =1: Warn at all?

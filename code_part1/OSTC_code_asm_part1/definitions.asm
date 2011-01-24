@@ -88,6 +88,11 @@ c_code_data_stack   EQU 0x800
 ; BANK0 data
 ;
 bank0           udata 0x060     ;Bank 0
+
+                global letter, win_color1, win_top, win_leftx2
+                global win_font, win_invert
+                global win_height, win_width, win_bargraph
+
 letter          res .26         ;letter buffer
 win_color1      res 1
 win_color2      res 1
@@ -159,6 +164,7 @@ oled2_temp  	res 1
 oled3_temp      res 1
 oled4_temp      res 1           ; Used in "Displaytext"
 
+                global hi,lo    ; Make them visible from C-code
 lo              res 1           ; bin to dec conversion routine
 hi              res 1
 lo_temp         res 1

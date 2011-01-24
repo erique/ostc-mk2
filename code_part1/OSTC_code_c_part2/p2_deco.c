@@ -64,28 +64,67 @@
 // 07/13/10 v110: cns vault added
 // 12/25/10 v110: split in three files (deco.c, main.c, definitions.h)
 // 2011/01/20: [jDG] Create a common file included in ASM and C code.
+// 2011/01/23: [jDG] Added read_custom_function().
 //
+// TODO:
+//  + Make char_O_ascenttime an int.
+//  + Fusion deco array for both models.
+//  + Allow (CF) revesring stop order (while copying).
+//  + Allow (CF) delay for gas switch while predicting ascent.
+//  + Allow to abort MD2 calculation (have to restart next time).
 //
-// literature:
+// Literature:
 // B"uhlmann, Albert: Tauchmedizin; 4. Auflage;
 // Schr"oder, Kai & Reith, Steffen; 2000; S"attigungsvorg"ange beim Tauchen, das Modell ZH-L16, Funktionsweise von Tauchcomputern; http://www.achim-und-kai.de/kai/tausim/saett_faq
 // Morrison, Stuart; 2000; DIY DECOMPRESSION; http://www.lizardland.co.uk/DIYDeco.html
 // Balthasar, Steffen; Dekompressionstheorie I: Neo Haldane Modelle; http://www.txfreak.de/dekompressionstheorie_1.pdf
 // Baker, Erik C.; Clearing Up The Confusion About "Deep Stops"
 // Baker, Erik C.; Understanding M-values; http://www.txfreak.de/understanding_m-values.pdf
-
+//
+//
 
 // *********************
 // ** I N C L U D E S **
 // *********************
 #include <math.h>
- 
-#include "p2_definitions.h"
+
+// *************************
+// ** P R O T O T Y P E S **
+// *************************
+
+static void calc_hauptroutine(void);
+static void calc_tissue_2_secs(void);
+static void calc_tissue_1_min(void);
+static void calc_nullzeit(void);
+static void backup_sim_pres_tissue(void);
+static void restore_sim_pres_tissue(void);
+
+static void calc_without_deco(void);
+static void clear_tissue(void);
+static void calc_ascenttime(void);
+static void update_startvalues(void);
+static void clear_decoarray(void);
+static void update_decoarray(void);
+static void sim_tissue_1min(void);
+static void sim_tissue_10min(void);
+static void calc_gradient_factor(void);
+static void calc_wo_deco_step_1_min(void);
+
+static void calc_hauptroutine_data_input(void);
+static void calc_hauptroutine_update_tissues(void);
+static void calc_hauptroutine_calc_deco(void);
+static void calc_hauptroutine_calc_ascend_to_deco(void);
+
+static void calc_nextdecodepth_GF(void);
+static void copy_deco_table_GF(void);
+static void clear_internal_deco_table_GF(void);
+static void update_internal_deco_table_GF(void);
 
 // ***********************************************
 // ** V A R I A B L E S   D E F I N I T I O N S **
 // ***********************************************
 
+#include "p2_definitions.h"
 #include "../OSTC_code_c_part2/shared_definitions.h"
 
 //---- Bank 3 parameters -----------------------------------------------------
@@ -109,11 +148,9 @@ static unsigned char	temp_gtissue_no;
 static	unsigned int	temp_depth_last_deco;				// new in v.101
 
 static unsigned char	temp_depth_GF_low_meter;
-static unsigned char	temp_depth_GF_low_number;
 static unsigned char	internal_deco_pointer;
 
-static unsigned char	internal_deco_table[32];			//  0x2C8
-static float			temp_pres_deco_GF_low;
+static unsigned char	internal_deco_table[32];
 
 static char output[32];                 // used by the math routines
 
@@ -124,11 +161,7 @@ static float pres_tissue_vault[32];
 //---- Bank 5 parameters -----------------------------------------------------
 #pragma udata bank5=0x500
 
-static unsigned char	ci ; // don't move - used in _asm routines - if moved then modify movlb commands
-static unsigned char 	x;
-static unsigned int 	main_i_dummy;
-static unsigned int 	int_temp;
-static unsigned int 	int_temp2;
+static unsigned char	ci;
 static unsigned int 	int_temp_decostatus;
 static float 			pres_respiration;
 static float			pres_surface;
@@ -143,7 +176,6 @@ static float			temp_tissue;
 static float			temp_surface;
 static float			N2_ratio;
 static float			He_ratio;
-static float			temp_ratio;
 static float 			var_N2_a;
 static float 			var_N2_b;
 static float 			var_He_a;
@@ -154,13 +186,38 @@ static float  			var_N2_halftime;
 static float  			var_He_halftime;
 static float			pres_gtissue_limit;
 static float			temp_pres_gtissue_limit;
-static float			actual_ppO2;                // new in v.102
 
 static float            pres_diluent;               // new in v.101
 static float            deco_diluent;               // new in v.101
 static float            const_ppO2;                 // new in v.101
 static float            deco_ppO2_change;           // new in v.101
 static float            deco_ppO2;                  // new in v.101
+
+static float			calc_N2_ratio;			// new in v.101
+static float			calc_He_ratio;			// new in v.101
+static float			CNS_fraction;			// new in v.101
+static float			float_saturation_multiplier;		// new in v.101
+static float			float_desaturation_multiplier;		// new in v.101
+static float			float_deco_distance;	// new in v.101
+static char			    flag_in_divemode;		// new in v.108
+
+static float			deco_gas_change1;		// new in v.101
+static float			deco_gas_change2;		// new in v.109
+static float			deco_gas_change3;		// new in v.109
+static float			deco_gas_change4;		// new in v.109
+static float			deco_gas_change5;		// new in v.109
+
+static float			deco_N2_ratio1;			// new in v.101
+static float			deco_He_ratio1;			// new in v.101
+static float			deco_N2_ratio2;			// new in v.109
+static float			deco_N2_ratio3;			// new in v.109
+static float			deco_N2_ratio4;			// new in v.109
+static float			deco_N2_ratio5;			// new in v.109
+static float			deco_He_ratio2;			// new in v.109
+static float			deco_He_ratio3;			// new in v.109
+static float			deco_He_ratio4;			// new in v.109
+static float			deco_He_ratio5;			// new in v.109
+
 
 //---- Bank 6 parameters -----------------------------------------------------
 #pragma udata bank6=0x600
@@ -182,28 +239,12 @@ static char	  md_pi_subst[256];
 #define C_STACK md_pi_subst                     // Overlay C-code data stack here, too.
 
 //---- Bank 9 parameters -----------------------------------------------------
-#pragma udata bank9a=0x900
+#pragma udata bank9=0x900
 
 static char	  md_state[48];		        // DONT MOVE !! // has to be at the beginning of bank 9 for the asm code!!!
 
-static char            md_t;
-static char            md_buffer[16];
-static unsigned char   md_i;
-static char            md_j;
-static char            md_temp;
-static unsigned int	md_pointer;
-static float			deco_N2_ratio;			// new in v.101
-static float			deco_He_ratio;			// new in v.101
-static float			calc_N2_ratio;			// new in v.101
-static float			calc_He_ratio;			// new in v.101
-static float			deco_gas_change;		// new in v.101
-static float			CNS_fraction;			// new in v.101
-static float			float_saturation_multiplier;		// new in v.101
-static float			float_desaturation_multiplier;		// new in v.101
-static float			float_deco_distance;	// new in v.101
-
 // internal, dbg:
-static unsigned char	DBG_char_I_deco_model;	// new in v.108
+static unsigned char	DBG_char_I_deco_model;	// new in v.108.
 static unsigned char	DBG_char_I_depth_last_deco;			// new in v.108
 static float			DBG_pres_surface;		// new in v.108
 static float			DBG_GF_low;				// new in v.108
@@ -221,34 +262,21 @@ static float			DBG_deco_N2_ratio;		// new in v.108
 static float			DBG_deco_He_ratio;		// new in v.108
 static float			DBG_N2_ratio;			// new in v.108
 static float			DBG_He_ratio;			// new in v.108
-static char			    flag_in_divemode;		// new in v.108
-static	int 			int_dbg_i;				// new in v.108
-static unsigned int 	temp_DBS;
 
-static float			deco_gas_change2;		// new in v.109
-static float			deco_gas_change3;		// new in v.109
-static float			deco_gas_change4;		// new in v.109
-static float			deco_gas_change5;		// new in v.109
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+///////////////////////////// THE LOOKUP TABLES //////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//
+// End of PROM code is 17F00, So push tables on PROM top...
+//
+#pragma romdata buhlmann_tables = 0x017B00  // Needs to be in UPPER bank.
+#include "p2_tables.romdata" 		        // new table for deco_main_v.101 (var_N2_a modified)
 
-static float			deco_N2_ratio2;			// new in v.109
-static float			deco_N2_ratio3;			// new in v.109
-static float			deco_N2_ratio4;			// new in v.109
-static float			deco_N2_ratio5;			// new in v.109
-static float			deco_He_ratio2;			// new in v.109
-static float			deco_He_ratio3;			// new in v.109
-static float			deco_He_ratio4;			// new in v.109
-static float			deco_He_ratio5;			// new in v.109
-
-// ***********************
-// ***********************
-// ** THE LOOKUP TABLES **
-// ***********************
-// ***********************
-
-#pragma romdata buhlmann_tables = 0x010200  // Needs to be in UPPER bank.
-#include	"p2_tables.romdata" 		// new table for deco_main_v.101 (var_N2_a modified)
-
-#pragma romdata hash_tables = 0x010600  // Address fixed by ASM access...
+// Magic table to compute the MD2 HASH
+//
+#pragma romdata hash_tables = 0x017E00  // Address fixed by ASM access...
 rom const rom unsigned int md_pi[] =
 {
     0x292E, 0x43C9, 0xA2D8, 0x7C01, 0x3D36, 0x54A1, 0xECF0, 0x0613
@@ -269,21 +297,25 @@ rom const rom unsigned int md_pi[] =
   , 0x3144, 0x50B4, 0x8FED, 0x1F1A, 0xDB99, 0x8D33, 0x9F11, 0x8314
 };
 
-// *********************
-// *********************
-// ** THE SUBROUTINES **
-// *********************
-// *********************
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+////////////////////////////// THE SUBROUTINES ///////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//
 // all new in v.102
 // moved from 0x0D000 to 0x0C000 in v.108
 
 #pragma code p2_deco = 0x0C000
 
-// -------------------------------
-// DBS - debug on start of dive //
-// -------------------------------
-void create_dbs_set_dbg_and_ndl20mtr(void)
+//////////////////////////////////////////////////////////////////////////////
+// DBS - debug on start of dive
+//
+static void create_dbs_set_dbg_and_ndl20mtr(void)
 {
+    overlay char i;                     // Local loop index.
+
+    //---- Reset DEBUG bit fields --------------------------------------------
 	int_O_DBS_bitfield = 0;
 	int_O_DBS2_bitfield = 0;
 	if(int_O_DBG_pre_bitfield & DBG_RUN)
@@ -291,8 +323,11 @@ void create_dbs_set_dbg_and_ndl20mtr(void)
 	else
 		int_O_DBG_pre_bitfield = DBG_RUN;
 	int_O_DBG_post_bitfield = 0;
+	
+	//---- Set 20meters ND limit ---------------------------------------------
 	char_O_NDL_at_20mtr = 255;
 
+    //---- Copy all dive parameters ------------------------------------------
 	DBG_N2_ratio = N2_ratio;
 	DBG_He_ratio = He_ratio;
 	DBG_char_I_deco_model = char_I_deco_model;
@@ -303,19 +338,20 @@ void create_dbs_set_dbg_and_ndl20mtr(void)
 	DBG_const_ppO2 = const_ppO2;
 	DBG_deco_ppO2_change = deco_ppO2_change;
 	DBG_deco_ppO2 = deco_ppO2;
-	DBG_deco_N2_ratio = deco_N2_ratio;
-	DBG_deco_He_ratio = deco_He_ratio;
-	DBG_deco_gas_change = deco_gas_change;
+	DBG_deco_N2_ratio = deco_N2_ratio1;
+	DBG_deco_He_ratio = deco_He_ratio1;
+	DBG_deco_gas_change = deco_gas_change1;
 	DBG_float_saturation_multiplier = float_saturation_multiplier;
 	DBG_float_desaturation_multiplier = float_desaturation_multiplier;
 	DBG_float_deco_distance = float_deco_distance;
 
+    //---- Setup some error (?) conditions -----------------------------------
 	if(char_I_deco_model)
 		int_O_DBS_bitfield |= DBS_mode;
 	if(const_ppO2)
 		int_O_DBS_bitfield |= DBS_ppO2;
-	for(int_dbg_i = 16; int_dbg_i < 32; int_dbg_i++)
-		if(pres_tissue[int_dbg_i])
+	for(i = 16; i < 32; i++)
+		if(pres_tissue[i])
 			int_O_DBS_bitfield |= DBS_HE_sat;
 	if(deco_ppO2_change)
 		int_O_DBS_bitfield |= DBS_ppO2chg;
@@ -339,9 +375,9 @@ void create_dbs_set_dbg_and_ndl20mtr(void)
 		int_O_DBS_bitfield |= DBS_DIST2h;
 	if(char_I_depth_last_deco > 8)
 		int_O_DBS_bitfield |= DBS_LAST2h;
-	if(DBG_deco_gas_change && ((deco_N2_ratio + deco_He_ratio) > 0.95))
+	if(DBG_deco_gas_change && ((deco_N2_ratio1 + deco_He_ratio1) > 0.95))
 		int_O_DBS_bitfield |= DBS_DECOO2l;
-	if(DBG_deco_gas_change && ((deco_N2_ratio + deco_He_ratio) < 0.05))
+	if(DBG_deco_gas_change && ((deco_N2_ratio1 + deco_He_ratio1) < 0.05))
 		int_O_DBS_bitfield |= DBS_DECOO2h;
 	if(pres_respiration > 3.0)
 		int_O_DBS2_bitfield |= DBS2_PRES2h;
@@ -359,57 +395,70 @@ void create_dbs_set_dbg_and_ndl20mtr(void)
 		int_O_DBS2_bitfield |= DBS2_GFDneg;
 }
 
-// -------------------------------
-// DBG - set DBG to end_of_dive //
-// -------------------------------
-void set_dbg_end_of_dive(void)
+//////////////////////////////////////////////////////////////////////////////
+// DBG - set DBG to end_of_dive
+//
+static void set_dbg_end_of_dive(void)
 {
 	int_O_DBG_pre_bitfield &= (~DBG_RUN);
 	int_O_DBG_post_bitfield &= (~DBG_RUN);
 }
 
-// -------------------------------
-// DBG - NDL at first 20 m. hit //
-// -------------------------------
-void check_ndl(void)
+//////////////////////////////////////////////////////////////////////////////
+// DBG - NDL at first 20 m. hit
+//
+static void check_ndl(void)
 {
-	if((char_O_NDL_at_20mtr == -1) && (int_I_pres_respiration > 3000))
+	if( char_O_NDL_at_20mtr == 255      // Still in NDL mode ?
+	 && int_I_pres_respiration > 3000   // And we hit the 20m limit ?
+	)
 	{
-		char_O_NDL_at_20mtr = char_O_nullzeit;
-		if(char_O_NDL_at_20mtr == 255)
+		char_O_NDL_at_20mtr = char_O_nullzeit;  // change to max bottom time.
+		if( char_O_NDL_at_20mtr == 255)         // and avoid confusion.
 			char_O_NDL_at_20mtr == 254;
 	}
 }
 
-// -------------------------------
-// DBG - multi main during dive //
-// -------------------------------
-void check_dbg(static char is_post_check)
+//////////////////////////////////////////////////////////////////////////////
+// DBG - multi main during dive
+//
+static void check_dbg(static char is_post_check)
 {
-	temp_DBS = 0;
+	overlay unsigned int temp_DBS = 0;
+    overlay char i;                     // Local loop index.
+
 	if( (DBG_N2_ratio != N2_ratio) || (DBG_He_ratio != He_ratio) )
 		temp_DBS |= DBG_c_gas;
 	if(DBG_const_ppO2 != const_ppO2)
 		temp_DBS |= DBG_c_ppO2;
-	if((DBG_float_saturation_multiplier != float_saturation_multiplier) || (DBG_float_desaturation_multiplier != float_desaturation_multiplier))
+	if( DBG_float_saturation_multiplier != float_saturation_multiplier
+     || DBG_float_desaturation_multiplier != float_desaturation_multiplier
+    )
 		temp_DBS |= DBG_CdeSAT;
 	if(DBG_char_I_deco_model != char_I_deco_model)
 		temp_DBS |= DBG_C_MODE;
 	if(DBG_pres_surface != pres_surface)
 		temp_DBS |= DBG_C_SURF;
-	if((!DBS_HE_sat) && (!He_ratio))
-		for(int_dbg_i = 16; int_dbg_i < 32; int_dbg_i++)
-			if(pres_tissue[int_dbg_i])
+
+	if( !DBS_HE_sat && !He_ratio)
+		for(i = 16; i < 32; i++)
+			if(pres_tissue[i])
 				temp_DBS |= DBG_HEwoHE;
+
 	if(DBG_deco_ppO2 != deco_ppO2)
 		temp_DBS |= DBG_C_DPPO2;
-	if((DBG_deco_gas_change != deco_gas_change) || (DBG_deco_N2_ratio != deco_N2_ratio) || (DBG_deco_He_ratio != deco_He_ratio))
+
+	if( DBG_deco_gas_change != deco_gas_change1
+	 || DBG_deco_N2_ratio != deco_N2_ratio1
+	 || DBG_deco_He_ratio != deco_He_ratio1 )
 		temp_DBS |= DBG_C_DGAS;
+
 	if(DBG_float_deco_distance != float_deco_distance)
 		temp_DBS |= DBG_C_DIST;
 	if(DBG_char_I_depth_last_deco != char_I_depth_last_deco)
 		temp_DBS |= DBG_C_LAST;
-	if((DBG_GF_low != GF_low) || (DBG_GF_high != GF_high))
+	if( DBG_GF_low != GF_low
+	 || DBG_GF_high != GF_high )
 		temp_DBS |= DBG_C_GF;
 	if(pres_respiration > 13.0)
 		temp_DBS |= DBG_PHIGH;
@@ -421,34 +470,61 @@ void check_dbg(static char is_post_check)
 		int_O_DBG_pre_bitfield |= temp_DBS;
 }
 
-// -------------------------------
-// DBG - prior to calc. of dive //
-// -------------------------------
-void check_pre_dbg(void)
+//////////////////////////////////////////////////////////////////////////////
+// DBG - prior to calc. of dive
+//
+static void check_pre_dbg(void)
 {
 	check_dbg(0);
 }
 
-// -------------------------------
-// DBG - after decocalc of dive //
-// -------------------------------
-void check_post_dbg(void)
+//////////////////////////////////////////////////////////////////////////////
+// DBG - after decocalc of dive
+//
+static void check_post_dbg(void)
 {
 	check_dbg(1);
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// read buhlmann tables for compatriment ci
-// If mode == 0 : 2sec interval
-//            1 : 1 min interval
-//            2 : 10 min interval.
-// TODO: an assembleur version of the table reads...
-static void read_buhlmann_compartment(static char mode)
+//////////////////////////////////////////////////////////////////////////////
+///////////////////////  U T I L I T I E S   /////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+static int read_custom_function(static unsigned char cf)
 {
+    extern unsigned char hi, lo;
+    extern void getcustom15();
+    _asm
+        movff   cf,WREG
+        call    getcustom15,0
+        movff   lo,PRODL
+        movff   hi,PRODH
+    _endasm
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// read buhlmann tables for compatriment ci
+// If period == 0 : 2sec interval
+//              1 : 1 min interval
+//              2 : 10 min interval.
+static void read_buhlmann_coeffifients(static char period)
+{
+    // Note: we don't use far rom pointer, because the
+    //       24 bits is to complex, hence we have to set
+    //       the UPPER page ourself...
+    //       --> Set zero if tables are moved to lower pages !
+    _asm
+        movlw 1
+        movwf TBLPTRU,0
+    _endasm
+
     var_N2_a = buhlmann_a[ci];
     var_N2_b = buhlmann_b[ci];
-    var_He_a = buhlmann_a[ci + 16];
-    var_He_b = buhlmann_b[ci + 16];
+    var_He_a = (buhlmann_a+16)[ci];
+    var_He_b = (buhlmann_b+16)[ci];
+
     // Check reading consistency:
 	if(	(var_N2_a < 0.231)
 	 || (var_N2_a > 1.27)
@@ -460,13 +536,17 @@ static void read_buhlmann_compartment(static char mode)
 	 || (var_He_b > 0.927)
     )
         int_O_DBG_pre_bitfield |= DBG_ZH16ERR;
-
+        
     // Integration intervals.
-    switch(mode)
+    switch(period)
     {
+    case -1://---- no interval -----------------------------------------------
+        var_N2_e = var_He_e = 0.0;
+        break;
+
     case 0: //---- 2 sec -----------------------------------------------------
         var_N2_e = e2secs[ci];
-        var_He_e = e2secs[ci + 16];
+        var_He_e = (e2secs+16)[ci];
 
         // Check reading consistency:
     	if(	(var_N2_e < 0.0000363)
@@ -480,7 +560,7 @@ static void read_buhlmann_compartment(static char mode)
 
     case 1: //---- 1 min -----------------------------------------------------
         var_N2_e = e1min[ci];
-        var_He_e = e1min[ci + 16];
+        var_He_e = (e1min+16)[ci];
 
         // Check reading consistency:
     	if(	(var_N2_e < 1.09E-3)
@@ -494,7 +574,7 @@ static void read_buhlmann_compartment(static char mode)
 
     case 2: //---- 10 min ----------------------------------------------------
         var_N2_e = e10min[ci];
-        var_He_e = e10min[ci + 16];
+        var_He_e = (e10min+16)[ci];
 
         // Check reading consistency:
     	if(	(var_N2_e < 0.01085)
@@ -509,53 +589,57 @@ static void read_buhlmann_compartment(static char mode)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// calc_next_decodepth_GF //
+// calc_next_decodepth_GF
 //
 // new in v.102
 //
-void calc_nextdecodepth_GF(void)
-{
 // INPUT, changing during dive:
-// temp_pres_gtissue_limit_GF_low
-// temp_pres_gtissue_limit_GF_low_below_surface
-// temp_pres_gtissue
-// temp_pres_gtissue_diff
-// lock_GF_depth_list
-
+//      temp_pres_gtissue_limit_GF_low
+//      temp_pres_gtissue_limit_GF_low_below_surface
+//      temp_pres_gtissue
+//      temp_pres_gtissue_diff
+//      lock_GF_depth_list
+//
 // INPUT, fixed during dive:
-// pres_surface
-// GF_delta
-// GF_high
-// GF_low
-// temp_depth_last_deco
-// float_deco_distance
-
+//      pres_surface
+//      GF_delta
+//      GF_high
+//      GF_low
+//      temp_depth_last_deco
+//      float_deco_distance
+//
 // OUTPUT
-// GF_step
-// temp_deco
-// temp_depth_limt
-// lock_GF_depth_list
-
-// USES
-// temp1
-// temp2
-// int_temp
+//      GF_step
+//      temp_deco
+//      temp_depth_limt
+//      lock_GF_depth_list
+//
+static void calc_nextdecodepth_GF(void)
+{
 
 	char_I_table_deco_done[0] = 0; // safety if changed somewhere else. Needed for exit
+	
+	//---- ZH-L16 + Gradient factor model ------------------------------------
 	if (char_I_deco_model == 1)
 	{
+        overlay float next_stop;            // Next stop to test, in Bar.
+        overlay float press_tol;            // Upper limit (lower pressure) tolerated.
+        overlay int   int_temp;
+        overlay unsigned char temp_depth_GF_low_number;
+        overlay float temp_pres_deco_GF_low;
+
 		if (lock_GF_depth_list == 0)
 		{
-			temp2 =  temp_pres_gtissue_limit_GF_low_below_surface / 0.29985; 					// = ... / 99.95 / 0.003;
- 			int_temp = (int) (temp2 + 0.99);
+			next_stop =  temp_pres_gtissue_limit_GF_low_below_surface / 0.29985; 					// = ... / 99.95 / 0.003;
+ 			int_temp = (int) (next_stop + 0.99);
 			if (int_temp > 31)
 				int_temp = 31;						//	deepest deco at 93 meter (31 deco stops)
 			if (int_temp < 0)
 				int_temp = 0;
 			temp_depth_GF_low_number = int_temp;
  			temp_depth_GF_low_meter = 3 * temp_depth_GF_low_number;
-			temp2 = (float)temp_depth_GF_low_meter * 0.09995;
-			temp_pres_deco_GF_low = temp2 + float_deco_distance + pres_surface;
+			next_stop = (float)temp_depth_GF_low_meter * 0.09995;
+			temp_pres_deco_GF_low = next_stop + float_deco_distance + pres_surface;
 			if (temp_depth_GF_low_number == 0)
 				GF_step = 0;
 			else
@@ -588,23 +672,23 @@ void calc_nextdecodepth_GF(void)
 			int_temp = internal_deco_pointer - 1;
 			if (int_temp == 1)								// new in v104
 			{
-				temp2 = (float)(temp_depth_last_deco * int_temp) * 0.09995;
+				next_stop = (float)(temp_depth_last_deco * int_temp) * 0.09995;
 				GF_step2 = GF_step/3.0 * ((float)(6 - temp_depth_last_deco));
 			}
 			else
 			if (int_temp == 0)
 			{
-				temp2 = 0.0;
+				next_stop = 0.0;
 				GF_step2 = GF_high - GF_temp;
 			}
 			else
 			{
-				temp2 = (float)(3 *int_temp) * 0.09995;
+				next_stop = (float)(3 *int_temp) * 0.09995;
 				GF_step2 = GF_step;
 			}
-			temp2 = temp2 + pres_surface; // next deco stop to be tested
-			temp1 = ((GF_temp + GF_step2)* temp_pres_gtissue_diff) + temp_pres_gtissue;	// upper limit (lowest pressure allowed) // changes GF_step2 in v104
-			if (temp1 > temp2) // check if ascent to next deco stop is ok
+			next_stop = next_stop + pres_surface; // next deco stop to be tested
+			press_tol = ((GF_temp + GF_step2)* temp_pres_gtissue_diff) + temp_pres_gtissue;	// upper limit (lowest pressure allowed) // changes GF_step2 in v104
+			if (press_tol > next_stop) // check if ascent to next deco stop is ok
 			{
 				int_temp = 0;	// no
 			}
@@ -615,10 +699,11 @@ void calc_nextdecodepth_GF(void)
 				int_temp = char_I_table_deco_done[internal_deco_pointer]; // yes and check for ascent to even next stop if deco_done is set
 			}
 		} // while
+
 		if (internal_deco_pointer > 0)
 		{
-			temp2 = (float)(0.29985 * internal_deco_pointer);
-			temp_deco = temp2 + float_deco_distance + pres_surface;
+			next_stop = 0.29985 * internal_deco_pointer;
+			temp_deco = next_stop + float_deco_distance + pres_surface;
 			if (internal_deco_pointer == 1)						// new in v104
 				temp_depth_limit = temp_depth_last_deco;
 			else
@@ -638,99 +723,105 @@ void calc_nextdecodepth_GF(void)
 			temp_depth_limit = 0;
 		}
 	}
-	else
+	else //---- ZH-L16 model -------------------------------------------------
 	{
 		// calc_nextdecodepth - original
 		// optimized in v.101
 		// depth_last_deco included in v.101
 
-		temp1 = temp_pres_gtissue_limit - pres_surface;
-		if (temp1 >= 0)
+		overlay float pres_gradient = temp_pres_gtissue_limit - pres_surface;
+		if (pres_gradient >= 0)
  		{
- 			temp1 = temp1 / 0.29985; 									// = temp1 / 99.95 / 0.003;
- 			temp_depth_limit = (int) (temp1 + 0.99);
- 			temp_depth_limit = 3 * temp_depth_limit; 					// depth for deco [m]
+ 			pres_gradient = pres_gradient / 0.29985; 	        // = pres_gradient / 99.95 / 0.003;
+ 			temp_depth_limit = (int) (pres_gradient + 0.99);
+ 			temp_depth_limit = 3 * temp_depth_limit;            // depth for deco [m]
  			if (temp_depth_limit == 0)
   				temp_deco = pres_surface;
  			else
   			{
   				if (temp_depth_limit < temp_depth_last_deco)
 					temp_depth_limit = temp_depth_last_deco;
-  				temp1 = (float)temp_depth_limit * 0.09995;
-  				temp_deco = temp1 + float_deco_distance + pres_surface; 	// depth for deco [bar]
+  				pres_gradient = (float)temp_depth_limit * 0.09995;
+  				temp_deco = pres_gradient + float_deco_distance + pres_surface;    // depth for deco [bar]
   			} // if (temp_depth_limit == 0)
- 		} // if (temp1 >= 0)
+ 		} // if (pres_gradient >= 0)
 		else
  		{
  			temp_deco = pres_surface;
  			temp_depth_limit = 0;
- 		} // if (temp1 >= 0)
+ 		} // if (pres_gradient >= 0)
 	} // calc_nextdecodepth original
-} // calc_nextdecodepth_GF
+}
 
-
-// ---------------------
-// copy_deco_table_GF //
-// ---------------------
+//////////////////////////////////////////////////////////////////////////////
+// copy_deco_table_GF
+//
 // new in v.102
-void copy_deco_table_GF(void)
+//
+static void copy_deco_table_GF(void)
+{
+    overlay unsigned char x;
+
+	if( char_I_deco_model == 1 )
+	{
+		for(x=0; x<32; x++)
+			char_O_deco_table[x] = internal_deco_table[x];
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// clear_internal_deco_table_GF
+//
+// new in v.102
+//
+static void clear_internal_deco_table_GF(void)
 {
 	if (char_I_deco_model == 1)
 	{
-		for (ci=0;ci<32;ci++)
-			char_O_deco_table[ci] = internal_deco_table[ci];
+        overlay unsigned char x;
+
+		for(x=0;x<32;x++)  // cycle through the 16 tissues for N2 and He
+			internal_deco_table[x] = 0;
 	}
-}		// copy_deco_table_GF
+}
 
-
-// ------------------------------
-// clear_internal_deco_table_GF//
-// ------------------------------
+//////////////////////////////////////////////////////////////////////////////
+// update_internal_deco_table_GF
+//
 // new in v.102
-void clear_internal_deco_table_GF(void)
-{
-	if (char_I_deco_model == 1)
-	{
-		for (ci=0;ci<32;ci++)  // cycle through the 16 b"uhlmann tissues for Helium
-		{
-			internal_deco_table[ci] = 0;
-		}
-	}
-}	// clear_internal_deco_table_GF
-
-
-// --------------------------------
-// update_internal_deco_table_GF //
-// --------------------------------
-// new in v.102
-void update_internal_deco_table_GF(void)
+//
+// Add one minute to the current stop (if lower than 255).
+//
+static void update_internal_deco_table_GF(void)
 {
 	if ((char_I_deco_model == 1) && (internal_deco_table[internal_deco_pointer] < 255))
-		internal_deco_table[internal_deco_pointer] = internal_deco_table[internal_deco_pointer] + 1;
-}	// update_internal_deco_table_GF
+		internal_deco_table[internal_deco_pointer]++;
+}
 
-
-// ---------------------
+//////////////////////////////////////////////////////////////////////////////
 // temp_tissue_safety //
-// ---------------------
+//
 // outsourced in v.102
-void temp_tissue_safety(void)
+//
+// Apply safety factors for brand ZH-L16 model.
+//
+static void temp_tissue_safety(void)
 {
-	if (char_I_deco_model != 1)
+	if( char_I_deco_model == 0 )
 	{
 		if (temp_tissue < 0.0)
 			temp_tissue *= float_desaturation_multiplier;
  		else
 			temp_tissue *= float_saturation_multiplier;
 	}
-} // temp_tissue_safety
+}
 
-// **********************
-// **********************
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 // ** THE JUMP-IN CODE **
 // ** for the asm code **
-// **********************
-// **********************
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 void fillDataStack(void)
 {
@@ -743,11 +834,10 @@ loop:   MOVWF   POSTINC1,0
 
         LFSR    1,C_STACK
         LFSR    2,C_STACK
-        MOVLW   1
-        MOVWF   TBLPTRU,0
     _endasm
 }
 
+//////////////////////////////////////////////////////////////////////////////
 // When calling C code from ASM context, the data stack pointer and
 // frames should be reset. Bank3 is dedicated to the stack (see the
 // .lkr script).
@@ -758,10 +848,10 @@ loop:   MOVWF   POSTINC1,0
     _asm                    \
         LFSR    1, C_STACK  \
         LFSR    2, C_STACK  \
-        MOVLW   1           \
-        MOVWF   TBLPTRU,0   \
     _endasm
 #endif
+
+//////////////////////////////////////////////////////////////////////////////
 
 void deco_calc_hauptroutine(void)
 {
@@ -770,6 +860,8 @@ void deco_calc_hauptroutine(void)
     int_O_desaturation_time = 65535;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 void deco_calc_without_deco(void)
 {
     RESET_C_STACK
@@ -777,12 +869,16 @@ void deco_calc_without_deco(void)
     deco_calc_desaturation_time();
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 void deco_clear_tissue(void)
 {
     RESET_C_STACK
     clear_tissue();
     char_I_depth_last_deco	= 0;		// for compatibility with v.101pre_no_last_deco
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 void deco_calc_wo_deco_step_1_min(void)
 {
@@ -792,20 +888,22 @@ void deco_calc_wo_deco_step_1_min(void)
     deco_calc_desaturation_time();
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 void deco_debug(void)
 {
     RESET_C_STACK
-//  debug();
 }
 
-// ---------------
-// CLEAR tissue //
-// ---------------
+//////////////////////////////////////////////////////////////////////////////
+// clear_tissue
+//
 // optimized in v.101 (var_N2_a)
+//
+// preload tissues with standard pressure for the given ambient pressure.
+// Note: fixed N2_ratio for standard air.
 
-#pragma code p2_deco_suite = 0x10700
-
-void clear_tissue(void)    // preload tissues with standard pressure for the given ambient pressure
+static void clear_tissue(void)
 {
 	flag_in_divemode = 0;
 	int_O_DBS_bitfield = 0;
@@ -814,21 +912,17 @@ void clear_tissue(void)    // preload tissues with standard pressure for the giv
 	int_O_DBG_post_bitfield = 0;
 	char_O_NDL_at_20mtr = 255;
 
-    // N2_ratio = (float)char_I_N2_ratio; // the 0.0002 of 0.7902 are missing with standard air
-    N2_ratio = 0.7902; // N2_ratio / 100.0;
+    // Kludge: the 0.0002 of 0.7902 are missing with standard air.
+    N2_ratio = 0.7902;
     pres_respiration = (float)int_I_pres_respiration / 1000.0;
     
-    _asm
-        movlw 1
-        movwf TBLPTRU,0
-    _endasm
-    for(ci=0;ci<16;ci++)
+    for(ci=0; ci<16; ci++)
     {
         // cycle through the 16 b"uhlmann tissues
         overlay float p = N2_ratio * (pres_respiration -  0.0627);
         pres_tissue[ci] = p;
         
-        read_buhlmann_compartment(0);
+        read_buhlmann_coeffifients(-1);
 
         p = (p - var_N2_a) * var_N2_b ;
         if( p < 0.0 )
@@ -836,7 +930,7 @@ void clear_tissue(void)    // preload tissues with standard pressure for the giv
         pres_tissue_limit[ci] = p;
 
         // cycle through the 16 b"uhlmann tissues for Helium
-        pres_tissue[ci+16] = 0.0;
+        (pres_tissue+16)[ci] = 0.0;
     } // for 0 to 16
 
     clear_decoarray();
@@ -845,18 +939,18 @@ void clear_tissue(void)    // preload tissues with standard pressure for the giv
     char_O_ascenttime = 0;
     char_O_gradient_factor = 0;
     char_O_relative_gradient_GF = 0;
-} // clear_tissue(void)
+}
 
-
-// --------------------
-// calc_without_deco //
-// fixed N2_ratio !  //
-// --------------------
+//////////////////////////////////////////////////////////////////////////////
+// calc_without_deco
+//
 // optimized in v.101 (float_..saturation_multiplier)
+//
+// Note: fixed N2_ratio for standard air.
 
-void calc_without_deco(void)
+static void calc_without_deco(void)
 {
-    N2_ratio = 0.7902; // FIXED RATIO !! sum as stated in b"uhlmann
+    N2_ratio = 0.7902; // Sum as stated in b"uhlmann
     pres_respiration = (float)int_I_pres_respiration / 1000.0; // assembler code uses different digit system
     pres_surface = (float)int_I_pres_surface / 1000.0;
     temp_atem = N2_ratio * (pres_respiration - 0.0627); // 0.0627 is the extra pressure in the body
@@ -865,26 +959,24 @@ void calc_without_deco(void)
     float_desaturation_multiplier = char_I_desaturation_multiplier / 100.0;
     float_saturation_multiplier = char_I_saturation_multiplier / 100.0;
     
-    calc_tissue();  // update the pressure in the 16 tissues in accordance with the new ambient pressure
+    calc_tissue_2_secs();  // update the pressure in the 32 tissues in accordance with the new ambient pressure
     
     clear_decoarray();
     char_O_deco_status = 0;
     char_O_nullzeit = 0;
     char_O_ascenttime = 0;
     calc_gradient_factor();
-} // calc_without_deco
+}
 
-
-// --------------------
-// calc_hauptroutine //
-// --------------------
-// this is the major code in dive mode
-// calculates:
+//////////////////////////////////////////////////////////////////////////////
+// calc_hauptroutine
+//
+// this is the major code in dive mode calculates:
 // 		the tissues,
-//		the bottom time
-//		and simulates the ascend with all deco stops
+//		the bottom time,
+//		and simulates the ascend with all deco stops.
 
-void calc_hauptroutine(void)
+static void calc_hauptroutine(void)
 {
 	calc_hauptroutine_data_input();
 
@@ -899,69 +991,78 @@ void calc_hauptroutine(void)
 	calc_hauptroutine_update_tissues();
 	calc_gradient_factor();
 
-
-	switch (char_O_deco_status)	// toggle between calculation for nullzeit (bottom time), deco stops and more deco stops (continue)
+    // toggle between calculation for nullzeit (bottom time), 
+    //                deco stops 
+    //                and more deco stops (continue)
+	switch( char_O_deco_status )
 	{
- 		case 0:
-			update_startvalues();
-			calc_nullzeit();
-			check_ndl();
-			char_O_deco_status = 255; // calc deco next time
-			break;
-		case 1:
-			if (char_O_deco_status == 3)
-				break;
-			char_O_deco_status = 0;
-			calc_hauptroutine_calc_deco();
-			break;
-		case 3:				// new dive
-			clear_decoarray();
-			clear_internal_deco_table_GF();
-			copy_deco_table_GF();
-			internal_deco_pointer = 0;
-			lock_GF_depth_list = 0;
-			update_startvalues();
-			calc_nextdecodepth_GF();
-			char_O_deco_status = 0;
-			break;
-		default:
-			update_startvalues();
-			clear_decoarray();
-			clear_internal_deco_table_GF();
-			output[6] = 1;
-			calc_hauptroutine_calc_ascend_to_deco();
- 			if (char_O_deco_status > 15)		// can't go up to first deco, too deep to calculate in the given time slot
-			{
-				char_O_deco_status = 2;
-			}
- 			else
-			{
-				calc_hauptroutine_calc_deco();
-			}
-			break;
+    case 0: //---- bottom time -----------------------------------------------
+    	update_startvalues();
+    	calc_nullzeit();
+    	check_ndl();
+    	char_O_deco_status = 255; // calc deco next time
+    	break;
+    
+    case 1: //---- ???? ------------------------------------------------------
+    	char_O_deco_status = 0;
+    	calc_hauptroutine_calc_deco();
+    	break;
+    
+    case 3: //---- new dive --------------------------------------------------
+    	clear_decoarray();
+    	clear_internal_deco_table_GF();
+    	copy_deco_table_GF();
+    	internal_deco_pointer = 0;
+    	lock_GF_depth_list = 0;
+    	update_startvalues();
+    	calc_nextdecodepth_GF();
+    	char_O_deco_status = 0;
+    	break;
+    
+    default: //---- Continue stops calculation -------------------------------
+    	update_startvalues();
+    	clear_decoarray();
+    	clear_internal_deco_table_GF();
+    	output[6] = 1;
+    	calc_hauptroutine_calc_ascend_to_deco();
+    	
+    	// can't go up to first deco, too deep to calculate in the given time slot
+        if (char_O_deco_status > 15)		
+    		char_O_deco_status = 2;
+        else
+    		calc_hauptroutine_calc_deco();
+    	break;
 	}
+
 	calc_ascenttime();
 	check_post_dbg();
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// calc_hauptroutine_data_input
+//
+// Reset all C-code dive parameters from their ASM-code values.
+// Detect gas change condition.
+//
 void calc_hauptroutine_data_input(void)
 {
-    pres_respiration = (float)int_I_pres_respiration / 1000.0;
-    pres_surface = (float)int_I_pres_surface / 1000.0;
+    overlay int int_temp;
     
-    N2_ratio = (float)char_I_N2_ratio / 100.0;; // the 0.0002 of 0.7902 are missing with standard air
-    He_ratio = (float)char_I_He_ratio / 100.0;;
-    deco_N2_ratio = (float)char_I_deco_N2_ratio / 100.0;
-    deco_He_ratio = (float)char_I_deco_He_ratio / 100.0;
-    deco_N2_ratio2 = (float)char_I_deco_N2_ratio2 / 100.0;
-    deco_He_ratio2 = (float)char_I_deco_He_ratio2 / 100.0;
-    deco_N2_ratio3 = (float)char_I_deco_N2_ratio3 / 100.0;
-    deco_He_ratio3 = (float)char_I_deco_He_ratio3 / 100.0;
-    deco_N2_ratio4 = (float)char_I_deco_N2_ratio4 / 100.0;
-    deco_He_ratio4 = (float)char_I_deco_He_ratio4 / 100.0;
-    deco_N2_ratio5 = (float)char_I_deco_N2_ratio5 / 100.0;
-    deco_He_ratio5 = (float)char_I_deco_He_ratio5 / 100.0;
-    float_deco_distance = (float)char_I_deco_distance / 100.0;
+    pres_respiration    = int_I_pres_respiration / 1000.0;
+    pres_surface        = int_I_pres_surface / 1000.0;
+    N2_ratio            = char_I_N2_ratio / 100.0;
+    He_ratio            = char_I_He_ratio / 100.0;
+    deco_N2_ratio1      = char_I_deco_N2_ratio1 / 100.0;
+    deco_He_ratio1      = char_I_deco_He_ratio1 / 100.0;
+    deco_N2_ratio2      = char_I_deco_N2_ratio2 / 100.0;
+    deco_He_ratio2      = char_I_deco_He_ratio2 / 100.0;
+    deco_N2_ratio3      = char_I_deco_N2_ratio3 / 100.0;
+    deco_He_ratio3      = char_I_deco_He_ratio3 / 100.0;
+    deco_N2_ratio4      = char_I_deco_N2_ratio4 / 100.0;
+    deco_He_ratio4      = char_I_deco_He_ratio4 / 100.0;
+    deco_N2_ratio5      = char_I_deco_N2_ratio5 / 100.0;
+    deco_He_ratio5      = char_I_deco_He_ratio5 / 100.0;
+    float_deco_distance = char_I_deco_distance / 100.0;
 
     // ____________________________________________________
     //
@@ -970,24 +1071,24 @@ void calc_hauptroutine_data_input(void)
     
     int_temp = (int_I_pres_respiration - int_I_pres_surface) + MBAR_REACH_GASCHANGE_AUTO_CHANGE_OFF;
     
-    deco_gas_change = 0;
+    deco_gas_change1 = 0;
     deco_gas_change2 = 0;
     deco_gas_change3 = 0;
     deco_gas_change4 = 0;
     deco_gas_change5 = 0;
 
-    if(char_I_deco_gas_change)
+    if(char_I_deco_gas_change1)
     {
-        int_temp2 = ((int)char_I_deco_gas_change) * 100;
+        overlay int int_temp2 = ((int)char_I_deco_gas_change1) * 100;
         if(int_temp > int_temp2)
         {
-        	deco_gas_change = (float)char_I_deco_gas_change / 9.995 + pres_surface;
-        	deco_gas_change += float_deco_distance;
+        	deco_gas_change1 = (float)char_I_deco_gas_change1 / 9.995 + pres_surface;
+        	deco_gas_change1 += float_deco_distance;
     	}
     }
     if(char_I_deco_gas_change2)
     {
-        int_temp2 = ((int)char_I_deco_gas_change2) * 100;
+        overlay int int_temp2 = ((int)char_I_deco_gas_change2) * 100;
         if(int_temp > int_temp2)
         {
         	deco_gas_change2 = (float)char_I_deco_gas_change2 / 9.995 + pres_surface;
@@ -996,7 +1097,7 @@ void calc_hauptroutine_data_input(void)
     }
     if(char_I_deco_gas_change3)
     {
-        int_temp2 = ((int)char_I_deco_gas_change3) * 100;
+        overlay int int_temp2 = ((int)char_I_deco_gas_change3) * 100;
         if(int_temp > int_temp2)
         {
         	deco_gas_change3 = (float)char_I_deco_gas_change3 / 9.995 + pres_surface;
@@ -1005,7 +1106,7 @@ void calc_hauptroutine_data_input(void)
     }
     if(char_I_deco_gas_change4)
     {
-        int_temp2 = ((int)char_I_deco_gas_change4) * 100;
+        overlay int int_temp2 = ((int)char_I_deco_gas_change4) * 100;
         if(int_temp > int_temp2)
         {
         	deco_gas_change4 = (float)char_I_deco_gas_change4 / 9.995 + pres_surface;
@@ -1014,7 +1115,7 @@ void calc_hauptroutine_data_input(void)
     }
     if(char_I_deco_gas_change5)
     {
-        int_temp2 = ((int)char_I_deco_gas_change5) * 100;
+        overlay int int_temp2 = ((int)char_I_deco_gas_change5) * 100;
         if(int_temp > int_temp2)
         {
         	deco_gas_change5 = (float)char_I_deco_gas_change5 / 9.995 + pres_surface;
@@ -1043,33 +1144,35 @@ void calc_hauptroutine_data_input(void)
     temp_depth_last_deco = (int)char_I_depth_last_deco;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 void calc_hauptroutine_update_tissues(void)
 {
 	int_O_calc_tissue_call_counter = int_O_calc_tissue_call_counter + 1;
- 	if (char_I_const_ppO2 == 0)																// new in v.101
-  		pres_diluent = pres_respiration;															// new in v.101
- 	else																						// new in v.101
-  		pres_diluent = ((pres_respiration - const_ppO2)/(N2_ratio + He_ratio));					// new in v.101
- 	if (pres_diluent > pres_respiration)														// new in v.101
-  		pres_diluent = pres_respiration;															// new in v.101
- 	if (pres_diluent > 0.0627)																	// new in v.101
+ 	if (char_I_const_ppO2 == 0)													// new in v.101
+  		pres_diluent = pres_respiration;										// new in v.101
+ 	else																		// new in v.101
+  		pres_diluent = ((pres_respiration - const_ppO2)/(N2_ratio + He_ratio));	// new in v.101
+ 	if (pres_diluent > pres_respiration)										// new in v.101
+  		pres_diluent = pres_respiration;										// new in v.101
+ 	if (pres_diluent > 0.0627)													// new in v.101
  	{
- 		temp_atem = N2_ratio * (pres_diluent - 0.0627);											// changed in v.101
- 		temp2_atem = He_ratio * (pres_diluent - 0.0627);											// changed in v.101
+ 		temp_atem = N2_ratio * (pres_diluent - 0.0627);							// changed in v.101
+ 		temp2_atem = He_ratio * (pres_diluent - 0.0627);						// changed in v.101
  		char_O_diluent = (char)(pres_diluent/pres_respiration*100.0);
  	}
- 	else																						// new in v.101
+ 	else																		// new in v.101
  	{
- 		temp_atem = 0.0;																			// new in v.101
- 		temp2_atem = 0.0;																			// new in v.101
+ 		temp_atem = 0.0;														// new in v.101
+ 		temp2_atem = 0.0;														// new in v.101
  		char_O_diluent = 0;
  	}
  	temp_surface = pres_surface;
 
  	if(!char_I_step_is_1min)
- 		calc_tissue();
+ 		calc_tissue_2_secs();
  	else
- 		calc_tissue_step_1_min();
+ 		calc_tissue_1_min();
 
  	int_O_gtissue_limit = (int)(pres_tissue_limit[char_O_gtissue_no] * 1000);
 	int_O_gtissue_press = (int)((pres_tissue[char_O_gtissue_no] + pres_tissue[char_O_gtissue_no+16]) * 1000);
@@ -1088,6 +1191,8 @@ void calc_hauptroutine_update_tissues(void)
  	}
 } 		// calc_hauptroutine_update_tissues
 
+//////////////////////////////////////////////////////////////////////////////
+
 void calc_hauptroutine_calc_deco(void)
 {
  	do
@@ -1103,10 +1208,10 @@ void calc_hauptroutine_calc_deco(void)
 	 		{
      			deco_diluent = temp_deco;																// new in v.101
 
-  				if(deco_gas_change && (temp_deco < deco_gas_change))
+  				if(deco_gas_change1 && (temp_deco < deco_gas_change1))
  	 			{
-	 				calc_N2_ratio = deco_N2_ratio;
-	 				calc_He_ratio = deco_He_ratio;
+	 				calc_N2_ratio = deco_N2_ratio1;
+	 				calc_He_ratio = deco_He_ratio1;
 	 			}
   				if(deco_gas_change2 && (temp_deco < deco_gas_change2))
  	 			{
@@ -1165,6 +1270,7 @@ void calc_hauptroutine_calc_deco(void)
    		char_O_deco_status = 0;
 		}
 	} while (int_temp_decostatus == 1);
+
 	if (char_O_deco_status > 15)
 	{
    		char_O_deco_status = 1;
@@ -1175,6 +1281,8 @@ void calc_hauptroutine_calc_deco(void)
 		char_O_deco_status = 0;
   	}
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 void calc_hauptroutine_calc_ascend_to_deco(void)
 {
@@ -1203,10 +1311,10 @@ void calc_hauptroutine_calc_ascend_to_deco(void)
 			{
     			deco_diluent = temp_deco;															// new in v.101
 
-  				if(deco_gas_change && (temp_deco < deco_gas_change))
+  				if(deco_gas_change1 && (temp_deco < deco_gas_change1))
  	 			{
-	 				calc_N2_ratio = deco_N2_ratio;
-	 				calc_He_ratio = deco_He_ratio;
+	 				calc_N2_ratio = deco_N2_ratio1;
+	 				calc_He_ratio = deco_He_ratio1;
 	 			}
   				if(deco_gas_change2 && (temp_deco < deco_gas_change2))
  	 			{
@@ -1255,36 +1363,36 @@ void calc_hauptroutine_calc_ascend_to_deco(void)
     			int_temp_decostatus = 1;
    		}
 	} while (int_temp_decostatus == 1);
-}	// calc_hauptroutine_calc_ascend_to_deco
+}
 
-// --------------
-// calc_tissue //
-// --------------
+//////////////////////////////////////////////////////////////////////////////
+// calc_tissue
+//
 // optimized in v.101
-
-void calc_tissue(void)
+//
+static void calc_tissue(static unsigned char period)
 {
     char_O_gtissue_no = 255;
     pres_gtissue_limit = 0.0;
     
     for (ci=0;ci<16;ci++)
     {
-        read_buhlmann_compartment(0);   // 2 sec mode.
+        read_buhlmann_coeffifients(period);   // 2 sec or 1 min period.
 
         // N2
         temp_tissue = (temp_atem - pres_tissue[ci]) * var_N2_e;
         temp_tissue_safety();
-        pres_tissue[ci] = pres_tissue[ci] + temp_tissue;
+        pres_tissue[ci] += temp_tissue;
 
         // He
-        temp_tissue = (temp2_atem - pres_tissue[ci+16]) * var_He_e;
+        temp_tissue = (temp2_atem - (pres_tissue+16)[ci]) * var_He_e;
         temp_tissue_safety();
-        pres_tissue[ci+16] = pres_tissue[ci+16] + temp_tissue;
+        (pres_tissue+16)[ci] += temp_tissue;
 
-        temp_tissue = pres_tissue[ci] + pres_tissue[ci+16];
+        temp_tissue = pres_tissue[ci] + (pres_tissue+16)[ci];
 
-        var_N2_a = (var_N2_a * pres_tissue[ci] + var_He_a * pres_tissue[ci+16]) / temp_tissue;
-        var_N2_b = (var_N2_b * pres_tissue[ci] + var_He_b * pres_tissue[ci+16]) / temp_tissue;
+        var_N2_a = (var_N2_a * pres_tissue[ci] + var_He_a * (pres_tissue+16)[ci]) / temp_tissue;
+        var_N2_b = (var_N2_b * pres_tissue[ci] + var_He_b * (pres_tissue+16)[ci]) / temp_tissue;
         pres_tissue_limit[ci] = (temp_tissue - var_N2_a) * var_N2_b;
         if (pres_tissue_limit[ci] < 0)
             pres_tissue_limit[ci] = 0;
@@ -1294,85 +1402,103 @@ void calc_tissue(void)
             char_O_gtissue_no = ci;
         }//if
     } // for
-}//calc_tissue(void)
+}
 
-// ----------------
-// calc_nullzeit //
-// ----------------
-// calculates the remaining bottom time
-
-// unchanged in v.101
-
-void calc_nullzeit(void)
+//////////////////////////////////////////////////////////////////////////////
+// calc_tissue_2_secs
+//
+// optimized in v.101
+//
+static void calc_tissue_2_secs(void)
 {
+    calc_tissue(0);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// calc_tissue_1_min
+//
+// optimized in v.101
+//
+static void calc_tissue_1_min(void)
+{
+    calc_tissue(1);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// calc_nullzeit
+//
+// calculates the remaining bottom time
+//
+// unchanged in v.101
+//
+static void calc_nullzeit(void)
+{
+    overlay int loop;
+    
 	char_O_nullzeit = 0;
-	int_temp = 1;
- 	do
+	for(loop = 1; loop <= 17; loop++)
 	{
   		backup_sim_pres_tissue();
   		sim_tissue_10min();
   		char_O_nullzeit = char_O_nullzeit + 10;
-  		int_temp = int_temp + 1;
+
 		if (char_I_deco_model == 1)
 			temp1 = GF_high * temp_pres_gtissue_diff + temp_pres_gtissue;
 		else
 			temp1 = temp_pres_gtissue_limit;
 		if (temp1 > temp_surface)  // changed in v.102 , if guiding tissue can not be exposed to surface pressure immediately
-			int_temp = 255;
- 	} while (int_temp < 17);
- 	if (int_temp == 255)
+			loop = 255;
+ 	}
+
+ 	if (loop == 255)
  	{
   		restore_sim_pres_tissue();
   		char_O_nullzeit = char_O_nullzeit - 10;
- 	} //if int_temp == 255]
- 	int_temp = 1;
+ 	} //if loop == 255]
+
  	if (char_O_nullzeit < 60)
  	{
-  		do
+     	for(loop=1; loop <= 10; loop++)
 		{
    			sim_tissue_1min();
    			char_O_nullzeit = char_O_nullzeit + 1;
-   			int_temp = int_temp + 1;			// new in v.102a
-		if (char_I_deco_model == 1)
-			temp1 = GF_high * temp_pres_gtissue_diff + temp_pres_gtissue;
-		else
-			temp1 = temp_pres_gtissue_limit;
-		if (temp1 > temp_surface)  // changed in v.102 , if guiding tissue can not be exposed to surface pressure immediately
-			int_temp = 255;
-  		} while (int_temp < 10);
-  		if (int_temp == 255)
+    		if (char_I_deco_model == 1)
+    			temp1 = GF_high * temp_pres_gtissue_diff + temp_pres_gtissue;
+    		else
+    			temp1 = temp_pres_gtissue_limit;
+    		if (temp1 > temp_surface)  // changed in v.102 , if guiding tissue can not be exposed to surface pressure immediately
+    			loop = 255;
+  		}
+  		if (loop == 255)
    			char_O_nullzeit = char_O_nullzeit - 1;
  	} // if char_O_nullzeit < 60
 } //calc_nullzeit
 
-// -------------------------
-// backup_sim_pres_tissue //
-// -------------------------
+//////////////////////////////////////////////////////////////////////////////
+// backup_sim_pres_tissue
+//
 void backup_sim_pres_tissue(void)
 {
-    for (x = 0;x<16;x++)
-    {
-        sim_pres_tissue_backup[x] = sim_pres_tissue[x];
-        sim_pres_tissue_backup[x+16] = sim_pres_tissue[x+16];
-    }
-} // backup_sim
+    overlay unsigned char x;
 
-// --------------------------
-// restore_sim_pres_tissue //
-// --------------------------
+    for(x = 0; x<32; x++)
+        sim_pres_tissue_backup[x] = sim_pres_tissue[x];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// restore_sim_pres_tissue
+//
 void restore_sim_pres_tissue(void)
 {
-    for (x = 0;x<16;x++)
-    {
+    overlay unsigned char x;
+
+    for(x = 0; x<32; x++)
         sim_pres_tissue[x] = sim_pres_tissue_backup[x];
-        sim_pres_tissue[x+16] = sim_pres_tissue_backup[x+16];
-    }
-} // restore_sim
+}
 
-// ------------------
-// calc_ascenttime //
-// ------------------
-
+//////////////////////////////////////////////////////////////////////////////
+// calc_ascenttime
+//
 void calc_ascenttime(void)
 {
     if (pres_respiration > pres_surface)
@@ -1385,36 +1511,41 @@ void calc_ascenttime(void)
         case 1:
             break;
         default:
-            temp1 = pres_respiration - pres_surface + 0.6; // + 0.6 hence 1 minute ascent time from a depth of 4 meter on
-            if (temp1 < 0)
-                temp1 = 0;
-            if (temp1 > 255)
-                temp1 = 255;
-            char_O_ascenttime = (char)temp1;
-            
-            for(ci=0;ci<7;ci++)
             {
-                x = char_O_ascenttime + char_O_array_decotime[ci];
-                if (x < char_O_ascenttime)
-                    char_O_ascenttime = 255;
-                else
-                    char_O_ascenttime = x;
+                overlay unsigned char x;
+                overlay float ascent = pres_respiration - pres_surface + 0.6; // + 0.6 hence 1 minute ascent time from a depth of 4 meter on
+
+                if (ascent < 0.0)
+                    ascent = 0.0;
+                if (ascent > 255.0)
+                    ascent = 255.0;
+                char_O_ascenttime = (char)ascent;
+                
+                for(x=0; x<7; x++)
+                {
+                    overlay int int_ascent = (int)char_O_ascenttime + (int)char_O_array_decotime[x];
+                    if(int_ascent >= 255)
+                        char_O_ascenttime = 255;
+                    else
+                        char_O_ascenttime = int_ascent;
+                }
+                break;
             }
-            break;
         }
     }
     else
         char_O_ascenttime = 0;
-} // calc_ascenttime()
+}
 
-
-// ---------------------
-// update_startvalues //
-// ---------------------
+//////////////////////////////////////////////////////////////////////////////
+// update_startvalues
+//
 // updated in v.102
-
+//
 void update_startvalues(void)
 {
+    overlay unsigned char x;
+    
   	temp_pres_gtissue_limit = pres_gtissue_limit;
   	temp_pres_gtissue = pres_tissue[char_O_gtissue_no] + pres_tissue[char_O_gtissue_no+16];
   	temp_pres_gtissue_diff = temp_pres_gtissue_limit - temp_pres_gtissue;						// negative number
@@ -1430,37 +1561,41 @@ void update_startvalues(void)
    		sim_pres_tissue[x+16] = pres_tissue[x+16];
    		sim_pres_tissue_limit[x] = pres_tissue_limit[x];
   	}
-} // update_startvalues
+}
 
-
-// ------------------
-// sim_tissue_1min //
-// ------------------
+//////////////////////////////////////////////////////////////////////////////
+// sim_tissue_1min
+//
 // optimized in v.101
-
-void sim_tissue_1min(void)
+//
+// Function very simular to calc_tissue, but:
+//   + Use a 1min or 10min period.
+//   + Do it on sim_pres_tissue, instead of pres_tissue.
+//   + Update GF_low state for GF decompression model.
+//
+static void sim_tissue(static unsigned char period)
 {
     temp_pres_gtissue_limit = 0.0;
     temp_gtissue_no = 255;
-    
+
     for (ci=0;ci<16;ci++)
     {
-        read_buhlmann_compartment(1);       // 1 minute interval
+        read_buhlmann_coeffifients(period);  // 1 or 10 minute(s) interval
 
         // N2
         temp_tissue = (temp_atem - sim_pres_tissue[ci]) * var_N2_e;
         temp_tissue_safety();
-        sim_pres_tissue[ci] = sim_pres_tissue[ci] + temp_tissue;
+        sim_pres_tissue[ci] += temp_tissue;
         
         // He
-        temp_tissue = (temp2_atem - sim_pres_tissue[ci+16]) * var_He_e;
+        temp_tissue = (temp2_atem - (sim_pres_tissue+16)[ci]) * var_He_e;
         temp_tissue_safety();
-        sim_pres_tissue[ci+16] = sim_pres_tissue[ci+16] + temp_tissue;
+        (sim_pres_tissue+16)[ci] += temp_tissue;
         
         // pressure limit
-        temp_tissue = sim_pres_tissue[ci] + sim_pres_tissue[ci+16];
-        var_N2_a = (var_N2_a * sim_pres_tissue[ci] + var_He_a * sim_pres_tissue[ci+16]) / temp_tissue;
-        var_N2_b = (var_N2_b * sim_pres_tissue[ci] + var_He_b * sim_pres_tissue[ci+16]) / temp_tissue;
+        temp_tissue = sim_pres_tissue[ci] + (sim_pres_tissue+16)[ci];
+        var_N2_a = (var_N2_a * sim_pres_tissue[ci] + var_He_a * (sim_pres_tissue+16)[ci]) / temp_tissue;
+        var_N2_b = (var_N2_b * sim_pres_tissue[ci] + var_He_b * (sim_pres_tissue+16)[ci]) / temp_tissue;
         sim_pres_tissue_limit[ci] = (temp_tissue - var_N2_a) * var_N2_b;
         
         if (sim_pres_tissue_limit[ci] < 0)
@@ -1478,100 +1613,60 @@ void sim_tissue_1min(void)
     temp_pres_gtissue_limit_GF_low_below_surface = temp_pres_gtissue_limit_GF_low - pres_surface;
     if (temp_pres_gtissue_limit_GF_low_below_surface < 0)
         temp_pres_gtissue_limit_GF_low_below_surface = 0;
-} //sim_tissue_1min()
+}
 
-//--------------------
-// sim_tissue_10min //
-//--------------------
-
-// Attention!! uses var_N2_e und var_He_e to load 10min data !!!
-// is identical to sim_tissue_1min routine except for the different load of those variables
-
-// optimized in v.101
-
-void sim_tissue_10min(void)
+//////////////////////////////////////////////////////////////////////////////
+// sim_tissue_1min
+//
+static void sim_tissue_1min(void)
 {
-    temp_pres_gtissue_limit = 0.0;
-    temp_gtissue_no = 255;
-    
-    for (ci=0;ci<16;ci++)
-    {
-        read_buhlmann_compartment(2);       // 10 minute interval
+    sim_tissue(1);  // 1 minute period
+}
 
-        // N2
-        temp_tissue = (temp_atem - sim_pres_tissue[ci]) * var_N2_e;
-        temp_tissue_safety();
-        sim_pres_tissue[ci] = sim_pres_tissue[ci] + temp_tissue;
-        // He
-        temp_tissue = (temp2_atem - sim_pres_tissue[ci+16]) * var_He_e;
-        temp_tissue_safety();
-        sim_pres_tissue[ci+16] = sim_pres_tissue[ci+16] + temp_tissue;
+//////////////////////////////////////////////////////////////////////////////
+// sim_tissue_10min
+//
+static void sim_tissue_10min(void)
+{
+    sim_tissue(2);  // 10 minutes period
+}
         
-        // pressure limit
-        temp_tissue = sim_pres_tissue[ci] + sim_pres_tissue[ci+16];
-        var_N2_a = (var_N2_a * sim_pres_tissue[ci] + var_He_a * sim_pres_tissue[ci+16]) / temp_tissue;
-        var_N2_b = (var_N2_b * sim_pres_tissue[ci] + var_He_b * sim_pres_tissue[ci+16]) / temp_tissue;
-
-        sim_pres_tissue_limit[ci] = (temp_tissue - var_N2_a) * var_N2_b;
-        if (sim_pres_tissue_limit[ci] < 0)
-            sim_pres_tissue_limit[ci] = 0;
-        if (sim_pres_tissue_limit[ci] > temp_pres_gtissue_limit)
-        {
-            temp_pres_gtissue = temp_tissue;
-            temp_pres_gtissue_limit = sim_pres_tissue_limit[ci];
-            temp_gtissue_no = ci;
-        }
-    } // for
-
-  	temp_pres_gtissue_diff = temp_pres_gtissue_limit - temp_pres_gtissue;							// negative number
-	temp_pres_gtissue_limit_GF_low = GF_low * temp_pres_gtissue_diff + temp_pres_gtissue;
-  	temp_pres_gtissue_limit_GF_low_below_surface = temp_pres_gtissue_limit_GF_low - pres_surface;
-	if (temp_pres_gtissue_limit_GF_low_below_surface < 0)
-		temp_pres_gtissue_limit_GF_low_below_surface = 0;
-} //sim_tissue_10min()
-
-
-// ------------------
-// clear_decoarray //
-// ------------------
+//////////////////////////////////////////////////////////////////////////////
+// clear_decoarray
+//
 // unchanged in v.101
-
-void clear_decoarray(void)
+//
+static void clear_decoarray(void)
 {
-    char_O_array_decodepth[0] = 0;
-    char_O_array_decodepth[1] = 0;
-    char_O_array_decodepth[2] = 0;
-    char_O_array_decodepth[3] = 0;
-    char_O_array_decodepth[4] = 0;
-    char_O_array_decodepth[5] = 0;
-    char_O_array_decotime[0] = 0;
-    char_O_array_decotime[1] = 0;
-    char_O_array_decotime[2] = 0;
-    char_O_array_decotime[3] = 0;
-    char_O_array_decotime[4] = 0;
-    char_O_array_decotime[5] = 0;
+    overlay unsigned char x;
+
+    for(x=0; x<6; ++x)
+    {
+        char_O_array_decodepth[x] = 0;
+        char_O_array_decotime [x] = 0;
+    }
     char_O_array_decotime[6] = 0;
-} // clear_decoarray
+}
 
-
-// -------------------
-// update_decoarray //
-// -------------------
+//////////////////////////////////////////////////////////////////////////////
+// update_decoarray
+//
 // unchanged in v.101
-
-void update_decoarray()
+//
+static void update_decoarray()
 {
-	x = 0;
+    overlay int stop_time;
+	overlay unsigned char x = 0;
 	do
 	{
 		if (char_O_array_decodepth[x] == temp_depth_limit)
 		{
-			int_temp = char_O_array_decotime[x] + temp_decotime;
-			if (int_temp < 0)
-				int_temp = 0;
-			if (int_temp > 240)
-				int_temp = 240;
- 			char_O_array_decotime[x] = int_temp;
+			stop_time = char_O_array_decotime[x] + temp_decotime;
+			if (stop_time < 0)
+				stop_time = 0;
+			if (stop_time > 240)
+				stop_time = 240;
+ 			char_O_array_decotime[x] = stop_time;
 			x = 10; // exit
 		} // if
 		else
@@ -1582,11 +1677,11 @@ void update_decoarray()
    					char_O_array_decodepth[x] = 255;
   				else
    					char_O_array_decodepth[x] = (char)temp_depth_limit;
-  				int_temp = char_O_array_decotime[x] + temp_decotime;
-  				if (int_temp > 240)
+  				stop_time = char_O_array_decotime[x] + temp_decotime;
+  				if (stop_time > 240)
    					char_O_array_decotime[x] = 240;
   				else
-   					char_O_array_decotime[x] = (char)int_temp;
+   					char_O_array_decotime[x] = (char)stop_time;
   				x = 10; // exit
   			} // if
  			else
@@ -1595,22 +1690,21 @@ void update_decoarray()
 	} while (x<6);
 	if (x == 6)
  	{
- 		int_temp = char_O_array_decotime[6] + temp_decotime;
- 		if (int_temp > 220)
+ 		stop_time = char_O_array_decotime[6] + temp_decotime;
+ 		if (stop_time > 220)
   			char_O_array_decotime[6] = 220;
  		else
-  			char_O_array_decotime[6] = (char)int_temp;
+  			char_O_array_decotime[6] = (char)stop_time;
  	} // if x == 6
-} // update_decoarray
+}
 
-
-// -----------------------
-// calc_gradient_factor //
-// -----------------------
+//////////////////////////////////////////////////////////////////////////////
+// calc_gradient_factor
+//
 // optimized in v.101 (var_N2_a)
 // new code in v.102
-
-void calc_gradient_factor(void)
+//
+static void calc_gradient_factor(void)
 {
 	// tissue > respiration (entsaettigungsvorgang)
 	// gradient ist wieviel prozent an limit mit basis tissue
@@ -1656,16 +1750,18 @@ void calc_gradient_factor(void)
 	{
  			char_O_relative_gradient_GF = char_O_gradient_factor;
 	}
-} // calc_gradient
+}
 
-// ------------------------------
-// deco_calc_desaturation_time //
-// ------------------------------
+//////////////////////////////////////////////////////////////////////////////
+// deco_calc_desaturation_time
+//
 // FIXED N2_ratio
 // unchanged in v.101
-
+//
 void deco_calc_desaturation_time(void)
 {
+    overlay int desat_time;     // For a particular compartiment, in min.
+
     RESET_C_STACK
 
     N2_ratio = 0.7902; // FIXED sum as stated in b"uhlmann
@@ -1677,7 +1773,7 @@ void deco_calc_desaturation_time(void)
     for (ci=0;ci<16;ci++)
     {
         var_N2_halftime = buhlmann_ht[ci];
-        var_He_halftime = buhlmann_ht[ci + 16];
+        var_He_halftime = (buhlmann_ht+16)[ci];
 
         // saturation_time (for flight) and N2_saturation in multiples of halftime
         // version v.100: 1.1 = 10 percent distance to totally clean (totally clean is not possible, would take infinite time )
@@ -1709,14 +1805,14 @@ void deco_calc_desaturation_time(void)
         }
 
         // He
-        temp3 = 0.1 - pres_tissue[ci+16];
+        temp3 = 0.1 - (pres_tissue+16)[ci];
         if (temp3 >= 0.0)
         {
             temp3 = 0;
             temp4 = 0;
         }
         else
-            temp3 = -1.0 * temp3 / pres_tissue[ci+16];
+            temp3 = -1.0 * temp3 / (pres_tissue+16)[ci];
         if (temp3 > 0.0)
     	{
         	temp3 = log(1.0 - temp3);
@@ -1733,11 +1829,11 @@ void deco_calc_desaturation_time(void)
 
         // saturation_time (for flight)
         if (temp4 > temp2)
-            int_temp = (int)temp4;
+            desat_time = (int)temp4;
         else
-            int_temp = (int)temp2;
-         if(int_temp > int_O_desaturation_time)
-        	int_O_desaturation_time = int_temp;
+            desat_time = (int)temp2;
+         if(desat_time > int_O_desaturation_time)
+        	int_O_desaturation_time = desat_time;
 
         // N2 saturation in multiples of halftime for display purposes
         temp2 = temp1 * 20.0;  // 0 = 1/8, 120 = 0, 249 = 8
@@ -1754,19 +1850,18 @@ void deco_calc_desaturation_time(void)
             temp4 = 0.0;
         if (temp4 > 255.0)
             temp4 = 255.0;
-        char_O_tissue_saturation[ci+16] = (char)temp4;
+        (char_O_tissue_saturation+16)[ci] = (char)temp4;
     } // for
-} // deco_calc_desaturation_time
+}
 
-
-// --------------------------
-// calc_wo_deco_step_1_min //
-// --------------------------
+//////////////////////////////////////////////////////////////////////////////
+// calc_wo_deco_step_1_min
+//
 // FIXED N2 Ratio
 // optimized in v.101 (...saturation_multiplier)
 // desaturation slowed down to 70,42%
-
-void calc_wo_deco_step_1_min(void)
+//
+static void calc_wo_deco_step_1_min(void)
 {
 	if(flag_in_divemode)
 	{
@@ -1783,59 +1878,29 @@ void calc_wo_deco_step_1_min(void)
     float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
     float_saturation_multiplier = char_I_saturation_multiplier / 100.0;
     
-    calc_tissue_step_1_min();  // update the pressure in the 16 tissues in accordance with the new ambient pressure
+    calc_tissue_1_min();  // update the pressure in the 32 tissues in accordance with the new ambient pressure
+    
     clear_decoarray();
     char_O_deco_status = 0;
     char_O_nullzeit = 0;
     char_O_ascenttime = 0;
     calc_gradient_factor();
+}
 
-} // calc_wo_deco_step_1_min(void)
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+////////////////////////////////// deco_hash /////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
-
-// -------------------------
-// calc_tissue_step_1_min //
-// -------------------------
-// optimized in v.101
-
-void calc_tissue_step_1_min(void)
-{
-    char_O_gtissue_no = 255;
-    pres_gtissue_limit = 0.0;
-    
-    for (ci=0;ci<16;ci++)
-    {
-        read_buhlmann_compartment(1);       // 1 minute interval
-
-        // N2 1 min
-        temp_tissue = (temp_atem - pres_tissue[ci]) * var_N2_e;
-        temp_tissue_safety();
-        pres_tissue[ci] = pres_tissue[ci] + temp_tissue;
-
-        // He 1 min
-        temp_tissue = (temp2_atem - pres_tissue[ci+16]) * var_He_e;
-        temp_tissue_safety();
-        pres_tissue[ci+16] = pres_tissue[ci+16] + temp_tissue;
-
-        temp_tissue = pres_tissue[ci] + pres_tissue[ci+16];
-        var_N2_a = (var_N2_a * pres_tissue[ci] + var_He_a * pres_tissue[ci+16]) / temp_tissue;
-        var_N2_b = (var_N2_b * pres_tissue[ci] + var_He_b * pres_tissue[ci+16]) / temp_tissue;
-        pres_tissue_limit[ci] = (temp_tissue - var_N2_a) * var_N2_b;
-        if (pres_tissue_limit[ci] < 0)
-            pres_tissue_limit[ci] = 0;
-        if (pres_tissue_limit[ci] > pres_gtissue_limit)
-        {
-            pres_gtissue_limit = pres_tissue_limit[ci];
-            char_O_gtissue_no = ci;
-        }//if
-    } // for
-} // calc wo deco 1min
-
-// ----------
-// deco_hash //
-// ----------
 void deco_hash(void)
 {
+    overlay unsigned char md_i, md_j;   // Loop index.
+    overlay unsigned char md_t;
+    overlay unsigned char md_buffer[16];
+    overlay unsigned char md_temp;
+    overlay unsigned int  md_pointer;
+
     RESET_C_STACK
     
     // init
@@ -1846,12 +1911,12 @@ void deco_hash(void)
     } // for md_i 16
 
     _asm
-    movlw	0x01            // md_pi address.
-    movwf	TBLPTRU,0
-    movlw	0x06
-    movwf	TBLPTRH,0
-    movlw	0x00
-    movwf	TBLPTRL,0
+        movlw	0x01            // md_pi address.
+        movwf	TBLPTRU,0
+        movlw	0x7E
+        movwf	TBLPTRH,0
+        movlw	0x00
+        movwf	TBLPTRL,0
     _endasm;
     md_i = 0;
     do {
@@ -1863,13 +1928,14 @@ void deco_hash(void)
     } while( md_i != 0 );
 
     _asm
-     movlw	0x00
-     movwf	TBLPTRU,0
-     movlw	0x00
-     movwf	TBLPTRH,0
-     movlw	0x00
-     movwf	TBLPTRL,0
+         movlw	0x00
+         movwf	TBLPTRU,0
+         movlw	0x00
+         movwf	TBLPTRH,0
+         movlw	0x00
+         movwf	TBLPTRL,0
     _endasm
+
     // cycle buffers
     for (md_pointer=0x0000;md_pointer<0x17f3;md_pointer++)
     {
@@ -1881,11 +1947,12 @@ void deco_hash(void)
             else
             {
                 _asm
-                TBLRDPOSTINC
-                movff	TABLAT,md_temp
+                    TBLRDPOSTINC
+                    movff	TABLAT,md_temp
                 _endasm
             } // else
-            md_buffer[md_i] = md_temp;
+
+            md_buffer[md_i]   = md_temp;
             md_state[md_i+16] = md_buffer[md_i];
             md_state[md_i+32] = (unsigned char)(md_buffer[md_i] ^ md_state[md_i]);
         } // for md_i 16
@@ -1894,7 +1961,7 @@ void deco_hash(void)
         {
             for (md_j=0;md_j<48;md_j++)
             {
-                md_state[md_j] = (unsigned char)(md_state[md_j] ^ md_pi_subst[md_t]);
+                md_state[md_j] ^= md_pi_subst[md_t];
                 md_t = md_state[md_j];
             } // for md_j 48
             md_t = (unsigned char)(md_t+1);
@@ -1903,39 +1970,40 @@ void deco_hash(void)
             
         for (md_i=0;md_i<16;md_i++)
         {
-            char_O_hash[md_i] = (unsigned char)(char_O_hash[md_i] ^ md_pi_subst[(md_buffer[md_i] ^ md_t)]);
+            char_O_hash[md_i] ^= md_pi_subst[(md_buffer[md_i] ^ md_t)];
             md_t = char_O_hash[md_i];
         } // for md_i 16
     } // for md_pointer
 } // void deco_hash(void)
 
-// ---------------------
-// deco_clear_CNS_fraction //
-// ---------------------
+//////////////////////////////////////////////////////////////////////////////
+// deco_clear_CNS_fraction
+//
 // new in v.101
-
+//
 void deco_clear_CNS_fraction(void)
 {
     RESET_C_STACK
     CNS_fraction = 0.0;
     char_O_CNS_fraction = 0;
-} // void deco_clear_CNS_fraction(void)
+}
 
-
-// -------------------------
-// deco_calc_CNS_fraction //
-// -------------------------
+//////////////////////////////////////////////////////////////////////////////
+// deco_calc_CNS_fraction
+//
 // new in v.101
 // optimized in v.102 : with new variables char_I_actual_ppO2 and actual_ppO2
-
+//
 // Input: char_I_actual_ppO2
 // Output: char_O_CNS_fraction
 // Uses and Updates: CNS_fraction
 // Uses: acutal_ppO2
-
+//
 void deco_calc_CNS_fraction(void)
 {
+    overlay float actual_ppO2;
     RESET_C_STACK
+
     actual_ppO2 = (float)char_I_actual_ppO2 / 100.0;
 
     if (char_I_actual_ppO2 < 50)
@@ -1981,31 +2049,30 @@ void deco_calc_CNS_fraction(void)
         CNS_fraction = 0.0;
 
     char_O_CNS_fraction = (char)((CNS_fraction + 0.005)* 100.0);
-} // void deco_calc_CNS_fraction(void)
+}
 
-// -------------------------------
-// deco_calc_CNS_decrease_15min //
-// -------------------------------
+//////////////////////////////////////////////////////////////////////////////
+// deco_calc_CNS_decrease_15min
+//
 // new in v.101
-
+//
 // calculates the half time of 90 minutes in 6 steps of 15 min
-
+//
 // Output: char_O_CNS_fraction
 // Uses and Updates: CNS_fraction
-
+//
 void deco_calc_CNS_decrease_15min(void)
 {
     RESET_C_STACK    
     CNS_fraction =  0.890899 * CNS_fraction;
-    char_O_CNS_fraction = (char)((CNS_fraction + 0.005)* 100.0);
-}// deco_calc_CNS_decrease_15min(void)
+    char_O_CNS_fraction = (char)(CNS_fraction * 100.0 + 0.5);
+}
 
-
-// -----------------------
-// deco_calc_percentage //
-// -----------------------
+//////////////////////////////////////////////////////////////////////////////
+// deco_calc_percentage
+//
 // new in v.101
-
+//
 // calculates int_I_temp * char_I_temp / 100
 // output is int_I_temp
 
@@ -2018,19 +2085,28 @@ void deco_calc_percentage(void)
     int_I_temp = (int)temp3;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 void deco_push_tissues_to_vault(void)
 {
+    overlay unsigned char x;
     RESET_C_STACK
+
 	cns_vault = CNS_fraction;
-	for (ci=0;ci<32;ci++)
-		pres_tissue_vault[ci] = pres_tissue[ci];
-}
-void deco_pull_tissues_from_vault(void)
-{
-    RESET_C_STACK
-	CNS_fraction = cns_vault;
-	for (ci=0;ci<32;ci++)
-		pres_tissue[ci] = pres_tissue_vault[ci];
+	for (x=0;x<32;x++)
+		pres_tissue_vault[x] = pres_tissue[x];
 }
 
+void deco_pull_tissues_from_vault(void)
+{
+    overlay unsigned char x;
+    RESET_C_STACK
+
+	CNS_fraction = cns_vault;
+	for (x=0;x<32;x++)
+		pres_tissue[x] = pres_tissue_vault[x];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//
 void main() {}

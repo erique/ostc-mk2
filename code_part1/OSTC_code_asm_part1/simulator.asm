@@ -159,8 +159,10 @@ simulator_show_decoplan:
         call	divemenu_see_decoplan
         
         ; Display TTS, if any...
-        movff   char_O_ascenttime,WREG
-        iorwf   WREG
+        movff   int_O_ascenttime+0,lo
+        movff   int_O_ascenttime+1,hi
+        movf    lo,W
+        iorwf   hi,W
         bz      simulator_decoplan_notts
 
         WIN_LEFT .0
@@ -168,9 +170,8 @@ simulator_show_decoplan:
         call    PLED_standard_color
         
         STRCPY  "TTS: "
-        movff   char_O_ascenttime,lo
         bcf		leftbind
-        output_8
+        output_16
         STRCAT_PRINT    "'"		
 simulator_decoplan_notts:
 

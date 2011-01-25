@@ -65,9 +65,9 @@
 // 12/25/10 v110: split in three files (deco.c, main.c, definitions.h)
 // 2011/01/20: [jDG] Create a common file included in ASM and C code.
 // 2011/01/23: [jDG] Added read_custom_function().
+//  + Make int_O_ascenttime an int.
 //
 // TODO:
-//  + Make char_O_ascenttime an int.
 //  + Fusion deco array for both models.
 //  + Allow (CF) revesring stop order (while copying).
 //  + Allow (CF) delay for gas switch while predicting ascent.
@@ -143,7 +143,6 @@ static float			temp_pres_gtissue_diff;
 static float			temp_pres_gtissue_limit_GF_low;
 static float			temp_pres_gtissue_limit_GF_low_below_surface;
 static	unsigned int	temp_depth_limit;
-static unsigned char	temp_decotime;
 static unsigned char	temp_gtissue_no;
 static	unsigned int	temp_depth_last_deco;				// new in v.101
 
@@ -936,7 +935,7 @@ static void clear_tissue(void)
     clear_decoarray();
     char_O_deco_status = 0;
     char_O_nullzeit = 0;
-    char_O_ascenttime = 0;
+    int_O_ascenttime = 0;
     char_O_gradient_factor = 0;
     char_O_relative_gradient_GF = 0;
 }
@@ -964,7 +963,7 @@ static void calc_without_deco(void)
     clear_decoarray();
     char_O_deco_status = 0;
     char_O_nullzeit = 0;
-    char_O_ascenttime = 0;
+    int_O_ascenttime = 0;
     calc_gradient_factor();
 }
 
@@ -1259,7 +1258,6 @@ void calc_hauptroutine_calc_deco(void)
     		}
    			sim_tissue_1min();
 			update_internal_deco_table_GF();
-   			temp_decotime = 1;
    			update_decoarray();
    			char_O_deco_status = char_O_deco_status + 1;
    			if (char_O_deco_status < 16)
@@ -1267,7 +1265,7 @@ void calc_hauptroutine_calc_deco(void)
    		}
   		else // if (temp_depth_limit > 0)
 		{
-   		char_O_deco_status = 0;
+   		    char_O_deco_status = 0;
 		}
 	} while (int_temp_decostatus == 1);
 
@@ -1339,12 +1337,12 @@ void calc_hauptroutine_calc_ascend_to_deco(void)
 			}
    			else																						// new in v.101
 			{
-					if (temp_deco > deco_ppO2_change)
-     					deco_diluent = ((temp_deco - const_ppO2)/(N2_ratio + He_ratio));	// new in v.101 // calculate at half of the ascent
-					else
-     					deco_diluent = ((temp_deco - deco_ppO2)/(N2_ratio + He_ratio));	// new in v.101 // calculate at half of the ascent
-    				if (deco_diluent > (temp_deco))															// new in v.101
-     					deco_diluent = temp_deco;															// new in v.101 // calculate at half of the ascent
+				if (temp_deco > deco_ppO2_change)
+ 					deco_diluent = ((temp_deco - const_ppO2)/(N2_ratio + He_ratio));	// new in v.101 // calculate at half of the ascent
+				else
+ 					deco_diluent = ((temp_deco - deco_ppO2)/(N2_ratio + He_ratio));	// new in v.101 // calculate at half of the ascent
+				if (deco_diluent > (temp_deco))															// new in v.101
+ 					deco_diluent = temp_deco;															// new in v.101 // calculate at half of the ascent
 			}
 	 		temp_deco -= 0.5;
    			if (deco_diluent > 0.0627)																// new in v.101
@@ -1506,35 +1504,37 @@ void calc_ascenttime(void)
         switch (char_O_deco_status)
         {
         case 2:
-            char_O_ascenttime = 255;
+            int_O_ascenttime = -1;
             break;
         case 1:
             break;
         default:
             {
-                overlay unsigned char x;
-                overlay float ascent = pres_respiration - pres_surface + 0.6; // + 0.6 hence 1 minute ascent time from a depth of 4 meter on
-
+                // + 0.6 to count 1 minute ascent time from 4 meter to surface
+                overlay float ascent = pres_respiration - pres_surface + 0.6; 
                 if (ascent < 0.0)
                     ascent = 0.0;
-                if (ascent > 255.0)
-                    ascent = 255.0;
-                char_O_ascenttime = (char)ascent;
-                
-                for(x=0; x<7; x++)
+                int_O_ascenttime = (unsigned int)ascent;
+
+                if( char_I_deco_model == 0 ) //---- ZH-L16 model 
                 {
-                    overlay int int_ascent = (int)char_O_ascenttime + (int)char_O_array_decotime[x];
-                    if(int_ascent >= 255)
-                        char_O_ascenttime = 255;
-                    else
-                        char_O_ascenttime = int_ascent;
+                    overlay unsigned char x;
+                    for(x=0; x<7; x++)
+                        int_O_ascenttime += (unsigned int)char_O_array_decotime[x];
                 }
+                else //---------------------------- ZH-L16-GF model
+                {
+                    overlay unsigned char x;
+                    for(x=0; x<32; x++)
+                        int_O_ascenttime += (unsigned int)internal_deco_table[x];
+                }
+
                 break;
             }
         }
     }
     else
-        char_O_ascenttime = 0;
+        int_O_ascenttime = 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1661,7 +1661,7 @@ static void update_decoarray()
 	{
 		if (char_O_array_decodepth[x] == temp_depth_limit)
 		{
-			stop_time = char_O_array_decotime[x] + temp_decotime;
+			stop_time = char_O_array_decotime[x] + 1;
 			if (stop_time < 0)
 				stop_time = 0;
 			if (stop_time > 240)
@@ -1677,7 +1677,7 @@ static void update_decoarray()
    					char_O_array_decodepth[x] = 255;
   				else
    					char_O_array_decodepth[x] = (char)temp_depth_limit;
-  				stop_time = char_O_array_decotime[x] + temp_decotime;
+  				stop_time = char_O_array_decotime[x] + 1;
   				if (stop_time > 240)
    					char_O_array_decotime[x] = 240;
   				else
@@ -1690,7 +1690,7 @@ static void update_decoarray()
 	} while (x<6);
 	if (x == 6)
  	{
- 		stop_time = char_O_array_decotime[6] + temp_decotime;
+ 		stop_time = char_O_array_decotime[6] + 1;
  		if (stop_time > 220)
   			char_O_array_decotime[6] = 220;
  		else
@@ -1883,7 +1883,7 @@ static void calc_wo_deco_step_1_min(void)
     clear_decoarray();
     char_O_deco_status = 0;
     char_O_nullzeit = 0;
-    char_O_ascenttime = 0;
+    int_O_ascenttime = 0;
     calc_gradient_factor();
 }
 

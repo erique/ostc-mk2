@@ -80,14 +80,14 @@ VAR_UINT  (int_O_gtissue_press);
 VAR_UINT  (int_O_limit_GF_low);
 VAR_UINT  (int_O_gtissue_press_at_GF_low);
 VAR_UINT  (int_O_calc_tissue_call_counter);
+VAR_UINT  (int_O_desaturation_time);       // 
+VAR_UINT  (int_O_ascenttime);              // TTS (in minutes)
 
 VAR_UCHAR (char_O_GF_low_pointer);
 VAR_UCHAR (char_O_actual_pointer);
 
-VAR_UINT  (int_O_desaturation_time);       // 
 VAR_UCHAR (char_O_nullzeit);               // 
 VAR_UCHAR (char_O_deco_status);            // 
-VAR_UCHAR (char_O_ascenttime);             // 
 VAR_UCHAR (char_O_gradient_factor);        // 
 VAR_UCHAR (char_O_gtissue_no);             // 
 VAR_UCHAR (char_O_diluent);                // new in v.101

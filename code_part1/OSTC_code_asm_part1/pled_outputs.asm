@@ -470,17 +470,16 @@ PLED_display_deko:
 	ostc_debug	'x'		; Sends debug-information to screen if debugmode active
 	
 	WIN_TOP		.136
-	WIN_LEFT	.119
+	WIN_LEFT	.140 - 6*7 - 4          ; let space for sign + 5 digits + '
 	WIN_FONT 	FT_MEDIUM
-	WIN_INVERT	.0					; Init new Wordprocessor
+	WIN_INVERT	.0					    ; Init new Wordprocessor
+
 	call	PLED_standard_color
 	lfsr	FSR2,letter
-	movff	char_O_ascenttime,lo		; complete ascend time
-	movlw	d'199'							; limit display of total ascend time to 99mins....
-	cpfslt	lo								; skip if 199 (WREG) > lo
-	movwf	lo
-	bcf		leftbind
-	output_8
+	movff	int_O_ascenttime+0,lo       ; complete ascend time
+	movff	int_O_ascenttime+1,hi       ; on 16bits
+	bcf     leftbind
+	output_16
 	STRCAT_PRINT    "'"
 
 PLED_display_deko1:

@@ -159,11 +159,11 @@ test_switches_divemode_menu3:
 	dcfsnz	menupos,F
 	bra		divemode_toggle_brightness	; Toggle OLED-Brightness
 	dcfsnz	menupos,F
-	bra		timeout_divemenu2			; Quit divemode menu
+	bra		timeout_divemenu2           ; Quit divemode menu
 	bra		timeout_divemenu2			; Quit divemode menu
 
 divemode_menu3:
-	movff	menupos3,temp1		; copy
+	movff	menupos3,temp1              ; copy
 	dcfsnz	temp1,F
 	bra		toggle_stopwatch			; Toggle Stopwatch/Average register
 	dcfsnz	temp1,F
@@ -177,9 +177,9 @@ divemode_menu3_nothing:
 	bra		timeout_divemenu2			; Quit divemode menu
 
 set_marker:
-	movlw	d'6'				; Type of Alarm  (Manual Marker)
-	movwf	AlarmType			; Copy to Alarm Register
-	bsf		event_occured		; Set Event Flag
+	movlw	d'6'                        ; Type of Alarm  (Manual Marker)
+	movwf	AlarmType                   ; Copy to Alarm Register
+	bsf		event_occured               ; Set Event Flag
 	bra		timeout_divemenu2			; quit menu!
 
 toggle_stopwatch:
@@ -333,41 +333,23 @@ divemenu_see_decoplan:
 	bsf		display_see_deco			; set flag
 	call	PLED_clear_divemode_menu	; Clear Menu
 	
-	read_int_eeprom	d'34'
-	movlw	d'3'
-	cpfsgt	EEDATA						; in multi-gf mode? Z16 GF OC=4 and Z16 GF CC=5
-	bra		divemenu_see_decoplan1		; No, standard ZH-L16
-
-	bsf		multi_gf_display			; Yes, display the multi-gf table screen
 	bcf		last_ceiling_gf_shown		; Clear flag
-
     clrf    decoplan_page               ; Starts on page 0
-	call	PLED_decoplan_gf			; Display the new screen
-	return
-	
-divemenu_see_decoplan1:	
-    movff	char_O_deco_status,WREG
-    tstfsz	WREG                        ; deco_status=0 if decompression calculation done
-    return                              ; calculation not yet finished!
-	
-	call	PLED_decoplan				; display the Decoplan
-	return
+    bra     divemenu_see_decoplan2_1
 
 divemenu_see_decoplan2:
-	btfsc	multi_gf_display			; Next Page in Multi-GF Screen?
-	bra		divemenu_see_decoplan2_nextgf	; Yes!
-; No, remove outputs!
-divemenu_see_decoplan2_0:
-	bcf		display_see_deco			; clear flag
-	bra		timeout_divemenu2			; quit menu!
-
-divemenu_see_decoplan2_nextgf:
 	incf	decoplan_page,F
 	btfsc	last_ceiling_gf_shown		; last ceiling shown?
 	bra		divemenu_see_decoplan2_0	; All done, clear and return
 
+divemenu_see_decoplan2_1:
 	clrf	timeout_counter3			; Clear timeout Divemode menu
-	bra		timeout_divemenu3x			; Display next page
+	call	PLED_decoplan   			; Display the new screen
+	return
+
+divemenu_see_decoplan2_0:
+	bcf		display_see_deco			; clear flag
+	bra		timeout_divemenu2			; quit menu!
 
 divemenu_set_xgas2:
 	dcfsnz	menupos,F
@@ -593,25 +575,15 @@ timeout_divemenu:
 	
 	btfss	display_see_deco		; Is the decoplan active?
 	bra		timeout_divemenu1		; No, skip updating the decoplan
-
-	btfsc	multi_gf_display		; display the multi-gf table screen?
-	bra		timeout_divemenu3		; Yes...
-
-	movff	char_O_deco_status,WREG
-	tstfsz	WREG                        ; deco_status=0 if decompression calculation done
-	bra		timeout_divemenu1		; No, skip updating the decoplan
-	
-	call	PLED_decoplan			; update the Decoplan
+	bra		timeout_divemenu3	    ; Yes...
 	
 timeout_divemenu1:	
 	incf	timeout_counter3,F		; increase timeout_counter3
 	GETCUSTOM8	d'10'				; loads timeout_divemenu into WREG
 	cpfsgt	timeout_counter3		; ... longer then timeout_divemenu
 	return							; No!
-timeout_divemenu2:					; quit divemode menu
-;	btfss	multi_gf_display		; Was the Multi-GF Table displayed?
-;	bra		timeout_divemenu2a		; No, normal OLED rebuild
 
+timeout_divemenu2:					; quit divemode menu
 ; Restore some outputs
 	clrf	decoplan_page           ; Page 0-1 of deco list
 	call	PLED_clear_divemode_menu; Clear dive mode menu
@@ -627,7 +599,6 @@ timeout_divemenu2:					; quit divemode menu
 	call	PLED_display_ndl_mask	;  Clear deco data, display nostop time
 
 timeout_divemenu2a:
-	bcf		multi_gf_display		; Do not display the multi-gf table screen
 	bcf		menubit
 	bcf		premenu					; Yes, clear flags and menu, display dive time and mask again
 	call	PLED_active_gas_divemode; Display gas, if required
@@ -643,15 +614,15 @@ timeout_divemenu2a:
 	bcf		switch_left				; and debounce switches
 	bcf		switch_right
 	return
-	
+
+; Re-Draw current page of decoplan (may have more stops)
 timeout_divemenu3:
-	movff	char_O_deco_status,WREG
-	tstfsz	WREG                        ; deco_status=0 if decompression calculation done
-	bra		timeout_divemenu1				; No, skip updating the decoplan
-timeout_divemenu3x:
-	call	PLED_decoplan_gf            ; Re-Draw Current page of GF Decoplan
+    movff   char_O_deco_status,WREG     ; Get last computation state (BANK safe)
+    iorwf   WREG                        ; Is it zero ?
+    btfsc   STATUS,Z
+	call	PLED_decoplan               ; Yes: new data available.
 	bra		timeout_divemenu1			; Check timeout
-	
+
 timeout_divemenu6:
 	; Update Simulator Mask
 	call	PLED_divemode_simulator_mask; Show mask

@@ -94,10 +94,11 @@ VAR_UCHAR (char_O_diluent);                // new in v.101
 VAR_UCHAR (char_O_CNS_fraction);           // new in v.101
 VAR_UCHAR (char_O_relative_gradient_GF);   // new in v.102
 
-TAB_UCHAR (char_O_array_decotime, 7);      // Old-school decompression table (ZH-L16)
-TAB_UCHAR (char_O_array_decodepth, 6);     // 
+VAR_UCHAR (char_O_first_deco_depth);        // Depth of first stop.
+VAR_UCHAR (char_O_first_deco_time) ;        // Duration of first stop.
+TAB_UCHAR (char_O_deco_depth, 0x20);        // Fusionned decompression table:
+TAB_UCHAR (char_O_deco_time,  0x20);        // Both ZH-L16 and L16-GF models.
 
-TAB_UCHAR (char_O_deco_table, 0x20);        // New school decompression table (GF mode)
 TAB_UCHAR (char_O_tissue_saturation, 0x20); // Compartiment desaturation time, in min.
 
 VAR_UINT  (int_O_DBS_bitfield);

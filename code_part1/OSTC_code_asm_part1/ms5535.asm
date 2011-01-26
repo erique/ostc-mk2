@@ -18,13 +18,18 @@
 ; routines for Intersema MS5535A, MS5541B and MS5541C
 ; history:
 ; 2005-09-26: Written by Matthias Heinrichs, info@heinrichsweikamp.com
-; 2008-08-21: MH last updated
+; 2008-08-21: MH last updated, with second order compensation.
 ; 2011-01-19: jDG Clean up using true signed arithmetics.
 ; known bugs:
 ; ToDo: 
 
-; with second order temperature compensation
+;=============================================================================
+; Expose internal variables, to ease debug:
+    global D1, D2
+    global C1, C2, C3, C4, C5
+    global xdT, xdT2, OFF, SENS, amb_pressure
 
+;=============================================================================
 calculate_compensation:
     ; calculate UT1 = 8*C5 + 10000 (u16 range 10.000 .. +42.760)
 	clrf	isr_xA+1
@@ -193,6 +198,7 @@ calc_pressure_done:
 calc_pos_temp:
 	return			                    ; Fertig mit allem
 
+;=============================================================================
 get_pressure_start:
 	rcall	reset_MS5535A
 	movlw	b'10100000'	;+3*high as start and 1+low as stop!
@@ -212,6 +218,7 @@ get_pressure_value:
 #endif
 	return
 
+;=============================================================================
 get_temperature_start:
 	rcall	reset_MS5535A
 	movlw	b'10010000'	;+3*high as start and 1+low as stop!
@@ -226,20 +233,8 @@ get_temperature_value:
 #endif
 	return
 
+;=============================================================================
 get_calibration_data:
-;	; read addional temperature correction from internal EEPROM 0x100
-;	bsf		no_sensor_int				; No sensor interupt!
-;	clrf	temperature_correction		; clear compensation value
-;	movlw	LOW		0x100
-;	movwf	EEADR
-;	movlw	HIGH	0x100
-;	movwf	EEADRH
-;	call	read_eeprom
-;	clrf	EEADRH						; Only 256Bytes used in normal program
-;	movlw	d'200'						; limit value
-;	cpfsgt	EEDATA						; EEDATA>200?
-;	movff	EEDATA, temperature_correction	; No, Store for compensation
-;	
 	rcall	reset_MS5535A
 	movlw	d'13'
 	movwf	clock_count
@@ -398,6 +393,7 @@ get_calibration_data:
 	bcf		no_sensor_int		; enable sensor interrupts
 	return
 
+;=============================================================================
 reset_MS5535A_one:
 	bsf		sensor_SDO
 	nop
@@ -485,7 +481,6 @@ recieve_loop:
 	decfsz	clock_count,F
 	bra		recieve_loop
 	return
-	
 
 send_data_MS55535A:
 	; send three startbits first

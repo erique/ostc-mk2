@@ -170,8 +170,9 @@ simulator_show_decoplan:
         call    PLED_standard_color
         
         STRCPY  "TTS: "
-        bcf		leftbind
+        bsf		leftbind
         output_16
+        bcf		leftbind
         STRCAT_PRINT    "'"		
 simulator_decoplan_notts:
 
@@ -209,20 +210,16 @@ simulator_show_decoplan3:
 	bra		simulator_show_decoplan2
 
 simulator_show_decoplan5:
-	btfsc	multi_gf_display			; Next Page in Multi-GF Screen?
-	bra		simulator_show_decoplan5_1	; Yes!
-simulator_show_decoplan5_0:
-
-	bcf		display_see_deco			; clear flag
-	bra		simulator_show_decoplan4	; Quit
-
-simulator_show_decoplan5_1:
 	incf	decoplan_page,F
 	btfsc	last_ceiling_gf_shown		; last ceiling shown?
 	bra		simulator_show_decoplan5_0	; All done, clear and return
 
-	call	PLED_decoplan_gf        	; Re-Draw Current page of GF Decoplan
+	call	PLED_decoplan               ; Re-Draw Current page of GF Decoplan
 	bra		simulator_show_decoplan1	
+
+simulator_show_decoplan5_0:
+	bcf		display_see_deco			; clear flag
+	bra		simulator_show_decoplan4	; Quit
 
 simulator_show_decoplan4:
 	movlw	d'5'
@@ -264,7 +261,7 @@ simulator_calc_deco:
 	WIN_INVERT	.0
 
 simulator_calc_deco_loop1:
-	call	divemode_check_decogases			; Checks for decogases and sets the gases
+	call	divemode_check_decogases        ; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
 
 	call	deco_calc_hauptroutine		    ; calc_tissue
@@ -277,7 +274,7 @@ simulator_calc_deco_loop1:
 	movlw	d'1'
 	movff	WREG,char_I_step_is_1min		; 1 minute mode
 
-	movlw	d'255'
+	movlw	d'2'
 	movff	WREG,char_O_deco_status			; Reset Deco module
 
 simulator_calc_deco_loop2:
@@ -299,7 +296,7 @@ simulator_calc_deco_loop2:
 	movlw	d'0'
 	movff	WREG,char_I_step_is_1min		; 2 second deco mode
 
-	movlw	d'255'
+	movlw	d'2'
 	movff	WREG,char_O_deco_status			; Reset Deco module
 
 	bra		simulator_calc_deco2				; Not finished

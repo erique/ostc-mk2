@@ -170,7 +170,7 @@ cf_default_table1:
 	                
 	CF_DEFAULT    CF_BOOL,     	d'1',   0,      0 		; CF52 Show Tissue Graph in Divemode
 	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0 		; CF53 Show Laeding Tissue in Divemode
-	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+	CF_DEFAULT    CF_BOOL,      d'0',   0,      0 		; CF54 Display shalowest stop first
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	                

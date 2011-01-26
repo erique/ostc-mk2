@@ -591,7 +591,7 @@ text_pointer:
 	DA	"Show Stopwatch }"		;173
 	DA	"ShowTissueGraph}"		;174
 	DA	"Show Lead.Tiss.}"		;175
-	DA	"not used       }"		;176
+	DA	"Shalow stop 1st}"		;176
 	DA	"not used       }"		;177
 	DA	"not used       }"		;178
 	DA	"not used       }"		;179
@@ -628,7 +628,7 @@ text_pointer:
 	DA	"time and Desat.-   }"	;205		l=20		
 	DA	"time at all!       }"	;206		l=20	
 ; Const.ppO2 description
-	DA	"Decotype:ZH-L16 CC }"	;207		l=20
+	DA	"Decotype: ZH-L16 CC}"	;207		l=20
 	DA	"For (Semi-)Closed  }"	;208		l=20
 	DA	"Circuit rebreathers}"	;209		l=20
 	DA	"Configure the 3    }"	;210		l=20

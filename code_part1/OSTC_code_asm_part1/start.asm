@@ -149,14 +149,20 @@ restart:
 	clrf	flag14
 	clrf	flag15
 
-	bsf		flag1,0                 ; Should we set win_flip_screen ?
+    ; Should we set win_flip_screen ?
+	bsf		flag1,0                 ; Precondition to yes
 	clrf	EEADRH					; Reset EEADRH
 	read_int_eeprom	d'1'
 	movlw	.7
-	cpfsgt	EEDATA					; >2048?
+	cpfsgt	EEDATA					; serial > 2048 (Mk2n hardware) ?
 	bcf		flag1,0
+	incf    EEDATA,W                ; serial == 65535 (emulation) ?
+	btfsc   STATUS,Z
+	bcf     flag1,0
 	movff	flag1,win_flags			; store in Bank0 register
 	clrf	flag1					; Clear flag1 (again)
+	
+	; Should we disable sleep (hardware emulator)
 	movlw	.0
 	cpfsgt	EEDATA					; >256
 	bsf		nsm						; NO-SLEEP-MODE : for hardware debugging

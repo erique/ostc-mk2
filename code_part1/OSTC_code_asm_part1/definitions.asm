@@ -488,7 +488,7 @@ time_correction_value   res 1   ; Adds to Seconds on midnight
 
 #DEFINE	internal_eeprom_write2	flag13,0	;=1: start routine to access internal EEPROM BANK 1 via the UART
 #DEFINE	button_delay_done		flag13,1	;=1: Button was pressed for more then 500ms, start counting
-#DEFINE	multi_gf_display		flag13,2	;=1: Display the Multi-GF screen instead of normal divemode screen
+; free                          flag13,2	;=1: unused
 #DEFINE	deco_mode_changed		flag13,3	;=1: The Decomode was changes, show decomode description!
 #DEFINE	pled_velocity_display	flag13,4	;=1: Velocity is displayed 
 #DEFINE depth_greater_100m		flag13,5	;=1: Depth is greater then 100m

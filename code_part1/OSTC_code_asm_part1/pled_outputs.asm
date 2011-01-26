@@ -143,8 +143,8 @@ PLED_color_code_ceiling:
 	cpfseq	lo					; =1?
 	bra		PLED_color_code_ceiling1	; No, Set to default color
 
-	movff	char_O_array_decodepth+0,lo	; Ceiling in m
-	decf	lo,F	; -1
+	movff	char_O_first_deco_depth,lo  ; Ceiling in m
+	decf	lo,F	                    ; -1
 	movff	rel_pressure+1,xA+1
 	movff	rel_pressure+0,xA+0
 	movlw	LOW		d'100'
@@ -455,13 +455,13 @@ PLED_display_deko:
 	WIN_TOP		.80
 	WIN_LEFT	.94
 	WIN_FONT 	FT_MEDIUM
-	WIN_INVERT	.0					; Init new Wordprocessor
-	PLED_color_code		warn_ceiling	; Color-code Output
+	WIN_INVERT	.0                      ; Init new Wordprocessor
+	PLED_color_code		warn_ceiling    ; Color-code Output
 	lfsr	FSR2,letter
-	movff	char_O_array_decodepth+0,lo		; Ceiling in m
+	movff	char_O_first_deco_depth,lo  ; Ceiling in m
 	output_99
 	PUTC    'm'
-	movff	char_O_array_decotime,lo		; length of first stop in m
+	movff	char_O_first_deco_time,lo   ; length of first stop in m
 	output_99
 	STRCAT_PRINT "'"
 	WIN_FONT 	FT_SMALL
@@ -530,8 +530,8 @@ PLED_simulator_data:
 	return
 
 PLED_display_velocity:
-	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
-	return							; Yes, No update and return!
+;	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
+;	return							; Yes, No update and return!
 
 	ostc_debug	'v'		; Sends debug-information to screen if debugmode active
 	WIN_TOP		.90
@@ -835,8 +835,8 @@ PLED_temp_surfmode:
 	return
 
 PLED_temp_divemode:
-	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
-	return								; Yes, No update and return!
+;	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
+;	return								; Yes, No update and return!
 
 	ostc_debug	'u'		; Sends debug-information to screen if debugmode active
 
@@ -913,8 +913,8 @@ PLED_active_gas_divemode:				; Displays current gas (e.g. 40/20) if a) He>0 or b
 	btfsc	FLAG_apnoe_mode				; Ignore in Apnoe mode
 	return
 
-	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
-	return								; Yes, No update and return!
+;	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
+;	return								; Yes, No update and return!
 
 	WIN_INVERT	.0					; Init new Wordprocessor	
 	call	PLED_active_gas_divemode_show	; Show gas (Non-Inverted in all cases)
@@ -2191,7 +2191,7 @@ PLED_divemode_simulator_mask:
 ;         win_top = line to draw on screen.
 ; Trashed: hi, lo, win_height, win_leftx2, win_width, win_color*,
 ;          WREG, PROD, TBLPTR TABLAT.
-
+;
 PLED_decoplan_show_stop:
         ;---- Print depth ----------------------------------------------------
         WIN_LEFT .100
@@ -2273,34 +2273,32 @@ PLED_decoplan_clear_bottom:
 #define decoplan_last   apnoe_max_pressure  ; Depth of last stop (CF#29)
 #define decoplan_max    apnoe_max_pressure+1; Number of lines per page. 7 in planning, 5 in diving.
 
-PLED_decoplan_gf:
+PLED_decoplan:
         ostc_debug	'n'		; Sends debug-information to screen if debugmode active
 
         WIN_INVERT 0
 
         ;---- Is there deco stops ? ------------------------------------------
-    	lfsr	FSR1,char_O_deco_table
-    	movlw   .1
-    	movf    PLUSW1,W                ; char_O_deco_table[1] --> WREG
-        bnz		PLED_decoplan_gf_1
-        
+    	movff   char_O_first_deco_depth,WREG
+    	iorwf   WREG
+        bnz		PLED_decoplan_1
+
         ;---- No Deco --------------------------------------------------------
         call    PLED_standard_color
         DISPLAYTEXT	d'239'              ;"No Deco"
         bsf     last_ceiling_gf_shown
         return
 
-PLED_decoplan_gf_1:
-    	GETCUSTOM8	d'29'			    ; Last decostop depth, in m
-        movwf	decoplan_last		    ; --> decoplan_last
+PLED_decoplan_1:
+    	lfsr	FSR0,char_O_deco_depth  ; Initialize indexed addressing.
+	    lfsr	FSR1,char_O_deco_time
 
         movlw   .8                      ; 8 lines/page in decoplan
         btfsc   divemode
         movlw   .6                      ; 6 lines/page in divemode.
         movwf   decoplan_max
 
-        movlw   .1
-        movwf   decoplan_index          ; Start with index = 1
+        clrf   decoplan_index           ; Start with index = 0
         clrf	WREG
         movff	WREG,win_top            ; and row = 0
 
@@ -2313,29 +2311,16 @@ PLED_decoplan_gf_1:
         
         bcf     last_ceiling_gf_shown   ; Not finished yet...
 
-PLED_decoplan_gf_2:
+PLED_decoplan_2:
         btfsc   decoplan_gindex,5       ; Reached table length (32) ?
-        bra     PLED_decoplan_gf_99     ; YES: finished...
+        bra     PLED_decoplan_99        ; YES: finished...
 
-        ; Compute new depth
-        movf    decoplan_gindex,W       ; depth = 3 * (global index)
-        mullw   .3                      ; --> PROD
-        movf    decoplan_last,W         ; depth < decoplan_last (CF#29) ?
-        cpfslt  PRODL
-        movf    PRODL,W                 ; NO: take depth, else keep decoplan_last.
-        movwf   lo                      ; --> lo
-
-        ; Read deepest depth from other bank.
-        movff   char_O_array_decodepth,WREG
-        xorwf   lo,W                    ; This is last stop ?
-        btfsc   STATUS,Z
-        bsf     last_ceiling_gf_shown   ; YES: mark for latter...
-
-        ; Read stop duration
+        ; Read stop parameters, indexed by decoplan_index
         movf    decoplan_gindex,W       ; index
-    	movff	PLUSW1,hi               ; char_O_deco_table[index] --> hi
-    	movf    hi,W                    ; time = zero ?
-    	bz      PLED_decoplan_gf_4      ; Do not display it: continue.
+    	movff	PLUSW1,hi               ; char_O_deco_time [gindex] --> hi
+	    movff	PLUSW0,lo               ; char_O_deco_depth[gindex]
+        movf    lo,W
+        bz      PLED_decoplan_99        ; depth == 0 : finished.
 
         ; Display the stop line
     	call	PLED_decoplan_show_stop
@@ -2345,22 +2330,18 @@ PLED_decoplan_gf_2:
 	    addlw	.24
         movff   WREG,win_top
 	    incf	decoplan_index,F        ; local index += 1
-PLED_decoplan_gf_4:
 	    incf	decoplan_gindex,F       ; global index += 1
 
-        btfsc   last_ceiling_gf_shown   ; Last one done ?
-        bra     PLED_decoplan_gf_99     ; YES: finished...
-
         ; Max number of lines/page reached ?
-    	incf    decoplan_max,W          ; index+1 == max+1 ?
+    	movf    decoplan_max,W          ; index+1 == max ?
     	cpfseq	decoplan_index
-    	bra		PLED_decoplan_gf_2      ; NO: loop
+    	bra		PLED_decoplan_2         ; NO: loop
 
     	; Check if next stop if end-of-list ?
-    	movlw   .3                      ; Next stop is lo + 3m
-    	addwf   lo,W
-    	xorwf   decoplan_last,W         ; == last stop ?
-    	bz      PLED_decoplan_gf_99     ; End of list...
+    	movf    decoplan_gindex,W
+	    movff	PLUSW0,WREG             ; char_O_deco_depth[gindex]
+	    iorwf   WREG
+    	bz      PLED_decoplan_99        ; End of list...
 
         ; Display the message "more..."
         rcall   PLED_decoplan_clear_bottom  ; Clear from next line
@@ -2371,93 +2352,10 @@ PLED_decoplan_gf_4:
         bcf		last_ceiling_gf_shown	; More page to display...
     	return
 
-PLED_decoplan_gf_99:
+PLED_decoplan_99:
         bsf		last_ceiling_gf_shown   ; Nothing more in table to display.
         rcall   PLED_decoplan_clear_bottom  ; Clear from next line
         return
-
-;-----------------------------------------------------------------------------
-; Display the decoplan (simulator or divemode) for ZH-L16 model
-PLED_decoplan:
-        ostc_debug	'n'		; Sends debug-information to screen if debugmode active
-        
-        WIN_INVERT 0
-
-        ;---- Is there deco information --------------------------------------
-    	lfsr	FSR0,char_O_array_decodepth
-	    lfsr	FSR1,char_O_array_decotime
-
-    	movf    INDF0,W
-        bnz		PLED_decoplan1
-        
-        ;---- No Deco --------------------------------------------------------
-        call    PLED_standard_color
-        DISPLAYTEXT	d'239'              ;"No Deco"
-        bsf     last_ceiling_gf_shown
-        return
-
-PLED_decoplan1:
-    	GETCUSTOM8	d'29'			    ; Last decostop depth, in m
-        movwf	decoplan_last		    ; --> decoplan_last
-
-        movlw   .6                      ; Max 6 lines in all modes.
-        movwf   decoplan_max
-        
-        clrf	decoplan_index          ; Starts with index = 0
-        clrf	WREG
-        movff	WREG,win_top            ; and row = 0
-
-PLED_decoplan2:
-        ; Read stop parameters, indexed by decoplan_index
-	    movf	decoplan_index,W
-	    movff	PLUSW0,lo               ; array_decodepth[index]
-	    movff	PLUSW1,hi               ; array_decotime[index]
-
-        ; 0 time == end-of-table.
-    	movf	hi,w
-    	bz      PLED_decoplan_0
-
-        call	PLED_decoplan_show_stop
-
-        movff   win_top,WREG            ; row += 24
-	    addlw	.24         
-        movff   WREG,win_top
-	    incf	decoplan_index,F        ; index += 1    
-
-        ; 6 Stops max...
-        movf    decoplan_max,W
-        cpfseq	decoplan_index
-        bra		PLED_decoplan2
-
-        ;---- Additional time in the decoplan ? ------------------------------
-        movf    decoplan_max,W          ; Read array_decotime[6]
-        movf    PLUSW1,W                ; set Z flag
-        movwf   lo                      ; and copy to lo
-        btfsc   STATUS,Z                ; Zero: nothing to add.
-        return
-        
-        WIN_LEFT .100
-        call    PLED_standard_color
-
-        STRCPY  "add:"
-        output_8
-        STRCAT_PRINT "'"
-        return
-
-PLED_decoplan_0:
-        ;---- Plan not finished to compute ? ---------------------------------
-	    decf	decoplan_index,W
-	    movf 	PLUSW0,W                ; array_decodepth[index-1]
-	    subwf   decoplan_last,W         ; == last stop depth ?
-	    bz      PLED_decoplan_99
-        
-        WIN_LEFT .100
-        call    PLED_standard_color
-        STRCPY_PRINT "..."
-
-PLED_decoplan_99:
-        return
-
 ;-----------------------------------------------------------------------------
 PLED_gas_list:
 	ostc_debug	'm'		; Sends debug-information to screen if debugmode active
@@ -2816,8 +2714,8 @@ PLED_new_cf_warning:
 	return
 
 PLED_const_ppO2_value:
-	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
-	return								; Yes, No update and return!
+;	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
+;	return								; Yes, No update and return!
 
 	ostc_debug	'j'		; Sends debug-information to screen if debugmode active
 	
@@ -2973,8 +2871,8 @@ PLED_topline_box2:
 	return
 
 PLED_display_cns:
-	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
-	return								; Yes, No update and return!
+;	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
+;	return								; Yes, No update and return!
 
 	btfsc	gauge_mode			; Do not display in gauge mode
 	 return

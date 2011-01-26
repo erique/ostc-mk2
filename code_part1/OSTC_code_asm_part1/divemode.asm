@@ -433,11 +433,7 @@ calc_deko_divemode2:
 	movlb	b'00000001'						; rambank 1 selected
 	ostc_debug	'C'		; Sends debug-information to screen if debugmode active
 
-	movff	char_O_deco_status,WREG
-	tstfsz	WREG                        ; deco_status=0 if decompression calculation done
-	return                              ; calculation not yet finished!
-
-	movff	char_O_array_decodepth+0,wait_temp	; copy ceiling to temp register
+	movff	char_O_first_deco_depth,wait_temp	; copy ceiling to temp register
 	tstfsz	wait_temp							; Ceiling<0m?
 	bra		calc_deko_divemode3					; Yes!
 
@@ -476,8 +472,8 @@ calc_deko_divemode3:
 	call	PLED_display_deko_mask				; clear nostop time, display decodata
 	bsf		dekostop_active						; Set flag
 
-	movff	char_O_array_decodepth+0,decodata+0	; ceiling
-	movff	char_O_array_decotime,decodata+1	; length of first stop in minues
+	movff	char_O_first_deco_depth,decodata+0	; ceiling
+	movff	char_O_first_deco_time,decodata+1	; length of first stop in minues
 
 	call	PLED_display_deko					; display decodata
 	return						
@@ -1682,5 +1678,4 @@ divemode1:
 	subfwb	EEDATA,F					; minus O2
 	movff	EEDATA, char_I_N2_ratio		; = N2!
 
-	bcf		multi_gf_display			; Do not display the multi-gf table screen
 	return

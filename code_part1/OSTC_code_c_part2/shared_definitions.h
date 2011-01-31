@@ -74,17 +74,10 @@
 bank2   udata_ovr  0x200
 #endif
 
-VAR_UINT  (int_O_GF_step);
 VAR_UINT  (int_O_gtissue_limit);
 VAR_UINT  (int_O_gtissue_press);
-VAR_UINT  (int_O_limit_GF_low);
-VAR_UINT  (int_O_gtissue_press_at_GF_low);
-VAR_UINT  (int_O_calc_tissue_call_counter);
 VAR_UINT  (int_O_desaturation_time);       // 
 VAR_UINT  (int_O_ascenttime);              // TTS (in minutes)
-
-VAR_UCHAR (char_O_GF_low_pointer);
-VAR_UCHAR (char_O_actual_pointer);
 
 VAR_UCHAR (char_O_nullzeit);               // 
 VAR_UCHAR (char_O_deco_status);            // 
@@ -101,7 +94,7 @@ TAB_UCHAR (char_O_deco_time,  0x20);        // Both ZH-L16 and L16-GF models.
 
 TAB_UCHAR (char_O_tissue_saturation, 0x20); // Compartiment desaturation time, in min.
 
-VAR_UINT  (int_O_DBS_bitfield);
+VAR_UINT  (int_O_DBS_bitfield);             // NOTE: 9 bytes dumped to divelog by store_dive_decodebug
 VAR_UINT  (int_O_DBS2_bitfield);
 VAR_UINT  (int_O_DBG_pre_bitfield);
 VAR_UINT  (int_O_DBG_post_bitfield);
@@ -119,7 +112,6 @@ bank3   udata_ovr  0x300
 #endif
 
 VAR_UCHAR (char_I_step_is_1min);
-TAB_UCHAR (char_I_table_deco_done, 0x20);
 
 VAR_UINT  (int_I_pres_respiration);        // 
 VAR_UINT  (int_I_pres_surface);            // 

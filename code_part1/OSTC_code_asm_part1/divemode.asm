@@ -646,32 +646,25 @@ store_dive_nuy2:
 	return
 
 store_dive_decodebug:
-	movff	0x931,divisor_deco_debug	; Used as temp
-	movf	divisor_deco_debug,W		; copy to WREG
+    ; Dump 9 bytes, int_O_DBS_bitfield .. char_O_NDL_at_20mtr
+    lfsr    FSR2, int_O_DBS_bitfield
+    movf    POSTINC2,W
 	call	write_external_eeprom		; Store in EEPROM
-	movff	0x930,divisor_deco_debug	; Used as temp
-	movf	divisor_deco_debug,W		; copy to WREG
+    movf    POSTINC2,W
 	call	write_external_eeprom		; Store in EEPROM
-	movff	0x933,divisor_deco_debug	; Used as temp
-	movf	divisor_deco_debug,W		; copy to WREG
+    movf    POSTINC2,W
 	call	write_external_eeprom		; Store in EEPROM
-	movff	0x932,divisor_deco_debug	; Used as temp
-	movf	divisor_deco_debug,W		; copy to WREG
+    movf    POSTINC2,W
 	call	write_external_eeprom		; Store in EEPROM
-	movff	0x935,divisor_deco_debug	; Used as temp
-	movf	divisor_deco_debug,W		; copy to WREG
+    movf    POSTINC2,W
 	call	write_external_eeprom		; Store in EEPROM
-	movff	0x934,divisor_deco_debug	; Used as temp
-	movf	divisor_deco_debug,W		; copy to WREG
+    movf    POSTINC2,W
 	call	write_external_eeprom		; Store in EEPROM
-	movff	0x937,divisor_deco_debug	; Used as temp
-	movf	divisor_deco_debug,W		; copy to WREG
+    movf    POSTINC2,W
 	call	write_external_eeprom		; Store in EEPROM
-	movff	0x936,divisor_deco_debug	; Used as temp
-	movf	divisor_deco_debug,W		; copy to WREG
+    movf    POSTINC2,W
 	call	write_external_eeprom		; Store in EEPROM
-	movff	0x938,divisor_deco_debug	; Used as temp
-	movf	divisor_deco_debug,W		; copy to WREG
+    movf    POSTINC2,W
 	call	write_external_eeprom		; Store in EEPROM
 	GETCUSTOM8	d'25'
 	movwf	divisor_deco_debug			; Reload divisor from CF
@@ -1592,28 +1585,6 @@ diveloop_boot:
 	movff	last_surfpressure_30min+0,int_I_pres_surface+0	; LOW copy surfacepressure to deco routine
 	movff	temperature+0,mintemp+0						; Reset Min-Temp registers
 	movff	temperature+1,mintemp+1						; Reset Min-Temp registers
-
-	clrf	wait_temp					; Used to clear Bankx registers
-	movff	wait_temp,char_O_GF_low_pointer
-	movff	wait_temp,char_O_actual_pointer
-	lfsr	FSR0,0x250
-	movlw	0x20
-	movwf	wait_temp
-clear_deco_lists:						; Clear Deco list
-	clrf	POSTINC0
-	decfsz	wait_temp,F
-		bra		clear_deco_lists
-	lfsr	FSR0,0x270
-	movlw	0x20
-	movwf	wait_temp
-set_no_forced_stops:					; Init Deco list
-	movlw	0x01
-	movwf	POSTINC0
-	decfsz	wait_temp,F
-		bra		set_no_forced_stops
-	lfsr	FSR0,0x290					; clear int_O_calc_tissue_call_counter (DEBUG)
-	clrf	POSTINC0
-	clrf	POSTINC0
 
 ; Init profile recording parameters	
 	GETCUSTOM8	d'20'			; sample rate

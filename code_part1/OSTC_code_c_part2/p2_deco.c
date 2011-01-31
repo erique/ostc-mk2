@@ -58,7 +58,7 @@
 // 07/xx/08 v102a: debug of bottom time routine
 // 09/xx/08 v102d: Gradient Factor Model implemenation
 // 10/10/08 v104: renamed to build v103 for v118 stable
-// 10/14/08	v104: integration of temp_depth_last_deco for Gradient Model
+// 10/14/08	v104: integration of char_I_depth_last_deco for Gradient Model
 // 03/31/09 v107: integration of FONT Incon24
 // 05/23/10 v109: 5 gas changes & 1 min timer
 // 07/13/10 v110: cns vault added
@@ -115,7 +115,7 @@ static void calc_hauptroutine_update_tissues(void);
 static void calc_hauptroutine_calc_deco(void);
 static void sim_ascent_to_first_stop(void);
 
-static void calc_nextdecodepth_GF(void);
+static void calc_nextdecodepth(void);
 
 // ***********************************************
 // ** V A R I A B L E S   D E F I N I T I O N S **
@@ -132,16 +132,15 @@ static float			temp_limit;
 static float			GF_low;
 static float			GF_high;
 static float			GF_delta;
-static float			GF_temp;
-static float			GF_step;
-static float			GF_step2;
-static float			temp_pres_gtissue;
-static float			temp_pres_gtissue_diff;
-static float			temp_pres_gtissue_limit_GF_low;
-static float			temp_pres_gtissue_limit_GF_low_below_surface;
-static	unsigned int	temp_depth_limit;
-static unsigned char	temp_gtissue_no;
-static	unsigned int	temp_depth_last_deco;				// new in v.101
+static float			locked_GF_step;
+
+static float			sim_pres_gtissue;
+static float			sim_pres_gtissue_diff;
+static float			sim_pres_gtissue_limit_GF_low;
+static float			sim_pres_gtissue_limit_GF_low_below_surface;
+static unsigned char    temp_depth_limit;
+static float			sim_pres_gtissue_limit;
+static unsigned char	sim_gtissue_no;
 
 static unsigned char	temp_depth_GF_low_meter;
 static unsigned char	internal_deco_pointer;
@@ -178,7 +177,6 @@ static float  			var_He_e;
 static float  			var_N2_halftime;
 static float  			var_He_halftime;
 static float			pres_gtissue_limit;
-static float			temp_pres_gtissue_limit;
 
 static float            pres_diluent;               // new in v.101
 static float            deco_diluent;               // new in v.101
@@ -186,6 +184,7 @@ static float            const_ppO2;                 // new in v.101
 static float            deco_ppO2_change;           // new in v.101
 static float            deco_ppO2;                  // new in v.101
 
+static unsigned char    calc_gas_switch;            // Detected a gas switch. 
 static float			calc_N2_ratio;			// new in v.101
 static float			calc_He_ratio;			// new in v.101
 static float			CNS_fraction;			// new in v.101
@@ -587,10 +586,10 @@ static void read_buhlmann_coeffifients(static char period)
 // new in v.102
 //
 // INPUT, changing during dive:
-//      temp_pres_gtissue_limit_GF_low
-//      temp_pres_gtissue_limit_GF_low_below_surface
-//      temp_pres_gtissue
-//      temp_pres_gtissue_diff
+//      sim_pres_gtissue_limit_GF_low
+//      sim_pres_gtissue_limit_GF_low_below_surface
+//      sim_pres_gtissue
+//      sim_pres_gtissue_diff
 //      lock_GF_depth_list
 //
 // INPUT, fixed during dive:
@@ -598,142 +597,112 @@ static void read_buhlmann_coeffifients(static char period)
 //      GF_delta
 //      GF_high
 //      GF_low
-//      temp_depth_last_deco
+//      char_I_depth_last_deco
 //      float_deco_distance
 //
 // OUTPUT
-//      GF_step
+//      locked_GF_step
 //      temp_deco
 //      temp_depth_limt
 //      lock_GF_depth_list
 //
-static void calc_nextdecodepth_GF(void)
+static void calc_nextdecodepth(void)
 {
-
-	char_I_table_deco_done[0] = 0; // safety if changed somewhere else. Needed for exit
-	
 	//---- ZH-L16 + GRADIENT FACTOR model ------------------------------------
 	if (char_I_deco_model == 1)
 	{
         overlay float next_stop;            // Next stop to test, in Bar.
-        overlay float press_tol;            // Upper limit (lower pressure) tolerated.
-        overlay int   int_temp;
-        overlay unsigned char temp_depth_GF_low_number;
-        overlay float temp_pres_deco_GF_low;
 
 		if (lock_GF_depth_list == 0)
 		{
-			next_stop =  temp_pres_gtissue_limit_GF_low_below_surface / 0.29985; 					// = ... / 99.95 / 0.003;
- 			int_temp = (int) (next_stop + 0.99);
-			if (int_temp > 31)
-				int_temp = 31;						//	deepest deco at 93 meter (31 deco stops)
-			if (int_temp < 0)
-				int_temp = 0;
-			temp_depth_GF_low_number = int_temp;
+            overlay unsigned char temp_depth_GF_low_number;
+
+			next_stop =  sim_pres_gtissue_limit_GF_low_below_surface / 0.29985;
+ 			temp_depth_GF_low_number = (int) (next_stop + 0.99);    // Deepest stop index.                           
+			if (temp_depth_GF_low_number > 31)
+				temp_depth_GF_low_number = 31;						//	deepest deco at 93 meter (31 deco stops)
+			if (temp_depth_GF_low_number < 0)
+				temp_depth_GF_low_number = 0;
  			temp_depth_GF_low_meter = 3 * temp_depth_GF_low_number;
 			next_stop = (float)temp_depth_GF_low_meter * 0.09995;
-			temp_pres_deco_GF_low = next_stop + float_deco_distance + pres_surface;
 			if (temp_depth_GF_low_number == 0)
-				GF_step = 0;
+				locked_GF_step = 0;
 			else
-				GF_step = GF_delta / (float)temp_depth_GF_low_number;
-			if (GF_step < 0)
-				GF_step = 0;
-			if (GF_step > GF_delta)
-				GF_step = GF_delta;
-			int_O_GF_step = (int)(GF_step * 10000);
-			int_O_limit_GF_low = (int)(temp_pres_deco_GF_low * 1000);
-			int_O_gtissue_press_at_GF_low = (int)(temp_pres_gtissue * 1000);
-			char_O_GF_low_pointer = temp_depth_GF_low_number;
+				locked_GF_step = GF_delta / (float)temp_depth_GF_low_number;
 			lock_GF_depth_list = 1;
-			internal_deco_pointer = 0;
-		}
-		if (internal_deco_pointer == 0)		// new run
-		{
-			internal_deco_pointer = temp_depth_GF_low_number;
-			GF_temp = GF_high - ((float)internal_deco_pointer * GF_step);
-			int_temp = char_I_table_deco_done[internal_deco_pointer];
-		}
-		else
-		{
-			int_temp = 1;
-		}
-		while (int_temp == 1)
-		{
-			int_temp = internal_deco_pointer - 1;
-			if (int_temp == 1)								// new in v104
-			{
-				next_stop = (float)(temp_depth_last_deco * int_temp) * 0.09995;
-				GF_step2 = GF_step/3.0 * ((float)(6 - temp_depth_last_deco));
-			}
-			else
-			if (int_temp == 0)
-			{
-				next_stop = 0.0;
-				GF_step2 = GF_high - GF_temp;
-			}
-			else
-			{
-				next_stop = (float)(3 *int_temp) * 0.09995;
-				GF_step2 = GF_step;
-			}
-			next_stop = next_stop + pres_surface; // next deco stop to be tested
-			press_tol = ((GF_temp + GF_step2)* temp_pres_gtissue_diff) + temp_pres_gtissue;	// upper limit (lowest pressure allowed) // changes GF_step2 in v104
-			if (press_tol > next_stop) // check if ascent to next deco stop is ok
-			{
-				int_temp = 0;	// no
-			}
-			else
-			{
-				internal_deco_pointer = int_temp;
-				GF_temp = GF_temp + GF_step2; // changed in v104
-				int_temp = char_I_table_deco_done[internal_deco_pointer]; // yes and check for ascent to even next stop if deco_done is set
-			}
-		} // while
 
-		if (internal_deco_pointer > 0)
-		{
-			next_stop = 0.29985 * internal_deco_pointer;
-			temp_deco = next_stop + float_deco_distance + pres_surface;
-			if (internal_deco_pointer == 1)						// new in v104
-				temp_depth_limit = temp_depth_last_deco;
-			else
-				temp_depth_limit = 3 * internal_deco_pointer;
+            // new run
+			internal_deco_pointer = temp_depth_GF_low_number;
 		}
-		else	// 	if (char_I_deco_model == 1)
-		{
-			temp_deco = pres_surface;
-			temp_depth_limit = 0;
+
+		// Check all stops until one is higher that tolerated presure
+		while(internal_deco_pointer > 0)
+        {
+            overlay unsigned char index;            // Next index (0..30)
+            overlay unsigned char next_depth_limit; // Next depth (0m..90m)
+            overlay float press_tol;                // Upper limit (lower pressure) tolerated.
+    		overlay float GF_temp;                  // Changing Gradient-Factor value at next depth.
+
+            index = internal_deco_pointer - 1;                          // Index of next (upper) stop.
+            if (index == 1)                                             // new in v104
+                next_depth_limit = char_I_depth_last_deco;              // Use last 3m..6m instead.
+            else
+				next_depth_limit = 3 * index;                           // Convert index to meter.
+
+        	next_stop =  next_depth_limit * 0.09995                     // Meters to bar
+        	          + pres_surface;
+            // current GF is GF_high - alpha (GF_high - GF_low)
+            // With alpha = currentStop / (totalStops-1), hence in [0..1]
+            GF_temp = GF_high - (next_depth_limit/3) * locked_GF_step;
+            
+            // upper limit (lowest pressure tolerated):
+			press_tol = GF_temp * sim_pres_gtissue_diff + sim_pres_gtissue;
+
+            if( press_tol > next_stop ) // check if ascent to next deco stop is ok
+                break;
+            
+            // Else, validate that stop and loop...
+            internal_deco_pointer = index;
 		}
+
+        // Redo the results once we do have the validated index
+        if( internal_deco_pointer==1 )
+            temp_depth_limit = char_I_depth_last_deco;                  // Use last 3m..6m instead.
+        else
+        	temp_depth_limit = 3 * internal_deco_pointer;               // Normal depth, from 0m to 96m
+    	temp_deco =  temp_depth_limit * 0.09995                         // Convert to bars.
+    	          + pres_surface;
+		if (internal_deco_pointer != 0)
+			temp_deco += float_deco_distance;                           // Add security distance (bars too)
 	}
 	else //---- ZH-L16 model -------------------------------------------------
 	{
-		// calc_nextdecodepth - original
+		// calc_nextdecodepth - original model
 		// optimized in v.101
-		// depth_last_deco included in v.101
+		// char_I_depth_last_deco included in v.101
 
-		overlay float pres_gradient = temp_pres_gtissue_limit - pres_surface;
+		overlay float pres_gradient = sim_pres_gtissue_limit - pres_surface;
 		if (pres_gradient >= 0)
  		{
- 			pres_gradient = pres_gradient / 0.29985; 	        // = pres_gradient / 99.95 / 0.003;
- 			temp_depth_limit = (int) (pres_gradient + 0.99);
- 			temp_depth_limit = 3 * temp_depth_limit;            // depth for deco [m]
- 			if (temp_depth_limit == 0)
+ 			pres_gradient = pres_gradient / 0.29985; 	            // == pres_gradient / 99.95 / 3m;
+ 			temp_depth_limit = 3 * (int) (pres_gradient + 0.99);    // depth for deco [m]
+ 			if (temp_depth_limit == 0)                              // At surface ?
   				temp_deco = pres_surface;
  			else
   			{
-  				if (temp_depth_limit < temp_depth_last_deco)
-					temp_depth_limit = temp_depth_last_deco;
-  				pres_gradient = (float)temp_depth_limit * 0.09995;
-  				temp_deco = pres_gradient + float_deco_distance + pres_surface;    // depth for deco [bar]
-  			} // if (temp_depth_limit == 0)
- 		} // if (pres_gradient >= 0)
+  				if (temp_depth_limit < char_I_depth_last_deco)      // Implement last stop at 4m/5m/6m...
+					temp_depth_limit = char_I_depth_last_deco;
+  				temp_deco = (temp_depth_limit * 0.09995)            // depth for deco [bar] = depth
+  				          + float_deco_distance                     // + security margin
+  				          + pres_surface;                           // + surface ambient presure
+  			}
+ 		}
 		else
  		{
- 			temp_deco = pres_surface;
- 			temp_depth_limit = 0;
- 		} // if (pres_gradient >= 0)
-	} // calc_nextdecodepth original
+ 			temp_deco = pres_surface;                               // surface ambient presure
+ 			temp_depth_limit = 0;                                   // stop number = 0
+ 		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -969,7 +938,15 @@ static void calc_without_deco(void)
 // 		the tissues,
 //		the bottom time,
 //		and simulates the ascend with all deco stops.
-
+//
+// The deco_state sequence is :
+//       3 (at surface)
+// +---> 0 : calc nullzeit
+// |     2 : simulate ascent to first stop (at 10m/min, less that 16x 1min simu)
+// | +-> 1 : simulate up to 16min of stops.
+// | +------< not finished
+// +--------< finish
+//
 static void calc_hauptroutine(void)
 {
 	calc_hauptroutine_data_input();
@@ -999,6 +976,8 @@ static void calc_hauptroutine(void)
 
     case 1: //---- Simulate stops --------------------------------------------
     	calc_hauptroutine_calc_deco();
+    	// Sets char_O_deco_status to 0 (buffered results, and restart nullzeit),
+    	//                         or 1 (more stops to simulate).
     	break;
 
     case 3: //---- At surface: start a new dive ------------------------------
@@ -1007,7 +986,7 @@ static void calc_hauptroutine(void)
     	internal_deco_pointer = 0;
     	lock_GF_depth_list = 0;
     	update_startvalues();
-    	calc_nextdecodepth_GF();
+    	calc_nextdecodepth();
     	char_O_deco_status = 0; // Calc nullzeit next time.
     	break;
 
@@ -1114,23 +1093,13 @@ void calc_hauptroutine_data_input(void)
     GF_low = (float)char_I_GF_Low_percentage / 100.0;
     GF_high = (float)char_I_GF_High_percentage / 100.0;
     GF_delta = GF_high - GF_low;
-    
-    temp2 = (pres_respiration - pres_surface) / 0.29985;
-    int_temp = (int)(temp2);
-    if (int_temp < 0)
-        int_temp = 0;
-    if (int_temp > 255)
-        int_temp = 255;
-    char_O_actual_pointer = int_temp;
-    
-    temp_depth_last_deco = (int)char_I_depth_last_deco;
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
+//
+//
 void calc_hauptroutine_update_tissues(void)
 {
-	int_O_calc_tissue_call_counter = int_O_calc_tissue_call_counter + 1;
  	if (char_I_const_ppO2 == 0)													// new in v.101
   		pres_diluent = pres_respiration;										// new in v.101
  	else																		// new in v.101
@@ -1171,7 +1140,79 @@ void calc_hauptroutine_update_tissues(void)
   		char_O_nullzeit = 0;    // deco necessary
   		char_O_deco_status = 2; // calculate ascent on next iteration.
  	}
-} 		// calc_hauptroutine_update_tissues
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Calculate gas switches
+// 
+//
+void check_gas_switch(void)
+{
+    calc_N2_ratio = N2_ratio;   
+    calc_He_ratio = He_ratio;
+    
+    if (char_I_const_ppO2 == 0)
+    {
+    	deco_diluent = temp_deco;
+        calc_gas_switch = 0;
+
+		if(deco_gas_change1 && (temp_deco < deco_gas_change1))
+		{
+    		calc_N2_ratio = deco_N2_ratio1;
+    		calc_He_ratio = deco_He_ratio1;
+    		calc_gas_switch = 1;
+    	}
+		if(deco_gas_change2 && (temp_deco < deco_gas_change2))
+		{
+    		calc_N2_ratio = deco_N2_ratio2;
+    		calc_He_ratio = deco_He_ratio2;
+    		calc_gas_switch = 2;
+    	}
+		if(deco_gas_change3 && (temp_deco < deco_gas_change3))
+		{
+    		calc_N2_ratio = deco_N2_ratio3;
+    		calc_He_ratio = deco_He_ratio3;
+    		calc_gas_switch = 3;
+    	}
+		if(deco_gas_change4 && (temp_deco < deco_gas_change4))
+		{
+    		calc_N2_ratio = deco_N2_ratio4;
+    		calc_He_ratio = deco_He_ratio4;
+    		calc_gas_switch = 4;
+    	}
+		if(deco_gas_change5 && (temp_deco < deco_gas_change5))
+		{
+    		calc_N2_ratio = deco_N2_ratio5;
+    		calc_He_ratio = deco_He_ratio5;
+    		calc_gas_switch = 4;
+    	}
+    }
+    else
+   	{
+   		if (temp_deco > deco_ppO2_change)
+    	{
+            deco_diluent = ((temp_deco - const_ppO2)/(N2_ratio + He_ratio));
+    	}
+   		else
+    	{
+            deco_diluent = ((temp_deco - deco_ppO2)/(N2_ratio + He_ratio));
+    	}
+  	}
+
+    if (deco_diluent > temp_deco)
+    	deco_diluent = temp_deco;
+
+    if (deco_diluent > 0.0627)
+    {
+        temp_atem = calc_N2_ratio * (deco_diluent - 0.0627);
+        temp2_atem = calc_He_ratio * (deco_diluent - 0.0627);
+    }
+    else
+    {
+        temp_atem = 0.0;
+        temp2_atem = 0.0;
+    }
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Compute stops.
@@ -1185,7 +1226,7 @@ void calc_hauptroutine_calc_deco(void)
 
  	for(loop = 0; loop < 16; ++loop)
   	{
-  		calc_nextdecodepth_GF();
+        calc_nextdecodepth();
 
         //---- Finish computations once surface is reached -------------------
         if( temp_depth_limit <= 0 )
@@ -1197,64 +1238,7 @@ void calc_hauptroutine_calc_deco(void)
       	}
 
         //---- Else, continue simulating the stops ---------------------------
-        calc_N2_ratio = N2_ratio;
-        calc_He_ratio = He_ratio;
-        
-        if (char_I_const_ppO2 == 0)
-        {
-        	deco_diluent = temp_deco;
-
-    		if(deco_gas_change1 && (temp_deco < deco_gas_change1))
-    		{
-        		calc_N2_ratio = deco_N2_ratio1;
-        		calc_He_ratio = deco_He_ratio1;
-        	}
-    		if(deco_gas_change2 && (temp_deco < deco_gas_change2))
-    		{
-        		calc_N2_ratio = deco_N2_ratio2;
-        		calc_He_ratio = deco_He_ratio2;
-        	}
-    		if(deco_gas_change3 && (temp_deco < deco_gas_change3))
-    		{
-        		calc_N2_ratio = deco_N2_ratio3;
-        		calc_He_ratio = deco_He_ratio3;
-        	}
-    		if(deco_gas_change4 && (temp_deco < deco_gas_change4))
-    		{
-        		calc_N2_ratio = deco_N2_ratio4;
-        		calc_He_ratio = deco_He_ratio4;
-        	}
-    		if(deco_gas_change5 && (temp_deco < deco_gas_change5))
-    		{
-        		calc_N2_ratio = deco_N2_ratio5;
-        		calc_He_ratio = deco_He_ratio5;
-        	}
-        }
-        else
-       	{
-       		if (temp_deco > deco_ppO2_change)
-        	{
-                deco_diluent = ((temp_deco - const_ppO2)/(N2_ratio + He_ratio));
-        	}
-       		else
-        	{
-                deco_diluent = ((temp_deco - deco_ppO2)/(N2_ratio + He_ratio));
-        	}
-      	}
-
-        if (deco_diluent > temp_deco)															// new in v.101
-        	deco_diluent = temp_deco;																// new in v.101
-
-        if (deco_diluent > 0.0627)																// new in v.101
-        {
-            temp_atem = calc_N2_ratio * (deco_diluent - 0.0627);										// changed in v.101
-            temp2_atem = calc_He_ratio * (deco_diluent - 0.0627);										// changed in v.101
-        }
-        else																					// new in v.101
-        {
-            temp_atem = 0.0;																		// new in v.101
-            temp2_atem = 0.0;																		// new in v.101
-        }
+        check_gas_switch();
 
         sim_tissue_1min();          // Simulate compartiments for 1 minute.
         update_deco_table();        // Add one minute stops.
@@ -1273,11 +1257,10 @@ void calc_hauptroutine_calc_deco(void)
 //
 void sim_ascent_to_first_stop(void)
 {
- 	update_startvalues();
+    update_startvalues();
     clear_deco_table();
 
    	temp_deco = pres_respiration;
- 	lock_GF_depth_list = 1;
 
     // Loop until first top or surface is reached.
  	for(;;)
@@ -1285,77 +1268,25 @@ void sim_ascent_to_first_stop(void)
   		temp_deco = temp_deco - 1.0;    // Ascent 1 min, at 10m/min. == 1bar/min.
 
   		if ( char_I_deco_model == 1)
-			temp_limit = temp_pres_gtissue_limit_GF_low;
+			temp_limit = sim_pres_gtissue_limit_GF_low;
   		else
-			temp_limit = temp_pres_gtissue_limit;
+			temp_limit = sim_pres_gtissue_limit;
 
-        // Did we hit the first stop ?
+        // Can we ascent directly to surface ?
         if( temp_deco <= temp_limit )
-            break;
+            break;                      //Yes: finished !
         
-        // Or the surface ?
+        // Next stop is surface ?
         if( temp_deco <= pres_surface )
-            break;
-        
+            break;                      // Yes: finished too.
+
+        // The ascent is not done (already), so re-defined locked_GF_step:
 		lock_GF_depth_list = 0;
- 		temp_deco += 0.5;           // Check gas change 5 meter below new depth.
 
         //---- Simulat gas switches, at half the ascent
- 		calc_N2_ratio = N2_ratio;
-		calc_He_ratio = He_ratio;
-
-		if (char_I_const_ppO2 == 0)
-		{
-			deco_diluent = temp_deco;
-
- 				if(deco_gas_change1 && (temp_deco < deco_gas_change1))
-	 			{
- 				calc_N2_ratio = deco_N2_ratio1;
- 				calc_He_ratio = deco_He_ratio1;
- 			}
- 				if(deco_gas_change2 && (temp_deco < deco_gas_change2))
-	 			{
- 				calc_N2_ratio = deco_N2_ratio2;
- 				calc_He_ratio = deco_He_ratio2;
- 			}
- 				if(deco_gas_change3 && (temp_deco < deco_gas_change3))
-	 			{
- 				calc_N2_ratio = deco_N2_ratio3;
- 				calc_He_ratio = deco_He_ratio3;
- 			}
- 				if(deco_gas_change4 && (temp_deco < deco_gas_change4))
-	 			{
- 				calc_N2_ratio = deco_N2_ratio4;
- 				calc_He_ratio = deco_He_ratio4;
- 			}
- 				if(deco_gas_change5 && (temp_deco < deco_gas_change5))
-	 			{
- 				calc_N2_ratio = deco_N2_ratio5;
- 				calc_He_ratio = deco_He_ratio5;
- 			}
-		}
-		else
-		{
-			if( temp_deco > deco_ppO2_change )
-					deco_diluent = (temp_deco - const_ppO2)/(N2_ratio + He_ratio);  // calculate at half of the ascent
-			else
-					deco_diluent = (temp_deco - deco_ppO2)/(N2_ratio + He_ratio);   // calculate at half of the ascent
-			if( deco_diluent > temp_deco )
-					deco_diluent = temp_deco;
-		}
-		
- 		temp_deco -= 0.5;   // Back to new depth.
-
-		if (deco_diluent > 0.0627)
-		{
-			temp_atem = calc_N2_ratio * (deco_diluent - 0.0627);
-			temp2_atem = calc_He_ratio * (deco_diluent - 0.0627);
-		}
-		else
-		{
-			temp_atem = 0.0;
-			temp2_atem = 0.0;
-		}
+ 		temp_deco += 0.5;           // Check gas change 5 meter below new depth.
+            check_gas_switch();
+ 		temp_deco -= 0.5;           // Back to new depth.
 
         // Then simulate with the new gas pressures...s
 		sim_tissue_1min();
@@ -1440,9 +1371,9 @@ static void calc_nullzeit(void)
   		char_O_nullzeit += 10;
 
 		if (char_I_deco_model == 1)
-			temp1 = GF_high * temp_pres_gtissue_diff + temp_pres_gtissue;
+			temp1 = GF_high * sim_pres_gtissue_diff + sim_pres_gtissue;
 		else
-			temp1 = temp_pres_gtissue_limit;
+			temp1 = sim_pres_gtissue_limit;
 		if (temp1 > temp_surface)  // changed in v.102 , if guiding tissue can not be exposed to surface pressure immediately
 			loop = 255;
  	}
@@ -1460,9 +1391,9 @@ static void calc_nullzeit(void)
    			sim_tissue_1min();
    			char_O_nullzeit = char_O_nullzeit + 1;
     		if (char_I_deco_model == 1)
-    			temp1 = GF_high * temp_pres_gtissue_diff + temp_pres_gtissue;
+    			temp1 = GF_high * sim_pres_gtissue_diff + sim_pres_gtissue;
     		else
-    			temp1 = temp_pres_gtissue_limit;
+    			temp1 = sim_pres_gtissue_limit;
     		if (temp1 > temp_surface)  // changed in v.102 , if guiding tissue can not be exposed to surface pressure immediately
     			loop = 255;
   		}
@@ -1523,16 +1454,17 @@ static void calc_ascenttime(void)
 void update_startvalues(void)
 {
     overlay unsigned char x;
-    
-  	temp_pres_gtissue_limit = pres_gtissue_limit;
-  	temp_pres_gtissue = pres_tissue[char_O_gtissue_no] + pres_tissue[char_O_gtissue_no+16];
-  	temp_pres_gtissue_diff = temp_pres_gtissue_limit - temp_pres_gtissue;						// negative number
-	temp_pres_gtissue_limit_GF_low = GF_low * temp_pres_gtissue_diff + temp_pres_gtissue;
-  	temp_pres_gtissue_limit_GF_low_below_surface = temp_pres_gtissue_limit_GF_low - pres_surface;
-	if (temp_pres_gtissue_limit_GF_low_below_surface < 0)
-		temp_pres_gtissue_limit_GF_low_below_surface = 0;
 
-	temp_gtissue_no = char_O_gtissue_no;
+    // Initialize data used to compute GF_low depth from current dive/simu 
+	sim_gtissue_no = char_O_gtissue_no;
+  	sim_pres_gtissue_limit = pres_gtissue_limit;
+  	sim_pres_gtissue = pres_tissue[char_O_gtissue_no] + pres_tissue[char_O_gtissue_no+16];
+  	sim_pres_gtissue_diff = sim_pres_gtissue_limit - sim_pres_gtissue;						// negative number
+	sim_pres_gtissue_limit_GF_low = GF_low * sim_pres_gtissue_diff + sim_pres_gtissue;
+  	sim_pres_gtissue_limit_GF_low_below_surface = sim_pres_gtissue_limit_GF_low - pres_surface;
+	if (sim_pres_gtissue_limit_GF_low_below_surface < 0)
+		sim_pres_gtissue_limit_GF_low_below_surface = 0;
+
   	for (x = 0;x<16;x++)
   	{
    		sim_pres_tissue[x] = pres_tissue[x];
@@ -1553,8 +1485,8 @@ void update_startvalues(void)
 //
 static void sim_tissue(static unsigned char period)
 {
-    temp_pres_gtissue_limit = 0.0;
-    temp_gtissue_no = 255;
+    sim_pres_gtissue_limit = 0.0;
+    sim_gtissue_no = 255;
 
     for (ci=0;ci<16;ci++)
     {
@@ -1578,19 +1510,20 @@ static void sim_tissue(static unsigned char period)
         
         if (sim_pres_tissue_limit[ci] < 0)
             sim_pres_tissue_limit[ci] = 0;
-        if (sim_pres_tissue_limit[ci] > temp_pres_gtissue_limit)
+        if (sim_pres_tissue_limit[ci] > sim_pres_gtissue_limit)
         {
-            temp_pres_gtissue = temp_tissue;
-            temp_pres_gtissue_limit = sim_pres_tissue_limit[ci];
-            temp_gtissue_no = ci;
+            sim_pres_gtissue = temp_tissue;
+            sim_pres_gtissue_limit = sim_pres_tissue_limit[ci];
+            sim_gtissue_no = ci;
         }
     } // for
 
-    temp_pres_gtissue_diff = temp_pres_gtissue_limit - temp_pres_gtissue;
-    temp_pres_gtissue_limit_GF_low = GF_low * temp_pres_gtissue_diff + temp_pres_gtissue;
-    temp_pres_gtissue_limit_GF_low_below_surface = temp_pres_gtissue_limit_GF_low - pres_surface;
-    if (temp_pres_gtissue_limit_GF_low_below_surface < 0)
-        temp_pres_gtissue_limit_GF_low_below_surface = 0;
+    // Update data used to compute GF_low depth:
+    sim_pres_gtissue_diff = sim_pres_gtissue_limit - sim_pres_gtissue;
+    sim_pres_gtissue_limit_GF_low = GF_low * sim_pres_gtissue_diff + sim_pres_gtissue;
+    sim_pres_gtissue_limit_GF_low_below_surface = sim_pres_gtissue_limit_GF_low - pres_surface;
+    if (sim_pres_gtissue_limit_GF_low_below_surface < 0)
+        sim_pres_gtissue_limit_GF_low_below_surface = 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////

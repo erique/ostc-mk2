@@ -29,24 +29,23 @@
 altimeter_calc:
         movlb   HIGH(pressureAvg)
         
-        movlw   HIGH(4*.1100)           ; Is presure ref lower than 900mbar
-        cpfslt  pressureRef+1
-        bra     altimeter_1             ; No: ok it is valid...
+        movlw   HIGH(4*.900)            ; Is presure ref bigger than 900mbar
+        cpfsgt  pressureRef+1
+        bra     altimeter_reset         ; No: Should do a reset now.
         
         movlw   HIGH(4*.1100)           ; Is ref pressure bigger than 1100mbar ?
         cpfsgt  pressureRef+1
         bra     altimeter_1             ; No: ok it is valid...
 
-altimeter_0:            
+; Reset computation. Eg. after a sleep, enables to faster restart with correct
+; values...
+altimeter_reset:
+        movlb   HIGH(pressureAvg)
         movlw   LOW(4*.1013+1)          ; Init see level at 1013,25 mbar.
         movwf   pressureRef+0
         movlw   HIGH(4*.1013+1)
         movwf   pressureRef+1
 
-; Reset computation. Eg. after a sleep, enables to faster restart with correct
-; values...
-altimeter_reset:
-        movlb   HIGH(pressureAvg)
         clrf    pressureSum+0           ; Init averaging area
         clrf    pressureSum+1
         clrf    pressureCount
@@ -233,7 +232,7 @@ altimeter_menu_1:
         WIN_TOP     .1
         STRCPY_PRINT "Set Altimeter:"
 
-        movlw       3                   ; Start menu on line 3.
+        movlw       2                   ; Start menu on line 2.
         movwf       menupos
 
 altimeter_menu_2:
@@ -254,38 +253,19 @@ altimeter_menu_2:
         bsf         leftbind
         output_16
         
-        PUTC    '.'
-        movff       pressureRef+0, hi   ; Decimal part is constructed
-        clrf        WREG                ; from the 2 lower bits.
-        btfsc       hi,0
-        addlw       .25   
-        btfsc       hi,1
-        addlw       .50 
-        movwf       lo  
-        output_99x
+;        PUTC    '.'
+;        movff       pressureRef+0, hi   ; Decimal part is constructed
+;        clrf        WREG                ; from the 2 lower bits.
+;        btfsc       hi,0
+;        addlw       .25   
+;        btfsc       hi,1
+;        addlw       .50 
+;        movwf       lo  
+;        output_99x
+
+        STRCAT_PRINT    " mbar  "
         
-        STRCAT_PRINT    "mbar  "
-        
-        WIN_TOP     .65                 ; Second line:
-        STRCPY      "Alt: "
-        movff       altitude+0, lo
-        movff       altitude+1, hi
-        btfss   hi,7                    ; Is altitude negativ ?
-        bra     altimeter_menu_3        ; No: just print it
-
-        PUTC    '-'                     ; Yes: print the minus sign
-        comf    hi                      ; And do a 16bit 2-complement.
-        comf    lo
-        infsnz  lo
-        incf    hi
-
-altimeter_menu_3:
-        bsf         leftbind
-        output_16
-        bcf         leftbind
-        STRCAT_PRINT    "m    "
-
-        WIN_TOP     .95                 ; Action enable
+        WIN_TOP     .65                 ; Action enable
         STRCPY      "Enabled: "
         GETCUSTOM8  .49
         btfss       WREG,0
@@ -296,12 +276,33 @@ alt_menu_1:
         STRCAT_PRINT "OFF"
 alt_menu_2:
         
+        WIN_TOP     .95                 ; Action reset
+        STRCPY_PRINT "Default: 1013 mbar"
         WIN_TOP     .125                ; Action add
-        STRCPY_PRINT "+0.25 mbar"
+        STRCPY_PRINT "+1 mbar"
         WIN_TOP     .155                ; Action sub
-        STRCPY_PRINT "-0.25 mbar"
+        STRCPY_PRINT "-1 mbar"
         WIN_TOP     .185                ; Action exit
         STRCPY_PRINT "Exit"
+
+        WIN_LEFT    .85                 ; Bottom right.
+        STRCPY      "Alt: "
+        movff       altitude+0, lo
+        movff       altitude+1, hi
+        btfss       hi,7                ; Is altitude negativ ?
+        bra         altimeter_menu_3    ; No: just print it
+
+        PUTC        '-'                 ; Yes: print the minus sign
+        comf        hi                  ; And do a 16bit 2-complement.
+        comf        lo
+        infsnz      lo
+        incf        hi
+
+altimeter_menu_3:
+        bsf         leftbind
+        output_16
+        bcf         leftbind
+        STRCAT_PRINT    "m    "
 
 alt_menu_loop:
         call        PLED_menu_cursor    ; Display cursor
@@ -338,7 +339,7 @@ alt_menu_next:
         movlw       .7
         cpfseq      menupos             ; Below last line ?
         bra         alt_menu_loop
-        movlw       .3                  ; Yes: back to line no 3.
+        movlw       .2                  ; Yes: back to line no 2.
         movwf       menupos
         bra         alt_menu_loop
 
@@ -346,8 +347,10 @@ alt_menu_next:
 
 alt_menu_do_it:
         movf        menupos,W           ; test line value
-        addlw       -3
-        bz          alt_menu_enable
+        addlw       -2
+        bz          alt_menu_enable     ; 2 --> reset
+        dcfsnz      WREG
+        bra         alt_menu_reset      ; 3 --> +1
         dcfsnz      WREG
         bra         alt_menu_plus1      ; 4 --> +1
         dcfsnz      WREG
@@ -366,21 +369,28 @@ alt_menu_enable:
     	call	    write_eeprom
     	bra         altimeter_menu_2
 
+;---- Reset sea level pressure to reference ----------------------------------
+alt_menu_reset:
+        rcall       altimeter_reset
+        movlb       1                   ; Go back to normal bank1
+        bra         altimeter_menu_2
+        
 ;---- Increment sea level pressure -------------------------------------------        
-
 alt_menu_plus1:
         movlb       HIGH(pressureRef)   ; Setup our own ram bank
-        infsnz      pressureRef+0       ; 16bit inc.
-        incf        pressureRef+1
+        movlw       4
+        addwf       pressureRef+0,F     ; 16bit inc.
+        movlw       0
+        addwfc      pressureRef+1,F
         bra         alt_menu_recompute  ; then recompute altitude.
 
 ;---- Decrement sea level pressure -------------------------------------------        
-
 alt_menu_minus1:
         movlb       HIGH(pressureRef)   ; Setup our own ram bank
-        decf        pressureRef+0       ; 16bit decrement
-        movlw       0
-        subwfb      pressureRef+1
+        movlw       -4
+        addwf       pressureRef+0,F     ; 16bit decrement
+        movlw       -1
+        addwfc      pressureRef+1,F
 
 alt_menu_recompute:
         rcall       compute_altitude    ; Recompute altitude

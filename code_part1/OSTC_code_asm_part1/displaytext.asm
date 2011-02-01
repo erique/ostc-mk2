@@ -115,11 +115,11 @@ displaytext1a:
 	bcf		displaytext_high		; Clear flag
 									; Get textadress from textlength table
 displaytext1b:	
-	TBLRD*+
+	TBLRD*+							; Read from textlength_pointer
 	movf	TABLAT,W
 	addwf	textaddress+0,F
 	movlw	d'0'
-	addwfc	textaddress+1,F
+	addwfc	textaddress+1,F			; textaddress:2 holds address for first character
 	decfsz	textnumber,F
 	bra		displaytext1b
 	

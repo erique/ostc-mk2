@@ -112,7 +112,7 @@ cf_default_table0:
 	CF_DEFAULT    CF_INT15,	    d'1160',d'950', 0    	; pressure_offset_divemode	1160mBar
 	CF_DEFAULT    CF_INT15,	    d'1100',d'1100', 0   	; max_surfpressure		    1100mBar
 	CF_DEFAULT    CF_PERCENT,	d'20',  d'1',  d'99'   	; min_gradient_factor		20%
-	CF_DEFAULT    CF_PERCENT,	d'20',  d'1',  d'20'	; oxygen_threshold			20%
+	CF_DEFAULT    CF_PERCENT,	d'20',  d'1',  d'22'	; oxygen_threshold			22%
 
 	CF_DEFAULT    CF_SEC,	    d'30',  d'5',   d'30'   ; dive_menu_timeout		    30s
 	CF_DEFAULT    CF_PERCENT,   d'110', d'110', d'200' 	; saturation_multiplier		x1.10

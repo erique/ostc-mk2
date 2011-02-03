@@ -24,140 +24,105 @@
 
 
 ; These macros output to POSTINC only
-OUTPUTTEXT	macro	textnumber 		; For Texts 1-254
-	movlw	textnumber
-	call	displaytext0
+OUTPUTTEXT	macro	n                   ; For Texts 1-255
+    If n>.255
+        Error "Bad low text number", n
+    Endif
+	movlw	n
+	call	displaytext0_low
 	endm
 
-OUTPUTTEXTH	macro	textnumber		; For Texts 255-511
-	movlw	LOW	textnumber			; Use only Lower 8 Bit
-	call	displaytext0_h
+OUTPUTTEXTH	macro	n		            ; For Texts 256-511
+    If n<.256
+        Error "Bad low text number", n
+    Endif
+	movlw	n-.256			            ; Use only Lower 8 Bit
+	call	displaytext0_high
 	endm
 
-displaytext0_h:
-	bsf		displaytext_high		; Highbit set
-	rcall	displaytext0
-	return
+displaytext0_high:
+	bsf		displaytext_high            ; Highbit set
+	bra     displaytext0
 	
+displaytext0_low:
+	bcf		displaytext_high            ; Highbit clear
 displaytext0:
-	bsf		output_to_postinc_only
-	rcall	displaytext1
-	bcf		output_to_postinc_only
-	return
+	bsf     output_to_postinc_only
+	bra     displaytext
 
-; These macros output to POSTINC and call the wordprocessor
-DISPLAYTEXT	macro	textnumber
-	movlw	textnumber
-	call	displaytext1
+; These macros output to letter[], and call the wordprocessor
+DISPLAYTEXT	macro	n
+	movlw	n
+	call	displaytext_1_low
 	endm
 
-DISPLAYTEXTH	macro	textnumber
-	movlw	LOW	textnumber			; Use only Lower 8 Bit
-	call	displaytext1h
+DISPLAYTEXTH	macro	n
+	movlw   LOW	n			        ; Use only Lower 8 Bit
+	call    displaytext_1_high
 	endm
 
-displaytext1h:
-	bsf		displaytext_high		; Highbit set
-	rcall	displaytext1
-	return
+displaytext_1_high:
+	bsf     displaytext_high		; Highbit set
+	bra     displaytext
 
-displaytext1:
-	movwf	textnumber
-	movlw	b'10000000'
-	movwf	EECON1
+displaytext_1_low:
+    bcf     displaytext_high
 
-	clrf	TBLPTRU
-	movlw	HIGH (textpos_pointer-4)
-	movwf	TBLPTRH
-	movlw	LOW (textpos_pointer-4)	; base address -4 for position table
-	movwf	TBLPTRL
+displaytext:
+    movwf   textnumber
+    movlw   LOW(text_pointer-4)
+    movwf   TBLPTRL
+    movlw   HIGH(text_pointer-4)
+    movwf   TBLPTRH
+    movlw   UPPER(text_pointer-4)
+    movwf   TBLPTRU
 
-	movff	textnumber,xA+0
-	movlw	d'0'
-	btfsc	displaytext_high		; Highbit set?
-	movlw	d'1'					; Yes!
-	movwf	xA+1					; Set High Bit
+    movlw   4                           ; textnumber * 4 --> PROD
+    mulwf   textnumber
 
-	bcf		STATUS,C
-	rlcf	xA+0,F
-	rlcf	xA+1,F					; times 2 for adress
+    btfsc   displaytext_high            ; If high text, add 4*256 to PROD
+    addwf   PRODH
 
-	movlw	d'2'
-	addwf	xA+0,F
-	movlw	d'0'
-	addwfc	xA+1,F					; + 2
-
-	movf	xA+0,W
-	addwf	TBLPTRL,F				; set adress, data can be read
-	movf	xA+1,W
-	addwfc	TBLPTRH,F				; High byte, if required
+    movf    PRODL,W                     ; Add PROD to TBLPTR
+    addwf   TBLPTRL,F
+    movf    PRODH,W
+    addwfc  TBLPTRH,F
+    movlw   0
+    addwfc  TBLPTRU
 
 	TBLRD*+
-	btfss	output_to_postinc_only		; output to postinc only?
+	movff   TABLAT,textaddress+0        ; textaddress:2 holds address for first character
+	TBLRD*+
+	movff   TABLAT,textaddress+1
+	
+	btfsc   output_to_postinc_only      ; output to postinc only?
+	bra     displaytext2
+	
+	TBLRD*+
 	movff	TABLAT,win_leftx2			; No, write coordinates
 
 	TBLRD*+
-	btfss	output_to_postinc_only	; output to postinc only?
-	movff	TABLAT,win_top			; No, write coordinates
+	movff	TABLAT,win_top              ; No, write coordinates
 
-	movlw	d'0'
-	movff	WREG,win_font			; Bank0 Variable...
+displaytext2:
+    clrf    WREG                        ; Reset to small font
+    movff   WREG,win_font               ; (BANK 0)
 
-	clrf	textaddress+0
-	clrf	textaddress+1
-	clrf	TBLPTRH					; Set Pointer for textlength table
-	clrf	TBLPTRU
-	movlw	LOW textlength_pointer
-	movwf	TBLPTRL
-	bra		displaytext1b
-
-displaytext1a:	
-	bcf		displaytext_high		; Clear flag
-									; Get textadress from textlength table
-displaytext1b:	
-	TBLRD*+							; Read from textlength_pointer
-	movf	TABLAT,W
-	addwf	textaddress+0,F
-	movlw	d'0'
-	addwfc	textaddress+1,F			; textaddress:2 holds address for first character
-	decfsz	textnumber,F
-	bra		displaytext1b
-	
-	btfsc	displaytext_high		; Highbit set?
-	bra		displaytext1a			; Yes, add 256 loops
-
-displaytext2:						; copies text to wordprocessor
-	clrf	TBLPTRU
-	movlw	LOW text_pointer
-	addwf	textaddress+0,W
-	movwf	TBLPTRL
-	movlw	HIGH text_pointer		; Base address Texts
-	addwfc	textaddress+1,W
-	movwf	TBLPTRH
-
+    movff   textaddress+0,TBLPTRL
+    movff   textaddress+1,TBLPTRH
 	btfss	output_to_postinc_only		; output to postinc2 only?
 	lfsr	FSR2,letter					; no!
 
-displaytext2a:
-	TBLRD*+
-	movlw	'}'						; Text finished?
-	cpfseq	TABLAT
-	bra		displaytext3
-	bra		display_text_exit
-
 displaytext3:
-	movff	TABLAT,POSTINC2
-
 	TBLRD*+
-	movlw	'}'						; Text finished?
-	cpfseq	TABLAT
-	bra		displaytext4
-	bra		display_text_exit
-displaytext4:
-	movff	TABLAT,POSTINC2
-	bra		displaytext2a
+	movf    TABLAT,W
+	bz      display_text_exit           ; Text finished?
+	movwf   POSTINC2
+	bra     displaytext3
 
 display_text_exit:
 	btfss	output_to_postinc_only		; output to postinc only?
-	call	word_processor
+	goto    word_processor
+	
+	bcf     output_to_postinc_only
 	return

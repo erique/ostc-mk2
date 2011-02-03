@@ -204,7 +204,7 @@ menu_custom_functions1:
 
 	movf	customfunction_temp1,W		; start of custom function descriptors		
 	addwf	decodata+0,W				; add # of current custom function, place result in wreg
-	call	displaytext1				; shows descriptor
+	call	displaytext_1_low           ; shows descriptor
 
 ; Read default, type and min/max from reset table.
     rcall    cf_read_default

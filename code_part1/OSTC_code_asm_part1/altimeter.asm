@@ -227,20 +227,18 @@ altimeter_menu_1:
         call    PLED_standard_color
     	call	PLED_topline_box
     	WIN_INVERT	.1	; Init new Wordprocessor	
-        WIN_FONT    .0
-        WIN_LEFT    .80-7*7
-        WIN_TOP     .1
-        STRCPY_PRINT "Set Altimeter:"
+        DISPLAYTEXTH .288               ; Title bar
 
         movlw       2                   ; Start menu on line 2.
         movwf       menupos
 
 altimeter_menu_2:
-        WIN_FONT    .0                  ; Reset, because compute erase that...
-        WIN_INVERT  .0
+        WIN_INVERT  0
+        WIN_FONT    0
         WIN_LEFT    .20                 ; First line:
         WIN_TOP     .35
-        STRCPY      "Sea ref: "
+        lfsr        FSR2,letter
+        OUTPUTTEXTH .289               ; Sea ref:
 
         movff       pressureRef+0, lo
         movff       pressureRef+1, hi
@@ -253,20 +251,11 @@ altimeter_menu_2:
         bsf         leftbind
         output_16
         
-;        PUTC    '.'
-;        movff       pressureRef+0, hi   ; Decimal part is constructed
-;        clrf        WREG                ; from the 2 lower bits.
-;        btfsc       hi,0
-;        addlw       .25   
-;        btfsc       hi,1
-;        addlw       .50 
-;        movwf       lo  
-;        output_99x
-
         STRCAT_PRINT    " mbar  "
         
         WIN_TOP     .65                 ; Action enable
-        STRCPY      "Enabled: "
+        lfsr        FSR2, letter
+        OUTPUTTEXTH .290
         GETCUSTOM8  .49
         btfss       WREG,0
         bra         alt_menu_1
@@ -276,17 +265,15 @@ alt_menu_1:
         STRCAT_PRINT "OFF"
 alt_menu_2:
         
-        WIN_TOP     .95                 ; Action reset
-        STRCPY_PRINT "Default: 1013 mbar"
-        WIN_TOP     .125                ; Action add
-        STRCPY_PRINT "+1 mbar"
-        WIN_TOP     .155                ; Action sub
-        STRCPY_PRINT "-1 mbar"
-        WIN_TOP     .185                ; Action exit
-        STRCPY_PRINT "Exit"
+        DISPLAYTEXTH .291               ; Action reset
+        DISPLAYTEXTH .292               ; Action add
+        DISPLAYTEXTH .293               ; Action sub
+        DISPLAYTEXT  .011               ; Action exit
 
-        WIN_LEFT    .85                 ; Bottom right.
-        STRCPY      "Alt: "
+        WIN_LEFT    .85                 ; Bottom right. 
+        lfsr    FSR2, letter
+        OUTPUTTEXTH .294                ; "Alt: "
+
         movff       altitude+0, lo
         movff       altitude+1, hi
         btfss       hi,7                ; Is altitude negativ ?

@@ -326,7 +326,7 @@ deco_info_screen1:
 
 menu0:
 	movf	menupos,W	
-	call	displaytext1				; Display text!
+	call	displaytext_1_low           ; Display text!
 	incf	menupos,F
 	
 	decfsz	temp1,F

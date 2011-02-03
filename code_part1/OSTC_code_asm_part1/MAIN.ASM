@@ -79,7 +79,7 @@ HighInt:
 		retfie
 
 ;=============================================================================
-#include	text_table.asm		; includes textmacros
+#include    multilang_text.asm		; includes textmacros
 
 ;=============================================================================
 osct_asm	code

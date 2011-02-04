@@ -30,12 +30,18 @@
 ;---- SMALL font description and data ----------------------------------------
 aa_fonts	code_pack
 aa_font28_block:
-			DB	' ', 0x80		; Translate space
-			DB	'²', 0x81
-			DB	'°', 0x82
-			DB	'¤', 0x83
-			DB	0xB7,0x7F		        ; Cursor
-			DB	0xB8,0x84		        ; Dimmed cursor.
+			DB	'°', 0x7F               ; Remap a few ASCII chars, to avoid
+			DB	'ö', 0x80               ; holes in the character table...
+			DB	'ä', 0x81
+			DB	'ü', 0x82
+			DB	'ß', 0x83
+			DB	'é', 0x84
+			DB	'è', 0x85
+			DB	'ê', 0x86
+			DB	'ç', 0x87
+			DB	'¤', 0x8F
+			DB	0xB7,0x92		        ; Cursor
+			DB	0xB8,0x93		        ; Dimmed cursor.
 			DB	0				; End of translation table
 			DB	aa_font28_firstChar			; To be substracted
 			DB	aa_font28_chars				; Max value

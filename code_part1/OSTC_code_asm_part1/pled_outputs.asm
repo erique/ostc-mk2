@@ -2106,7 +2106,7 @@ PLED_serial:			; Writes OSTC #Serial and Firmware version in surfacemode
 
 	bsf		leftbind
 	output_16
-	STRCAT  " \x85\x86 V"		; Scribble logo...
+	STRCAT  " \x90\x91 V"		; Scribble logo...
 	movlw	softwareversion_x
 	movwf	lo
 	bsf		leftbind

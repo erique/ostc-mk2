@@ -30,12 +30,13 @@
 
 #DEFINE	max_custom_number		d'53'		; Number of last used custom function
 
-; Language (No define -> English)
-#DEFINE	FRENCH							; Use french_text.asm
+; International extension. Selecting messages source:
+; Language (No define -> english_text.asm)
+#DEFINE	FRENCH  							; Use french_text.asm
 ;#DEFINE	GERMAN							; Use german_text.asm
 
-#DEFINE	logbook_profile_version	0x20		; Do not touch!
-#DEFINE	T0CON_debounce	b'00000000'					; Timer0 Switch Debounce
+#DEFINE	logbook_profile_version	0x20        ; Do not touch!
+#DEFINE	T0CON_debounce	b'00000000'         ; Timer0 Switch Debounce
 
 #DEFINE		FT_SMALL		.0
 #DEFINE		FT_MEDIUM		.1

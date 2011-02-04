@@ -1,3 +1,4 @@
+;=============================================================================
 ; OSTC - diving computer code
 ; Copyright (C) 2008 HeinrichsWeikamp GbR
 ;
@@ -14,12 +15,46 @@
 ;    You should have received a copy of the GNU General Public License
 ;    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
-; hold texts and parameters for the texts
-; written by: Matthias Heinrichs, info@heinrichsweikamp.com
-; written: 10/13/07
-; last updated: 05/24/08
+; Hold texts and screen position to display the texts.
+; History:
+; 2007/10/13 : Initial version by Matthias Heinrichs, info@heinrichsweikamp.com
+; 2008/05/24 : MW.
+; 2011/02/02 : Jean-Do Gascuel : split into different files for multi-lingual support
+;
 ; known bugs:
 ; ToDo: 
+;=============================================================================
+;
+; Instructions for translating:
+;
+; * Strings are accessed according to the order in the file.
+;   So don't change ordering !
+;
+; * Keep the english original version on the right column. So translations
+;   can be reviewed and maintened.
+;
+; * One of the main constraint is to keep texts short, to avoid clobering
+;   the OSTC screen. Of course, the technical, precise terms should be used.
+;   Generally, there is no hard constraint: you can be one or two chars 
+;   shorter or longer.
+; 
+; * Beware that some strings do have a fixed length. You should then use 
+;   exactly the same size.
+;
+; * Beware that some strings have ponctuation, or trailling space(s). In that
+;   case, you should keep EXACTLY the same ponctuation AND TRAILING SPACES.
+;
+; * Ascii chars: we can support a few specific chars. צהüß for German.
+;   יט for French. If you really absolutetly need more, ask...
+;
+; * Do not translate comments (everithing after the ;), because they are
+;   used for maintenance.
+;
+; * The X column is position on screen. Some texts are centered, left
+;   padded or right padded. In that case, if you changed the text size,
+;   you will have to adjust position. A char is 7 pixels wide.
+;
+;=============================================================================
 ;   macro     X     Y        "translation"               ; English original
     TCODE    .0,   .0,       "Building MD2 Hash"         ;001 Building MD2 Hash
     TCODE    .0,   .25,      "Please Wait..."            ;002 Please Wait...
@@ -32,7 +67,7 @@
     TCODE    .20,  .95,      "Reset Menu"                ;009 Reset Menu
     TCODE    .20,  .125,     "Setup"                     ;010 Setup
     TCODE    .20,  .185,     "Exit"                      ;011 Exit
-    TCODE    .115, .2,       "Wait.."                    ;012 Wait..
+    TCODE    .115, .2,       "Wait..."                   ;012 Wait..
     TCODE    .0,   .24,      "MD2 Hash:"                 ;013 MD2 Hash:
     TCODE    .0,   .0,       "Desat"                     ;014 Desat
     TCODE    .50,  .2,       "Interface"                 ;015 Interface
@@ -56,7 +91,8 @@
     TCODE    .100, .50,      "ResetAvr"                  ;033 ResetAvr
     TCODE    .100, .100,     "Exit"                      ;034 Exit
     TCODE    .0,   .0,       "NoFly"                     ;035 NoFly
-; 32 custom function descriptors I
+;
+; 32 custom function descriptors I (FIXED LENGTH = 15 chars).
     TCODE    .40,  .35,      "Start Dive  [m]"           ;036 Start Dive  [m]
     TCODE    .40,  .35,      "End Dive    [m]"           ;037 End Dive    [m]
     TCODE    .40,  .35,      "End Delay [min]"           ;038 End Delay [min]
@@ -89,6 +125,8 @@
     TCODE    .40,  .35,      "Last Deco at[m]"           ;065 Last Deco at[m]
     TCODE    .40,  .35,      "End Apnoe   [h]"           ;066 End Apnoe   [h]
     TCODE    .40,  .35,      "Show Batt.Volts"           ;067 Show Batt.Volts
+; End of function descriptor I
+;
 ;licence:
     TCODE    .0,   .35,      "This program is"           ;068 This program is
     TCODE    .0,   .65,      "distributed in the"        ;069 distributed in the
@@ -104,7 +142,8 @@
     TCODE    .0,   .155,     "Public License for"        ;079 Public License for
     TCODE    .0,   .185,     "more details:"             ;080 more details:
     TCODE    .0,   .215,     "www.heinrichsweikamp.de"   ;081 www.heinrichsweikamp.de
-; end of licence POS
+; end of licence
+;
     TCODE    .102,  .54,     "Decostop"                  ;082 Decostop
     TCODE    .0,    .0,      "m/min"                     ;083 m/min
     TCODE    .108,  .113,    "No Stop"                   ;084 No Stop
@@ -177,7 +216,8 @@
     TCODE    .108,  .216,    "Marker?"                   ;151 Marker?
     TCODE    .85,   .125,    "L16-GF OC"                 ;152 L16-GF OC
     TCODE    .20,   .65,     "Custom FunctionsII"        ;153 Custom FunctionsII
-; 32 Custom funtion descriptot II
+;
+; 32 custom function descriptors II (FIXED LENGTH = 15 chars).
     TCODE    .40,   .35,     "GF Low      [%]"           ;154 GF Low      [%]
     TCODE    .40,   .35,     "GF High     [%]"           ;155 GF High     [%]
     TCODE    .40,   .35,     "Color# Battery "           ;156 Color# Battery 
@@ -210,6 +250,7 @@
     TCODE    .40,   .35,     "not used       "           ;183 not used
     TCODE    .40,   .35,     "not used       "           ;184 not used
     TCODE    .40,   .35,     "not used       "           ;185 not used
+; End of function descriptor I
 ;
     TCODE    .13,   .2,      "Custom Functions II"       ;186 Custom Functions II
     TCODE    .20,   .95,     "Show License"              ;187 Show License
@@ -288,8 +329,9 @@
     TCODE    .100,  .100,    "-10m"                      ;253 -10m
     TCODE    .100,  .0,      "Close"                     ;254 Close
     TCODE    .131,  .170,    "Time"                      ;255 Time
-
+;
 ; Text Bank2 (Texts 256-511)
+;
     TCODE    .0,    .0,      "x"                         ;256 x
     TCODE    .20,   .35,     "Date format:"              ;257 Date format:
     TCODE    .40,   .2,      "Setup Menu 2:"             ;258 Setup Menu 2:
@@ -312,19 +354,19 @@
     TCODE    .0,    .95,     "CF I and CF II Menu"       ;274 CF I and CF II Menu
     TCODE    .0,    .125,    "for Details!"              ;275 for Details!
     TCODE    .20,   .95,     "Salinity: "                ;276 Salinity:
-
+;
     TCODE    .20,   .65,     "Bottom Time:"              ;277 Bottom Time:
     TCODE    .20,   .95,     "Max. Depth:"               ;278 Max. Depth:
     TCODE    .20,   .125,    "Calculate Deco"            ;279 Calculate Deco
     TCODE    .20,   .155,    "Show Decoplan"             ;280 Show Decoplan
-
+;
     TCODE    .93,   .170,    "Avr.Depth"                 ;281 Avr.Depth
     TCODE    .90,   .170,    "Lead Tiss."                ;282 Lead Tiss.
     TCODE    .93,   .170,    "Stopwatch"                 ;283 Stopwatch
     TCODE    .20,   .95,     "Reset Logbook"             ;284 Reset Logbook
     TCODE    .20,   .125,    "Reboot OSTC"               ;285 Reboot OSTC
     TCODE    .20,   .155,    "Reset Decodata"            ;286 Reset Decodata
-;
+; Altimeter extension
     TCODE    .20,   .155,    "Altimeter"                 ;287 Altimeter
     TCODE    .38,   .1,      "Set Altimeter"             ;288 Set Altimeter
     TCODE    .20,   .35,     "Sea ref: "                 ;289 Sea ref: 
@@ -333,4 +375,4 @@
     TCODE    .20,   .125,    "+1 mbar"                   ;292 +1 mbar
     TCODE    .20,   .155,    "-1 mbar"                   ;293 -1 mbar
     TCODE    .85,   .185,    "Alt: "                     ;294 Alt: 
-    
+;=============================================================================

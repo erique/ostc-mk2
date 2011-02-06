@@ -3013,6 +3013,7 @@ PLED_simdata_screen2_loop:
 	addlw	d'27'			; -> Adress of change depth register
 	call	read_int_eeprom_1
 	movff	EEDATA,lo		; Change depth in m
+	movff	lo,lo_temp		; Store for grey-out
 	output_99				; outputs into Postinc2!
     PUTC    'm'
 	read_int_eeprom		d'27'	; read flag register
@@ -3022,9 +3023,13 @@ PLED_simdata_screen2_loop1:
 	decfsz	lo,F			; max. 5 times...
 	bra		PLED_simdata_screen2_loop1
 	
-	btfsc	STATUS,C		; test carry
-	bra		PLED_simdata_white
+	btfss	STATUS,C		; test inactive flag
+	bra		PLED_simdata_grey	; Is inactive!
+	
+	tstfsz	lo_temp			; Test change depth=0?
+	bra		PLED_simdata_white	; Is not zero
 
+PLED_simdata_grey:
 	movlw	color_grey
 	call	PLED_set_color	; grey out inactive gases!
 	bra		PLED_simdata_color_done

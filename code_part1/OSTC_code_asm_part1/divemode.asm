@@ -931,6 +931,7 @@ check_gas_change4:					; check gas4
 	bra		check_gas_change5		; Yes, skip depth check
 check_gas_change4x:	
 	read_int_eeprom		d'31'		; read gas_change_depth
+	movlw	d'3'
 	cpfsgt	EEDATA					; Change depth>3m?
 	bra		check_gas_change5		; No, Change depth not deep enough, skip!
 	movf	xC+0,W					; load depth in m into WREG
@@ -951,6 +952,7 @@ check_gas_change5:					; check gas5
 	bra		check_gas_change6		; Yes, skip depth check
 check_gas_change5x:	
 	read_int_eeprom		d'32'		; read gas_change_depth
+	movlw	d'3'
 	cpfsgt	EEDATA					; Change depth>3m?
 	bra		check_gas_change6		; No, Change depth not deep enough, skip!
 	movf	xC+0,W					; load depth in m into WREG

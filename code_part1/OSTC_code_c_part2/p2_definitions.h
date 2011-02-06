@@ -23,64 +23,56 @@
 // history:
 // 12/25/10 v110: [jDG] split in three files (deco.c, main.c, definitions.h)
 
-#	define	DBG_c_gas	0b0000000000000001
-#	define	DBG_c_ppO2	0b0000000000000010
-#	define	DBG_RUN 	0b0000000000000100
-#	define	DBG_RESTART 0b0000000000001000
+#define	DBG_c_gas	0x0001
+#define	DBG_c_ppO2	0x0002
+#define	DBG_RUN 	0x0004
+#define	DBG_RESTART 0x0008
 
-#	define	DBG_CdeSAT 	0b0000000000010000
-#	define	DBG_C_MODE	0b0000000000100000
-#	define	DBG_C_SURF	0b0000000001000000
-#	define	DBG_HEwoHE 	0b0000000010000000
+#define	DBG_CdeSAT 	0x0010
+#define	DBG_C_MODE	0x0020
+#define	DBG_C_SURF	0x0040
+#define	DBG_HEwoHE 	0x0080
 
-#	define	DBG_C_DPPO2	0b0000000100000000
-#	define	DBG_C_DGAS 	0b0000001000000000
-#	define	DBG_C_DIST	0b0000010000000000
-#	define	DBG_C_LAST	0b0000100000000000
+#define	DBG_C_DPPO2	0x0100
+#define	DBG_C_DGAS 	0x0200
+#define	DBG_C_DIST	0x0400
+#define	DBG_C_LAST	0x0800
 
-#	define	DBG_C_GF	0b0001000000000000
-#	define	DBG_ZH16ERR	0b0010000000000000
-#	define	DBG_PHIGH	0b0100000000000000
-#	define	DBG_PLOW	0b1000000000000000
+#define	DBG_C_GF	0x1000
+#define	DBG_ZH16ERR	0x2000
+#define	DBG_PHIGH	0x4000
+#define	DBG_PLOW	0x8000
 
+#define	DBS_mode	0x0001
+#define	DBS_ppO2	0x0002
+#define	DBS_HE_sat	0x0004
+#define	DBS_ppO2chg 0x0008
+                    
+#define	DBS_SAT2l	0x0010
+#define	DBS_SAT2h	0x0020
+#define	DBS_GFLOW2l	0x0040
+#define	DBS_GFLOW2h	0x0080
+                    
+#define	DBS_GFHGH2l	0x0100
+#define	DBS_GFHGH2h	0x0200
+#define	DBS_GASO22l	0x0400
+#define	DBS_GASO22h	0x0800
+                    
+#define	DBS_DIST2h 	0x1000
+#define	DBS_LAST2h 	0x2000
+#define	DBS_DECOO2l	0x4000
+#define	DBS_DECOO2h	0x8000
 
-#	define	DBS_mode	0b0000000000000001
-#	define	DBS_ppO2	0b0000000000000010
-#	define	DBS_HE_sat	0b0000000000000100
-#	define	DBS_ppO2chg 0b0000000000001000
+#define	DBS2_PRES2h 0x0001
+#define	DBS2_PRES2l 0x0002
+#define	DBS2_SURF2l	0x0004
+#define	DBS2_SURF2h	0x0008
+                    
+#define DBS2_DESAT2l 0x0010
+#define DBS2_DESAT2h 0x0020
+#define	DBS2_GFDneg  0x0040
 
-#	define	DBS_SAT2l	0b0000000000010000
-#	define	DBS_SAT2h	0b0000000000100000
-#	define	DBS_GFLOW2l	0b0000000001000000
-#	define	DBS_GFLOW2h	0b0000000010000000
-
-#	define	DBS_GFHGH2l	0b0000000100000000
-#	define	DBS_GFHGH2h	0b0000001000000000
-#	define	DBS_GASO22l	0b0000010000000000
-#	define	DBS_GASO22h	0b0000100000000000
-
-#	define	DBS_DIST2h 	0b0001000000000000
-#	define	DBS_LAST2h 	0b0010000000000000
-#	define	DBS_DECOO2l	0b0100000000000000
-#	define	DBS_DECOO2h	0b1000000000000000
-
-
-#	define	DBS2_PRES2h 0b0000000000000001
-#	define	DBS2_PRES2l 0b0000000000000010
-#	define	DBS2_SURF2l	0b0000000000000100
-#	define	DBS2_SURF2h	0b0000000000001000
-
-#	define DBS2_DESAT2l 0b0000000000010000
-#	define DBS2_DESAT2h 0b0000000000100000
-#	define	DBS2_GFDneg 0b0000000001000000
-#	define	DBS2_ 0b000000000000000
-
-#	define	DBS2_ 0b000000000000000
-#	define	DBS2_ 0b000000000000000
-#	define	DBS2_ 0b000000000000000
-#	define	DBS2_ 0b000000000000000
-
-#	define	MBAR_REACH_GASCHANGE_AUTO_CHANGE_OFF	150
+#define	MBAR_REACH_GASCHANGE_AUTO_CHANGE_OFF	150
 
 // *************************
 // ** P R O T O T Y P E S **
@@ -100,5 +92,24 @@ extern void deco_calc_CNS_fraction(void);
 extern void deco_clear_CNS_fraction(void);
 extern void deco_push_tissues_to_vault(void);
 extern void deco_pull_tissues_from_vault(void);
+
+// ***********************************************
+// **         Allow compile on VisualC          **
+// ***********************************************
+
+#ifdef WIN32
+    // Some keywords just dont exists on Visual C++:
+#   define CROSS_COMPILE
+#   define __18CXX
+#   define ram
+#   define rom
+#   define overlay
+#   define PARAMETER
+
+    // Avoid warnings about float/double mismatches:
+#   pragma warning(disable: 4244 4068 4305)
+#else
+#   define PARAMETER static
+#endif
 
 //////////////////////////////////////////////////////////////////////////////

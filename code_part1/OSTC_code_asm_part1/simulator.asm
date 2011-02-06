@@ -158,23 +158,34 @@ simulator_show_decoplan:
         call	PLED_simdata_screen
         call	divemenu_see_decoplan
         
+        WIN_LEFT .0
+        call    PLED_standard_color
+
         ; Display TTS, if any...
         movff   int_O_ascenttime+0,lo
         movff   int_O_ascenttime+1,hi
         movf    lo,W
         iorwf   hi,W
         bz      simulator_decoplan_notts
-
-        WIN_LEFT .0
-        WIN_TOP .160
-        call    PLED_standard_color
         
-        STRCPY  "TTS: "
+        WIN_TOP .160
+        lfsr    FSR2, letter
+        OUTPUTTEXT .85                  ; TTS (for translation).
+        STRCAT  ": "
+        bsf		leftbind
+        output_16
+        STRCAT_PRINT    "'"		
+
+simulator_decoplan_notts:
+        movff   int_I_pres_surface+0,lo
+        movff   int_I_pres_surface+1,hi
+
+        WIN_TOP .190                    ; Print Pamb used for compute
+        lfsr    FSR2, letter
         bsf		leftbind
         output_16
         bcf		leftbind
-        STRCAT_PRINT    "'"		
-simulator_decoplan_notts:
+        STRCAT_PRINT    " mbar"
 
         WIN_INVERT	.1	                ; Init new Wordprocessor	
         DISPLAYTEXT	.188		        ; Sim. Results:

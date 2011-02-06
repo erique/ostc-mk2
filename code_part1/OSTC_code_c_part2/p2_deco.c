@@ -122,7 +122,7 @@ static void calc_nextdecodepth(void);
 // ***********************************************
 
 #include "p2_definitions.h"
-#include "../OSTC_code_c_part2/shared_definitions.h"
+#include "shared_definitions.h"
 
 //---- Bank 3 parameters -----------------------------------------------------
 #pragma udata bank4=0x400
@@ -407,14 +407,14 @@ static void check_ndl(void)
 	{
 		char_O_NDL_at_20mtr = char_O_nullzeit;  // change to max bottom time.
 		if( char_O_NDL_at_20mtr == 255)         // and avoid confusion.
-			char_O_NDL_at_20mtr == 254;
+			char_O_NDL_at_20mtr = 254;
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // DBG - multi main during dive
 //
-static void check_dbg(static char is_post_check)
+static void check_dbg(PARAMETER char is_post_check)
 {
 	overlay unsigned int temp_DBS = 0;
     overlay char i;                     // Local loop index.
@@ -484,8 +484,12 @@ static void check_post_dbg(void)
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-static int read_custom_function(static unsigned char cf)
+static int read_custom_function(PARAMETER unsigned char cf)
 {
+#ifdef CROSS_COMPILE
+    extern unsigned short custom_functions[];
+    return custom_functions[cf];
+#else
     extern unsigned char hi, lo;
     extern void getcustom15();
     _asm
@@ -494,6 +498,7 @@ static int read_custom_function(static unsigned char cf)
         movff   lo,PRODL
         movff   hi,PRODH
     _endasm
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -501,8 +506,9 @@ static int read_custom_function(static unsigned char cf)
 // If period == 0 : 2sec interval
 //              1 : 1 min interval
 //              2 : 10 min interval.
-static void read_buhlmann_coeffifients(static char period)
+static void read_buhlmann_coefficients(PARAMETER char period)
 {
+#ifndef CROSS_COMPILE
     // Note: we don't use far rom pointer, because the
     //       24 bits is to complex, hence we have to set
     //       the UPPER page ourself...
@@ -511,6 +517,7 @@ static void read_buhlmann_coeffifients(static char period)
         movlw 1
         movwf TBLPTRU,0
     _endasm
+#endif
 
     var_N2_a = buhlmann_a[ci];
     var_N2_b = buhlmann_b[ci];
@@ -782,6 +789,7 @@ static void temp_tissue_safety(void)
 
 void fillDataStack(void)
 {
+#ifndef CROSS_COMPILE
     _asm
         LFSR    1,C_STACK
         MOVLW   0xCC
@@ -792,25 +800,31 @@ loop:   MOVWF   POSTINC1,0
         LFSR    1,C_STACK
         LFSR    2,C_STACK
     _endasm
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // When calling C code from ASM context, the data stack pointer and
 // frames should be reset. Bank3 is dedicated to the stack (see the
 // .lkr script).
-#ifdef __DEBUG
-#   define RESET_C_STACK fillDataStack();
+#ifdef CROSS_COMPILE
+#       define RESET_C_STACK
 #else
-#   define RESET_C_STACK    \
-    _asm                    \
-        LFSR    1, C_STACK  \
-        LFSR    2, C_STACK  \
-    _endasm
+#   ifdef __DEBUG
+#       define RESET_C_STACK fillDataStack();
+#   else
+#       define RESET_C_STACK    \
+        _asm                    \
+            LFSR    1, C_STACK  \
+            LFSR    2, C_STACK  \
+        _endasm
+#   endif
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
 // Called every 2 seconds during diving.
 // update tissues every time.
+//
 // Every 6 seconds (or slower when TTS > 16):
 //    - update deco table (char_O_deco_time/depth) with new values.
 //    - update ascent time,
@@ -833,12 +847,14 @@ void deco_calc_without_deco(void)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
+// Reset decompression model:
+// + Set all tissues to equilibrium with Air at ambient pressure.
+// + Reset last stop to 0m
+// + Reset all model output.
 void deco_clear_tissue(void)
 {
     RESET_C_STACK
     clear_tissue();
-    char_I_depth_last_deco	= 0;		// for compatibility with v.101pre_no_last_deco
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -885,7 +901,7 @@ static void clear_tissue(void)
         overlay float p = N2_ratio * (pres_respiration -  0.0627);
         pres_tissue[ci] = p;
         
-        read_buhlmann_coeffifients(-1);
+        read_buhlmann_coefficients(-1);
 
         p = (p - var_N2_a) * var_N2_b ;
         if( p < 0.0 )
@@ -902,6 +918,7 @@ static void clear_tissue(void)
     int_O_ascenttime = 0;
     char_O_gradient_factor = 0;
     char_O_relative_gradient_GF = 0;
+    char_I_depth_last_deco	= 0;		// for compatibility with v.101pre_no_last_deco
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1023,7 +1040,7 @@ void calc_hauptroutine_data_input(void)
     deco_He_ratio4      = char_I_deco_He_ratio4 / 100.0;
     deco_N2_ratio5      = char_I_deco_N2_ratio5 / 100.0;
     deco_He_ratio5      = char_I_deco_He_ratio5 / 100.0;
-    float_deco_distance = char_I_deco_distance / 100.0;
+    float_deco_distance = char_I_deco_distance / 100.0;     // Get offset is in mbar.
 
     // ____________________________________________________
     //
@@ -1086,7 +1103,7 @@ void calc_hauptroutine_data_input(void)
 
     const_ppO2 = (float)char_I_const_ppO2 / 100.0;
     deco_ppO2_change = (float)char_I_deco_ppO2_change / 99.95 + pres_surface;
-    deco_ppO2_change = deco_ppO2_change + float_deco_distance;
+    deco_ppO2_change += float_deco_distance;
     deco_ppO2 = (float)char_I_deco_ppO2 / 100.0;
     float_desaturation_multiplier = char_I_desaturation_multiplier / 100.0;
     float_saturation_multiplier = char_I_saturation_multiplier / 100.0;
@@ -1126,7 +1143,7 @@ void calc_hauptroutine_update_tissues(void)
  		calc_tissue_1_min();
 
  	int_O_gtissue_limit = (int)(pres_tissue_limit[char_O_gtissue_no] * 1000);
-	int_O_gtissue_press = (int)((pres_tissue[char_O_gtissue_no] + pres_tissue[char_O_gtissue_no+16]) * 1000);
+	int_O_gtissue_press = (int)((pres_tissue[char_O_gtissue_no] + (pres_tissue+16)[char_O_gtissue_no]) * 1000);
  	if (char_I_deco_model == 1)
  	{
 		temp1 = temp1 * GF_high;
@@ -1298,14 +1315,14 @@ void sim_ascent_to_first_stop(void)
 //
 // optimized in v.101
 //
-static void calc_tissue(static unsigned char period)
+static void calc_tissue(PARAMETER unsigned char period)
 {
     char_O_gtissue_no = 255;
     pres_gtissue_limit = 0.0;
     
     for (ci=0;ci<16;ci++)
     {
-        read_buhlmann_coeffifients(period);   // 2 sec or 1 min period.
+        read_buhlmann_coefficients(period);   // 2 sec or 1 min period.
 
         // N2
         temp_tissue = (temp_atem - pres_tissue[ci]) * var_N2_e;
@@ -1483,14 +1500,14 @@ void update_startvalues(void)
 //   + Do it on sim_pres_tissue, instead of pres_tissue.
 //   + Update GF_low state for GF decompression model.
 //
-static void sim_tissue(static unsigned char period)
+static void sim_tissue(PARAMETER unsigned char period)
 {
     sim_pres_gtissue_limit = 0.0;
     sim_gtissue_no = 255;
 
     for (ci=0;ci<16;ci++)
     {
-        read_buhlmann_coeffifients(period);  // 1 or 10 minute(s) interval
+        read_buhlmann_coefficients(period);  // 1 or 10 minute(s) interval
 
         // N2
         temp_tissue = (temp_atem - sim_pres_tissue[ci]) * var_N2_e;
@@ -1667,7 +1684,7 @@ static void calc_gradient_factor(void)
 //
 void deco_calc_desaturation_time(void)
 {
-    overlay int desat_time;     // For a particular compartiment, in min.
+    overlay unsigned int desat_time;    // For a particular compartiment, in min.
 
     RESET_C_STACK
 
@@ -1736,9 +1753,9 @@ void deco_calc_desaturation_time(void)
 
         // saturation_time (for flight)
         if (temp4 > temp2)
-            desat_time = (int)temp4;
+            desat_time = (unsigned int)temp4;
         else
-            desat_time = (int)temp2;
+            desat_time = (unsigned int)temp2;
          if(desat_time > int_O_desaturation_time)
         	int_O_desaturation_time = desat_time;
 
@@ -1800,6 +1817,7 @@ static void calc_wo_deco_step_1_min(void)
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+#ifndef CROSS_COMPILE
 void deco_hash(void)
 {
     overlay unsigned char md_i, md_j;   // Loop index.
@@ -1882,6 +1900,7 @@ void deco_hash(void)
         } // for md_i 16
     } // for md_pointer
 } // void deco_hash(void)
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // deco_clear_CNS_fraction
@@ -2016,4 +2035,6 @@ void deco_pull_tissues_from_vault(void)
 
 //////////////////////////////////////////////////////////////////////////////
 //
+#ifndef CROSS_COMPILE
 void main() {}
+#endif

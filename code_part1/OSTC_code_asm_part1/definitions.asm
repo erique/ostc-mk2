@@ -32,7 +32,7 @@
 
 ; International extension. Selecting messages source:
 ; Language (No define -> english_text.asm)
-#DEFINE	FRENCH  							; Use french_text.asm
+;#DEFINE	FRENCH  							; Use french_text.asm
 ;#DEFINE	GERMAN							; Use german_text.asm
 
 #DEFINE	logbook_profile_version	0x20        ; Do not touch!

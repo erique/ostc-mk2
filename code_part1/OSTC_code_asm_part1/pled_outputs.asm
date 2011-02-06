@@ -3022,7 +3022,14 @@ PLED_simdata_screen2_loop1:
 	rrcf	EEDATA			; roll flags into carry
 	decfsz	lo,F			; max. 5 times...
 	bra		PLED_simdata_screen2_loop1
-	
+
+	read_int_eeprom		d'33'	; First gas (1-5)?
+	movf	hi,W				; Current gas in WREG
+	cpfseq	EEDATA				; Is equal first gas?
+	bra		PLED_simdata_screen2_loop2	; No
+	bra		PLED_simdata_white	; Yes
+
+PLED_simdata_screen2_loop2:
 	btfss	STATUS,C		; test inactive flag
 	bra		PLED_simdata_grey	; Is inactive!
 	

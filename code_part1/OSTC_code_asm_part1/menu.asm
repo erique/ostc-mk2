@@ -448,7 +448,7 @@ show_salinity_value:
 	cpfslt	EEDATA					; Salinity higher limit
 	rcall	toggle_salinity_reset2	; Reset before display!
 	WIN_TOP		.95
-	WIN_LEFT	.83
+	WIN_LEFT	.90                 ; +7 for spanish
 	WIN_FONT 	FT_SMALL
 	lfsr	FSR2,letter
 	movff	EEDATA,lo

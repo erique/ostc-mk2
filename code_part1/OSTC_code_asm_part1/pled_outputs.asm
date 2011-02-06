@@ -507,7 +507,7 @@ PLED_display_deko2:
 
 PLED_simulator_data:
 	WIN_TOP		.65
-	WIN_LEFT	.105
+	WIN_LEFT	.112                    ; +7 for spanish.
 	WIN_FONT 	FT_SMALL
 	call	PLED_standard_color
 	lfsr	FSR2,letter
@@ -753,7 +753,7 @@ PLED_setup_menu_mask:
 	WIN_INVERT	.0	; Init new Wordprocessor	
 	DISPLAYTEXT .99			; Custom FunctionsI
 	DISPLAYTEXT	.153		; Custom FunctionsII
-	DISPLAYTEXTH	.276	; Salinity:
+	DISPLAYTEXTH .276	    ; Salinity:
 	DISPLAYTEXT .100		; Decotype:
 	DISPLAYTEXT	.142		; More...
 	DISPLAYTEXT .11			; Exit
@@ -1422,7 +1422,7 @@ PLED_depth:
 
 	movlw	.039
 	cpfslt	hi
-		bra	depth_greater_99_84mtr
+    bra	depth_greater_99_84mtr
 
 	btfsc	depth_greater_100m			; Was depth>100m during last call
 	call	PLED_clear_depth			; Yes, clear depth area

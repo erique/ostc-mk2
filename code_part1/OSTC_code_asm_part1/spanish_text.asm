@@ -131,13 +131,13 @@
     TCODE    .0,   .35,      "Este programa se"          ;068 This program is
     TCODE    .0,   .65,      "distribuye con el deseo"   ;069 distributed in the
     TCODE    .0,   .95,      "de que le resulte útil,"   ;070 hope that it will be
-    TCODE    .0,   .125,     "pero SIN GARANTÍAS"        ;071 useful, but WITHOUT
-    TCODE    .0,   .155,     "DE NINGÚN TIPO;"           ;072 ANY WARRANTY
+    TCODE    .0,   .125,     "pero SIN GARANTIAS"        ;071 useful, but WITHOUT
+    TCODE    .0,   .155,     "DE NINGUN TIPO;"           ;072 ANY WARRANTY
     TCODE    .0,   .185,     "ni siquiera con las"       ;073 even the implied
     TCODE    .0,   .215,     "garantías implícitas"      ;074 warranty of
     TCODE    .0,   .35,      "de COMERCIABILIDAD"        ;075 MERCHANTABILITY or
     TCODE    .0,   .65,      "o APTITUD PARA UN"         ;076 FITNESS FOR A
-    TCODE    .0,   .95,      "PROPÓSITO DETERMINADO."    ;077 PARTICULAR PURPOSE.
+    TCODE    .0,   .95,      "PROPOSITO DETERMINADO."    ;077 PARTICULAR PURPOSE.
     TCODE    .0,   .125,     "Para más información,"     ;078 See the GNU General
     TCODE    .0,   .155,     "consulte la Licencia"      ;079 Public License for
     TCODE    .0,   .185,     "Pública General de GNU:"   ;080 more details:
@@ -167,7 +167,7 @@
     TCODE    .85,   .125,    "Indicador"                 ;102 Gauge    
     TCODE    .85,   .125,    "Indi."                     ;103 Gauge
     TCODE    .85,   .125,    "ZH-L16 CC"                 ;104 ZH-L16 CC
-    TCODE    .0,    .0,      "¿Gas Activo?"              ;105 Active Gas?
+    TCODE    .0,    .0,      "¿Gas Activo? "             ;105 Active Gas?
     TCODE    .10,   .2,      "Conf.Gas - Listagas"       ;106 Gas Setup - Gaslist
     TCODE    .0,    .0,      "Prof. +"                   ;107 Depth +
     TCODE    .0,    .0,      "Prof. -"                   ;108 Depth -
@@ -179,7 +179,7 @@
     TCODE    .10,   .2,      "Información Batería"       ;114 Battery Information
     TCODE    .0,    .9,      "Ciclos:"                   ;115 Cycles:
     TCODE    .85,   .125,    "Apnea"                     ;116 Apnoe
-    TCODE    .0,    .18,     "Últ. Completo:"            ;117 Last Complete:
+    TCODE    .0,    .18,     "Ult. Completo:"            ;117 Last Complete:
     TCODE    .0,    .27,     "Vbatt Mínimo:"             ;118 Lowest Vbatt:
     TCODE    .0,    .36,     "Mínimo el:"                ;119 Lowest at:
     TCODE    .0,    .45,     "Tmín:"                     ;120 Tmin:
@@ -192,7 +192,7 @@
     TCODE    .100,  .0,      "Sal."                      ;127 Exit
     TCODE    .100,  .25,     "Borrar"                    ;128 Delete
     TCODE    .20,   .65,     "Depur:"                    ;129 Debug:
-    TCODE    .65,   .65,     "ACT"                       ;130 ON 
+    TCODE    .65,   .65,     "ACT"                       ;130 ON
     TCODE    .65,   .65,     "DES"                       ;131 OFF
     TCODE    .100,  .50,     "Borrtodo"                  ;132 Del. all
     TCODE    .0,    .0,      "¡Reinicio inesperado"      ;133 Unexpected reset from
@@ -322,7 +322,7 @@
     TCODE    .50,   .145,    "BatBaja!"                  ;246 LowBatt!
     TCODE    .20,   .125,    "Simulador"                 ;247 Simulator
     TCODE    .30,   .2,      "Simulador OSTC"            ;248 OSTC Simulator
-    TCODE    .20,   .35,     "InicioBuc."                ;249 Start Dive
+    TCODE    .20,   .35,     "Inicio Buc."               ;249 Start Dive
     TCODE    .100,  .25,     "+ 1m"                      ;250 + 1m
     TCODE    .100,  .50,     "- 1m"                      ;251 - 1m
     TCODE    .100,  .75,     "+10m"                      ;252 +10m
@@ -355,7 +355,7 @@
     TCODE    .0,    .125,    "más Detalles!"             ;275 for Details!
     TCODE    .20,   .95,     "Salinidad:"                ;276 Salinity:
 ;
-    TCODE    .20,   .65,     "TiempoFondo:"              ;277 Bottom Time:
+    TCODE    .20,   .65,     "Tiempo Fondo:"             ;277 Bottom Time:
     TCODE    .20,   .95,     "Prof. Max.:"               ;278 Max. Depth:
     TCODE    .20,   .125,    "Calcular Deco"             ;279 Calculate Deco
     TCODE    .20,   .155,    "Mostr. Plan Deco"          ;280 Show Decoplan

@@ -1,5 +1,5 @@
 ;==========================================================================
-; Font index exported ven. fÈvr. 4 2011 by FontIO.cpp 57 2010-11-24 23:24:47Z gascuel $ 
+; Font index exported dim. fÈvr. 6 2011 by FontIO.cpp 103 2011-02-04 22:26:15Z gascuel $ 
 ;==========================================================================
 aa_font28_chars		EQU	.116
 aa_font28_firstChar	EQU	' '
@@ -111,15 +111,15 @@ aa_font28_idx:
 			DW	aa_font28_bits + 0x0E17	; Ü 86
 			DW	aa_font28_bits + 0x0E62	; á 87
 			DW	aa_font28_bits + 0x0E91	; à 88
-			DW	aa_font28_bits + 0x0EB6	; â 89
-			DW	aa_font28_bits + 0x0EDB	; ä 8A
-			DW	aa_font28_bits + 0x0F00	; ã 8B
-			DW	aa_font28_bits + 0x0F25	; å 8C
-			DW	aa_font28_bits + 0x0F4A	; ç 8D
-			DW	aa_font28_bits + 0x0F6F	; é 8E
-			DW	aa_font28_bits + 0x0F94	; è 8F
-			DW	aa_font28_bits + 0x0FB9	; ê 90
-			DW	aa_font28_bits + 0x103E	; ë 91
-			DW	aa_font28_bits + 0x1089	; í 92
-			DW	aa_font28_bits + 0x10AE	; ì 93
-			DW	aa_font28_bits + 0x10C5	; END OF INDEX
+			DW	aa_font28_bits + 0x0ED4	; â 89
+			DW	aa_font28_bits + 0x0EED	; ä 8A
+			DW	aa_font28_bits + 0x0F20	; ã 8B
+			DW	aa_font28_bits + 0x0F3F	; å 8C
+			DW	aa_font28_bits + 0x0F64	; ç 8D
+			DW	aa_font28_bits + 0x0F70	; é 8E
+			DW	aa_font28_bits + 0x0F95	; è 8F
+			DW	aa_font28_bits + 0x0FBA	; ê 90
+			DW	aa_font28_bits + 0x103F	; ë 91
+			DW	aa_font28_bits + 0x108A	; í 92
+			DW	aa_font28_bits + 0x10AF	; ì 93
+			DW	aa_font28_bits + 0x10C6	; END OF INDEX

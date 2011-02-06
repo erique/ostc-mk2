@@ -1385,39 +1385,35 @@ static void calc_nullzeit(void)
 	{
   		backup_sim_pres_tissue();
   		sim_tissue_10min();
-  		char_O_nullzeit += 10;
 
 		if (char_I_deco_model == 1)
 			temp1 = GF_high * sim_pres_gtissue_diff + sim_pres_gtissue;
 		else
 			temp1 = sim_pres_gtissue_limit;
 		if (temp1 > temp_surface)  // changed in v.102 , if guiding tissue can not be exposed to surface pressure immediately
-			loop = 255;
+        {
+  		    restore_sim_pres_tissue();
+            break;
+        }
+        // Validate once we know its good.
+  		char_O_nullzeit += 10;
  	}
-
- 	if (loop == 255)
- 	{
-  		restore_sim_pres_tissue();
-  		char_O_nullzeit -= 10;
- 	} //if loop == 255
 
  	if (char_O_nullzeit < 60)
  	{
      	for(loop=1; loop <= 10; loop++)
 		{
    			sim_tissue_1min();
-   			char_O_nullzeit = char_O_nullzeit + 1;
     		if (char_I_deco_model == 1)
     			temp1 = GF_high * sim_pres_gtissue_diff + sim_pres_gtissue;
     		else
     			temp1 = sim_pres_gtissue_limit;
     		if (temp1 > temp_surface)  // changed in v.102 , if guiding tissue can not be exposed to surface pressure immediately
-    			loop = 255;
+                break;
+   			char_O_nullzeit++;
   		}
-  		if (loop == 255)
-   			char_O_nullzeit = char_O_nullzeit - 1;
- 	} // if char_O_nullzeit < 60
-} //calc_nullzeit
+ 	}
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // backup_sim_pres_tissue

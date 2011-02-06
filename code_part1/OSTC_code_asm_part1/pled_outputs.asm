@@ -476,7 +476,7 @@ PLED_display_deko:
 
 	call	PLED_standard_color
 	lfsr	FSR2,letter
-	movff	int_O_ascenttime+0,lo       ; complete ascend time
+	movff	int_O_ascenttime+0,lo       ; TTS
 	movff	int_O_ascenttime+1,hi       ; on 16bits
 	bcf     leftbind
 	output_16
@@ -686,7 +686,7 @@ PLED_show_cf32_cf33_cf29:; Display GF_LOW, GF_HIGH and last deco in the customvi
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
-	GETCUSTOM8	d'32'
+	GETCUSTOM8	d'32'				; GF_lo
 	movwf	lo
 
     STRCPY  "GF_lo:"
@@ -695,7 +695,7 @@ PLED_show_cf32_cf33_cf29:; Display GF_LOW, GF_HIGH and last deco in the customvi
 	STRCAT_PRINT  "%"
 
 	WIN_TOP		.50
-	GETCUSTOM8	d'33'
+	GETCUSTOM8	d'33'				; GF_hi
 	movwf	lo
     STRCPY  "GF_hi:"
 	bsf		leftbind

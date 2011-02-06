@@ -1,10 +1,11 @@
 New in 1.81 beta:
 BETA Version - Do NOT use for diving!
-CHANGE: ZH-L16 display all stops (up to 93m), as ZH-L16-GF mode.
-BUGFIX: Don't wrap TTS sum (still limit each stop display (not compute) to ~4h).
-NEW: CF54: Display shallowest stop first (decoplan and divemode).
+CHANGE: ZH-L16 display all stops (up to 93m), as ZH-L16-GF mode
+BUGFIX: Don't wrap TTS sum (still limit each stop display (not compute) to ~4h)
+NEW: CF54: =1:Display shallowest stop first (decoplan and divemode)
 BUGFIX: Inactive gases greyed-out in Simulator results
 BUGFIX: "Better Gas" now works for Gas 4 and Gas 5, as well
+NEW: GF_lo and GF_hi stored in logbook
 
 New in 1.80 Stable:
 Stable release

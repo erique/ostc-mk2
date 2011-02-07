@@ -25,7 +25,7 @@
 ; known bugs:
 ; ToDo: 
 
-texts	    code_pack    0x15000
+texts code_pack    0x15000
 
 TCODE_1 macro   x, y, text
     ; Compile-time checking on provided parameters:

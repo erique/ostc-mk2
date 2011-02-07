@@ -45,7 +45,8 @@
 ;   case, you should keep EXACTLY the same ponctuation AND TRAILING SPACES.
 ;
 ; * Ascii chars: we can support a few specific chars. öäüß for German.
-;   éèêç for French. If you really absolutetly need more, ask...
+;   éèêç for French. áíóúñ¡¿ for Spanish.
+;   If you really, absolutly, need more: ask...
 ;
 ; * Do not translate comments (everithing after the ;), because they are
 ;   used for maintenance.
@@ -67,10 +68,10 @@
     TCODE    .20,  .95,      "Reset Menu"                ;009 Reset Menu
     TCODE    .20,  .125,     "Setup"                     ;010 Setup
     TCODE    .20,  .185,     "Exit"                      ;011 Exit
-    TCODE    .115, .2,       "Wait..."                   ;012 Wait..
+    TCODE    .115, .2,       "Wait..."                   ;012 Wait...
     TCODE    .0,   .24,      "MD2 Hash:"                 ;013 MD2 Hash:
-    TCODE    .0,   .0,       "Desat"                     ;014 Desat
-    TCODE    .50,  .2,       "Interface"                 ;015 Interface
+    TCODE    .0,   .0,       "Desat"                     ;014 Desat         (Desaturation count-down)
+    TCODE    .50,  .2,       "Interface"                 ;015 Interface		(Connected to USB)
     TCODE    .10,  .30,      "Start"                     ;016 Start
     TCODE    .10,  .55,      "Data"                      ;017 Data
     TCODE    .10,  .80,      "Header"                    ;018 Header
@@ -85,19 +86,19 @@
     TCODE    .14,  .2,       "Custom Functions I"        ;027 Custom Functions I
     TCODE    .40,  .2,       "Reset Menu"                ;028 Reset Menu
     TCODE    .50,  .2,       "Set Time:"                 ;029 Set Time:
-    TCODE    .100, .50,      "SetMarker"                 ;030 SetMarker
+    TCODE    .100, .50,      "SetMarker"                 ;030 SetMarker         (Add a mark in logbook profile)
     TCODE    .100, .25,      "Decoplan"                  ;031 Decoplan
     TCODE    .100, .0,       "Gaslist"                   ;032 Gaslist
-    TCODE    .100, .50,      "ResetAvr"                  ;033 ResetAvr
-    TCODE    .100, .100,     "Exit"                      ;034 Exit
-    TCODE    .0,   .0,       "NoFly"                     ;035 NoFly
+    TCODE    .100, .50,      "ResetAvr"                  ;033 ResetAvr          (Reset average depth)
+    TCODE    .100, .100,     "Exit"                      ;034 Exit		        (Exit current menu)
+    TCODE    .0,   .0,       "NoFly"                     ;035 NoFly		        (No-flight count-down)
 ;
 ; 32 custom function descriptors I (FIXED LENGTH = 15 chars).
-    TCODE    .40,  .35,      "Start Dive  [m]"           ;036 Start Dive  [m]
-    TCODE    .40,  .35,      "End Dive    [m]"           ;037 End Dive    [m]
-    TCODE    .40,  .35,      "End Delay [min]"           ;038 End Delay [min]
+    TCODE    .40,  .35,      "Start Dive  [m]"           ;036 Start Dive  [m]	(depth to switch to dive mode)
+    TCODE    .40,  .35,      "End Dive    [m]"           ;037 End Dive    [m]	(depth to switch back to surface mode)
+    TCODE    .40,  .35,      "End Delay [min]"           ;038 End Delay [min]  	(duration dive screen stays after end of dive)
     TCODE    .40,  .35,      "Power Off [min]"           ;039 Power Off [min]
-    TCODE    .40,  .35,      "Pre-menu  [min]"           ;040 Pre-menu  [min]
+    TCODE    .40,  .35,      "Pre-menu  [min]"           ;040 Pre-menu  [min]	(Delais to keep surface-mode menus displayed)
     TCODE    .40,  .35,      "velocity[m/min]"           ;041 velocity[m/min]
     TCODE    .40,  .35,      "Wake-up  [mBar]"           ;042 Wake-up  [mBar]
     TCODE    .40,  .35,      "max.Surf.[mBar]"           ;043 max.Surf.[mBar]
@@ -106,7 +107,7 @@
     TCODE    .40,  .35,      "Dive menus[min]"           ;046 Dive menus[min]
     TCODE    .40,  .35,      "Saturate x  [%]"           ;047 Saturate x  [%]
     TCODE    .40,  .35,      "Desaturate x[%]"           ;048 Desaturate x[%]
-    TCODE    .40,  .35,      "NoFly Ratio [%]"           ;049 NoFly Ratio [%]
+    TCODE    .40,  .35,      "NoFly Ratio [%]"           ;049 NoFly Ratio [%]	(Grandient factor tolerance for no-flight countdown).
     TCODE    .40,  .35,      "GF alarm 1  [%]"           ;050 GF alarm 1  [%]
     TCODE    .40,  .35,      "CNSshow surf[%]"           ;051 CNSshow surf[%]
     TCODE    .40,  .35,      "Deco Offset [m]"           ;052 Deco Offset [m]
@@ -228,7 +229,7 @@
     TCODE    .40,   .35,     "Adjust fixed SP"           ;161 Adjust fixed SP
     TCODE    .40,   .35,     "Warn Ceiling   "           ;162 Warn Ceiling
     TCODE    .40,   .35,     "Mix type icons "           ;163 Mix type icons
-    TCODE    .40,   .35,     "Blink BetterGas"           ;164 Blink BetterGas
+    TCODE    .40,   .35,     "Blink BetterGas"           ;164 Blink BetterGas	(Remainder in divemode to switch to a bteter decompression gas).
     TCODE    .40,   .35,     "DepthWarn[mBar]"           ;165 DepthWarn[mBar]
     TCODE    .40,   .35,     "CNS warning [%]"           ;166 CNS warning [%]
     TCODE    .40,   .35,     "GF warning  [%]"           ;167 GF warning  [%]
@@ -258,7 +259,7 @@
     TCODE    .90,   .25,     "Surface"                   ;189 Surface
     TCODE    .0,    .0,      "ppO2 +"                    ;190 ppO2 +
     TCODE    .0,    .0,      "ppO2 -"                    ;191 ppO2 -
-    TCODE    .0,    .0,      "Dil."                      ;192 Dil.
+    TCODE    .0,    .0,      "Dil."                      ;192 Dil.			       (Rebreather diluant)
 ; ZH-L16 mode description
     TCODE    .0,    .35,     "Decotype: ZH-L16 OC"       ;193 Decotype: ZH-L16 OC
     TCODE    .0,    .65,     "For Open Circuit   "       ;194 For Open Circuit

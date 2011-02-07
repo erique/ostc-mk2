@@ -31,8 +31,8 @@
 #DEFINE	max_custom_number		d'53'		; Number of last used custom function
 
 ; International extension. Selecting messages source:
-; Language (No define -> english_text.asm)
-;#DEFINE	FRENCH  						; Use french_text.asm
+;#DEFINE     ENGLISH                         ; Use english_text.asm
+#DEFINE	FRENCH  						; Use french_text.asm
 ;#DEFINE	GERMAN							; Use german_text.asm
 ;#DEFINE	SPANISH							; Use spanish_text.asm
 

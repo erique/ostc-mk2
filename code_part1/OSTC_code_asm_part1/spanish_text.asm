@@ -45,7 +45,8 @@
 ;   case, you should keep EXACTLY the same ponctuation AND TRAILING SPACES.
 ;
 ; * Ascii chars: we can support a few specific chars. φδόί for German.
-;   ιθ for French. If you really absolutetly need more, ask...
+;   ιθκη for French. ανσϊρ‘Ώ for Spanish.
+;   If you really, absolutly, need more: ask...
 ;
 ; * Do not translate comments (everithing after the ;), because they are
 ;   used for maintenance.

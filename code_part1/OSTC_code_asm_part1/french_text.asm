@@ -377,4 +377,7 @@
     TCODE    .20,   .125,    "+1 mbar"                   ;292 +1 mbar
     TCODE    .20,   .155,    "-1 mbar"                   ;293 -1 mbar
     TCODE    .85,   .185,    "Alt: "                     ;294 Alt: 
+;
+	TCODE    .20,   .125,    "Show raw data"             ;295 Show raw data
+	TCODE    .50,    .2,     "Raw Data:"                 ;296 Raw Data:
 ;=============================================================================

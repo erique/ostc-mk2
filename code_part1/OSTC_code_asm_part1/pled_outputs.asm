@@ -733,6 +733,132 @@ PLED_menu_cursor:
 	STRCPY_PRINT "\xB7"
 	return
 
+PLED_static_raw_data:
+	WIN_FONT 	FT_SMALL
+	WIN_LEFT	.0
+	WIN_TOP		.27
+	STRCPY  "C1:"
+	movff	C1+0,lo
+	movff	C1+1,hi
+	output_16
+	call	word_processor
+	WIN_LEFT	.80
+	WIN_TOP		.27
+	STRCPY  "C2:"
+	movff	C2+0,lo
+	movff	C2+1,hi
+	output_16
+	call	word_processor
+
+	WIN_LEFT	.0
+	WIN_TOP		.52
+	STRCPY  "C3:"
+	movff	C3+0,lo
+	movff	C3+1,hi
+	output_16
+	call	word_processor
+	WIN_LEFT	.80
+	WIN_TOP		.52
+	STRCPY  "C4:"
+	movff	C4+0,lo
+	movff	C4+1,hi
+	output_16
+	call	word_processor
+
+	WIN_LEFT	.0
+	WIN_TOP		.77
+	STRCPY  "C5:"
+	movff	C5+0,lo
+	movff	C5+1,hi
+	output_16
+	call	word_processor
+	WIN_LEFT	.80
+	WIN_TOP		.77
+	STRCPY  "C6:"
+	movff	C6+0,lo
+	movff	C6+1,hi
+	output_16
+	call	word_processor
+	return
+
+PLED_update_raw_data:
+	WIN_LEFT	.0
+	WIN_TOP		.102
+	STRCPY  "D1:"
+	movff	D1+0,lo
+	movff	D1+1,hi
+	output_16
+	call	word_processor
+	WIN_LEFT	.80
+	WIN_TOP		.102
+	STRCPY  "D2:"
+	movff	D2+0,lo
+	movff	D2+1,hi
+	output_16
+	call	word_processor
+
+	WIN_LEFT	.0
+	WIN_TOP		.127
+	STRCPY  "OFF:"
+	movff	OFF+0,lo
+	movff	OFF+1,hi
+	output_16
+	call	word_processor
+	WIN_LEFT	.80
+	WIN_TOP		.127
+	STRCPY  "SENS:"
+	movff	SENS+0,lo
+	movff	SENS+1,hi
+	output_16
+	call	word_processor
+
+	WIN_LEFT	.0
+	WIN_TOP		.152
+	STRCPY  "xdT:"
+	movff	xdT+0,lo
+	movff	xdT+1,hi
+	output_16
+	call	word_processor
+	WIN_LEFT	.80
+	WIN_TOP		.152
+	STRCPY  "xdT2:"
+	movff	xdT2+0,lo
+	movff	xdT2+1,hi
+	output_16
+	call	word_processor
+
+	WIN_LEFT	.0
+	WIN_TOP		.177
+	STRCPY  "amb:"
+	movff	amb_pressure+0,lo
+	movff	amb_pressure+1,hi
+	output_16
+	call	word_processor
+	WIN_LEFT	.80
+	WIN_TOP		.177
+	STRCPY  "temp:"
+	movff	temperature+0,lo
+	movff	temperature+1,hi
+	output_16
+	call	word_processor
+
+	call	get_battery_voltage			; get battery voltage
+	WIN_LEFT	.0
+	WIN_TOP		.202
+	STRCPY  "AD0:"
+	movff	ADRESL,lo
+	movff	ADRESH,hi
+	output_16
+	call	word_processor
+	WIN_LEFT	.80
+	WIN_TOP		.202
+	STRCPY  "BATT:"
+	movff	batt_voltage+0,lo
+	movff	batt_voltage+1,hi
+	output_16
+	call	word_processor
+	return
+
 PLED_menu_mask:
 	call	PLED_topline_box
 	WIN_INVERT	.1	; Init new Wordprocessor
@@ -767,6 +893,7 @@ PLED_more_setup_menu_mask:
 	DISPLAYTEXTH	.257	; Date format:
 	DISPLAYTEXT		.129	; Debug: 
 	DISPLAYTEXT		.187	; Show License
+	DISPLAYTEXTH	.295	; Show raw data	
 	
 	DISPLAYTEXT .11			; Exit
 	return	

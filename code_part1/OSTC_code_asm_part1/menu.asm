@@ -359,7 +359,7 @@ more_setup_menu3a:
 more_setup_menu_loop:
 	call	check_switches_menu
 
-	movlw	d'4'				; x-1 menu entries
+	movlw	d'5'				; x-1 menu entries
 	cpfseq	menupos
 	bra		more_setup_menu_loop2
 	movlw	d'6'
@@ -400,12 +400,65 @@ do_more_setup_menu:								; calls submenu
 	dcfsnz	menupos,F
 	bra		show_license
 	dcfsnz	menupos,F
-	bra		setup_menu						; spare
+	bra		show_rawdata
 	dcfsnz	menupos,F
 	bra		setup_menu						; spare
 	movlw	d'5'					; set cursor to "More again"
 	movwf	menupos
 	bra		setup_menu2						; exit...
+
+show_rawdata:						; Displays Sensor raw data
+	call	PLED_ClearScreen
+	call	PLED_topline_box
+	WIN_INVERT	.1	; Init new Wordprocessor
+	DISPLAYTEXTH	.296		; Raw Data:
+	WIN_INVERT	.0	; Init new Wordprocessor
+
+	call	PLED_static_raw_data
+
+	clrf	timeout_counter2
+	bcf		sleepmode
+	bcf		menubit2
+	bcf		menubit3
+	bsf		menubit
+	bcf		switch_left
+	bcf		switch_right
+show_rawdata_loop:
+	btfsc	switch_left					; Ack?
+	bsf		menubit2
+	btfsc	switch_right				; Ack?
+	bsf		menubit2
+
+	btfsc	menubit2
+	bra		show_rawdata_exit
+
+	btfss	menubit
+	goto	restart						; exit menu, restart and enter surfmode
+
+	btfsc	onesecupdate
+	call	timeout_surfmode
+
+	btfsc	onesecupdate
+	call	PLED_update_raw_data
+
+	btfsc	onesecupdate
+	call	set_dive_modes
+
+	bcf		onesecupdate				; End of one second tasks
+
+	btfsc	sleepmode
+	bra		show_rawdata_exit			; Exit
+
+	btfsc	divemode
+	goto	restart						; exit menu, restart and enter divemode
+
+	bra		show_rawdata_loop
+
+show_rawdata_exit:	
+	movlw	d'4'
+	movwf	menupos
+	bcf		switch_right
+	bra		more_setup_menu2			; return to "more menu" loop
 
 show_license:
 	call	startup_screen1				;1/2

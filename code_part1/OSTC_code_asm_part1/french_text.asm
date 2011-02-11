@@ -19,8 +19,8 @@
 ; History:
 ; 2007/10/13 : Initial version by Matthias Heinrichs, info@heinrichsweikamp.com
 ; 2008/05/24 : MW.
-; 2011/02/02 : Jean-Do Gascuel : split into different files for multi-lingual support
-; 2011/02/07 : Pierre Vidalot : translation to french
+; 2011/02/02 : Jean-Do Gascuel: split into different files for multi-lingual support
+; 2011/02/09 : Pierre Vidalot: French translation.
 ;
 ; known bugs:
 ; ToDo: 
@@ -66,8 +66,8 @@
     TCODE    .20,  .35,      "Carnet de plongées"        ;006 Logbook
     TCODE    .20,  .65,      "Réglage Gaz"               ;007 Gas Setup
     TCODE    .20,  .35,      "Réglage Heure"             ;008 Set Time
-    TCODE    .20,  .95,      "Menu RaZ"                  ;009 Reset Menu
-    TCODE    .20,  .125,     "Configuration"             ;010 Setup
+    TCODE    .20,  .95,      "Remises à zéro"            ;009 Reset Menu
+    TCODE    .20,  .125,     "Menu Réglages"             ;010 Setup
     TCODE    .20,  .185,     "Sortir"                    ;011 Exit
     TCODE    .115, .2,       "Attendre..."               ;012 Wait..
     TCODE    .0,   .24,      "Hash MD2:"                 ;013 MD2 Hash:
@@ -80,16 +80,16 @@
     TCODE    .10,  .130,     "Fait."                     ;020 Done.
     TCODE    .20,  .35,      "Annuler RaZ"               ;021 Cancel Reset
     TCODE    .32,  .65,      "Heure:"                    ;022 Time:
-    TCODE    .32,  .95,      "Date:"                     ;023 Date:
+    TCODE    .32,  .95,      "Date :"                    ;023 Date:
     TCODE    .32,  .155,     "Rég. Heures"               ;024 Set Hours
     TCODE    .6,   .0,       "Initialisation..."         ;025 Reset...
     TCODE    .55,  .2,       "Carnet"                    ;026 Logbook
     TCODE    .14,  .2,       "Config Fonctions I"        ;027 Custom Functions I
-    TCODE    .40,  .2,       "Menu RaZ"                  ;028 Reset Menu
+    TCODE    .31,  .2,       "Remises à zéro:"           ;028 Reset Menu
     TCODE    .50,  .2,       "Reg.Heure:"                ;029 Set Time:
     TCODE    .100, .50,      "Repère"                    ;030 SetMarker         (Add a mark in logbook profile)
-    TCODE    .100, .25,      "PlanDéco"                  ;031 Decoplan
-    TCODE    .100, .0,       "ListeGaz"                  ;032 Gaslist
+    TCODE    .100, .25,      "Paliers"                   ;031 Decoplan
+    TCODE    .100, .0,       "Liste Gaz"                 ;032 Gaslist
     TCODE    .100, .50,      "RazMoyn."                  ;033 ResetAvr          (Reset average depth)
     TCODE    .100, .100,     "Sortir"                    ;034 Exit              (Exit current menu)
     TCODE    .0,   .0,       "SansAvion"                 ;035 NoFly             (No-flight count-down)
@@ -106,9 +106,9 @@
     TCODE    .40,  .35,      "Affichage GF[%]"           ;044 GF display  [%]
     TCODE    .40,  .35,      "Aff. O2 min [%]"           ;045 min. O2 Dis.[%]
     TCODE    .40,  .35,      "MenusPlong[min]"           ;046 Dive menus[min]
-    TCODE    .40,  .35,      "Saturation  [%]"           ;047 Saturate x  [%]
-    TCODE    .40,  .35,      "Desaturation[%]"           ;048 Desaturate x[%]
-    TCODE    .40,  .35,      "Seuil avion [%]"           ;049 NoFly Ratio [%]	(Grandient factor tolerance for no-flight countdown).
+    TCODE    .40,  .35,      "Saturat. x  [%]"           ;047 Saturate x  [%]
+    TCODE    .40,  .35,      "Desaturat. x[%]"           ;048 Desaturate x[%]
+    TCODE    .40,  .35,      "NoFly Ratio [%]"           ;049 NoFly Ratio [%]	(Grandient factor tolerance for no-flight countdown).
     TCODE    .40,  .35,      "Alarme GF   [%]"           ;050 GF alarm 1  [%]
     TCODE    .40,  .35,      "Aff.CNS Surf[%]"           ;051 CNSshow surf[%]
     TCODE    .40,  .35,      "Décal. Déco [m]"           ;052 Deco Offset [m]
@@ -139,21 +139,21 @@
     TCODE    .0,   .215,     "MARCHANDE ou"              ;074 warranty of
     TCODE    .0,   .35,      "D'ADEQUATION A UN"         ;075 MERCHANTABILITY or
     TCODE    .0,   .65,      "USAGE PARTICULIER."        ;076 FITNESS FOR A
-    TCODE    .0,   .95,      "Référez-vous à la"         ;077 PARTICULAR PURPOSE.
+    TCODE    .0,   .95,      "Référez-vous a la"         ;077 PARTICULAR PURPOSE.
     TCODE    .0,   .125,     "Licence Publique"          ;078 See the GNU General
     TCODE    .0,   .155,     "Générale GNU pour"         ;079 Public License for
     TCODE    .0,   .185,     "plus de détails:"          ;080 more details:
     TCODE    .0,   .215,     "www.heinrichsweikamp.de"   ;081 www.heinrichsweikamp.de
 ; end of licence
 ;
-    TCODE    .102,  .54,     "Palier"                    ;082 Decostop
+    TCODE    .118,  .54,     "Palier"                    ;082 Decostop
     TCODE    .0,    .0,      "m/min"                     ;083 m/min
-    TCODE    .80,   .113,    "Sans Palier"               ;084 No Stop
+    TCODE    .87,   .113,    "SansPalier"                ;084 No Stop
     TCODE    .135,  .113,    "DTR"                       ;085 TTS
     TCODE    .121,  .0,      "Durée"                     ;086 Divetime
     TCODE    .0,    .0,      "Profondeur"                ;087 Depth
     TCODE    .0,    .0,      "Premier Gaz?"              ;088 First Gas?
-    TCODE    .0,    .0,      "Defaut :"                  ;089 Default:
+    TCODE    .0,    .0,      "Défaut: "                  ;089 Default:
     TCODE    .0,    .0,      "Minutes"                   ;090 Minutes
     TCODE    .0,    .0,      "Mois   "                   ;091 Month  
     TCODE    .0,    .0,      "Jour   "                   ;092 Day    
@@ -161,19 +161,19 @@
     TCODE    .0,    .0,      "Rég."                      ;094 Set 
     TCODE    .0,    .0,      "#Gaz "                     ;095 Gas# 
     TCODE    .0,    .0,      "Oui"                       ;096 Yes
-    TCODE    .0,    .0,      "Actuel :"                  ;097 Current:
+    TCODE    .0,    .0,      "ppO2 :"                    ;097 Current:
     TCODE    .33,   .2,      "Menu Réglages:"            ;098 Setup Menu:
     TCODE    .20,   .35,     "Config FonctionsI"         ;099 Custom FunctionsI
-    TCODE    .20,   .125,    "TypeDéco:"                 ;100 Decotype:
+    TCODE    .20,   .125,    "ModeDéco:"                 ;100 Decotype:
     TCODE    .85,   .125,    "ZH-L16 OC"                 ;101 ZH-L16 OC
     TCODE    .85,   .125,    "Profondi."                 ;102 Gauge    
     TCODE    .85,   .125,    "Prof."                     ;103 Gauge
     TCODE    .85,   .125,    "ZH-L16 CC"                 ;104 ZH-L16 CC
     TCODE    .0,    .0,      "Gaz Actif ? "              ;105 Active Gas?
-    TCODE    .10,   .2,      "Rég. Gaz - ListeGaz"       ;106 Gas Setup - Gaslist
+    TCODE    .31,   .2,      "Liste des Gaz:"            ;106 Gas Setup - Gaslist
     TCODE    .0,    .0,      "Prof. +"		         ;107 Depth +
     TCODE    .0,    .0,      "Prof. -"	                 ;108 Depth -
-    TCODE    .20,   .35,     "Retour"                    ;109 Back
+    TCODE    .20,   .35,     "Préc."                     ;109 Back
     TCODE    .20,   .65,     "Menu SetPoint CCR"         ;110 CCR SetPoint Menu
     TCODE    .20,   .2,      "Menu SetPoint CCR"         ;111 CCR SetPoint Menu
     TCODE    .0,    .0,      "#SP"                       ;112 SP#
@@ -206,12 +206,12 @@
     TCODE    .105,  .120,    "Déscente"                  ;139 Descent
     TCODE    .105,  .60,     "Surface"                   ;140 Surface
     TCODE    .65,   .2,      "Quit?"                     ;141 Quit?
-    TCODE    .20,   .155,    "Plus"                      ;142 More
+    TCODE    .20,   .155,    "Suite..."                  ;142 More
     TCODE    .42,   .72,     "Confirm:"                  ;143 Confirm:
     TCODE    .60,   .2,      "Menu 2:"                   ;144 Menu 2:
     TCODE    .52,   .96,     "Annul."                    ;145 Cancel
     TCODE    .52,   .120,    "OK!"                       ;146 OK!
-    TCODE    .20,   .35,     "Plus"                      ;147 More
+    TCODE    .20,   .35,     "Suite..."                  ;147 More
     TCODE    .0,    .0,      ":.........:"               ;148 :.........:
     TCODE    .0,    .8,      "(ppO2:"                    ;149 (ppO2:
     TCODE    .2,    .39,     "Bar) "                     ;150 Bar) 
@@ -230,7 +230,7 @@
     TCODE    .40,   .35,     "Adjust. SP fixe"           ;161 Adjust fixed SP
     TCODE    .40,   .35,     "Alarme Plafond "           ;162 Warn Ceiling
     TCODE    .40,   .35,     "Icones TypeMél."           ;163 Mix type icons
-    TCODE    .40,   .35,     "Blink BetterGas"           ;164 Blink BetterGas	(Remainder in divemode to switch to a bteter decompression gas).
+    TCODE    .40,   .35,     "Blink BetterGas"           ;164 Blink BetterGas	(Remainder in divemode to switch to a beter decompression gas).
     TCODE    .40,   .35,     "AlarmProf[mBar]"           ;165 DepthWarn[mBar]
     TCODE    .40,   .35,     "Alarme CNS  [%]"           ;166 CNS warning [%]
     TCODE    .40,   .35,     "Alarme GF   [%]"           ;167 GF warning  [%]
@@ -262,7 +262,7 @@
     TCODE    .0,    .0,      "ppO2 -"                    ;191 ppO2 -
     TCODE    .0,    .0,      "Dil."                      ;192 Dil.			       (Rebreather diluant)
 ; ZH-L16 mode description
-    TCODE    .0,    .35,     "TypeDéco: ZH-L16 OC"       ;193 Decotype: ZH-L16 OC
+    TCODE    .0,    .35,     "TypeDéco: ZH-L16 OC"       ;193 Decotype: ZH-L16 OC	(22 chars maximum)
     TCODE    .0,    .65,     "Pour Circuit Ouvert"       ;194 For Open Circuit
     TCODE    .0,    .95,     "Supporte    5   Gaz"       ;195 Divers. Supports 5
     TCODE    .0,    .125,    "Trimix.  Configurez"       ;196 Trimix Gases.
@@ -316,21 +316,21 @@
     TCODE    .100,  .0,      "SetPoint"                  ;238 SetPoint
     TCODE    .100,  .0,      "PasDéco"                   ;239 No Deco
     TCODE    .90,   .50,     "Interval:"                 ;240 Interval:
-    TCODE    .100,  .75,     "Affich."                   ;241 Display
+    TCODE    .100,  .75,     "Contrast"                  ;241 Display
     TCODE    .100,  .0,      "PasDéco"                   ;242 No deco
-    TCODE    .132,  .0,      "beta"                      ;243 beta
+    TCODE    .132,  .0,      "béta"                      ;243 beta
     TCODE    .100,  .100,    "unuse"                     ;244 unuse
     TCODE    .20,   .65,     "RaZ CF,Gaz & Déco"         ;245 Reset CF,Gas & Deco
     TCODE    .50,   .145,    "BattFaible!"               ;246 LowBatt!
     TCODE    .20,   .125,    "Simulateur"                ;247 Simulator
     TCODE    .27,   .2,      "Simulateur OSTC"           ;248 OSTC Simulator
-    TCODE    .20,   .35,     "Début Plongée"             ;249 Start Dive
+    TCODE    .20,   .35,     "Mode Simulation..."        ;249 Start Dive
     TCODE    .100,  .25,     "+ 1m"                      ;250 + 1m
     TCODE    .100,  .50,     "- 1m"                      ;251 - 1m
     TCODE    .100,  .75,     "+10m"                      ;252 +10m
     TCODE    .100,  .100,    "-10m"                      ;253 -10m
     TCODE    .100,  .0,      "Fermer"                    ;254 Close
-    TCODE    .131,  .170,    "Heure"                     ;255 Time
+    TCODE    .125,  .170,    "Heure"                     ;255 Time
 ;
 ; Text Bank2 (Texts 256-511)
 ;
@@ -362,12 +362,12 @@
     TCODE    .20,   .125,    "Calculer la Déco"          ;279 Calculate Deco
     TCODE    .20,   .155,    "Voir Plan de Déco"         ;280 Show Decoplan
 ;
-    TCODE    .93,   .170,    "Prof. Moy"                 ;281 Avr.Depth
+    TCODE    .93,   .170,    "Prof.Moyn"                 ;281 Avr.Depth
     TCODE    .90,   .170,    "TissuDirec"                ;282 Lead Tiss.
-    TCODE    .93,   .170,    "Chrono.  "                 ;283 Stopwatch
-    TCODE    .20,   .95,     "RaZ Carnet"                ;284 Reset Logbook
+    TCODE    .118,   .170,   "Chrono"                    ;283 Stopwatch
+    TCODE    .20,   .95,     "RaZ Carnet Plongées"       ;284 Reset Logbook
     TCODE    .20,   .125,    "Redémarrer OSTC"           ;285 Reboot OSTC
-    TCODE    .20,   .155,    "RaZ Données de Déco"       ;286 Reset Decodata
+    TCODE    .20,   .155,    "RaZ Saturation"            ;286 Reset Decodata
 ; Altimeter extension
     TCODE    .20,   .155,    "Altimètre"                 ;287 Altimeter
     TCODE    .24,   .1,      "Réglage Altimètre"         ;288 Set Altimeter
@@ -378,6 +378,6 @@
     TCODE    .20,   .155,    "-1 mbar"                   ;293 -1 mbar
     TCODE    .85,   .185,    "Alt: "                     ;294 Alt: 
 ;
-	TCODE    .20,   .125,    "Show raw data"             ;295 Show raw data
-	TCODE    .50,    .2,     "Raw Data:"                 ;296 Raw Data:
+	TCODE    .20,   .125,    "Aff. donn. brutes"         ;295 Show raw data
+	TCODE    .50,    .2,     "Données brutes:"           ;296 Raw Data:
 ;=============================================================================

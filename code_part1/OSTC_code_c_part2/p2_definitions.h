@@ -106,10 +106,13 @@ extern void deco_pull_tissues_from_vault(void);
 #   define overlay
 #   define PARAMETER
 
+#include <assert.h>
+
     // Avoid warnings about float/double mismatches:
 #   pragma warning(disable: 4244 4068 4305)
 #else
 #   define PARAMETER static
+#   define assert(predicate)
 #endif
 
 //////////////////////////////////////////////////////////////////////////////

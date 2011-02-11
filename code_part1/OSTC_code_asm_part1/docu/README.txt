@@ -62,9 +62,9 @@ Installing the new firmware
 
  - Click "Write Flash" button. Now you have 10sec to confirm on OSTC too.
 
- - The bootloader should say it found a PIC18F6485 device, and start uploading.
+ - The bootloader should say it found a 18F6485 device, and start uploading.
    The OSTC should have the blue and red led blinking rapidly.
-   The upload time is ~ 1 minute.
+   The upload time is ~ 20 secondes.
 
  - Once done, the OSTC finishes its reboot.
 

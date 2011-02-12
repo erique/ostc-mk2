@@ -241,7 +241,7 @@
     TCODE    .40,   .35,     "Mostrar Cronom."           ;173 Show Stopwatch
     TCODE    .40,   .35,     "Mostr. Gráf.Tej"           ;174 ShowTissueGraph
     TCODE    .40,   .35,     "Mostr. TejContr"           ;175 Show Lead.Tiss.
-    TCODE    .40,   .35,     "PriParadaSuperf"           ;176 Shalow stop 1st
+    TCODE    .40,   .35,     "PriParadaSuperf"           ;176 Shallow stop 1st
     TCODE    .40,   .35,     "sin uso        "           ;177 not used
     TCODE    .40,   .35,     "sin uso        "           ;178 not used
     TCODE    .40,   .35,     "sin uso        "           ;179 not used

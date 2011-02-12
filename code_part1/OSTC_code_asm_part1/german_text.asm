@@ -229,7 +229,7 @@
     TCODE    .40,   .35,     "Adjust fixed SP"           ;161 Adjust fixed SP
     TCODE    .40,   .35,     "Warn Ceiling   "           ;162 Warn Ceiling
     TCODE    .40,   .35,     "Mix type icons "           ;163 Mix type icons
-    TCODE    .40,   .35,     "Blink BetterGas"           ;164 Blink BetterGas	(Remainder in divemode to switch to a bteter decompression gas).
+    TCODE    .40,   .35,     "Blink BetterGas"           ;164 Blink BetterGas	(Remainder in divemode to switch to a better decompression gas).
     TCODE    .40,   .35,     "DepthWarn[mBar]"           ;165 DepthWarn[mBar]
     TCODE    .40,   .35,     "CNS warning [%]"           ;166 CNS warning [%]
     TCODE    .40,   .35,     "GF warning  [%]"           ;167 GF warning  [%]
@@ -241,7 +241,7 @@
     TCODE    .40,   .35,     "Show Stopwatch "           ;173 Show Stopwatch
     TCODE    .40,   .35,     "ShowTissueGraph"           ;174 ShowTissueGraph
     TCODE    .40,   .35,     "Show Lead.Tiss."           ;175 Show Lead.Tiss.
-    TCODE    .40,   .35,     "Shalow stop 1st"           ;176 Shalow stop 1st
+    TCODE    .40,   .35,     "ShallowStop 1st"           ;176 Shallow stop 1st
     TCODE    .40,   .35,     "not used       "           ;177 not used
     TCODE    .40,   .35,     "not used       "           ;178 not used
     TCODE    .40,   .35,     "not used       "           ;179 not used
@@ -259,7 +259,7 @@
     TCODE    .90,   .25,     "Surface"                   ;189 Surface
     TCODE    .0,    .0,      "ppO2 +"                    ;190 ppO2 +
     TCODE    .0,    .0,      "ppO2 -"                    ;191 ppO2 -
-    TCODE    .0,    .0,      "Dil."                      ;192 Dil.			       (Rebreather diluant)
+    TCODE    .0,    .0,      "Dil."                      ;192 Dil.			       (Rebreather diluent)
 ; ZH-L16 mode description
     TCODE    .0,    .35,     "Decotype: ZH-L16 OC"       ;193 Decotype: ZH-L16 OC
     TCODE    .0,    .65,     "For Open Circuit   "       ;194 For Open Circuit

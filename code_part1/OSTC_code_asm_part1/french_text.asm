@@ -59,17 +59,17 @@
 ;=============================================================================
 ;   macro     X     Y        "translation"               ; English original
     TCODE    .0,   .0,       "Calcul du hash MD2"        ;001 Building MD2 Hash
-    TCODE    .0,   .25,      "Attendre SVP..."           ;002 Please Wait...
+    TCODE    .0,   .25,      "Attendez SVP..."           ;002 Please Wait...
     TCODE    .0,   .2,       "HeinrichsWeikamp OSTC2"    ;003 HeinrichsWeikamp OSTC2
     TCODE    .65,  .2,       "Menu?"                     ;004 Menu?
     TCODE    .65,  .2,       "Menu:"                     ;005 Menu:
     TCODE    .20,  .35,      "Carnet de plongées"        ;006 Logbook
-    TCODE    .20,  .65,      "Réglage Gaz"               ;007 Gas Setup
+    TCODE    .20,  .65,      "Réglage des Gaz"           ;007 Gas Setup
     TCODE    .20,  .35,      "Réglage Heure"             ;008 Set Time
-    TCODE    .20,  .95,      "Remises à zéro"            ;009 Reset Menu
+    TCODE    .20,  .95,      "Remises a zéro"            ;009 Reset Menu
     TCODE    .20,  .125,     "Menu Réglages"             ;010 Setup
     TCODE    .20,  .185,     "Sortir"                    ;011 Exit
-    TCODE    .115, .2,       "Attendre..."               ;012 Wait..
+    TCODE    .83,  .2,       "Attendre..."               ;012 Wait..
     TCODE    .0,   .24,      "Hash MD2:"                 ;013 MD2 Hash:
     TCODE    .0,   .0,       "Désat"                     ;014 Desat         (Desaturation count-down)
     TCODE    .50,  .2,       "Interface"                 ;015 Interface		(Connected to USB)
@@ -83,9 +83,9 @@
     TCODE    .32,  .95,      "Date :"                    ;023 Date:
     TCODE    .32,  .155,     "Rég. Heures"               ;024 Set Hours
     TCODE    .6,   .0,       "Initialisation..."         ;025 Reset...
-    TCODE    .55,  .2,       "Carnet"                    ;026 Logbook
+    TCODE    .17,  .2,       "Carnet de plongées"        ;026 Logbook
     TCODE    .14,  .2,       "Config Fonctions I"        ;027 Custom Functions I
-    TCODE    .31,  .2,       "Remises à zéro:"           ;028 Reset Menu
+    TCODE    .31,  .2,       "Remises a zéro:"           ;028 Reset Menu
     TCODE    .50,  .2,       "Reg.Heure:"                ;029 Set Time:
     TCODE    .100, .50,      "Repère"                    ;030 SetMarker         (Add a mark in logbook profile)
     TCODE    .100, .25,      "Paliers"                   ;031 Decoplan
@@ -130,19 +130,19 @@
 ; End of function descriptor I
 ;
 ;licence:
-    TCODE    .0,   .35,      "Ce programme est"          ;068 This program is
-    TCODE    .0,   .65,      "distribué dans le"         ;069 distributed in the
-    TCODE    .0,   .95,      "but d'être utile, mais"    ;070 hope that it will be
-    TCODE    .0,   .125,     "SANS AUCUNE GARANTIE;"     ;071 useful, but WITHOUT
-    TCODE    .0,   .155,     "sans même la garantie"     ;072 ANY WARRANTY
-    TCODE    .0,   .185,     "tacite de QUALITE"         ;073 even the implied
-    TCODE    .0,   .215,     "MARCHANDE ou"              ;074 warranty of
-    TCODE    .0,   .35,      "D'ADEQUATION A UN"         ;075 MERCHANTABILITY or
+    TCODE    .0,   .35,      "Ce    programme    est"    ;068 This program is
+    TCODE    .0,   .65,      "distribué  dans le but"    ;069 distributed in the
+    TCODE    .0,   .95,      "d'être   utile,   mais"    ;070 hope that it will be
+    TCODE    .0,   .125,     "SANS AUCUNE  GARANTIE;"    ;071 useful, but WITHOUT
+    TCODE    .0,   .155,     "sans même  la garantie"    ;072 ANY WARRANTY
+    TCODE    .0,   .185,     "tacite    de   QUALITE"    ;073 even the implied
+    TCODE    .0,   .215,     "MARCHANDE           ou"    ;074 warranty of
+    TCODE    .0,   .35,      "D'ADEQUATION    A   UN"    ;075 MERCHANTABILITY or
     TCODE    .0,   .65,      "USAGE PARTICULIER."        ;076 FITNESS FOR A
-    TCODE    .0,   .95,      "Référez-vous a la"         ;077 PARTICULAR PURPOSE.
-    TCODE    .0,   .125,     "Licence Publique"          ;078 See the GNU General
-    TCODE    .0,   .155,     "Générale GNU pour"         ;079 Public License for
-    TCODE    .0,   .185,     "plus de détails:"          ;080 more details:
+    TCODE    .0,   .95,      "Référez-vous    a   la"    ;077 PARTICULAR PURPOSE.
+    TCODE    .0,   .125,     "Licence       Publique"    ;078 See the GNU General
+    TCODE    .0,   .155,     "Générale GNU pour plus"    ;079 Public License for
+    TCODE    .0,   .185,     "de détails sur:"           ;080 more details:
     TCODE    .0,   .215,     "www.heinrichsweikamp.de"   ;081 www.heinrichsweikamp.de
 ; end of licence
 ;
@@ -161,17 +161,17 @@
     TCODE    .0,    .0,      "Rég."                      ;094 Set 
     TCODE    .0,    .0,      "#Gaz "                     ;095 Gas# 
     TCODE    .0,    .0,      "Oui"                       ;096 Yes
-    TCODE    .0,    .0,      "ppO2 :"                    ;097 Current:
-    TCODE    .33,   .2,      "Menu Réglages:"            ;098 Setup Menu:
-    TCODE    .20,   .35,     "Config FonctionsI"         ;099 Custom FunctionsI
+    TCODE    .0,    .0,      "Valeur:"                   ;097 Current:
+    TCODE    .31,   .2,      "Menu Réglages:"            ;098 Setup Menu:
+    TCODE    .20,   .35,     "Config Fonctions I"        ;099 Custom FunctionsI
     TCODE    .20,   .125,    "ModeDéco:"                 ;100 Decotype:
     TCODE    .85,   .125,    "ZH-L16 OC"                 ;101 ZH-L16 OC
     TCODE    .85,   .125,    "Profondi."                 ;102 Gauge    
-    TCODE    .85,   .125,    "Prof."                     ;103 Gauge
+    TCODE    .85,   .125,    "Profondi."                 ;103 Gauge
     TCODE    .85,   .125,    "ZH-L16 CC"                 ;104 ZH-L16 CC
     TCODE    .0,    .0,      "Gaz Actif ? "              ;105 Active Gas?
     TCODE    .31,   .2,      "Liste des Gaz:"            ;106 Gas Setup - Gaslist
-    TCODE    .0,    .0,      "Prof. +"		         ;107 Depth +
+    TCODE    .0,    .0,      "Prof. +"  		         ;107 Depth +
     TCODE    .0,    .0,      "Prof. -"	                 ;108 Depth -
     TCODE    .20,   .35,     "Préc."                     ;109 Back
     TCODE    .20,   .65,     "Menu SetPoint CCR"         ;110 CCR SetPoint Menu
@@ -208,7 +208,7 @@
     TCODE    .65,   .2,      "Quit?"                     ;141 Quit?
     TCODE    .20,   .155,    "Suite..."                  ;142 More
     TCODE    .42,   .72,     "Confirm:"                  ;143 Confirm:
-    TCODE    .60,   .2,      "Menu 2:"                   ;144 Menu 2:
+    TCODE    .55,   .2,      "Menu 2:"                   ;144 Menu 2:
     TCODE    .52,   .96,     "Annul."                    ;145 Cancel
     TCODE    .52,   .120,    "OK!"                       ;146 OK!
     TCODE    .20,   .35,     "Suite..."                  ;147 More
@@ -217,7 +217,7 @@
     TCODE    .2,    .39,     "Bar) "                     ;150 Bar) 
     TCODE    .108,  .216,    "Repère?"                   ;151 Marker?
     TCODE    .85,   .125,    "L16-GF OC"                 ;152 L16-GF OC
-    TCODE    .20,   .65,     "Config FonctionsII"        ;153 Custom FunctionsII
+    TCODE    .20,   .65,     "Config Fonctions II"       ;153 Custom FunctionsII
 ;
 ; 32 custom function descriptors II (FIXED LENGTH = 15 chars).
     TCODE    .40,   .35,     "GF Bas      [%]"           ;154 GF Low      [%]
@@ -239,7 +239,7 @@
     TCODE    .40,   .35,     "Décal Heur/Jour"           ;170 Time offset/day
     TCODE    .40,   .35,     "Aff. altimètre "           ;171 Show altimeter
     TCODE    .40,   .35,     "Aff. Log-Marker"           ;172 Show Log-Marker
-    TCODE    .40,   .35,     "Aff. Stopwatch "           ;173 Show Stopwatch
+    TCODE    .40,   .35,     "Aff. Chrono.   "           ;173 Show Stopwatch
     TCODE    .40,   .35,     "Aff.GraphTissus"           ;174 ShowTissueGraph
     TCODE    .40,   .35,     "Aff.Tiss.Direct"           ;175 Show Lead.Tiss.
     TCODE    .40,   .35,     "Prof.DernPalier"           ;176 Shalow stop 1st
@@ -255,60 +255,60 @@
 ; End of function descriptor I
 ;
     TCODE    .13,   .2,      "Config Fonctions II"       ;186 Custom Functions II
-    TCODE    .20,   .95,     "Voir Licence"              ;187 Show License
+    TCODE    .20,   .95,     "Voir la licence"           ;187 Show License
     TCODE    .0,    .2,      "Résultat Sim:"             ;188 Sim. Results:
     TCODE    .90,   .25,     "Surface"                   ;189 Surface
     TCODE    .0,    .0,      "ppO2 +"                    ;190 ppO2 +
     TCODE    .0,    .0,      "ppO2 -"                    ;191 ppO2 -
     TCODE    .0,    .0,      "Dil."                      ;192 Dil.			       (Rebreather diluant)
 ; ZH-L16 mode description
-    TCODE    .0,    .35,     "TypeDéco: ZH-L16 OC"       ;193 Decotype: ZH-L16 OC	(22 chars maximum)
-    TCODE    .0,    .65,     "Pour Circuit Ouvert"       ;194 For Open Circuit
-    TCODE    .0,    .95,     "Supporte    5   Gaz"       ;195 Divers. Supports 5
-    TCODE    .0,    .125,    "Trimix.  Configurez"       ;196 Trimix Gases.
-    TCODE    .0,    .155,    "les  gaz   dans  le"       ;197 Configure your gas
-    TCODE    .0,    .185,    "menu Config Gaz.   "       ;198 in Gassetup menu.
-    TCODE    .0,    .215,    "Vérifiez CF11&CF12!"       ;199 Check CF11 & CF12 !
+    TCODE    .0,    .35,     "TypeDéco: ZH-L16 OC   "    ;193 Decotype: ZH-L16 OC	(22 chars maximum)
+    TCODE    .0,    .65,     "Pour les plongeurs  en"    ;194 For Open Circuit
+    TCODE    .0,    .95,     "Circuit Ouvert.       "    ;195 Divers. Supports 5
+    TCODE    .0,    .125,    "Supporte 5 Gaz Trimix."    ;196 Trimix Gases.
+    TCODE    .0,    .155,    "Config des gaz dans le"    ;197 Configure your gas
+    TCODE    .0,    .185,    "menu Réglage des Gaz. "    ;198 in Gassetup menu.
+    TCODE    .0,    .215,    "Vérifiez CF11 & CF12 !"    ;199 Check CF11 & CF12 !
 ; Gaugemode description
-    TCODE    .0,    .35,     "TypeDéco: Profondi."       ;200 Decotype: Gauge    
-    TCODE    .0,    .65,     "La  durée  sera  en"       ;201 Divetime will be in
-    TCODE    .0,    .95,     "Minutes:Secondes.  "       ;202 Minutes:Seconds.   
-    TCODE    .0,    .125,    "OSTC2 ne  calculera"       ;203 OSTC2 will not     
-    TCODE    .0,    .155,    "pas de Déco,  durée"       ;204 compute Deco, NoFly
-    TCODE    .0,    .185,    "sans avion et durée"       ;205 time and Desat.
-    TCODE    .0,    .215,    "de désaturation !  "       ;206 time at all!
+    TCODE    .0,    .35,     "TypeDéco:Profondimètre"    ;200 Decotype: Gauge    
+    TCODE    .0,    .65,     "La durée  est affichée"    ;201 Divetime will be in
+    TCODE    .0,    .95,     "en Minutes:Secondes.  "    ;202 Minutes:Seconds.   
+    TCODE    .0,    .125,    "L'OSTC2  ne  calculera"    ;203 OSTC2 will not     
+    TCODE    .0,    .155,    "pas de Déco,  de durée"    ;204 compute Deco, NoFly
+    TCODE    .0,    .185,    "sans avion ni de temps"    ;205 time and Desat.
+    TCODE    .0,    .215,    "de désaturation !     "    ;206 time at all!
 ; Const.ppO2 description
-    TCODE    .0,    .35,     "TypeDéco: ZH-L16 CC"       ;207 Decotype: ZH-L16 CC
-    TCODE    .0,    .65,     "Pour  recycleurs  à"       ;208 For (Semi-)Closed
-    TCODE    .0,    .95,     "circuit (semi)fermé"       ;209 Circuit rebreathers
-    TCODE    .0,    .125,    "Configurez  les   3"       ;210 Configure the 3
-    TCODE    .0,    .155,    "SetPoints dans menu"       ;211 SetPoints in CCR -
-    TCODE    .0,    .185,    "CCR - Setup. 5 bail"       ;212 Setup menu. 5 bail-
-    TCODE    .0,    .215,    "outs disponibles.  "       ;213 outs are available.
+    TCODE    .0,    .35,     "TypeDéco: ZH-L16 CC   "    ;207 Decotype: ZH-L16 CC
+    TCODE    .0,    .65,     "Pour les  recycleurs a"    ;208 For (Semi-)Closed
+    TCODE    .0,    .95,     "circuit (semi-)fermé. "    ;209 Circuit rebreathers
+    TCODE    .0,    .125,    "Configurez    les    3"    ;210 Configure the 3
+    TCODE    .0,    .155,    "SetPoints   dans    le"    ;211 SetPoints in CCR -
+    TCODE    .0,    .185,    "Menu SetPoint CCR.    "    ;212 Setup menu. 5 bail-
+    TCODE    .0,    .215,    "5 bailouts disponibles"    ;213 outs are available.
 ; Apnoemode description
-    TCODE    .0,    .35,     "TypeDéco: Apnée    "       ;214 Decotype: Apnoe
-    TCODE    .0,    .65,     "OSTC2 affichera les"       ;215 OSTC2 will display
-    TCODE    .0,    .95,     "descentes   séparé-"       ;216 each descent separ-
-    TCODE    .0,    .125,    "ment   en   Min:Sec"       ;217 ately in Min:Sec.
-    TCODE    .0,    .155,    "sans Déco calculée."       ;218 Will temporally set
-    TCODE    .0,    .185,    "Echantillons   pris"       ;219 samplerate to 1 sec
-    TCODE    .0,    .215,    "toutes les secondes"       ;220 No Deco calculation
+    TCODE    .0,    .35,     "TypeDéco: Apnée       "    ;214 Decotype: Apnoe
+    TCODE    .0,    .65,     "L'OSTC2 affichera  les"    ;215 OSTC2 will display
+    TCODE    .0,    .95,     "descentes   séparément"    ;216 each descent separ-
+    TCODE    .0,    .125,    "en    Minutes:Secondes"    ;217 ately in Min:Sec.
+    TCODE    .0,    .155,    "sans calculer de Déco."    ;218 Will temporally set
+    TCODE    .0,    .185,    "Les  mesures  se  font"    ;219 samplerate to 1 sec
+    TCODE    .0,    .215,    "toutes les secondes.  "    ;220 No Deco calculation
 ; Multi GF OC mode description
-    TCODE    .0,    .35,     "TypeDéco: L16-GF OC"       ;221 Decotype: L16-GF OC
-    TCODE    .0,    .65,     "Calcul de Déco avec"       ;222 Decompression cal-
-    TCODE    .0,    .95,     "Facteur de Gradient"       ;223 culations with the
-    TCODE    .0,    .125,    "(GF_lo/GF_hi).     "       ;224 GF-Method (GF_lo/GF
-    TCODE    .0,    .155,    "Vérifiez CF32&CF33!"       ;225 _hi). Check CF32 &
-    TCODE    .0,    .185,    "Pour Circuit Ouvert"       ;226 CF33! Open Circuit
-    TCODE    .0,    .215,    "avec palier profond"       ;227 with Deep Stops.
+    TCODE    .0,    .35,     "TypeDéco: L16-GF OC   "    ;221 Decotype: L16-GF OC
+    TCODE    .0,    .65,     "Calcul  de  Déco  avec"    ;222 Decompression cal-
+    TCODE    .0,    .95,     "Facteurs  de  Gradient"    ;223 culations with the
+    TCODE    .0,    .125,    "(GF_bas/GF_haut).     "    ;224 GF-Method (GF_lo/GF
+    TCODE    .0,    .155,    "Vérifiez CF32 & CF33 !"    ;225 _hi). Check CF32 &
+    TCODE    .0,    .185,    "Pour  Circuit   Ouvert"    ;226 CF33! Open Circuit
+    TCODE    .0,    .215,    "avec paliers profonds."    ;227 with Deep Stops.
 ; Multi GF CC mode description
-    TCODE    .0,    .35,     "TypeDéco: L16-GF CC"       ;228 Decotype: L16-GF CC
-    TCODE    .0,    .65,     "Calcul de Déco avec"       ;229 Decompression cal-
-    TCODE    .0,    .95,     "Facteur de Gradient"       ;230 culations with the
-    TCODE    .0,    .125,    "(GF_lo/GF_hi).     "       ;231 GF-Method (GF_lo/GF
-    TCODE    .0,    .155,    "Vérifiez CF32&CF33!"       ;232 _hi). Check CF32 &
-    TCODE    .0,    .185,    "Pour  Circuit Fermé"       ;233 CF33!Closed Circuit
-    TCODE    .0,    .215,    "avec palier profond"       ;234 with Deep Stops.
+    TCODE    .0,    .35,     "TypeDéco: L16-GF CC   "    ;228 Decotype: L16-GF CC
+    TCODE    .0,    .65,     "Calcul  de  Déco  avec"    ;229 Decompression cal-
+    TCODE    .0,    .95,     "Facteurs  de  Gradient"    ;230 culations with the
+    TCODE    .0,    .125,    "(GF_bas/GF_haut).     "    ;231 GF-Method (GF_lo/GF
+    TCODE    .0,    .155,    "Vérifiez CF32 & CF33 !"    ;232 _hi). Check CF32 &
+    TCODE    .0,    .185,    "Pour   Circuit   Fermé"    ;233 CF33!Closed Circuit
+    TCODE    .0,    .215,    "avec paliers profonds."    ;234 with Deep Stops.
 ;
     TCODE    .10,   .2,      "Mode de Déco changé!"      ;235 Decomode changed!
     TCODE    .85,   .125,    "L16-GF CC"                 ;236 L16-GF CC
@@ -336,7 +336,7 @@
 ;
     TCODE    .0,    .0,      "x"                         ;256 x
     TCODE    .20,   .35,     "Format Date:"              ;257 Date format:
-    TCODE    .33,   .2,      "Menu Réglages 2:"          ;258 Setup Menu 2:
+    TCODE    .24,   .2,      "Menu Réglages 2:"          ;258 Setup Menu 2:
     TCODE    .105,  .35,     "MMJJAA"                    ;259 MMDDYY
     TCODE    .105,  .35,     "JJMMAA"                    ;260 DDMMYY
     TCODE    .105,  .35,     "AAMMJJ"                    ;261 YYMMDD
@@ -366,7 +366,7 @@
     TCODE    .90,   .170,    "TissuDirec"                ;282 Lead Tiss.
     TCODE    .118,   .170,   "Chrono"                    ;283 Stopwatch
     TCODE    .20,   .95,     "RaZ Carnet Plongées"       ;284 Reset Logbook
-    TCODE    .20,   .125,    "Redémarrer OSTC"           ;285 Reboot OSTC
+    TCODE    .20,   .125,    "Redémarrer l'OSTC"         ;285 Reboot OSTC
     TCODE    .20,   .155,    "RaZ Saturation"            ;286 Reset Decodata
 ; Altimeter extension
     TCODE    .20,   .155,    "Altimètre"                 ;287 Altimeter

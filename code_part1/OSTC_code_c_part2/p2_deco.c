@@ -68,6 +68,7 @@
 // 2011/01/24: [jDG] Make ascenttime an int. No more overflow!
 // 2011/01/25: [jDG] Fusion deco array for both models.
 // 2011/01/25: [jDG] Use CF(54) to reverse deco order.
+// 2011/02/11: [jDG] Reworked gradient-factor implementation.
 //
 // TODO:
 //  + Allow (CF) delay for gas switch while predicting ascent.

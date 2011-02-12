@@ -36,9 +36,16 @@ Creating a working project:
      (or use the .c instead of the .o if you have the C18 compiler)
 
    - If you want to compile C code, configure it:
-     Project > Build Options... > Project > MPLab C18
+     Menu: Project > Build Options... > Project > MPLab C18
          General: Default storage = Overlay (-sco)
          Optimization: Enable all
+
+   - Make sure the IDE is configured to find the clib.lib file
+     (needed even with pé_deco.o)
+     Menu : Project > Build Options ... > Project > Directories
+         Set «Search Directories» for : «Library Seach Path» to the path of the 
+             “clib.lib” file (in c:\Program Files\Microship\MCC18\lib in my case)
+         Set «Build Directory Policy» to «Assemble/Compile in source-file directory, link in output directory»
 
  - Hit F10 to recompile everything.
    --> You should get a .hex file where you saved your project.

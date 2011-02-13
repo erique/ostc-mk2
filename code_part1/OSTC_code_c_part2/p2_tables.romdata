@@ -138,9 +138,9 @@ rom const float buhlmann_ht[] =
 rom const float e2secs[] =
 { 
 //---- N2 --------------------------------------------------------------------
-	5.75958E-03,  // und zwar  1 - 2^(-1/(30sec*HT))
+	5.75958E-03,  // result of  1 - 2^(-1/(30sec*HT))
 	2.88395E-03,
-    1.92356E-03,
+	1.92356E-03,
     1.28278E-03,
     8.55371E-04,
     5.92258E-04,
@@ -214,8 +214,8 @@ rom const float e1min[] =
 rom const float e10min[] =
 {
 //---- N2 --------------------------------------------------------------------
-// Die 10 min Werte in float Notation:
-//  und zwar 1 - 2^(-10/ht)
+// The 10 min Value in float notation:
+//  result of 1 - 2^(-10/ht)
 	8.23223E-01,			// 1 - 2^(-10/4.0)
 	5.79552E-01,
     4.38769E-01,

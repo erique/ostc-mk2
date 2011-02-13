@@ -28,7 +28,7 @@
 
 #DEFINE softwareversion_beta 	1 			; (and 0 for release) 
 
-#DEFINE	max_custom_number		d'53'		; Number of last used custom function
+#DEFINE	max_custom_number		d'55'		; Number of last used custom function
 
 ; International extension. Selecting messages source:
 #DEFINE     ENGLISH                         ; Use english_text.asm

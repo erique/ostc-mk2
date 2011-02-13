@@ -68,7 +68,7 @@
     TCODE    .20,  .95,      "Reset Menu"                ;009 Reset Menu
     TCODE    .20,  .125,     "Setup"                     ;010 Setup
     TCODE    .20,  .185,     "Exit"                      ;011 Exit
-    TCODE    .115, .2,       "Wait..."                   ;012 Wait...
+    TCODE    .111, .2,       "Wait..."                   ;012 Wait...
     TCODE    .0,   .24,      "MD2 Hash:"                 ;013 MD2 Hash:
     TCODE    .0,   .0,       "Desat"                     ;014 Desat         (Desaturation count-down)
     TCODE    .50,  .2,       "Interface"                 ;015 Interface		(Connected to USB)
@@ -241,8 +241,8 @@
     TCODE    .40,   .35,     "Show Stopwatch "           ;173 Show Stopwatch
     TCODE    .40,   .35,     "ShowTissueGraph"           ;174 ShowTissueGraph
     TCODE    .40,   .35,     "Show Lead.Tiss."           ;175 Show Lead.Tiss.
-    TCODE    .40,   .35,     "ShallowStop 1st"           ;176 Shallow stop 1st
-    TCODE    .40,   .35,     "not used       "           ;177 not used
+    TCODE    .40,   .35,     "ShallowStop 1st"           ;176 Shallow stop 1st  (Reverse order of deco plans)
+    TCODE    .40,   .35,     "Gas switch[min]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
     TCODE    .40,   .35,     "not used       "           ;178 not used
     TCODE    .40,   .35,     "not used       "           ;179 not used
     TCODE    .40,   .35,     "not used       "           ;180 not used

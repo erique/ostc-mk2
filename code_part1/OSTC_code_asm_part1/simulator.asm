@@ -246,7 +246,7 @@ simulator_calc_deco:
 
 	movff	logbook_temp1,logbook_temp3		; store bottom time
 
-	movff	logbook_temp2,xA+0
+	movff	logbook_temp2,xA+0              ; Bottom depth. 
 	clrf	xA+1
 	movlw	d'100'
 	movwf	xB+0
@@ -264,87 +264,78 @@ simulator_calc_deco:
 	movff	sim_pressure+0,amb_pressure+0	; override readings with simulator values
 	movff	sim_pressure+1,amb_pressure+1
 
-	call	simulator_save_tissue_data		; Stores 32 floats "pre_tissue" into bank3
+	call	simulator_save_tissue_data  ; Stores 32 floats "pre_tissue" into bank3
 
 	call	PLED_topline_box
 	WIN_INVERT	.1
-	DISPLAYTEXT	.12							;" Wait.."
+	DISPLAYTEXT	.12                     ; "Wait..."
 	WIN_INVERT	.0
 
-simulator_calc_deco_loop1:
-	call	divemode_check_decogases        ; Checks for decogases and sets the gases
+	call	divemode_check_decogases    ; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
+	movlw	d'0'                        ; Begin of deco cycle (init sim tissues)
+	movff	WREG,char_O_deco_status     ; Reset Deco module.
 
-	call	deco_calc_hauptroutine		    ; calc_tissue
-	movlb	b'00000001'						; rambank 1 selected
+simulator_calc_deco_loop1:
+	call	deco_calc_hauptroutine      ; calc_tissue
+	movlb	b'00000001'                 ; rambank 1 selected
 
 	movff	char_O_deco_status,WREG
 	tstfsz	WREG                        ; deco_status=0 if decompression calculation done
-	bra		simulator_calc_deco_loop1			; Not finished
+	bra		simulator_calc_deco_loop1   ; Not finished
 
 	movlw	d'1'
-	movff	WREG,char_I_step_is_1min		; 1 minute mode
-
-	movlw	d'2'
-	movff	WREG,char_O_deco_status			; Reset Deco module
+	movff	WREG,char_I_step_is_1min    ; 1 minute mode
 
 simulator_calc_deco_loop2:
-	
 	call	PLED_simulator_data
+	btg     LED_red
 
-	btg		LED_red
-
-	call	divemode_check_decogases			; Checks for decogases and sets the gases
+	call	divemode_check_decogases    ; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
 
 	call	deco_calc_hauptroutine		; calc_tissue
-	movlb	b'00000001'						; rambank 1 selected
-	ostc_debug	'C'		; Sends debug-information to screen if debugmode active
-	
-	decfsz	logbook_temp1,F
-	bra		simulator_calc_deco_loop2
+	movlb	b'00000001'                 ; rambank 1 selected
+	ostc_debug	'C'	                    ; Sends debug-information to screen if debugmode active
+
+	decfsz	logbook_temp1,F             ; Decrement bottom time.
+	bra     simulator_calc_deco_loop2
 
 	movlw	d'0'
-	movff	WREG,char_I_step_is_1min		; 2 second deco mode
+	movff	WREG,char_I_step_is_1min    ; 2 second deco mode
 
-	movlw	d'2'
-	movff	WREG,char_O_deco_status			; Reset Deco module
+simulator_calc_deco2:
+	call	divemode_check_decogases    ; Checks for decogases and sets the gases
+	call	divemode_prepare_flags_for_deco
 
-	bra		simulator_calc_deco2				; Not finished
+	call	deco_calc_hauptroutine		; calc_tissue
+	movlb	b'00000001'                 ; rambank 1 selected
 
-simulator_calc_deco3:
+	movff	char_O_deco_status,WREG
+	tstfsz	WREG                        ; deco_status=0 if decompression calculation done
+	bra		simulator_calc_deco2        ; Not finished
+
+    ; Finished
 	bsf		LED_red
 	
 	call	simulator_restore_tissue_data	; Restore 32 floats "pre_tissue" from bank3
 
-	bcf		simulatormode_active			; normal simulator mode
-	bcf		standalone_simulator			; Standalone Simulator active
+	bcf		simulatormode_active        ; normal simulator mode
+	bcf		standalone_simulator        ; Standalone Simulator active
 
 	WAITMS	d'250'
 	WAITMS	d'250'
-	WAITMS	d'250'							; Wait for Pressure Sensor to get real pressure again...
+	WAITMS	d'250'                      ; Wait for Pressure Sensor to get real pressure again...
 
-	bcf		LED_red
+	bcf     LED_red
 	
 	movlw	d'1'
-	movwf	logbook_temp1					; Bottom time>0!
+	movwf	logbook_temp1                   ; Bottom time>0!
 
-	movlw	d'5'							; Pre-Set Cursor to "Show Decoplan"
+	movlw	d'5'                            ; Pre-Set Cursor to "Show Decoplan"
 	movwf	menupos
-	movff	logbook_temp3,logbook_temp1		; restore bottom time
-	bra		menu_simulator1					; Done.
-
-simulator_calc_deco2:
-	call	divemode_check_decogases			; Checks for decogases and sets the gases
-	call	divemode_prepare_flags_for_deco
-
-	call	deco_calc_hauptroutine		; calc_tissue
-	movlb	b'00000001'						; rambank 1 selected
-
-	movff	char_O_deco_status,WREG
-	tstfsz	WREG                        ; deco_status=0 if decompression calculation done
-	bra		simulator_calc_deco2				; Not finished
-	bra		simulator_calc_deco3				; finished!
+	movff	logbook_temp3,logbook_temp1     ; restore bottom time
+	bra     menu_simulator1                 ; Done.
 
 
 simulator_save_tissue_data:

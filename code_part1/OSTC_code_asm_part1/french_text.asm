@@ -230,7 +230,7 @@
     TCODE    .40,   .35,     "Ajuster SP fixe"           ;161 Adjust fixed SP
     TCODE    .40,   .35,     "Alarme Plafond "           ;162 Warn Ceiling
     TCODE    .40,   .35,     "Icone Type Mél."           ;163 Mix type icons
-    TCODE    .40,   .35,     "Aff.MeilleurGaz"           ;164 Blink BetterGas	(Remainder in divemode to switch to a beter decompression gas).
+    TCODE    .40,   .35,     "Aff.MeilleurGaz"           ;164 Blink BetterGas	(Remainder in divemode to switch to a better decompression gas).
     TCODE    .40,   .35,     "AlarmProf[mBar]"           ;165 DepthWarn[mBar]
     TCODE    .40,   .35,     "Alarme CNS  [%]"           ;166 CNS warning [%]
     TCODE    .40,   .35,     "Alarme GF   [%]"           ;167 GF warning  [%]
@@ -242,16 +242,16 @@
     TCODE    .40,   .35,     "Aff. Chrono.   "           ;173 Show Stopwatch
     TCODE    .40,   .35,     "Aff.GraphTissus"           ;174 ShowTissueGraph
     TCODE    .40,   .35,     "Aff.Tiss.Direct"           ;175 Show Lead.Tiss.
-    TCODE    .40,   .35,     "Prof.DernPalier"           ;176 Shalow stop 1st
-    TCODE    .40,   .35,     "non utilisé    "           ;177 not used
-    TCODE    .40,   .35,     "non utilisé    "           ;178 not used
-    TCODE    .40,   .35,     "non utilisé    "           ;179 not used
-    TCODE    .40,   .35,     "non utilisé    "           ;180 not used
-    TCODE    .40,   .35,     "non utilisé    "           ;181 not used
-    TCODE    .40,   .35,     "non utilisé    "           ;182 not used
-    TCODE    .40,   .35,     "non utilisé    "           ;183 not used
-    TCODE    .40,   .35,     "non utilisé    "           ;184 not used
-    TCODE    .40,   .35,     "non utilisé    "           ;185 not used
+    TCODE    .40,   .35,     "Ordre paliers  "           ;176 Shallow stop 1st   (Reverse order of deco plans)
+    TCODE    .40,   .35,     "Chang. gaz[min]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
+    TCODE    .40,   .35,     "not used       "           ;178 not used
+    TCODE    .40,   .35,     "not used       "           ;179 not used
+    TCODE    .40,   .35,     "not used       "           ;180 not used
+    TCODE    .40,   .35,     "not used       "           ;181 not used
+    TCODE    .40,   .35,     "not used       "           ;182 not used
+    TCODE    .40,   .35,     "not used       "           ;183 not used
+    TCODE    .40,   .35,     "not used       "           ;184 not used
+    TCODE    .40,   .35,     "not used       "           ;185 not used
 ; End of function descriptor I
 ;
     TCODE    .13,   .2,      "Config Fonctions II"       ;186 Custom Functions II

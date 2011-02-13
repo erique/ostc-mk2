@@ -452,24 +452,19 @@ calc_deko_divemode2:
 divemode_prepare_flags_for_deco:	
 	movff	amb_pressure+0,int_I_pres_respiration+0		; lo  and copy result to deco routine
 	movff	amb_pressure+1,int_I_pres_respiration+1		; hi
-	GETCUSTOM8	d'11'				; Saturation multiplier %
-	movwf	wait_temp
-	movff	wait_temp,char_I_saturation_multiplier
-	GETCUSTOM8	d'12'				; Desaturation multiplier %
-	movwf	wait_temp
-	movff	wait_temp,char_I_desaturation_multiplier
-	GETCUSTOM8	d'16'				; Deco distance to decostop in 1/10 meter for simulation
-	movwf	wait_temp
-	movff	wait_temp,char_I_deco_distance
-	GETCUSTOM8	d'29'				; Depth Last Deco in meter for simulation
-	movwf	wait_temp
-	movff	wait_temp,char_I_depth_last_deco
-	call	restart_set_modes_and_flags			; Sets decomode (char_I_deco_model) and flags (again)
-	return
+	GETCUSTOM8	d'11'                           ; Saturation multiplier %
+	movff	WREG,char_I_saturation_multiplier
+	GETCUSTOM8	d'12'                           ; Desaturation multiplier %
+	movff	WREG,char_I_desaturation_multiplier
+	GETCUSTOM8	d'16'                           ; Deco distance to decostop in 1/10 meter for simulation
+	movff	WREG,char_I_deco_distance
+	GETCUSTOM8	d'29'                           ; Depth Last Deco in meter for simulation
+	movff	WREG,char_I_depth_last_deco
+	goto	restart_set_modes_and_flags			; Sets decomode (char_I_deco_model) and flags (again)
 
 calc_deko_divemode3:
 	btfss	dekostop_active
-	call	PLED_display_deko_mask				; clear nostop time, display decodata
+	call	PLED_display_deko_mask              ; clear nostop time, display decodata
 	bsf		dekostop_active						; Set flag
 
 	movff	char_O_first_deco_depth,decodata+0	; ceiling

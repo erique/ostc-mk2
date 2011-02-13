@@ -241,16 +241,16 @@
     TCODE    .40,   .35,     "Mostrar Cronom."           ;173 Show Stopwatch
     TCODE    .40,   .35,     "Mostr. Gráf.Tej"           ;174 ShowTissueGraph
     TCODE    .40,   .35,     "Mostr. TejContr"           ;175 Show Lead.Tiss.
-    TCODE    .40,   .35,     "PriParadaSuperf"           ;176 Shallow stop 1st
-    TCODE    .40,   .35,     "sin uso        "           ;177 not used
-    TCODE    .40,   .35,     "sin uso        "           ;178 not used
-    TCODE    .40,   .35,     "sin uso        "           ;179 not used
-    TCODE    .40,   .35,     "sin uso        "           ;180 not used
-    TCODE    .40,   .35,     "sin uso        "           ;181 not used
-    TCODE    .40,   .35,     "sin uso        "           ;182 not used
-    TCODE    .40,   .35,     "sin uso        "           ;183 not used
-    TCODE    .40,   .35,     "sin uso        "           ;184 not used
-    TCODE    .40,   .35,     "sin uso        "           ;185 not used
+    TCODE    .40,   .35,     "PriParadaSuperf"           ;176 Shallow stop 1st  (Reverse order of deco plans)
+    TCODE    .40,   .35,     "Gas switch[min]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
+    TCODE    .40,   .35,     "not used       "           ;178 not used
+    TCODE    .40,   .35,     "not used       "           ;179 not used
+    TCODE    .40,   .35,     "not used       "           ;180 not used
+    TCODE    .40,   .35,     "not used       "           ;181 not used
+    TCODE    .40,   .35,     "not used       "           ;182 not used
+    TCODE    .40,   .35,     "not used       "           ;183 not used
+    TCODE    .40,   .35,     "not used       "           ;184 not used
+    TCODE    .40,   .35,     "not used       "           ;185 not used
 ; End of function descriptor I
 ;
     TCODE    .13,   .2,      "Func.Personaliz. II"       ;186 Custom Functions II

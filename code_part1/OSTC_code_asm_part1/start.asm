@@ -73,15 +73,14 @@ wait_start_pressure:
 
 ; reset deco data
 	incf	nofly_time+0,F					; =1
-	clrf	wait_temp						; Use as buffer
-	movff	wait_temp,char_I_He_ratio		; No He at the Surface
+	clrf	WREG                            ; Use as buffer
+	movff	WREG,char_I_He_ratio            ; No He at the Surface
 	movlw	d'79'							; 79% N2
-	movwf	wait_temp						; Use as buffer
-	movff	wait_temp,char_I_N2_ratio		; No He at the Surface
+	movff	WREG,char_I_N2_ratio            ; No He at the Surface
 	movff	amb_pressure+0,int_I_pres_respiration+0		; copy surface air pressure to deco routine
 	movff	amb_pressure+1,int_I_pres_respiration+1		
 
-	movlw	d'0'
+	clrf    WREG
 	movff	WREG,char_I_step_is_1min		; 2 second deco mode
 	call	deco_clear_tissue			    ;
 	call	deco_calc_desaturation_time     ; calculate desaturation time
@@ -210,70 +209,71 @@ display_new_cf_installed:
 	call	PLED_new_cf_warning		; Display new CF warning screen
 	movlw	d'20'					; timeout for warning screen
 	bra		startup_screen3a		; Will RETURN after timeout or button press
-	
-restart_set_modes_and_flags:		; "Call"ed from divemode, as well!
+
+;=============================================================================
+; Setup all flags and parameters for divemode and simulator computations.
+;
+restart_set_modes_and_flags:		    ; "Call"ed from divemode, as well!
 	bcf		gauge_mode
 	bcf		FLAG_const_ppO2_mode
 	bcf		FLAG_apnoe_mode			
 
 ; Pre-load modes for OC, GF 90/90 and no Aponoe or Gauge.
-	bcf		no_deco_customviews		; Clear no-deco-mode-flag
+	bcf		no_deco_customviews		    ; Clear no-deco-mode-flag
 	movlw	d'0'
-	movwf	wait_temp
-	movff	wait_temp,char_I_deco_model	; Clear Flagbyte 
+	movff	WREG,char_I_deco_model	    ; Clear Flagbyte 
 ; Load GF values into RAM
 	movlw	d'90'
-	movwf	wait_temp
-	movff	wait_temp,char_I_GF_Low_percentage
-	movff	wait_temp,char_I_GF_High_percentage		; Set to 90/90...
+	movff	WREG,char_I_GF_Low_percentage
+	movff	WREG,char_I_GF_High_percentage		; Set to 90/90...
 	clrf	EEADRH
-	read_int_eeprom d'34'			; Read deco data	
-	movlw	d'1'					; Gauge mode
+	read_int_eeprom d'34'			    ; Read deco data	
+	movlw	d'1'					    ; Gauge mode
 	cpfseq	EEDATA
-	 bra	restart_3_test_ppO2_mode; check for ppO2 mode
-	bsf		gauge_mode				; Set flag for gauge mode
-	bsf		no_deco_customviews		; Set no-deco-mode-flag
-	return							; start in Surfacemode
+	bra     restart_3_test_ppO2_mode    ; check for ppO2 mode
+	bsf		gauge_mode				    ; Set flag for gauge mode
+	bsf		no_deco_customviews		    ; Set no-deco-mode-flag
+    return							    ; start in Surfacemode
 restart_3_test_ppO2_mode:
-	movlw	d'2'					; const ppO2 mode
+	movlw	d'2'					    ; const ppO2 mode
 	cpfseq	EEDATA
-	 bra	restart_3_test_apnoe_mode; check for apnoe mode
-	bsf		FLAG_const_ppO2_mode	; Set flag for ppO2 mode
-	return							; start in Surfacemode
+    bra	    restart_3_test_apnoe_mode; check for apnoe mode
+	bsf		FLAG_const_ppO2_mode	    ; Set flag for ppO2 mode
+	return							    ; start in Surfacemode
 restart_3_test_apnoe_mode:
-	movlw	d'3'					; Apnoe mode
+	movlw	d'3'                        ; Apnoe mode
 	cpfseq	EEDATA
-	 bra	restart_4_test_gf_mode	; check for GF OC mode
-	bsf		FLAG_apnoe_mode			; Set flag for Apnoe Mode
-	bsf		no_deco_customviews		; Set no-deco-mode-flag
-	return							; start in Surfacemode
+	bra     restart_4_test_gf_mode	    ; check for GF OC mode
+	bsf		FLAG_apnoe_mode			    ; Set flag for Apnoe Mode
+	bsf		no_deco_customviews		    ; Set no-deco-mode-flag
+    return							    ; start in Surfacemode
 restart_4_test_gf_mode:
-	movlw	d'4'					; GF OC mode
+	movlw	d'4'					    ; GF OC mode
 	cpfseq	EEDATA
-	bra		restart_5_test_gfO2_mode; check for GF CC mode
+	bra		restart_5_test_gfO2_mode    ; check for GF CC mode
 	movlw	d'1'
-	movwf	wait_temp
-	movff	wait_temp,char_I_deco_model	; Set Flagbyte for GF method
+	movff	WREG,char_I_deco_model      ; Set Flagbyte for GF method
 ; Load GF values into RAM
-	GETCUSTOM8	d'32'			; GF low
-	movff		EEDATA,char_I_GF_Low_percentage
-	GETCUSTOM8	d'33'			; GF high
-	movff		EEDATA,char_I_GF_High_percentage
-	return							; start in Surfacemode
+	GETCUSTOM8	d'32'			        ; GF low
+	movff   EEDATA,char_I_GF_Low_percentage
+	GETCUSTOM8	d'33'			        ; GF high
+	movff   EEDATA,char_I_GF_High_percentage
+	return							    ; start in Surfacemode
 restart_5_test_gfO2_mode:
-	movlw	d'5'					; GF CC mode
+	movlw	d'5'					    ; GF CC mode
 	cpfseq	EEDATA
-	return							; Start in Surfacemode
-	bsf		FLAG_const_ppO2_mode	; Set flag for ppO2 mode
+	return							    ; Start in Surfacemode
+	bsf		FLAG_const_ppO2_mode	    ; Set flag for ppO2 mode
 	movlw	d'1'
-	movwf	wait_temp
-	movff	wait_temp,char_I_deco_model	; Set Flagbyte for GF method
+	movff	WREG,char_I_deco_model	    ; Set Flagbyte for GF method
 	; Load GF values into RAM
-	GETCUSTOM8	d'32'			; GF low
+	GETCUSTOM8	d'32'                   ; GF low
 	movff		EEDATA,char_I_GF_Low_percentage
-	GETCUSTOM8	d'33'			; GF high
+	GETCUSTOM8	d'33'                   ; GF high
 	movff		EEDATA,char_I_GF_High_percentage
-	return							; start in Surfacemode
+	return							    ; start in Surfacemode
+
+;=============================================================================
 
 startup_screen1:
 	call	PLED_ClearScreen		

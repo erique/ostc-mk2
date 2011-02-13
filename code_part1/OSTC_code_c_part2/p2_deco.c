@@ -69,9 +69,9 @@
 // 2011/01/25: [jDG] Fusion deco array for both models.
 // 2011/01/25: [jDG] Use CF(54) to reverse deco order.
 // 2011/02/11: [jDG] Reworked gradient-factor implementation.
+// 2011/02/13: [jDG] CF55 for additional gas switch delay in decoplan.
 //
 // TODO:
-//  + Allow (CF) delay for gas switch while predicting ascent.
 //  + Allow to abort MD2 calculation (have to restart next time).
 //
 // Literature:
@@ -160,9 +160,6 @@ static unsigned char	ci;
 static float 			pres_respiration;
 static float			pres_surface;
 static float			temp1;
-static float			temp2;
-static float			temp3;
-static float			temp4;
 static float			temp_deco;
 static float			temp_atem;
 static float			temp2_atem;
@@ -184,7 +181,8 @@ static float            const_ppO2;                 // new in v.101
 static float            deco_ppO2_change;           // new in v.101
 static float            deco_ppO2;                  // new in v.101
 
-static unsigned char    calc_gas_switch;            // Detected a gas switch. 
+static unsigned char    sim_gas_last_used;         // Last used gas, to detected a gas switch. 
+static unsigned char    sim_gas_delay;             // Delay added for gas switch (count down) [min].
 static float			calc_N2_ratio;			// new in v.101
 static float			calc_He_ratio;			// new in v.101
 static float			CNS_fraction;			// new in v.101
@@ -201,27 +199,19 @@ static float			deco_gas_change5;		// new in v.109
 
 static float			deco_N2_ratio1;			// new in v.101
 static float			deco_He_ratio1;			// new in v.101
-static float			deco_N2_ratio2;			// new in v.109
-static float			deco_N2_ratio3;			// new in v.109
-static float			deco_N2_ratio4;			// new in v.109
-static float			deco_N2_ratio5;			// new in v.109
-static float			deco_He_ratio2;			// new in v.109
-static float			deco_He_ratio3;			// new in v.109
-static float			deco_He_ratio4;			// new in v.109
-static float			deco_He_ratio5;			// new in v.109
 
 
 //---- Bank 6 parameters -----------------------------------------------------
 #pragma udata bank6=0x600
 
-static float  pres_tissue[32];
-static float  pres_tissue_limit[16];
-static float  sim_pres_tissue_limit[16];
+float  pres_tissue[32];
+float  pres_tissue_limit[16];
+float  sim_pres_tissue_limit[16];
 
 //---- Bank 7 parameters -----------------------------------------------------
 #pragma udata bank7=0x700
 
-static float  sim_pres_tissue[32];              // 32 floats = 128 bytes.
+float  sim_pres_tissue[32];                 // 32 floats = 128 bytes.
 static float  sim_pres_tissue_backup[32];
 
 //---- Bank 8 parameters -----------------------------------------------------
@@ -518,6 +508,7 @@ static void read_buhlmann_coefficients(PARAMETER char period)
         movwf TBLPTRU,0
     _endasm
 #endif
+    assert( 0 <= ci && ci < 16 );
 
     var_N2_a = buhlmann_a[ci];
     var_N2_b = buhlmann_b[ci];
@@ -584,6 +575,9 @@ static void read_buhlmann_coefficients(PARAMETER char period)
             int_O_DBG_pre_bitfield |= DBG_ZH16ERR;
 
         break;
+
+    default:
+            assert(0);  // Never go there...
     }
 }
 
@@ -778,6 +772,9 @@ static void copy_deco_table(void)
 //
 static void temp_tissue_safety(void)
 {
+    assert( 0.0 <  float_desaturation_multiplier && float_desaturation_multiplier <= 1.0 );
+    assert( 1.0 <= float_saturation_multiplier   && float_saturation_multiplier   <= 2.0 );
+
 	if( char_I_deco_model == 0 )
 	{
 		if (temp_tissue < 0.0)
@@ -904,10 +901,10 @@ static void clear_tissue(void)
     
     for(ci=0; ci<16; ci++)
     {
-        // cycle through the 16 b"uhlmann tissues
+        // cycle through the 16 Bühlmann tissues
         overlay float p = N2_ratio * (pres_respiration -  0.0627);
         pres_tissue[ci] = p;
-        
+
         read_buhlmann_coefficients(-1);
 
         p = (p - var_N2_a) * var_N2_b ;
@@ -915,7 +912,7 @@ static void clear_tissue(void)
             p = 0.0;
         pres_tissue_limit[ci] = p;
 
-        // cycle through the 16 b"uhlmann tissues for Helium
+        // cycle through the 16 Bühlmann tissues for Helium
         (pres_tissue+16)[ci] = 0.0;
     } // for 0 to 16
 
@@ -925,7 +922,7 @@ static void clear_tissue(void)
     int_O_ascenttime = 0;
     char_O_gradient_factor = 0;
     char_O_relative_gradient_GF = 0;
-    char_I_depth_last_deco	= 0;		// for compatibility with v.101pre_no_last_deco
+    char_I_depth_last_deco = 0;		// for compatibility with v.101pre_no_last_deco
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -942,8 +939,8 @@ static void calc_wo_deco_step_2s(void)
     pres_surface = (float)int_I_pres_surface / 1000.0;  // the b"uhlmann formula using pres_surface does apply to the pressure without any inert ratio
     temp_atem = N2_ratio * (pres_respiration - 0.0627); // 0.0627 is the extra pressure in the body
     temp2_atem = 0.0;
-    float_desaturation_multiplier = char_I_desaturation_multiplier / 100.0;
-    float_saturation_multiplier = char_I_saturation_multiplier / 100.0;
+    float_desaturation_multiplier = char_I_desaturation_multiplier * 0.01;
+    float_saturation_multiplier   = char_I_saturation_multiplier   * 0.01;
     
     calc_tissue(0);     // update the pressure in the 32 tissues in accordance with the new ambient pressure for 2 seconds.
     
@@ -1047,21 +1044,13 @@ void calc_hauptroutine_data_input(void)
 {
     overlay int int_temp;
     
-    pres_respiration    = int_I_pres_respiration / 1000.0;
-    pres_surface        = int_I_pres_surface / 1000.0;
-    N2_ratio            = char_I_N2_ratio / 100.0;
-    He_ratio            = char_I_He_ratio / 100.0;
-    deco_N2_ratio1      = char_I_deco_N2_ratio1 / 100.0;
-    deco_He_ratio1      = char_I_deco_He_ratio1 / 100.0;
-    deco_N2_ratio2      = char_I_deco_N2_ratio2 / 100.0;
-    deco_He_ratio2      = char_I_deco_He_ratio2 / 100.0;
-    deco_N2_ratio3      = char_I_deco_N2_ratio3 / 100.0;
-    deco_He_ratio3      = char_I_deco_He_ratio3 / 100.0;
-    deco_N2_ratio4      = char_I_deco_N2_ratio4 / 100.0;
-    deco_He_ratio4      = char_I_deco_He_ratio4 / 100.0;
-    deco_N2_ratio5      = char_I_deco_N2_ratio5 / 100.0;
-    deco_He_ratio5      = char_I_deco_He_ratio5 / 100.0;
-    float_deco_distance = char_I_deco_distance  / 100.0;     // Get offset is in mbar.
+    pres_respiration    = int_I_pres_respiration * 0.001;
+    pres_surface        = int_I_pres_surface     * 0.001;
+    N2_ratio            = char_I_N2_ratio        * 0.01;
+    He_ratio            = char_I_He_ratio        * 0.01;
+    deco_N2_ratio1      = char_I_deco_N2_ratio1  * 0.01;
+    deco_He_ratio1      = char_I_deco_He_ratio1  * 0.01;
+    float_deco_distance = char_I_deco_distance   * 0.01;     // Get offset is in mbar.
 
     // ____________________________________________________
     //
@@ -1122,14 +1111,15 @@ void calc_hauptroutine_data_input(void)
     	}
     }
 
-    const_ppO2 = (float)char_I_const_ppO2 / 100.0;
-    deco_ppO2_change = (float)char_I_deco_ppO2_change / 99.95 + pres_surface;
-    deco_ppO2_change += float_deco_distance;
-    deco_ppO2 = (float)char_I_deco_ppO2 / 100.0;
-    float_desaturation_multiplier = char_I_desaturation_multiplier / 100.0;
-    float_saturation_multiplier = char_I_saturation_multiplier / 100.0;
-    GF_low = (float)char_I_GF_Low_percentage / 100.0;
-    GF_high = (float)char_I_GF_High_percentage / 100.0;
+    const_ppO2 = char_I_const_ppO2 * 0.01;
+    deco_ppO2_change = char_I_deco_ppO2_change / 99.95 
+                     + pres_surface
+                     + float_deco_distance;
+    deco_ppO2 = char_I_deco_ppO2 * 0.01;
+    float_desaturation_multiplier = char_I_desaturation_multiplier * 0.01;
+    float_saturation_multiplier   = char_I_saturation_multiplier   * 0.01;
+    GF_low   = char_I_GF_Low_percentage  * 0.01;
+    GF_high  = char_I_GF_High_percentage * 0.01;
     GF_delta = GF_high - GF_low;
 }
 
@@ -1138,7 +1128,11 @@ void calc_hauptroutine_data_input(void)
 //
 void calc_hauptroutine_update_tissues(void)
 {
- 	if (char_I_const_ppO2 == 0)													// new in v.101
+    assert( 0.00 <= N2_ratio && N2_ratio <= 1.00 );
+    assert( 0.00 <= He_ratio && He_ratio <= 1.00 );
+    assert( (N2_ratio + He_ratio) <= 0.95 );
+
+    if (char_I_const_ppO2 == 0)													// new in v.101
   		pres_diluent = pres_respiration;										// new in v.101
  	else
     {
@@ -1184,46 +1178,64 @@ void calc_hauptroutine_update_tissues(void)
 //
 void check_gas_switch(void)
 {
+    overlay unsigned char temp_gas_switch = sim_gas_last_used;
+
     calc_N2_ratio = N2_ratio;   
     calc_He_ratio = He_ratio;
     
     if (char_I_const_ppO2 == 0)
     {
     	deco_diluent = temp_deco;
-        calc_gas_switch = 0;
 
-		if(deco_gas_change1 && (temp_deco < deco_gas_change1))
+		if( deco_gas_change1 && (temp_deco < deco_gas_change1) )
 		{
     		calc_N2_ratio = deco_N2_ratio1;
     		calc_He_ratio = deco_He_ratio1;
-    		calc_gas_switch = 1;
+            temp_gas_switch = 1;
     	}
-		if(deco_gas_change2 && (temp_deco < deco_gas_change2))
+		if(deco_gas_change2 && (temp_deco < deco_gas_change2) )
 		{
-    		calc_N2_ratio = deco_N2_ratio2;
-    		calc_He_ratio = deco_He_ratio2;
-    		calc_gas_switch = 2;
+    		calc_N2_ratio = char_I_deco_N2_ratio2 * 0.01;
+    		calc_He_ratio = char_I_deco_He_ratio2 * 0.01;
+            temp_gas_switch = 2;
     	}
 		if(deco_gas_change3 && (temp_deco < deco_gas_change3))
 		{
-    		calc_N2_ratio = deco_N2_ratio3;
-    		calc_He_ratio = deco_He_ratio3;
-    		calc_gas_switch = 3;
+    		calc_N2_ratio = char_I_deco_N2_ratio3 * 0.01;
+    		calc_He_ratio = char_I_deco_He_ratio3 * 0.01;
+            temp_gas_switch = 3;
     	}
 		if(deco_gas_change4 && (temp_deco < deco_gas_change4))
 		{
-    		calc_N2_ratio = deco_N2_ratio4;
-    		calc_He_ratio = deco_He_ratio4;
-    		calc_gas_switch = 4;
+    		calc_N2_ratio = char_I_deco_N2_ratio4 * 0.01;
+    		calc_He_ratio = char_I_deco_He_ratio4 * 0.01;
+            temp_gas_switch = 4;
     	}
 		if(deco_gas_change5 && (temp_deco < deco_gas_change5))
 		{
-    		calc_N2_ratio = deco_N2_ratio5;
-    		calc_He_ratio = deco_He_ratio5;
-    		calc_gas_switch = 4;
+    		calc_N2_ratio = char_I_deco_N2_ratio5 * 0.01;
+    		calc_He_ratio = char_I_deco_He_ratio5 * 0.01;
+            temp_gas_switch = 5;
     	}
     }
-    else
+
+    // Should detect gas switch just once.
+    if( temp_gas_switch != sim_gas_last_used )
+    {
+        sim_gas_last_used = temp_gas_switch;
+        sim_gas_delay = read_custom_function(55);
+    }
+
+    assert( 0.0 <= calc_N2_ratio && calc_N2_ratio <= 0.95 );
+    assert( 0.0 <= calc_He_ratio && calc_He_ratio <= 0.95 );
+    assert( (calc_N2_ratio + calc_He_ratio) <= 1.00 );
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+static void alveolar_presures(void)
+{
+    if (char_I_const_ppO2 != 0)
    	{
    		if (temp_deco > deco_ppO2_change)
     	{
@@ -1237,7 +1249,6 @@ void check_gas_switch(void)
 
     if (deco_diluent > temp_deco)
     	deco_diluent = temp_deco;
-
     if (deco_diluent > 0.0627)
     {
         temp_atem = calc_N2_ratio * (deco_diluent - 0.0627);
@@ -1248,6 +1259,8 @@ void check_gas_switch(void)
         temp_atem = 0.0;
         temp2_atem = 0.0;
     }
+    assert( 0.0 <= temp_atem  && temp_atem  < 14.0 );
+    assert( 0.0 <= temp2_atem && temp2_atem < 14.0 );
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1262,7 +1275,9 @@ void calc_hauptroutine_calc_deco(void)
 
  	for(loop = 0; loop < 16; ++loop)
   	{
-        calc_nextdecodepth();
+        // Do not ascent while doing a gas switch.
+        if( sim_gas_delay == 0 )
+            calc_nextdecodepth();
 
         //---- Finish computations once surface is reached -------------------
         if( temp_depth_limit <= 0 )
@@ -1274,7 +1289,12 @@ void calc_hauptroutine_calc_deco(void)
       	}
 
         //---- Else, continue simulating the stops ---------------------------
-        check_gas_switch();         // Also updates ppN2 and ppHe.
+        if( sim_gas_delay == 0 )
+            check_gas_switch();     // Calculate N2_ratio and He_ratio.
+        else
+            sim_gas_delay--;
+
+        alveolar_presures();        // Updates ppN2 and ppHe.
  
         sim_tissue(1);              // Simulate compartiments for 1 minute.
         update_deco_table();        // Add one minute stops.
@@ -1301,25 +1321,37 @@ void sim_ascent_to_first_stop(void)
     // Loop until first top or surface is reached.
  	for(;;)
   	{
-  		temp_deco -= 1.0;               // Ascent 1 min, at 10m/min. == 1bar/min.
+        // Do not ascent while doing a gas switch.
+        if( sim_gas_delay == 0 )
+  		    temp_deco -= 1.0;           // Ascent 1 min, at 10m/min. == 1bar/min.
 
         // Compute sim_lead_tissue_limit at GF_low (deepest stop).
         sim_limit(GF_low);
 
         // Did we reach first stop ?
         if( temp_deco <= sim_lead_tissue_limit )
-            break;                      //Yes: finished !
+            break;                      // Yes: finished !
         
         // Next stop is surface ?
         if( temp_deco <= pres_surface )
             break;                      // Yes: finished too.
 
-        //---- Simulat gas switches, and compute ppN2/ppHe at half the ascent:
- 		temp_deco += 0.5;               // Check gas change 5 meter below new depth.
+        //---- Simulat gas switches
+        if( sim_gas_delay > 0 )
+        {
+            sim_gas_delay--;            // Decrement switch delay
+            temp_depth_limit = (temp_deco - pres_surface) / 0.09985;
+            update_deco_table();        // And mark stop in table
+        }
+        else
+        {
+ 		    temp_deco += 0.5;           // Check gas change 5 meter below new depth.
             check_gas_switch();
- 		temp_deco -= 0.5;               // Back to new depth.
+ 		    temp_deco -= 0.5;           // Back to new depth.
+        }
 
         // Then simulate with the new gas pressures... (1min)
+        alveolar_presures();            // Calculated at true depth !
 		sim_tissue(1);
 	}
     temp_deco += 1.0;                   // Restore last correct depth.
@@ -1389,6 +1421,9 @@ static void calc_limit(PARAMETER float GF_current)
             calc_lead_tissue_limit = p;
         }
     }
+
+    assert( char_O_gtissue_no < 16 );
+    assert( 0.0 <= calc_lead_tissue_limit && calc_lead_tissue_limit <= 14.0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1406,7 +1441,7 @@ static void calc_nullzeit(void)
 	for(loop = 1; loop <= 17; loop++)
 	{
   		backup_sim_pres_tissue();
-  		sim_tissue(2);
+  		sim_tissue(2);      // 10 min.
         sim_limit(GF_high);
 
 		if( sim_lead_tissue_limit > pres_surface )  // changed in v.102 , if guiding tissue can not be exposed to surface pressure immediately
@@ -1422,7 +1457,7 @@ static void calc_nullzeit(void)
  	{
      	for(loop=1; loop <= 10; loop++)
 		{
-   			sim_tissue(1);
+   			sim_tissue(1);  // 1 min
             sim_limit(GF_high);
 
     		if( sim_lead_tissue_limit > pres_surface)  // changed in v.102 , if guiding tissue can not be exposed to surface pressure immediately
@@ -1491,6 +1526,10 @@ void update_startvalues(void)
    		(sim_pres_tissue+16)[x] = (pres_tissue+16)[x];
    		sim_pres_tissue_limit[x] = pres_tissue_limit[x];
   	}
+
+    sim_gas_last_used = -1;     // No switch yet.
+    sim_lead_tissue_limit = 0.0;
+    sim_lead_tissue_no = 255;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1562,6 +1601,9 @@ static void sim_limit(PARAMETER float GF_current)
             sim_lead_tissue_limit = p;
         }
     } // for ci
+
+    assert( sim_lead_tissue_no < 16 );
+    assert( 0.0 <= sim_lead_tissue_limit && sim_lead_tissue_limit <= 14.0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1629,46 +1671,49 @@ static void update_deco_table()
 //
 static void calc_gradient_factor(void)
 {
+    overlay float gf;
+    assert( char_O_gtissue_no < 16 );
+
 	// tissue > respiration (entsaettigungsvorgang)
 	// gradient ist wieviel prozent an limit mit basis tissue
 	// dh. 0% = respiration == tissue
 	// dh. 100% = respiration == limit
-	temp_tissue = pres_tissue[char_O_gtissue_no] + pres_tissue[char_O_gtissue_no+16];
-	temp1 = temp_tissue - pres_respiration;
-	temp2 = temp_tissue - pres_tissue_limit[char_O_gtissue_no];	// changed in v.102
-	temp2 = temp1/temp2;
-	temp2 = temp2 * 100; // displayed in percent
-	if (temp2 < 0)
-		temp2 = 0;
-	if (temp2 > 255)
-		temp2 = 255;
-	if (temp1 < 0)
- 		char_O_gradient_factor = 0;
-	else
- 		char_O_gradient_factor = (char)temp2;
-
-	temp3 = temp2;
+	temp_tissue = pres_tissue[char_O_gtissue_no] + (pres_tissue+16)[char_O_gtissue_no];
+    if( temp_tissue < pres_respiration )
+ 		gf = 0.0;
+    else
+    {
+       gf = (temp_tissue - pres_respiration) 
+          / (temp_tissue - pres_tissue_limit[char_O_gtissue_no])
+          * 100.0;
+        if( gf > 255.0 ) gf = 255.0;
+        if( gf < 0.0   ) gf = 0.0;
+    }
+	char_O_gradient_factor = (unsigned char)gf;
 
 	if (char_I_deco_model == 1)		// calculate relative gradient factor
 	{
-		temp1 = (float)low_depth * 0.09995;
-		temp2 = pres_respiration - pres_surface;
-		if (temp2 <= 0)
-			temp1 = GF_high;
-		else if (temp2 >= temp1)
-			temp1 = GF_low;
-		else
-			temp1 = GF_low + (temp1 - temp2)/temp1*GF_delta;
+        overlay float rgf;
 
-		if (low_depth == 0)
-			temp1 = GF_high;
+		if( low_depth == 0 )
+			rgf = GF_high;
+        else
+        {
+            overlay float temp1 = low_depth * 0.09995;
+            overlay float temp2 = pres_respiration - pres_surface;
 
-		temp2 = temp3 / temp1; // temp3 is already in percent
-		if (temp2 < 0)
-			temp2 = 0;
-		if (temp2 > 255)
-			temp2 = 255;
-		char_O_relative_gradient_GF  = (char)temp2;
+            if (temp2 <= 0)
+			    rgf = GF_high;
+		    else if (temp2 >= temp1)
+			    rgf = GF_low;
+		    else
+			    rgf = GF_low + (temp1 - temp2)/temp1*GF_delta;
+        }
+
+		rgf = gf / rgf; // gf is already in percent
+		if( rgf <   0.0 ) rgf =   0.0;
+		if( rgf > 255.0 ) rgf = 255.0;
+		char_O_relative_gradient_GF  = (unsigned char)rgf;
 	}	// calc relative gradient factor
 	else
 	{
@@ -1685,7 +1730,9 @@ static void calc_gradient_factor(void)
 void deco_calc_desaturation_time(void)
 {
     overlay unsigned int desat_time;    // For a particular compartiment, in min.
-
+    overlay float temp2;
+    overlay float temp3;
+    overlay float temp4;
     RESET_C_STACK
 
     N2_ratio = 0.7902; // FIXED sum as stated in b"uhlmann
@@ -1799,7 +1846,7 @@ static void calc_wo_deco_step_1_min(void)
     temp_atem = N2_ratio * (pres_respiration - 0.0627); // 0.0627 is the extra pressure in the body
     temp2_atem = 0.0;
     float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
-    float_saturation_multiplier = char_I_saturation_multiplier / 100.0;
+    float_saturation_multiplier   = char_I_saturation_multiplier   * 0.01;
     
     calc_tissue(1);  // update the pressure in the 32 tissues in accordance with the new ambient pressure
     
@@ -2004,10 +2051,7 @@ void deco_calc_CNS_decrease_15min(void)
 void deco_calc_percentage(void)
 {
     RESET_C_STACK
-    temp1 = (float)int_I_temp;
-    temp2 = (float)char_I_temp / 100.0;
-    temp3 = temp1 * temp2;
-    int_I_temp = (int)temp3;
+    int_I_temp = (int)(int_I_temp * (char_I_temp / 100.0));
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -89,7 +89,7 @@
     TCODE    .50,  .2,       "Reg.Heure:"                ;029 Set Time:
     TCODE    .100, .50,      "Repère"                    ;030 SetMarker         (Add a mark in logbook profile)
     TCODE    .100, .25,      "Paliers"                   ;031 Decoplan
-    TCODE    .100, .0,       "Liste Gaz"                 ;032 Gaslist
+    TCODE    .100, .0,       "ListeGaz"                  ;032 Gaslist
     TCODE    .100, .50,      "RazMoyn."                  ;033 ResetAvr          (Reset average depth)
     TCODE    .100, .100,     "Sortir"                    ;034 Exit              (Exit current menu)
     TCODE    .0,   .0,       "SansAvion"                 ;035 NoFly             (No-flight count-down)
@@ -97,7 +97,7 @@
 ; 32 custom function descriptors I (FIXED LENGTH = 15 chars).
     TCODE    .40,  .35,      "Début Plong.[m]"           ;036 Start Dive  [m]	(depth to switch to dive mode)
     TCODE    .40,  .35,      "Fin Plongée [m]"           ;037 End Dive    [m]	(depth to switch back to surface mode)
-    TCODE    .40,  .35,      "End Delay [min]"           ;038 End Delay [min]  	(duration dive screen stays after end of dive)
+    TCODE    .40,  .35,      "Délai Fin [min]"           ;038 End Delay [min]  	(duration dive screen stays after end of dive)
     TCODE    .40,  .35,      "Eteindre  [min]"           ;039 Power Off [min]
     TCODE    .40,  .35,      "Pré-menu  [min]"           ;040 Pre-menu  [min]	(Delais to keep surface-mode menus displayed)
     TCODE    .40,  .35,      "Vitesse [m/min]"           ;041 velocity[m/min]
@@ -112,19 +112,19 @@
     TCODE    .40,  .35,      "Alarme GF   [%]"           ;050 GF alarm 1  [%]
     TCODE    .40,  .35,      "Aff.CNS Surf[%]"           ;051 CNSshow surf[%]
     TCODE    .40,  .35,      "Décal. Déco [m]"           ;052 Deco Offset [m]
-    TCODE    .40,  .35,      "ppO2 basse[Bar]"           ;053 ppO2 low  [Bar]
-    TCODE    .40,  .35,      "ppO2 haute[Bar]"           ;054 ppO2 high [Bar]
+    TCODE    .40,  .35,      "ppO2 mini [Bar]"           ;053 ppO2 low  [Bar]
+    TCODE    .40,  .35,      "ppO2 maxi [Bar]"           ;054 ppO2 high [Bar]
     TCODE    .40,  .35,      "Aff. ppO2 [Bar]"           ;055 ppO2 show [Bar]
     TCODE    .40,  .35,      "Freq. Mesures  "           ;056 sampling rate  
     TCODE    .40,  .35,      "Diviseur Temp. "           ;057 Divisor Temp   
-    TCODE    .40,  .35,      "Divis. InfoDéco"           ;058 Divisor Decodat
-    TCODE    .40,  .35,      "Divisor NotUse1"           ;059 Divisor NotUse1
+    TCODE    .40,  .35,      "Divis.Donn.Déco"           ;058 Divisor Decodat
+    TCODE    .40,  .35,      "Diviseur NotUse"           ;059 Divisor NotUse1
     TCODE    .40,  .35,      "Diviseur ppO2  "           ;060 Divisor ppO2 
     TCODE    .40,  .35,      "Diviseur Debug "           ;061 Divisor Debug  
-    TCODE    .40,  .35,      "Divisor NotUse2"           ;062 Divisor NotUse2
+    TCODE    .40,  .35,      "Diviseur NotUse"           ;062 Divisor NotUse2
     TCODE    .40,  .35,      "Aff.CNSPlong[%]"           ;063 CNSshow dive[%]
     TCODE    .40,  .35,      "Décalage Carnet"           ;064 Logbook offset 
-    TCODE    .40,  .35,      "Dern. Déco à[m]"           ;065 Last Deco at[m]
+    TCODE    .40,  .35,      "Dern. Palier[m]"           ;065 Last Deco at[m]
     TCODE    .40,  .35,      "Fin Apnée   [h]"           ;066 End Apnoe   [h]
     TCODE    .40,  .35,      "Aff.TensionBatt"           ;067 Show Batt.Volts
 ; End of function descriptor I
@@ -153,7 +153,7 @@
     TCODE    .121,  .0,      "Durée"                     ;086 Divetime
     TCODE    .0,    .0,      "Profondeur"                ;087 Depth
     TCODE    .0,    .0,      "Premier Gaz?"              ;088 First Gas?
-    TCODE    .0,    .0,      "Défaut: "                  ;089 Default:
+    TCODE    .0,    .0,      "Défaut:"                   ;089 Default:
     TCODE    .0,    .0,      "Minutes"                   ;090 Minutes
     TCODE    .0,    .0,      "Mois   "                   ;091 Month  
     TCODE    .0,    .0,      "Jour   "                   ;092 Day    
@@ -178,7 +178,7 @@
     TCODE    .20,   .2,      "Menu SetPoint CCR"         ;111 CCR SetPoint Menu
     TCODE    .0,    .0,      "#SP"                       ;112 SP#
     TCODE    .20,   .95,     "Info Batterie"             ;113 Battery Info
-    TCODE    .10,   .2,      "Information Batterie"      ;114 Battery Information
+    TCODE    .6,   .2,       "Informations Batterie"     ;114 Battery Information
     TCODE    .0,    .9,      "Cycles:"                   ;115 Cycles:
     TCODE    .85,   .125,    "Apnée"                     ;116 Apnoe
     TCODE    .0,    .18,     "Dern.Complète:"            ;117 Last Complete:
@@ -224,25 +224,25 @@
     TCODE    .40,   .35,     "GF Haut     [%]"           ;155 GF High     [%]
     TCODE    .40,   .35,     "CouleurBatterie"           ;156 Color# Battery 
     TCODE    .40,   .35,     "CouleurStandard"           ;157 Color# Standard
-    TCODE    .40,   .35,     "Couleur Masque "           ;158 Color# Divemask
+    TCODE    .40,   .35,     "Couleur Legende"           ;158 Color# Divemask
     TCODE    .40,   .35,     "Couleur Alarmes"           ;159 Color# Warnings
-    TCODE    .40,   .35,     "Secs.ModePlong."           ;160 Divemode secs. 
-    TCODE    .40,   .35,     "Adjust. SP fixe"           ;161 Adjust fixed SP
+    TCODE    .40,   .35,     "Secs.TempsPlong"           ;160 Divemode secs. 
+    TCODE    .40,   .35,     "Ajuster SP fixe"           ;161 Adjust fixed SP
     TCODE    .40,   .35,     "Alarme Plafond "           ;162 Warn Ceiling
-    TCODE    .40,   .35,     "Icones TypeMél."           ;163 Mix type icons
-    TCODE    .40,   .35,     "Blink BetterGas"           ;164 Blink BetterGas	(Remainder in divemode to switch to a better decompression gas).
+    TCODE    .40,   .35,     "Icone Type Mél."           ;163 Mix type icons
+    TCODE    .40,   .35,     "Aff.MeilleurGaz"           ;164 Blink BetterGas	(Remainder in divemode to switch to a beter decompression gas).
     TCODE    .40,   .35,     "AlarmProf[mBar]"           ;165 DepthWarn[mBar]
     TCODE    .40,   .35,     "Alarme CNS  [%]"           ;166 CNS warning [%]
     TCODE    .40,   .35,     "Alarme GF   [%]"           ;167 GF warning  [%]
     TCODE    .40,   .35,     "Al. ppO2  [Bar]"           ;168 ppO2 warn [Bar]
     TCODE    .40,   .35,     "Al.Vites[m/min]"           ;169 Vel.warn[m/min]
     TCODE    .40,   .35,     "Décal Heur/Jour"           ;170 Time offset/day
-    TCODE    .40,   .35,     "Aff. altimètre "           ;171 Show altimeter
-    TCODE    .40,   .35,     "Aff. Log-Marker"           ;172 Show Log-Marker
+    TCODE    .40,   .35,     "Aff. Altimètre "           ;171 Show altimeter
+    TCODE    .40,   .35,     "Aff. Repère    "           ;172 Show Log-Marker
     TCODE    .40,   .35,     "Aff. Chrono.   "           ;173 Show Stopwatch
     TCODE    .40,   .35,     "Aff.GraphTissus"           ;174 ShowTissueGraph
     TCODE    .40,   .35,     "Aff.Tiss.Direct"           ;175 Show Lead.Tiss.
-    TCODE    .40,   .35,     "Prof.DernPalier"           ;176 Shallow stop 1st
+    TCODE    .40,   .35,     "Prof.DernPalier"           ;176 Shalow stop 1st
     TCODE    .40,   .35,     "non utilisé    "           ;177 not used
     TCODE    .40,   .35,     "non utilisé    "           ;178 not used
     TCODE    .40,   .35,     "non utilisé    "           ;179 not used
@@ -260,7 +260,7 @@
     TCODE    .90,   .25,     "Surface"                   ;189 Surface
     TCODE    .0,    .0,      "ppO2 +"                    ;190 ppO2 +
     TCODE    .0,    .0,      "ppO2 -"                    ;191 ppO2 -
-    TCODE    .0,    .0,      "Dil."                      ;192 Dil.			       (Rebreather diluent)
+    TCODE    .0,    .0,      "Dil."                      ;192 Dil.			       (Rebreather diluant)
 ; ZH-L16 mode description
     TCODE    .0,    .35,     "TypeDéco: ZH-L16 OC   "    ;193 Decotype: ZH-L16 OC	(22 chars maximum)
     TCODE    .0,    .65,     "Pour les plongeurs  en"    ;194 For Open Circuit

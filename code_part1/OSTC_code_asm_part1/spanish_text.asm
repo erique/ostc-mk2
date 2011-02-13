@@ -70,7 +70,7 @@
     TCODE    .20,  .185,     "Salir"                     ;011 Exit
     TCODE    .100, .2,       "Espere..."                 ;012 Wait..
     TCODE    .0,   .24,      "Resumen MD2:"              ;013 MD2 Hash:
-    TCODE    .0,   .0,       "Desat"                     ;014 Desat
+    TCODE    .0,   .0,       "Desat"                     ;014 Desat         (Desaturation count-down)
     TCODE    .57,  .2,       "Interfaz"                  ;015 Interface
     TCODE    .10,  .30,      "Inicio"                    ;016 Start
     TCODE    .10,  .55,      "Datos"                     ;017 Data
@@ -86,19 +86,19 @@
     TCODE    .14,  .2,       "Func. Personaliz. I"       ;027 Custom Functions I
     TCODE    .20,  .2,       "Menú Reinicio"             ;028 Reset Menu
     TCODE    .35,  .2,       "Fijar Hora:"               ;029 Set Time:
-    TCODE    .100, .50,      "FijaMarc"                  ;030 SetMarker
+    TCODE    .100, .50,      "FijaMarc"                  ;030 SetMarker         (Add a mark in logbook profile)
     TCODE    .100, .25,      "Plandeco"                  ;031 Decoplan
     TCODE    .100, .0,       "Listagas"                  ;032 Gaslist
-    TCODE    .100, .50,      "ReiniMed"                  ;033 ResetAvr
-    TCODE    .100, .100,     "Salir"                     ;034 Exit
-    TCODE    .0,   .0,       "NoVue"                     ;035 NoFly
+    TCODE    .100, .50,      "ReiniMed"                  ;033 ResetAvr          (Reset average depth)
+    TCODE    .100, .100,     "Salir"                     ;034 Exit		        (Exit current menu)
+    TCODE    .0,   .0,       "NoVue"                     ;035 NoFly		        (No-flight count-down)
 ;
 ; 32 custom function descriptors I (FIXED LENGTH = 15 chars).
-    TCODE    .40,  .35,      "Buceo Inic. [m]"           ;036 Start Dive  [m]
-    TCODE    .40,  .35,      "Buceo Fin.  [m]"           ;037 End Dive    [m]
-    TCODE    .40,  .35,      "Retras Fin[min]"           ;038 End Delay [min]
+    TCODE    .40,  .35,      "Buceo Inic. [m]"           ;036 Start Dive  [m]	(depth to switch to dive mode)
+    TCODE    .40,  .35,      "Buceo Fin.  [m]"           ;037 End Dive    [m]	(depth to switch back to surface mode)
+    TCODE    .40,  .35,      "Retras Fin[min]"           ;038 End Delay [min]  	(duration dive screen stays after end of dive)
     TCODE    .40,  .35,      "Apagado   [min]"           ;039 Power Off [min]
-    TCODE    .40,  .35,      "Pre-menú  [min]"           ;040 Pre-menu  [min]
+    TCODE    .40,  .35,      "Pre-menú  [min]"           ;040 Pre-menu  [min]	(Delais to keep surface-mode menus displayed)
     TCODE    .40,  .35,      "Vel.    [m/min]"           ;041 velocity[m/min]
     TCODE    .40,  .35,      "Activac. [mBar]"           ;042 Wake-up  [mBar]
     TCODE    .40,  .35,      "Máx. Sup.[mBar]"           ;043 max.Surf.[mBar]
@@ -107,7 +107,7 @@
     TCODE    .40,  .35,      "Menús buc.[min]"           ;046 Dive menus[min]
     TCODE    .40,  .35,      "Saturac. x  [%]"           ;047 Saturate x  [%]
     TCODE    .40,  .35,      "Desaturac. x[%]"           ;048 Desaturate x[%]
-    TCODE    .40,  .35,      "Ratio NoVue [%]"           ;049 NoFly Ratio [%]
+    TCODE    .40,  .35,      "Ratio NoVue [%]"           ;049 NoFly Ratio [%]	(Grandient factor tolerance for no-flight countdown).
     TCODE    .40,  .35,      "Alarma GF 1 [%]"           ;050 GF alarm 1  [%]
     TCODE    .40,  .35,      "Mues.CNSsup.[%]"           ;051 CNSshow surf[%]
     TCODE    .40,  .35,      "Dist. Deco  [m]"           ;052 Deco Offset [m]
@@ -193,7 +193,7 @@
     TCODE    .100,  .0,      "Sal."                      ;127 Exit
     TCODE    .100,  .25,     "Borrar"                    ;128 Delete
     TCODE    .20,   .65,     "Depur:"                    ;129 Debug:
-    TCODE    .65,   .65,     "ACT"                       ;130 ON
+    TCODE    .65,   .65,     "ACT"                       ;130 ON 
     TCODE    .65,   .65,     "DES"                       ;131 OFF
     TCODE    .100,  .50,     "Borrtodo"                  ;132 Del. all
     TCODE    .0,    .0,      "¡Reinicio inesperado"      ;133 Unexpected reset from
@@ -229,7 +229,7 @@
     TCODE    .40,   .35,     "Ajusta SP fijo "           ;161 Adjust fixed SP
     TCODE    .40,   .35,     "Tope Aviso     "           ;162 Warn Ceiling
     TCODE    .40,   .35,     "Iconos TipoMezl"           ;163 Mix type icons
-    TCODE    .40,   .35,     "Parp. Mejor Gas"           ;164 Blink BetterGas
+    TCODE    .40,   .35,     "Parp. Mejor Gas"           ;164 Blink BetterGas	(Remainder in divemode to switch to a better decompression gas).
     TCODE    .40,   .35,     "AvisoProf[mBar]"           ;165 DepthWarn[mBar]
     TCODE    .40,   .35,     "Aviso CNS   [%]"           ;166 CNS warning [%]
     TCODE    .40,   .35,     "Aviso GF    [%]"           ;167 GF warning  [%]
@@ -259,7 +259,7 @@
     TCODE    .90,   .25,     "Superf."                   ;189 Surface
     TCODE    .0,    .0,      "ppO2 +"                    ;190 ppO2 +
     TCODE    .0,    .0,      "ppO2 -"                    ;191 ppO2 -
-    TCODE    .0,    .0,      "Dil."                      ;192 Dil.
+    TCODE    .0,    .0,      "Dil."                      ;192 Dil.			       (Rebreather diluent)
 ; ZH-L16 mode description
     TCODE    .0,    .35,     "Tipodeco: ZH-L16 OC"       ;193 Decotype: ZH-L16 OC
     TCODE    .0,    .65,     "Para Buceo Circuito"       ;194 For Open Circuit

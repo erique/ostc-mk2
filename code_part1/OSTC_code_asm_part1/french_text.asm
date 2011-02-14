@@ -81,7 +81,7 @@
     TCODE    .20,  .35,      "Annuler RaZ"               ;021 Cancel Reset
     TCODE    .32,  .65,      "Heure:"                    ;022 Time:
     TCODE    .32,  .95,      "Date :"                    ;023 Date:
-    TCODE    .32,  .155,     "Rég. Heures"               ;024 Set Hours
+    TCODE    .32,  .155,     "Réglage Heures"            ;024 Set Hours     (see also 090..094)
     TCODE    .6,   .0,       "Initialisation..."         ;025 Reset...
     TCODE    .17,  .2,       "Carnet de plongées"        ;026 Logbook
     TCODE    .14,  .2,       "Config Fonctions I"        ;027 Custom Functions I
@@ -158,7 +158,7 @@
     TCODE    .0,    .0,      "Mois   "                   ;091 Month  
     TCODE    .0,    .0,      "Jour   "                   ;092 Day    
     TCODE    .0,    .0,      "Année  "                   ;093 Year   
-    TCODE    .0,    .0,      "Rég."                      ;094 Set 
+    TCODE    .0,    .0,      "Réglage "                  ;094 Set 
     TCODE    .0,    .0,      "#Gaz "                     ;095 Gas# 
     TCODE    .0,    .0,      "Oui"                       ;096 Yes
     TCODE    .0,    .0,      "Valeur:"                   ;097 Current:
@@ -194,8 +194,8 @@
     TCODE    .100,  .0,      "Sortie"                    ;127 Exit
     TCODE    .100,  .25,     "Suppr."                    ;128 Delete
     TCODE    .20,   .65,     "Débug:"                    ;129 Debug:
-    TCODE    .65,   .65,     "ON "                       ;130 ON 
-    TCODE    .65,   .65,     "OFF"                       ;131 OFF
+    TCODE    .65,   .65,     "OUI"                       ;130 ON 
+    TCODE    .65,   .65,     "NON"                       ;131 OFF
     TCODE    .100,  .50,     "Suppr.tout"                ;132 Del. all
     TCODE    .10,   .0,      "Réinitialisation"          ;133 Unexpected reset from
     TCODE    .10,   .25,     "inattendue! Merci de"      ;134 Divemode! Please help
@@ -380,4 +380,8 @@
 ;
 	TCODE    .20,   .125,    "Aff. donn. brutes"         ;295 Show raw data
 	TCODE    .50,    .2,     "Données brutes:"           ;296 Raw Data:
+; Gas-setup addons:
+    TCODE    .0,    .0,      "PMU:"                      ; 297 MOD:                 (max operating depth of a gas).
+    TCODE    .0,    .0,      "PEN:"                      ; 298 END:                 (equivalent nitrogen depth of a gas).
+    TCODE    .0,    .0,      "PEA:"                      ; 299 EAD:                 (equivalent air depth of a gas).
 ;=============================================================================

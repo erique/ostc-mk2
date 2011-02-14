@@ -80,9 +80,11 @@ settime_loop:
 	bra	settime_loop
 
 set_time_refresh:
-	WIN_LEFT	.70
+	WIN_LEFT	.32
 	WIN_TOP		.65
 	lfsr	FSR2,letter
+	OUTPUTTEXT  .22                     ; "Hours:" (actual length depends on translation)
+
 	movff	hours,lo
 	output_99x
 	PUTC	':'
@@ -91,9 +93,11 @@ set_time_refresh:
 	STRCAT_PRINT "  "
 
 set_date_refresh:
-	WIN_LEFT	.70
+	WIN_LEFT	.32
 	WIN_TOP		.95
 	lfsr	FSR2,letter
+	OUTPUTTEXT  .23                     ; "Date: " (actual length depends on translation)
+
 	movff	month,convert_value_temp+0
 	movff	day,convert_value_temp+1
 	movff	year,convert_value_temp+2
@@ -127,15 +131,15 @@ set_time_done:				; Check date
 	movlw	.30
 	dcfsnz	lo,F
 	movlw	.31
-	cpfsgt	day						; day ok?
-	bra	set_time_done2			; OK
-	movlw	.1						; not OK, set to 1st
+	cpfsgt	day                         ; day ok?
+	bra	set_time_done2                  ; OK
+	movlw	.1                          ; not OK, set to 1st
 	movwf	day
 
 set_time_done2:
 	WIN_LEFT	.32
 	WIN_TOP		.155
-	movlw	d'8'
+	movlw	(.160-.32)/7                ; full line length, for various translations.
 	movwf	temp1
 	call	PLED_display_clear_common_y1
 	
@@ -151,9 +155,11 @@ set_time_done_loop
 
 	call	set_date_refresh
 
-	WIN_LEFT	.70
+	WIN_LEFT	.32
 	WIN_TOP		.65
 	lfsr	FSR2,letter
+	OUTPUTTEXT  .22                     ; "Hours:" (actual length depends on translation)
+
 	movff	hours,lo
 	output_99x
 	PUTC	':'
@@ -191,23 +197,23 @@ set_time_next_or_exit:
 	WIN_TOP		.155
     call    PLED_standard_color    
 	lfsr	FSR2,letter
-	OUTPUTTEXT	.94			; Set
+	OUTPUTTEXT	.94			    ; Set
 
 	movff	menupos2,menupos3
 	decfsz	menupos3,F
-	bra	set_time_next_or_exit2
+	bra	    set_time_next_or_exit2
 	OUTPUTTEXT	.90				; Minutes
-	bra	set_time_next_or_exit5
+	bra	    set_time_next_or_exit5
 set_time_next_or_exit2:	
 	decfsz	menupos3,F
-	bra	set_time_next_or_exit3
+	bra	    set_time_next_or_exit3
 	OUTPUTTEXT	.91				; Month
-	bra	set_time_next_or_exit5
+	bra	    set_time_next_or_exit5
 set_time_next_or_exit3:	
 	decfsz	menupos3,F
-	bra	set_time_next_or_exit4
+	bra	    set_time_next_or_exit4
 	OUTPUTTEXT	.92				; Day
-	bra	set_time_next_or_exit5
+	bra	    set_time_next_or_exit5
 set_time_next_or_exit4:	
 	OUTPUTTEXT	.93				; Year
 

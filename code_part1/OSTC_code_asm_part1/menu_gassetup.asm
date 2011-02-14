@@ -299,102 +299,110 @@ menu_gassetup1:
 
 	rcall	gassetup_title_bar2			; Displays the title bar with the current Gas info
 
-	WIN_TOP		.65
 	WIN_LEFT	.20
-	
+	WIN_TOP		.65	
 	STRCPY  "O2: "
 
 	movf	divemins+0,W
 	addlw	0x06
 	movwf	EEADR
-	call	read_eeprom		; O2 value
+	call	read_eeprom                 ; O2 value
 	movff	EEDATA,lo
 	output_8
-	STRCAT  "% (MOD:"
+	STRCAT_PRINT "% "
 
 ; Show MOD in m
-	GETCUSTOM8 .18				; ppO2 warnvalue in WREG
+	WIN_LEFT	.90
+    lfsr    FSR2, letter
+	OUTPUTTEXTH .297                    ; MOD:
+
+	GETCUSTOM8 .18                      ; ppO2 warnvalue in WREG
 	mullw	d'10'
 	movff	PRODL,xA+0
-	movff	PRODH,xA+1			; ppO2 in [0.01Bar] * 10
+	movff	PRODH,xA+1                  ; ppO2 in [0.01Bar] * 10
 
 	movf	divemins+0,W
 	addlw	0x06
 	movwf	EEADR
-	call	read_eeprom			; O2 value
+	call	read_eeprom                 ; O2 value
 	movff	EEDATA,xB+0
 	clrf	xB+1
-	call	div16x16			;xA/xB=xC with xA as remainder
+	call	div16x16                    ; xA/xB=xC with xA as remainder
 	movlw	d'10'
-	subwf	xC+0,F				; Subtract 10m...
+	subwf	xC+0,F                      ; Subtract 10m...
 	movff	xC+0,lo
 	movlw	d'0'
 	subwfb	xC+1,F
 	movff	xC+1,hi
 	output_16
-	STRCAT_PRINT  "m)  "
+	STRCAT_PRINT  "m  "
 
+	WIN_LEFT	.20
 	WIN_TOP		.95
 	STRCPY  "He: "
 	movf	divemins+0,W
 	addlw	0x07
 	movwf	EEADR
-	call	read_eeprom		; He value
+	call	read_eeprom                 ; He value
 	movff	EEDATA,lo
 	output_8
-	STRCAT  "% (END:"
+	STRCAT_PRINT "% "
 
 ; Show END in m
-	GETCUSTOM8 .18				; ppO2 warnvalue in WREG
+    lfsr    FSR2, letter
+	WIN_LEFT	.90
+	OUTPUTTEXTH .298                    ; END:
+	GETCUSTOM8 .18				        ; ppO2 warnvalue in WREG
 	mullw	d'10'
 	movff	PRODL,xA+0
-	movff	PRODH,xA+1			; ppO2 in [0.01Bar] * 10
+	movff	PRODH,xA+1		            ; ppO2 in [0.01Bar] * 10
 	movf	divemins+0,W
 	addlw	0x06
 	movwf	EEADR
-	call	read_eeprom			; O2 value
+	call	read_eeprom                 ; O2 value
 	movff	EEDATA,xB+0
 	clrf	xB+1
-	call	div16x16			;xA/xB=xC with xA as remainder
+	call	div16x16                    ; xA/xB=xC with xA as remainder
 	movlw	d'10'
-	subwf	xC+0,F				; Subtract 10m...
+	subwf	xC+0,F                      ; Subtract 10m...
 	movff	xC+0,lo
 	movlw	d'0'
 	subwfb	xC+1,F
-	movff	xC+1,hi				; lo:hi holding MOD in meters
+	movff	xC+1,hi                     ; lo:hi holding MOD in meters
 	movlw	d'10'
 	addwf	lo,F
 	movlw	d'0'
-	addwfc	hi,F				; lo:hi holding MOD+10m
+	addwfc	hi,F                        ; lo:hi holding MOD+10m
 
 	movf	divemins+0,W
 	addlw	0x07
 	movwf	EEADR
-	call	read_eeprom		; He value in % -> EEDATA
+	call	read_eeprom                 ; He value in % -> EEDATA
 	movlw	d'100'
 	movwf	xA+0
-	movf	EEDATA,W		; He value in % -> EEDATA
-	subwf	xA+0,F			; xA+0 = 100 - He Value in %
+	movf	EEDATA,W                    ; He value in % -> EEDATA
+	subwf	xA+0,F                      ; xA+0 = 100 - He Value in %
 	clrf	xA+1
 	movff	lo,xB+0
-	movff	hi,xB+1			; Copy MOD+10
-	call	mult16x16		;xA*xB=xC
+	movff	hi,xB+1                     ; Copy MOD+10
+	call	mult16x16                   ; xA*xB=xC
 	movff	xC+0,xA+0
 	movff	xC+1,xA+1
 	movlw	d'100'
 	movwf	xB+0
 	clrf	xB+1
-	call	div16x16		;xA/xB=xC with xA as remainder 	
+	call	div16x16                    ; xA/xB=xC with xA as remainder 	
 	;	xC:2 = ((MOD+10) * 100 - HE Value in %) / 100
 	movlw	d'10'
-	subwf	xC+0,F				; Subtract 10m...
+	subwf	xC+0,F				        ; Subtract 10m...
 	movff	xC+0,lo
 	movlw	d'0'
 	subwfb	xC+1,F
 	movff	xC+1,hi
 	output_16
-	STRCAT_PRINT  "m)  "
+	STRCAT_PRINT  "m  "
 
+    WIN_LEFT    .20
 	WIN_TOP		.125
 	STRCPY  "+/-: "
 	movlw	'+'
@@ -405,18 +413,18 @@ menu_gassetup1:
 
 	WIN_TOP		.155
 	lfsr	FSR2,letter
-	OUTPUTTEXT	.89			; Default: 
+	OUTPUTTEXT	.89			            ; Default: 
 	movf	divemins+0,W
 	addlw	0x04
 	movwf	EEADR
-	call	read_eeprom		; Default O2 value
+	call	read_eeprom		            ; Default O2 value
 	movff	EEDATA,lo
 	output_8
 	PUTC	'/'
 	movf	divemins+0,W
 	addlw	0x05
 	movwf	EEADR
-	call	read_eeprom		; Default He value
+	call	read_eeprom		            ; Default He value
 	movff	EEDATA,lo
 	output_8
 	STRCAT_PRINT  "  "

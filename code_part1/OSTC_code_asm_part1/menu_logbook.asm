@@ -397,7 +397,9 @@ display_profile_offset3:
 	movff		SSPBUF,hi
 	bsf		leftbind
 	output_16							; Air pressure before dive
-	STRCAT      "mbar Desat "
+	STRCAT      "mbar "
+	OUTPUTTEXT  .014                    ; Desat
+	PUTC        ' '
 
 	call		I2CREAD2	
 	movff		SSPBUF,lo

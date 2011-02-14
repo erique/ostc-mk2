@@ -505,29 +505,37 @@ PLED_display_deko2:
 	call	PLED_standard_color
 	return
 
+;=============================================================================
+; Update simulator menu with time/depth
+; Note: because translations might change a bit the string length, we reprint
+;       that part of the mask to be sure the numbers fit in the right places.
 PLED_simulator_data:
+	WIN_LEFT	.20
 	WIN_TOP		.65
-	WIN_LEFT	.112                    ; +7 for spanish.
 	WIN_FONT 	FT_SMALL
 	call	PLED_standard_color
 	lfsr	FSR2,letter
-	movff	logbook_temp1,lo
+	OUTPUTTEXTH .277                    ; Bottom Time:
+	
+	movff	logbook_temp1,lo            
 	bsf		leftbind
 	output_8
 	bcf		leftbind
 	STRCAT_PRINT  "min "
 
+	WIN_LEFT	.20
 	WIN_TOP		.95
-	WIN_LEFT	.100
-	WIN_FONT 	FT_SMALL
-	call	PLED_standard_color
 	lfsr	FSR2,letter
+	OUTPUTTEXTH .278                    ; Max. Depth:
+
 	movff	logbook_temp2,lo
 	bsf		leftbind
 	output_8
 	bcf		leftbind
 	STRCAT_PRINT  "m "
 	return
+
+;=============================================================================
 
 PLED_display_velocity:
 ;	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?

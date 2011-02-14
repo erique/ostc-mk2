@@ -259,11 +259,12 @@ altimeter_menu_2:
         GETCUSTOM8  .49
         btfss       WREG,0
         bra         alt_menu_1
-        STRCAT_PRINT "ON "
+        OUTPUTTEXT  .130                ; ON
         bra         alt_menu_2
 alt_menu_1:
-        STRCAT_PRINT "OFF"
+        OUTPUTTEXT  .131                ; OFF
 alt_menu_2:
+        call word_processor
         
         DISPLAYTEXTH .291               ; Action reset
         DISPLAYTEXTH .292               ; Action add

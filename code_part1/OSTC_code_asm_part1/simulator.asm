@@ -149,6 +149,9 @@ simulator_startdive:
 
 	call	simulator_save_tissue_data		; Stores 32 floats "pre_tissue" into bank3
 
+	movlw	d'3'                            ; Begin of deco cycle (reset table).
+	movff	WREG,char_O_deco_status         ; Reset Deco module.
+
 	bsf		divemode						; Set divemode flag
 	ostc_debug	'P'							; Sends debug-information to screen if debugmode active
 	goto	diveloop						; Start Divemode
@@ -244,7 +247,7 @@ simulator_calc_deco:
 	bsf		simulatormode_active			; normal simulator mode
 	bsf		standalone_simulator			; Standalone Simulator active
 
-	movff	logbook_temp1,logbook_temp3		; store bottom time
+	movff	logbook_temp1,logbook_temp3		; store bottom time.
 
 	movff	logbook_temp2,xA+0              ; Bottom depth. 
 	clrf	xA+1
@@ -273,7 +276,7 @@ simulator_calc_deco:
 
 	call	divemode_check_decogases    ; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
-	movlw	d'0'                        ; Begin of deco cycle (init sim tissues)
+	movlw	d'3'                        ; Begin of deco cycle (reset table).
 	movff	WREG,char_O_deco_status     ; Reset Deco module.
 
 simulator_calc_deco_loop1:
@@ -305,6 +308,8 @@ simulator_calc_deco_loop2:
 	movff	WREG,char_I_step_is_1min    ; 2 second deco mode
 
 simulator_calc_deco2:
+	btg     LED_red
+
 	call	divemode_check_decogases    ; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
 
@@ -329,12 +334,9 @@ simulator_calc_deco2:
 
 	bcf     LED_red
 	
-	movlw	d'1'
-	movwf	logbook_temp1                   ; Bottom time>0!
-
 	movlw	d'5'                            ; Pre-Set Cursor to "Show Decoplan"
 	movwf	menupos
-	movff	logbook_temp3,logbook_temp1     ; restore bottom time
+	movff	logbook_temp3,logbook_temp1     ; restore bottom time.
 	bra     menu_simulator1                 ; Done.
 
 

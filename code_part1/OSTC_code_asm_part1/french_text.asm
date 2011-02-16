@@ -69,7 +69,7 @@
     TCODE    .20,  .95,      "Remises a zéro"            ;009 Reset Menu
     TCODE    .20,  .125,     "Menu Réglages"             ;010 Setup
     TCODE    .20,  .185,     "Sortir"                    ;011 Exit
-    TCODE    .83,  .2,       "Attendre..."               ;012 Wait..
+    TCODE    .87,  .2,       "Attendez.."                ;012 Wait..
     TCODE    .0,   .24,      "Hash MD2:"                 ;013 MD2 Hash:
     TCODE    .0,   .0,       "Désat"                     ;014 Desat         (Desaturation count-down)
     TCODE    .50,  .2,       "Interface"                 ;015 Interface		(Connected to USB)
@@ -148,9 +148,9 @@
 ;
     TCODE    .118,  .54,     "Palier"                    ;082 Decostop
     TCODE    .0,    .0,      "m/min"                     ;083 m/min
-    TCODE    .87,   .113,    "SansPalier"                ;084 No Stop
-    TCODE    .135,  .113,    "DTR"                       ;085 TTS
-    TCODE    .121,  .0,      "Durée"                     ;086 Divetime
+    TCODE    .90,   .113,    "SansPalier"                ;084 No Stop
+    TCODE    .139,  .113,    "DTR"                       ;085 TTS
+    TCODE    .125,  .0,      "Durée"                     ;086 Divetime
     TCODE    .0,    .0,      "Profondeur"                ;087 Depth
     TCODE    .0,    .0,      "Premier Gaz?"              ;088 First Gas?
     TCODE    .0,    .0,      "Défaut:"                   ;089 Default:
@@ -362,7 +362,7 @@
     TCODE    .20,   .125,    "Calculer la Déco"          ;279 Calculate Deco
     TCODE    .20,   .155,    "Voir Plan de Déco"         ;280 Show Decoplan
 ;
-    TCODE    .93,   .170,    "Prof.Moyn"                 ;281 Avr.Depth
+    TCODE    .97,   .170,    "Prof.Moyn"                 ;281 Avr.Depth
     TCODE    .90,   .170,    "TissuDirec"                ;282 Lead Tiss.
     TCODE    .118,   .170,   "Chrono"                    ;283 Stopwatch
     TCODE    .20,   .95,     "RaZ Carnet Plongées"       ;284 Reset Logbook

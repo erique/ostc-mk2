@@ -116,6 +116,7 @@ VAR_UCHAR (char_I_step_is_1min);
 VAR_UINT  (int_I_pres_respiration);        // 
 VAR_UINT  (int_I_pres_surface);            // 
 VAR_UINT  (int_I_temp);                    // new in v101
+VAR_UINT  (int_I_divemins);                // Dive time (minutes)
 VAR_UCHAR (char_I_temp);                   // new in v101
 VAR_UCHAR (char_I_actual_ppO2);            // 
 VAR_UCHAR (char_I_N2_ratio);               //

@@ -460,6 +460,8 @@ divemode_prepare_flags_for_deco:
 	movff	WREG,char_I_deco_distance
 	GETCUSTOM8	d'29'                           ; Depth Last Deco in meter for simulation
 	movff	WREG,char_I_depth_last_deco
+	movff   divemins+0,int_I_divemins+0         ; Current dive time.
+	movff   divemins+1,int_I_divemins+1
 	goto	restart_set_modes_and_flags			; Sets decomode (char_I_deco_model) and flags (again)
 
 calc_deko_divemode3:

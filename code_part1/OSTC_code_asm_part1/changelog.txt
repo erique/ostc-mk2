@@ -1,5 +1,9 @@
+New in 1.82 beta:
+BETA Version - Do NOT use for diving!
+
 New in 1.81 beta:
 BETA Version - Do NOT use for diving!
+NEW: Release in French, Spain and English (Use correct HEX file!)
 CHANGE: ZH-L16 display all stops (up to 96m), as ZH-L16-GF mode
 BUGFIX: Don't wrap TTS sum (still limit each stop display (not compute) to ~4h)
 NEW: CF54: =1:Display shallowest stop first (decoplan and divemode)

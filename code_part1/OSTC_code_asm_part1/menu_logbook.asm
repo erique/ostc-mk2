@@ -245,6 +245,7 @@ display_profile2:
 	bcf			logbook_profile_view			; clear flag for search routine
 
 	call		PLED_display_wait_clear
+	call		PLED_standard_color
 	WIN_TOP		.0
 	WIN_LEFT	.0
 	STRCPY      "#"

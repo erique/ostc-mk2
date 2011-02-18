@@ -386,15 +386,15 @@ PLED_divemode_mask:					; Displays mask in Dive-Mode
 	return
 
 PLED_clear_customview_divemode:
-    WIN_BOX_BLACK   .168, .239, .90, .159	
+    WIN_BOX_BLACK   .168, .239, .90, .159		;top, bottom, left, right
 	return
 
 PLED_clear_customview_surfmode:
-    WIN_BOX_BLACK   .25, .121, .82, .159
+    WIN_BOX_BLACK   .25, .121, .82, .159		;top, bottom, left, right
 	return
 
 PLED_clear_decoarea:
-    WIN_BOX_BLACK   .54, .168, .90, .159	
+    WIN_BOX_BLACK   .54, .168, .90, .159		;top, bottom, left, right
 	return
 
 PLED_display_ndl_mask:
@@ -567,12 +567,9 @@ PLED_display_velocity_clear:
 	bcf		pled_velocity_display
 	bra		PLED_display_clear_common_y1
 
-PLED_display_wait_clear
-	movlw	d'6'
-	movwf	temp1
-	WIN_TOP		.2
-	WIN_LEFT	.115
-	bra		PLED_display_clear_common_y1
+PLED_display_wait_clear:
+    WIN_BOX_BLACK   .0, .25, .0, .159		;top, bottom, left, right
+	return
 
 PLED_display_clear_common_y2:				; Clears with y-scale=2
 	WIN_FONT 	FT_MEDIUM
@@ -716,7 +713,7 @@ PLED_show_cf32_cf33_cf29:; Display GF_LOW, GF_HIGH and last deco in the customvi
 PLED_logbook_cursor:
 
 PLED_menu_cursor:
-    WIN_BOX_BLACK   .35, .239, .0, .16
+    WIN_BOX_BLACK   .35, .239, .0, .16		;top, bottom, left, right
 
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
@@ -1469,7 +1466,7 @@ PLED_active_gas_surfmode_exit:
 	return
 
 PLED_confirmbox:
-    WIN_BOX_BLACK   .68, .146, .34, .101
+    WIN_BOX_BLACK   .68, .146, .34, .101		;top, bottom, left, right
 	WIN_FRAME_STD   .70, .144, .35, .100
 
 	DISPLAYTEXT	.143			; Confirm:
@@ -1480,7 +1477,7 @@ PLED_confirmbox:
 	movwf		menupos
 
 PLED_confirmbox2:
-    WIN_BOX_BLACK   .96, .143, .39, .51
+    WIN_BOX_BLACK   .96, .143, .39, .51		;top, bottom, left, right
 
 	movff	menupos,temp1
 	movlw	d'96'
@@ -1670,7 +1667,7 @@ depth_less_10mtr:
 	return
 
 PLED_clear_depth			; No, clear depth area and set flag
-    WIN_BOX_BLACK   .24, .90, .0, .90
+    WIN_BOX_BLACK   .24, .90, .0, .90		;top, bottom, left, right
 	bsf		depth_greater_100m			; Set Flag
 	return
 
@@ -1981,7 +1978,7 @@ update_date:
 	return
 
 PLED_menu_clear:
-    WIN_BOX_BLACK   .0, .26, .65, .100	
+    WIN_BOX_BLACK   .0, .26, .65, .100			;top, bottom, left, right
 	return
 
 PLED_max_pressure:
@@ -2033,7 +2030,7 @@ maxdepth_greater_99_84mtr:			; Display only in full meters
 	return
 
 PLED_clear_maxdepth:
-    WIN_BOX_BLACK   .184, .215, .0, .41
+    WIN_BOX_BLACK   .184, .215, .0, .41		;top, bottom, left, right
 	bsf		maxdepth_greater_100m	; Set Flag
 	return
 
@@ -2098,7 +2095,7 @@ PLED_display_apnoe_surface:
 
 PLED_apnoe_clear_surface:
 	; Clear Surface timer....
-	WIN_BOX_BLACK   .60, .119, .90, .159	
+	WIN_BOX_BLACK   .60, .119, .90, .159			;top, bottom, left, right
 	return
 
 
@@ -2595,13 +2592,13 @@ PLED_splist_loop:
 	return						; no, return
 
 PLED_clear_divemode_menu:
-    WIN_BOX_BLACK   .0, .168, .82, .160
+    WIN_BOX_BLACK   .0, .168, .82, .160		;top, bottom, left, right
 	return
 
 PLED_divemenu_cursor:
 	ostc_debug	'l'		; Sends debug-information to screen if debugmode active
 
-    WIN_BOX_BLACK   .0, .150, .85, .95	
+    WIN_BOX_BLACK   .0, .150, .85, .95			;top, bottom, left, right
 
 	WIN_TOP		.0
 	WIN_LEFT	.85

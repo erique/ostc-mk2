@@ -24,14 +24,14 @@
 ;#DEFINE		NO_SENSOR_MODE			; uses Dummy values
 
 #DEFINE	softwareversion_x		d'1'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'81'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'82'		; Software version  XX.YY
 
 #DEFINE softwareversion_beta 	1 			; (and 0 for release) 
 
 #DEFINE	max_custom_number		d'55'		; Number of last used custom function
 
 ; International extension. Selecting messages source:
-#DEFINE     ENGLISH                         ; Use english_text.asm
+#DEFINE    ENGLISH                         ; Use english_text.asm
 ;#DEFINE	FRENCH  						; Use french_text.asm
 ;#DEFINE	GERMAN							; Use german_text.asm
 ;#DEFINE	SPANISH							; Use spanish_text.asm

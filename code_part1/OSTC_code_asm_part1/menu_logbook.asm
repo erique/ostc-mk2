@@ -45,8 +45,6 @@ menu_logbook1a:
 	WIN_INVERT	.1
 	DISPLAYTEXT	.12							;" Wait.."
 	WIN_INVERT	.0
-	clrf		divemins+0					; Here: used as temp variables
-	clrf		divemins+1
 	call 		I2CReset					; Reset I2C Bus
 	call		get_free_EEPROM_location	; search from "here" backwards through the external memory
 
@@ -54,6 +52,8 @@ menu_logbook1a:
 	movff		eeprom_address+1,logbook_temp6	; Store Pointer to 0xFE (From 0xFD, 0xFD, 0xFE sequence) for faster display
 
 menu_logbook1a_no_get_free:				; Without repeated search for dive
+	clrf		divemins+0					; Here: used as temp variables
+	clrf		divemins+1
 	movlw		d'5'
 	movwf		menupos					; Here: stores current position on display (5-x)
 
@@ -303,7 +303,7 @@ display_profile_offset3:
 	movff		SSPBUF,convert_value_temp+1
 	call		I2CREAD2					; Year
 	movff		SSPBUF,convert_value_temp+2
-	call		PLED_convert_date		; converts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
+	call		PLED_convert_date			; converts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 
 	PUTC		' '
 	call		I2CREAD2					; hour
@@ -318,9 +318,9 @@ display_profile_offset3:
 	WIN_TOP		.25
 	WIN_LEFT	.05
 	lfsr		FSR2,letter
-	call		I2CREAD2	
-	movff		SSPBUF,lo
-	call		I2CREAD2	
+	call		I2CREAD2				; read max depth
+	movff		SSPBUF,lo				
+	call		I2CREAD2				; read max depth
 	movff		SSPBUF,hi
 	movff		lo,xA+0					; calculate y-scale for profile display
 	movff		hi,xA+1
@@ -333,26 +333,69 @@ display_profile_offset3:
 	incf		sim_pressure+0,F		; increase one, because there may be a remainder
 	movlw		d'0'
 	addwfc		sim_pressure+1,F
+	movlw		LOW		d'164000'		; 164pixel*1000 height
+	movwf		xC+0
+	movlw		HIGH	d'164000'		; 164pixel*1000 height
+	movwf		xC+1
+	movlw		UPPER	d'164000'		; 164pixel*1000 height
+	movwf		xC+2
+	clrf		xC+3
+
+	movff		lo,xB+0					; Max. Depth in mBar
+	movff		hi,xB+1					; Max. Depth in mBar
+	call		div32x16				; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
+
+	movff		xC+0,last_temperature+0	; 
+	movff		xC+1,last_temperature+1	; = Pixels/10m (For scale, draw any xx rows a scale-line)
 
 	bsf			leftbind
-	output_16dp	d'3'						; max. depth
+	output_16dp	d'3'					; max. depth
 	STRCAT      "m "
-	call		I2CREAD2	
+	call		I2CREAD2				; divetime in minutes	
 	movff		SSPBUF,lo
 	call		I2CREAD2	
-	movff		SSPBUF,hi
+	movff		SSPBUF,hi				; divetime in minutes
 
 	movff		lo,xA+0					; calculate x-scale for profile display
 	movff		hi,xA+1					; calculate total diveseconds first
-	movlw		d'60'					; 60seconds are one minute
+	movlw		d'60'					; 60seconds are one minute...
 	movwf		xB+0
 	clrf		xB+1
 	call		mult16x16				; result is in xC:2 !
 
 	bsf			leftbind
 	output_16							; divetime minutes
-	PUTC		d'39'
-	call		I2CREAD2	
+
+; Compute spacing between 10min lines
+	movff		lo,xA+0
+	movff		hi,xA+1					; divetime in minutes
+	movlw		d'10'
+	movwf		xB+0
+	clrf		xB+1					; A vertical line every 10 minutes
+	call		div16x16				;xA/xB=xC with xA as remainder
+	; xC now holds number of lines
+	movlw		d'1'
+	addwf		xC+0					; Add one line...
+	movff		xC+0,xB+0
+	clrf		xB+1					; No more then 255 lines...
+	movlw		d'159'					; Available width
+	movwf		xA+0
+	clrf		xA+1
+	call		div16x16				;xA/xB=xC with xA as remainder
+	; xC now holds spacing between vertical 10min lines
+	movff		xC+0,avr_rel_pressure+0
+	movff		xC+1,avr_rel_pressure+1					; spacing between 10min lines (1-159)
+
+; Restore divetime in minutes:
+	movff		lo,xA+0					; calculate x-scale for profile display
+	movff		hi,xA+1					; calculate total diveseconds first
+	movlw		d'60'					; 60seconds are one minute...
+	movwf		xB+0
+	clrf		xB+1
+	call		mult16x16				; result is in xC:2 !
+
+	PUTC		d'39'					;"'"
+	call		I2CREAD2				; read divetime seconds
 	movff		SSPBUF,lo
 	movf		lo,W					; add seconds to total seconds
 	addwf		xC+0
@@ -375,6 +418,7 @@ display_profile_offset3:
 	incf		profile_temp+0,F		; increase one, because there may be a remainder
 	movlw		d'0'
 	addwfc		profile_temp+1,F
+
 
 	bsf			leftbind
 	output_99x							; divetime seconds
@@ -469,9 +513,59 @@ display_profile_offset3:
 
 display_profile2d:
 	; Start Profile display
-	movlw		color_deepblue
-	WIN_BOX_COLOR   .75, .239, .0, .159		; Background "image"
+; Write 0m X-Line..
+	movlw		color_grey	
+	call		PLED_set_color				; Make this configurable?
 
+	movlw		d'75'
+	movff		WREG,win_top
+	movlw		d'5'
+	movff		WREG,win_leftx2				; Left border (0-159)
+	movlw		d'1'
+	movff		WREG,win_height				
+	movlw		d'155'
+	movff		WREG,win_width				; Right border (0-159)
+display_profile2e:
+	call		PLED_box					; Inputs:  win_top, win_leftx2, win_height, win_width, win_color1, win_color2
+	movff		win_top,WREG				; Get row
+	addwf		last_temperature+0,W		; Add line interval distance to win_top
+	tstfsz		last_temperature+1			; >255?
+	movlw		d'255'						; Yes, make win_top>239 -> Abort here
+	btfsc		STATUS,C					; A Cary from the addwf above?
+	movlw		d'255'						; Yes, make win_top>239 -> Abort here
+	movff		WREG,win_top				; Result in win_top again
+	movff		win_top,lo					; Get win_top in Bank1...
+	movlw		d'239'						; Limit
+	cpfsgt		lo							; >239?
+	bra			display_profile2e			; No, draw another line
+
+; Write 0min Y-Line..
+	movlw		color_grey	
+	call		PLED_set_color				; Make this configurable?
+
+	movlw		d'75'
+	movff		WREG,win_top
+	movlw		d'4'
+	movff		WREG,win_leftx2				; Left border (0-159)
+	movlw		d'164'
+	movff		WREG,win_height				
+	movlw		d'1'
+	movff		WREG,win_width				; "Window" Width
+display_profile2f:
+	call		PLED_box					; Inputs:  win_top, win_leftx2, win_height, win_width, win_color1, win_color2
+	movff		win_leftx2,WREG				; Get column
+	addwf		avr_rel_pressure+0,W		; Add column interval distance to win_leftx2
+	tstfsz		avr_rel_pressure+1			; >255?
+	movlw		d'255'						; Yes, make win_leftx2>159 -> Abort here
+	btfsc		STATUS,C					; A Cary from the addwf above?
+	movlw		d'255'						; Yes, make win_leftx2>159 -> Abort here
+	movff		WREG,win_leftx2				; Result in win_leftx2 again
+	movff		win_leftx2,lo				; Get win_leftx2 in Bank1...
+	movlw		d'159'						; Limit
+	cpfsgt		lo							; >159?
+	bra			display_profile2f			; No, draw another line
+
+	
 	call		I2CREAD2					; skip 0xFB		(Header-end)
 	clrf		timeout_counter2			; here: used as counter for depth readings
 	call		I2CREAD2					; skip 0xFB		(Header-end)

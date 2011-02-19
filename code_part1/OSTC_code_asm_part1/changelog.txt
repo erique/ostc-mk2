@@ -1,5 +1,6 @@
 New in 1.82 beta:
 BETA Version - Do NOT use for diving!
+CHANGE: Speed optimization in Logbook
 
 New in 1.81 beta:
 BETA Version - Do NOT use for diving!

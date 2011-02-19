@@ -28,7 +28,7 @@
 ; does not require a FAT, will work with other profile intervals as ten seconds, too
 
 menu_logbook:
-	bcf		return_from_profileview				; clear some flags
+	bcf			return_from_profileview				; clear some flags
 ;call	enable_rs232
 menu_logbook1:
 	bcf			logbook_header_drawn
@@ -50,6 +50,10 @@ menu_logbook1a:
 	call 		I2CReset					; Reset I2C Bus
 	call		get_free_EEPROM_location	; search from "here" backwards through the external memory
 
+	movff		eeprom_address+0,logbook_temp5
+	movff		eeprom_address+1,logbook_temp6	; Store Pointer to 0xFE (From 0xFD, 0xFD, 0xFE sequence) for faster display
+
+menu_logbook1a_no_get_free:				; Without repeated search for dive
 	movlw		d'5'
 	movwf		menupos					; Here: stores current position on display (5-x)
 
@@ -110,17 +114,17 @@ test_FA_DONE:							; Found 0xFA 0xFA!
 	bra			menu_logbook4           ; Done with searching, display the header!
 
 menu_logbook3b:
-	btfss		logbook_page_not_empty			; Was there at least one dive?
+	btfss		logbook_page_not_empty		; Was there at least one dive?
 	goto		menu						; Not a single header was found, leave logbook.
-	bra		menu_logbook_display_loop2		; rcall of get_free_eeprom_location not required here (faster)
+	bra			menu_logbook_display_loop2	; rcall of get_free_eeprom_location not required here (faster)
 
 menu_logbook_reset:	
 	movf		divenumber,W
 	btfsc		STATUS,Z					; Was there at least one dive?
-	bra		menu_logbook3b				; No, Nothing to do
+	bra			menu_logbook3b				; No, Nothing to do
 
-	bsf		all_dives_shown				; Yes
-	bra		menu_logbook_display_loop2		; rcall of get_free_eeprom_location not required here (faster)
+	bsf			all_dives_shown				; Yes
+	bra			menu_logbook_display_loop2	; rcall of get_free_eeprom_location not required here (faster)
 
 
 menu_logbook4:
@@ -163,26 +167,26 @@ menu_logbook_display_loop:
 	subwfb		max_pressure+1,F
 
 menu_logbook_display_loop1:
-	decfsz	menupos,F					; List full?
-	bra		next_logbook				; no, search another dive for our current logbook page
+	decfsz		menupos,F					; List full?
+	bra			next_logbook				; no, search another dive for our current logbook page
 
 menu_logbook_display_loop2:
-	btfss	logbook_page_not_empty			; Was there one dive at all?
-	bra		menu_logbook				; Yes, so reload the first page
+	btfss		logbook_page_not_empty		; Was there one dive at all?
+	bra			menu_logbook				; Yes, so reload the first page
 
-	call	PLED_topline_box			; Draw box
+	call		PLED_topline_box			; Draw box
 	WIN_INVERT	.1	
-	DISPLAYTEXT	.26						; "Logbook"
+	DISPLAYTEXT	.26							; "Logbook"
 	WIN_INVERT	.0
 	
-	DISPLAYTEXT .11						; Displays "Exit" in the last row on the current page
+	DISPLAYTEXT .11							; Displays "Exit" in the last row on the current page
 
-	bcf		sleepmode					; clear some flags for user input
-	bcf		menubit2
-	bcf		menubit3
-	bcf		cursor
-	bcf		switch_right
-	bcf		switch_left
+	bcf			sleepmode					; clear some flags for user input
+	bcf			menubit2
+	bcf			menubit3
+	bcf			cursor
+	bcf			switch_right
+	bcf			switch_left
 	clrf		timeout_counter2
 
 	movlw		d'1'						; Set cursor to position 1...
@@ -239,8 +243,13 @@ display_profile:
 	call		PLED_ClearScreen				; search for dive
 	bsf			logbook_profile_view			; set flag for search routine
 
-	clrf		divenumber					; search from scratch
-	bra			menu_logbook1a				; start search
+	clrf		divenumber						; search from scratch
+
+	movff		logbook_temp5,eeprom_address+0
+	movff		logbook_temp6,eeprom_address+1	; Restore Pointer to 0xFE (From 0xFD, 0xFD, 0xFE sequence) for faster display
+
+	bra			menu_logbook1a_no_get_free		; Start Search for Dive (Without get_free_EEPROM_location)
+
 display_profile2:
 	bcf			logbook_profile_view			; clear flag for search routine
 
@@ -274,28 +283,20 @@ display_profile_offset1:
 	bra			display_profile_offset3		; Skip normal routine
 	
 display_profile_offset2:
-	movff		divesecs,lo
+	movff		divesecs,lo				; 
 	output_99x							; # of dive
 
 display_profile_offset3:
 	PUTC		' '
-	call		I2CREAD2	
-	movff		SSPBUF,lo				; 
-
 	call		I2CREAD2				; Skip Profile version
-	movff		SSPBUF,lo				; read month
+	call		I2CREAD2				; read month
+	movff		SSPBUF,lo				; store in lo
 
-;	movff		eeprom_address+0, EventByte		; Store current EEPROM position
-;	movff		eeprom_address+1, ProfileFlagByte
 ; Offset to SamplingRate
 	incf_eeprom_address	d'32'				; Macro, that adds 8Bit to eeprom_address:2 with banking at 0x8000
 	call		I2CREAD						; Read Sampling rate
 	movff		SSPBUF,samplesecs_value		; Copy sampling rate
 	decf_eeprom_address	d'32'				; Macro, that subtracts 8Bit from eeprom_address:2 with banking at 0x8000
-;	movff		EventByte, eeprom_address+0		; Re-Store current EEPROM position
-;	movff		ProfileFlagByte, eeprom_address+1		; Re-Store current EEPROM position
-
-;display_profile2a:
 
 	movff		lo,convert_value_temp+0		; Month (in lo, see above)
 	call		I2CREAD2					; Day
@@ -333,7 +334,7 @@ display_profile_offset3:
 	movlw		d'0'
 	addwfc		sim_pressure+1,F
 
-	bsf		leftbind
+	bsf			leftbind
 	output_16dp	d'3'						; max. depth
 	STRCAT      "m "
 	call		I2CREAD2	
@@ -348,7 +349,7 @@ display_profile_offset3:
 	clrf		xB+1
 	call		mult16x16				; result is in xC:2 !
 
-	bsf		leftbind
+	bsf			leftbind
 	output_16							; divetime minutes
 	PUTC		d'39'
 	call		I2CREAD2	
@@ -375,7 +376,7 @@ display_profile_offset3:
 	movlw		d'0'
 	addwfc		profile_temp+1,F
 
-	bsf		leftbind
+	bsf			leftbind
 	output_99x							; divetime seconds
 	STRCAT      "\" "
 	call		I2CREAD2	
@@ -384,7 +385,7 @@ display_profile_offset3:
 	movff		SSPBUF,hi
 	movlw		d'3'
 	movwf		ignore_digits
-	bsf		leftbind
+	bsf			leftbind
 	output_16dp	d'2'						; temperature
 	STRCAT_PRINT "°C"                   ; Display 2nd row of details
 
@@ -392,20 +393,20 @@ display_profile_offset3:
 	WIN_LEFT	.05
 	lfsr		FSR2,letter
 
-	call		I2CREAD2	
+	call		I2CREAD2				; read Air pressure
 	movff		SSPBUF,lo
-	call		I2CREAD2	
+	call		I2CREAD2				; read Air pressure
 	movff		SSPBUF,hi
-	bsf		leftbind
+	bsf			leftbind
 	output_16							; Air pressure before dive
 	STRCAT      "mbar "
 	OUTPUTTEXT  .014                    ; Desat
 	PUTC        ' '
 
-	call		I2CREAD2	
-	movff		SSPBUF,lo
-	call		I2CREAD2	
-	movff		SSPBUF,hi
+	call		I2CREAD2				; read Desaturation time
+	movff		SSPBUF,lo				
+	call		I2CREAD2				; read Desaturation time
+	movff		SSPBUF,hi		
 	call		convert_time				; converts hi:lo in minutes to hours (hi) and minutes (lo)
 	bsf			leftbind
 	movf		lo,W
@@ -418,24 +419,28 @@ display_profile_offset3:
 	bcf			leftbind
 	call		word_processor				; display 3rd page of details
 
-	call		I2CREAD2					; Skip Gas1 current O2
-	call		I2CREAD2					; Skip Gas1 current HE
-	call		I2CREAD2					; Skip Gas2 current O2
-	call		I2CREAD2					; Skip Gas2 current HE
-	call		I2CREAD2					; Skip Gas3 current O2
-	call		I2CREAD2					; Skip Gas3 current HE
-	call		I2CREAD2					; Skip Gas4 current O2
-	call		I2CREAD2					; Skip Gas4 current HE
-	call		I2CREAD2					; Skip Gas5 current O2
-	call		I2CREAD2					; Skip Gas5 current HE
-	call		I2CREAD2					; Skip Gas6 current O2
-	call		I2CREAD2					; Skip Gas6 current HE
-	call		I2CREAD2					; Skip Start Gas
-	call		I2CREAD2					; Skip Firmware x
-	call		I2CREAD2					; Skip Firmware y
-	call		I2CREAD2					; Skip battery
-	call		I2CREAD2					; Skip battery
-	call		I2CREAD2					; Skip Sampling rate
+	incf_eeprom_address	d'18'				; Skip 18Bytes in EEPROM (faster)
+
+; Do not remove comments below!
+;	call		I2CREAD2					; Skip Gas1 current O2
+;	call		I2CREAD2					; Skip Gas1 current HE
+;	call		I2CREAD2					; Skip Gas2 current O2
+;	call		I2CREAD2					; Skip Gas2 current HE
+;	call		I2CREAD2					; Skip Gas3 current O2
+;	call		I2CREAD2					; Skip Gas3 current HE
+;	call		I2CREAD2					; Skip Gas4 current O2
+;	call		I2CREAD2					; Skip Gas4 current HE
+;	call		I2CREAD2					; Skip Gas5 current O2
+;	call		I2CREAD2					; Skip Gas5 current HE
+;	call		I2CREAD2					; Skip Gas6 current O2
+;	call		I2CREAD2					; Skip Gas6 current HE
+;	call		I2CREAD2					; Skip Start Gas
+;	call		I2CREAD2					; Skip Firmware x
+;	call		I2CREAD2					; Skip Firmware y
+;	call		I2CREAD2					; Skip battery
+;	call		I2CREAD2					; Skip battery
+;	call		I2CREAD2					; Skip Sampling rate
+
 	call		I2CREAD2					; Read divisor
 	movff		SSPBUF,divisor_temperature	; Store divisor
 	bcf			divisor_temperature,4		; Clear information length
@@ -460,13 +465,12 @@ display_profile_offset3:
 	call		I2CREAD2					; Read divisor
 	movff		SSPBUF,divisor_nuy2			; Store divisor
 	call		I2CREAD2					; Read Salinity
-	call		I2CREAD2					; Skip Dummy byte
+	call		I2CREAD2					; Skip GF_HI (Upper nibble), GF_LO (Lower nibble)
 
 display_profile2d:
 	; Start Profile display
-	
 	movlw		color_deepblue
-	WIN_BOX_COLOR   .75, .239, .0, .159	
+	WIN_BOX_COLOR   .75, .239, .0, .159		; Background "image"
 
 	call		I2CREAD2					; skip 0xFB		(Header-end)
 	clrf		timeout_counter2			; here: used as counter for depth readings
@@ -623,12 +627,16 @@ profile_view_get_depth_new1:
 	bra			profile_view_get_depth_new3	; Yes (1-127)
 	return									; No (0)
 
-	; timeout_counter2 now holds the number of additional bytes to ignore (0-127)
 profile_view_get_depth_new3:
-	call		I2CREAD2					; ignore byte
-	decfsz		timeout_counter2,F			; reduce counter
-	bra			profile_view_get_depth_new3	; Loop
+	movf		timeout_counter2,W			; number of additional bytes to ignore (0-127)
+	call		incf_eeprom_address0		; increases bytes in eeprom_address:2 with 0x8000 bank switching
 	return
+
+;Keep comments for future temperature graph
+;	call		I2CREAD2					; ignore byte
+;	decfsz		timeout_counter2,F			; reduce counter
+;	bra			profile_view_get_depth_new3	; Loop
+;	return
 
 exit_profileview:
 	bcf			sleepmode

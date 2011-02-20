@@ -565,7 +565,9 @@ display_profile2f:
 	cpfsgt		lo							; >159?
 	bra			display_profile2f			; No, draw another line
 
-	
+	movlw		color_blue	
+	WIN_FRAME_COLOR	.75, .239, .4, .159	;top, bottom, left, right with color in WREG
+
 	call		I2CREAD2					; skip 0xFB		(Header-end)
 	clrf		timeout_counter2			; here: used as counter for depth readings
 	call		I2CREAD2					; skip 0xFB		(Header-end)
@@ -825,7 +827,7 @@ display_listdive1a:
 	movff		divenumber,lo
 	output_99x								; # of dive
 	PUTC		' '
-	call		I2CREAD2	
+	call		I2CREAD2					; logbook_profile_version (1st. byte of Header after the 0xFA, 0xFA)
 	movff		SSPBUF,lo
 	movlw		d'13'
 	cpfsgt		lo							; Skip if lo>13
@@ -843,8 +845,10 @@ display_listdive2:
 	call		PLED_convert_date_short		; converts into "DD/MM" or "MM/DD" or "MM/DD" in s
 
 
-	call		I2CREAD2					; hours (Skip)
-	call		I2CREAD2					; minutes (skip)
+	incf_eeprom_address	d'2'				; Skip Bytes in EEPROM (faster)
+;	call		I2CREAD2					; hours (Skip)
+;	call		I2CREAD2					; minutes (skip)
+
 	PUTC		' '
 	call		I2CREAD2					; Depth
 	movff		SSPBUF,lo
@@ -855,10 +859,11 @@ display_listdive2:
 	output_16dp	d'3'						; max. depth
 	STRCAT      "m "
 	call		I2CREAD2	
-	movff		SSPBUF,lo
+	movff		SSPBUF,lo					; read divetime in minutes
 	call		I2CREAD2	
-	movff		SSPBUF,hi
+	movff		SSPBUF,hi					; read divetime in minutes
 	bsf			leftbind
 	output_16								; Divetime minutes
-	STRCAT_PRINT "'"                    ; Display header-row in list
+	STRCAT_PRINT "'"                    	; Display header-row in list
+	incf_eeprom_address	d'37'				; 12 Bytes read from header, skip 37 Bytes in EEPROM (Remaining Header)
 	return

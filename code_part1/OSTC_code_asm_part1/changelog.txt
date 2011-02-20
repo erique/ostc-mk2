@@ -1,6 +1,7 @@
 New in 1.82 beta:
 BETA Version - Do NOT use for diving!
 CHANGE: Speed optimization in Logbook
+NEW: Scale for Profile view in Logbook (10m,10min)
 
 New in 1.81 beta:
 BETA Version - Do NOT use for diving!

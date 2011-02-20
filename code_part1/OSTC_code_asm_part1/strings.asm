@@ -168,6 +168,8 @@ box_common:
 
 box_frame_std:
         call    PLED_standard_color
+
+box_frame_common:
         VARARGS_BEGIN
             VARARGS_GET8    win_top
             VARARGS_GET8    win_height
@@ -175,3 +177,7 @@ box_frame_std:
             VARARGS_GET8    win_width
         VARARGS_END
         goto    PLED_frame
+
+box_frame_color:
+      	call	PLED_set_color
+		bra		box_frame_common

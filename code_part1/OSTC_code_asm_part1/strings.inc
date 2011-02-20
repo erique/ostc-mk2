@@ -179,4 +179,10 @@ WIN_FRAME_STD macro   top, bottom, left, right
         db      top, (bottom)-(top)+1, left, (right)-(left)+1
         endm
 
+; Draw a frame with color from WREG (8bits rrrgggbb)
+WIN_FRAME_COLOR macro   top, bottom, left, right
+        call    box_frame_color
+        db      top, (bottom)-(top)+1, left, (right)-(left)+1
+        endm
+
 

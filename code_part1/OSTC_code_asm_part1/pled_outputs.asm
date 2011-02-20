@@ -1459,8 +1459,7 @@ PLED_active_gas_surfmode4:
 	output_99
 	bcf		leftbind
 	call	word_processor
-	bra		PLED_active_gas_surfmode_exit
-
+;	bra		PLED_active_gas_surfmode_exit
 PLED_active_gas_surfmode_exit:
 ;   WIN_FRAME_BLACK   .122, .175, .82, .159
 	return

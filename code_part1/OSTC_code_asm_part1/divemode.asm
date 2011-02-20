@@ -812,8 +812,8 @@ check_ppO2_bail2:
 check_ppO2_0:
 	movff		xC+0,sub_b+0
 	movff		xC+1,sub_b+1
-	GETCUSTOM8	d'17'					; ppo2_warning_low
-	mullw		d'100'					; ppo2_warning_low*100
+	GETCUSTOM8	d'17'				; ppo2_warning_low
+	mullw		d'100'				; ppo2_warning_low*100
 	movff		PRODL,sub_a+0
 	movff		PRODH,sub_a+1
 	call		sub16					
@@ -845,7 +845,7 @@ check_ppO2_3:
 	return		; done
 
 
-check_gas_change:						; Checks if a better gas should be selected (by user)
+check_gas_change:					; Checks if a better gas should be selected (by user)
 	bcf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 	
 	movff	rel_pressure+0,xA+0			
@@ -961,7 +961,7 @@ check_gas_change5x:
 	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 
 check_gas_change6:			;Done
-	call	PLED_active_gas_divemode	; Display gas, if required (and with "*" if irequired...)
+	call	PLED_active_gas_divemode; Display gas, if required (and with "*" if irequired...)
 	return
 
 calculate_noflytime:

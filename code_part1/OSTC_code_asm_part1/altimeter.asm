@@ -23,15 +23,17 @@
 ;  2010-12-15 : [jDG] First prototype with quadratic polynomial ant tp°.
 ;  2010-12-28 : [jDG] Use MPLAB Math and C libraries for FP32 computations.
 ;  2011-01-02 : [jDG] Edit reference pressure by 0.25 mbar.
+;  2011-01-31 : [jDG] Better menu: default 1013mbar, and editing by +/- 1mbar.
+;  2011-02-23 : [jDG] Fix restart after sleepmode.
 ;
 ; Known bug: Simulator reset altitude and reference...
 
 altimeter_calc:
-        movlb   HIGH(pressureAvg)
+        movlb   HIGH(pressureAvg)       ; Altimeter data in bank 0.
         
         movlw   HIGH(4*.900)            ; Is presure ref bigger than 900mbar
         cpfsgt  pressureRef+1
-        bra     altimeter_restart       ; No: Should do a reset now.
+        bra     altimeter_reset         ; No: Should do a reset now.
         
         movlw   HIGH(4*.1100)           ; Is ref pressure bigger than 1100mbar ?
         cpfsgt  pressureRef+1
@@ -39,7 +41,7 @@ altimeter_calc:
 
 ; Reset calibration value to default.
 altimeter_reset:
-        movlb   HIGH(pressureAvg)
+        movlb   HIGH(pressureAvg)       ; Altimeter data in bank 0.
         movlw   LOW(4*.1013+1)          ; Init see level at 1013,25 mbar.
         movwf   pressureRef+0
         movlw   HIGH(4*.1013+1)
@@ -48,6 +50,7 @@ altimeter_reset:
 ; Restart averaging. Eg. after a sleep, enables to faster restart with correct
 ; values...
 altimeter_restart:
+        movlb   HIGH(pressureAvg)       ; Altimeter data in bank 0.
         clrf    pressureSum+0           ; Init averaging area
         clrf    pressureSum+1
         clrf    pressureCount

@@ -169,8 +169,8 @@ onesec_sleep1a:	; At least one button pressed....
 	bcf		sleepmode				; wake up!
 	bsf		show_startup_screen		;
 
-    ; Reset altimeter, so next averaging starts right over...
-	call    altimeter_reset
+    ; Restart altimeter averaging, so next averaging starts right over...
+	call    altimeter_restart
 
 	return
 	

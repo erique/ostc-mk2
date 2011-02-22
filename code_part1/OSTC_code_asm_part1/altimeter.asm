@@ -31,14 +31,13 @@ altimeter_calc:
         
         movlw   HIGH(4*.900)            ; Is presure ref bigger than 900mbar
         cpfsgt  pressureRef+1
-        bra     altimeter_reset         ; No: Should do a reset now.
+        bra     altimeter_restart       ; No: Should do a reset now.
         
         movlw   HIGH(4*.1100)           ; Is ref pressure bigger than 1100mbar ?
         cpfsgt  pressureRef+1
         bra     altimeter_1             ; No: ok it is valid...
 
-; Reset computation. Eg. after a sleep, enables to faster restart with correct
-; values...
+; Reset calibration value to default.
 altimeter_reset:
         movlb   HIGH(pressureAvg)
         movlw   LOW(4*.1013+1)          ; Init see level at 1013,25 mbar.
@@ -46,6 +45,9 @@ altimeter_reset:
         movlw   HIGH(4*.1013+1)
         movwf   pressureRef+1
 
+; Restart averaging. Eg. after a sleep, enables to faster restart with correct
+; values...
+altimeter_restart:
         clrf    pressureSum+0           ; Init averaging area
         clrf    pressureSum+1
         clrf    pressureCount
@@ -360,7 +362,6 @@ alt_menu_enable:
 ;---- Reset sea level pressure to reference ----------------------------------
 alt_menu_reset:
         rcall       altimeter_reset
-        movlb       1                   ; Go back to normal bank1
         bra         altimeter_menu_2
         
 ;---- Increment sea level pressure -------------------------------------------        

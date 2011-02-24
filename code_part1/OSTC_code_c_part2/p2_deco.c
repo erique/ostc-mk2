@@ -70,6 +70,7 @@
 // 2011/01/25: [jDG] Use CF(54) to reverse deco order.
 // 2011/02/11: [jDG] Reworked gradient-factor implementation.
 // 2011/02/13: [jDG] CF55 for additional gas switch delay in decoplan.
+// 2011/02/24: [jDG] Fixed inconsistencies introduced by gas switch delays.
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -127,7 +128,10 @@ static void calc_hauptroutine_update_tissues(void);
 static void calc_hauptroutine_calc_deco(void);
 static void sim_ascent_to_first_stop(void);
 
-static void check_gas_switch(void);
+static void deepest_gas_switch(void);
+static void best_gas_switch(void);
+static void set_gas(void);
+
 static void calc_nextdecodepth(void);
 
 //---- Bank 4 parameters -----------------------------------------------------
@@ -700,8 +704,8 @@ static void calc_nextdecodepth(void)
  			temp_depth_limit = 0;                                   // stop depth, in meter.
 	}
 
-    //---- Check gas change --------------------------------------------------    
-    check_gas_switch();     // Update temp_depth_limit if there is a change,
+    //---- Check gas change --------------------------------------------------
+    best_gas_switch();     // Update temp_depth_limit if there is a change,
                             // Calculate N2_ratio and He_ratio too.
 }
 
@@ -861,60 +865,44 @@ void deco_debug(void)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// Calculate gas switches
+// Find deepest available gas.
 // 
-//
-// Input:  N2_ratio, He_ratio.
-//         deco_gas_change*
+// Input:  deco_gas_change*
 //         sim_gas_delay, sim_gas_last_used, sim_dive_mins.
 //
-// Output: calc_N2_ratio, calc_He_ratio
-//         temp_depth_limit, sim_gas_delay, sim_gas_last_used IFF the is a switch.
+// Output: temp_depth_limit, sim_gas_delay, sim_gas_last_used IFF the is a switch.
 //
-static void check_gas_switch(void)
+static void deepest_gas_switch(void)
 {
     overlay unsigned char temp_gas_switch = 0;
     overlay unsigned char switch_deco = 0;
 
-    calc_N2_ratio = N2_ratio;   
-    calc_He_ratio = He_ratio;
-    
     if (char_I_const_ppO2 == 0)
     {
         // Keep selecting the best gas during the ascent simulation.
         // Add a one meter margin in depth comparaison.
 		if( deco_gas_change1 && ((temp_depth_limit-1) <= deco_gas_change1))
 		{
-    		calc_N2_ratio = deco_N2_ratio1;
-    		calc_He_ratio = deco_He_ratio1;
             temp_gas_switch = 1;
             switch_deco = deco_gas_change1;
-    	}
-		if(deco_gas_change2 && ((temp_depth_limit-1) <= deco_gas_change2))
+    	} 
+        else if(deco_gas_change2 && ((temp_depth_limit-1) <= deco_gas_change2))
 		{
-    		calc_N2_ratio = char_I_deco_N2_ratio2 * 0.01;
-    		calc_He_ratio = char_I_deco_He_ratio2 * 0.01;
             temp_gas_switch = 2;
             switch_deco = deco_gas_change2;
-    	}
-		if(deco_gas_change3 && ((temp_depth_limit-1) <= deco_gas_change3))
+    	} 
+		else if(deco_gas_change3 && ((temp_depth_limit-1) <= deco_gas_change3))
 		{
-    		calc_N2_ratio = char_I_deco_N2_ratio3 * 0.01;
-    		calc_He_ratio = char_I_deco_He_ratio3 * 0.01;
             temp_gas_switch = 3;
             switch_deco = deco_gas_change3;
     	}
-		if(deco_gas_change4 && ((temp_depth_limit-1) <= deco_gas_change4))
+		else if(deco_gas_change4 && ((temp_depth_limit-1) <= deco_gas_change4))
 		{
-    		calc_N2_ratio = char_I_deco_N2_ratio4 * 0.01;
-    		calc_He_ratio = char_I_deco_He_ratio4 * 0.01;
             temp_gas_switch = 4;
             switch_deco = deco_gas_change4;
     	}
-		if(deco_gas_change5 && ((temp_depth_limit-1) <= deco_gas_change5))
+		else if(deco_gas_change5 && ((temp_depth_limit-1) <= deco_gas_change5))
 		{
-    		calc_N2_ratio = char_I_deco_N2_ratio5 * 0.01;
-    		calc_He_ratio = char_I_deco_He_ratio5 * 0.01;
             temp_gas_switch = 5;
             switch_deco = deco_gas_change5;
     	}
@@ -926,9 +914,9 @@ static void check_gas_switch(void)
         // Should restart gas-switch delay only when gas do changes...
         // sim_gas_last_used: used to detect just once in each ascent simu.
         // N2_ratio         : used to detect when already breathing that gas.
-        if( sim_gas_last_used < temp_gas_switch
-         && sim_gas_delay <= sim_dive_mins
-         && (calc_N2_ratio != N2_ratio || calc_He_ratio != He_ratio)) 
+        if( temp_depth_limit != switch_deco
+         && sim_gas_last_used < temp_gas_switch
+         && sim_gas_delay <= sim_dive_mins )
         {
             sim_gas_last_used = temp_gas_switch;
             sim_gas_delay = read_custom_function(55);
@@ -943,6 +931,115 @@ static void check_gas_switch(void)
     }
     else
         sim_gas_delay = 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Find best (shallowest) available gas.
+// 
+// Input:  deco_gas_change*
+//         sim_gas_delay, sim_gas_last_used, sim_dive_mins.
+//
+// Output: temp_depth_limit, sim_gas_delay, sim_gas_last_used IFF the is a switch.
+//
+static void best_gas_switch(void)
+{
+    overlay unsigned char temp_gas_switch = 0;
+    overlay unsigned char switch_deco = 0;
+
+    if (char_I_const_ppO2 == 0)
+    {
+        // Keep selecting the best gas during the ascent simulation.
+        // Add a one meter margin in depth comparaison.
+		if( deco_gas_change5 && ((temp_depth_limit-1) <= deco_gas_change5))
+		{
+            temp_gas_switch = 5;
+            switch_deco = deco_gas_change5;
+    	} 
+        else if(deco_gas_change4 && ((temp_depth_limit-1) <= deco_gas_change4))
+		{
+            temp_gas_switch = 4;
+            switch_deco = deco_gas_change4;
+    	} 
+		else if(deco_gas_change3 && ((temp_depth_limit-1) <= deco_gas_change3))
+		{
+            temp_gas_switch = 3;
+            switch_deco = deco_gas_change3;
+    	}
+		else if(deco_gas_change2 && ((temp_depth_limit-1) <= deco_gas_change2))
+		{
+            temp_gas_switch = 2;
+            switch_deco = deco_gas_change2;
+    	}
+		else if(deco_gas_change1 && ((temp_depth_limit-1) <= deco_gas_change1))
+		{
+            temp_gas_switch = 1;
+            switch_deco = deco_gas_change1;
+    	}
+    }
+
+    // If there is a better gas available
+    if( temp_gas_switch )
+    {
+        // Should restart gas-switch delay only when gas do changes...
+        // sim_gas_last_used: used to detect just once in each ascent simu.
+        // N2_ratio         : used to detect when already breathing that gas.
+        if( sim_gas_last_used < temp_gas_switch
+         && sim_gas_delay <= sim_dive_mins )
+        {
+            sim_gas_last_used = temp_gas_switch;
+            sim_gas_delay = read_custom_function(55);
+
+            // Apply depth correction ONLY if CF#55 is not null:
+            if( sim_gas_delay > 0 )
+            {
+                sim_gas_delay += sim_dive_mins;
+                temp_depth_limit = switch_deco;
+            }
+        }
+    }
+    else
+        sim_gas_delay = 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Calculate gas switches
+// 
+//
+// Input:  N2_ratio, He_ratio.
+//         sim_gas_last_used
+//
+// Output: calc_N2_ratio, calc_He_ratio
+//
+static void set_gas(void)
+{
+    switch(sim_gas_last_used)
+    {
+    default:
+        calc_N2_ratio = N2_ratio;   
+        calc_He_ratio = He_ratio;
+        break;
+    case 1:
+	    calc_N2_ratio = deco_N2_ratio1;
+	    calc_He_ratio = deco_He_ratio1;
+        break;
+
+    case 2:
+		calc_N2_ratio = char_I_deco_N2_ratio2 * 0.01;
+		calc_He_ratio = char_I_deco_He_ratio2 * 0.01;
+        break;
+    case 3:
+		calc_N2_ratio = char_I_deco_N2_ratio3 * 0.01;
+		calc_He_ratio = char_I_deco_He_ratio3 * 0.01;
+        break;
+    case 4:
+		calc_N2_ratio = char_I_deco_N2_ratio4 * 0.01;
+		calc_He_ratio = char_I_deco_He_ratio4 * 0.01;
+        break;
+    case 5:
+		calc_N2_ratio = char_I_deco_N2_ratio5 * 0.01;
+		calc_He_ratio = char_I_deco_He_ratio5 * 0.01;
+        break;
+    }
 
     assert( 0.0 <= calc_N2_ratio && calc_N2_ratio <= 0.95 );
     assert( 0.0 <= calc_He_ratio && calc_He_ratio <= 0.95 );
@@ -1057,10 +1154,8 @@ static void clear_tissue(void)
 //
 static void calc_hauptroutine(void)
 {
-	static float backup_GF_step;
-	static unsigned char backup_low_depth;
-	static unsigned char backup_gas_used;
-	static unsigned char backup_gas_delay;
+	static unsigned char backup_gas_used = 0;
+	static unsigned char backup_gas_delay = 0;
 
 	calc_hauptroutine_data_input();
 
@@ -1087,14 +1182,15 @@ static void calc_hauptroutine(void)
     	char_O_nullzeit = 0;        // Reset bottom time.
       	char_O_deco_status = 0;     // Calc bottom-time/nullzeit next iteration.
 
-        // Values that should be reset just once for the full real dive
-        // (not every time we simulate an ascent):
-        low_depth = 0;              // Reset GF history.
-    	backup_low_depth = 255;     // backup is empty...
-        sim_gas_last_used = 0;      // Reset gas switch history.
-        sim_gas_delay = 0;
-        sim_dive_mins = 0;
+        // Values that should be reset just once for the full real dive.
+        // This is used to record the lowest stop for the whole dive,
+        // Including ACCROSS all simulated ascent.
+        low_depth = 0;
 
+        // Reset gas switch history.
+        backup_gas_used = sim_gas_last_used = 0;
+        backup_gas_delay = sim_gas_delay = 0;
+        sim_dive_mins = 0;
         break;
 
     case 0: //---- bottom time -----------------------------------------------
@@ -1104,15 +1200,11 @@ static void calc_hauptroutine(void)
     	break;
 
     case 2: //---- Simulate ascent to first stop -----------------------------
-        // Backup ascention state, so the simulation won't polute the real
-        // dive data.
-    	backup_GF_step = locked_GF_step;
-    	backup_low_depth = low_depth;
-
         // Check proposed gas at begin of ascent simulation
         sim_dive_mins = int_I_divemins;     // and time.
    	    temp_depth_limit = (int)(0.95 + (pres_respiration - pres_surface) / 0.09985) ;       // Starts from current real depth.
-        check_gas_switch();
+        best_gas_switch();
+        set_gas();
 
         backup_gas_used = sim_gas_last_used;// And save for later simu steps.
         backup_gas_delay = sim_gas_delay;
@@ -1127,14 +1219,10 @@ static void calc_hauptroutine(void)
 
         // If simulation is finished, restore the GF low reference, so that
         // next ascent simulation is done from the current depth:
-    	if( char_O_deco_status == 0 && backup_low_depth != 255)
+    	if( char_O_deco_status == 0 )
     	{
-        	locked_GF_step = backup_GF_step;
-        	low_depth = backup_low_depth;
             sim_gas_last_used = backup_gas_used;
             sim_gas_delay = backup_gas_delay;
-
-            backup_low_depth = 255;
         }
     	break;
 	}
@@ -1313,6 +1401,7 @@ void calc_hauptroutine_calc_deco(void)
 
         //---- Then update tissue and decoplan -------------------------------
         sim_dive_mins++;            // Advance simulated time by 1 minute.
+        set_gas();                  // Apply any simulated gas change, once validated.
         sim_alveolar_presures();    // Updates ppN2 and ppHe. 
         sim_tissue(1);              // Simulate compartiments for 1 minute.
 	}
@@ -1364,7 +1453,7 @@ void sim_ascent_to_first_stop(void)
 
         // Check gas change 5 meter below new depth.
         temp_depth_limit = (temp_deco + 0.5 - pres_surface) / 0.09985;
-        check_gas_switch();
+        deepest_gas_switch();
         if( sim_gas_delay > sim_dive_mins )
             break;
 

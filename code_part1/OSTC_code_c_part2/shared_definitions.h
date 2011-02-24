@@ -47,15 +47,15 @@
     //------------------------------------------------------------------------
     // C-style declarations:
 #   ifdef TEST_MAIN
-#       define VAR_UCHAR(n)      extern unsigned char n
-#       define TAB_UCHAR(n,size) extern unsigned char n[size]
-#       define VAR_UINT(n)       extern unsigned  int n
-#       define TAB_UINT(n,size)  extern unsigned  int n[size]
+#       define VAR_UCHAR(n)      extern unsigned  char n
+#       define TAB_UCHAR(n,size) extern unsigned  char n[size]
+#       define VAR_UINT(n)       extern unsigned short n
+#       define TAB_UINT(n,size)  extern unsigned short n[size]
 #   else
-#       define VAR_UCHAR(n)      unsigned char n
-#       define TAB_UCHAR(n,size) unsigned char n[size]
-#       define VAR_UINT(n)       unsigned  int n
-#       define TAB_UINT(n,size)  unsigned  int n[size]
+#       define VAR_UCHAR(n)      unsigned  char n
+#       define TAB_UCHAR(n,size) unsigned  char n[size]
+#       define VAR_UINT(n)       unsigned short n
+#       define TAB_UINT(n,size)  unsigned short n[size]
 #   endif
 #else
     ;-------------------------------------------------------------------------

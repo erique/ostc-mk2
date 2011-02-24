@@ -635,10 +635,10 @@ static void calc_nextdecodepth(void)
 
                 if( first_stop <= char_I_depth_last_deco )  // new in v104
                     next_stop = 0;
+                else if( first_stop == 6 )
+                    next_stop = char_I_depth_last_deco;
                 else
                     next_stop = first_stop - 3;             // Index of next (upper) stop.
-                if( first_stop == 3 )
-                    first_stop = char_I_depth_last_deco;
 
         	    pres_stop =  next_stop * 0.09995            // Meters to bar
         	              + pres_surface;

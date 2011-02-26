@@ -978,13 +978,12 @@ calculate_noflytime:
 	clrf	nofly_time+1			; Clear nofly time
 	bcf		nofly_active			; Clear flag
 	return
-	
+
 calculate_noflytime2:	
 	movff	xA+0,int_I_temp+0
 	movff	xA+1,int_I_temp+1
 	GETCUSTOM8 	.13					; nofly_time_ratio
-	movwf	xB+0
-	movff	xB,char_I_temp
+	movff	WREG,char_I_temp
 	ostc_debug	'K'		; Sends debug-information to screen if debugmode active
 	call	deco_calc_percentage
 	movlb	b'00000001'				; select ram bank 1

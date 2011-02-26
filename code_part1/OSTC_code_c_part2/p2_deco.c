@@ -2169,7 +2169,7 @@ void deco_calc_CNS_decrease_15min(void)
 void deco_calc_percentage(void)
 {
     RESET_C_STACK
-    int_I_temp = (short)(int_I_temp * (char_I_temp / 100.0));
+    int_I_temp = (unsigned short)(((float)int_I_temp * (float)char_I_temp) / 100.0);
 }
 
 //////////////////////////////////////////////////////////////////////////////

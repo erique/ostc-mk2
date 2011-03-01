@@ -357,7 +357,6 @@ divemode_check_decogases:					; CALLed from Simulator
 	movff	EEDATA, char_I_deco_N2_ratio1; = N2!
 
 ; Now, set change depth. Inactive gases have depth=0!
-	
 	read_int_eeprom		d'118'		; read gas_change_depth Gas1
 	movff	EEDATA,char_I_deco_gas_change5
 	read_int_eeprom		d'119'		; read gas_change_depth Gas2
@@ -368,7 +367,21 @@ divemode_check_decogases:					; CALLed from Simulator
 	movff	EEDATA,char_I_deco_gas_change2
 	read_int_eeprom		d'122'		; read gas_change_depth Gas5
 	movff	EEDATA,char_I_deco_gas_change1
+; If gas is inactive, overwrite char_I_deco_gas_changex with zero
+	read_int_eeprom		d'27'			; read flag register
+	clrf	WREG						; Clear WREG
 
+	btfss	EEDATA,0
+	movff	WREG,char_I_deco_gas_change1; Gas1
+	btfss	EEDATA,1
+	movff	WREG,char_I_deco_gas_change2; Gas2
+	btfss	EEDATA,2
+	movff	WREG,char_I_deco_gas_change3; Gas3
+	btfss	EEDATA,3
+	movff	WREG,char_I_deco_gas_change4; Gas4
+	btfss	EEDATA,4
+	movff	WREG,char_I_deco_gas_change5; Gas5
+	
 
 ; Debugger
 ;	call	enable_rs232	

@@ -252,45 +252,35 @@ divemenu_de_activate2_exit:
 	bra		timeout_divemenu2			; quit underwater menu!
 
 divemenu_de_activate2_g1:
-	read_int_eeprom		d'27'			; read flag register
-	btg		EEDATA,.0					; Toggle flag
-	write_int_eeprom	d'27'			; write flag register
+	btg		sorted_gaslist_active,0		; Toggle flag
 	movlw	d'2'
 	movwf	menupos						; reset cursor
 	call	PLED_de_activelist			; show (de)active gaslist
 	return
 
 divemenu_de_activate2_g2:
-	read_int_eeprom		d'27'			; read flag register
-	btg		EEDATA,.1					; Toggle flag
-	write_int_eeprom	d'27'			; write flag register
+	btg		sorted_gaslist_active,1		; Toggle flag
 	movlw	d'3'
 	movwf	menupos						; reset cursor
 	call	PLED_de_activelist			; show (de)active gaslist
 	return
 
 divemenu_de_activate2_g3:
-	read_int_eeprom		d'27'			; read flag register
-	btg		EEDATA,.2					; Toggle flag
-	write_int_eeprom	d'27'			; write flag register
+	btg		sorted_gaslist_active,2		; Toggle flag
 	movlw	d'4'
 	movwf	menupos						; reset cursor
 	call	PLED_de_activelist			; show (de)active gaslist
 	return
 
 divemenu_de_activate2_g4:
-	read_int_eeprom		d'27'			; read flag register
-	btg		EEDATA,.3					; Toggle flag
-	write_int_eeprom	d'27'			; write flag register
+	btg		sorted_gaslist_active,3		; Toggle flag
 	movlw	d'5'
 	movwf	menupos						; reset cursor
 	call	PLED_de_activelist			; show (de)active gaslist
 	return
 
 divemenu_de_activate2_g5:
-	read_int_eeprom		d'27'			; read flag register
-	btg		EEDATA,.4					; Toggle flag
-	write_int_eeprom	d'27'			; write flag register
+	btg		sorted_gaslist_active,4		; Toggle flag
 	movlw	d'6'
 	movwf	menupos						; reset cursor
 	call	PLED_de_activelist			; show (de)active gaslist

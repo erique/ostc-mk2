@@ -357,31 +357,30 @@ divemode_check_decogases:					; CALLed from Simulator
 	movff	EEDATA, char_I_deco_N2_ratio1; = N2!
 
 ; Now, set change depth. Inactive gases have depth=0!
-	read_int_eeprom		d'118'		; read gas_change_depth Gas1
-	movff	EEDATA,char_I_deco_gas_change5
-	read_int_eeprom		d'119'		; read gas_change_depth Gas2
-	movff	EEDATA,char_I_deco_gas_change4
-	read_int_eeprom		d'120'		; read gas_change_depth Gas3
-	movff	EEDATA,char_I_deco_gas_change3
-	read_int_eeprom		d'121'		; read gas_change_depth Gas4
-	movff	EEDATA,char_I_deco_gas_change2
-	read_int_eeprom		d'122'		; read gas_change_depth Gas5
-	movff	EEDATA,char_I_deco_gas_change1
-; If gas is inactive, overwrite char_I_deco_gas_changex with zero
-	read_int_eeprom		d'27'			; read flag register
-	clrf	WREG						; Clear WREG
+	read_int_eeprom		d'118'				; read gas_change_depth Gas1
+	btfss	sorted_gaslist_active,0			; Apply depth?
+	clrf	EEDATA							; No, clear!
+	movff	EEDATA,char_I_deco_gas_change5	; Yes!
 
-	btfss	EEDATA,0
-	movff	WREG,char_I_deco_gas_change1; Gas1
-	btfss	EEDATA,1
-	movff	WREG,char_I_deco_gas_change2; Gas2
-	btfss	EEDATA,2
-	movff	WREG,char_I_deco_gas_change3; Gas3
-	btfss	EEDATA,3
-	movff	WREG,char_I_deco_gas_change4; Gas4
-	btfss	EEDATA,4
-	movff	WREG,char_I_deco_gas_change5; Gas5
-	
+	read_int_eeprom		d'119'				; read gas_change_depth Gas2
+	btfss	sorted_gaslist_active,1			; Apply depth?
+	clrf	EEDATA							; No, clear!
+	movff	EEDATA,char_I_deco_gas_change4	; Yes!
+
+	read_int_eeprom		d'120'				; read gas_change_depth Gas3
+	btfss	sorted_gaslist_active,2			; Apply depth?
+	clrf	EEDATA							; No, clear!
+	movff	EEDATA,char_I_deco_gas_change3	; Yes!
+
+	read_int_eeprom		d'121'				; read gas_change_depth Gas4
+	btfss	sorted_gaslist_active,3			; Apply depth?
+	clrf	EEDATA							; No, clear!
+	movff	EEDATA,char_I_deco_gas_change2	; Yes!
+
+	read_int_eeprom		d'122'				; read gas_change_depth Gas5
+	btfss	sorted_gaslist_active,4			; Apply depth?
+	clrf	EEDATA							; No, clear!
+	movff	EEDATA,char_I_deco_gas_change1	; Yes!
 
 ; Debugger
 ;	call	enable_rs232	
@@ -410,7 +409,7 @@ divemode_check_decogases:					; CALLed from Simulator
 ;	movff	char_I_deco_gas_change4,TXREG
 ;	call	rs232_wait_tx				; wait for UART
 ;	movff	char_I_deco_gas_change3,TXREG
-;	call	rs232_wait_tx				; wait for UART
+;	call	rs232_wait_tx				; wait for UART	
 ;	movff	char_I_deco_gas_change2,TXREG
 ;	call	rs232_wait_tx				; wait for UART
 ;	movff	char_I_deco_gas_change,TXREG
@@ -1664,4 +1663,25 @@ divemode1:
 	subfwb	EEDATA,F					; minus O2
 	movff	EEDATA, char_I_N2_ratio		; = N2!
 
+; Configure sorted_gaslist_active flag register
+	clrf	sorted_gaslist_active	; Clear all flags
+	read_int_eeprom		d'118'		; read gas_change_depth Gas1
+	tstfsz	EEDATA					; =0m?
+	bsf		sorted_gaslist_active,0	; No, Set Flag for Gas1
+
+	read_int_eeprom		d'119'		; read gas_change_depth Gas2
+	tstfsz	EEDATA					; =0m?
+	bsf		sorted_gaslist_active,1	; No, Set Flag for Gas2
+
+	read_int_eeprom		d'120'		; read gas_change_depth Gas3
+	tstfsz	EEDATA					; =0m?
+	bsf		sorted_gaslist_active,2	; No, Set Flag for Gas3
+
+	read_int_eeprom		d'121'		; read gas_change_depth Gas4
+	tstfsz	EEDATA					; =0m?
+	bsf		sorted_gaslist_active,3	; No, Set Flag for Gas4
+
+	read_int_eeprom		d'122'		; read gas_change_depth Gas5
+	tstfsz	EEDATA					; =0m?
+	bsf		sorted_gaslist_active,4	; No, Set Flag for Gas5
 	return

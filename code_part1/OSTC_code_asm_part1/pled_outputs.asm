@@ -2498,7 +2498,7 @@ PLED_de_activelist:			; show (de)active gaslist
 	WIN_FONT	FT_SMALL
 	bsf		leftbind
 	
-	movlw	d'2'
+	movlw	d'92'
 	movwf	wait_temp			; here: stores eeprom address for gas list
 	movlw	d'0'
 	movwf	waitms_temp			; here: stores row for gas list
@@ -2513,10 +2513,7 @@ PLED_de_activelist_loop:
 	WIN_LEFT	.100
 	movff	waitms_temp,win_top ; Set Row
 	
-	STRCPY  "G"
-	movff	hi,lo			; copy gas number
-	output_8				; display gas number
-    PUTC    ':'
+  	lfsr	FSR2,letter
 	movff	wait_temp, EEADR; Gas #hi: %O2 - Set address in internal EEPROM
 	call	read_eeprom		; get byte (stored in EEDATA)
 	movff	EEDATA,lo		; copy to lo
@@ -2526,12 +2523,20 @@ PLED_de_activelist_loop:
 	call	read_eeprom		; get byte (stored in EEDATA)
 	movff	EEDATA,lo		; copy to lo
 	output_8				; outputs into Postinc2!
+    PUTC    '@'
 
-	decf	EEADR,F			; Gas #hi: %O2 - Set address in internal EEPROM
+	movlw	d'117'
+	addwf	hi,W
+	movwf	EEADR			; Point to Change depth
+
 	call	read_eeprom		; get byte (stored in EEDATA)
-	PLED_color_code		warn_gas_in_gaslist		; Color-code output	(%O2 in "EEDATA")
+	movff	EEDATA,lo		; copy to lo
+	output_8				; outputs into Postinc2!
+	
+;	call	PLED_standard_color	
+
 ; Check if gas needs to be greyed-out (inactive)	
-	read_int_eeprom		d'27'	; read flag register
+	movff	sorted_gaslist_active,EEDATA	; Get flag register
 	movff	hi,lo			; copy gas number
 PLED_de_activelist_loop1:
 	rrcf	EEDATA			; roll flags into carry
@@ -2541,7 +2546,10 @@ PLED_de_activelist_loop1:
 	movlw	color_grey
 	btfss	STATUS,C		; test carry
 	call	PLED_set_color	; grey out inactive gases!
-	
+
+	dcfsnz	hi,W			; First in List?
+	call	PLED_standard_color
+
 	call	word_processor	
 	call	PLED_standard_color	
 

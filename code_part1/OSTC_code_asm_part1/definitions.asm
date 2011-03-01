@@ -325,8 +325,9 @@ logbook_temp4           res 1   ; Temp used in logbook display&Divemode&Gassetup
 logbook_temp5           res 1   ; Temp used in logbook display&Divemode&Gassetup
 logbook_temp6           res 1   ; Temp used in logbook display&Divemode&Gassetup
 
-convert_value_temp      res 3    ; used in menu_battery_state_convert_date
+convert_value_temp      res 3   ; used in menu_battery_state_convert_date
 time_correction_value   res 1   ; Adds to Seconds on midnight
+sorted_gaslist_active	res 1	; Holds flags for active gases for the sorted list
 
 ;=============================================================================
 ; C-code Routines

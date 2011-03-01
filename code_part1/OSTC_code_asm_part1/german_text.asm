@@ -383,4 +383,5 @@
     TCODE    .0,    .0,      "MOD:"                      ; 297 MOD:                 (max operating depth of a gas).
     TCODE    .0,    .0,      "END:"                      ; 298 END:                 (equivalent nitrogen depth of a gas).
     TCODE    .0,    .0,      "EAD:"                      ; 299 EAD:                 (equivalent air depth of a gas).
+	TCODE	 .100,	.125,	 "Active?"					 ; 300 Active? 				(Enable/Disable Gas underwater)
 ;=============================================================================

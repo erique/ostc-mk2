@@ -107,6 +107,10 @@ test_switches_divemode_menu:
 	movlw	d'7'						; Yes, Number of entries for this menu+1 = 7
 	btfsc	display_set_setpoint		; In SetPoint Menu?
 	movlw	d'5'						; Number of entries for this menu+1 = 5
+	btfsc	display_set_active			; De/Activate gases underwater menu is visible?
+	movlw	d'7'						; Number of entries for this menu+1 = 7
+	btfsc	display_set_xgas			; Are we in the Gas6 menu?
+	movlw	d'7'						; Number of entries for this menu+1 = 7
 	cpfseq	menupos						; =limit?
 	bra		test_switches_divemode_menu1; No!
 	movlw	d'1'						; Yes, reset to position 1!
@@ -115,16 +119,18 @@ test_switches_divemode_menu:
 test_switches_divemode_menu1:
 ; Finally, check if menuposition 3 should be skipped (No customview with function displayed)
 
-	btfsc	display_set_gas				; Are we in the "Gaslist" or "SetPoint" menu?
+	btfsc	display_set_gas					; Are we in the "Gaslist", "SetPoint" or De/Activate gases menu?
 	bra		test_switches_divemode_menu1a	; Skip test for sub menus
-	btfsc	display_set_xgas				; Are we in the "Gaslist" or "SetPoint" menu?
+	btfsc	display_set_xgas				; Are we in the "Gaslist", "SetPoint" or De/Activate gases menu?
+	bra		test_switches_divemode_menu1a	; Skip test for sub menus
+	btfsc	display_set_active				; Are we in the "Gaslist", "SetPoint" or De/Activate gases menu?
 	bra		test_switches_divemode_menu1a	; Skip test for sub menus
 
 	movlw	d'3'
-	cpfseq	menupos						; At position 3?
-	bra		test_switches_divemode_menu1a; No
-	btfss	menu3_active				; Menu position 3 has functionality?
-	incf	menupos,F					; No, +1, skip to menuos=4
+	cpfseq	menupos							; At position 3?
+	bra		test_switches_divemode_menu1a	; No
+	btfss	menu3_active					; Menu position 3 has functionality?
+	incf	menupos,F						; No, +1, skip to menuos=4
 
 test_switches_divemode_menu1a:
 	call	PLED_divemenu_cursor		; update cursor
@@ -145,6 +151,9 @@ test_switches_divemode_menu3:
 
 	btfsc	display_set_xgas			; Are we in the "Set Gas" menu?
 	bra		divemenu_set_xgas2			; Yes, so configure gas or set menu and exit menu
+
+	btfsc	display_set_active			; Are we in the "De/Activate gases menu?" menu?
+	bra		divemenu_de_activate2		; Yes, so toggle active flag
 
 	btfsc	display_set_simulator		; Are we in the Divemode Simulator menu?
 	goto	divemode_menu_simulator2	; Yes, so adjust depth or set and exit
@@ -211,6 +220,81 @@ divemode_toggle_brightness3:
 	call	PLED_max_pressure			; ...and max. depth
 
 	bra		timeout_divemenu2			; quit menu!
+
+divemenu_de_activate:
+	bsf		display_set_active			; Set display flag
+	bcf		display_set_xgas			; Clear Flag
+	call	PLED_clear_divemode_menu	; Clear Menu
+
+	call	PLED_de_activelist			; show (de)active gaslist
+
+	movlw	d'1'
+	movwf	menupos						; reset cursor
+	call	PLED_divemenu_cursor		; update cursor
+	return
+
+divemenu_de_activate2:					; Toggle active flag
+	dcfsnz	menupos,F
+	bra		divemenu_de_activate2_exit	; Exit, Quit, Abort
+	dcfsnz	menupos,F
+	bra		divemenu_de_activate2_g1	; Toggle Gas1
+	dcfsnz	menupos,F
+	bra		divemenu_de_activate2_g2	; Toggle Gas2
+	dcfsnz	menupos,F
+	bra		divemenu_de_activate2_g3	; Toggle Gas3
+	dcfsnz	menupos,F
+	bra		divemenu_de_activate2_g4	; Toggle Gas4
+	dcfsnz	menupos,F
+	bra		divemenu_de_activate2_g5	; Toggle Gas5
+	return	; should never be here
+
+divemenu_de_activate2_exit:
+	bra		timeout_divemenu2			; quit underwater menu!
+
+divemenu_de_activate2_g1:
+	read_int_eeprom		d'27'			; read flag register
+	btg		EEDATA,.0					; Toggle flag
+	write_int_eeprom	d'27'			; write flag register
+	movlw	d'2'
+	movwf	menupos						; reset cursor
+	call	PLED_de_activelist			; show (de)active gaslist
+	return
+
+divemenu_de_activate2_g2:
+	read_int_eeprom		d'27'			; read flag register
+	btg		EEDATA,.1					; Toggle flag
+	write_int_eeprom	d'27'			; write flag register
+	movlw	d'3'
+	movwf	menupos						; reset cursor
+	call	PLED_de_activelist			; show (de)active gaslist
+	return
+
+divemenu_de_activate2_g3:
+	read_int_eeprom		d'27'			; read flag register
+	btg		EEDATA,.2					; Toggle flag
+	write_int_eeprom	d'27'			; write flag register
+	movlw	d'4'
+	movwf	menupos						; reset cursor
+	call	PLED_de_activelist			; show (de)active gaslist
+	return
+
+divemenu_de_activate2_g4:
+	read_int_eeprom		d'27'			; read flag register
+	btg		EEDATA,.3					; Toggle flag
+	write_int_eeprom	d'27'			; write flag register
+	movlw	d'5'
+	movwf	menupos						; reset cursor
+	call	PLED_de_activelist			; show (de)active gaslist
+	return
+
+divemenu_de_activate2_g5:
+	read_int_eeprom		d'27'			; read flag register
+	btg		EEDATA,.4					; Toggle flag
+	write_int_eeprom	d'27'			; write flag register
+	movlw	d'6'
+	movwf	menupos						; reset cursor
+	call	PLED_de_activelist			; show (de)active gaslist
+	return
 
 divemode_set_xgas:						; Set the extra gas...
 	bsf		display_set_xgas			; Set Flag
@@ -362,7 +446,9 @@ divemenu_set_xgas2:
 	bra		divemenu_set_xgas2_heplus	; Adjust He+
 	dcfsnz	menupos,F
 	bra		divemenu_set_xgas2_heminus	; Adjust He-
-	return
+	dcfsnz	menupos,F
+	bra		divemenu_de_activate		; Goto (De)active gases underwater list
+	return	; should never be here
 
 divemenu_set_xgas2_heminus:
 	read_int_eeprom		d'25'			; He value
@@ -611,6 +697,7 @@ timeout_divemenu2a:
 	bcf		display_set_xgas
 	bcf		display_set_setpoint
 	bcf		display_set_simulator
+	bcf		display_set_active
 	bcf		switch_left				; and debounce switches
 	bcf		switch_right
 	return

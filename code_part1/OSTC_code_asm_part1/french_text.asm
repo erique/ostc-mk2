@@ -384,4 +384,5 @@
     TCODE    .0,    .0,      "PMU:"                      ; 297 MOD:                 (max operating depth of a gas).
     TCODE    .0,    .0,      "PEN:"                      ; 298 END:                 (equivalent nitrogen depth of a gas).
     TCODE    .0,    .0,      "PEA:"                      ; 299 EAD:                 (equivalent air depth of a gas).
+	TCODE	 .100,	.125,	 "Active?"					 ; 300 Active? 				(Enable/Disable Gas underwater)
 ;=============================================================================

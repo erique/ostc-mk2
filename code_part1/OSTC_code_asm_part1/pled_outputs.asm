@@ -2304,6 +2304,7 @@ PLED_divemode_set_xgas:				; Displayes the "Set Gas" menu
 	DISPLAYTEXT	.124			; O2 -
 	DISPLAYTEXT	.125			; He +
 	DISPLAYTEXT	.126			; He -
+	DISPLAYTEXTH	d'300'		; Active? (Enable/Disable Gas underwater)
 	return
 
 PLED_divemode_simulator_mask:
@@ -2488,6 +2489,69 @@ PLED_decoplan_99:
         rcall   PLED_decoplan_clear_bottom  ; Clear from next line
         return
 ;-----------------------------------------------------------------------------
+
+PLED_de_activelist:			; show (de)active gaslist
+	call	PLED_standard_color	
+    DISPLAYTEXT	.254			; Close
+
+	WIN_LEFT	.100
+	WIN_FONT	FT_SMALL
+	bsf		leftbind
+	
+	movlw	d'2'
+	movwf	wait_temp			; here: stores eeprom address for gas list
+	movlw	d'0'
+	movwf	waitms_temp			; here: stores row for gas list
+	clrf	hi					; here: Gas counter
+
+PLED_de_activelist_loop:
+	incf	hi,F				; Increase Gas
+	movlw	d'4'
+	addwf	wait_temp,F			; Increase eeprom address for gas list
+	movlw	d'25'
+	addwf	waitms_temp,F		; Increase row
+	WIN_LEFT	.100
+	movff	waitms_temp,win_top ; Set Row
+	
+	STRCPY  "G"
+	movff	hi,lo			; copy gas number
+	output_8				; display gas number
+    PUTC    ':'
+	movff	wait_temp, EEADR; Gas #hi: %O2 - Set address in internal EEPROM
+	call	read_eeprom		; get byte (stored in EEDATA)
+	movff	EEDATA,lo		; copy to lo
+	output_8				; outputs into Postinc2!
+    PUTC    '/'
+	incf	EEADR,F			; Gas #hi: %He - Set address in internal EEPROM
+	call	read_eeprom		; get byte (stored in EEDATA)
+	movff	EEDATA,lo		; copy to lo
+	output_8				; outputs into Postinc2!
+
+	decf	EEADR,F			; Gas #hi: %O2 - Set address in internal EEPROM
+	call	read_eeprom		; get byte (stored in EEDATA)
+	PLED_color_code		warn_gas_in_gaslist		; Color-code output	(%O2 in "EEDATA")
+; Check if gas needs to be greyed-out (inactive)	
+	read_int_eeprom		d'27'	; read flag register
+	movff	hi,lo			; copy gas number
+PLED_de_activelist_loop1:
+	rrcf	EEDATA			; roll flags into carry
+	decfsz	lo,F			; max. 5 times...
+	bra		PLED_de_activelist_loop1
+
+	movlw	color_grey
+	btfss	STATUS,C		; test carry
+	call	PLED_set_color	; grey out inactive gases!
+	
+	call	word_processor	
+	call	PLED_standard_color	
+
+	movlw	d'5'			; list all five gases
+	cpfseq	hi				; All gases shown?
+	bra		PLED_de_activelist_loop	; No
+
+	return					;  return 
+
+
 PLED_gas_list:
 	ostc_debug	'm'		; Sends debug-information to screen if debugmode active
 
@@ -2546,8 +2610,7 @@ PLED_gas_list_loop1:
 	cpfseq	hi				; All gases shown?
 	bra		PLED_gas_list_loop	; No
 
-	DISPLAYTEXT	d'122'		; Gas 6..
-
+	DISPLAYTEXT		d'122'		; Gas 6..
 	return					;  return (OC mode)
 
 PLED_splist_start:	
@@ -2619,8 +2682,8 @@ PLED_divemenu_cursor:
 	movlw	d'100'
 	dcfsnz	temp1,F
 	movlw	d'125'
-	movff	WREG,win_top
 
+	movff	WREG,win_top
     STRCPY_PRINT "\xB7"				; Cursor
 	return
 

@@ -1,3 +1,8 @@
+New in 1.83 beta:
+BETA Version - Do NOT use for diving!
+BUGFIX: gas switch
+NEW: De/Activate gases underwater (Gaslist -> Gas6.. -> Actve?)
+
 New in 1.82 beta:
 BETA Version - Do NOT use for diving!
 CHANGE: Speed optimization in Logbook

@@ -264,18 +264,18 @@ calc_deko_divemode:
 	call	calc_average_depth	; calculate average depth
 	call	calc_velocity		; calculate vertical velocity and display if > threshold (every two seconds)
 	
-	; calculate ppO2 in 0.1Bar (e.g. 150 = 1.50Bar ppO2)
-	movff		amb_pressure+0,xA+0
+	; calculate ppO2 in 0.01Bar (e.g. 150 = 1.50 Bar ppO2)
+	movff		amb_pressure+0,xA+0     ; P_amb in milibar (1000 = 1.000 bar).
 	movff		amb_pressure+1,xA+1
 	movlw		d'10'
 	movwf		xB+0
 	clrf		xB+1
-	call		div16x16				; xC=p_amb/10
+	call		div16x16				; xC=p_amb/10 (100 = 1.00 bar).
 	movff		xC+0,xA+0
 	movff		xC+1,xA+1
 	movff		char_I_O2_ratio,xB+0
 	clrf		xB+1
-	call		mult16x16				; char_I_O2_ratio * p_amb/10
+	call		mult16x16				; char_I_O2_ratio * (p_amb/10)
 	movff		xC+0,xA+0
 	movff		xC+1,xA+1
 	movlw		d'100'
@@ -360,27 +360,27 @@ divemode_check_decogases:					; CALLed from Simulator
 	read_int_eeprom		d'118'				; read gas_change_depth Gas1
 	btfss	sorted_gaslist_active,0			; Apply depth?
 	clrf	EEDATA							; No, clear!
-	movff	EEDATA,char_I_deco_gas_change5	; Yes!
+	movff	EEDATA,char_I_deco_gas_change+4	; Yes!
 
 	read_int_eeprom		d'119'				; read gas_change_depth Gas2
 	btfss	sorted_gaslist_active,1			; Apply depth?
 	clrf	EEDATA							; No, clear!
-	movff	EEDATA,char_I_deco_gas_change4	; Yes!
+	movff	EEDATA,char_I_deco_gas_change+3	; Yes!
 
 	read_int_eeprom		d'120'				; read gas_change_depth Gas3
 	btfss	sorted_gaslist_active,2			; Apply depth?
 	clrf	EEDATA							; No, clear!
-	movff	EEDATA,char_I_deco_gas_change3	; Yes!
+	movff	EEDATA,char_I_deco_gas_change+2	; Yes!
 
 	read_int_eeprom		d'121'				; read gas_change_depth Gas4
 	btfss	sorted_gaslist_active,3			; Apply depth?
 	clrf	EEDATA							; No, clear!
-	movff	EEDATA,char_I_deco_gas_change2	; Yes!
+	movff	EEDATA,char_I_deco_gas_change+1	; Yes!
 
 	read_int_eeprom		d'122'				; read gas_change_depth Gas5
 	btfss	sorted_gaslist_active,4			; Apply depth?
 	clrf	EEDATA							; No, clear!
-	movff	EEDATA,char_I_deco_gas_change1	; Yes!
+	movff	EEDATA,char_I_deco_gas_change+0	; Yes!
 
 ; Debugger
 ;	call	enable_rs232	
@@ -420,11 +420,11 @@ divemode_check_decogases:					; CALLed from Simulator
 reset_decompression_gases:				; reset the deco gas while in NDL
 	ostc_debug	'F'		; Sends debug-information to screen if debugmode active
   	clrf	lo
-	movff	lo,char_I_deco_gas_change5
-	movff	lo,char_I_deco_gas_change4
-	movff	lo,char_I_deco_gas_change3
-	movff	lo,char_I_deco_gas_change2
- 	movff	lo,char_I_deco_gas_change1  ; clear 
+	movff	lo,char_I_deco_gas_change+4
+	movff	lo,char_I_deco_gas_change+3
+	movff	lo,char_I_deco_gas_change+2
+	movff	lo,char_I_deco_gas_change+1
+ 	movff	lo,char_I_deco_gas_change+0 ; clear 
 	return
 
 calc_deko_divemode2:

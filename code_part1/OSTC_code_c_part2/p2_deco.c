@@ -1264,30 +1264,30 @@ void calc_hauptroutine_data_input(void)
     deco_gas_change5 = 0;
 
     // Gas are selectable if we did not pass the change depth by more than 1.50m:
-    if(char_I_deco_gas_change1)
+    if(char_I_deco_gas_change[0])
     {
-        if( int_temp > 100 *(short)char_I_deco_gas_change1 )
-        	deco_gas_change1 = char_I_deco_gas_change1;
+        if( int_temp > 100 *(short)char_I_deco_gas_change[0] )
+        	deco_gas_change1 = char_I_deco_gas_change[0];
     }
-    if(char_I_deco_gas_change2)
+    if(char_I_deco_gas_change[1])
     {
-        if( int_temp > 100 *(short)char_I_deco_gas_change2 )
-        	deco_gas_change2 = char_I_deco_gas_change2;
+        if( int_temp > 100 *(short)char_I_deco_gas_change[1] )
+        	deco_gas_change2 = char_I_deco_gas_change[1];
     }
-    if(char_I_deco_gas_change3)
+    if(char_I_deco_gas_change[2])
     {
-        if( int_temp > 100 *(short)char_I_deco_gas_change3 )
-        	deco_gas_change3 = char_I_deco_gas_change3;
+        if( int_temp > 100 *(short)char_I_deco_gas_change[2] )
+        	deco_gas_change3 = char_I_deco_gas_change[2];
     }
-    if(char_I_deco_gas_change4)
+    if(char_I_deco_gas_change[3])
     {
-        if( int_temp > 100 *(short)char_I_deco_gas_change4 )
-        	deco_gas_change4 = char_I_deco_gas_change4;
+        if( int_temp > 100 *(short)char_I_deco_gas_change[3] )
+        	deco_gas_change4 = char_I_deco_gas_change[3];
     }
-    if(char_I_deco_gas_change5)
+    if(char_I_deco_gas_change[4])
     {
-        if( int_temp > 100 *(short)char_I_deco_gas_change5 )
-        	deco_gas_change5 = char_I_deco_gas_change5;
+        if( int_temp > 100 *(short)char_I_deco_gas_change[4] )
+        	deco_gas_change5 = char_I_deco_gas_change[4];
     }
 
     const_ppO2 = char_I_const_ppO2 * 0.01;
@@ -2165,11 +2165,83 @@ void deco_calc_CNS_decrease_15min(void)
 // output is int_I_temp
 //
 // Used to compute NoFly remaining time.
-
+//
 void deco_calc_percentage(void)
 {
     RESET_C_STACK
-    int_I_temp = (unsigned short)(((float)int_I_temp * (float)char_I_temp) / 100.0);
+
+    int_I_temp = (unsigned short)(((float)int_I_temp * (float)char_I_temp) * 0.01 );
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// deco_gas_volumes
+//
+// new in v.111
+//
+// calculates volumes for each gas.
+//
+// Input:   char_I_bottom_depth, char_I_bottom_time for planned dive.
+///         Gas list. First gas is the bottom gas.
+//          decoplan (char_O_deco_depth, char_O_deco_time).
+//          CF#56 == bottom deci-liters/minutes (0.5 .. 50.0)
+//          CF#57 == deco deci-liters/minutes (0.5 .. 50.0).
+// Output:  char_O_gas_volumes[0..4] in litters x 100.
+//
+void deco_gas_volumes(void)
+{
+    overlay float volumes[5];
+    overlay float ascent_usage;
+    overlay unsigned char i, j;
+    RESET_C_STACK
+
+    //---- initialize with bottom consumption --------------------------------
+    volumes[0] = (char_I_bottom_depth*0.1 + 1.0)    // Use Psurface = 1.0 bar.
+               * char_I_bottom_time                 // in minutes.
+               * read_custom_function(56)           // In deci-liter/minutes.
+               * 0.1;                               // deci-liters --> liters.
+
+    for(i=1; i<5; ++i)                              // Nothing yet...
+        volumes[i] = 0.0;
+
+    //---- Ascent usage ------------------------------------------------------
+
+    ascent_usage = read_custom_function(57) * 0.1;  // In liter/minutes.
+
+    // Usage to the first stop:
+    //  - computed at mean depth (triangular integration),
+    //  - with an ascent speed of 10m/min.
+    //  - with ascent liter / minutes.
+    //  - still using bottom gas:
+    volumes[0] += (0.05 * (char_I_bottom_depth + char_O_first_deco_depth) + 1.0)
+               * (char_I_bottom_depth - char_O_first_deco_depth) * 0.1
+               * ascent_usage;
+
+    for(i=0; i<32 && char_O_deco_depth[i] > 0; ++i)
+    {
+        // Gas switch depth ?
+        for(j=4; j>0; --j)
+        {
+            if( char_O_deco_depth[i] <= char_I_deco_gas_change[j] )
+                break;
+        }
+
+        // usage during stop:
+        volumes[j] += (char_O_deco_depth[i]*0.1 + 1.0)// Use Psurface = 1.0 bar.
+                    * char_O_deco_time[i]               // in minutes.
+                    * ascent_usage
+        // Plus usage during ascent to the next stop, at 10m/min.
+                    + (0.05*(char_O_deco_depth[i] + char_O_deco_depth[i+1]) + 1.0)
+                    * (char_O_deco_depth[i] - char_O_deco_depth[i+1]) * 0.1
+                    * ascent_usage;
+    }
+
+    //---- convert results for the ASM interface -----------------------------
+    for(i=0; i<5; ++i)
+        if( volumes[i] > 25499.0 )
+            char_O_gas_volumes[i] = 255;
+        else
+            char_O_gas_volumes[i] = (unsigned char)((volumes[i] + 99.0)*0.01);
 }
 
 //////////////////////////////////////////////////////////////////////////////

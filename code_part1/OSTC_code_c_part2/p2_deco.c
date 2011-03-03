@@ -194,11 +194,7 @@ static float			float_desaturation_multiplier;  // new in v.101
 static float			float_deco_distance;	// new in v.101
 static char			    flag_in_divemode;		// new in v.108
 
-static unsigned char    deco_gas_change1;		// new in v.101
-static unsigned char    deco_gas_change2;		// new in v.109
-static unsigned char    deco_gas_change3;		// new in v.109
-static unsigned char    deco_gas_change4;		// new in v.109
-static unsigned char    deco_gas_change5;		// new in v.109
+static unsigned char    deco_gas_change[5];		// new in v.109
 
 //---- Bank 6 parameters -----------------------------------------------------
 #pragma udata bank6=0x600
@@ -319,7 +315,7 @@ static void create_dbs_set_dbg_and_ndl20mtr(void)
 	DBG_deco_ppO2 = deco_ppO2;
 	DBG_deco_N2_ratio = char_I_deco_N2_ratio[0];
 	DBG_deco_He_ratio = char_I_deco_He_ratio[0];
-	DBG_deco_gas_change = deco_gas_change1;
+	DBG_deco_gas_change = deco_gas_change[0];
 	DBG_float_saturation_multiplier = float_saturation_multiplier;
 	DBG_float_desaturation_multiplier = float_desaturation_multiplier;
 	DBG_float_deco_distance = float_deco_distance;
@@ -427,7 +423,7 @@ static void check_dbg(PARAMETER char is_post_check)
 	if(DBG_deco_ppO2 != deco_ppO2)
 		temp_DBS |= DBG_C_DPPO2;
 
-	if( DBG_deco_gas_change != deco_gas_change1
+	if( DBG_deco_gas_change != deco_gas_change[0]
 	 || DBG_deco_N2_ratio != char_I_deco_N2_ratio[0]
 	 || DBG_deco_He_ratio != char_I_deco_He_ratio[0] )
 		temp_DBS |= DBG_C_DGAS;
@@ -861,7 +857,7 @@ void deco_debug(void)
 //////////////////////////////////////////////////////////////////////////////
 // Find deepest available gas.
 // 
-// Input:  deco_gas_change*
+// Input:  deco_gas_change[]
 //         sim_gas_delay, sim_gas_last_used, sim_dive_mins.
 //
 // Output: temp_depth_limit, sim_gas_delay, sim_gas_last_used IFF the is a switch.
@@ -873,33 +869,18 @@ static void deepest_gas_switch(void)
 
     if (char_I_const_ppO2 == 0)
     {
-        // Keep selecting the best gas during the ascent simulation.
-        // Add a one meter margin in depth comparaison.
-		if( deco_gas_change1 && ((temp_depth_limit-1) <= deco_gas_change1))
-		{
-            temp_gas_switch = 1;
-            switch_deco = deco_gas_change1;
-    	} 
-        else if(deco_gas_change2 && ((temp_depth_limit-1) <= deco_gas_change2))
-		{
-            temp_gas_switch = 2;
-            switch_deco = deco_gas_change2;
-    	} 
-		else if(deco_gas_change3 && ((temp_depth_limit-1) <= deco_gas_change3))
-		{
-            temp_gas_switch = 3;
-            switch_deco = deco_gas_change3;
-    	}
-		else if(deco_gas_change4 && ((temp_depth_limit-1) <= deco_gas_change4))
-		{
-            temp_gas_switch = 4;
-            switch_deco = deco_gas_change4;
-    	}
-		else if(deco_gas_change5 && ((temp_depth_limit-1) <= deco_gas_change5))
-		{
-            temp_gas_switch = 5;
-            switch_deco = deco_gas_change5;
-    	}
+        overlay unsigned char j;
+
+        // Loop over all enabled gas, to find the deepest enabled one above us.
+        for(temp_gas_switch=j=0; j<5; ++j)
+        {
+            if( temp_depth_limit <= deco_gas_change[j] )
+                if( (temp_gas_switch == 0) || (switch_deco < deco_gas_change[j]) )
+                {
+                    temp_gas_switch = j+1;
+                    switch_deco = deco_gas_change[j];
+                }
+        }
     }
 
     // If there is a better gas available
@@ -942,33 +923,18 @@ static void best_gas_switch(void)
 
     if (char_I_const_ppO2 == 0)
     {
-        // Keep selecting the best gas during the ascent simulation.
-        // Add a one meter margin in depth comparaison.
-		if( deco_gas_change5 && ((temp_depth_limit-1) <= deco_gas_change5))
-		{
-            temp_gas_switch = 5;
-            switch_deco = deco_gas_change5;
-    	} 
-        else if(deco_gas_change4 && ((temp_depth_limit-1) <= deco_gas_change4))
-		{
-            temp_gas_switch = 4;
-            switch_deco = deco_gas_change4;
-    	} 
-		else if(deco_gas_change3 && ((temp_depth_limit-1) <= deco_gas_change3))
-		{
-            temp_gas_switch = 3;
-            switch_deco = deco_gas_change3;
-    	}
-		else if(deco_gas_change2 && ((temp_depth_limit-1) <= deco_gas_change2))
-		{
-            temp_gas_switch = 2;
-            switch_deco = deco_gas_change2;
-    	}
-		else if(deco_gas_change1 && ((temp_depth_limit-1) <= deco_gas_change1))
-		{
-            temp_gas_switch = 1;
-            switch_deco = deco_gas_change1;
-    	}
+        overlay unsigned char j;
+
+        // Loop over all enabled gas, to find the shallowest enabled one above us.
+        for(temp_gas_switch=j=0; j<5; ++j)
+        {
+            if( temp_depth_limit <= deco_gas_change[j] )
+                if( (temp_gas_switch == 0) || (switch_deco > deco_gas_change[j]) )
+                {
+                    temp_gas_switch = j+1;
+                    switch_deco = deco_gas_change[j];
+                }
+        }
     }
 
     // If there is a better gas available
@@ -1233,37 +1199,37 @@ void calc_hauptroutine_data_input(void)
     int_temp = (int_I_pres_respiration - int_I_pres_surface)
              + MBAR_REACH_GASCHANGE_AUTO_CHANGE_OFF;
     
-    deco_gas_change1 = 0;
-    deco_gas_change2 = 0;
-    deco_gas_change3 = 0;
-    deco_gas_change4 = 0;
-    deco_gas_change5 = 0;
+    deco_gas_change[0] = 0;
+    deco_gas_change[1] = 0;
+    deco_gas_change[2] = 0;
+    deco_gas_change[3] = 0;
+    deco_gas_change[4] = 0;
 
     // Gas are selectable if we did not pass the change depth by more than 1.50m:
     if(char_I_deco_gas_change[0])
     {
         if( int_temp > 100 *(short)char_I_deco_gas_change[0] )
-        	deco_gas_change1 = char_I_deco_gas_change[0];
+        	deco_gas_change[0] = char_I_deco_gas_change[0];
     }
     if(char_I_deco_gas_change[1])
     {
         if( int_temp > 100 *(short)char_I_deco_gas_change[1] )
-        	deco_gas_change2 = char_I_deco_gas_change[1];
+        	deco_gas_change[1] = char_I_deco_gas_change[1];
     }
     if(char_I_deco_gas_change[2])
     {
         if( int_temp > 100 *(short)char_I_deco_gas_change[2] )
-        	deco_gas_change3 = char_I_deco_gas_change[2];
+        	deco_gas_change[2] = char_I_deco_gas_change[2];
     }
     if(char_I_deco_gas_change[3])
     {
         if( int_temp > 100 *(short)char_I_deco_gas_change[3] )
-        	deco_gas_change4 = char_I_deco_gas_change[3];
+        	deco_gas_change[3] = char_I_deco_gas_change[3];
     }
     if(char_I_deco_gas_change[4])
     {
         if( int_temp > 100 *(short)char_I_deco_gas_change[4] )
-        	deco_gas_change5 = char_I_deco_gas_change[4];
+        	deco_gas_change[4] = char_I_deco_gas_change[4];
     }
 
     const_ppO2 = char_I_const_ppO2 * 0.01;
@@ -2197,7 +2163,7 @@ void deco_gas_volumes(void)
     {
         overlay unsigned char j, gas;
         // Gas switch depth ?
-        for(gas=j=0; j<4; ++j)
+        for(gas=j=0; j<5; ++j)
         {
             if( char_O_deco_depth[i] <= char_I_deco_gas_change[j] )
                 if( (gas == 0) || (char_I_deco_gas_change[gas] > char_I_deco_gas_change[j]) )
@@ -2206,13 +2172,13 @@ void deco_gas_volumes(void)
 
         // usage during stop:
         // Note: because first gas is not in there, increment gas+1
-        volumes[gas+1] += (char_O_deco_depth[i]*0.1 + 1.0)// Use Psurface = 1.0 bar.
-                        * char_O_deco_time[i]               // in minutes.
-                        * ascent_usage
+        volumes[gas] += (char_O_deco_depth[i]*0.1 + 1.0)// Use Psurface = 1.0 bar.
+                      * char_O_deco_time[i]               // in minutes.
+                      * ascent_usage
         // Plus usage during ascent to the next stop, at 10m/min.
-                        + (char_O_deco_depth[i]*0.1  + 1.0)
-                        * (char_O_deco_depth[i] - char_O_deco_depth[i+1]) * 0.1
-                        * ascent_usage;
+                      + (char_O_deco_depth[i]*0.1  + 1.0)
+                      * (char_O_deco_depth[i] - char_O_deco_depth[i+1]) * 0.1
+                      * ascent_usage;
     }
 
     //---- convert results for the ASM interface -----------------------------

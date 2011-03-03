@@ -240,9 +240,35 @@ simulator_show_decoplan5_0:
     bra     simulator_show_decoplan4
 	bcf		display_see_deco			; clear flag
    
+   ; Re-read gas change depth, from the unsorted list.
+    movlw   .27                         ; Active flags.
+    movwf   EEADR
+    clrf    EEADRH
+    call    read_eeprom
+    movff   EEDATA,waitms_temp          ; Save activity flags.
+    incf    EEADR,F                     ; 28 == Gas#1's change depth.
+
+    lfsr    FSR2,char_I_deco_gas_change
+    movlw   5
+    movwf   wait_temp
+
+simulator_show_decoplan5_4:
+    call    read_eeprom
+    incf    EEADR,F
+    
+    rrcf    waitms_temp                 ; Roll acticity to cary.
+    btfss   STATUS,C
+    clrf    EEDATA                      ; If not active, set depth=0
+
+    movff   EEDATA,POSTINC2             ; Write that in depth array.
+    decfsz  wait_temp
+    bra     simulator_show_decoplan5_4
+
+    ; Compute gas consumption for each tank.
     call    deco_gas_volumes
     movlb   1
 
+    ; Display results
     call    PLED_clear_divemode_menu    ; Clear right part.
 
 	movlw	d'10'
@@ -266,7 +292,7 @@ simulator_show_decoplan5_loop:
     bz      simulator_show_decoplan5_1  ; Skip printing.
 
     movf    lo,W                        ; == 65535 (saturated ?)
-    iorwf   hi,W
+    andwf   hi,W
     incf    WREG
     bnz     simulator_show_decoplan5_2
     call    PLED_warnings_color

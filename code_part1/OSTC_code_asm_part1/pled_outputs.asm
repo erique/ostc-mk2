@@ -2476,13 +2476,15 @@ PLED_decoplan_2:
     	bz      PLED_decoplan_99        ; End of list...
 
         ; Display the message "more..."
+        bcf		last_ceiling_gf_shown	; More page to display...
+
         rcall   PLED_decoplan_clear_bottom  ; Clear from next line
 
     	WIN_LEFT .130 - 7*3
     	call    PLED_standard_color
-    	STRCPY_PRINT "more..."
-        bcf		last_ceiling_gf_shown	; More page to display...
-    	return
+    	lfsr    FSR2,letter
+    	OUTPUTTEXT .142                 ; More...
+    	goto    word_processor
 
 PLED_decoplan_99:
         bsf		last_ceiling_gf_shown   ; Nothing more in table to display.
@@ -3215,32 +3217,36 @@ PLED_simdata_screen2_loop:
 	addlw	d'27'			; -> Adress of change depth register
 	call	read_int_eeprom_1
 	movff	EEDATA,lo		; Change depth in m
-	movff	lo,lo_temp		; Store for grey-out
+	movff	lo,divemins		; Store for grey-out
 	output_99				; outputs into Postinc2!
     PUTC    'm'
-	read_int_eeprom		d'27'	; read flag register
-	movff	hi,lo			; copy gas number
+
+    ; Check if gas is first gas ?
+	read_int_eeprom d'33'	            ; First gas (1-5)?
+	movf	hi,W                        ; Current gas in WREG
+	cpfseq	EEDATA				        ; Is equal first gas?
+	bra		PLED_simdata_screen2_loop2	; No : more tests...
+
+	bra		PLED_simdata_white	        ; Yes
+
+PLED_simdata_screen2_loop2:	
+    ; Check if gas is inactive ?
+	read_int_eeprom d'27'	            ; read flag register
+	movff	hi,lo			            ; copy gas number
 PLED_simdata_screen2_loop1:
-	rrcf	EEDATA			; roll flags into carry
-	decfsz	lo,F			; max. 5 times...
+	rrcf	EEDATA			            ; roll flags into carry
+	decfsz	lo,F		            	; max. 5 times...
 	bra		PLED_simdata_screen2_loop1
 
-	read_int_eeprom		d'33'	; First gas (1-5)?
-	movf	hi,W				; Current gas in WREG
-	cpfseq	EEDATA				; Is equal first gas?
-	bra		PLED_simdata_screen2_loop2	; No
-	bra		PLED_simdata_white	; Yes
+	btfss	STATUS,C		            ; test inactive flag
+	bra		PLED_simdata_grey	        ; Is inactive!
 
-PLED_simdata_screen2_loop2:
-	btfss	STATUS,C		; test inactive flag
-	bra		PLED_simdata_grey	; Is inactive!
-	
-	tstfsz	lo_temp			; Test change depth=0?
-	bra		PLED_simdata_white	; Is not zero
+	tstfsz	divemins		            ; Test change depth=0?
+	bra		PLED_simdata_white      	; Is not zero
 
 PLED_simdata_grey:
 	movlw	color_grey
-	call	PLED_set_color	; grey out inactive gases!
+	call	PLED_set_color	            ; grey out inactive gases!
 	bra		PLED_simdata_color_done
 
 PLED_simdata_white:

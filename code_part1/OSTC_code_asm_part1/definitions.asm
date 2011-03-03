@@ -26,7 +26,7 @@
 
 #DEFINE softwareversion_beta 	1 			; (and 0 for release) 
 
-#DEFINE	max_custom_number		d'55'		; Number of last used custom function
+#DEFINE	max_custom_number		d'57'		; Number of last used custom function
 
 ; International extension. Selecting messages source:
 #DEFINE    ENGLISH                         ; Use english_text.asm
@@ -343,6 +343,7 @@ sorted_gaslist_active	res 1	; Holds flags for active gases for the sorted list
     extern deco_hash    
     extern deco_pull_tissues_from_vault
     extern deco_push_tissues_to_vault
+    extern deco_gas_volumes
 
 ;=============================================================================
 ;I/O Ports (I=Input, O=Output)

@@ -100,7 +100,7 @@ VAR_UINT  (int_O_DBG_pre_bitfield);
 VAR_UINT  (int_O_DBG_post_bitfield);
 VAR_UCHAR (char_O_NDL_at_20mtr);
 
-TAB_UCHAR (char_O_gas_volumes, 5);           // Volumes evaluation for each gas tank, in 100's of liters.
+TAB_UINT (int_O_gas_volumes, 5);            // Volumes evaluation for each gas tank, in 0.1 liters.
 
 TAB_UCHAR (char_O_hash, 16);
 
@@ -137,17 +137,8 @@ VAR_UCHAR (char_I_bottom_depth);           // Bottom depth for planning (used in
 VAR_UCHAR (char_I_bottom_time);            // Bottom time for planning (used in gas volume evaluation).
 
 TAB_UCHAR (char_I_deco_gas_change, 5);     // new in v.101
-
-VAR_UCHAR (char_I_deco_N2_ratio1);         // new in v.101
-VAR_UCHAR (char_I_deco_He_ratio1);         // new in v.101
-VAR_UCHAR (char_I_deco_N2_ratio2);         // new in v.109
-VAR_UCHAR (char_I_deco_He_ratio2);         // new in v.109
-VAR_UCHAR (char_I_deco_N2_ratio3);         // new in v.109
-VAR_UCHAR (char_I_deco_He_ratio3);         // new in v.109
-VAR_UCHAR (char_I_deco_N2_ratio4);         // new in v.109
-VAR_UCHAR (char_I_deco_He_ratio4);         // new in v.109
-VAR_UCHAR (char_I_deco_N2_ratio5);         // new in v.109
-VAR_UCHAR (char_I_deco_He_ratio5);         // new in v.109
+TAB_UCHAR (char_I_deco_N2_ratio, 5);       // new in v.101
+TAB_UCHAR (char_I_deco_He_ratio, 5);       // new in v.101
 
 #ifdef __18CXX
 //----------------------------------------------------------------------------

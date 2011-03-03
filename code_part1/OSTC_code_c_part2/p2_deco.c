@@ -200,10 +200,6 @@ static unsigned char    deco_gas_change3;		// new in v.109
 static unsigned char    deco_gas_change4;		// new in v.109
 static unsigned char    deco_gas_change5;		// new in v.109
 
-static float			deco_N2_ratio1;			// new in v.101
-static float			deco_He_ratio1;			// new in v.101
-
-
 //---- Bank 6 parameters -----------------------------------------------------
 #pragma udata bank6=0x600
 
@@ -232,19 +228,17 @@ static char	  md_state[48];		        // DONT MOVE !! // has to be at the beginni
 static unsigned char	DBG_char_I_deco_model;	// new in v.108.
 static unsigned char	DBG_char_I_depth_last_deco;			// new in v.108
 static unsigned char	DBG_deco_gas_change;	// new in v.108
+static unsigned char    DBG_deco_N2_ratio;		// new in v.108
+static unsigned char	DBG_deco_He_ratio;		// new in v.108
 static float			DBG_pres_surface;		// new in v.108
 static float			DBG_GF_low;				// new in v.108
 static float			DBG_GF_high;			// new in v.108
 static float			DBG_const_ppO2;			// new in v.108
 static float			DBG_deco_ppO2_change;	// new in v.108
 static float			DBG_deco_ppO2;			// new in v.108
-static float			DBG_deco_N2_ratio;		// new in v.108
-static float			DBG_deco_He_ratio;		// new in v.108
 static float			DBG_float_saturation_multiplier;	// new in v.108
 static float			DBG_float_desaturation_multiplier;	// new in v.108
 static float			DBG_float_deco_distance;			// new in v.108
-static float			DBG_deco_N2_ratio;		// new in v.108
-static float			DBG_deco_He_ratio;		// new in v.108
 static float			DBG_N2_ratio;			// new in v.108
 static float			DBG_He_ratio;			// new in v.108
 
@@ -323,8 +317,8 @@ static void create_dbs_set_dbg_and_ndl20mtr(void)
 	DBG_const_ppO2 = const_ppO2;
 	DBG_deco_ppO2_change = deco_ppO2_change;
 	DBG_deco_ppO2 = deco_ppO2;
-	DBG_deco_N2_ratio = deco_N2_ratio1;
-	DBG_deco_He_ratio = deco_He_ratio1;
+	DBG_deco_N2_ratio = char_I_deco_N2_ratio[0];
+	DBG_deco_He_ratio = char_I_deco_He_ratio[0];
 	DBG_deco_gas_change = deco_gas_change1;
 	DBG_float_saturation_multiplier = float_saturation_multiplier;
 	DBG_float_desaturation_multiplier = float_desaturation_multiplier;
@@ -360,9 +354,9 @@ static void create_dbs_set_dbg_and_ndl20mtr(void)
 		int_O_DBS_bitfield |= DBS_DIST2h;
 	if(char_I_depth_last_deco > 8)
 		int_O_DBS_bitfield |= DBS_LAST2h;
-	if(DBG_deco_gas_change && ((deco_N2_ratio1 + deco_He_ratio1) > 0.95))
+	if(DBG_deco_gas_change && ((char_I_deco_N2_ratio[0] + char_I_deco_He_ratio[0]) > 95))
 		int_O_DBS_bitfield |= DBS_DECOO2l;
-	if(DBG_deco_gas_change && ((deco_N2_ratio1 + deco_He_ratio1) < 0.05))
+	if(DBG_deco_gas_change && ((char_I_deco_N2_ratio[0] + char_I_deco_He_ratio[0]) <  5))
 		int_O_DBS_bitfield |= DBS_DECOO2h;
 	if(pres_respiration > 3.0)
 		int_O_DBS2_bitfield |= DBS2_PRES2h;
@@ -434,8 +428,8 @@ static void check_dbg(PARAMETER char is_post_check)
 		temp_DBS |= DBG_C_DPPO2;
 
 	if( DBG_deco_gas_change != deco_gas_change1
-	 || DBG_deco_N2_ratio != deco_N2_ratio1
-	 || DBG_deco_He_ratio != deco_He_ratio1 )
+	 || DBG_deco_N2_ratio != char_I_deco_N2_ratio[0]
+	 || DBG_deco_He_ratio != char_I_deco_He_ratio[0] )
 		temp_DBS |= DBG_C_DGAS;
 
 	if(DBG_float_deco_distance != float_deco_distance)
@@ -1012,33 +1006,17 @@ static void best_gas_switch(void)
 //
 static void set_gas(void)
 {
-    switch(sim_gas_last_used)
-    {
-    default:
-        calc_N2_ratio = N2_ratio;   
-        calc_He_ratio = He_ratio;
-        break;
-    case 1:
-	    calc_N2_ratio = deco_N2_ratio1;
-	    calc_He_ratio = deco_He_ratio1;
-        break;
+    assert( 0 <= sim_gas_last_used && sim_gas_last_used <= 5 );
 
-    case 2:
-		calc_N2_ratio = char_I_deco_N2_ratio2 * 0.01;
-		calc_He_ratio = char_I_deco_He_ratio2 * 0.01;
-        break;
-    case 3:
-		calc_N2_ratio = char_I_deco_N2_ratio3 * 0.01;
-		calc_He_ratio = char_I_deco_He_ratio3 * 0.01;
-        break;
-    case 4:
-		calc_N2_ratio = char_I_deco_N2_ratio4 * 0.01;
-		calc_He_ratio = char_I_deco_He_ratio4 * 0.01;
-        break;
-    case 5:
-		calc_N2_ratio = char_I_deco_N2_ratio5 * 0.01;
-		calc_He_ratio = char_I_deco_He_ratio5 * 0.01;
-        break;
+    if( sim_gas_last_used == 0 )
+    {
+        calc_N2_ratio = N2_ratio;
+	    calc_He_ratio = He_ratio;
+    }
+    else
+    {
+        calc_N2_ratio = char_I_deco_N2_ratio[sim_gas_last_used-1] * 0.01;
+	    calc_He_ratio = char_I_deco_He_ratio[sim_gas_last_used-1] * 0.01;
     }
 
     assert( 0.0 <= calc_N2_ratio && calc_N2_ratio <= 0.95 );
@@ -1244,8 +1222,6 @@ void calc_hauptroutine_data_input(void)
     pres_surface        = int_I_pres_surface     * 0.001;
     N2_ratio            = char_I_N2_ratio        * 0.01;
     He_ratio            = char_I_He_ratio        * 0.01;
-    deco_N2_ratio1      = char_I_deco_N2_ratio1  * 0.01;
-    deco_He_ratio1      = char_I_deco_He_ratio1  * 0.01;
     float_deco_distance = char_I_deco_distance   * 0.01;     // Get offset is in mbar.
 
     // ____________________________________________________
@@ -2186,13 +2162,13 @@ void deco_calc_percentage(void)
 //          decoplan (char_O_deco_depth, char_O_deco_time).
 //          CF#56 == bottom deci-liters/minutes (0.5 .. 50.0)
 //          CF#57 == deco deci-liters/minutes (0.5 .. 50.0).
-// Output:  char_O_gas_volumes[0..4] in litters x 100.
+// Output:  int_O_gas_volumes[0..4] in litters * 0.1
 //
 void deco_gas_volumes(void)
 {
     overlay float volumes[5];
     overlay float ascent_usage;
-    overlay unsigned char i, j;
+    overlay unsigned char i;
     RESET_C_STACK
 
     //---- initialize with bottom consumption --------------------------------
@@ -2206,42 +2182,45 @@ void deco_gas_volumes(void)
 
     //---- Ascent usage ------------------------------------------------------
 
-    ascent_usage = read_custom_function(57) * 0.1;  // In liter/minutes.
+    ascent_usage = read_custom_function(57) * 0.1;  // In litter/minutes.
 
-    // Usage to the first stop:
-    //  - computed at mean depth (triangular integration),
+    // Usage up to the first stop:
+    //  - computed at MAX depth (easier, safer),
     //  - with an ascent speed of 10m/min.
-    //  - with ascent liter / minutes.
+    //  - with ascent litter / minutes.
     //  - still using bottom gas:
-    volumes[0] += (0.05 * (char_I_bottom_depth + char_O_first_deco_depth) + 1.0)
+    volumes[0] += (char_I_bottom_depth* 0.1 + 1.0)
                * (char_I_bottom_depth - char_O_first_deco_depth) * 0.1
                * ascent_usage;
 
     for(i=0; i<32 && char_O_deco_depth[i] > 0; ++i)
     {
+        overlay unsigned char j, gas;
         // Gas switch depth ?
-        for(j=4; j>0; --j)
+        for(gas=j=0; j<4; ++j)
         {
             if( char_O_deco_depth[i] <= char_I_deco_gas_change[j] )
-                break;
+                if( (gas == 0) || (char_I_deco_gas_change[gas] > char_I_deco_gas_change[j]) )
+                    gas = j;
         }
 
         // usage during stop:
-        volumes[j] += (char_O_deco_depth[i]*0.1 + 1.0)// Use Psurface = 1.0 bar.
-                    * char_O_deco_time[i]               // in minutes.
-                    * ascent_usage
+        // Note: because first gas is not in there, increment gas+1
+        volumes[gas+1] += (char_O_deco_depth[i]*0.1 + 1.0)// Use Psurface = 1.0 bar.
+                        * char_O_deco_time[i]               // in minutes.
+                        * ascent_usage
         // Plus usage during ascent to the next stop, at 10m/min.
-                    + (0.05*(char_O_deco_depth[i] + char_O_deco_depth[i+1]) + 1.0)
-                    * (char_O_deco_depth[i] - char_O_deco_depth[i+1]) * 0.1
-                    * ascent_usage;
+                        + (char_O_deco_depth[i]*0.1  + 1.0)
+                        * (char_O_deco_depth[i] - char_O_deco_depth[i+1]) * 0.1
+                        * ascent_usage;
     }
 
     //---- convert results for the ASM interface -----------------------------
     for(i=0; i<5; ++i)
-        if( volumes[i] > 25499.0 )
-            char_O_gas_volumes[i] = 255;
+        if( volumes[i] > 6553.4 )
+            int_O_gas_volumes[i] = 65535;
         else
-            char_O_gas_volumes[i] = (unsigned char)((volumes[i] + 99.0)*0.01);
+            int_O_gas_volumes[i] = (unsigned short)(volumes[i]*10.0 + 0.5);
 }
 
 //////////////////////////////////////////////////////////////////////////////

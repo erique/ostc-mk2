@@ -180,15 +180,19 @@ simulator_show_decoplan:
         STRCAT_PRINT    "'"		
 
 simulator_decoplan_notts:
+        ; Print ambient pressure in DEBUG compile, because if might
+        ; be usefull to calibrate decompression algorithm.
+#ifdef  __DEBUG
         movff   int_I_pres_surface+0,lo
         movff   int_I_pres_surface+1,hi
 
-        WIN_TOP .190                    ; Print Pamb used for compute
+        WIN_TOP .190
         lfsr    FSR2, letter
         bsf		leftbind
         output_16
         bcf		leftbind
         STRCAT_PRINT    " mbar"
+#endif
 
         WIN_INVERT	.1	                ; Init new Wordprocessor	
         DISPLAYTEXT	.188		        ; Sim. Results:
@@ -213,7 +217,7 @@ simulator_show_decoplan3:
 	bra		simulator_show_decoplan4	; Quit display
 
 	btfsc	switch_left
-	bra		simulator_show_decoplan5	; Quit display or new Decoplan-Page (GF Mode only)
+	bra		simulator_show_decoplan5	; Next decoplan-page.
 
 	btfsc	sleepmode
 	goto	more_menu
@@ -232,8 +236,64 @@ simulator_show_decoplan5:
 	bra		simulator_show_decoplan1	
 
 simulator_show_decoplan5_0:
+    btfss   display_see_deco
+    bra     simulator_show_decoplan4
 	bcf		display_see_deco			; clear flag
-	bra		simulator_show_decoplan4	; Quit
+   
+    call    deco_gas_volumes
+    movlb   1
+
+    call    PLED_clear_divemode_menu    ; Clear right part.
+
+	movlw	d'10'
+	movwf	waitms_temp                 ; Row for gas list is .10+.25
+	clrf	wait_temp                   ; Gas counter
+    lfsr	FSR0,int_O_gas_volumes      ; Initialize indexed addressing.
+
+	WIN_LEFT	.90                     ; Set column
+
+simulator_show_decoplan5_loop:
+    incf    wait_temp,F                 ; Increment gas #
+    
+	movlw	.25
+	addwf	waitms_temp,F		        ; Increase row position
+	movff	waitms_temp,win_top         ; Set Row
+
+    movff   POSTINC0,lo                 ; Read (16bit) result, low first,
+    movff   POSTINC0,hi                 ; then high.
+    movf    lo,W                        ; Null ?
+    iorwf   hi,W
+    bz      simulator_show_decoplan5_1  ; Skip printing.
+
+    movf    lo,W                        ; == 65535 (saturated ?)
+    iorwf   hi,W
+    incf    WREG
+    bnz     simulator_show_decoplan5_2
+    call    PLED_warnings_color
+    STRCPY  "> "
+    bra     simulator_show_decoplan5_3
+    
+simulator_show_decoplan5_2: 
+    call    PLED_standard_color   
+    STRCPY  "= "
+
+simulator_show_decoplan5_3:    
+    output_16dp .4                      ; 1 decimal.
+    call    word_processor              ; No unit: can be bars or litters.
+    
+    ; Loop for all 5 gas
+simulator_show_decoplan5_1:
+	movlw	d'5'                        ; list all five gases
+	cpfseq	wait_temp                   ; All gases shown?
+	bra		simulator_show_decoplan5_loop	; No
+	
+	WIN_TOP  .2
+	WIN_LEFT .0
+	WIN_INVERT 1
+	STRCPY_PRINT "Gas usage:  "
+	WIN_INVERT 0
+
+	bra		simulator_show_decoplan1		
 
 simulator_show_decoplan4:
 	movlw	d'5'
@@ -247,7 +307,10 @@ simulator_calc_deco:
 	bsf		simulatormode_active			; normal simulator mode
 	bsf		standalone_simulator			; Standalone Simulator active
 
-	movff	logbook_temp1,logbook_temp3		; store bottom time.
+    ; Save dive parameters for gas volume estimation:
+    movff   logbook_temp2,char_I_bottom_depth
+    movff   logbook_temp1,char_I_bottom_time
+
 
 	movff	logbook_temp2,xA+0              ; Bottom depth. 
 	clrf	xA+1
@@ -336,9 +399,8 @@ simulator_calc_deco2:
 	
 	movlw	d'5'                            ; Pre-Set Cursor to "Show Decoplan"
 	movwf	menupos
-	movff	logbook_temp3,logbook_temp1     ; restore bottom time.
+	movff	char_I_bottom_time,logbook_temp1; restore bottom time.
 	bra     menu_simulator1                 ; Done.
-
 
 simulator_save_tissue_data:
 	bsf		restore_deco_data		; Set restore flag

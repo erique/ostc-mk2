@@ -307,54 +307,54 @@ calc_deko_divemode:
 divemode_check_decogases:					; CALLed from Simulator
 ; Copy active gases to char_I_deco_N2_ratio and char_I_deco_He_ratio
 	read_int_eeprom		d'97'			; Read He ratio
-	movff	EEDATA,char_I_deco_He_ratio5	; And copy into hold register
+	movff	EEDATA,char_I_deco_He_ratio+4	; And copy into hold register
 	read_int_eeprom		d'96'			; Read O2 ratio
-	movff	char_I_deco_He_ratio5, wait_temp			; copy into bank1 register
+	movff	char_I_deco_He_ratio+4, wait_temp			; copy into bank1 register
 	bsf		STATUS,C					; 
 	movlw	d'100'						; 100%
 	subfwb	wait_temp,W					; minus He
 	subfwb	EEDATA,F					; minus O2
-	movff	EEDATA, char_I_deco_N2_ratio5; = N2!
+	movff	EEDATA, char_I_deco_N2_ratio+4; = N2!
 
 	read_int_eeprom		d'101'			; Read He ratio
-	movff	EEDATA,char_I_deco_He_ratio4	; And copy into hold register
+	movff	EEDATA,char_I_deco_He_ratio+3	; And copy into hold register
 	read_int_eeprom		d'100'			; Read O2 ratio
-	movff	char_I_deco_He_ratio4, wait_temp			; copy into bank1 register
+	movff	char_I_deco_He_ratio+3, wait_temp			; copy into bank1 register
 	bsf		STATUS,C					; 
 	movlw	d'100'						; 100%
 	subfwb	wait_temp,W					; minus He
 	subfwb	EEDATA,F					; minus O2
-	movff	EEDATA, char_I_deco_N2_ratio4; = N2!
+	movff	EEDATA, char_I_deco_N2_ratio+3; = N2!
 
 	read_int_eeprom		d'105'			; Read He ratio
-	movff	EEDATA,char_I_deco_He_ratio3	; And copy into hold register
+	movff	EEDATA,char_I_deco_He_ratio+2	; And copy into hold register
 	read_int_eeprom		d'104'			; Read O2 ratio
-	movff	char_I_deco_He_ratio3, wait_temp			; copy into bank1 register
+	movff	char_I_deco_He_ratio+2, wait_temp			; copy into bank1 register
 	bsf		STATUS,C					; 
 	movlw	d'100'						; 100%
 	subfwb	wait_temp,W					; minus He
 	subfwb	EEDATA,F					; minus O2
-	movff	EEDATA, char_I_deco_N2_ratio3; = N2!
+	movff	EEDATA, char_I_deco_N2_ratio+2; = N2!
 
 	read_int_eeprom		d'109'			; Read He ratio
-	movff	EEDATA,char_I_deco_He_ratio2	; And copy into hold register
+	movff	EEDATA,char_I_deco_He_ratio+1	; And copy into hold register
 	read_int_eeprom		d'108'			; Read O2 ratio
-	movff	char_I_deco_He_ratio2, wait_temp			; copy into bank1 register
+	movff	char_I_deco_He_ratio+1, wait_temp			; copy into bank1 register
 	bsf		STATUS,C					; 
 	movlw	d'100'						; 100%
 	subfwb	wait_temp,W					; minus He
 	subfwb	EEDATA,F					; minus O2
-	movff	EEDATA, char_I_deco_N2_ratio2; = N2!
+	movff	EEDATA, char_I_deco_N2_ratio+1; = N2!
 
 	read_int_eeprom		d'113'			; Read He ratio
-	movff	EEDATA,char_I_deco_He_ratio1; And copy into hold register
+	movff	EEDATA,char_I_deco_He_ratio+0; And copy into hold register
 	read_int_eeprom		d'112'			; Read O2 ratio
-	movff	char_I_deco_He_ratio1, wait_temp			; copy into bank1 register
+	movff	char_I_deco_He_ratio+0, wait_temp			; copy into bank1 register
 	bsf		STATUS,C					; 
 	movlw	d'100'						; 100%
 	subfwb	wait_temp,W					; minus He
 	subfwb	EEDATA,F					; minus O2
-	movff	EEDATA, char_I_deco_N2_ratio1; = N2!
+	movff	EEDATA, char_I_deco_N2_ratio+0; = N2!
 
 ; Now, set change depth. Inactive gases have depth=0!
 	read_int_eeprom		d'118'				; read gas_change_depth Gas1
@@ -384,21 +384,21 @@ divemode_check_decogases:					; CALLed from Simulator
 
 ; Debugger
 ;	call	enable_rs232	
-;	movff	char_I_deco_He_ratio5,TXREG
+;	movff	char_I_deco_He_ratio+4,TXREG
 ;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio5,TXREG
+;	movff	char_I_deco_N2_ratio+4,TXREG
 ;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_He_ratio4,TXREG
+;	movff	char_I_deco_He_ratio+3,TXREG
 ;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio4,TXREG
+;	movff	char_I_deco_N2_ratio+3,TXREG
 ;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_He_ratio3,TXREG
+;	movff	char_I_deco_He_ratio+2,TXREG
 ;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio3,TXREG
+;	movff	char_I_deco_N2_ratio+2,TXREG
 ;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_He_ratio2,TXREG
+;	movff	char_I_deco_He_ratio+1,TXREG
 ;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio2,TXREG
+;	movff	char_I_deco_N2_ratio+1,TXREG
 ;	call	rs232_wait_tx				; wait for UART
 ;	movff	char_I_deco_He_ratio,TXREG
 ;	call	rs232_wait_tx				; wait for UART

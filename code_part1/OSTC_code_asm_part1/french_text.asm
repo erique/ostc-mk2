@@ -244,8 +244,8 @@
     TCODE    .40,   .35,     "Aff.Tiss.Direct"           ;175 Show Lead.Tiss.
     TCODE    .40,   .35,     "Ordre paliers  "           ;176 Shallow stop 1st   (Reverse order of deco plans)
     TCODE    .40,   .35,     "Chang. gaz[min]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
-    TCODE    .40,   .35,     "not used       "           ;178 not used
-    TCODE    .40,   .35,     "not used       "           ;179 not used
+    TCODE    .40,   .35,     "ConsoFond[l/mn]"           ;178 BottomGas[l/mn]   (Bottom gas usage, for volume estimation).
+    TCODE    .40,   .35,     "ConsoDeco[l/mn]"           ;179 AscentGas[l/mn]   (Ascent+Deco gas usage)
     TCODE    .40,   .35,     "not used       "           ;180 not used
     TCODE    .40,   .35,     "not used       "           ;181 not used
     TCODE    .40,   .35,     "not used       "           ;182 not used

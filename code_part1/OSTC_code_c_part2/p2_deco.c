@@ -890,7 +890,7 @@ static void deepest_gas_switch(void)
         // sim_gas_last_used: used to detect just once in each ascent simu.
         // N2_ratio         : used to detect when already breathing that gas.
         if( temp_depth_limit != switch_deco
-         && sim_gas_last_used < temp_gas_switch
+         && sim_gas_last_used != temp_gas_switch
          && sim_gas_delay <= sim_dive_mins )
         {
             sim_gas_last_used = temp_gas_switch;
@@ -943,7 +943,7 @@ static void best_gas_switch(void)
         // Should restart gas-switch delay only when gas do changes...
         // sim_gas_last_used: used to detect just once in each ascent simu.
         // N2_ratio         : used to detect when already breathing that gas.
-        if( sim_gas_last_used < temp_gas_switch
+        if( sim_gas_last_used != temp_gas_switch
          && sim_gas_delay <= sim_dive_mins )
         {
             sim_gas_last_used = temp_gas_switch;

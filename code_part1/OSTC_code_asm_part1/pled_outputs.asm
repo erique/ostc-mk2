@@ -2290,7 +2290,7 @@ PLED_divemode_set_xgas:				; Displayes the "Set Gas" menu
 	WIN_FONT	FT_SMALL
 	call	PLED_standard_color
 
-    STRCPY  "Sel"
+    STRCPY  "G6:"
 	read_int_eeprom	d'24'			; Get Gas6 %O2
 	movff	EEDATA,lo
 	bcf		leftbind

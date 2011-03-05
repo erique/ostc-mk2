@@ -22,7 +22,7 @@
 ; ToDo:
 
 #DEFINE	softwareversion_x		d'1'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'83'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'84'		; Software version  XX.YY
 
 #DEFINE softwareversion_beta 	1 			; (and 0 for release) 
 

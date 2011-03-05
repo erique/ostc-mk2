@@ -186,7 +186,7 @@
     TCODE    .0,    .36,     "PlusBas le :"              ;119 Lowest at:
     TCODE    .0,    .45,     "Tmin:"                     ;120 Tmin:
     TCODE    .0,    .54,     "Tmax:"                     ;121 Tmax:
-    TCODE    .100,  .125,    "Gaz 6.."                   ;122 Gas 6..
+    TCODE    .100,  .125,    "Suite"                   	 ;122 More (Gaslist)
     TCODE    .100,  .25,     "O2 +"                      ;123 O2 +
     TCODE    .100,  .50,     "O2 -"                      ;124 O2 -
     TCODE    .100,  .75,     "He +"                      ;125 He +

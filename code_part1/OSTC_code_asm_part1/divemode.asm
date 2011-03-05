@@ -1518,7 +1518,7 @@ calc_average_depth:
 	movf	divesecs,W
 	addwf	xC+0,F
 	movlw	d'0'
-	addwfc	xC+1,F
+	addwfc	xC+1,F					; xC:2 holds total dive seconds
 	movlw	d'3'					; 2+1
 	btfss	divesecs,0				; divesecs even?
 	movlw	d'2'					; Yes, do not add +1

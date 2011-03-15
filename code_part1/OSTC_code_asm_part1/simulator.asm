@@ -268,8 +268,8 @@ simulator_show_decoplan5_4:
     call    deco_gas_volumes
     movlb   1
 
-    ; Display results
-    call    PLED_clear_divemode_menu    ; Clear right part.
+    ; Clear the complete stop result column:
+    WIN_BOX_BLACK   .0, .239, .82, .160		;top, bottom, left, right
 
 	movlw	d'10'
 	movwf	waitms_temp                 ; Row for gas list is .10+.25

@@ -97,12 +97,13 @@ surfloop3:
 	call	PLED_custom_text			; Displays custom text
 	clrf	cf_checker_counter			; next cf to check
 	ostc_debug	'G'						; Sends debug-information to screen if debugmode active
+
+    ; Desaturation time needs:
+    ;   int_I_pres_surface
+    ;   char_I_desaturation_multiplier
 	GETCUSTOM8	d'12'					; Desaturation multiplier %
-	movwf	wait_temp
-	movff	wait_temp,char_I_desaturation_multiplier
-	GETCUSTOM8	d'11'					; Saturation multiplier %
-	movwf	wait_temp
-	movff	wait_temp,char_I_saturation_multiplier
+	movff	WREG,char_I_desaturation_multiplier
+
 	call	deco_calc_desaturation_time ; calculate desaturation time
 	movlb	b'00000001'					; select ram bank 1
 	ostc_debug	'H'						; Sends debug-information to screen if debugmode active
@@ -118,7 +119,6 @@ surfloop_loop:
 ; One Second tasks for ppO2 modes
 
 	bra		surfloop_loop1				; Do not search for sensor in CC mode
-
 
 surfloop_loop1:
 ; One Second tasks for all modes

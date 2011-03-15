@@ -98,7 +98,7 @@
 #include "shared_definitions.h"
 
 // Water vapour partial pressure in the lumb.
-static const float ppWVapour = 0.0627;
+#define ppWVapour 0.0627
 
 // *************************
 // ** P R O T O T Y P E S **
@@ -1782,6 +1782,8 @@ static void calc_gradient_factor(void)
 //
 // FIXED N2_ratio
 // unchanged in v.101
+// Inputs:  int_I_pres_surface, ppWVapour, char_I_desaturation_multiplier
+// Outputs: int_O_desaturation_time, char_O_tissue_saturation[0..31]
 //
 void deco_calc_desaturation_time(void)
 {
@@ -1792,12 +1794,15 @@ void deco_calc_desaturation_time(void)
     overlay float temp4;
     RESET_C_STACK
 
+    assert( 800 < int_I_pres_surface && int_I_pres_surface < 1100 );
+    assert( 0 < char_I_desaturation_multiplier && char_I_desaturation_multiplier <= 100 );
+
     N2_ratio = 0.7902; // FIXED sum as stated in b"uhlmann
-    pres_surface = (float)int_I_pres_surface / 1000.0;
+    pres_surface = int_I_pres_surface * 0.001;
     ppO2 = N2_ratio * (pres_surface - ppWVapour);
     int_O_desaturation_time = 0;
     float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
-    
+
     for (ci=0;ci<16;ci++)
     {
         overlay float var_N2_halftime = buhlmann_ht[ci];
@@ -1813,8 +1818,8 @@ void deco_calc_desaturation_time(void)
         temp2 = ppO2 - pres_tissue[ci];
         if (temp2 >= 0.0)
         {
-            temp1 = 0;
-            temp2 = 0;
+            temp1 = 0.0;
+            temp2 = 0.0;
         }
         else
             temp1 = temp1 / temp2;
@@ -1828,16 +1833,16 @@ void deco_calc_desaturation_time(void)
         }
         else
         {
-            temp1 = 0;
-            temp2 = 0;
+            temp1 = 0.0;
+            temp2 = 0.0;
         }
 
         // He
         temp3 = 0.1 - (pres_tissue+16)[ci];
         if (temp3 >= 0.0)
         {
-            temp3 = 0;
-            temp4 = 0;
+            temp3 = 0.0;
+            temp4 = 0.0;
         }
         else
             temp3 = -1.0 * temp3 / (pres_tissue+16)[ci];
@@ -1851,8 +1856,8 @@ void deco_calc_desaturation_time(void)
     	}
         else
     	{
-        	temp3 = 0;
-        	temp4 = 0;
+        	temp3 = 0.0;
+        	temp4 = 0.0;
     	}
 
         // saturation_time (for flight)
@@ -1871,6 +1876,7 @@ void deco_calc_desaturation_time(void)
         if (temp2 > 255.0)
             temp2 = 255.0;
         char_O_tissue_saturation[ci] = (char)temp2;
+
         // He saturation in multiples of halftime for display purposes
         temp4 = temp3 * 20.0;  // 0 = 1/8, 120 = 0, 249 = 8
         temp4 = temp4 + 80.0; // set center
@@ -1898,9 +1904,9 @@ static void calc_wo_deco_step_1_min(void)
 	}
 
     N2_ratio = 0.7902; // FIXED, sum lt. buehlmann
-    pres_respiration = int_I_pres_respiration * 0.001; // assembler code uses different digit system
-    pres_surface = int_I_pres_surface * 0.001;  // the b"uhlmann formula using pres_surface does not use the N2_ratio
-    ppO2 = N2_ratio * (pres_respiration - ppWVapour); // ppWVapour is the extra pressure in the body
+    pres_respiration = int_I_pres_respiration * 0.001;  // assembler code uses different digit system
+    pres_surface = int_I_pres_surface * 0.001;          // the b"uhlmann formula using pres_surface does not use the N2_ratio
+    ppO2 = N2_ratio * (pres_respiration - ppWVapour);   // ppWVapour is the extra pressure in the body
     ppHe = 0.0;
     float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
     float_saturation_multiplier   = char_I_saturation_multiplier   * 0.01;

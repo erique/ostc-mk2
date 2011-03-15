@@ -491,8 +491,10 @@ store_dive_data:						; CF20 seconds gone
 	bcf		store_sample				; update only any CF20 seconds
 	bsf		update_divetime				; update divemins every CF20 seconds
 
-	btfsc	simulatormode_active		; Are we in simulator mode?
-	return								; Yes, discard everything
+    ifndef __DEBUG
+    	btfsc	simulatormode_active    ; Are we in simulator mode?
+    	return                          ; Yes, discard everything
+    endif
 
 	btfsc	header_stored				; Header already stored?
 	bra		store_dive_data2			; Yes, store only profile data
@@ -1019,8 +1021,11 @@ end_dive:
 	btfss	realdive					; dive longer then one minute
 	goto	end_dive_common				; No, discard everything
 
-	btfsc	simulatormode_active		; Are we in simulator mode?
-	goto	end_dive_common				; Yes, discard everything
+; In DEBUG compile, keep all simulated dives in logbook, Desat time, nofly, etc...
+    ifndef __DEBUG
+    	btfsc	simulatormode_active		; Are we in simulator mode?
+    	goto	end_dive_common				; Yes, discard everything
+    endif
 
 	; Dive finished (and longer then one minute or Apnoe timeout occured)
 
@@ -1291,8 +1296,10 @@ timeout_divemode:
 	btfsc	FLAG_apnoe_mode				; In Apnoe mode?
 	bra		timeout_divemode2			; Yes, use CF30 [min] for timeout
 
-	btfsc	simulatormode_active		; In Simulator mode?
-	bra		timeout_divemode3			; Yes, use fixed 5 seconds timeout			
+    ifndef __DEBUG
+    	btfsc	simulatormode_active    ; In Simulator mode?
+    	bra		timeout_divemode3       ; Yes, use fixed 5 seconds timeout			
+    endif
 	
 	bcf		divemode
 	incf	timeout_counter,F

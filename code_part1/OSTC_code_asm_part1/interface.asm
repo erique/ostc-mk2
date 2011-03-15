@@ -48,8 +48,7 @@ reset_decodata:
 	call		deco_clear_CNS_fraction			; clear CNS
 	movlb		b'00000001'						; select ram bank 1
 
-	movlw		d'1'
-	movwf		nofly_time+0				; Clear nofly time
+	clrf		nofly_time+0				; Clear nofly time
 	clrf		nofly_time+1				; Clear nofly time
 
 	movlw		'h'							; send echo

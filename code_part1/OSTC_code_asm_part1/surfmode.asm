@@ -227,18 +227,20 @@ update_surfloop60_2:
 	return
 
 nofly_timeout60:
-	bsf		nofly_active					; Set flag
+    movf    nofly_time+0,W              ; Is nofly null ?
+    iorwf   nofly_time+1,W
+    bnz     nofly_timeout60_1           ; No...
+    
+	bcf		nofly_active                ; Clear flag
+	bcf		LED_blue                    ; Clear led.
+	return
+
+nofly_timeout60_1:
+	bsf		nofly_active                ; Set flag
 	movlw	d'1'
 	subwf	nofly_time+0,F
 	movlw	d'0'
-	subwfb	nofly_time+1,F					; reduce by one
-	tstfsz	nofly_time+0					; =0?
-	return			
-	tstfsz	nofly_time+1					; =0?
-	return
-	bcf		nofly_active					; Clear flag
-	bcf		LED_blue
-	incf	nofly_time+0,F					; =1
+	subwfb	nofly_time+1,F              ; reduce by one
 	return
 
 calc_surface_interval:

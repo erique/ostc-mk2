@@ -437,19 +437,22 @@ simulator_save_tissue_data:
 	return
 
 simulator_restore_tissue_data:
-	bcf		restore_deco_data		; clear restore flag
-	ostc_debug	'S'							; Sends debug-information to screen if debugmode active
+	bcf		restore_deco_data           ; clear restore flag
+	ostc_debug	'S'                     ; Sends debug-information to screen if debugmode active
 	call	deco_pull_tissues_from_vault
 	movlb	0x01						; Back to RAM Bank1
-	ostc_debug	'T'							; Sends debug-information to screen if debugmode active
+	ostc_debug	'T'                     ; Sends debug-information to screen if debugmode active
 
 	ostc_debug	'G'		; Sends debug-information to screen if debugmode active
 	call	deco_calc_desaturation_time	; calculate desaturation time
-	movlb	b'00000001'						; select ram bank 1
-	call	calculate_noflytime				; Calc NoFly time
+	movlb	b'00000001'                 ; select ram bank 1
+	
+	; Note: should not reset nofly-time here: the true value have continued to be decremented
+	;       during simulation, which is the right thing to do...
 	ostc_debug	'H'		; Sends debug-information to screen if debugmode active
 
 	; Calculate CNS	
-	call	deco_calc_CNS_fraction		; calculate CNS
-	movlb	b'00000001'					; rambank 1 selected
+	call	deco_calc_CNS_fraction      ; calculate CNS
+	movlb	b'00000001'                 ; rambank 1 selected
+
 	return

@@ -370,8 +370,7 @@ reset_all_cf:
 	write_int_eeprom	d'37'		; reset mix2 to ppO2=1.00Bar
 	write_int_eeprom	d'38'		; reset mix3 to ppO2=1.00Bar
 
-	movlw	d'1'
-	movwf	nofly_time+0			; Clear nofly time
+	clrf	nofly_time+0			; Clear nofly time
 	clrf	nofly_time+1			; Clear nofly time
 
 reset_all_cf_bank0:

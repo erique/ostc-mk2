@@ -1,10 +1,10 @@
 New in 1.84 beta:
 BETA Version - Do NOT use for diving!
+BUGFIX: NoFly time should not be reseted after dive simulation.
 
 New in 1.83 beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: gas switch
-BUGFIX: NoFly time
 NEW: De/Activate gases underwater (Gaslist -> More -> Actve?)
 NEW: Gas Consumption caluculation in offline simulator (After Decoplan)
 NEW: CF56 Bottom gas usage (l/min or bar/min) (For Simulator)

@@ -41,11 +41,10 @@ clear_rambank:
 	call	disable_rs232			; disable UART module
 	call	RTCinit					; reset RTC
 
-; Extra power-up reset jDG jDG jDG jDG
+; Extra power-up reset (JeanDo)
 	ifdef	TESTING
 		call 	do_menu_reset_all2
 	endif
-; DONE jDG jDG jDG jDG
 
 ; Air pressure compensation	after reset
 	call	get_calibration_data	; Get calibration data from pressure sensor
@@ -72,7 +71,6 @@ wait_start_pressure:
 	movff	amb_pressure+1,last_surfpressure_30min+1	; Rests all airpressure registers
 
 ; reset deco data
-	incf	nofly_time+0,F					; =1
 	clrf	WREG                            ; Use as buffer
 	movff	WREG,char_I_He_ratio            ; No He at the Surface
 	movlw	d'79'							; 79% N2

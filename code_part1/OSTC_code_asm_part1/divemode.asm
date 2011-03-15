@@ -984,9 +984,10 @@ calculate_noflytime:
 	bra		calculate_noflytime2
 	tstfsz	xA+1			; Desat=0?
 	bra		calculate_noflytime2
+
+calculate_noflytime_3:	
 	; Desaturation time = zero
-	movlw	d'1'
-	movwf	nofly_time+0			; Clear nofly time
+	clrf	nofly_time+0			; Clear nofly time
 	clrf	nofly_time+1			; Clear nofly time
 	bcf		nofly_active			; Clear flag
 	return
@@ -1006,12 +1007,8 @@ calculate_noflytime2:
 	bra		calculate_noflytime_2_final
 	tstfsz	xA+1			; Desat=0?
 	bra		calculate_noflytime_2_final
-	; noflytime = zero
-	movlw	d'1'
-	movwf	nofly_time+0			; Clear nofly time
-	clrf	nofly_time+1			; Clear nofly time
-	bcf		nofly_active			; Clear flag
-	return
+	bra     calculate_noflytime_3
+
 calculate_noflytime_2_final:
 	movff	xA+0,nofly_time+0
 	movff	xA+1,nofly_time+1
@@ -1035,21 +1032,20 @@ end_dive:
 	movff	last_surfpressure_30min+1,int_I_pres_respiration+1		; 30min old values 
 
 	GETCUSTOM8	d'12'				; Desaturation multiplier %
-	movwf	wait_temp
-	movff	wait_temp,char_I_desaturation_multiplier
+	movff	WREG,char_I_desaturation_multiplier
 
 	ostc_debug	'G'		; Sends debug-information to screen if debugmode active
 	call	deco_calc_desaturation_time	; calculate desaturation time
-	movlb	b'00000001'						; select ram bank 1
-	rcall	calculate_noflytime				; Calc NoFly time
-	ostc_debug	'H'		; Sends debug-information to screen if debugmode active
+	movlb	b'00000001'                 ; select ram bank 1
+	rcall	calculate_noflytime         ; Calc NoFly time
+	ostc_debug	'H'                     ; Sends debug-information to screen if debugmode active
 										; store header and ...
 	movlw	0xFD						; .... End-of-Profile Bytes
 	call	write_external_eeprom
 	movlw	0xFD
 	call	write_external_eeprom
 	movlw	0xFE						; This positon will be overwritten for the next profile
-	call	write_external_eeprom			; and is required to find the newest dive after a firmware reset
+	call	write_external_eeprom       ; and is required to find the newest dive after a firmware reset
 
 	movff	eeprom_header_address+0, eeprom_address+0	; set header adress
 	movff	eeprom_header_address+1, eeprom_address+1	; write header
@@ -1058,9 +1054,9 @@ end_dive:
 	call	write_external_eeprom
 	movlw	0xFA
 	call	write_external_eeprom
-	movlw	logbook_profile_version			; Defined in definitions_vxyy.asm
+	movlw	logbook_profile_version     ; Defined in definitions_vxyy.asm
 	call	write_external_eeprom
-	movf	month,W					; Date
+	movf	month,W                     ; Date
 	call	write_external_eeprom
 	movf	day,W
 	call	write_external_eeprom

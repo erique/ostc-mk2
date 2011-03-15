@@ -1708,8 +1708,7 @@ PLED_desaturation_time2:
 PLED_nofly_time:	
 	movff		nofly_time+0,lo			
 	movff		nofly_time+1,hi					; Copy
-	movlw		d'1'	
-	cpfseq		lo								; =1?
+	tstfsz		lo								; =0?
 	bra			PLED_nofly_time2				; No!
 	tstfsz		hi								; =0?
 	bra			PLED_nofly_time2				; No!

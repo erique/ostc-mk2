@@ -235,11 +235,16 @@ simulator_show_decoplan5:
 	call	PLED_decoplan               ; Re-Draw Current page of GF Decoplan
 	bra		simulator_show_decoplan1	
 
-simulator_show_decoplan5_0:
-    btfss   display_see_deco
-    bra     simulator_show_decoplan4
+;---- In OCR mode, show the gas Usage special page ---------------------------
+simulator_show_decoplan5_0:    
+    btfss   display_see_deco            ; Already displayed ?
+    bra     simulator_show_decoplan4    ; Exit to menu.
+
 	bcf		display_see_deco			; clear flag
    
+    btfsc   FLAG_const_ppO2_mode        ; In CCR mode ?
+    bra     simulator_show_decoplan4    ; YES: finished.
+
    ; Re-read gas change depth, from the unsorted list.
     movlw   .27                         ; Active flags.
     movwf   EEADR
@@ -313,10 +318,8 @@ simulator_show_decoplan5_1:
 	cpfseq	wait_temp                   ; All gases shown?
 	bra		simulator_show_decoplan5_loop	; No
 	
-	WIN_TOP  .2
-	WIN_LEFT .0
 	WIN_INVERT 1
-	STRCPY_PRINT "Gas usage:  "
+	DISPLAYTEXTH .301                   ; OCR Gas Usage:
 	WIN_INVERT 0
 
 	bra		simulator_show_decoplan1		

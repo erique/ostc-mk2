@@ -380,8 +380,9 @@
 	TCODE    .20,   .125,    "Show raw data"             ;295 Show raw data
 	TCODE    .50,    .2,     "Raw Data:"                 ;296 Raw Data:
 ; Gas-setup addons:
-    TCODE    .0,    .0,      "MOD:"                      ; 297 MOD:                 (max operating depth of a gas).
-    TCODE    .0,    .0,      "END:"                      ; 298 END:                 (equivalent nitrogen depth of a gas).
-    TCODE    .0,    .0,      "EAD:"                      ; 299 EAD:                 (equivalent air depth of a gas).
-	TCODE	 .100,	.125,	 "Active?"					 ; 300 Active? 				(Enable/Disable Gas underwater)
+    TCODE    .0,    .0,      "MOD:"                      ;297 MOD:                  (max operating depth of a gas).
+    TCODE    .0,    .0,      "END:"                      ;298 END:                  (equivalent nitrogen depth of a gas).
+    TCODE    .0,    .0,      "EAD:"                      ;299 EAD:                  (equivalent air depth of a gas).
+	TCODE	 .100,	.125,	 "Active?"					 ;300 Active?               (Enable/Disable Gas underwater)
+	TCODE    .0,    .2,      "OCR Gas Usage:"            ;301 OCR Gas Usage:        (Planned gas consumtion by tank).
 ;=============================================================================

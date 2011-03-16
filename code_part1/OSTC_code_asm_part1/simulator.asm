@@ -309,7 +309,9 @@ simulator_show_decoplan5_2:
     STRCPY  "= "
 
 simulator_show_decoplan5_3:    
+    bsf     leftbind
     output_16dp .4                      ; 1 decimal.
+    bcf     leftbind
     call    word_processor              ; No unit: can be bars or litters.
     
     ; Loop for all 5 gas

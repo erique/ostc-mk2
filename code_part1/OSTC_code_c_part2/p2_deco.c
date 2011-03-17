@@ -2132,6 +2132,7 @@ void deco_calc_percentage(void)
 // Input:   char_I_bottom_depth, char_I_bottom_time for planned dive.
 ///         Gas list. First gas is the bottom gas.
 //          decoplan (char_O_deco_depth, char_O_deco_time).
+//          CF#54 == TRUE if shallowest stop first.
 //          CF#56 == bottom deci-liters/minutes (0.5 .. 50.0)
 //          CF#57 == deco deci-liters/minutes (0.5 .. 50.0).
 // Output:  int_O_gas_volumes[0..4] in litters * 0.1
@@ -2140,7 +2141,7 @@ void deco_gas_volumes(void)
 {
     overlay float volumes[5];
     overlay float ascent_usage;
-    overlay unsigned char i;
+    overlay unsigned char i, deepest_first;
     RESET_C_STACK
 
     //---- initialize with bottom consumption --------------------------------
@@ -2154,36 +2155,59 @@ void deco_gas_volumes(void)
 
     //---- Ascent usage ------------------------------------------------------
 
-    ascent_usage = read_custom_function(57) * 0.1;  // In litter/minutes.
+    deepest_first = read_custom_function(54) == 0;
+    ascent_usage  = read_custom_function(57) * 0.1;  // In litter/minutes.
 
     // Usage up to the first stop:
     //  - computed at MAX depth (easier, safer),
     //  - with an ascent speed of 10m/min.
     //  - with ascent litter / minutes.
     //  - still using bottom gas:
-    volumes[0] += (char_I_bottom_depth* 0.1 + 1.0)
-               * (char_I_bottom_depth - char_O_first_deco_depth) * 0.1
-               * ascent_usage;
+    volumes[0] += (char_I_bottom_depth*0.1 + 1.0)   // Depth -> bar
+               * (char_I_bottom_depth - char_O_first_deco_depth) * 0.1  // ascent time (min)
+               * ascent_usage;                      // Consumption ( xxx / min @ 1 bar)
 
-    for(i=0; i<32 && char_O_deco_depth[i] > 0; ++i)
+    for(i=0; i<32; ++i)
     {
         overlay unsigned char j, gas;
+        overlay unsigned char depth, time, ascent;
+
+        // Manage stops in reverse order (CF#54)
+        if( deepest_first )
+        {
+            time   = char_O_deco_time[i];
+            if( time == 0 ) break;          // End of table: done.
+
+            ascent = depth  = char_O_deco_depth[i];
+            if( i < 31 )
+                ascent -= char_O_deco_depth[i+1];
+        }
+        else
+        {
+            time = char_O_deco_time[31-i];
+            if( time == 0 ) continue;       // not yet: still searh table.
+
+            ascent = depth = char_O_deco_depth[31-i];
+            if( i < 31 )
+                ascent -= char_O_deco_depth[30-i];
+        }
+
         // Gas switch depth ?
         for(gas=j=0; j<5; ++j)
         {
-            if( char_O_deco_depth[i] <= char_I_deco_gas_change[j] )
+            if( depth <= char_I_deco_gas_change[j] )
                 if( (gas == 0) || (char_I_deco_gas_change[gas] > char_I_deco_gas_change[j]) )
                     gas = j;
         }
 
         // usage during stop:
         // Note: because first gas is not in there, increment gas+1
-        volumes[gas] += (char_O_deco_depth[i]*0.1 + 1.0)// Use Psurface = 1.0 bar.
-                      * char_O_deco_time[i]               // in minutes.
-                      * ascent_usage
+        volumes[gas] += (depth*0.1 + 1.0)   // depth --> bar.
+                      * time                // in minutes.
+                      * ascent_usage        // in xxx / min @ 1bar.
         // Plus usage during ascent to the next stop, at 10m/min.
-                      + (char_O_deco_depth[i]*0.1  + 1.0)
-                      * (char_O_deco_depth[i] - char_O_deco_depth[i+1]) * 0.1
+                      + (depth*0.1  + 1.0)
+                      * ascent*0.1          // meter --> min
                       * ascent_usage;
     }
 

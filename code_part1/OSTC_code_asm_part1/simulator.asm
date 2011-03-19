@@ -130,11 +130,6 @@ simulator_startdive:
 	movlw	HIGH	d'1000'
 	addwfc	xC+1,F							; add 1000mBar
 
-;	movf	amb_pressure+0,W
-;	addwf	xC+0,F
-;	movf	amb_pressure+1,W
-;	addwfc	xC+1,F							; Add ambient pressure
-;	
 	movff	xC+0,sim_pressure+0
 	movff	xC+1,sim_pressure+1
 	

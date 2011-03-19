@@ -166,7 +166,7 @@ static unsigned char	ci;
 static float 			pres_respiration;
 static float			pres_surface;
 static float			temp_deco;
-static float			ppO2;
+static float			ppN2;
 static float			ppHe;
 static float			temp_tissue;
 static float			N2_ratio;       // Breathed gas nitrogen ratio.
@@ -646,7 +646,7 @@ static void calc_nextdecodepth(void)
 	{
         // Recompute leading gas limit, at current depth:
         overlay float depth = (temp_deco - pres_surface) / 0.09995;
-        assert( depth >= 0.0 );
+        assert( depth >= -0.01 );       // -epsilon tolerance.
         assert( low_depth < 255 );
 
         if( depth > low_depth )
@@ -1006,7 +1006,7 @@ static void set_gas(void)
 //        temp_deco : simulated respiration pressure + security offset (deco_distance)
 //        Water-vapor pressure inside lumbs (ppWVapour).
 //
-// Output: ppO2, ppHe.
+// Output: ppN2, ppHe.
 //
 static void sim_alveolar_presures(void)
 {
@@ -1031,15 +1031,15 @@ static void sim_alveolar_presures(void)
 
     if( deco_diluent > ppWVapour )
     {
-        ppO2 = calc_N2_ratio * (deco_diluent - ppWVapour);
+        ppN2 = calc_N2_ratio * (deco_diluent - ppWVapour);
         ppHe = calc_He_ratio * (deco_diluent - ppWVapour);
     }
     else
     {
-        ppO2 = 0.0;
+        ppN2 = 0.0;
         ppHe = 0.0;
     }
-    assert( 0.0 <= ppO2 && ppO2 < 14.0 );
+    assert( 0.0 <= ppN2 && ppN2 < 14.0 );
     assert( 0.0 <= ppHe && ppHe < 14.0 );
 }
 
@@ -1273,13 +1273,13 @@ void calc_hauptroutine_update_tissues(void)
     }
  	if (pres_diluent > ppWVapour)                                               // new in v.101
  	{
- 		ppO2 = N2_ratio * (pres_diluent - ppWVapour);                           // changed in v.101
+ 		ppN2 = N2_ratio * (pres_diluent - ppWVapour);                           // changed in v.101
  		ppHe = He_ratio * (pres_diluent - ppWVapour);                           // changed in v.101
  		char_O_diluent = (char)(pres_diluent/pres_respiration*100.0);
  	}
  	else																		// new in v.101
  	{
- 		ppO2 = 0.0;                                                             // new in v.101
+ 		ppN2 = 0.0;                                                             // new in v.101
  		ppHe = 0.0;                                                             // new in v.101
  		char_O_diluent = 0;
  	}
@@ -1422,12 +1422,15 @@ void sim_ascent_to_first_stop(void)
 //
 static void calc_tissue(PARAMETER unsigned char period)
 {
+    assert( 0.00 <= ppN2 && ppN2 < 6.40 );  // 80% N2 at 70m
+    assert( 0.00 <= ppHe && ppHe < 18.9 );  // 90% He at 200m
+
     for (ci=0;ci<16;ci++)
     {
         read_buhlmann_coefficients(period);   // 2 sec or 1 min period.
 
         // N2
-        temp_tissue = (ppO2 - pres_tissue[ci]) * var_N2_e;
+        temp_tissue = (ppN2 - pres_tissue[ci]) * var_N2_e;
         temp_tissue_safety();
         pres_tissue[ci] += temp_tissue;
 
@@ -1602,12 +1605,15 @@ void update_startvalues(void)
 //   + Do it on sim_pres_tissue, instead of pres_tissue.
 static void sim_tissue(PARAMETER unsigned char period)
 {
+    assert( 0.00 <= ppN2 && ppN2 < 6.40 );  // 80% N2 at 70m
+    assert( 0.00 <= ppHe && ppHe < 18.9 );  // 90% He at 200m
+
     for(ci=0; ci<16; ci++)
     {
         read_buhlmann_coefficients(period);  // 1 or 10 minute(s) interval
 
         // N2
-        temp_tissue = (ppO2 - sim_pres_tissue[ci]) * var_N2_e;
+        temp_tissue = (ppN2 - sim_pres_tissue[ci]) * var_N2_e;
         temp_tissue_safety();
         sim_pres_tissue[ci] += temp_tissue;
         
@@ -1809,7 +1815,7 @@ void deco_calc_desaturation_time(void)
 
     N2_ratio = 0.7902; // FIXED sum as stated in b"uhlmann
     pres_surface = int_I_pres_surface * 0.001;
-    ppO2 = N2_ratio * (pres_surface - ppWVapour);
+    ppN2 = N2_ratio * (pres_surface - ppWVapour);
     int_O_desaturation_time = 0;
     float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
 
@@ -1823,9 +1829,9 @@ void deco_calc_desaturation_time(void)
         // new in version v.101: 1.07 = 7 percent distance to totally clean (totally clean is not possible, would take infinite time )
         // changes in v.101: 1.05 = 5 percent dist to totally clean is new desaturation point for display and noFly calculations
         // N2
-        temp1 = 1.05 * ppO2;
+        temp1 = 1.05 * ppN2;
         temp1 = temp1 - pres_tissue[ci];
-        temp2 = ppO2 - pres_tissue[ci];
+        temp2 = ppN2 - pres_tissue[ci];
         if (temp2 >= 0.0)
         {
             temp1 = 0.0;
@@ -1916,7 +1922,7 @@ static void calc_wo_deco_step_1_min(void)
     N2_ratio = 0.7902; // FIXED, sum lt. buehlmann
     pres_respiration = int_I_pres_respiration * 0.001;  // assembler code uses different digit system
     pres_surface = int_I_pres_surface * 0.001;          // the b"uhlmann formula using pres_surface does not use the N2_ratio
-    ppO2 = N2_ratio * (pres_respiration - ppWVapour);   // ppWVapour is the extra pressure in the body
+    ppN2 = N2_ratio * (pres_respiration - ppWVapour);   // ppWVapour is the extra pressure in the body
     ppHe = 0.0;
     float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
     float_saturation_multiplier   = char_I_saturation_multiplier   * 0.01;

@@ -334,15 +334,12 @@ divemode_menu_simulator_common:
 	call	PLED_divemode_simulator_mask		; Redraw Simualtor mask
 
 	; Check limits (130m and 0m)
-	movlw	LOW		d'14000'
-	movwf	sub_a+0
+	movlw	LOW		d'14000'            ; Compare to 14bar=14000mbar (130m).
+	subwf   sim_pressure+0,W
 	movlw	HIGH	d'14000'
-	movwf	sub_a+1
-	movff	sim_pressure+0,sub_b+0
-	movff	sim_pressure+1,sub_b+1
-	call	sub16				; sub_c = sub_a - sub_b
-	btfss	neg_flag	
-	bra		divemode_menu_simulator_common2
+	subwfb  sim_pressure+1,W
+	bnc     divemode_menu_simulator_common2 ; No-carry = borrow = not deeper
+
 	; Too deep, limit to 130m
 	movlw	LOW		d'14000'
 	movwf	sim_pressure+0
@@ -351,15 +348,13 @@ divemode_menu_simulator_common:
 	return
 
 divemode_menu_simulator_common2:
-	movlw	LOW		d'1000'
-	movwf	sub_a+0
+	movlw	LOW		d'1000'             ; Compare to 1bar == 0m == 1000 mbar.
+	subwf   sim_pressure+0,W
 	movlw	HIGH	d'1000'
-	movwf	sub_a+1
-	movff	sim_pressure+0,sub_b+0
-	movff	sim_pressure+1,sub_b+1
-	call	sub16				; sub_c = sub_a - sub_b
-	btfsc	neg_flag	
-	return
+	subwfb  sim_pressure+1,W
+	btfsc   STATUS,C                    ; No-carry = borrow = not deeper.
+	return                              ; Deeper than 0m == Ok.
+
 	; Too shallow, limit to 1m
 	movlw	LOW		d'1000'
 	movwf	sim_pressure+0
@@ -381,6 +376,7 @@ divemode_menu_simulator_p10:
 	addwf	sim_pressure+0,F
 	movlw	HIGH	d'1000'
 	addwfc	sim_pressure+1,F
+
 	movlw	d'4'
 	movwf	menupos						; reset cursor
 	bra		divemode_menu_simulator_common

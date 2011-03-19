@@ -281,11 +281,9 @@ calc_deko_surfmode:
 	movff	amb_pressure+0,int_I_pres_respiration+0		; copy surface air pressure to deco routine
 	movff	amb_pressure+1,int_I_pres_respiration+1		
 	GETCUSTOM8	d'11'									; Saturation multiplier %
-	movwf	wait_temp
-	movff	wait_temp,char_I_saturation_multiplier
+	movff	WREG,char_I_saturation_multiplier
 	GETCUSTOM8	d'12'									; Desaturation multiplier %
-	movwf	wait_temp
-	movff	wait_temp,char_I_desaturation_multiplier
+	movff	WREG,char_I_desaturation_multiplier
 
 	call	deco_calc_wo_deco_step_1_min    ; calculate deco in surface mode 
 	movlb	b'00000001'									; select ram bank 1

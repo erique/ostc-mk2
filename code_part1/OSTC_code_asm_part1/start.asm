@@ -73,15 +73,22 @@ wait_start_pressure:
 	endif
 
 ; reset deco data
-	clrf	WREG                            ; Use as buffer
-	movff	WREG,char_I_He_ratio            ; No He at the Surface
+	ostc_debug	'0'		; Sends debug-information to screen if debugmode active
+
 	movlw	d'79'							; 79% N2
 	movff	WREG,char_I_N2_ratio            ; No He at the Surface
-	movff	amb_pressure+0,int_I_pres_respiration+0		; copy surface air pressure to deco routine
-	movff	amb_pressure+1,int_I_pres_respiration+1		
-
-	clrf    WREG
+	clrf	WREG                            ; Use as buffer
+	movff	WREG,char_I_He_ratio            ; No He at the Surface
 	movff	WREG,char_I_step_is_1min		; 2 second deco mode
+	GETCUSTOM8	d'11'					    ; Saturation multiplier %
+	movff	WREG,char_I_saturation_multiplier
+	GETCUSTOM8	d'12'					    ; Desaturation multiplier %
+	movff	WREG,char_I_desaturation_multiplier
+	movff	amb_pressure+0,int_I_pres_respiration+0 ; copy for deco routine
+	movff	amb_pressure+1,int_I_pres_respiration+1		
+	movff	amb_pressure+0,int_I_pres_surface+0     ; copy for desat routine
+	movff	amb_pressure+1,int_I_pres_surface+1		
+
 	call	deco_clear_tissue			    ;
 	call	deco_calc_desaturation_time     ; calculate desaturation time
 	call	deco_clear_CNS_fraction			; clear CNS

@@ -112,7 +112,11 @@ extern void deco_gas_volumes(void);
 #   pragma warning(disable: 4244 4068 4305)
 #else
 #   define PARAMETER static
-#   define assert(predicate)
+#   ifdef __DEBUG
+#       define assert(predicate) if( !(predicate) ) assert_failed(__LINE__)
+#   else
+#       define assert(predicate)
+#   endif
 #endif
 
 //////////////////////////////////////////////////////////////////////////////

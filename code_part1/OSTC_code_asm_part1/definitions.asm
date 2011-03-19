@@ -314,7 +314,7 @@ customfunction_temp1    res 1   ; start of custom function descriptors
 customfunction_temp2    res 1   ; used in GETCUSTOM8 and GETCUSTOM15
 
 decoplan_page           res 1   ; used in PLED_MultiGF,...
-temp10                  res 1   ; used in customview
+temp10                  res 2   ; used in customview
 
 fatal_error_code        res 1   ; holds error code value 
 

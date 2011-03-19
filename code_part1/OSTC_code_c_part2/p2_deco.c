@@ -467,6 +467,50 @@ static void check_post_dbg(void)
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
+#ifdef __DEBUG
+void assert_failed(PARAMETER short int line)
+{
+    extern void PLED_resetdebugger(void);
+    extern unsigned short temp10;
+
+    temp10 = line;
+    PLED_resetdebugger();
+}
+#endif
+//////////////////////////////////////////////////////////////////////////////
+// When calling C code from ASM context, the data stack pointer and
+// frames should be reset. Bank8 is used by stack, when not doing hashing.
+
+#ifdef CROSS_COMPILE
+#       define RESET_C_STACK
+#else
+#   ifdef __DEBUG
+#       define RESET_C_STACK fillDataStack();
+        void fillDataStack(void)
+        {
+            _asm
+                LFSR    1,C_STACK
+                MOVLW   0xCC
+        loop:   MOVWF   POSTINC1,0
+                TSTFSZ  FSR1L,0
+                BRA     loop
+        
+                LFSR    1,C_STACK
+                LFSR    2,C_STACK
+            _endasm
+        }
+#   else
+#       define RESET_C_STACK    \
+        _asm                    \
+            LFSR    1, C_STACK  \
+            LFSR    2, C_STACK  \
+        _endasm
+#   endif
+#endif
+
+//////////////////////////////////////////////////////////////////////////////
+
 static short read_custom_function(PARAMETER unsigned char cf)
 {
 #ifdef CROSS_COMPILE
@@ -776,40 +820,6 @@ static void temp_tissue_safety(void)
 // ** for the asm code **
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-
-void fillDataStack(void)
-{
-#ifndef CROSS_COMPILE
-    _asm
-        LFSR    1,C_STACK
-        MOVLW   0xCC
-loop:   MOVWF   POSTINC1,0
-        TSTFSZ  FSR1L,0
-        BRA     loop
-
-        LFSR    1,C_STACK
-        LFSR    2,C_STACK
-    _endasm
-#endif
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// When calling C code from ASM context, the data stack pointer and
-// frames should be reset. Bank3 is dedicated to the stack (see the
-// .lkr script).
-#ifdef CROSS_COMPILE
-#       define RESET_C_STACK
-#else
-#   ifdef __DEBUG
-#       define RESET_C_STACK fillDataStack();
-#   else
-#       define RESET_C_STACK    \
-        _asm                    \
-            LFSR    1, C_STACK  \
-            LFSR    2, C_STACK  \
-        _endasm
-#   endif
-#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // Called every 2 seconds during diving.

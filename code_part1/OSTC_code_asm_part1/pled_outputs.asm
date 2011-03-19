@@ -283,10 +283,17 @@ ostc_debug1:
 	STRCAT_PRINT " "
 	return
 
-
+;=============================================================================
+; BlueScreen function.
+;
 PLED_resetdebugger:
+    global PLED_resetdebugger
+    global temp10
+
+    movlb   1                       ; For C-code calls
 	call	PLED_boot				; PLED boot
 	call	PLED_ClearScreen		; clean up OLED
+
 	call	PLED_standard_color
 	WIN_INVERT	.0					; Init new Wordprocessor
 
@@ -297,12 +304,11 @@ PLED_resetdebugger:
 	
 	WIN_TOP		.100
 	WIN_LEFT	.10
-	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
+
 	lfsr	FSR2,letter
-	movff	temp10,lo
-	output_8		
+	movff	temp10+0,lo             ; Code-stack point at crash time.
+	movff	temp10+1,hi             ; Code-stack point at crash time.
+	output_16
 	movlw	' '
 	movwf	POSTINC2
 	movf	debug_char+0,W
@@ -326,10 +332,6 @@ PLED_resetdebugger:
 	call	word_processor
 
 	WIN_TOP		.125
-	WIN_LEFT	.10
-	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
 
 	lfsr	FSR2,letter
 	movff	flag3,lo
@@ -349,10 +351,6 @@ PLED_resetdebugger:
 	call	word_processor
 
 	WIN_TOP		.150
-	WIN_LEFT	.10
-	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
 
 	lfsr	FSR2,letter
 	movff	flag8,lo
@@ -373,8 +371,15 @@ PLED_resetdebugger:
 
 	bcf		switch_left	
 PLED_resetdebugger_loop:
+    bcf     LED_blue            ; Blink blue led every seconds..
+    btfss   secs,0
+    bsf     LED_blue
+
 	btfss	switch_left
 	bra		PLED_resetdebugger_loop		; Loop
+
+    bcf     LED_blue
+    bcf     LED_red
 	return
 
 PLED_divemode_mask:					; Displays mask in Dive-Mode
@@ -2215,28 +2220,36 @@ PLED_total_average_show2:
 	STRCAT_PRINT "m"
 	return
 
-
-PLED_serial:			; Writes OSTC #Serial and Firmware version in surfacemode
+;=============================================================================
+; Writes OSTC #Serial and Firmware version in surfacemode
+;
+PLED_serial:			
 	ostc_debug	'a'		; Sends debug-information to screen if debugmode active
 	WIN_TOP		.0
 	WIN_LEFT	.1
 	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
+	WIN_INVERT	.0                      ; Init new Wordprocessor
+	
+  ifdef __DEBUG
+    movlw   color_grey                  ; Write header in blue when
+    call    PLED_set_color              ; compiled in DEBUG mode...
+  else
 	call	PLED_standard_color
+  endif
 
 	lfsr	FSR2,letter
-	OUTPUTTEXTH		d'262'			; "OSTC "
+	OUTPUTTEXTH		d'262'              ; "OSTC "
 	clrf	EEADRH
-	clrf	EEADR				; Get Serial number LOW
-	call	read_eeprom			; read byte
+	clrf	EEADR                       ; Get Serial number LOW
+	call	read_eeprom                 ; read byte
 	movff	EEDATA,lo
-	incf	EEADR,F				; Get Serial number HIGH
-	call	read_eeprom			; read byte
+	incf	EEADR,F                     ; Get Serial number HIGH
+	call	read_eeprom                 ; read byte
 	movff	EEDATA,hi
 
 	bsf		leftbind
 	output_16
-	STRCAT  " \x90\x91 V"		; Scribble logo...
+	STRCAT  " \x90\x91 V"               ; Scribble logo...
 	movlw	softwareversion_x
 	movwf	lo
 	bsf		leftbind
@@ -2247,16 +2260,24 @@ PLED_serial:			; Writes OSTC #Serial and Firmware version in surfacemode
 	bsf		leftbind
 	output_99x
 	bcf		leftbind
+
+  ifdef __DEBUG
+    STRCAT_PRINT "-Dbg"    
+  else
 	call	word_processor
 
-	movlw	softwareversion_beta			; =1: Beta, =0: Release
+	movlw	softwareversion_beta        ; =1: Beta, =0: Release
 	decfsz	WREG,F
-	return									; Release version -> Return
+	return                              ; Release version -> Return
 
 	call	PLED_warnings_color
-	DISPLAYTEXT		d'243'			; beta
+	DISPLAYTEXT		d'243'              ; beta
 	call	PLED_standard_color
+  endif
+
 	return
+
+;=============================================================================
 
 PLED_divemode_menu_mask_first:			; Write Divemode menu1 mask
 	ostc_debug	'o'		; Sends debug-information to screen if debugmode active

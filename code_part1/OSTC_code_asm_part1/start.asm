@@ -25,6 +25,8 @@
 start:
 	movlb	b'00000001'				; ram bank 1 selected
 	movff	STKPTR,temp10
+	clrf    temp10+1
+
 	call	init
 	btfsc	divemode				; Reset from Divemode?
 	call	PLED_resetdebugger		; Yes! Something went wrong, show reset informations

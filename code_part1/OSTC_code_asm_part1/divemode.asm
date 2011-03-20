@@ -461,7 +461,7 @@ calc_deko_divemode2:
 
 ;-----------------------------------------------------------------------------
 
-divemode_prepare_flags_for_deco:	
+divemode_prepare_flags_for_deco:
 	movff	amb_pressure+0,int_I_pres_respiration+0		; lo  and copy result to deco routine
 	movff	amb_pressure+1,int_I_pres_respiration+1		; hi
 	GETCUSTOM8	d'11'                           ; Saturation multiplier %
@@ -771,8 +771,8 @@ do_not_display_velocity:
 	call	PLED_display_velocity_clear
 	return
 
-check_ppO2:								; check current ppO2 and display warning if required
-	btfsc		FLAG_const_ppO2_mode		; ignore in ppO2 mode....
+check_ppO2:							    ; check current ppO2 and display warning if required
+	btfsc		FLAG_const_ppO2_mode    ; ignore in ppO2 mode....
 	return
 
 check_ppO2_bail:						; In CC mode but bailout active!
@@ -1598,16 +1598,29 @@ diveloop_boot:
 	
 	call	get_free_EEPROM_location	; get last position in external EEPROM, may be up to 2 secs!
 
-	movff	last_surfpressure_30min+1,int_I_pres_surface+1	; HIGH copy surfacepressure to deco routine
+    btfss   simulatormode_active
+    bra     diveloop_boot_1
+    ; Normal mode = Surface pressure is the pressure 30mn before dive.
 	movff	last_surfpressure_30min+0,int_I_pres_surface+0	; LOW copy surfacepressure to deco routine
-	movff	temperature+0,mintemp+0						; Reset Min-Temp registers
-	movff	temperature+1,mintemp+1						; Reset Min-Temp registers
+	movff	last_surfpressure_30min+1,int_I_pres_surface+1	; HIGH copy surfacepressure to deco routine
+    bra     diveloop_boot_2
+
+diveloop_boot_1:
+    ; Simulator mode: Surface pressure is 1bar.
+    movlw   LOW .1000
+	movff	WREG,int_I_pres_surface+0   ; LOW copy surfacepressure to deco routine
+    movlw   HIGH .1000
+	movff	WREG,int_I_pres_surface+1   ; HIGH copy surfacepressure to deco routine
+
+diveloop_boot_2:
+	movff	temperature+0,mintemp+0     ; Reset Min-Temp registers
+	movff	temperature+1,mintemp+1     ; Reset Min-Temp registers
 
 ; Init profile recording parameters	
-	GETCUSTOM8	d'20'			; sample rate
-	movwf	samplesecs_value	; to avoid EEPROM access in the ISR
+	GETCUSTOM8	d'20'                   ; sample rate
+	movwf	samplesecs_value            ; to avoid EEPROM access in the ISR
 	GETCUSTOM8	d'21'
-	movwf	divisor_temperature			; load divisors for profile storage
+	movwf	divisor_temperature         ; load divisors for profile storage
 	GETCUSTOM8	d'22'
 	movwf	divisor_deco				
 	GETCUSTOM8	d'23'

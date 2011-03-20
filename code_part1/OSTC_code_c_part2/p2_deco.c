@@ -646,7 +646,7 @@ static void calc_nextdecodepth(void)
 	{
         // Recompute leading gas limit, at current depth:
         overlay float depth = (temp_deco - pres_surface) / 0.09995;
-        assert( depth >= -0.01 );       // -epsilon tolerance.
+        assert( depth >= -0.2 );        // Allow for 200mbar of weather change.
         assert( low_depth < 255 );
 
         if( depth > low_depth )
@@ -1262,6 +1262,7 @@ void calc_hauptroutine_update_tissues(void)
     assert( 0.00 <= N2_ratio && N2_ratio <= 1.00 );
     assert( 0.00 <= He_ratio && He_ratio <= 1.00 );
     assert( (N2_ratio + He_ratio) <= 0.95 );
+    assert( 0.800 < pres_respiration && pres_respiration < 14.0 );
 
     if (char_I_const_ppO2 == 0)													// new in v.101
   		pres_diluent = pres_respiration;										// new in v.101
@@ -1652,15 +1653,12 @@ static void sim_limit(PARAMETER float GF_current)
         //       Actual values are in the 1.5 .. 1.0 range (for a GF=30%),
         //       so that can change who is the leading gas...
         // Note: Also depends of the GF_current...
-        //       *BUT* calc_tissue() is used to compute bottom time,
-        //       hence what would happend at surface,
-        //       hence at GF_high.
         if( char_I_deco_model == 1 )
             p = ( p - var_N2_a * GF_current) * var_N2_b
               / (GF_current + var_N2_b * (1.0 - GF_current));
         else
             p = (p - var_N2_a) * var_N2_b;
-        if( p < 0 ) p = 0;
+        if( p < 0.0 ) p = 0.0;
 
         sim_pres_tissue_limit[ci] = p;
         if( p > sim_lead_tissue_limit )
@@ -1671,7 +1669,7 @@ static void sim_limit(PARAMETER float GF_current)
     } // for ci
 
     assert( sim_lead_tissue_no < 16 );
-    assert( 0.0 <= sim_lead_tissue_limit && sim_lead_tissue_limit <= 14.0);
+    assert( 0.0 <= sim_lead_tissue_limit && sim_lead_tissue_limit <= 14.0 );
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1744,7 +1742,9 @@ static void update_deco_table()
 static void calc_gradient_factor(void)
 {
     overlay float gf;
+
     assert( char_O_gtissue_no < 16 );
+    assert( 0.800 <= pres_respiration && pres_respiration < 14.0 );
 
 	// tissue > respiration (entsaettigungsvorgang)
 	// gradient ist wieviel prozent an limit mit basis tissue
@@ -1813,7 +1813,7 @@ void deco_calc_desaturation_time(void)
     assert( 800 < int_I_pres_surface && int_I_pres_surface < 1100 );
     assert( 0 < char_I_desaturation_multiplier && char_I_desaturation_multiplier <= 100 );
 
-    N2_ratio = 0.7902; // FIXED sum as stated in b"uhlmann
+    N2_ratio = 0.7902; // FIXED sum as stated in bühlmann
     pres_surface = int_I_pres_surface * 0.001;
     ppN2 = N2_ratio * (pres_surface - ppWVapour);
     int_O_desaturation_time = 0;
@@ -2035,6 +2035,7 @@ void deco_hash(void)
 void deco_clear_CNS_fraction(void)
 {
     RESET_C_STACK
+
     CNS_fraction = 0.0;
     char_O_CNS_fraction = 0;
 }
@@ -2054,6 +2055,9 @@ void deco_calc_CNS_fraction(void)
 {
     overlay float actual_ppO2;
     RESET_C_STACK
+
+    assert( 0.0 <= CNS_fraction && CNS_fraction <= 2.5 );
+    assert( char_I_actual_ppO2 > 15 );
 
     actual_ppO2 = (float)char_I_actual_ppO2 / 100.0;
 
@@ -2115,7 +2119,9 @@ void deco_calc_CNS_fraction(void)
 //
 void deco_calc_CNS_decrease_15min(void)
 {
-    RESET_C_STACK    
+    RESET_C_STACK
+    assert( 0.0 <= CNS_fraction && CNS_fraction <= 2.5 );
+
     CNS_fraction =  0.890899 * CNS_fraction;
     char_O_CNS_fraction = (char)(CNS_fraction * 100.0 + 0.5);
 }
@@ -2134,7 +2140,12 @@ void deco_calc_percentage(void)
 {
     RESET_C_STACK
 
+    assert( 60 <= char_I_temp && char_I_temp <= 100 );
+    assert(  0 <= int_I_temp  && int_I_temp  < 2880 );      // Less than 48h...
+
     int_I_temp = (unsigned short)(((float)int_I_temp * (float)char_I_temp) * 0.01 );
+
+    assert( int_I_temp < 1440 );                            // Less than 24h...
 }
 
 

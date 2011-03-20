@@ -81,7 +81,7 @@ simulator_int1:
 		movff	PRODH,sim_pressure+1
 		bra		uartint1					; exit uart int
 
-schalter_links:								; 
+switch_left_int:
 		bcf		INTCON,INT0IF				; Clear flag
 
 		btfsc	T0CON,TMR0ON				; Timer0 running?
@@ -93,7 +93,7 @@ schalter_links:								;
 		return
 
 
-schalter_rechts:							; 
+switch_right_int:
 		bcf		INTCON3,INT1IF				; Clear flag
 
 		btfsc	T0CON,TMR0ON				; Timer0 running?
@@ -106,7 +106,6 @@ schalter_rechts:							;
 
 timer0_restart:
 		bcf		INTCON,TMR0IF				; Clear flag
-
 		clrf	T0CON						; Timer0
 		clrf	TMR0H
 		clrf	TMR0L
@@ -120,7 +119,6 @@ timer0int:
 		clrf	TMR0L
 		return
 		
-
 timer0int_left_reset:
 		bcf		INTCON2, INTEDG0			; Interrupt on faling edge again
 		bcf		switch_left_isr				; Clear flag, button press is done
@@ -149,12 +147,6 @@ timer0int_right:
 		bsf		INTCON2, INTEDG1			; Interrupt on rising edge again
 		return
 
-timer3int:
-		bcf		PIR2,TMR3IF					; Clear flag
-		bcf		T3CON,TMR0ON				; Stop Timer 3
-		bcf		T2CON,2						; stop Timer 2
-		return
-
 timer1int:
 		bcf		PIR1,TMR1IF					; Clear flag
 
@@ -168,94 +160,66 @@ timer1int_debug:
 		movlw	0x08						; Timer1 int after 62.5ms (=16/second)
 		subwf	TMR1H,F			
 	
-		incf	timer1int_counter1,F
+		incf	timer1int_counter1,F		; Increase timer1 counter
+
 		movlw	d'15'						; One second 16
 		cpfsgt	timer1int_counter1			 
 		bra		sensor_int_pre				; only pressure sensor
-		call	RTCisr						; adjust time, then query pressure sensor
+		rcall	RTCisr						; adjust time, then query pressure sensor
 
 sensor_int_pre:
-		btfss	sleepmode					; In sleepmode?
-		bra		sensor_int					; No
-		return
+		btfsc	sleepmode					; In sleepmode?
+		return								; Yes
 
 sensor_int:
 		btfsc		no_sensor_int			; No sensor interrupt (because it's addressed during sleep)
 		return						
 
-		incf		timer1int_counter2,F		; counts to eight for state maschine
+		incf		timer1int_counter2,F	; counts to eight for state maschine
 
-		movlw		d'1'
-		cpfseq		timer1int_counter2		; State 1?
-		bra			sensor_int1				; No
+; State 1: Clear flags and average registers, get temperature (51us) and start pressure integration (73,5us)
+; State 2: Get pressure (51us), start temperature integration (73,5us) and calculate temperature compensated pressure (233us)
+; State 3: Get temperature (51us) and start pressure integration (73,5us)
+; State 4: Get pressure (51us), start temperature integration (73,5us) and calculate temperature compensated pressure (233us)
+; State 5: Get temperature (51us) and start pressure integration (73,5us)
+; State 6: Get pressure (51us), start temperature integration (73,5us) and calculate temperature compensated pressure (233us)
+; State 7: Get temperature (51us) and start pressure integration (73,5us)
+; State 8: Get pressure (51us), start temperature integration (73,5us), calculate temperature compensated pressure (233us) and build average for half-second update of tempperature and pressure
+	
+		movff	timer1int_counter2,isr_divB		; isr_divB used as temp here...
+		dcfsnz	isr_divB,F
+		bra		sensor_int_state1_plus_restart	; Do State 1
+		dcfsnz	isr_divB,F
+		bra		sensor_int_state2				; Do State 2
+		dcfsnz	isr_divB,F
+		bra		sensor_int_state1				; Do State 3
+		dcfsnz	isr_divB,F
+		bra		sensor_int_state2				; Do State 4
+		dcfsnz	isr_divB,F
+		bra		sensor_int_state1				; Do State 5
+		dcfsnz	isr_divB,F
+		bra		sensor_int_state2				; Do State 6
+		dcfsnz	isr_divB,F
+		bra		sensor_int_state1				; Do State 7
+;		bra		sensor_int2_plus_average		; Do State 8
 
-		bcf			pressure_refresh			; clear flags
-		clrf		isr3_temp+0				; pressure average registers
-		clrf		isr3_temp+1
-		clrf		temperature_temp+0
-		clrf		temperature_temp+1
-sensor_int0:
-		call		get_temperature_value		; State 1: Get temperature
-		call		get_pressure_start	 	; and start pressure integration.
-		return						; Done.
-sensor_int1:
-		movlw		d'2'
-		cpfseq		timer1int_counter2		; State 2?
-		bra			sensor_int2				; No
-		
-sensor_int1_1:
-		call		get_pressure_value		; State2: Get pressure (51us)
-		call		get_temperature_start		; and start temperature integration (73,5us)
-		call		calculate_compensation		; calculate temperature compensated pressure (233us)
-		movf		amb_pressure+0,W
-		addwf		isr3_temp+0				; average pressure
-		movf		amb_pressure+1,W
-		addwfc		isr3_temp+1
-		movf		temperature+0,W
-		addwf		temperature_temp+0		; average temperature
-		movf		temperature+1,W
-		addwfc		temperature_temp+1
-		return		
-sensor_int2:
-		movlw		d'3'
-		cpfseq		timer1int_counter2		; State 3?
-		bra			sensor_int3				; No
-		bra			sensor_int0				; Yes, but same as State 1!
-sensor_int3:
-		movlw		d'4'
-		cpfseq		timer1int_counter2		; State 4?
-		bra			sensor_int4				; No
-		bra			sensor_int1_1			; Yes, but same as State 2!
-sensor_int4:
-		movlw		d'5'					
-		cpfseq		timer1int_counter2		; State 5?
-		bra			sensor_int5				; No
-		bra			sensor_int0				; Yes, but same as State 1!
-sensor_int5:
-		movlw		d'6'
-		cpfseq		timer1int_counter2		; State 6?
-		bra			sensor_int6				; No
-		bra			sensor_int1_1			; Yes, but same as State 2!
-sensor_int6:
-		movlw		d'7'
-		cpfseq		timer1int_counter2		; State 7?
-		bra			sensor_int7				; No
-		bra			sensor_int0				; Yes, but same as State 1!
-sensor_int7:
-		rcall		sensor_int1_1			; Do State 2...
-		clrf		timer1int_counter2		; ..then reset State counter...
-		movlw		d'2'					; and calculate average!
-		movwf		isr2_temp				
-sensor_int8:		
+;sensor_int2_plus_average:
+		rcall		sensor_int_state2
+sensor_int2_plus_average2:		
 		bcf			STATUS,C
 		rrcf		isr3_temp+1				; isr3_temp / 2
 		rrcf		isr3_temp+0
 		bcf			STATUS,C
 		rrcf		temperature_temp+1		; temperature_temp /2
 		rrcf		temperature_temp+0
-		decfsz		isr2_temp,F
-		bra			sensor_int8				; once more
-		
+
+		bcf			STATUS,C
+		rrcf		isr3_temp+1				; isr3_temp / 4
+		rrcf		isr3_temp+0
+		bcf			STATUS,C
+		rrcf		temperature_temp+1		; temperature_temp /4
+		rrcf		temperature_temp+0
+	
 		movff		isr3_temp+1,amb_pressure+1	; copy into actual register
 		movff		isr3_temp+0,amb_pressure+0
 
@@ -263,6 +227,7 @@ sensor_int8:
 		movff		temperature_temp+0,temperature+0
 
 		bsf			pressure_refresh 			; Set flag! Temp and pressure were updated!
+		clrf		timer1int_counter2			; Then reset State counter
 
 		btfss		simulatormode_active		; are we in simulator mode?
 		bra			comp_air_pressure			; no
@@ -277,16 +242,44 @@ comp_air_pressure:
 		bcf			neg_flag				
 		movf		last_surfpressure+0,W		; compensate airpressure
 		subwf   	amb_pressure+0,W             
-		movwf   	rel_pressure+0			; rel_pressure stores depth!
+		movwf   	rel_pressure+0				; rel_pressure stores depth!
 
 		movf		last_surfpressure+1,W
 		subwfb  	amb_pressure+1,W
 		movwf   	rel_pressure+1
-		btfss		STATUS,N				; result is below zero?
+		btfss		STATUS,N					; result is below zero?
 		return
-		clrf		rel_pressure+0			; Yes, do not display negative depths
-		clrf		rel_pressure+1			; e.g. when surface air pressure dropped during the dive
+		clrf		rel_pressure+0				; Yes, do not display negative depths
+		clrf		rel_pressure+1				; e.g. when surface air pressure dropped during the dive
 		return
+
+
+sensor_int_state1_plus_restart:
+		bcf			pressure_refresh		; clear flags
+		clrf		isr3_temp+0				; pressure average registers
+		clrf		isr3_temp+1
+		clrf		temperature_temp+0
+		clrf		temperature_temp+1
+
+sensor_int_state1:
+		call		get_temperature_value	; State 1: Get temperature
+		call		get_pressure_start	 	; and start pressure integration.
+		return								; Done.
+
+sensor_int_state2:
+		call		get_pressure_value		; State2: Get pressure (51us)
+		call		get_temperature_start	; and start temperature integration (73,5us)
+		call		calculate_compensation	; calculate temperature compensated pressure (233us)
+		movf		amb_pressure+0,W
+		addwf		isr3_temp+0				; average pressure
+		movf		amb_pressure+1,W
+		addwfc		isr3_temp+1
+		movf		temperature+0,W
+		addwf		temperature_temp+0		; average temperature
+		movf		temperature+1,W
+		addwfc		temperature_temp+1
+		return		
+
 
 RTCisr:			
 		clrf		timer1int_counter1		; counts to 16 (one second / 62.5ms)
@@ -294,15 +287,16 @@ RTCisr:
 
 		bcf			STATUS,Z				; are we in dive mode?
 		btfss		divemode
-		bra			RTCisr2				; No, must be surface or sleepmode
+		bra			RTCisr2					; No, must be surface or sleepmode
 
 		incf		samplesecs,F			; CF20 diving seconds done 
 		decf		samplesecs_value,W		; holds CF20 value  (minus 1 into WREG)
 		cpfsgt		samplesecs
-		bra			RTCisr1				; no
+		bra			RTCisr1					; no
 
 		clrf		samplesecs				; clear counter...
 		bsf			store_sample			; ...and set bit for profile storage
+
 RTCisr1:		
 ; Increase re-setable average depth divetime counter
 		incf		average_divesecs+0,F	; increase stopwatch registers	
@@ -316,6 +310,7 @@ RTCisr1:
 		movlw		d'59'
 		cpfsgt		divesecs
 		bra			RTCisr1a
+
 		clrf		divesecs
 		bsf			realdive				; this bit is always set (again) if the dive is longer then one minute
 

@@ -59,17 +59,14 @@ HighInt:
 		btfsc	INTCON,TMR0IF				;Timer0 INT (Debounce Timer)
 		call	timer0int
 
-		btfsc	PIR2,TMR3IF					;Timer3 INT (Delay for PWM Buzzer)
-		call	timer3int
-
 		btfsc	PIR1,RCIF					; UART
 		call	uartint
 
 		btfsc	INTCON,INT0IF				; Switch left
-		call	schalter_links
+		call	switch_left_int
 
 		btfsc	INTCON3,INT1IF				; switch right
-		call	schalter_rechts
+		call	switch_right_int
 
 		movff   prod_temp+1,PRODH
 		movff   prod_temp+0,PRODL
@@ -133,6 +130,13 @@ osct_asm	code
     MESSG "This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY"
     MESSG "or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details."
     MESSG "You should have received a copy of the GNU General Public License along with this program.If not, see http://www.gnu.org/licenses/."
+
+  ifdef __DEBUG
+   	MESSG "OSTC Mk.2 code compiled in DEBUG configuration!"
+  else
+	MESSG "OSTC Mk.2 code compiled in RELEASE configuration!"
+  endif
+
 
 	END				; end of program
 

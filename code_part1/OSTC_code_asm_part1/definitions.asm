@@ -34,6 +34,7 @@
 ;#DEFINE	GERMAN							; Use german_text.asm
 ;#DEFINE	SPANISH							; Use spanish_text.asm
 
+#DEFINE	__DEBUG	; 
 
 #DEFINE	logbook_profile_version	0x20        ; Do not touch!
 #DEFINE	T0CON_debounce	b'00000000'         ; Timer0 Switch Debounce
@@ -183,7 +184,6 @@ ext_ee_temp1    res 1           ; External EEPROM Temp 1		used in I2C EEPROM
 ext_ee_temp2    res 1           ; External EEPROM Temp 2		used in I2C EEPROM
 
 isr1_temp       res 1           ; ISR temp variables
-isr2_temp       res 1
 isr3_temp       res 2
 
 timer1int_counter1  res 1       ;Timer 1 counter

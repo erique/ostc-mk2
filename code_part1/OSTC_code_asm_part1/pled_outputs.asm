@@ -1758,7 +1758,12 @@ update_surf_press:
 	WIN_LEFT	.1
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
+
+	btfss	high_altitude_mode		; In high altitude mode?
+	call	PLED_standard_color		; No
+	btfsc	high_altitude_mode		; In high altitude mode?
+	call	PLED_warnings_color		; Yes, display ambient pressure in red
+
 
 	lfsr	FSR2,letter
 	movff	amb_pressure+0,lo
@@ -1767,6 +1772,7 @@ update_surf_press:
 	output_16
 	bcf		leftbind
 	STRCAT_PRINT  "mbar "
+	call	PLED_standard_color		; Reset color
 	return
 
 update_batt_voltage_divemode:

@@ -34,7 +34,7 @@
 ;#DEFINE	GERMAN							; Use german_text.asm
 ;#DEFINE	SPANISH							; Use spanish_text.asm
 
-#DEFINE	__DEBUG	; 
+;#DEFINE	__DEBUG	; 
 
 #DEFINE	logbook_profile_version	0x20        ; Do not touch!
 #DEFINE	T0CON_debounce	b'00000000'         ; Timer0 Switch Debounce
@@ -452,7 +452,7 @@ sorted_gaslist_active	res 1	; Holds flags for active gases for the sorted list
 #DEFINE	FLAG_active_descent		flag8,3	;=1: A Descent in Apnoe mode is active
 #DEFINE	display_see_deco		flag8,4	;=1: Display decoplan in Divemode
 #DEFINE	display_set_gas			flag8,5	;=1: Display Gaslist menu in Divemode
-;free flag8,6	;=1: 
+#DEFINE	high_altitude_mode		flag8,6	;=1: Unit was manually turned on with ambient pressure <880mBar
 #DEFINE	rs232_recieve_overflow	flag8,7	;=1: An RS232 timeout overflow occoured
 
 #DEFINE	nofly_active			flag9,0	;=1: Do not fly!

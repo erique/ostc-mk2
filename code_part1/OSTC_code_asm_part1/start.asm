@@ -167,6 +167,17 @@ restart:
 	bcf     flag1,0
 	movff	flag1,win_flags			; store in Bank0 register
 	clrf	flag1					; Clear flag1 (again)
+
+	; Select high altitude (Fly) mode?
+	movff	last_surfpressure_30min+0,sub_b+0
+	movff	last_surfpressure_30min+1,sub_b+1
+	movlw	HIGH	d'880'
+	movwf	sub_a+1
+	movlw	LOW		d'880'			; Hard-wired 880mBar
+	movwf	sub_a+0
+	call	sub16					; sub_c = sub_a - sub_b
+	btfss	neg_flag				; Result negative (Ambient>880mBar)?
+	bsf		high_altitude_mode		; No, Set Flag!
 	
 	; Should we disable sleep (hardware emulator)
 	movlw	.0

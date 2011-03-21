@@ -1409,30 +1409,47 @@ set_min_temp:
 	return
 
 set_dive_modes:
+	btfsc	high_altitude_mode		; In high altitude (Fly) mode?
+	bra		set_dive_modes3			; Yes
+
 	bcf		divemode2				; Stop time
 
 	GETCUSTOM8	.0					; loads dive_threshold in WREG
 	movwf	sub_a+0					; dive_treshold is in cm
 	clrf	sub_a+1
-
 	movff	rel_pressure+0,sub_b+0
 	movff	rel_pressure+1,sub_b+1
-		
-	call	sub16						; sub_c = sub_a - sub_b
+	call	sub16					; sub_c = sub_a - sub_b
 	
 	btfss	neg_flag	
-	bra		set_dive_modes2				; too shallow (rel_pressure<dive_threshold)
+	bra		set_dive_modes2			; too shallow (rel_pressure<dive_threshold)
 
-	btfsc	realdive					; Dive longer than one minute?
-	clrf 	timeout_counter
+	btfsc	realdive				; Dive longer than one minute?
+	clrf 	timeout_counter			; Yes, reset timout counter
 
-	bsf		divemode
+	bsf		divemode				; (Re-)Set divemode flag
 	bsf		divemode2				; displayed divetime is running
 	return
 
 set_dive_modes2:
 	btfss	realdive					; dive longer then one minute?
 	bcf		divemode					; no -> this was no real dive
+	return
+
+set_dive_modes3:
+	movlw	HIGH	d'1075'			; hard-wired 1075mBar threshold
+	movwf	sub_a+1
+	movlw	LOW		d'1075'			; hard-wired 1075mBar threshold
+	movwf	sub_a+0
+	movff	rel_pressure+0,sub_b+0
+	movff	rel_pressure+1,sub_b+1
+	call	sub16					; sub_c = sub_a - sub_b
+	
+	btfss	neg_flag	
+	bra		set_dive_modes2			; too shallow (rel_pressure<dive_threshold)
+	
+	bsf		divemode				; (Re-)Set divemode flag
+	bsf		divemode2				; displayed divetime is running
 	return
 
 set_powersafe:

@@ -1,6 +1,7 @@
 New in 1.84 beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: NoFly time should not be reseted after dive simulation.
+NEW: High altitude (Plane/Fly) mode added
 
 New in 1.83 beta:
 BETA Version - Do NOT use for diving!

@@ -240,10 +240,15 @@ simulator_show_decoplan5_0:
     btfsc   FLAG_const_ppO2_mode        ; In CCR mode ?
     bra     simulator_show_decoplan4    ; YES: finished.
 
-   ; Re-read gas change depth, from the unsorted list.
-    movlw   .27                         ; Active flags.
+    ; Re-read gas change depth, from the unsorted list.
+    movlw   .33                         ; First gas.
     movwf   EEADR
     clrf    EEADRH
+    call    read_eeprom
+    movff   EEDATA,char_I_first_gas
+    
+    movlw   .27                         ; Active flags.
+    movwf   EEADR
     call    read_eeprom
     movff   EEDATA,waitms_temp          ; Save activity flags.
     incf    EEADR,F                     ; 28 == Gas#1's change depth.

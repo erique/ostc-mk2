@@ -2157,7 +2157,8 @@ void deco_calc_percentage(void)
 // calculates volumes for each gas.
 //
 // Input:   char_I_bottom_depth, char_I_bottom_time for planned dive.
-///         Gas list. First gas is the bottom gas.
+//          Gas list.
+//          char_I_first_gas is the bottom gas.
 //          decoplan (char_O_deco_depth, char_O_deco_time).
 //          CF#54 == TRUE if shallowest stop first.
 //          CF#56 == bottom deci-liters/minutes (0.5 .. 50.0)
@@ -2172,27 +2173,30 @@ void deco_gas_volumes(void)
     RESET_C_STACK
 
     //---- initialize with bottom consumption --------------------------------
-    volumes[0] = (char_I_bottom_depth*0.1 + 1.0)    // Use Psurface = 1.0 bar.
-               * char_I_bottom_time                 // in minutes.
-               * read_custom_function(56)           // In deci-liter/minutes.
-               * 0.1;                               // deci-liters --> liters.
-
-    for(i=1; i<5; ++i)                              // Nothing yet...
+    for(i=0; i<5; ++i)                              // Nothing yet...
         volumes[i] = 0.0;
+
+    assert( 1 <= char_I_first_gas && char_I_first_gas <= 5);
+    volumes[char_I_first_gas - 1]
+        = (char_I_bottom_depth*0.1 + 1.0)           // Use Psurface = 1.0 bar.
+        * char_I_bottom_time                        // in minutes.
+        * read_custom_function(56)                  // In deci-liter/minutes.
+        * 0.1;                                      // deci-liters --> liters.
 
     //---- Ascent usage ------------------------------------------------------
 
     deepest_first = read_custom_function(54) == 0;
-    ascent_usage  = read_custom_function(57) * 0.1;  // In litter/minutes.
+    ascent_usage  = read_custom_function(57) * 0.1; // In liter/minutes.
 
     // Usage up to the first stop:
     //  - computed at MAX depth (easier, safer),
     //  - with an ascent speed of 10m/min.
     //  - with ascent litter / minutes.
     //  - still using bottom gas:
-    volumes[0] += (char_I_bottom_depth*0.1 + 1.0)   // Depth -> bar
-               * (char_I_bottom_depth - char_O_first_deco_depth) * 0.1  // ascent time (min)
-               * ascent_usage;                      // Consumption ( xxx / min @ 1 bar)
+    volumes[char_I_first_gas - 1]
+        += (char_I_bottom_depth*0.1 + 1.0)          // Depth -> bar
+         * (char_I_bottom_depth - char_O_first_deco_depth) * 0.1  // ascent time (min)
+         * ascent_usage;                            // Consumption ( xxx / min @ 1 bar)
 
     for(i=0; i<32; ++i)
     {

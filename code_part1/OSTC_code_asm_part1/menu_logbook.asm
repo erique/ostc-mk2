@@ -136,7 +136,7 @@ menu_logbook4:
 
 	movf		divesecs,W					; divenumber that is searched
 	cpfseq		divenumber					; current divenumber
-	bra			next_logbook				; No match, continue search
+	goto		next_logbook				; No match, continue search
 	bra			display_profile2
 	
 
@@ -144,7 +144,7 @@ menu_logbook_display_loop:
 	btfsc		all_dives_shown				; All dives displayed?
 	bra			menu_logbook_display_loop2		; Yes, but display first page again.
 
-	rcall 		display_listdive			; display short header for list on current list position
+	call 		display_listdive			; display short header for list on current list position
 
 	movlw		d'5'
 	cpfseq		menupos					; first dive on list (top place)?
@@ -168,7 +168,7 @@ menu_logbook_display_loop:
 
 menu_logbook_display_loop1:
 	decfsz		menupos,F					; List full?
-	bra			next_logbook				; no, search another dive for our current logbook page
+	goto		next_logbook				; no, search another dive for our current logbook page
 
 menu_logbook_display_loop2:
 	btfss		logbook_page_not_empty		; Was there one dive at all?
@@ -202,7 +202,7 @@ menu_logbook_loop:
 	call		check_switches_logbook
 	
 	btfsc		menubit3					; SET/MENU?
-	bra			next_logbook3				; adjust cursor or create new page
+	goto		next_logbook3				; adjust cursor or create new page
 
 	btfsc		menubit2					; ENTER?
 	bra			display_profile_or_exit		; view details/profile or exit logbook
@@ -221,7 +221,7 @@ menu_logbook_loop:
 	btfsc		divemode
 	goto		restart						; Enter Divemode if required
 
-	bra			menu_logbook_loop			; Wait for something to do
+	goto		menu_logbook_loop			; Wait for something to do
 
 display_profile_or_exit:
 	bcf			menubit2					; debounce
@@ -463,28 +463,11 @@ display_profile_offset3:
 	bcf			leftbind
 	call		word_processor				; display 3rd page of details
 
+	movff		eeprom_address+0,avr_rel_pressure+0
+	movff		eeprom_address+1,avr_rel_pressure+1			; Pointer to Gaslist (For Page 2)
+
 	incf_eeprom_address	d'18'				; Skip 18Bytes in EEPROM (faster)
-
-; Do not remove comments below!
-;	call		I2CREAD2					; Skip Gas1 current O2
-;	call		I2CREAD2					; Skip Gas1 current HE
-;	call		I2CREAD2					; Skip Gas2 current O2
-;	call		I2CREAD2					; Skip Gas2 current HE
-;	call		I2CREAD2					; Skip Gas3 current O2
-;	call		I2CREAD2					; Skip Gas3 current HE
-;	call		I2CREAD2					; Skip Gas4 current O2
-;	call		I2CREAD2					; Skip Gas4 current HE
-;	call		I2CREAD2					; Skip Gas5 current O2
-;	call		I2CREAD2					; Skip Gas5 current HE
-;	call		I2CREAD2					; Skip Gas6 current O2
-;	call		I2CREAD2					; Skip Gas6 current HE
-;	call		I2CREAD2					; Skip Start Gas
-;	call		I2CREAD2					; Skip Firmware x
-;	call		I2CREAD2					; Skip Firmware y
-;	call		I2CREAD2					; Skip battery
-;	call		I2CREAD2					; Skip battery
-;	call		I2CREAD2					; Skip Sampling rate
-
+	; 18bytes gases, battery, firmware number
 	call		I2CREAD2					; Read divisor
 	movff		SSPBUF,divisor_temperature	; Store divisor
 	bcf			divisor_temperature,4		; Clear information length
@@ -508,11 +491,17 @@ display_profile_offset3:
 	movff		SSPBUF,divisor_deco_debug	; Store divisor
 	call		I2CREAD2					; Read divisor
 	movff		SSPBUF,divisor_nuy2			; Store divisor
-	call		I2CREAD2					; Read Salinity
-	call		I2CREAD2					; Skip GF_HI (Upper nibble), GF_LO (Lower nibble)
+	incf_eeprom_address	d'2'				; Skip 2Bytes in EEPROM (faster)
+	; 2 bytes salinity, GF
 
 display_profile2d:
 	; Start Profile display
+
+	clrf	average_depth_hold_total+0
+	clrf	average_depth_hold_total+1
+	clrf	average_depth_hold_total+2
+	clrf	average_depth_hold_total+3		; Track average depth here...
+
 ; Write 0m X-Line..
 	movlw		color_grey	
 	call		PLED_set_color				; Make this configurable?
@@ -593,6 +582,14 @@ profile_display_loop:
 profile_display_loop2:
 	rcall		profile_view_get_depth		; reads depth, ignores temp and profile data	-> hi, lo
 
+	movf		lo,w
+	addwf		average_depth_hold_total+0,F
+	movf		hi,w
+	addwfc		average_depth_hold_total+1,F
+	movlw		d'0'
+	addwfc		average_depth_hold_total+2,F
+	addwfc		average_depth_hold_total+3,F 	; Will work up to 9999mBar*60*60*24=863913600mBar
+
 	btfsc		second_FD					; end-of profile reached?
 	bra			profile_display_loop_done	; Yes, skip all remaining pixels
 
@@ -628,6 +625,10 @@ profile_display_loop3:
 	bra			profile_display_loop		; Not ready yet
 ; Done.
 profile_display_loop_done:
+	movlw		d'159'
+	subfwb		ignore_digits,W				; keep number of X-pixels (For average depth display on Page 3)
+	movwf		average_divesecs+0			; Store here for compatibility
+
 	bcf			sleepmode					; clear some flags
 	bcf			menubit2
 	bcf			menubit3
@@ -637,29 +638,239 @@ profile_display_loop_done:
 
 display_profile_loop:
 	call		check_switches_logbook
-	
 	btfsc		menubit2					; SET/MENU?
 	bra			exit_profileview			; back to list
-
 	btfsc		menubit3					; ENTER?
-	bra			exit_profileview			; back to list
-;	bra			profileview_menu			; Switch to the Profileview menu
-
+	bra			profileview_page2			; Switch to Page2 of profile view
 	btfsc		onesecupdate
 	call		timeout_surfmode			; timeout
-
 	btfsc		onesecupdate
 	call		set_dive_modes				; check, if divemode must be entered
-
 	bcf			onesecupdate				; one second update
-
 	btfsc		sleepmode					; Timeout?
 	bra			exit_profileview			; back to list
-
 	btfsc		divemode
 	goto		restart						; Enter Divemode if required
-
 	bra			display_profile_loop		; wait for something to do
+
+
+profileview_page2:
+    WIN_BOX_BLACK   .0, .74, .0, .159		;top, bottom, left, right
+
+	movff		avr_rel_pressure+0,eeprom_address+0
+	movff		avr_rel_pressure+1,eeprom_address+1			; Pointer to Gaslist
+
+	call		PLED_standard_color
+	bsf			leftbind
+	WIN_TOP		.0
+	WIN_LEFT	.0
+	STRCPY      "G1:"
+	call		I2CREAD2					; Gas1 current O2
+	movff		SSPBUF,lo
+	output_99x
+	PUTC		'/'
+	call		I2CREAD2					; Gas1 current HE
+	movff		SSPBUF,lo
+	output_8
+	call		word_processor				; Display Gas information
+
+	WIN_TOP		.25
+	STRCPY      "G2:"
+	call		I2CREAD2					; Gas2 current O2
+	movff		SSPBUF,lo
+	output_8
+	PUTC		'/'
+	call		I2CREAD2					; Gas2 current HE
+	movff		SSPBUF,lo
+	output_8
+	call		word_processor				; Display Gas information
+
+	WIN_TOP		.50
+	STRCPY      "G3:"
+	call		I2CREAD2					; Gas3 current O2
+	movff		SSPBUF,lo
+	output_8
+	PUTC		'/'
+	call		I2CREAD2					; Gas3 current HE
+	movff		SSPBUF,lo
+	output_8
+	call		word_processor				; Display Gas information
+
+	WIN_TOP		.0
+	WIN_LEFT	.60
+	STRCPY      "G4:"
+	call		I2CREAD2					; Gas4 current O2
+	movff		SSPBUF,lo
+	output_8
+	PUTC		'/'
+	call		I2CREAD2					; Gas4 current HE
+	movff		SSPBUF,lo
+	output_8
+	call		word_processor				; Display Gas information
+
+	WIN_TOP		.25
+	STRCPY      "G5:"
+	call		I2CREAD2					; Gas5 current O2
+	movff		SSPBUF,lo
+	output_8
+	PUTC		'/'
+	call		I2CREAD2					; Gas5 current HE
+	movff		SSPBUF,lo
+	output_8
+	call		word_processor				; Display Gas information
+
+	WIN_TOP		.50
+	STRCPY      "G6:"
+	call		I2CREAD2					; Gas6 current O2
+	movff		SSPBUF,lo
+	output_8
+	PUTC		'/'
+	call		I2CREAD2					; Gas6 current HE
+	movff		SSPBUF,lo
+	output_8
+	call		word_processor				; Display Gas information
+
+	WIN_TOP		.0
+	WIN_LEFT	.120
+	STRCPY      "1st:"
+	call		I2CREAD2					; Start Gas
+	movff		SSPBUF,lo
+	output_8
+	call		word_processor				; Display Gas information
+
+	WIN_TOP		.25
+	STRCPY      "V"
+	call		I2CREAD2					; Firmware x
+	movff		SSPBUF,lo
+	output_8
+	PUTC		'.'
+	call		I2CREAD2					; Firmware y
+	movff		SSPBUF,lo
+	output_8
+	call		word_processor				; Display Gas information
+	bcf			leftbind					; Clear flag
+
+	WIN_TOP		.50
+	lfsr		FSR2,letter	
+	call		I2CREAD2					; Battery lo
+	movff		SSPBUF,lo
+	call		I2CREAD2					; Battery hi
+	movff		SSPBUF,hi
+	movlw	d'1'
+	movwf	ignore_digits
+	bsf		ignore_digit5		; do not display mV
+	bsf		leftbind
+	output_16dp	d'2'			; e.g. 3.45V
+	bcf		leftbind
+	STRCAT_PRINT  "V"
+
+	bcf			leftbind					; Clear flag
+
+;	call		I2CREAD2					; Skip Sampling rate
+
+	bcf			menubit2
+	bcf			menubit3
+	bcf			switch_right
+	bcf			switch_left
+	clrf		timeout_counter2
+display_profile2_loop:
+	call		check_switches_logbook
+	btfsc		menubit2					; SET/MENU?
+	bra			exit_profileview			; back to list
+	btfsc		menubit3					; ENTER?
+	bra			profileview_page3			; Switch to Page3 of profile view
+	btfsc		onesecupdate
+	call		timeout_surfmode			; timeout
+	btfsc		onesecupdate
+	call		set_dive_modes				; check, if divemode must be entered
+	bcf			onesecupdate				; one second update
+	btfsc		sleepmode					; Timeout?
+	bra			exit_profileview			; back to list
+	btfsc		divemode
+	goto		restart						; Enter Divemode if required
+	bra			display_profile2_loop		; wait for something to do
+
+profileview_page3:
+    WIN_BOX_BLACK   .0, .74, .0, .159		;top, bottom, left, right
+
+	call		PLED_standard_color
+
+	movff		avr_rel_pressure+0,eeprom_address+0
+	movff		avr_rel_pressure+1,eeprom_address+1			; Pointer to Gaslist
+
+	incf_eeprom_address	d'24'				; Point to "Salinity"
+	bsf			leftbind
+	WIN_TOP		.0
+	WIN_LEFT	.0
+	call		I2CREAD2					; read Salinity
+	lfsr	FSR2,letter
+	movff	SSPBUF,lo
+	clrf	hi
+	output_16dp	d'3'
+	STRCAT_PRINT "kg/l"
+
+	call		I2CREAD2					; Skip GF_HI (Upper nibble), GF_LO (Lower nibble)
+	movff		SSPBUF,lo
+	movlw		b'11110000'					; mask GF hi
+	andwf		lo,F
+	WIN_TOP		.25
+	STRCPY      "GF_hi:"
+	output_8
+	call		word_processor				; Display Gas information
+
+	movff		SSPBUF,lo
+	movlw		b'00001111'					; mask GF lo
+	andwf		lo,F
+	WIN_TOP		.50
+	STRCPY      "GF_lo:"
+	output_8
+	call		word_processor				; Display Gas information
+
+	WIN_TOP		.0
+	WIN_LEFT	.65
+	movff	average_divesecs+0,xB+0
+	clrf	xB+1								; Number of x-pixels displayed
+	movff	average_depth_hold_total+0,xC+0
+	movff	average_depth_hold_total+1,xC+1
+	movff	average_depth_hold_total+2,xC+2
+	movff	average_depth_hold_total+3,xC+3
+	call	div32x16 	; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
+	STRCPY      "Avr:"
+	movff	xC+0,lo
+	movff	xC+1,hi
+	output_16dp	d'3'					; Average depth (Re-calculated from the drawn profile - not 100% exact!)
+	STRCAT_PRINT "m"
+
+;	WIN_TOP		.25
+;	WIN_LEFT	.65
+;	lfsr	FSR2,letter
+;	movff	average_divesecs+0,lo
+;	output_8
+;	call		word_processor
+
+	bcf			menubit2
+	bcf			menubit3
+	bcf			switch_right
+	bcf			switch_left
+	clrf		timeout_counter2
+display_profile3_loop:
+	call		check_switches_logbook
+	btfsc		menubit2					; SET/MENU?
+	bra			exit_profileview			; back to list
+	btfsc		menubit3					; ENTER?
+	bra			exit_profileview			; back to list
+	btfsc		onesecupdate
+	call		timeout_surfmode			; timeout
+	btfsc		onesecupdate
+	call		set_dive_modes				; check, if divemode must be entered
+	bcf			onesecupdate				; one second update
+	btfsc		sleepmode					; Timeout?
+	bra			exit_profileview			; back to list
+	btfsc		divemode
+	goto		restart						; Enter Divemode if required
+	bra			display_profile3_loop		; wait for something to do
+	
+
 
 profile_display_fill:		; In this column between this row (xC+0) and the last row (apnoe_mins), keep xC+0!!
 ; First, check if xC+0>apnoe_mins or xC+0<aponoe_mins
@@ -752,7 +963,7 @@ exit_profileview:
 	movwf		menupos						; here: active row on current page
 	incf		menupos2,F					; start new page
 	call		PLED_ClearScreen			; clear details/profile
-	bra			menu_logbook1b					; start search
+	goto		menu_logbook1b					; start search
 
 next_logbook2:
 	btfsc		all_dives_shown				; all shown
@@ -796,7 +1007,7 @@ next_logbook3b:
 
 	bcf			switch_right
 	bcf			menubit3					; clear flag
-	bra			menu_logbook_loop
+	goto		menu_logbook_loop
 
 display_listdive:
 	bsf			logbook_page_not_empty		; Page not empty

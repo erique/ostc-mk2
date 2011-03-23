@@ -463,8 +463,8 @@ display_profile_offset3:
 	bcf			leftbind
 	call		word_processor				; display 3rd page of details
 
-	movff		eeprom_address+0,avr_rel_pressure+0
-	movff		eeprom_address+1,avr_rel_pressure+1			; Pointer to Gaslist (For Page 2)
+	movff		eeprom_address+0,average_depth_hold+0
+	movff		eeprom_address+1,average_depth_hold+1			; Pointer to Gaslist (For Page 2)
 
 	incf_eeprom_address	d'18'				; Skip 18Bytes in EEPROM (faster)
 	; 18bytes gases, battery, firmware number
@@ -657,8 +657,8 @@ display_profile_loop:
 profileview_page2:
     WIN_BOX_BLACK   .0, .74, .0, .159		;top, bottom, left, right
 
-	movff		avr_rel_pressure+0,eeprom_address+0
-	movff		avr_rel_pressure+1,eeprom_address+1			; Pointer to Gaslist
+	movff		average_depth_hold+0,eeprom_address+0
+	movff		average_depth_hold+1,eeprom_address+1			; Pointer to Gaslist
 
 	call		PLED_standard_color
 	bsf			leftbind
@@ -795,8 +795,8 @@ profileview_page3:
 
 	call		PLED_standard_color
 
-	movff		avr_rel_pressure+0,eeprom_address+0
-	movff		avr_rel_pressure+1,eeprom_address+1			; Pointer to Gaslist
+	movff		average_depth_hold+0,eeprom_address+0
+	movff		average_depth_hold+1,eeprom_address+1			; Pointer to Gaslist
 
 	incf_eeprom_address	d'24'				; Point to "Salinity"
 	bsf			leftbind

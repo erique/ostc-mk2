@@ -40,12 +40,21 @@ Creating a working project:
          General: Default storage = Overlay (-sco)
          Optimization: Enable all
 
-   - Make sure the IDE is configured to find the clib.lib file
-     (needed even with pé_deco.o)
+   - Make sure the IDE is configured to find the "clib.lib" file
+     (needed even with precompiled p2_deco.o)
      Menu : Project > Build Options ... > Project > Directories
          Set «Search Directories» for : «Library Seach Path» to the path of the 
              “clib.lib” file (in c:\Program Files\Microship\MCC18\lib in my case)
          Set «Build Directory Policy» to «Assemble/Compile in source-file directory, link in output directory»
+
+ - If you want to compile in DEBUG mode, select "Debug" in the build configuration
+   menu in the top-bar of the IDE.
+   It adds more safety tests into the code, so it is easier to spot bugs, 
+   but generate firware NOT SUITABLE for diving !
+   ==> Always revert to Release and recompile everything once debugging is done.
+
+ - If you want a translated version (FRENCH, SPANISH, etc.), uncomment
+   the corresponding #define in definitions.asm
 
  - Hit F10 to recompile everything.
    --> You should get a .hex file where you saved your project.
@@ -54,7 +63,7 @@ Creating a working project:
 Installing the new firmware
 ---------------------------
 
- - Get the .hew file you want to flash onto the OSTC.
+ - Get the .hex file you want to flash onto the OSTC Mk2.
 
  - Connect the OSTC, wake it up.
 

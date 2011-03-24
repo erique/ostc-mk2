@@ -4,6 +4,7 @@ BUGFIX: NoFly time should not be reseted after dive simulation.
 NEW: High altitude (Plane/Fly) mode added
 NEW: Gaslist, Salinity, Gradient Factors and Average depth displayed in Logbook
 
+
 New in 1.83 beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: gas switch

@@ -119,34 +119,6 @@ timer0int:
 		clrf	TMR0L
 		return
 		
-timer0int_left_reset:
-		bcf		INTCON2, INTEDG0			; Interrupt on faling edge again
-		bcf		switch_left_isr				; Clear flag, button press is done
-
-		movlw	T0CON_debounce				; Timer0
-		movwf	T0CON
-
-		bsf		T0CON,TMR0ON				; Start Timer 0
-		return
-
-timer0int_left:
-		bsf		INTCON2, INTEDG0			; Interrupt on rising edge again
-		return
-
-timer0int_right_reset:
-		bcf		INTCON2, INTEDG1			; Interrupt on faling edge again
-		bcf		switch_right_isr			; Clear flag, button press is done
-
-		movlw	T0CON_debounce				; Timer0
-		movwf	T0CON
-
-		bsf		T0CON,TMR0ON				; Start Timer 0
-		return
-
-timer0int_right:
-		bsf		INTCON2, INTEDG1			; Interrupt on rising edge again
-		return
-
 timer1int:
 		bcf		PIR1,TMR1IF					; Clear flag
 

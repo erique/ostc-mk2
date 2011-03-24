@@ -79,7 +79,7 @@ menu_logbook2:
 	btfsc		divemins+1,7            ; At 0x8000?
 	bra			menu_logbook_reset      ; yes, restart (if not empty)
 
-	decf_eeprom_address	d'2'			; +2 to eeprom address.
+	decf_eeprom_address	d'2'			; -2 to eeprom address.
 
 	call		I2CREAD					; reads one byte (Slow! Better use Blockread!)
 
@@ -137,7 +137,7 @@ menu_logbook4:
 	movf		divesecs,W					; divenumber that is searched
 	cpfseq		divenumber					; current divenumber
 	goto		next_logbook				; No match, continue search
-	bra			display_profile2
+	bra			display_profile2			; Match: Show header and profile
 	
 
 menu_logbook_display_loop:
@@ -1038,20 +1038,20 @@ display_listdive1a:
 	movff		divenumber,lo
 	output_99x								; # of dive
 	PUTC		' '
-	call		I2CREAD2					; logbook_profile_version (1st. byte of Header after the 0xFA, 0xFA)
+	call		I2CREAD3					; logbook_profile_version (1st. byte of Header after the 0xFA, 0xFA)  (Block read start)
 	movff		SSPBUF,lo
 	movlw		d'13'
 	cpfsgt		lo							; Skip if lo>13
 	bra			display_listdive2			; use old format
 
-	call		I2CREAD2					; Skip Profile version
+	call		I2CREAD4					; Skip Profile version (Block read)
 	movff		SSPBUF,lo					; in new format, read month
 
 display_listdive2:
 	movff		lo,convert_value_temp+0		; Month (in lo, see above)
-	call		I2CREAD2					; Day
+	call		I2CREAD4					; Day (Block read)
 	movff		SSPBUF,convert_value_temp+1
-	call		I2CREAD2					; Year
+	call		I2CREAD4					; Year (Block read)
 	movff		SSPBUF,convert_value_temp+2
 	call		PLED_convert_date_short		; converts into "DD/MM" or "MM/DD" or "MM/DD" in s
 
@@ -1061,17 +1061,17 @@ display_listdive2:
 ;	call		I2CREAD2					; minutes (skip)
 
 	PUTC		' '
-	call		I2CREAD2					; Depth
+	call		I2CREAD3					; Depth (Block read start)
 	movff		SSPBUF,lo
-	call		I2CREAD2	
+	call		I2CREAD4					; Block read
 	movff		SSPBUF,hi
 	bsf			leftbind
 	bsf			ignore_digit5				; Do not display 1cm figure
 	output_16dp	d'3'						; max. depth
 	STRCAT      "m "
-	call		I2CREAD2	
+	call		I2CREAD4					; Block read
 	movff		SSPBUF,lo					; read divetime in minutes
-	call		I2CREAD2	
+	call		I2CREAD4					; Block read
 	movff		SSPBUF,hi					; read divetime in minutes
 	bsf			leftbind
 	output_16								; Divetime minutes

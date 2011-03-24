@@ -220,6 +220,43 @@ get_free_EEPROM_location4:
 	
 	
 I2CREAD:
+	rcall		I2CREAD_COMMON
+	bsf			SSPCON2, PEN	; Stop
+	rcall		WaitMSSP	
+	return
+
+I2CREAD2:						; same as I2CREAD but with automatic address increase 
+	rcall		I2CREAD
+I2CREAD2_2:
+	movlw		d'1'
+	addwf		eeprom_address+0,F
+	movlw		d'0'
+	addwfc		eeprom_address+1,F
+	bcf			eeprom_overflow		
+	btfss		eeprom_address+1,7	; at 0x8000?
+	return		; no, return
+	
+	clrf		eeprom_address+0	; Yes, clear address
+	clrf		eeprom_address+1
+	bsf			eeprom_overflow		; and set overflow bit
+	return
+
+I2CREAD3:						; block read start with automatic address increase 
+	rcall		I2CREAD_COMMON
+	; no Stop condition here
+	bra			I2CREAD2_2
+
+I2CREAD4:						; block read with automatic address increase 
+	bsf			SSPCON2,ACKEN	; Master acknowlegde
+	rcall		WaitMSSP	
+	bsf			SSPCON2, RCEN	; Enable recieve mode
+	rcall		WaitMSSP	
+	movf		SSPBUF,W		; copy read byte into WREG
+	; no Stop condition here
+	bra			I2CREAD2_2
+
+
+I2CREAD_COMMON:
 	bsf			SSPCON2, PEN	; Stop
 	rcall		WaitMSSP	
 	bsf			SSPCON2,SEN		; Start condition
@@ -246,25 +283,9 @@ I2CREAD:
 	bsf			SSPCON2, RCEN	; Enable recieve mode
 	rcall		WaitMSSP	
 	movf		SSPBUF,W		; copy read byte into WREG
-	bsf			SSPCON2, PEN	; Stop
-	rcall		WaitMSSP	
 	return
 
-I2CREAD2:						; same as I2CREAD but with automatic address increase 
-	rcall		I2CREAD
-	movlw		d'1'
-	addwf		eeprom_address+0,F
-	movlw		d'0'
-	addwfc		eeprom_address+1,F
-	bcf			eeprom_overflow		
-	btfss		eeprom_address+1,7	; at 0x8000?
-	return		; no, return
-	
-	clrf		eeprom_address+0	; Yes, clear address
-	clrf		eeprom_address+1
-	bsf			eeprom_overflow		; and set overflow bit
-	return
-	
+
 I2CWRITE:
 	movwf		ext_ee_temp1				; Data byte
 	bsf			SSPCON2,SEN			; Start condition
@@ -284,7 +305,7 @@ I2CWRITE:
 	rcall		I2C_WaitforACK
 	bsf			SSPCON2,PEN			; Stop condition
 	rcall		WaitMSSP	
-	WAITMS		d'6'				; Write delay
+	WAITMS		d'5'				; Write delay
 	return
 
 I2C_WaitforACK:

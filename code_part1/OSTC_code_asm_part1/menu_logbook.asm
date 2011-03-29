@@ -466,8 +466,14 @@ display_profile_offset3:
 	movff		eeprom_address+0,average_depth_hold+0
 	movff		eeprom_address+1,average_depth_hold+1			; Pointer to Gaslist (For Page 2)
 
-	incf_eeprom_address	d'18'				; Skip 18Bytes in EEPROM (faster)
-	; 18bytes gases, battery, firmware number
+;	incf_eeprom_address	d'18'				; Skip 18Bytes in EEPROM (faster)
+;	;18bytes gases, battery, firmware number
+
+	incf_eeprom_address	d'12'				; Skip 12 Bytes in EEPROM (faster) (Gaslist)
+	call		I2CREAD2					; Read start gas (1-5)
+	movff		SSPBUF,active_gas			; Store
+	incf_eeprom_address	d'5'				; Skip 5 Bytes in EEPROM (faster) (Battery, firmware)
+
 	call		I2CREAD2					; Read divisor
 	movff		SSPBUF,divisor_temperature	; Store divisor
 	bcf			divisor_temperature,4		; Clear information length
@@ -569,7 +575,20 @@ display_profile2f:
 	movwf		apnoe_mins					; here: used for fill between rows
 	incf		timeout_counter3,W			; Init Column
 
-    INIT_PIXEL_WROTE timeout_counter3       ; pixel x2
+    INIT_PIXEL_WROTE timeout_counter3       ; pixel x2			(Also sets standard Color!)
+
+	dcfsnz		active_gas,F
+	movlw		color_white					; Color for Gas 1
+	dcfsnz		active_gas,F
+	movlw		color_green					; Color for Gas 2
+	dcfsnz		active_gas,F
+	movlw		color_red					; Color for Gas 3
+	dcfsnz		active_gas,F
+	movlw		color_yellow				; Color for Gas 4
+	dcfsnz		active_gas,F
+	movlw		color_violet				; Color for Gas 5
+	call		PLED_set_color				; Set Color...
+
 
 profile_display_loop:
 	movff		profile_temp+0,profile_temp2+0
@@ -625,6 +644,7 @@ profile_display_loop3:
 	bra			profile_display_loop		; Not ready yet
 ; Done.
 profile_display_loop_done:
+	call		PLED_standard_color			; Restore color
 	movlw		d'159'
 	subfwb		ignore_digits,W				; keep number of X-pixels (For average depth display on Page 3)
 	movwf		average_divesecs+0			; Store here for compatibility
@@ -660,7 +680,8 @@ profileview_page2:
 	movff		average_depth_hold+0,eeprom_address+0
 	movff		average_depth_hold+1,eeprom_address+1			; Pointer to Gaslist
 
-	call		PLED_standard_color
+	movlw		color_white					; Color for Gas 1
+	call		PLED_set_color				; Set Color...
 	bsf			leftbind
 	WIN_TOP		.0
 	WIN_LEFT	.0
@@ -674,6 +695,8 @@ profileview_page2:
 	output_8
 	call		word_processor				; Display Gas information
 
+	movlw		color_green					; Color for Gas 2
+	call		PLED_set_color				; Set Color...
 	WIN_TOP		.25
 	STRCPY      "G2:"
 	call		I2CREAD2					; Gas2 current O2
@@ -685,6 +708,8 @@ profileview_page2:
 	output_8
 	call		word_processor				; Display Gas information
 
+	movlw		color_red					; Color for Gas 3
+	call		PLED_set_color				; Set Color...
 	WIN_TOP		.50
 	STRCPY      "G3:"
 	call		I2CREAD2					; Gas3 current O2
@@ -696,6 +721,8 @@ profileview_page2:
 	output_8
 	call		word_processor				; Display Gas information
 
+	movlw		color_yellow				; Color for Gas 4
+	call		PLED_set_color				; Set Color...
 	WIN_TOP		.0
 	WIN_LEFT	.60
 	STRCPY      "G4:"
@@ -708,6 +735,8 @@ profileview_page2:
 	output_8
 	call		word_processor				; Display Gas information
 
+	movlw		color_violet				; Color for Gas 5
+	call		PLED_set_color				; Set Color...
 	WIN_TOP		.25
 	STRCPY      "G5:"
 	call		I2CREAD2					; Gas5 current O2
@@ -719,6 +748,8 @@ profileview_page2:
 	output_8
 	call		word_processor				; Display Gas information
 
+	movlw		color_cyan					; Color for Gas 6
+	call		PLED_set_color				; Set Color...
 	WIN_TOP		.50
 	STRCPY      "G6:"
 	call		I2CREAD2					; Gas6 current O2
@@ -730,6 +761,7 @@ profileview_page2:
 	output_8
 	call		word_processor				; Display Gas information
 
+	call		PLED_standard_color
 	WIN_TOP		.0
 	WIN_LEFT	.120
 	STRCPY      "1st:"
@@ -930,6 +962,9 @@ profile_view_get_depth:
 	return
 
 profile_view_get_depth_new1:
+	btfsc		event_occured				; Was there an event attached to this sample?
+	rcall		profile_view_get_depth_new2	; Yes, get information about this event
+
 	tstfsz		timeout_counter2			; Any bytes to ignore
 	bra			profile_view_get_depth_new3	; Yes (1-127)
 	return									; No (0)
@@ -938,6 +973,38 @@ profile_view_get_depth_new3:
 	movf		timeout_counter2,W			; number of additional bytes to ignore (0-127)
 	call		incf_eeprom_address0		; increases bytes in eeprom_address:2 with 0x8000 bank switching
 	return
+
+profile_view_get_depth_new2:
+	call		I2CREAD2					; Read Event byte
+	movff		SSPBUF,EventByte			; store EventByte
+	decf		timeout_counter2,F			; reduce counter
+; Check Event flags in the EventByte
+	btfsc		EventByte,4					; Manual Gas Changed?
+	bra			logbook_event1				; Yes!
+	btfss		EventByte,5					; Stored Gas Changed?
+	return									; No, return
+; Stored Gas changed!
+	call		I2CREAD2					; Read Gas#
+	movff		SSPBUF,active_gas			; store gas#
+	decf		timeout_counter2,F			; reduce counter
+	dcfsnz		active_gas,F
+	movlw		color_white					; Color for Gas 1
+	dcfsnz		active_gas,F
+	movlw		color_green					; Color for Gas 2
+	dcfsnz		active_gas,F
+	movlw		color_red					; Color for Gas 3
+	dcfsnz		active_gas,F
+	movlw		color_yellow				; Color for Gas 4
+	dcfsnz		active_gas,F
+	movlw		color_violet				; Color for Gas 5
+	call		PLED_set_color				; Set Color...
+	return
+
+logbook_event1:
+	movlw		color_cyan					; Color for Gas 6
+	call		PLED_set_color				; Set Color...
+	return		;(The two bytes indicating the manual gas change will be ignored in the standard "ignore loop" above...)
+
 
 ;Keep comments for future temperature graph
 ;	call		I2CREAD2					; ignore byte

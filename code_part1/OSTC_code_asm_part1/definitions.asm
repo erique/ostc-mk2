@@ -44,13 +44,16 @@
 #DEFINE		FT_LARGE		.2
 
 ; Color Definitions: 8Bit RGB b'RRRGGGBB'
-;#DEFINE	color_red	b'11100000'
-#DEFINE	color_blue	b'00000011'
+#DEFINE	color_red		d'224'
+#DEFINE	color_violet	d'235'
+#DEFINE	color_blue		d'199'
 #DEFINE	color_green	b'00011100'
-;#DEFINE	color_white b'11111111'
+#DEFINE	color_yellow 	d'253'
+#DEFINE	color_white b'11111111'
 #DEFINE	color_black b'00000000'
-#DEFINE	color_deepblue b'00000001'
+#DEFINE	color_deepblue b'00000010'
 #DEFINE	color_grey	d'74'
+#DEFINE	color_cyan	d'223'
 
 #DEFINE	warn_depth		d'1'
 #DEFINE	warn_cns		d'2'

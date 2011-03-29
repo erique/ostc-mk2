@@ -1711,14 +1711,11 @@ PLED_desaturation_time2:
 	return
 
 PLED_nofly_time:	
-	movff		nofly_time+0,lo			
-	movff		nofly_time+1,hi					; Copy
-	tstfsz		lo								; =0?
-	bra			PLED_nofly_time2				; No!
-	tstfsz		hi								; =0?
-	bra			PLED_nofly_time2				; No!
+ 	movf    nofly_time+0,W              ; Is nofly null ?
+    iorwf   nofly_time+1,W
+    bnz     PLED_nofly_time2            ; No...
 	return
-
+ 
 PLED_nofly_time2:
 	ostc_debug	'g'
 	WIN_TOP		.125
@@ -1732,7 +1729,7 @@ PLED_nofly_time2:
 	PUTC    ' '
 	movff		nofly_time+0,lo			; divide by 60...
 	movff		nofly_time+1,hi
-	call		convert_time				; converts hi:lo in minutes to hours (hi) and minutes (lo)
+	call		convert_time			; converts hi:lo in minutes to hours (hi) and minutes (lo)
 	bsf			leftbind
 	movf		lo,W
 	movff		hi,lo
@@ -1740,9 +1737,9 @@ PLED_nofly_time2:
 	output_8								; Hours
 	PUTC        ':'
 	movff		hi,lo					; Minutes
-	decf		lo,F
-	btfsc		lo,7					; keep Nofly time
-	clrf		lo
+;	decf		lo,F
+;	btfsc		lo,7					; keep Nofly time
+;	clrf		lo
 	output_99x
 	bcf		leftbind
 	call	word_processor

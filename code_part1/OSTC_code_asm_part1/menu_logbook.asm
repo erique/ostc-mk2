@@ -466,9 +466,6 @@ display_profile_offset3:
 	movff		eeprom_address+0,average_depth_hold+0
 	movff		eeprom_address+1,average_depth_hold+1			; Pointer to Gaslist (For Page 2)
 
-;	incf_eeprom_address	d'18'				; Skip 18Bytes in EEPROM (faster)
-;	;18bytes gases, battery, firmware number
-
 	incf_eeprom_address	d'12'				; Skip 12 Bytes in EEPROM (faster) (Gaslist)
 	call		I2CREAD2					; Read start gas (1-5)
 	movff		SSPBUF,active_gas			; Store

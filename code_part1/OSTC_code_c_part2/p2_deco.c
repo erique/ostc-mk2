@@ -1473,8 +1473,8 @@ void sim_ascent_to_first_stop(void)
 //
 static void calc_tissue(PARAMETER unsigned char period)
 {
-    assert( 0.00 <= ppN2 && ppN2 < 6.40 );  // 80% N2 at 70m
-    assert( 0.00 <= ppHe && ppHe < 18.9 );  // 90% He at 200m
+    assert( 0.00 <= ppN2 && ppN2 < 11.2 );  // 80% N2 at 130m
+    assert( 0.00 <= ppHe && ppHe < 12.6 );  // 90% He at 130m
 
     for (ci=0;ci<16;ci++)
     {
@@ -1655,8 +1655,8 @@ void update_startvalues(void)
 //   + Do it on sim_pres_tissue, instead of pres_tissue.
 static void sim_tissue(PARAMETER unsigned char period)
 {
-    assert( 0.00 <= ppN2 && ppN2 < 6.40 );  // 80% N2 at 70m
-    assert( 0.00 <= ppHe && ppHe < 18.9 );  // 90% He at 200m
+    assert( 0.00 <= ppN2 && ppN2 < 11.2 );  // 80% N2 at 130m
+    assert( 0.00 <= ppHe && ppHe < 12.6 );  // 90% He at 130m
 
     for(ci=0; ci<16; ci++)
     {
@@ -1857,11 +1857,6 @@ static void calc_gradient_factor(void)
 //
 void deco_calc_desaturation_time(void)
 {
-    overlay unsigned short desat_time;    // For a particular compartiment, in min.
-    overlay float temp1;
-    overlay float temp2;
-    overlay float temp3;
-    overlay float temp4;
     RESET_C_STACK
 
     assert( 800 < int_I_pres_surface && int_I_pres_surface < 1100 );
@@ -1875,6 +1870,12 @@ void deco_calc_desaturation_time(void)
 
     for (ci=0;ci<16;ci++)
     {
+        overlay unsigned short desat_time;    // For a particular compartiment, in min.
+        overlay float temp1;
+        overlay float temp2;
+        overlay float temp3;
+        overlay float temp4;
+    
         overlay float var_N2_halftime = buhlmann_ht[ci];
         overlay float var_He_halftime = (buhlmann_ht+16)[ci];
 
@@ -1893,7 +1894,7 @@ void deco_calc_desaturation_time(void)
         }
         else
             temp1 = temp1 / temp2;
-         if (temp1 > 0.0)
+        if( 0.0 < temp1 && temp1 < 1.0 )
         {
             temp1 = log(1.0 - temp1);
             temp1 = temp1 / -0.6931; // temp1 is the multiples of half times necessary.
@@ -1916,7 +1917,7 @@ void deco_calc_desaturation_time(void)
         }
         else
             temp3 = -1.0 * temp3 / (pres_tissue+16)[ci];
-        if (temp3 > 0.0)
+        if( 0.0 < temp3 && temp3 < 1.0 )
     	{
         	temp3 = log(1.0 - temp3);
         	temp3 = temp3 / -0.6931; // temp1 is the multiples of half times necessary.
@@ -1935,8 +1936,9 @@ void deco_calc_desaturation_time(void)
             desat_time = (unsigned short)temp4;
         else
             desat_time = (unsigned short)temp2;
-         if(desat_time > int_O_desaturation_time)
-        	int_O_desaturation_time = desat_time;
+
+        if(desat_time > int_O_desaturation_time)
+            int_O_desaturation_time = desat_time;
 
         // N2 saturation in multiples of halftime for display purposes
         temp2 = temp1 * 20.0;  // 0 = 1/8, 120 = 0, 249 = 8
@@ -1967,6 +1969,11 @@ void deco_calc_desaturation_time(void)
 //
 static void calc_wo_deco_step_1_min(void)
 {
+    assert( 800 < int_I_pres_surface && int_I_pres_surface < 1100 );
+    assert( 800 < int_I_pres_respiration && int_I_pres_respiration < 1100 );
+    assert( 100 <= char_I_saturation_multiplier && char_I_saturation_multiplier < 200 );
+    assert( 0 < char_I_desaturation_multiplier && char_I_desaturation_multiplier <= 100 );
+
 	if(flag_in_divemode)
 	{
 		flag_in_divemode = 0;

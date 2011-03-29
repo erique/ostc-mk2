@@ -985,6 +985,10 @@ calculate_noflytime:
 	; calculate nofly time
 	movff	int_O_desaturation_time+0,xA+0
 	movff	int_O_desaturation_time+1,xA+1
+
+    btfsc   xA+1,7                  ; Is desat time negatif ?
+    bra     calculate_noflytime_3   ; Then surely not valid !
+
 	tstfsz	xA+0			; Desat=0?
 	bra		calculate_noflytime2
 	tstfsz	xA+1			; Desat=0?
@@ -1036,14 +1040,14 @@ end_dive:
 	rcall	apnoe_calc_maxdepth
 
 	; calculate desaturation time
-	movff	last_surfpressure_30min+0,int_I_pres_respiration+0		; copy surface air pressure to deco routine
-	movff	last_surfpressure_30min+1,int_I_pres_respiration+1		; 30min old values 
+	movff	last_surfpressure_30min+0,int_I_pres_surface+0          ; Pass surface to desat routine !
+	movff	last_surfpressure_30min+1,int_I_pres_surface+1
 
-	GETCUSTOM8	d'12'				; Desaturation multiplier %
+	GETCUSTOM8	d'12'                   ; Desaturation multiplier %
 	movff	WREG,char_I_desaturation_multiplier
 
 	ostc_debug	'G'		; Sends debug-information to screen if debugmode active
-	call	deco_calc_desaturation_time	; calculate desaturation time
+	call	deco_calc_desaturation_time ; calculate desaturation time
 	movlb	b'00000001'                 ; select ram bank 1
 	rcall	calculate_noflytime         ; Calc NoFly time
 	ostc_debug	'H'                     ; Sends debug-information to screen if debugmode active

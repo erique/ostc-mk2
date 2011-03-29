@@ -101,11 +101,9 @@ onemin_sleep2:
 	movff	amb_pressure+0,int_I_pres_respiration+0		; LOW copy pressure to deco routine
 	movff	amb_pressure+1,int_I_pres_respiration+1		; HIGH
 	GETCUSTOM8	d'11'				; Saturation multiplier %
-	movwf	wait_temp
-	movff	wait_temp,char_I_saturation_multiplier
+	movff	WREG,char_I_saturation_multiplier
 	GETCUSTOM8	d'12'				; Desaturation multiplier %
-	movwf	wait_temp
-	movff	wait_temp,char_I_desaturation_multiplier
+	movff	WREG,char_I_desaturation_multiplier
 	call	deco_calc_wo_deco_step_1_min	; "calc_tissue_sleep"
 	movlb	b'00000001'									; RAM Bank1 selected
 

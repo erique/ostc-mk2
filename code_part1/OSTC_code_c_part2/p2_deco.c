@@ -892,23 +892,56 @@ void deco_debug(void)
 //
 static void gas_switch_find_current(void)
 {
-    if( sim_gas_last_used == 0 )
+    overlay unsigned char j;
+    overlay unsigned char N2 = (unsigned char)(N2_ratio * 100 + 0.5);
+    overlay unsigned char He = (unsigned char)(He_ratio * 100 + 0.5);
+
+    for(j=0; j<5; ++j)
     {
-        overlay unsigned char j;
-        overlay unsigned char N2 = (unsigned char)(N2_ratio * 100 + 0.5);
-        overlay unsigned char He = (unsigned char)(He_ratio * 100 + 0.5);
-        for(j=0; j<5; ++j)
+        // Make sure to detect if we are already breathing some gas in
+        // the current list (happends when first gas do have a depth).
+        if( N2 == char_I_deco_N2_ratio[j] 
+         && He == char_I_deco_He_ratio[j] 
+        )                                 
+        {                                 
+            temp_depth_limit = sim_gas_last_depth = char_I_deco_gas_change[j];
+            sim_gas_last_used  = j+1;
+            break;
+        }
+    }
+
+    // If there is no gas-switch-delay running ?
+    if( sim_gas_delay <= sim_dive_mins)
+    {
+        // Compute current depth:
+        overlay unsigned char depth = (unsigned char)((pres_respiration - pres_surface) / 0.09985);
+        assert( depth < 130 );
+
+        // And if I'm above the last decostop (with the 3m margin) ?
+        if( (sim_gas_last_depth-3) > depth )
         {
-            // Make sure to detect if we are already breathing some gas in
-            // the current list (happends when first gas do have a depth).
-            if( N2 == char_I_deco_N2_ratio[j] 
-             && He == char_I_deco_He_ratio[j] )
+            for(j=0; j<5; ++j)
             {
-                sim_gas_last_depth = char_I_deco_gas_change[j];
-                sim_gas_last_used  = j+1;
-                break;
+                // And If I am in the range of a valide stop ?
+                // (again, with the same 3m margin)
+                if( char_I_deco_gas_change[j]
+                 && depth <= char_I_deco_gas_change[j]
+                 && depth >= (char_I_deco_gas_change[j] - 3)
+                )
+                {
+                    // Then start gas-switch timer there,
+                    sim_gas_delay = sim_dive_mins 
+                                  + read_custom_function(55);
+
+                    // And make sure decostop will be recorded at the right depth.
+                    temp_depth_limit = char_I_deco_gas_change[j];
+                    break;
+                }
             }
         }
+        else
+            // Make clear there is no deay anymore.
+            sim_gas_delay = 0;
     }
 }
 
@@ -948,7 +981,7 @@ static unsigned char gas_switch_deepest(void)
                 continue;
 
             // First, or deeper ?
-            if( (switch_last == 0) || (switch_deco < deco_gas_change[j]) )
+            if( switch_deco < deco_gas_change[j] )
             {
                 switch_deco = deco_gas_change[j];
                 switch_last = j+1;
@@ -1169,12 +1202,13 @@ static void calc_hauptroutine(void)
 
     case 2: //---- Simulate ascent to first stop -----------------------------
         // Check proposed gas at begin of ascent simulation
-        gas_switch_find_current();
-        gas_switch_set();
+        sim_dive_mins = int_I_divemins;         // Init current time.
 
-        sim_dive_mins = int_I_divemins;     // and time.
-        backup_gas_used  = sim_gas_last_used; // And save for later simu steps.
-        backup_gas_depth = sim_gas_last_depth;// And save for later simu steps.
+        gas_switch_find_current();              // Lookup for current gas & time.
+        gas_switch_set();                       // setup calc_ratio's
+
+        backup_gas_used  = sim_gas_last_used;   // And save for later simu steps.
+        backup_gas_depth = sim_gas_last_depth;  // And save for later simu steps.
         backup_gas_delay = sim_gas_delay;
 
     	sim_ascent_to_first_stop();
@@ -1191,7 +1225,7 @@ static void calc_hauptroutine(void)
     	{
             sim_gas_last_used  = backup_gas_used;
             sim_gas_last_depth = backup_gas_depth;
-            sim_gas_delay = backup_gas_delay;
+            sim_gas_delay      = backup_gas_delay;
         }
     	break;
 	}
@@ -1721,7 +1755,8 @@ static void clear_deco_table(void)
 static void update_deco_table()
 {
     overlay unsigned char x;
-    assert( temp_depth_limit < 128 ); // Can't be negativ (overflown).
+    assert( temp_depth_limit < 128 );   // Can't be negativ (overflown).
+    assert( temp_depth_limit > 0 );     // No stop at surface...
 
     for(x=0; x<32; ++x)
     {

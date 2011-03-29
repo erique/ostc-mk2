@@ -284,9 +284,12 @@ calc_deko_divemode:
 	call		div16x16				; xC=(char_I_O2_ratio * p_amb/10)/100
 
 ; Copy ppO2 for CNS calculation
-	movff		xC+0, char_I_actual_ppO2	; copy last ppO2 to buffer register
-	btfsc		FLAG_const_ppO2_mode		; do in const_ppO2_mode
-	movff		char_I_const_ppO2, char_I_actual_ppO2	; copy last ppO2 to buffer register
+    tstfsz      xC+1                    ; Is ppO2 > 2.55bar ?
+    setf        xC+0                    ; yes: bound to 2.55... better than wrap around.
+
+    movff		xC+0, char_I_actual_ppO2	; copy last ppO2 to buffer register
+    btfsc		FLAG_const_ppO2_mode		; do in const_ppO2_mode
+    movff		char_I_const_ppO2, char_I_actual_ppO2	; copy last ppO2 to buffer register
 
 ; Calculate CNS	
 	call	deco_calc_CNS_fraction		; calculate CNS

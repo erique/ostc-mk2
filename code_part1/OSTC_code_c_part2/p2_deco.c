@@ -1901,6 +1901,9 @@ void deco_calc_desaturation_time(void)
             						 // 0.6931 is ln(2), because the math function log() calculates with a base of e not 2 as requested.
             						 // minus because log is negative
             temp2 = var_N2_halftime * temp1 / float_desaturation_multiplier; // time necessary (in minutes ) for complete desaturation (see comment about 10 percent) , new in v.101: float_desaturation_multiplier
+
+            // HERE ==> This assert fails during simulated dives, and should not....
+            assert( temp2 < 28800.0 );  // 480h !!
         }
         else
         {
@@ -1936,7 +1939,7 @@ void deco_calc_desaturation_time(void)
             desat_time = (unsigned short)temp4;
         else
             desat_time = (unsigned short)temp2;
-
+        
         if(desat_time > int_O_desaturation_time)
             int_O_desaturation_time = desat_time;
 

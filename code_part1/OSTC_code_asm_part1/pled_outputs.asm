@@ -379,7 +379,7 @@ PLED_resetdebugger_loop:
 	bra		PLED_resetdebugger_loop		; Loop
 
     bcf     LED_blue
-    bcf     LED_red
+	bcf		switch_left	
 	return
 
 PLED_divemode_mask:					; Displays mask in Dive-Mode

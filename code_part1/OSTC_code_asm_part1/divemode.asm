@@ -1233,13 +1233,9 @@ end_dive2:
 	read_int_eeprom	d'26'			; Read Salinity from EEPROM
 	movf	EEDATA,W
 	call	write_external_eeprom	; Store Salinity to Dive
-	
-	GETCUSTOM8	d'33'				; GF_hi
-	movwf	temp1
-	swapf	temp1,F					; GF_hi -> Bit7-4
-	GETCUSTOM8	d'32'				; GF_lo
-	addwf	temp1,W					; Add GF_lo -> Bit 3-0
-	call	write_external_eeprom	; Stores GF_hi and GF_lo
+
+	movff	char_O_CNS_fraction,WREG	; copy into bank1
+	call	write_external_eeprom		; Stores CNS%
 
 	movlw	0xFB						; Header stop
 	call	write_external_eeprom

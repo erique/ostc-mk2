@@ -519,5 +519,6 @@ sorted_gaslist_active	res 1	; Holds flags for active gases for the sorted list
 #DEFINE	menu3_active			flag15,4	;=1: menu entry three in divemode menu is active
 #DEFINE no_deco_customviews		flag15,5	;=1: Selected mode is Apnoe or Gauge
 #DEFINE	maxdepth_greater_100m	flag15,6	;=1: Max Depth greater>100m
-;unused			flag15,7	;=1: 
+#DEFINE	show_cns_in_logbook		flag15,7	;=1: Show CNS value in logbook (>= V1.84)
+
 

@@ -767,17 +767,28 @@ profileview_page2:
 	output_8
 	call		word_processor				; Display Gas information
 
+
+	bcf			show_cns_in_logbook			; clear flag
 	WIN_TOP		.25
 	STRCPY      "V"
 	call		I2CREAD2					; Firmware x
 	movff		SSPBUF,lo
+	movff		SSPBUF,hi
 	output_8
 	PUTC		'.'
 	call		I2CREAD2					; Firmware y
 	movff		SSPBUF,lo
+	movlw		.83							; Check firmware y > 83
+	cpfslt		lo							; <83?
+	bsf			show_cns_in_logbook			; No, set flag
+	movlw		.2							; Check firmware x > 1
+	cpfslt		hi							; <2?
+	bsf			show_cns_in_logbook			; No, set flag
 	output_8
 	call		word_processor				; Display Gas information
 	bcf			leftbind					; Clear flag
+
+
 
 	WIN_TOP		.50
 	lfsr		FSR2,letter	
@@ -838,25 +849,19 @@ profileview_page3:
 	output_16dp	d'3'
 	STRCAT_PRINT "kg/l"
 
-	call		I2CREAD2					; Skip GF_HI (Upper nibble), GF_LO (Lower nibble)
+	call		I2CREAD2					; Read CNS%
+
+	btfss	show_cns_in_logbook				; Show CNS?
+	bra		logbook_skip_cns				; No
+
 	movff		SSPBUF,lo
-	movlw		b'11110000'					; mask GF hi
-	andwf		lo,F
 	WIN_TOP		.25
-	STRCPY      "GF_hi:"
+	STRCPY      "CNS:"
 	output_8
-	call		word_processor				; Display Gas information
+	STRCAT_PRINT "%"						; Display CNS %
 
-	movff		SSPBUF,lo
-	movlw		b'00001111'					; mask GF lo
-	andwf		lo,F
+logbook_skip_cns:
 	WIN_TOP		.50
-	STRCPY      "GF_lo:"
-	output_8
-	call		word_processor				; Display Gas information
-
-	WIN_TOP		.0
-	WIN_LEFT	.65
 	movff	average_divesecs+0,xB+0
 	clrf	xB+1								; Number of x-pixels displayed
 	movff	average_depth_hold_total+0,xC+0
@@ -870,7 +875,7 @@ profileview_page3:
 	output_16dp	d'3'					; Average depth (Re-calculated from the drawn profile - not 100% exact!)
 	STRCAT_PRINT "m"
 
-;	WIN_TOP		.25
+;	WIN_TOP		.0
 ;	WIN_LEFT	.65
 ;	lfsr	FSR2,letter
 ;	movff	average_divesecs+0,lo

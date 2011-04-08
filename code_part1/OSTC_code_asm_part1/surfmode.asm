@@ -1,4 +1,4 @@
-
+f
 ; OSTC - diving computer code
 ; Copyright (C) 2008 HeinrichsWeikamp GbR
 
@@ -267,7 +267,6 @@ set_leds_surfmode:
 	return	
 
 calc_deko_surfmode:
-	bsf		LED_red
 	ostc_debug	'I'		; Sends debug-information to screen if debugmode active
 
 	movff	last_surfpressure+0,int_I_pres_surface+0	; copy surface air pressure to deco routine
@@ -288,7 +287,10 @@ calc_deko_surfmode:
 	call	deco_calc_wo_deco_step_1_min    ; calculate deco in surface mode 
 	movlb	b'00000001'									; select ram bank 1
 	ostc_debug	'J'		; Sends debug-information to screen if debugmode active
-	bcf		LED_red
+
+movff	int_O_desaturation_time+0,desaturation_time_buffer+0
+movff	int_O_desaturation_time+1,desaturation_time_buffer+1
+
 	return
 
 

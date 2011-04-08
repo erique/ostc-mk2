@@ -1695,8 +1695,11 @@ PLED_desaturation_time2:
 	lfsr	FSR2,letter
 	OUTPUTTEXT	d'14'				; Desat
 	PUTC    ' '
-	movff		int_O_desaturation_time+0,lo			; divide by 60...
-	movff		int_O_desaturation_time+1,hi
+;	movff		int_O_desaturation_time+0,lo			; divide by 60...
+;	movff		int_O_desaturation_time+1,hi
+movff		desaturation_time_buffer+0,lo			; divide by 60...
+movff		desaturation_time_buffer+1,hi
+
 	call		convert_time				; converts hi:lo in minutes to hours (hi) and minutes (lo)
 	bsf			leftbind
 	movf		lo,W

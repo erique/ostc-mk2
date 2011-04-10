@@ -26,6 +26,10 @@
 diveloop:
 	call	diveloop_boot			; Boot tasks for all modes
 
+; start timer3 for deco routine CPU usesage monitor
+	movlw	b'00000011'
+	movwf	T3CON			; Timer3 with 32768Hz clock running
+
 ; Startup Tasks for all modes
 	ostc_debug	'R'		; Sends debug-information to screen if debugmode active
 	call	PLED_ClearScreen			; clean up OLED
@@ -440,13 +444,46 @@ calc_deko_divemode2:
 
  	ostc_debug	'B'		; Sends debug-information to screen if debugmode active
 	call	divemode_prepare_flags_for_deco
-	
 	movlw	d'0'
 	movff	WREG,char_I_step_is_1min		; 2 second deco mode
+
+	clrf	TMR3L
+	clrf	TMR3H						; Reset Timer3
 
 	call	deco_calc_hauptroutine		; calc_tissue
 	movlb	b'00000001'						; rambank 1 selected
 	ostc_debug	'C'		; Sends debug-information to screen if debugmode active
+
+	btfss	debug_mode				; Are we in debugmode?
+	bra		calc_deko_divemode4		; No...
+
+; Show timer3 reading converted into ms (Error: +2,3%) in custom area
+	movff		TMR3L,lo
+	movff		TMR3H,hi
+	bcf			STATUS,C
+	rrcf		hi
+	rrcf		lo			;/2
+	bcf			STATUS,C
+	rrcf		hi
+	rrcf		lo			;/4
+	bcf			STATUS,C
+	rrcf		hi
+	rrcf		lo			;/8
+	bcf			STATUS,C
+	rrcf		hi
+	rrcf		lo			;/16
+	bcf			STATUS,C
+	rrcf		hi
+	rrcf		lo			;/32
+
+	WIN_TOP		.216
+	WIN_LEFT	.100
+	WIN_FONT	FT_SMALL
+   	STRCPY  "ms:"
+	output_16
+	call	word_processor
+
+calc_deko_divemode4:
 
 	movff	char_O_first_deco_depth,wait_temp	; copy ceiling to temp register
 	tstfsz	wait_temp							; Ceiling<0m?

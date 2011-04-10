@@ -261,7 +261,7 @@ ostc_debug1:
 	btfss	debug_mode				; Are we in debugmode?
 	return							; No, return!
 
-	WIN_TOP		.200
+	WIN_TOP		.192
 	WIN_LEFT	.100
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor

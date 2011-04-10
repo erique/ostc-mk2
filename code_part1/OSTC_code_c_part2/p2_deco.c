@@ -1887,6 +1887,17 @@ void deco_calc_desaturation_time(void)
     assert( 800 < int_I_pres_surface && int_I_pres_surface < 1100 );
     assert( 0 < char_I_desaturation_multiplier && char_I_desaturation_multiplier <= 100 );
 
+#ifndef CROSS_COMPILE
+    // Note: we don't use far rom pointer, because the
+    //       24 bits is to complex, hence we have to set
+    //       the UPPER page ourself...
+    //       --> Set zero if tables are moved to lower pages !
+    _asm
+        movlw 1
+        movwf TBLPTRU,0
+    _endasm
+#endif
+
     N2_ratio = 0.7902; // FIXED sum as stated in bühlmann
     pres_surface = int_I_pres_surface * 0.001;
     ppN2 = N2_ratio * (pres_surface - ppWVapour);
@@ -1901,16 +1912,12 @@ void deco_calc_desaturation_time(void)
         overlay float temp3;
         overlay float temp4;
     
-        overlay float var_N2_halftime = buhlmann_ht[ci];
-        overlay float var_He_halftime = (buhlmann_ht+16)[ci];
-
         // saturation_time (for flight) and N2_saturation in multiples of halftime
         // version v.100: 1.1 = 10 percent distance to totally clean (totally clean is not possible, would take infinite time )
         // new in version v.101: 1.07 = 7 percent distance to totally clean (totally clean is not possible, would take infinite time )
-        // changes in v.101: 1.05 = 5 percent dist to totally clean is new desaturation point for display and noFly calculations
+        // changes in v.101: 1.05 = 5 percent dist to totally clean is new desaturation point for display and NoFly calculations
         // N2
-        temp1 = 1.05 * ppN2;
-        temp1 = temp1 - pres_tissue[ci];
+        temp1 = 1.05 * ppN2 - pres_tissue[ci];
         temp2 = ppN2 - pres_tissue[ci];
         if (temp2 >= 0.0)
         {
@@ -1921,14 +1928,14 @@ void deco_calc_desaturation_time(void)
             temp1 = temp1 / temp2;
         if( 0.0 < temp1 && temp1 < 1.0 )
         {
-            temp1 = log(1.0 - temp1);
-            temp1 = temp1 / -0.6931; // temp1 is the multiples of half times necessary.
-            						 // 0.6931 is ln(2), because the math function log() calculates with a base of e not 2 as requested.
-            						 // minus because log is negative
-            temp2 = var_N2_halftime * temp1 / float_desaturation_multiplier; // time necessary (in minutes ) for complete desaturation (see comment about 10 percent) , new in v.101: float_desaturation_multiplier
+            overlay float var_N2_halftime = buhlmann_ht[ci];
+            assert( 4.0 <= var_N2_halftime && var_N2_halftime <= 635.0 );
 
-            // HERE ==> This assert fails during simulated dives, and should not....
-            assert( temp2 < 28800.0 );  // 480h !!
+            // 0.6931 is ln(2), because the math function log() calculates with a base of e not 2 as requested.
+            // minus because log is negative.
+            temp1 = log(1.0 - temp1) / -0.6931; // temp1 is the multiples of half times necessary.
+            temp2 = var_N2_halftime * temp1 / float_desaturation_multiplier; // time necessary (in minutes ) for complete desaturation (see comment about 5 percent) , new in v.101: float_desaturation_multiplier
+
         }
         else
         {
@@ -1944,11 +1951,13 @@ void deco_calc_desaturation_time(void)
             temp4 = 0.0;
         }
         else
-            temp3 = -1.0 * temp3 / (pres_tissue+16)[ci];
+            temp3 = - temp3 / (pres_tissue+16)[ci];
         if( 0.0 < temp3 && temp3 < 1.0 )
     	{
-        	temp3 = log(1.0 - temp3);
-        	temp3 = temp3 / -0.6931; // temp1 is the multiples of half times necessary.
+            overlay float var_He_halftime = (buhlmann_ht+16)[ci];
+            assert( 1.51 <= var_N2_halftime && var_N2_halftime <= 240.03 );
+
+        	temp3 = log(1.0 - temp3) / -0.6931; // temp1 is the multiples of half times necessary.
         							 // 0.6931 is ln(2), because the math function log() calculates with a base of e  not 2 as requested.
         							 // minus because log is negative
         	temp4 = var_He_halftime * temp3 / float_desaturation_multiplier; // time necessary (in minutes ) for "complete" desaturation, new in v.101 float_desaturation_multiplier

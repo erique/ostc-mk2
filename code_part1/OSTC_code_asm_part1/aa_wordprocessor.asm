@@ -51,15 +51,15 @@
 ;   FSRx            12bits. Usefull as RAM pointers.
 ;=============================================================================
 ; Temporary variables are overlayed in bank 0 ACCESS, used also by C-code
-; (p2_deco), MPLAB math abd stdlib libraries.
+; (p2_deco), MPLAB math and stdlib libraries.
 
     CBLOCK 0x000                        
-        	aa_flags					; Various flags for aa_wordprocessor
-        	aa_width:2                  ; Width in pixels (0..319)
-        	aa_bitlen					; Count of pixels when decoding bitmaps.
-        	aa_start:2					; PROM ptr to start of encoded bitmap
-        	aa_end:2					; and end of it.
-        	aa_temp:2				; Current color, divided by 2 or 4
+        	aa_flags                ; Various flags for aa_wordprocessor
+        	aa_width:2              ; Width in pixels (0..319)
+        	aa_bitlen               ; Count of pixels when decoding bitmaps.
+        	aa_start:2              ; PROM ptr to start of encoded bitmap
+        	aa_end:2                ; and end of it.
+        	aa_temp:2               ; Current color, divided by 2 or 4
     ENDC
 
 ; Flags allocation:

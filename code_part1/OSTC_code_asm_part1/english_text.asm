@@ -80,7 +80,7 @@
     TCODE    .20,  .35,      "Cancel Reset"              ;021 Cancel Reset
     TCODE    .32,  .65,      "Time:"                     ;022 Time:
     TCODE    .32,  .95,      "Date:"                     ;023 Date:
-    TCODE    .32,  .155,     "Set Hours"                 ;024 Set Hours
+    TCODE    .0,   .215,     "Set Hours"                 ;024 Set Hours
     TCODE    .6,   .0,       "Reset..."                  ;025 Reset...
     TCODE    .55,  .2,       "Logbook"                   ;026 Logbook
     TCODE    .14,  .2,       "Custom Functions I"        ;027 Custom Functions I

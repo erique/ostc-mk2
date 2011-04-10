@@ -232,9 +232,9 @@ RTCinit2:
 	movwf	mins
 	movlw	.12
 	movwf	hours
-	movlw	.1
+	movlw	.10
 	movwf	day
-	movlw	.1
+	movlw	.4
 	movwf	month
 	movlw	.11
 	movwf	year

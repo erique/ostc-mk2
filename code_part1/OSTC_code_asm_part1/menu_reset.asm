@@ -364,11 +364,15 @@ reset_all_cf:
 	clrf	EEDATA
 	write_int_eeprom	d'32'		; reset change depth gas #5
 
+	movlw	d'80'
+	movwf	EEDATA
+	write_int_eeprom	d'36'		; reset mix1 to ppO2=0.80Bar
 	movlw	d'100'
 	movwf	EEDATA
-	write_int_eeprom	d'36'		; reset mix1 to ppO2=1.00Bar
 	write_int_eeprom	d'37'		; reset mix2 to ppO2=1.00Bar
-	write_int_eeprom	d'38'		; reset mix3 to ppO2=1.00Bar
+	movlw	d'120'
+	movwf	EEDATA
+	write_int_eeprom	d'38'		; reset mix3 to ppO2=1.20Bar
 
 	clrf	nofly_time+0			; Clear nofly time
 	clrf	nofly_time+1			; Clear nofly time

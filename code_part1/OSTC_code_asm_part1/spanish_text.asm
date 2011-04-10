@@ -80,7 +80,7 @@
     TCODE    .20,  .35,      "Cancelar Reinicio"         ;021 Cancel Reset
     TCODE    .32,  .65,      "Hora :"                    ;022 Time:
     TCODE    .32,  .95,      "Fecha:"                    ;023 Date:
-    TCODE    .32,  .155,     "Fijar Horas"               ;024 Set Hours
+    TCODE    .0,   .215,     "Fijar Horas"               ;024 Set Hours
     TCODE    .6,   .0,       "Reinicio..."               ;025 Reset...
     TCODE    .55,  .2,       "Diario"                    ;026 Logbook
     TCODE    .14,  .2,       "Func. Personaliz. I"       ;027 Custom Functions I

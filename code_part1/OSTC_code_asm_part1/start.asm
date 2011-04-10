@@ -185,7 +185,6 @@ restart:
 	bsf		nsm						; NO-SLEEP-MODE : for hardware debugging
 
 	call	gassetup_sort_gaslist       ; Sorts Gaslist according to change depth
-	call	PLED_boot                   ; PLED boot (Incl. Clear Screen!)
 	WIN_TOP		.0
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
@@ -206,6 +205,7 @@ restart:
 	bra		restart_1				; No new CF, continue with boot
 restart_01:
 ; Save new number of current CF count
+	call	PLED_boot                   ; PLED boot (Incl. Clear Screen!)
 	rcall	display_new_cf_installed; Show warning
 	movlw	max_custom_number		; Defined in definitions.asm
 	movwf	EEDATA

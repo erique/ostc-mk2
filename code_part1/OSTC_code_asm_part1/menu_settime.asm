@@ -50,14 +50,14 @@ menu_settime:
 
 	DISPLAYTEXT	.24			; Set Hours
 	
-	bcf		switch_left
 	bcf		switch_right
+	bcf		switch_left
 
 settime_loop:
-	btfsc	switch_left
+	btfsc	switch_right
 	call	add_hours_or_minutes_or_date
 
-	btfsc	switch_right
+	btfsc	switch_left
 	call	set_time_next_or_exit
 
 	btfsc	menubit4
@@ -137,9 +137,9 @@ set_time_done:				; Check date
 	movwf	day
 
 set_time_done2:
-	WIN_LEFT	.32
-	WIN_TOP		.155
-	movlw	(.160-.32)/7                ; full line length, for various translations.
+	WIN_LEFT	.0
+	WIN_TOP		.215
+	movlw	(.160-.0)/7                ; full line length, for various translations.
 	movwf	temp1
 	call	PLED_display_clear_common_y1
 	
@@ -193,8 +193,8 @@ set_time_next_or_exit:
 	dcfsnz	menupos3,F
 	bsf		set_year
 	
-	WIN_LEFT	.32
-	WIN_TOP		.155
+	WIN_LEFT	.0
+	WIN_TOP		.215
     call    PLED_standard_color    
 	lfsr	FSR2,letter
 	OUTPUTTEXT	.94			    ; Set
@@ -223,7 +223,7 @@ set_time_next_or_exit5:
 	return
 	
 add_hours_or_minutes_or_date:
-	bcf		switch_right
+	bcf		switch_left
 	clrf	secs
 
 	btfsc	set_year

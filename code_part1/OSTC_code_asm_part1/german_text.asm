@@ -81,7 +81,7 @@
     TCODE    .20,  .35,      "Zurücksetzen abbr."        ;021 Cancel Reset
     TCODE    .32,  .65,      "Uhrzeit:"                  ;022 Time:
     TCODE    .32,  .95,      "Datum:"                    ;023 Date:
-    TCODE    .32,  .155,     "Einst.Stunden"             ;024 Set Hours
+    TCODE    .0,   .215,     "Einst.Stunden"             ;024 Set Hours
     TCODE    .6,   .0,       "Zurücksetzen..."           ;025 Reset...
     TCODE    .55,  .2,       "Logbuch"                   ;026 Logbook
     TCODE    .14,  .2,       "Custom Funktionen I"       ;027 Custom Functions I

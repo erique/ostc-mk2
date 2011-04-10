@@ -81,7 +81,7 @@
     TCODE    .20,  .35,      "Annuler RaZ"               ;021 Cancel Reset
     TCODE    .32,  .65,      "Heure:"                    ;022 Time:
     TCODE    .32,  .95,      "Date :"                    ;023 Date:
-    TCODE    .32,  .155,     "Réglage Heures"            ;024 Set Hours     (see also 090..094)
+    TCODE    .0,   .215,     "Réglage Heures"            ;024 Set Hours     (see also 090..094)
     TCODE    .6,   .0,       "Initialisation..."         ;025 Reset...
     TCODE    .17,  .2,       "Carnet de plongées"        ;026 Logbook
     TCODE    .14,  .2,       "Config Fonctions I"        ;027 Custom Functions I

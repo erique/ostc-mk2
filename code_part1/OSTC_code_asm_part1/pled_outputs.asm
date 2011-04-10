@@ -292,8 +292,6 @@ PLED_resetdebugger:
 
     movlb   1                       ; For C-code calls
 	call	PLED_boot				; PLED boot
-	call	PLED_ClearScreen		; clean up OLED
-
 	call	PLED_standard_color
 	WIN_INVERT	.0					; Init new Wordprocessor
 
@@ -1697,8 +1695,8 @@ PLED_desaturation_time2:
 	PUTC    ' '
 ;	movff		int_O_desaturation_time+0,lo			; divide by 60...
 ;	movff		int_O_desaturation_time+1,hi
-movff		desaturation_time_buffer+0,lo			; divide by 60...
-movff		desaturation_time_buffer+1,hi
+	movff		desaturation_time_buffer+0,lo			; divide by 60...
+	movff		desaturation_time_buffer+1,hi
 
 	call		convert_time				; converts hi:lo in minutes to hours (hi) and minutes (lo)
 	bsf			leftbind
@@ -1763,7 +1761,6 @@ update_surf_press:
 	call	PLED_standard_color		; No
 	btfsc	high_altitude_mode		; In high altitude mode?
 	call	PLED_warnings_color		; Yes, display ambient pressure in red
-
 
 	lfsr	FSR2,letter
 	movff	amb_pressure+0,lo

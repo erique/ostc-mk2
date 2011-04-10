@@ -5,6 +5,7 @@ NEW: High altitude (Plane/Fly) mode added
 NEW: Gaslist, Salinity, CNS and Average depth displayed in Logbook
 NEW: Internal logbook shows Gas changes
 NEW: Release in French, Spain, English and German (Use correct HEX file!)
+CHANGE: Set Time menu
 
 New in 1.83 beta:
 BETA Version - Do NOT use for diving!

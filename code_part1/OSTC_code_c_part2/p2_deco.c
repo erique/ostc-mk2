@@ -109,7 +109,7 @@ static void calc_hauptroutine(void);
 static void calc_nullzeit(void);
 
 static void calc_tissue(PARAMETER unsigned char period);
-static void calc_limit(PARAMETER float GF_current);
+static void calc_limit(void);
 
 static void clear_tissue(void);
 static void calc_ascenttime(void);
@@ -201,8 +201,6 @@ static unsigned char    deco_gas_change[5];		// new in v.109
 #pragma udata bank6=0x600
 
 float  pres_tissue[32];
-float  pres_tissue_limit[16];
-float  sim_pres_tissue_limit[16];
 
 //---- Bank 7 parameters -----------------------------------------------------
 #pragma udata bank7=0x700
@@ -544,11 +542,9 @@ static unsigned short tmr3(void)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// read buhlmann tables for compatriment ci
-// If period == 0 : 2sec interval
-//              1 : 1 min interval
-//              2 : 10 min interval.
-static void read_buhlmann_coefficients(PARAMETER char period)
+// read buhlmann tables A and B for compatriment ci
+// 
+static void read_buhlmann_coefficients(void)
 {
 #ifndef CROSS_COMPILE
     // Note: we don't use far rom pointer, because the
@@ -560,8 +556,8 @@ static void read_buhlmann_coefficients(PARAMETER char period)
         movwf TBLPTRU,0
     _endasm
 #endif
-    assert( 0 <= ci && ci < 16 );
 
+    assert( 0 <= ci && ci < 16 );
     var_N2_a = buhlmann_a[ci];
     var_N2_b = buhlmann_b[ci];
     var_He_a = (buhlmann_a+16)[ci];
@@ -577,16 +573,31 @@ static void read_buhlmann_coefficients(PARAMETER char period)
 	 || (var_He_b < 0.423)
 	 || (var_He_b > 0.927)
     )
-        int_O_DBG_pre_bitfield |= DBG_ZH16ERR;
-        
+        int_O_DBG_pre_bitfield |= DBG_ZH16ERR;       
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// read buhlmann tables for compatriment ci
+// If period == 0 : 2sec interval
+//              1 : 1 min interval
+//              2 : 10 min interval.
+static void read_buhlmann_times(PARAMETER char period)
+{
+#ifndef CROSS_COMPILE
+    // Note: we don't use far rom pointer, because the
+    //       24 bits is to complex, hence we have to set
+    //       the UPPER page ourself...
+    //       --> Set zero if tables are moved to lower pages !
+    _asm
+        movlw 1
+        movwf TBLPTRU,0
+    _endasm
+#endif
+    assert( 0 <= ci && ci < 16 );
+
     // Integration intervals.
     switch(period)
     {
-    case -1://---- no interval -----------------------------------------------
-        var_N2_e = 0.0;
-        var_He_e = 0.0;
-        break;
-
     case 0: //---- 2 sec -----------------------------------------------------
         var_N2_e = e2secs[ci];
         var_He_e = (e2secs+16)[ci];
@@ -1131,13 +1142,6 @@ static void clear_tissue(void)
         overlay float p = N2_ratio * (pres_respiration -  ppWVapour);
         pres_tissue[ci] = p;
 
-        read_buhlmann_coefficients(-1);
-
-        p = (p - var_N2_a) * var_N2_b ;
-        if( p < 0.0 )
-            p = 0.0;
-        pres_tissue_limit[ci] = p;
-
         // cycle through the 16 Bühlmann tissues for Helium
         (pres_tissue+16)[ci] = 0.0;
     } // for 0 to 16
@@ -1149,6 +1153,9 @@ static void clear_tissue(void)
     char_O_gradient_factor = 0;
     char_O_relative_gradient_GF = 0;
     char_I_depth_last_deco = 0;		// for compatibility with v.101pre_no_last_deco
+
+    calc_lead_tissue_limit = 0.0;
+    char_O_gtissue_no = 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1356,7 +1363,7 @@ void calc_hauptroutine_update_tissues(void)
  		calc_tissue(1);
 
     // Calc limit for surface, ie. GF_high.
-    calc_limit(GF_high);
+    calc_limit();
 
  	int_O_gtissue_limit = (short)(calc_lead_tissue_limit * 1000);
 	int_O_gtissue_press = (short)((pres_tissue[char_O_gtissue_no] + (pres_tissue+16)[char_O_gtissue_no]) * 1000);
@@ -1500,7 +1507,7 @@ static void calc_tissue(PARAMETER unsigned char period)
 
     for (ci=0;ci<16;ci++)
     {
-        read_buhlmann_coefficients(period);   // 2 sec or 1 min period.
+        read_buhlmann_times(period);        // 2 sec or 1 min period.
 
         // N2
         temp_tissue = (ppN2 - pres_tissue[ci]) * var_N2_e;
@@ -1519,7 +1526,7 @@ static void calc_tissue(PARAMETER unsigned char period)
 //
 // New in v.111 : separated from calc_tissue(), and depends on GF value.
 //
-static void calc_limit(PARAMETER float GF_current)
+static void calc_limit(void)
 {
     char_O_gtissue_no = 255;
     calc_lead_tissue_limit = 0.0;
@@ -1528,7 +1535,7 @@ static void calc_limit(PARAMETER float GF_current)
     {
         overlay float p = pres_tissue[ci] + (pres_tissue+16)[ci];
 
-        read_buhlmann_coefficients(-1);   // 2 sec or 1 min period.
+        read_buhlmann_coefficients();
         var_N2_a = (var_N2_a * pres_tissue[ci] + var_He_a * (pres_tissue+16)[ci]) / p;
         var_N2_b = (var_N2_b * pres_tissue[ci] + var_He_b * (pres_tissue+16)[ci]) / p;
 
@@ -1542,13 +1549,12 @@ static void calc_limit(PARAMETER float GF_current)
         //       hence what would happend at surface,
         //       hence at GF_high.
         if( char_I_deco_model == 1 )
-            p = ( p - var_N2_a * GF_current) * var_N2_b
-              / (GF_current + var_N2_b * (1.0 - GF_current));
+            p = ( p - var_N2_a * GF_high) * var_N2_b
+              / (GF_high + var_N2_b * (1.0 - GF_high));
         else
             p = (p - var_N2_a) * var_N2_b;
-        if( p < 0 ) p = 0;
+        if( p < 0.0 ) p = 0.0;
 
-        pres_tissue_limit[ci] = p;
         if( p > calc_lead_tissue_limit )
         {
             char_O_gtissue_no = ci;
@@ -1682,7 +1688,7 @@ static void sim_tissue(PARAMETER unsigned char period)
 
     for(ci=0; ci<16; ci++)
     {
-        read_buhlmann_coefficients(period);  // 1 or 10 minute(s) interval
+        read_buhlmann_times(period);        // 1 or 10 minute(s) interval
 
         // N2
         temp_tissue = (ppN2 - sim_pres_tissue[ci]) * var_N2_e;
@@ -1717,7 +1723,7 @@ static void sim_limit(PARAMETER float GF_current)
         overlay float He = (sim_pres_tissue+16)[ci];
         overlay float p = N2 + He;
 
-        read_buhlmann_coefficients(-1);
+        read_buhlmann_coefficients();
         var_N2_a = (var_N2_a * N2 + var_He_a * He) / p;
         var_N2_b = (var_N2_b * N2 + var_He_b * He) / p;
 
@@ -1733,9 +1739,6 @@ static void sim_limit(PARAMETER float GF_current)
             p = (p - var_N2_a) * var_N2_b;
         if( p < 0.0 ) p = 0.0;
 
-        assert( p <= 14.0 );
-
-        sim_pres_tissue_limit[ci] = p;
         if( p > sim_lead_tissue_limit )
         {
             sim_lead_tissue_no = ci;
@@ -1832,7 +1835,7 @@ static void calc_gradient_factor(void)
     else
     {
        gf = (temp_tissue - pres_respiration) 
-          / (temp_tissue - pres_tissue_limit[char_O_gtissue_no])
+          / (temp_tissue - calc_lead_tissue_limit)
           * 100.0;
         if( gf > 255.0 ) gf = 255.0;
         if( gf < 0.0   ) gf = 0.0;

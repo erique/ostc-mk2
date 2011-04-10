@@ -288,8 +288,8 @@ calc_deko_surfmode:
 	movlb	b'00000001'									; select ram bank 1
 	ostc_debug	'J'		; Sends debug-information to screen if debugmode active
 
-movff	int_O_desaturation_time+0,desaturation_time_buffer+0
-movff	int_O_desaturation_time+1,desaturation_time_buffer+1
+    movff	int_O_desaturation_time+0,desaturation_time_buffer+0
+    movff	int_O_desaturation_time+1,desaturation_time_buffer+1
 
 	return
 

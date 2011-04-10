@@ -71,6 +71,7 @@
 // 2011/02/11: [jDG] Reworked gradient-factor implementation.
 // 2011/02/13: [jDG] CF55 for additional gas switch delay in decoplan.
 // 2011/02/24: [jDG] Fixed inconsistencies introduced by gas switch delays.
+// 2011/04/10: [jDG] Use timer TMR3 to limit loops in calc_hauptroutine_calc_deco()
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -468,16 +469,18 @@ static void check_post_dbg(void)
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
+// Bump to blue-screen when an assert is wrong
 #ifdef __DEBUG
 void assert_failed(PARAMETER short int line)
 {
     extern void PLED_resetdebugger(void);
     extern unsigned short temp10;
 
-    temp10 = line;
+    temp10 = line;          // Show source line number as stack depth.
     PLED_resetdebugger();
 }
 #endif
+
 //////////////////////////////////////////////////////////////////////////////
 // When calling C code from ASM context, the data stack pointer and
 // frames should be reset. Bank8 is used by stack, when not doing hashing.
@@ -510,6 +513,7 @@ void assert_failed(PARAMETER short int line)
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
+// Read CF values from the C code.
 
 static short read_custom_function(PARAMETER unsigned char cf)
 {
@@ -526,6 +530,17 @@ static short read_custom_function(PARAMETER unsigned char cf)
         movff   hi,PRODH
     _endasm
 #endif
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Fast subroutine to read RTC timer 3.
+// Note: result is in 1/32 of msecs.
+static unsigned short tmr3(void)
+{
+    _asm
+        movff   0xfb2,PRODL     // TMR3L
+        movff   0xfb3,PRODH     // TMR3H
+    _endasm                     // result in PRODH:PRODL.
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -568,7 +583,8 @@ static void read_buhlmann_coefficients(PARAMETER char period)
     switch(period)
     {
     case -1://---- no interval -----------------------------------------------
-        var_N2_e = var_He_e = 0.0;
+        var_N2_e = 0.0;
+        var_He_e = 0.0;
         break;
 
     case 0: //---- 2 sec -----------------------------------------------------
@@ -1359,6 +1375,8 @@ void calc_hauptroutine_update_tissues(void)
 // 
 // Note: because this can be very long, break on 16 iterations, and set state
 //       to 0 when finished, or to 1 when needing to continue.
+// Note: because this might be very long (~ 66 ms by iteration in 1.84beta),
+//       break the loop when total time > 512msec.
 //
 void calc_hauptroutine_calc_deco(void)
 {
@@ -1366,6 +1384,10 @@ void calc_hauptroutine_calc_deco(void)
 
  	for(loop = 0; loop < 16; ++loop)
   	{
+      	// Limit loops to 512ms, using the RTC timer 3:
+      	if( tmr3() & (512*32) )
+      	    break;
+          	
         // Do not ascent while doing a gas switch ?
         if( sim_gas_delay <= sim_dive_mins )
         {
@@ -1711,7 +1733,7 @@ static void sim_limit(PARAMETER float GF_current)
             p = (p - var_N2_a) * var_N2_b;
         if( p < 0.0 ) p = 0.0;
 
-        assert( 0.0 <= p && p <= 14.0 );
+        assert( p <= 14.0 );
 
         sim_pres_tissue_limit[ci] = p;
         if( p > sim_lead_tissue_limit )

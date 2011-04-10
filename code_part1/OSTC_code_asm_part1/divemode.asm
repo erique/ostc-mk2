@@ -1086,7 +1086,7 @@ end_dive:
 	ostc_debug	'G'		; Sends debug-information to screen if debugmode active
 	call	deco_calc_desaturation_time ; calculate desaturation time
 	movlb	b'00000001'                 ; select ram bank 1
-call	calc_deko_surfmode			; work-around for nofly bug
+    call	calc_deko_surfmode			; work-around for nofly bug
 	rcall	calculate_noflytime         ; Calc NoFly time
 	ostc_debug	'H'                     ; Sends debug-information to screen if debugmode active
 										; store header and ...

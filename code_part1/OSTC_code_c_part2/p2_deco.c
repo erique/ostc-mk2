@@ -535,10 +535,14 @@ static short read_custom_function(PARAMETER unsigned char cf)
 // Note: result is in 1/32 of msecs.
 static unsigned short tmr3(void)
 {
+#ifndef CROSS_COMPILE
     _asm
         movff   0xfb2,PRODL     // TMR3L
         movff   0xfb3,PRODH     // TMR3H
     _endasm                     // result in PRODH:PRODL.
+#else
+    return 0;
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -695,15 +699,37 @@ static unsigned char calc_nextdecodepth(void)
         if( sim_lead_tissue_limit > pres_surface )
         {
             // Deepest stop, in meter (rounded up with a margin of 0.5m)
-            overlay unsigned char first_stop = 3 * (short)(0.83 + (sim_lead_tissue_limit - pres_surface) / 0.29955);
+            overlay unsigned char first_stop = 3 * (short)(0.99 + (sim_lead_tissue_limit - pres_surface) / 0.29955);
             assert( first_stop < 128 );
+
+#ifdef __DEBUG || defined(CROSS_COMPILE)
+            {
+                // Extra testing code to make sure the first_stop formula
+                // and rounding provides correct depth:
+                overlay float pres_stop =  first_stop * 0.09985            // Meters to bar
+        	                  + pres_surface;
+
+                // Keep GF_low until a first stop depth is found:
+                if( first_stop >= low_depth )
+                    sim_limit( GF_low );
+                else
+                    // current GF is GF_high - alpha (GF_high - GF_low)
+                    // With alpha = currentDepth / maxDepth, hence in [0..1]
+                    sim_limit( GF_high - first_stop * locked_GF_step );
+
+                // upper limit (lowest pressure tolerated):
+                assert( sim_lead_tissue_limit < pres_stop );
+            }
+#endif
 
             // Apply correction for the shallowest stop.
             if( first_stop == 3 )                           // new in v104
                 first_stop = char_I_depth_last_deco;        // Use last 3m..6m instead.
 
-		    // Check all stops until one is higher than tolerated presure
-		    while(first_stop > 0)
+            // Because gradient factor at fist_stop might be less than at 
+            // current depth, we might ascent a bit more.
+            // Hence, check all stops until one is indeed higher than tolerated presure:
+            while(first_stop > 0)
             {
                 overlay unsigned char next_stop;            // Next index (0..30)
                 overlay float pres_stop;                    // Next depth (0m..90m)
@@ -1955,7 +1981,7 @@ void deco_calc_desaturation_time(void)
         if( 0.0 < temp3 && temp3 < 1.0 )
     	{
             overlay float var_He_halftime = (buhlmann_ht+16)[ci];
-            assert( 1.51 <= var_N2_halftime && var_N2_halftime <= 240.03 );
+            assert( 1.51 <= var_He_halftime && var_He_halftime <= 240.03 );
 
         	temp3 = log(1.0 - temp3) / -0.6931; // temp1 is the multiples of half times necessary.
         							 // 0.6931 is ln(2), because the math function log() calculates with a base of e  not 2 as requested.

@@ -50,7 +50,7 @@ diveloop:
 
 diveloop_loop:		; The diveloop starts here
 	btfss	onesecupdate					; tasks any new second
-	bra		diveloop_loop2
+	bra		diveloop_loop3
 
 	btfsc	gauge_mode						; Only in gauge mode
 	bra		diveloop_loop1a					; One Second Tasks in Gauge mode
@@ -71,10 +71,10 @@ diveloop_loop1a:
 	call	timeout_divemode				; dive finished? This routine sets the required flags
 
 	btfsc	twosecupdate					; two seconds after the last call
-	bra		diveloop_loop1a2					; Common Tasks
+	bra		diveloop_loop1a2				; Common Tasks
 
-	bsf		twosecupdate				; Routines used in the "other second"
-	call	calc_average_depth			; calculate average depth
+	bsf		twosecupdate					; Routines used in the "other second"
+	call	calc_average_depth				; calculate average depth
 	
 	bra		diveloop_loop1x					; Common Tasks
 
@@ -98,6 +98,29 @@ diveloop_loop1c:
 	
 ; Common Tasks for all modes
 diveloop_loop1x:
+	call	customview_second				; Do every-second tasks for the custom view area
+
+	GETCUSTOM8	d'38'		; Show seconds (=1?)
+	movwf	lo
+	movlw	d'1'
+	cpfseq	lo					; =1?
+	bra		diveloop_loop1y		; No, minutes only
+	bsf		update_divetime		; Set Update flag
+diveloop_loop1y:
+	btfss	update_divetime				; display new divetime?
+	bra		diveloop_loop1z				; No
+	btfsc	premenu						; Is the divemode menu active?
+	bra		diveloop_loop1z				; Yes
+	call	PLED_divemins				; Display (new) divetime!
+
+diveloop_loop1z
+	bcf		update_divetime				; clear flag
+
+	btfsc	FLAG_const_ppO2_mode		; only in const_ppO2_mode
+	call	PLED_const_ppO2_value		; display const ppO2 setting in [Bar]
+	btfsc	ppO2_show_value				; show ppO2?
+	call	check_ppO2					; check ppO2 and displays warning if required
+
 	call	timeout_divemode				; dive finished? This routine sets the required flags
 	btfsc	low_battery_state				; If battery is low, then...
 	call	update_batt_voltage_divemode	; Display Battery Warning Text
@@ -108,32 +131,31 @@ diveloop_loop1x:
 	call	set_leds_divemode				; Sets warnings, if required. Also Sets buzzer
 	btfsc	enter_error_sleep				; Enter Fatal Error Routine?
 	call	fatal_error_sleep				; Yes (In Sleepmode_vxx.asm!)
-	call	customview_second				; Do every-second tasks for the custom view area
 
 	bcf		onesecupdate					; one seconds update done
 
-	GETCUSTOM8	d'38'		; Show seconds (=1?)
-	movwf	lo
-	movlw	d'1'
-	cpfseq	lo					; =1?
-	bra		diveloop_loop2		; No, minutes only
-	bsf		update_divetime		; Set Update flag
-
-
-diveloop_loop2:	
-	btfss	update_divetime				; display new divetime?
-	bra		diveloop_loop3				; No
-	btfsc	premenu						; Is the divemode menu active?
-	bra		diveloop_loop2a				; Yes
-	call	PLED_divemins				; Display (new) divetime!
-	btfsc	FLAG_const_ppO2_mode		; only in const_ppO2_mode
-	call	PLED_const_ppO2_value		; display const ppO2 setting in [Bar]
-	btfsc	ppO2_show_value				; show ppO2?
-	call	check_ppO2					; check ppO2 and displays warning if required
-
-diveloop_loop2a:
-	bcf		update_divetime				; clear flag
-
+;	GETCUSTOM8	d'38'		; Show seconds (=1?)
+;	movwf	lo
+;	movlw	d'1'
+;	cpfseq	lo					; =1?
+;	bra		diveloop_loop2		; No, minutes only
+;	bsf		update_divetime		; Set Update flag
+;
+;
+;diveloop_loop2:	
+;	btfss	update_divetime				; display new divetime?
+;	bra		diveloop_loop3				; No
+;	btfsc	premenu						; Is the divemode menu active?
+;	bra		diveloop_loop2a				; Yes
+;	call	PLED_divemins				; Display (new) divetime!
+;	btfsc	FLAG_const_ppO2_mode		; only in const_ppO2_mode
+;	call	PLED_const_ppO2_value		; display const ppO2 setting in [Bar]
+;	btfsc	ppO2_show_value				; show ppO2?
+;	call	check_ppO2					; check ppO2 and displays warning if required
+;
+;diveloop_loop2a:
+;	bcf		update_divetime				; clear flag
+;
 diveloop_loop3:
 	btfss	menubit							; Divemode menu active?
 	call	test_switches_divemode			; No, Check switches normal

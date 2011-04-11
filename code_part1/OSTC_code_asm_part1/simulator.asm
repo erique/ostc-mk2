@@ -403,7 +403,6 @@ simulator_calc_deco_loop2:
 	movlw	d'30'
 	movwf	timeout_counter2			; timeout used as temp here
 simulator_calc_deco2:
-
 	call	divemode_check_decogases    ; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
 

@@ -301,14 +301,13 @@ simulator_show_decoplan5_loop:
     incf    WREG
     bnz     simulator_show_decoplan5_2
     call    PLED_warnings_color
-    STRCPY  "> "
-    bra     simulator_show_decoplan5_3
+    STRCPY_PRINT  "= xxxx.x"
+    call    PLED_standard_color   
+    bra     simulator_show_decoplan5_1
     
 simulator_show_decoplan5_2: 
-    call    PLED_standard_color   
     STRCPY  "= "
 
-simulator_show_decoplan5_3:    
     bsf     leftbind
     output_16dp .4                      ; 1 decimal.
     bcf     leftbind

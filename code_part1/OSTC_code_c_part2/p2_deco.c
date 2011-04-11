@@ -2292,7 +2292,7 @@ void deco_calc_percentage(void)
 void deco_gas_volumes(void)
 {
     overlay float volumes[5];
-    overlay float ascent_usage;
+    overlay float bottom_usage, ascent_usage;
     overlay unsigned char i, deepest_first;
     overlay unsigned char gas;
     RESET_C_STACK
@@ -2304,11 +2304,14 @@ void deco_gas_volumes(void)
     assert(1 <= char_I_first_gas && char_I_first_gas <= 5);
     gas = char_I_first_gas - 1;
 
-    volumes[gas]
-        = (char_I_bottom_depth*0.1 + 1.0)           // Use Psurface = 1.0 bar.
-        * char_I_bottom_time                        // in minutes.
-        * read_custom_function(56)                  // In deci-liter/minutes.
-        * 0.1;                                      // deci-liters --> liters.
+    bottom_usage = read_custom_function(56) * 0.1;
+    if( bottom_usage > 0.0 )
+        volumes[gas]
+            = (char_I_bottom_depth*0.1 + 1.0)           // Use Psurface = 1.0 bar.
+            * char_I_bottom_time                        // in minutes.
+            * bottom_usage;                             // In liter/minutes.
+    else
+        volumes[gas] = 65535.0;
 
     //---- Ascent usage ------------------------------------------------------
 
@@ -2320,10 +2323,13 @@ void deco_gas_volumes(void)
     //  - with an ascent speed of 10m/min.
     //  - with ascent litter / minutes.
     //  - still using bottom gas:
-    volumes[gas]
-        += (char_I_bottom_depth*0.1 + 1.0)          // Depth -> bar
-         * (char_I_bottom_depth - char_O_first_deco_depth) * 0.1  // ascent time (min)
-         * ascent_usage;                            // Consumption ( xxx / min @ 1 bar)
+    if( ascent_usage > 0.0 )
+        volumes[gas]
+            += (char_I_bottom_depth*0.1 + 1.0)          // Depth -> bar
+             * (char_I_bottom_depth - char_O_first_deco_depth) * 0.1  // ascent time (min)
+             * ascent_usage;                            // Consumption ( xxx / min @ 1 bar)
+    else
+        volumes[gas] = 65535.0;
 
     for(i=0; i<32; ++i)
     {
@@ -2360,13 +2366,16 @@ void deco_gas_volumes(void)
 
         // usage during stop:
         // Note: because first gas is not in there, increment gas+1
-        volumes[gas] += (depth*0.1 + 1.0)   // depth --> bar.
-                      * time                // in minutes.
-                      * ascent_usage        // in xxx / min @ 1bar.
-        // Plus usage during ascent to the next stop, at 10m/min.
-                      + (depth*0.1  + 1.0)
-                      * ascent*0.1          // meter --> min
-                      * ascent_usage;
+        if( ascent_usage > 0.0 )
+            volumes[gas] += (depth*0.1 + 1.0)   // depth --> bar.
+                          * time                // in minutes.
+                          * ascent_usage        // in xxx / min @ 1bar.
+            // Plus usage during ascent to the next stop, at 10m/min.
+                          + (depth*0.1  + 1.0)
+                          * ascent*0.1          // meter --> min
+                          * ascent_usage;
+        else
+            volumes[gas] = 65535.0;
     }
 
     //---- convert results for the ASM interface -----------------------------

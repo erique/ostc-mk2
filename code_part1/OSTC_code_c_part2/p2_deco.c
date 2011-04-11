@@ -699,10 +699,10 @@ static unsigned char calc_nextdecodepth(void)
         if( sim_lead_tissue_limit > pres_surface )
         {
             // Deepest stop, in meter (rounded up with a margin of 0.5m)
-            overlay unsigned char first_stop = 3 * (short)(0.99 + (sim_lead_tissue_limit - pres_surface) / 0.29955);
+            overlay unsigned char first_stop = 3 * (short)(1.1667 + (sim_lead_tissue_limit - pres_surface) / 0.29955);
             assert( first_stop < 128 );
 
-#ifdef __DEBUG || defined(CROSS_COMPILE)
+#if defined(__DEBUG) || defined(CROSS_COMPILE)
             {
                 // Extra testing code to make sure the first_stop formula
                 // and rounding provides correct depth:

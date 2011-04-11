@@ -386,7 +386,6 @@ simulator_calc_deco_loop1:
 
 simulator_calc_deco_loop2:
 	call	PLED_simulator_data
-	btg     LED_red
 
 	call	divemode_check_decogases    ; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
@@ -401,8 +400,9 @@ simulator_calc_deco_loop2:
 	movlw	d'0'
 	movff	WREG,char_I_step_is_1min    ; 2 second deco mode
 
+	movlw	d'30'
+	movwf	timeout_counter2			; timeout used as temp here
 simulator_calc_deco2:
-	btg     LED_red
 
 	call	divemode_check_decogases    ; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
@@ -410,13 +410,15 @@ simulator_calc_deco2:
 	call	deco_calc_hauptroutine		; calc_tissue
 	movlb	b'00000001'                 ; rambank 1 selected
 
+	dcfsnz	timeout_counter2,F			; Abort loop (max. 30 tries)?
+	bra		simulator_calc_deco3		; Yes...
+
 	movff	char_O_deco_status,WREG
 	tstfsz	WREG                        ; deco_status=0 if decompression calculation done
 	bra		simulator_calc_deco2        ; Not finished
 
+simulator_calc_deco3:
     ; Finished
-	bsf		LED_red
-	
 	call	simulator_restore_tissue_data	; Restore 32 floats "pre_tissue" from bank3
 
 	bcf		simulatormode_active        ; normal simulator mode
@@ -426,8 +428,6 @@ simulator_calc_deco2:
 	WAITMS	d'250'
 	WAITMS	d'250'                      ; Wait for Pressure Sensor to get real pressure again...
 
-	bcf     LED_red
-	
 	movlw	d'5'                            ; Pre-Set Cursor to "Show Decoplan"
 	movwf	menupos
 	movff	char_I_bottom_time,logbook_temp1; restore bottom time.

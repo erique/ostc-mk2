@@ -282,6 +282,7 @@ simulator_show_decoplan5_4:
     lfsr	FSR0,int_O_gas_volumes      ; Initialize indexed addressing.
 
 	WIN_LEFT	.90                     ; Set column
+    call    PLED_standard_color   
 
 simulator_show_decoplan5_loop:
     incf    wait_temp,F                 ; Increment gas #

@@ -1449,7 +1449,6 @@ Surface:
     		        return;
                 }
             }
-
         }
         else
             update_deco_table();    // Just pass one minute.

@@ -332,10 +332,17 @@ simulator_show_decoplan4:
 	
 	
 simulator_calc_deco:
-	call	diveloop_boot					; configure gases, etc.
+	call	simulator_save_tissue_data  ; Stores 32 floats "pre_tissue" into bank3
 
 	bsf		simulatormode_active			; normal simulator mode
 	bsf		standalone_simulator			; Standalone Simulator active
+	bsf		no_sensor_int					; Disable sensor interrupt
+	clrf	T3CON
+	clrf	TMR3L
+	clrf	TMR3H
+
+	call	diveloop_boot					; configure gases, etc.
+
 
     ; Save dive parameters for gas volume estimation:
     movff   logbook_temp2,char_I_bottom_depth
@@ -357,20 +364,25 @@ simulator_calc_deco:
 	movff	xC+0,sim_pressure+0
 	movff	xC+1,sim_pressure+1
 
-	movff	sim_pressure+0,amb_pressure+0	; override readings with simulator values
-	movff	sim_pressure+1,amb_pressure+1
-
-	call	simulator_save_tissue_data  ; Stores 32 floats "pre_tissue" into bank3
+;	movff	sim_pressure+0,amb_pressure+0	; override readings with simulator values
+;	movff	sim_pressure+1,amb_pressure+1
 
 	call	PLED_topline_box
 	WIN_INVERT	.1
 	DISPLAYTEXT	.12                     ; "Wait..."
 	WIN_INVERT	.0
 
+	movff	sim_pressure+0,amb_pressure+0	; override readings with simulator values
+	movff	sim_pressure+1,amb_pressure+1
+
 	call	divemode_check_decogases    ; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
+
 	movlw	d'3'                        ; Begin of deco cycle (reset table).
 	movff	WREG,char_O_deco_status     ; Reset Deco module.
+
+	movlw	d'0'
+	movff	WREG,char_I_step_is_1min    ; 2 second deco mode
 
 simulator_calc_deco_loop1:
 	call	deco_calc_hauptroutine      ; calc_tissue
@@ -386,8 +398,8 @@ simulator_calc_deco_loop1:
 simulator_calc_deco_loop2:
 	call	PLED_simulator_data
 
-	call	divemode_check_decogases    ; Checks for decogases and sets the gases
-	call	divemode_prepare_flags_for_deco
+;	call	divemode_check_decogases    ; Checks for decogases and sets the gases
+;	call	divemode_prepare_flags_for_deco
 
 	call	deco_calc_hauptroutine		; calc_tissue
 	movlb	b'00000001'                 ; rambank 1 selected
@@ -399,16 +411,16 @@ simulator_calc_deco_loop2:
 	movlw	d'0'
 	movff	WREG,char_I_step_is_1min    ; 2 second deco mode
 
-	movlw	d'30'
+	movlw	d'255'
 	movwf	timeout_counter2			; timeout used as temp here
 simulator_calc_deco2:
-	call	divemode_check_decogases    ; Checks for decogases and sets the gases
-	call	divemode_prepare_flags_for_deco
+;	call	divemode_check_decogases    ; Checks for decogases and sets the gases
+;	call	divemode_prepare_flags_for_deco
 
 	call	deco_calc_hauptroutine		; calc_tissue
 	movlb	b'00000001'                 ; rambank 1 selected
 
-	dcfsnz	timeout_counter2,F			; Abort loop (max. 30 tries)?
+	dcfsnz	timeout_counter2,F			; Abort loop (max. 255 tries)?
 	bra		simulator_calc_deco3		; Yes...
 
 	movff	char_O_deco_status,WREG
@@ -417,10 +429,11 @@ simulator_calc_deco2:
 
 simulator_calc_deco3:
     ; Finished
-	call	simulator_restore_tissue_data	; Restore 32 floats "pre_tissue" from bank3
+	rcall	simulator_restore_tissue_data	; Restore 32 floats "pre_tissue" from bank3
 
 	bcf		simulatormode_active        ; normal simulator mode
 	bcf		standalone_simulator        ; Standalone Simulator active
+	bcf		no_sensor_int				; Re-enable sensor interrupt
 
 	WAITMS	d'250'
 	WAITMS	d'250'

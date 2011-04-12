@@ -326,29 +326,29 @@ simulator_show_decoplan5_1:
 
 	bra		simulator_show_decoplan1		
 
+;=============================================================================
+; OSTC Simulator: compute a new runtime
+;
 simulator_show_decoplan4:
 	movlw	d'5'
 	movwf	menupos
 	bra		menu_simulator1
-	
-	
+
 simulator_calc_deco:
 	call	simulator_save_tissue_data  ; Stores 32 floats "pre_tissue" into bank3
 
 	bsf		simulatormode_active			; normal simulator mode
 	bsf		standalone_simulator			; Standalone Simulator active
 	bsf		no_sensor_int					; Disable sensor interrupt
-	clrf	T3CON
-	clrf	TMR3L
+	clrf	T3CON                           ; Restart time3 counter,
+	clrf	TMR3L                           ; so the simu won't stop right away.
 	clrf	TMR3H
 
 	call	diveloop_boot					; configure gases, etc.
 
-
     ; Save dive parameters for gas volume estimation:
     movff   logbook_temp2,char_I_bottom_depth
     movff   logbook_temp1,char_I_bottom_time
-
 
 	movff	logbook_temp2,xA+0              ; Bottom depth. 
 	clrf	xA+1
@@ -365,12 +365,9 @@ simulator_calc_deco:
 	movff	xC+0,sim_pressure+0
 	movff	xC+1,sim_pressure+1
 
-;	movff	sim_pressure+0,amb_pressure+0	; override readings with simulator values
-;	movff	sim_pressure+1,amb_pressure+1
-
 	call	PLED_topline_box
 	WIN_INVERT	.1
-	DISPLAYTEXT	.12                     ; "Wait..."
+	DISPLAYTEXT	.12                         ; "Wait..."
 	WIN_INVERT	.0
 
 	movff	sim_pressure+0,amb_pressure+0	; override readings with simulator values
@@ -383,7 +380,7 @@ simulator_calc_deco:
 	movff	WREG,char_O_deco_status     ; Reset Deco module.
 
 	movlw	d'0'
-	movff	WREG,char_I_step_is_1min    ; 2 second deco mode
+	movff	WREG,char_I_step_is_1min    ; 2 second deco mode for descent.
 
 simulator_calc_deco_loop1:
 	call	deco_calc_hauptroutine      ; calc_tissue
@@ -394,13 +391,10 @@ simulator_calc_deco_loop1:
 	bra		simulator_calc_deco_loop1   ; Not finished
 
 	movlw	d'1'
-	movff	WREG,char_I_step_is_1min    ; 1 minute mode
+	movff	WREG,char_I_step_is_1min    ; 1 minute mode for bottom time.
 
 simulator_calc_deco_loop2:
 	call	PLED_simulator_data
-
-;	call	divemode_check_decogases    ; Checks for decogases and sets the gases
-;	call	divemode_prepare_flags_for_deco
 
 	call	deco_calc_hauptroutine		; calc_tissue
 	movlb	b'00000001'                 ; rambank 1 selected
@@ -412,16 +406,13 @@ simulator_calc_deco_loop2:
 	movlw	d'0'
 	movff	WREG,char_I_step_is_1min    ; 2 second deco mode
 
-	movlw	d'255'
-	movwf	timeout_counter2			; timeout used as temp here
+	clrf	timeout_counter2			; timeout used as maxloop here
 simulator_calc_deco2:
-;	call	divemode_check_decogases    ; Checks for decogases and sets the gases
-;	call	divemode_prepare_flags_for_deco
 
 	call	deco_calc_hauptroutine		; calc_tissue
 	movlb	b'00000001'                 ; rambank 1 selected
 
-	dcfsnz	timeout_counter2,F			; Abort loop (max. 255 tries)?
+	dcfsnz	timeout_counter2,F			; Abort loop (max. 256 tries)?
 	bra		simulator_calc_deco3		; Yes...
 
 	movff	char_O_deco_status,WREG

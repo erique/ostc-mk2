@@ -441,6 +441,10 @@ display_profile_offset3:
 	movff		SSPBUF,lo
 	call		I2CREAD2				; read Air pressure
 	movff		SSPBUF,hi
+
+	movff		lo,average_depth_hold+2
+	movff		hi,average_depth_hold+3		; Store here for correct average
+
 	bsf			leftbind
 	output_16							; Air pressure before dive
 	STRCAT      "mbar "
@@ -598,9 +602,17 @@ profile_display_loop:
 profile_display_loop2:
 	rcall		profile_view_get_depth		; reads depth, ignores temp and profile data	-> hi, lo
 
-	movf		lo,w
+	; Subtract Surface pressure
+	movff		average_depth_hold+2,sub_b+0
+	movff		average_depth_hold+3,sub_b+1	; ambient pressure in mBar
+	movff		lo,sub_a+0
+	movff		hi,sub_a+1					; depth in mBar
+	call		sub16						; sub_c = sub_a - sub_b
+
+	; add depth to average registers
+	movf		sub_c+0,W
 	addwf		average_depth_hold_total+0,F
-	movf		hi,w
+	movf		sub_c+1,W
 	addwfc		average_depth_hold_total+1,F
 	movlw		d'0'
 	addwfc		average_depth_hold_total+2,F
@@ -643,6 +655,7 @@ profile_display_loop3:
 profile_display_loop_done:
 	call		PLED_standard_color			; Restore color
 	movlw		d'159'
+;	movlw		d'200'
 	subfwb		ignore_digits,W				; keep number of X-pixels (For average depth display on Page 3)
 	movwf		average_divesecs+0			; Store here for compatibility
 
@@ -862,7 +875,10 @@ profileview_page3:
 
 logbook_skip_cns:
 	WIN_TOP		.50
-	movff	average_divesecs+0,xB+0
+
+	btfsc	average_divesecs+0,0				; Number of drawn pixels even?
+	incf	average_divesecs+0,W				; No, add +1 -> WREG
+	movwf	xB+0								; Copy W to xB+0
 	clrf	xB+1								; Number of x-pixels displayed
 	movff	average_depth_hold_total+0,xC+0
 	movff	average_depth_hold_total+1,xC+1

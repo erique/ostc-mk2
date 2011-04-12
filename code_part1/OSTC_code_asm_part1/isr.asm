@@ -87,7 +87,12 @@ switch_left_int:
 		btfsc	T0CON,TMR0ON				; Timer0 running?
 		bra		timer0_restart				; Yes, restart
 
+		; OSTC 2N has flipped screen and exchanged switches...
+		movff	win_flags,WREG				; Get into Bank0
+		btfss	WREG,0
 		bsf		switch_left					; Set flag, button press is OK
+		btfsc	WREG,0
+		bsf		switch_right				; Set flag, button press is OK
 
 		bsf		T0CON,TMR0ON				; Start Timer 0
 		return
@@ -99,6 +104,11 @@ switch_right_int:
 		btfsc	T0CON,TMR0ON				; Timer0 running?
 		bra		timer0_restart				; Yes, restart
 
+		; OSTC 2N has flipped screen and exchanged switches...
+		movff	win_flags,WREG				; Get into Bank0
+		btfsc	WREG,0
+		bsf		switch_left					; Set flag, button press is OK
+		btfss	WREG,0
 		bsf		switch_right				; Set flag, button press is OK
 
 		bsf		T0CON,TMR0ON				; Start Timer 0

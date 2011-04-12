@@ -1,3 +1,12 @@
+New in 1.86 beta:
+BETA Version - Do NOT use for diving!
+
+New in 1.85 beta:
+BETA Version - Do NOT use for diving!
+BUGFIX: zero gas rate (bug bb28)
+BUGFIX: Safer rounding (bug bb29)
+CHANGE: making the seconds display in divemode smoother
+
 New in 1.84 beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: NoFly time should not be reseted after dive simulation.

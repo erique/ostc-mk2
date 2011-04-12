@@ -132,7 +132,7 @@
 ;licence:
     TCODE    .0,   .35,      "Dieses Programm wird in"   ;068 This program is
     TCODE    .0,   .65,      "der Hoffnung bereit-"      ;069 distributed in the
-    TCODE    .0,   .95,      "gestellt dass es nütz-"    ;070 hope that it will be
+	TCODE    .0,   .95,      "gestellt, dass es nütz-"   ;070 hope that it will be
     TCODE    .0,   .125,     "lich ist, aber OHNE"       ;071 useful, but WITHOUT
     TCODE    .0,   .155,     "JEDE GEWAEHRLEISTUNG,"     ;072 ANY WARRANTY
     TCODE    .0,   .185,     "auch keine implizierte"    ;073 even the implied
@@ -208,7 +208,7 @@
     TCODE    .65,   .2,      "Beenden?"                  ;141 Quit?
     TCODE    .20,   .155,    "Mehr"                      ;142 More
     TCODE    .42,   .72,     "Sicher?"                   ;143 Confirm:
-    TCODE    .60,   .2,      "Menu 2:"                   ;144 Menu 2:
+ 	TCODE    .60,   .2,      "Menü 2:"                   ;144 Menu 2:
     TCODE    .52,   .96,     "Zurück"                    ;145 Cancel
     TCODE    .52,   .120,    "OK!"                       ;146 OK!
     TCODE    .20,   .35,     "Mehr"                      ;147 More
@@ -370,13 +370,13 @@
     TCODE    .20,   .155,    "Dekodaten zurücks."        ;286 Reset Decodata
 ; Altimeter extension
     TCODE    .20,   .155,    "Höhenmesser"               ;287 Altimeter
-    TCODE    .14,   .1,      "Höhenmesser einst."        ;288 Set Altimeter
-    TCODE    .20,   .35,     "Meeresspiegel: "           ;289 Sea ref: 
-    TCODE    .0,    .0,      "Aktiv: "                   ;290 Enabled:
-    TCODE    .20,   .95,     "Standard: 1013 mbar"       ;291 Default: 1013 mbar
+    TCODE    .18,   .1,      "Höhenmesser einst."        ;288 Set Altimeter
+    TCODE    .20,   .35,     "Höhe NN: "                 ;289 Sea ref: 
+    TCODE    .0,    .0,      "Aktiv:   "                 ;290 Enabled:
+    TCODE    .20,   .95,     "Normal:  1013 mbar"        ;291 Default: 1013 mbar
     TCODE    .20,   .125,    "+1 mbar"                   ;292 +1 mbar
     TCODE    .20,   .155,    "-1 mbar"                   ;293 -1 mbar
-    TCODE    .85,   .185,    "Höhe: "                    ;294 Alt: 
+    TCODE    .85,   .185,    "Höhe "                     ;294 Alt: 
 ;
     TCODE    .20,   .125,    "Rohdaten anzeigen"         ;295 Show raw data
     TCODE    .50,    .2,     "Rohdaten:"                 ;296 Raw Data:

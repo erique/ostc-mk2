@@ -504,10 +504,12 @@ display_profile_offset3:
 display_profile2d:
 	; Start Profile display
 
-	clrf	average_depth_hold_total+0
-	clrf	average_depth_hold_total+1
-	clrf	average_depth_hold_total+2
-	clrf	average_depth_hold_total+3		; Track average depth here...
+	clrf		average_divesecs+0
+	clrf		average_divesecs+1			; Counts x-pixels for average
+	clrf		average_depth_hold_total+0
+	clrf		average_depth_hold_total+1
+	clrf		average_depth_hold_total+2
+	clrf		average_depth_hold_total+3	; Track average depth here...
 
 ; Write 0m X-Line..
 	movlw		color_grey	
@@ -602,22 +604,6 @@ profile_display_loop:
 profile_display_loop2:
 	rcall		profile_view_get_depth		; reads depth, ignores temp and profile data	-> hi, lo
 
-	; Subtract Surface pressure
-	movff		average_depth_hold+2,sub_b+0
-	movff		average_depth_hold+3,sub_b+1	; ambient pressure in mBar
-	movff		lo,sub_a+0
-	movff		hi,sub_a+1					; depth in mBar
-	call		sub16						; sub_c = sub_a - sub_b
-
-	; add depth to average registers
-	movf		sub_c+0,W
-	addwf		average_depth_hold_total+0,F
-	movf		sub_c+1,W
-	addwfc		average_depth_hold_total+1,F
-	movlw		d'0'
-	addwfc		average_depth_hold_total+2,F
-	addwfc		average_depth_hold_total+3,F 	; Will work up to 9999mBar*60*60*24=863913600mBar
-
 	btfsc		second_FD					; end-of profile reached?
 	bra			profile_display_loop_done	; Yes, skip all remaining pixels
 
@@ -649,15 +635,11 @@ profile_display_loop3:
 	decfsz		profile_temp2+1,F			; 16 bit x-scaler test
 	bra			profile_display_skip_loop1	; skips readings!
 
-	decfsz		ignore_digits,F				; counts x-pixels to zero
+	decfsz		ignore_digits,F				; counts drawn x-pixels to zero
 	bra			profile_display_loop		; Not ready yet
 ; Done.
 profile_display_loop_done:
 	call		PLED_standard_color			; Restore color
-	movlw		d'159'
-;	movlw		d'200'
-	subfwb		ignore_digits,W				; keep number of X-pixels (For average depth display on Page 3)
-	movwf		average_divesecs+0			; Store here for compatibility
 
 	bcf			sleepmode					; clear some flags
 	bcf			menubit2
@@ -876,27 +858,27 @@ profileview_page3:
 logbook_skip_cns:
 	WIN_TOP		.50
 
-	btfsc	average_divesecs+0,0				; Number of drawn pixels even?
-	incf	average_divesecs+0,W				; No, add +1 -> WREG
-	movwf	xB+0								; Copy W to xB+0
-	clrf	xB+1								; Number of x-pixels displayed
+	movff	average_divesecs+0,xB+0				; Number of samples in dive
+	movff	average_divesecs+1,xB+1				; Copy to xB:2
+
 	movff	average_depth_hold_total+0,xC+0
 	movff	average_depth_hold_total+1,xC+1
 	movff	average_depth_hold_total+2,xC+2
 	movff	average_depth_hold_total+3,xC+3
-	call	div32x16 	; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
+	call	div32x16 			; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
 	STRCPY      "Avr:"
 	movff	xC+0,lo
 	movff	xC+1,hi
-	output_16dp	d'3'					; Average depth (Re-calculated from the drawn profile - not 100% exact!)
+	output_16dp	d'3'			; Average depth (Re-calculated from the drawn profile - not 100% exact!)
 	STRCAT_PRINT "m"
 
 ;	WIN_TOP		.0
-;	WIN_LEFT	.65
+;	WIN_LEFT	.75
 ;	lfsr	FSR2,letter
 ;	movff	average_divesecs+0,lo
 ;	output_8
 ;	call		word_processor
+
 
 	bcf			menubit2
 	bcf			menubit3
@@ -965,6 +947,7 @@ profile_view_get_depth:
 	movff		SSPBUF,hi					; high value
 	call		I2CREAD2					; read Profile Flag Byte
 	movff		SSPBUF,timeout_counter2		; Read Profile Flag Byte
+
 	bcf			event_occured				; clear flag
 	btfsc		timeout_counter2,7
 	bsf			event_occured				; We also have an Event byte!
@@ -980,6 +963,18 @@ profile_view_get_depth:
 	return
 
 profile_view_get_depth_new1:
+	incf		average_divesecs+0,F			
+	movlw		d'0'
+	addwfc		average_divesecs+1,F			; counter for average depth
+	; add depth to average registers
+	movf		lo,W
+	addwf		average_depth_hold_total+0,F
+	movf		hi,W
+	addwfc		average_depth_hold_total+1,F
+	movlw		d'0'
+	addwfc		average_depth_hold_total+2,F
+	addwfc		average_depth_hold_total+3,F 	; Will work up to 9999mBar*60*60*24=863913600mBar
+
 	btfsc		event_occured				; Was there an event attached to this sample?
 	rcall		profile_view_get_depth_new2	; Yes, get information about this event
 

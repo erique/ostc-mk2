@@ -1,6 +1,10 @@
+New in 1.87 beta:
+BETA Version - Do NOT use for diving!
+
 New in 1.86 beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: Average depth in Logbook fixed
+BUGFIX: Stand-alone simulator
 
 New in 1.85 beta:
 BETA Version - Do NOT use for diving!

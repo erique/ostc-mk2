@@ -1107,6 +1107,7 @@ static void gas_switch_set(void)
 //
 // Input: calc_N2_ratio, calc_He_ratio : simulated gas mix.
 //        temp_deco : simulated respiration pressure + security offset (deco_distance)
+//        float_deco_distance : security factor.
 //        Water-vapor pressure inside lumbs (ppWVapour).
 //
 // Output: ppN2, ppHe.
@@ -1115,22 +1116,27 @@ static void sim_alveolar_presures(void)
 {
     overlay float deco_diluent = temp_deco;                 // new in v.101
 
+    // Take deco offset into account, but not at surface.
+    // Note: this should be done on ambiant pressure, hence before
+    //       computing the diluant partial pressure...
+    if( deco_diluent > pres_surface )
+        deco_diluent += float_deco_distance;
+
     //---- CCR mode : deco gas switch ? --------------------------------------
-    if (char_I_const_ppO2 != 0)
+    if( char_I_const_ppO2 != 0 )
    	{
-        // In CCR mode, calc_XX_ratio == XX_ratio.
+        // In CCR mode, use calc_XX_ratio instead of XX_ratio.
+        // Note: PPO2 and ratios are known outside the lumbs, so there is no
+        //       ppWVapour in the equations below:
    		if( temp_deco > deco_ppO2_change )
-            deco_diluent = ((temp_deco - const_ppO2)/(calc_N2_ratio + calc_He_ratio));
+            deco_diluent -= const_ppO2;
    		else
-            deco_diluent = ((temp_deco - deco_ppO2)/(calc_N2_ratio + calc_He_ratio));
+            deco_diluent -= deco_ppO2;
+        deco_diluent /= calc_N2_ratio + calc_He_ratio;
 
         if (deco_diluent > temp_deco)
     	    deco_diluent = temp_deco;
   	}
-
-    // Take deco offset into account, but not at surface.
-    if( deco_diluent > pres_surface )
-        deco_diluent += float_deco_distance;
 
     if( deco_diluent > ppWVapour )
     {
@@ -1367,17 +1373,17 @@ void calc_hauptroutine_update_tissues(void)
     assert( (N2_ratio + He_ratio) <= 0.95 );
     assert( 0.800 < pres_respiration && pres_respiration < 14.0 );
 
-    if (char_I_const_ppO2 == 0)													// new in v.101
-  		pres_diluent = pres_respiration;										// new in v.101
- 	else
+	pres_diluent = pres_respiration;
+    if (char_I_const_ppO2 != 0)													// new in v.101
     {
-  		pres_diluent = ((pres_respiration - const_ppO2)/(N2_ratio + He_ratio));	// new in v.101
- 	    if (pres_diluent > pres_respiration)									// new in v.101
-  		    pres_diluent = pres_respiration;								    // new in v.101
+  		pres_diluent -= const_ppO2;                                             // new in v.101
+  		pres_diluent /= N2_ratio + He_ratio;                                    // new in v.101
+ 	    if( pres_diluent > pres_respiration )                                   // new in v.101
+  		    pres_diluent = pres_respiration;                                    // new in v.101
     }
- 	if (pres_diluent > ppWVapour)                                               // new in v.101
+    if (pres_diluent > ppWVapour)                                               // new in v.101
  	{
- 		ppN2 = N2_ratio * (pres_diluent - ppWVapour);                           // changed in v.101
+        ppN2 = N2_ratio * (pres_diluent - ppWVapour);                           // changed in v.101
  		ppHe = He_ratio * (pres_diluent - ppWVapour);                           // changed in v.101
  		char_O_diluent = (char)(pres_diluent/pres_respiration*100.0);
  	}

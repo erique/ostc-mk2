@@ -46,7 +46,7 @@
 #ifdef __18CXX
     //------------------------------------------------------------------------
     // C-style declarations:
-#   ifdef TEST_MAIN
+#   ifndef TEST_MAIN
 #       define VAR_UCHAR(n)      extern unsigned  char n
 #       define TAB_UCHAR(n,size) extern unsigned  char n[size]
 #       define VAR_UINT(n)       extern unsigned short n

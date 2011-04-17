@@ -70,8 +70,10 @@
 // 2011/01/25: [jDG] Use CF(54) to reverse deco order.
 // 2011/02/11: [jDG] Reworked gradient-factor implementation.
 // 2011/02/13: [jDG] CF55 for additional gas switch delay in decoplan.
-// 2011/02/24: [jDG] Fixed inconsistencies introduced by gas switch delays.
+// 2011/02/15: [jDG] Fixed inconsistencies introduced by gas switch delays.
+// 2011/03/21: [jDG] Added gas consumption (CF56 & CF57) evaluation for OCR mode.
 // 2011/04/10: [jDG] Use timer TMR3 to limit loops in calc_hauptroutine_calc_deco()
+// 2011/04/15: [jDG] Store low_depth in 32bits (w/o rounding), for a better stability.
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -96,6 +98,7 @@
 // ***********************************************
 
 #include "p2_definitions.h"
+#define TEST_MAIN
 #include "shared_definitions.h"
 
 // Water vapour partial pressure in the lumb.
@@ -141,7 +144,7 @@ static float			temp_limit;
 static float			GF_low;
 static float			GF_high;
 static float			GF_delta;
-static unsigned char    low_depth;                  // Depth of deepest stop
+static float            low_depth;                  // Depth of deepest stop
 static float			locked_GF_step;             // GF_delta / low_depth
 
 static unsigned char    temp_depth_limit;
@@ -685,7 +688,6 @@ static unsigned char calc_nextdecodepth(void)
     overlay unsigned char need_stop = 0;
 
     assert( depth >= -0.2 );        // Allow for 200mbar of weather change.
-    assert( low_depth < 255 );
 
     //---- ZH-L16 + GRADIENT FACTOR model ------------------------------------
 	if (char_I_deco_model == 1)
@@ -698,9 +700,21 @@ static unsigned char calc_nextdecodepth(void)
         // Stops are needed ?
         if( sim_lead_tissue_limit > pres_surface )
         {
-            // Deepest stop, in meter (rounded up with a margin of 0.5m)
-            overlay unsigned char first_stop = 3 * (short)(1.1667 + (sim_lead_tissue_limit - pres_surface) / 0.29955);
+            // Compute tolerated depth, for the leading tissue [metre]:
+            overlay float depth_tol = (sim_lead_tissue_limit - pres_surface) / 0.09985;
+
+            // Deepest stop, in multiples of 3 metres.
+            overlay unsigned char first_stop = 3 * (short)(0.99999 + depth_tol * 0.33333 );
             assert( first_stop < 128 );
+
+            // Is it a new deepest needed stop ? If yes this is the reference for
+            // the varying gradient factor. So reset that:
+            if( depth_tol > min_depth && depth_tol > low_depth )
+            {
+                // Store the deepest stop depth, as reference for GF_low.
+                low_depth = depth_tol;
+                locked_GF_step = GF_delta / low_depth;
+            }
 
 #if defined(__DEBUG) || defined(CROSS_COMPILE)
             {
@@ -726,7 +740,7 @@ static unsigned char calc_nextdecodepth(void)
             if( first_stop == 3 )                           // new in v104
                 first_stop = char_I_depth_last_deco;        // Use last 3m..6m instead.
 
-            // Because gradient factor at fist_stop might be less than at 
+            // Because gradient factor at first_stop might be bigger than at 
             // current depth, we might ascent a bit more.
             // Hence, check all stops until one is indeed higher than tolerated presure:
             while(first_stop > 0)
@@ -765,22 +779,13 @@ static unsigned char calc_nextdecodepth(void)
                 
                 // Else, validate that stop and loop...
                 first_stop = next_stop;
-		    }
-
-            // Is it a new deepest first stop ? If yes this is the reference for
-            // the varying gradient factor. So reset that:
-            if( first_stop > min_depth && first_stop > low_depth )
-            {
-                // Store the deepest stop depth, as reference for GF_low.
-                low_depth = first_stop;
-                locked_GF_step = GF_delta / low_depth;
             }
 
             // next stop is the last validated depth found, aka first_stop
-            temp_depth_limit = first_stop;                  // Stop depth, in meter.
+            temp_depth_limit = first_stop;                  // Stop depth, in metre.
         }
         else
- 			temp_depth_limit = 0;                           // stop depth, in meter.
+ 			temp_depth_limit = 0;                           // stop depth, in metre.
 	}
 	else //---- ZH-L16 model -------------------------------------------------
 	{
@@ -797,7 +802,7 @@ static unsigned char calc_nextdecodepth(void)
 		if (pres_gradient >= 0)
  		{
  			pres_gradient /= 0.29955; 	                            // Bar --> stop number;
- 			temp_depth_limit = 3 * (short) (pres_gradient + 0.99);  // --> meter : depth for deco
+ 			temp_depth_limit = 3 * (short) (pres_gradient + 0.99);  // --> metre : depth for deco
             need_stop = 1;                                          // Hit.
 
             // Implement last stop at 4m/5m/6m...
@@ -1664,7 +1669,7 @@ static void calc_ascenttime(void)
     {
         overlay unsigned char x;
 
-        // + 0.7 to count 1 minute ascent time from 3 meter to surface
+        // + 0.7 to count 1 minute ascent time from 3 metre to surface
         overlay float ascent = pres_respiration - pres_surface + 0.7; 
         if (ascent < 0.0)
             ascent = 0.0;
@@ -1799,7 +1804,7 @@ static void clear_deco_table(void)
 // Inputs:
 //      temp_depth_limit = stop's depth, in meters.
 // In/Out:
-//      internal_deco_depth[] : depth (in meters) of each stops.
+//      internal_deco_depth[] : depth (in metres) of each stops.
 //      internal_deco_time [] : time (in minutes) of each stops.
 //
 static void update_deco_table()
@@ -2284,8 +2289,8 @@ void deco_calc_percentage(void)
 //          char_I_first_gas is the bottom gas.
 //          decoplan (char_O_deco_depth, char_O_deco_time).
 //          CF#54 == TRUE if shallowest stop first.
-//          CF#56 == bottom deci-liters/minutes (0.5 .. 50.0)
-//          CF#57 == deco deci-liters/minutes (0.5 .. 50.0).
+//          CF#56 == bottom deci-liters/minutes (0.5 .. 50.0) or bar/min.
+//          CF#57 == deco deci-liters/minutes (0.5 .. 50.0) or bar/min.
 // Output:  int_O_gas_volumes[0..4] in litters * 0.1
 //
 void deco_gas_volumes(void)
@@ -2371,7 +2376,7 @@ void deco_gas_volumes(void)
                           * ascent_usage        // in xxx / min @ 1bar.
             // Plus usage during ascent to the next stop, at 10m/min.
                           + (depth*0.1  + 1.0)
-                          * ascent*0.1          // meter --> min
+                          * ascent*0.1          // metre --> min
                           * ascent_usage;
         else
             volumes[gas] = 65535.0;

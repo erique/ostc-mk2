@@ -73,6 +73,9 @@ customview_second:
 	bra		customview_1sec_average     ; Update the Average depth
 	dcfsnz	WREG,F
 	bra		customview_1sec_graphs      ; Update the leading tissue
+	dcfsnz	WREG,F
+	bra		customview_1sec_ead_end		; Show END and EAD in divemode
+
 	; Menupos3=0, do nothing
 	return
 
@@ -100,6 +103,10 @@ customview_1sec_graphs:                 ; Do nothing extra
 	call	PLED_tissue_saturation_graph
 	return
 
+customview_1sec_ead_end:
+	call	PLED_show_end_ead_divemode
+	return
+
 ;=============================================================================
 ; Do every-minute tasks for the custom view area
 
@@ -114,9 +121,12 @@ customview_minute:
 	dcfsnz	WREG,F
 	bra		customview_minute_lead_tiss ; Update the leading tissue
 	dcfsnz	WREG,F
-	bra		customview_minute_average		; Update the Average depth
+	bra		customview_minute_average	; Update the Average depth
 	dcfsnz	WREG,F
 	bra		customview_minute_graphs	; Update the graphs
+	dcfsnz	WREG,F
+	bra		customview_minute_ead_end	; Show END and EAD in divemode
+
 	; Menupos3=0, do nothing
 	return
 
@@ -128,10 +138,11 @@ customview_minute_lead_tiss:
 	call	PLED_show_leading_tissue_2  ; Update the leading tissue
 	return
 
+customview_minute_ead_end:              ; Do nothing extra
 customview_minute_marker:               ; Do nothing extra
 customview_minute_stopwatch:            ; Do nothing extra
 customview_minute_average:				; Do nothing extra
-customview_minute_graphs:
+customview_minute_graphs:               ; Do nothing extra
 	return
 
 ;=============================================================================
@@ -144,7 +155,7 @@ customview_toggle:
 	bra		customview_toggle_exit			; Yes, ignore custom view in divemode completely
 
 	incf	menupos3,F			            ; Number of customview to show
-	movlw	d'6'							; Max number
+	movlw	d'7'							; Max number
 	cpfsgt	menupos3			            ; Max reached?
 	bra		customview_mask		            ; No, show
 	clrf	menupos3			            ; Reset to zero (Zero=no custom view)
@@ -163,6 +174,8 @@ customview_mask:
 	bra		customview_init_average			; Show Total average depth
 	dcfsnz	WREG,F
 	bra		customview_init_graphs		    ; Show the graphs
+	dcfsnz	WREG,F
+	bra		customview_init_ead_end		    ; Show END and EAD in divemode
 
 customview_init_nocustomview:
 	bra		customview_toggle_exit	
@@ -201,6 +214,10 @@ customview_init_lead_tissue:			; Show leading tissue
 	bra			customview_toggle		; Yes, use next Customview!
 
 	call	    PLED_show_leading_tissue
+	bra		    customview_toggle_exit	
+
+customview_init_ead_end:
+	call		PLED_show_end_ead_divemode
 	bra		    customview_toggle_exit	
 
 customview_init_graphs:					; Show tissue graph

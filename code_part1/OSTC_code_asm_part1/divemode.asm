@@ -635,6 +635,12 @@ check_event1:
 	addwf	ProfileFlagByte,F	; add to ProfileFlagByte
 	bsf		EventByte,5			; Also set Flag in EventByte!
 check_event2:
+	btfss	setpoint_changed	; Check flag	
+	bra		check_event3
+	movlw	d'1'				; Information length	
+	addwf	ProfileFlagByte,F	; add to ProfileFlagByte
+	bsf		EventByte,6			; Also set Flag in EventByte!
+check_event3:
 	bsf		ProfileFlagByte,7	; Set EventByte Flag in ProfileFlagByte
 
 store_dive_data3:
@@ -648,7 +654,7 @@ store_dive_data3:
 	movf	EventByte,W		
 	call	write_external_eeprom
 
-	btfss	manual_gas_changed	; Check flag	
+	btfss	manual_gas_changed		; Check flag	
 	bra		store_dive_data3a
 	read_int_eeprom	d'24'			; % O2 Gas6
 	movf	EEDATA,W
@@ -656,19 +662,17 @@ store_dive_data3:
 	read_int_eeprom	d'25'			; % He Gas6
 	movf	EEDATA,W
 	call	write_external_eeprom
+	bcf		manual_gas_changed		; Clear this event
 
 store_dive_data3a:
 	btfss	stored_gas_changed	; Check flag	
 	bra		store_dive_data3b			
 	movf	active_gas,W		; Store active gas
 	call	write_external_eeprom
-
+	bcf		stored_gas_changed	; Clear this event
 store_dive_data3b:
 
 store_dive_data4:
-	bcf		event_occured		; Clear the global event flag
-	bcf		manual_gas_changed	; Clear all events
-	bcf		stored_gas_changed	; Clear all events
 
 ; Store extended informations
 	decfsz	divisor_temperature,F	; Check divisor
@@ -711,7 +715,17 @@ store_extended6:
 	clrf	divisor_nuy2			; And clear register again, so it will never reach zero...
 
 	ostc_debug	'D'		; Sends debug-information to screen if debugmode active
-	return				; Done.
+
+; SetPoint change appended to information due to compatibility reasons
+	btfss	setpoint_changed		; Check flag	
+	bra		store_dive_data5
+	movff	char_I_const_ppO2,WREG	; SetPoint in cBar
+	call	write_external_eeprom
+	bcf		setpoint_changed		; Clear this event
+
+store_dive_data5:
+	bcf		event_occured		; Clear the global event flag
+	return						; Done. (Sample with all informations written to EEPROM)
 	
 store_dive_nuy2:
 	GETCUSTOM8	d'26'
@@ -1665,6 +1679,7 @@ diveloop_boot:
 	clrf 	timeout_counter2			; Here: counts to six, then store deco data and temperature
 	clrf	AlarmType					; Clear all alarms
 	bcf		event_occured				; clear flag
+	bcf		setpoint_changed			; clear flag
 	rcall	reset_average1				; Reset the resettable average depth
 	clrf	average_depth_hold_total+0
 	clrf	average_depth_hold_total+1

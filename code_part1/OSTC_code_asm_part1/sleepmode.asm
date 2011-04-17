@@ -150,8 +150,6 @@ onesec_sleep1:
 ; No button pressed
 	bcf		INTCON,INT0IF				; Clear flag
 	bcf		INTCON3,INT1IF				; Clear flag
-	bcf		switch_right_isr
-	bcf		switch_left_isr
 	bcf		switch_right
 	bcf		switch_left
 	bcf		T0CON,TMR0ON				; Stop Timer 0
@@ -159,8 +157,6 @@ onesec_sleep1:
 onesec_sleep1a:	; At least one button pressed....
 	bcf		INTCON,INT0IF				; Clear flag
 	bcf		INTCON3,INT1IF				; Clear flag
-	bcf		switch_right_isr
-	bcf		switch_left_isr
 	bcf		switch_right
 	bcf		switch_left
 	bcf		T0CON,TMR0ON				; Stop Timer 0

@@ -85,7 +85,7 @@
 
 ;=============================================================================
 
-#include "../OSTC_code_c_part2/shared_definitions.h"
+#include "shared_definitions.h"
 
 ;=============================================================================
 ; Reserve space for C-code data space. Eg.when calling log.
@@ -486,8 +486,8 @@ desaturation_time_buffer res 2	; buffer for desat time
 #DEFINE	initialize_battery2		flag11,6	;=1: Battery memory need to be initialised
 #DEFINE	charge_started			flag11,7	;=1: Charger started in CC mode
 
-#DEFINE	switch_left_isr			flag12,0	;=1: left switch pressed (Only modified in ISR!)
-#DEFINE	switch_right_isr		flag12,1	;=1: right switch pressed (Only modified in ISR!)
+#DEFINE	setpoint_changed		flag12,0	;=1: Setpoint was changed in divemode, store in profile
+; #DEFINE	free		flag12,1	;=1: 
 #DEFINE	debug_mode				flag12,2	;=1: Debugmode active
 #DEFINE	neg_flag_isr			flag12,3	;=1: ISR Negative flag (Math)
 #DEFINE	select_bailoutgas		flag12,4	;=1: Select Bailout instead of Setpoint in Gaslist

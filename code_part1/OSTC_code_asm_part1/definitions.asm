@@ -86,6 +86,7 @@
 ;=============================================================================
 
 #include "../OSTC_code_c_part2/shared_definitions.h"
+;#include "shared_definitions.h"
 
 ;=============================================================================
 ; Reserve space for C-code data space. Eg.when calling log.

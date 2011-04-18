@@ -401,6 +401,9 @@ PLED_clear_decoarea:
 	return
 
 PLED_display_ndl_mask:
+	btfsc	menubit					; Divemode menu active?
+	return							; Yes, return
+
 	; Clear Dekostop and Dekosum
 	rcall	PLED_clear_decoarea	
 
@@ -438,12 +441,15 @@ PLED_display_ndl:
 	return
 
 PLED_display_deko_mask:
-        rcall	PLED_clear_decoarea	
-        ; total deco time word
-        call		PLED_divemask_color	; Set Color for Divemode mask
-        DISPLAYTEXT	d'85'			; TTS
-        call	PLED_standard_color
-        return
+	btfsc	menubit					; Divemode menu active?
+	return							; Yes, return
+
+    rcall	PLED_clear_decoarea	
+    ; total deco time word
+    call		PLED_divemask_color	; Set Color for Divemode mask
+    DISPLAYTEXT	d'85'			; TTS
+    call	PLED_standard_color
+    return
 
 PLED_display_deko:
 	btfsc	menubit					; Divemode menu active?
@@ -3051,8 +3057,17 @@ PLED_show_end_ead_divemode:
 	WIN_TOP		.216
 	lfsr	FSR2,letter
 	STRCAT_PRINT  "END:"
-; Show EAD: char_I_N2_ratio/0.79*rel_pressure:2*10 -> char_I_N2_ratio*rel_pressure:2/7900 -> EAD in m
 	call	PLED_standard_color
+
+	btfss	FLAG_const_ppO2_mode		; are we in ppO2 mode?
+	bra		PLED_show_end_ead_divemode2	; no, show OC EAD and END
+
+; We are in CCR mode...
+	btfss	is_bailout					; In bailout mode?
+	bra		PLED_show_end_ead_divemode3	; No, show CC EAD and END
+
+PLED_show_end_ead_divemode2:			; Show OC EAD and END
+; Show EAD: char_I_N2_ratio/0.79*rel_pressure:2*10 -> char_I_N2_ratio*rel_pressure:2/7900 -> EAD in m
 	WIN_LEFT	.125
 	WIN_TOP		.192
 	movff	char_I_N2_ratio,xA+0
@@ -3093,6 +3108,10 @@ PLED_show_end_ead_divemode:
 	lfsr	FSR2,letter
 	output_16_3
 	STRCAT_PRINT  "m"					; Display END
+	return
+
+PLED_show_end_ead_divemode3:			; Show CC EAD and END
+; ToDo...
 	return
 
 

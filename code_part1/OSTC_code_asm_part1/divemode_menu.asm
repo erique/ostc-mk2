@@ -34,6 +34,12 @@ test_switches_divemode:				; checks switches in divemode
 	bcf		switch_right
 	
 	bcf		select_bailoutgas		; Clear Flag for Bailout list
+
+	btfsc	premenu					; Pre-Menu? already shown?
+	bra		test_switches_divemode0	; Yes, check if we should jump to menu Entry3
+
+test_switches_divemode_a:
+
 	bsf		premenu					; Set Flag for premenu
 	bcf		menubit
 	clrf	timeout_counter3		; timeout_divemenu
@@ -41,11 +47,18 @@ test_switches_divemode:				; checks switches in divemode
 	btfsc	FLAG_apnoe_mode			; In Apnoe mode?
 	bra		test_switches_divemode1	; Yes!
 
-test_switches_divemode0:	
 	WIN_INVERT		.1
 	DISPLAYTEXT	.4			;Menu?
 	WIN_INVERT		.0
 	return
+
+test_switches_divemode0:
+	btfss	menu3_active				; Something to do at Menupos=3?
+	bra		test_switches_divemode_a	; No
+; Yes! So show menu and jump to this position
+	movlw	d'3'
+	movwf	menupos
+	bra		test_switches_divemode2b	; Show menu with cursor at menupos=3
 
 test_switches_divemode1:
 	DISPLAYTEXT	.141			;Quit?
@@ -76,13 +89,14 @@ test_switches_divemode2_2:
 	return
 
 test_switches_divemode2a:
+	movlw	d'1'
+	movwf	menupos					; reset cursor in divemode menu
+test_switches_divemode2b:
 	bsf		menubit					; Enter Divemode-Menu!
 	bcf		premenu					; clear premenu flag
 	call	PLED_clear_divemode_menu		; Clear dive mode menu area
 	call	PLED_divemode_menu_mask_first	; Write Divemode menu1 mask
 	bcf		display_set_simulator			; Clear Simulator-Menu flag
-	movlw	d'1'
-	movwf	menupos					; reset cursor in divemode menu
 	call	PLED_divemenu_cursor	; show cursor
 	bcf		switch_right
 	bcf		switch_left				; Left button pressed!

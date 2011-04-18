@@ -28,7 +28,7 @@
 ; Show the customview-dependent entry for the divemode menu
 ;
 customview_menu_entry3:		
-	bcf		menu3_active	;=1: menu entry three in divemode menu is active
+;	bcf		menu3_active	;=1: menu entry three in divemode menu is active
 
 	movff	menupos3,WREG	            ; copy
 	dcfsnz	WREG,F
@@ -43,12 +43,12 @@ customview_menu_entry3:
 	return
 
 customview_menu3_stopwatch:
-	bsf		menu3_active                ; Set Flag
+;	bsf		menu3_active                ; Set Flag
 	DISPLAYTEXT	.33                     ; ResetAvr
 	return
 
 customview_menu3_marker:
-	bsf		menu3_active                ; Set Flag
+;	bsf		menu3_active                ; Set Flag
 	DISPLAYTEXT	.30                     ; Set Marker
 	return
 
@@ -148,7 +148,8 @@ customview_minute_graphs:               ; Do nothing extra
 ;=============================================================================
 ; Yes, show next customview (and delete this flag)
 
-customview_toggle:		
+customview_toggle:
+	bcf		menu3_active	;=1: menu entry three in divemode menu is active		
 	ostc_debug	'X'		; Sends debug-information to screen if debugmode active
 	
 	btfsc	FLAG_apnoe_mode					; In Apnoe mode?
@@ -190,6 +191,7 @@ customview_init_stopwatch:
 	bra			customview_toggle		; No, use next Customview
 
 	call	PLED_stopwatch_show			; Init Stopwatch display
+	bsf		menu3_active                ; Set Flag
 	bra		customview_toggle_exit	
 
 customview_init_marker:					; Init Marker
@@ -199,6 +201,7 @@ customview_init_marker:					; Init Marker
 
     call        PLED_standard_color
 	DISPLAYTEXT d'151'				    ; Set Marker?
+	bsf			menu3_active                ; Set Flag
 	bra		    customview_toggle_exit	
 
 customview_init_clock:					; Init Clock

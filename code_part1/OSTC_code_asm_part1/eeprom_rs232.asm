@@ -198,3 +198,38 @@ rs232_get_byte3:
 	bsf		RCSTA,CREN
 	bsf		rs232_recieve_overflow		; set flag
 	return				; and return anyway
+
+uart_115k_bootloader:
+	bcf		PIE1,RCIE				; disable interrupt for RS232
+	bcf		RCSTA,CREN				; Clear receiver status
+	bsf		RCSTA,CREN
+	bcf		PIR1,RCIF				; clear flag
+	call	PLED_ClearScreen		; Clear screen
+	movlw	color_red
+    call	PLED_set_color			; Set to Red
+	DISPLAYTEXTH	d'302'			; Bootloader
+	WAITMS	d'250'
+	WAITMS	d'250'
+	WAITMS	d'50'
+	btfss	PIR1,RCIF				; New byte in UART?
+	bra		uart_115k_bootloader2	; No, Abort	
+	movlw	0xC1
+	cpfseq	RCREG					; 115200Baud Bootloader request?
+	bra		uart_115k_bootloader2	; No, Abort	
+	DISPLAYTEXTH	d'303'			; Yes, "Please wait!"
+	clrf	INTCON					; Interrupts disabled
+	bcf		PIR1,RCIF				; clear flag
+	goto	0x17F56					; Enter straight into bootloader. Good luck!
+uart_115k_bootloader2:
+	DISPLAYTEXTH	d'304'			; Aborted!
+	WAITMS	d'250'
+	WAITMS	d'250'
+	WAITMS	d'250'
+	WAITMS	d'250'
+	WAITMS	d'250'
+	WAITMS	d'250'
+	WAITMS	d'250'
+	WAITMS	d'250'
+	goto	restart
+	
+	

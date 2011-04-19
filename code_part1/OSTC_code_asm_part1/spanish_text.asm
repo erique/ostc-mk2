@@ -385,4 +385,7 @@
     TCODE    .0,    .0,      "EAD:"                      ;299 EAD:                  (equivalent air depth of a gas).
 	TCODE	 .100,	.125,	 "¿Activar?"				 ;300 Active?               (Enable/Disable Gas underwater)
 	TCODE    .0,    .2,      "Uso Gas OCR:"              ;301 OCR Gas Usage:        (Planned gas consumtion by tank).
+	TCODE	 .45,	.100,	 "Bootloader"				 ;302 Bootloader
+	TCODE	 .40,	.130,	 "Please wait!"				 ;303 Please wait!
+	TCODE	 .50,	.130,	 "Aborted!"					 ;304 Aborted
 ;=============================================================================

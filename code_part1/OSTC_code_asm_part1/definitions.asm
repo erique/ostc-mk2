@@ -489,7 +489,7 @@ desaturation_time_buffer res 2	; buffer for desat time
 #DEFINE	charge_started			flag11,7	;=1: Charger started in CC mode
 
 #DEFINE	setpoint_changed		flag12,0	;=1: Setpoint was changed in divemode, store in profile
-; #DEFINE	free		flag12,1	;=1: 
+#DEFINE	uart_115200_bootloader	flag12,1	;=1: Look for 115200 Baud bootloader
 #DEFINE	debug_mode				flag12,2	;=1: Debugmode active
 #DEFINE	neg_flag_isr			flag12,3	;=1: ISR Negative flag (Math)
 #DEFINE	select_bailoutgas		flag12,4	;=1: Select Bailout instead of Setpoint in Gaslist

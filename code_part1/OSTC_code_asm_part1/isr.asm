@@ -56,6 +56,11 @@ uartint:
 		bsf		uart_send_int_eeprom2		; set flag
 		dcfsnz	uart1_temp,F				; "k"
 		bsf		uart_store_tissue_data		; set flag
+	
+		movlw	0xC1
+		cpfseq	RCREG						; 115200Baud Bootloader request?
+		bra		uartint1					; No
+		bsf		uart_115200_bootloader		; Yes, set Flag
 
 
 uartint1:

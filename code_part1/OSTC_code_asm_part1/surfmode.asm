@@ -193,8 +193,10 @@ surfloop_loop3:
 	goto	reset_decodata				; Yes!
 	btfsc	uart_send_int_eeprom2		; Send internal EEPROM BANK 1
 	goto	send_int_eeprom_b1			; Yes!
-	btfsc	uart_store_tissue_data		; Store tissue data?`
+	btfsc	uart_store_tissue_data		; Store tissue data?
 	goto	uart_store_tissues			; Yes!
+	btfsc	uart_115200_bootloader		; Look for 115200Baud bootloader?
+	goto	uart_115k_bootloader		; Yes!
 
 	bra		surfloop_loop				; loop surfacemode
 

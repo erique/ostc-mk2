@@ -80,7 +80,8 @@ VAR_UINT  (int_O_desaturation_time);       //
 VAR_UINT  (int_O_ascenttime);              // TTS (in minutes)
 
 VAR_UCHAR (char_O_nullzeit);               // 
-VAR_UCHAR (char_O_deco_status);            // 
+VAR_UCHAR (char_O_deco_status);            // Deko state-machine state.
+VAR_UCHAR (char_O_deco_last_stop);         // Depth reached during deko planning.
 VAR_UCHAR (char_O_gradient_factor);        // 
 VAR_UCHAR (char_O_gtissue_no);             // 
 VAR_UCHAR (char_O_diluent);                // new in v.101

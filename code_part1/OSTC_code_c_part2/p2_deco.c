@@ -925,6 +925,16 @@ void deco_clear_tissue(void)
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// Called every 1 min during decoplanning.
+// Update tissues for 1 min.
+//
+void deco_calc_tissue(void)
+{
+    RESET_C_STACK
+    calc_hauptroutine_update_tissues();
+}    
+
+//////////////////////////////////////////////////////////////////////////////
 
 void deco_calc_wo_deco_step_1_min(void)
 {
@@ -1240,7 +1250,7 @@ static void calc_hauptroutine(void)
     	copy_deco_table();
     	int_O_ascenttime = 0;       // Reset DTR.
     	char_O_nullzeit = 0;        // Reset bottom time.
-      	char_O_deco_status = 0;     // Calc bottom-time/nullzeit next iteration.
+        char_O_deco_status = 0;     // Calc bottom-time/nullzeit next iteration.
 
         // Values that should be reset just once for the full real dive.
         // This is used to record the lowest stop for the whole dive,
@@ -1457,6 +1467,7 @@ Surface:
     		        copy_deco_table();
         	        calc_ascenttime();
     		        char_O_deco_status = 0; // calc nullzeit next time.
+                    char_O_deco_last_stop = 0;  // Surface reached.
     		        return;
                 }
             }
@@ -1473,6 +1484,7 @@ Surface:
 
 	// Surface not reached, need more stops...
     char_O_deco_status = 1; // calc more stops next time.
+    char_O_deco_last_stop = temp_depth_limit;   // Reached depth.
 }
 
 //////////////////////////////////////////////////////////////////////////////

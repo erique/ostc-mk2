@@ -376,48 +376,49 @@ simulator_calc_deco:
 	call	divemode_check_decogases    ; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
 
+    ; First minute is special: init everything.
 	movlw	d'3'                        ; Begin of deco cycle (reset table).
 	movff	WREG,char_O_deco_status     ; Reset Deco module.
 
-	movlw	d'0'
-	movff	WREG,char_I_step_is_1min    ; 2 second deco mode for descent.
+	movlw	d'1'
+	movff	WREG,char_I_step_is_1min    ; 1 minute mode.
 
-simulator_calc_deco_loop1:
-	call	deco_calc_hauptroutine      ; calc_tissue
+	call	deco_calc_hauptroutine      ; Reset table + sim one minute for descent.
 	movlb	b'00000001'                 ; rambank 1 selected
 
-	movff	char_O_deco_status,WREG
-	tstfsz	WREG                        ; deco_status=0 if decompression calculation done
-	bra		simulator_calc_deco_loop1   ; Not finished
+    decf    logbook_temp1,F             ; One minute done.
 
-	movlw	d'1'
-	movff	WREG,char_I_step_is_1min    ; 1 minute mode for bottom time.
-
+    ; Loop for bottom time duration
 simulator_calc_deco_loop2:
-	call	PLED_simulator_data
+	call	PLED_simulator_data         ; Update display of bottom time.
 
-	call	deco_calc_hauptroutine		; calc_tissue
+	call	deco_calc_tissue		    ; JUST calc tissue (faster).
 	movlb	b'00000001'                 ; rambank 1 selected
 	ostc_debug	'C'	                    ; Sends debug-information to screen if debugmode active
 
-	decfsz	logbook_temp1,F             ; Decrement bottom time.
-	bra     simulator_calc_deco_loop2
+    decfsz  logbook_temp1,F             ; Decrement bottom time,
+	bra     simulator_calc_deco_loop2   ; and loop while not finished.
 
+    ; No the bottom time is finish, restart a full ascent simulation,
 	movlw	d'0'
-	movff	WREG,char_I_step_is_1min    ; 2 second deco mode
+	movff	WREG,char_I_step_is_1min    ; Back to 2 second deco mode
 
 	clrf	timeout_counter2			; timeout used as maxloop here
-simulator_calc_deco2:
+	movff   char_I_bottom_depth,char_O_deco_last_stop
 
+simulator_calc_deco2:
 	call	deco_calc_hauptroutine		; calc_tissue
 	movlb	b'00000001'                 ; rambank 1 selected
+
+    movff   char_O_deco_last_stop,logbook_temp2
+    call    PLED_simulator_data         ; Animate ascent simu.
 
 	dcfsnz	timeout_counter2,F			; Abort loop (max. 256 tries)?
 	bra		simulator_calc_deco3		; Yes...
 
 	movff	char_O_deco_status,WREG
-	tstfsz	WREG                        ; deco_status=0 if decompression calculation done
-	bra		simulator_calc_deco2        ; Not finished
+	iorwf	WREG                        ; deco_status=0 if decompression calculation done
+	bnz		simulator_calc_deco2        ; Not finished
 
 simulator_calc_deco3:
     ; Finished
@@ -433,7 +434,8 @@ simulator_calc_deco3:
 
 	movlw	d'5'                            ; Pre-Set Cursor to "Show Decoplan"
 	movwf	menupos
-	movff	char_I_bottom_time,logbook_temp1; restore bottom time.
+	movff	char_I_bottom_time,logbook_temp1    ; Restore bottom time,
+	movff   char_I_bottom_depth,logbook_temp2   ; and depth.
 	bra     menu_simulator1                 ; Done.
 
 simulator_save_tissue_data:

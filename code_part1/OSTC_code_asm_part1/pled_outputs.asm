@@ -436,7 +436,6 @@ PLED_display_ndl:
 	movff	char_O_nullzeit,lo				; NDL in minutes
 	output_8
 	STRCAT_PRINT    "'"
-
 	WIN_FONT 	FT_SMALL
 	return
 
@@ -457,7 +456,6 @@ PLED_display_deko:
 	bra		PLED_display_deko1		; Yes, do not display deco, only GF (if required)
 
 	ostc_debug	'y'		; Sends debug-information to screen if debugmode active
-; deco stop word
 	WIN_TOP		.80
 	WIN_LEFT	.94
 	WIN_FONT 	FT_MEDIUM
@@ -2539,7 +2537,8 @@ PLED_de_activelist:			; show (de)active gaslist
 	WIN_FONT	FT_SMALL
 	bsf		leftbind
 	
-	movlw	d'92'
+;	movlw	d'92'	; old sorted list
+	movlw	d'2'
 	movwf	wait_temp			; here: stores eeprom address for gas list
 	movlw	d'0'
 	movwf	waitms_temp			; here: stores row for gas list
@@ -2566,7 +2565,8 @@ PLED_de_activelist_loop:
 	output_8				; outputs into Postinc2!
     PUTC    '@'
 
-	movlw	d'117'
+;	movlw	d'117'			; old sorted list
+	movlw	d'27'
 	addwf	hi,W
 	movwf	EEADR			; Point to Change depth
 
@@ -2640,8 +2640,9 @@ PLED_gas_list_loop:
 	decf	EEADR,F			; Gas #hi: %O2 - Set address in internal EEPROM
 	call	read_eeprom		; get byte (stored in EEDATA)
 	PLED_color_code		warn_gas_in_gaslist		; Color-code output	(%O2 in "EEDATA")
-; Check if gas needs to be greyed-out (inactive)	
-	read_int_eeprom		d'27'	; read flag register
+; Check if gas needs to be greyed-out (inactive)
+	movff	sorted_gaslist_active, EEDATA		; Work with sorted list
+;	read_int_eeprom		d'27'	; read flag register
 	movff	hi,lo			; copy gas number
 PLED_gas_list_loop1:
 	rrcf	EEDATA			; roll flags into carry

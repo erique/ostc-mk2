@@ -1013,6 +1013,9 @@ gassetup_show_ppO2:
 
 ;=============================================================================
 gassetup_sort_gaslist:			; Sorts Gaslist according to change depth
+	return			; No sort test
+
+
 ; EEPROM Locations of Gaslist
 ; Gas1: 
 ; O2 Default:4

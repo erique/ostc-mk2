@@ -829,7 +829,7 @@ static void copy_deco_table(void)
 {
     // Copy depth of the first (deepest) stop, because when reversing
     // order, it will be hard to find...    
-    char_O_first_deco_depth = internal_deco_depth[0];
+    char_O_first_deco_depth = internal_deco_depth[0] & 0x7F;
     char_O_first_deco_time  = internal_deco_time [0];
 
     if( read_custom_function(54) & 1 ) //---- Should we reverse table ? ------
@@ -1836,7 +1836,7 @@ static void update_deco_table()
         // Make sure deco-stops are recorded in order:
         assert( !internal_deco_depth[x] || temp_depth_limit <= internal_deco_depth[x] );
 
-        if( internal_deco_depth[x] == temp_depth_limit )
+        if( (internal_deco_depth[x] & 0x7F) == temp_depth_limit )
         {
             // Do not overflow (max 255')
 	        if( internal_deco_time[x] < 255 )
@@ -1850,6 +1850,9 @@ static void update_deco_table()
         if( internal_deco_depth[x] == 0 )
         {
             internal_deco_depth[x] = temp_depth_limit;
+            if( sim_gas_delay > sim_dive_mins )
+                internal_deco_depth[x] |= 0x80;
+
             internal_deco_time[x]  = 1;
             return;
         }

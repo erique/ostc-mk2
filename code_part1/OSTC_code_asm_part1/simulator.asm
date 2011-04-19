@@ -151,6 +151,9 @@ simulator_startdive:
 	ostc_debug	'P'							; Sends debug-information to screen if debugmode active
 	goto	diveloop						; Start Divemode
 
+;=============================================================================
+; Show decoplanning result.
+;
 simulator_show_decoplan:
         call	PLED_ClearScreen
         call	PLED_simdata_screen
@@ -168,7 +171,7 @@ simulator_show_decoplan:
         
         WIN_TOP .160
         lfsr    FSR2, letter
-        OUTPUTTEXT .85                  ; TTS (for translation).
+        OUTPUTTEXT .85                  ; TTS
         STRCAT  ": "
         bsf		leftbind
         output_16

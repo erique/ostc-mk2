@@ -2348,6 +2348,7 @@ PLED_divemode_simulator_mask:
 ;-----------------------------------------------------------------------------
 ; Draw a stop of the deco plan (simulator or dive).
 ; Inputs: lo      = depth. Range 3m...93m
+;                 + 80 if this is a switch-gas stop.
 ;         hi      = minutes. range 1'..240'.
 ;         win_top = line to draw on screen.
 ; Trashed: hi, lo, win_height, win_leftx2, win_width, win_color*,
@@ -2356,7 +2357,19 @@ PLED_divemode_simulator_mask:
 PLED_decoplan_show_stop:
         ;---- Print depth ----------------------------------------------------
         WIN_LEFT .100
+        
+        btfss   lo,7                    ; Bit set ?
+        bra     PLED_decoplan_std_stop  ; No : Just an usual stop.
+
+        movlw   b'11111101'             ; Yellow.
+        call    PLED_set_color
+        bcf     lo,7                    ; and cleanup depth.
+        bra     PLED_decoplan_nstd_stop
+
+PLED_decoplan_std_stop:
 	    call    PLED_standard_color
+
+PLED_decoplan_nstd_stop:        
 	    lfsr	FSR2,letter
 	    bsf     leftbind
 	    output_8					    ; outputs into Postinc2!
@@ -2390,7 +2403,6 @@ PLED_decoplan_show_stop:
         movff	WREG,win_width    		; column max width.
 
         ; Draw used area (hi = minutes):
-        call    PLED_standard_color
         movlw	d'16'                   ; Limit length (16min)
         cpfslt	hi
         movwf	hi
@@ -2398,6 +2410,7 @@ PLED_decoplan_show_stop:
         call	PLED_box
 
         ; Restore win_top
+        call    PLED_standard_color
         movff   win_top,WREG            ; decf win_top (BANK SAFE)
         decf    WREG
         movff   WREG,win_top

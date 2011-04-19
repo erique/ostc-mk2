@@ -448,6 +448,7 @@ PLED_display_deko_mask:
     ; total deco time word
     call		PLED_divemask_color	; Set Color for Divemode mask
     DISPLAYTEXT	d'85'			; TTS
+	DISPLAYTEXT	d'82'			; DEKOSTOP
     call	PLED_standard_color
     return
 
@@ -457,10 +458,6 @@ PLED_display_deko:
 
 	ostc_debug	'y'		; Sends debug-information to screen if debugmode active
 ; deco stop word
-	call		PLED_divemask_color	; Set Color for Divemode mask
-	DISPLAYTEXT	d'82'			; DEKOSTOP
-	call	PLED_standard_color
-
 	WIN_TOP		.80
 	WIN_LEFT	.94
 	WIN_FONT 	FT_MEDIUM

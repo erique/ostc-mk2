@@ -680,6 +680,7 @@ timeout_divemenu2:					; quit divemode menu
 	btfsc	gauge_mode					; Ignore in Gauge mode
 	bra		timeout_divemenu2a			; skip!
 
+	bcf		menubit
 	btfsc	dekostop_active
 	call	PLED_display_deko_mask	; clear nostop time, display decodata
 	btfss	dekostop_active

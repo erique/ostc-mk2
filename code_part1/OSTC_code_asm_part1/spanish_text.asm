@@ -242,15 +242,15 @@
     TCODE    .40,   .35,     "Mostr. Gráf.Tej"           ;174 ShowTissueGraph
     TCODE    .40,   .35,     "Mostr. TejContr"           ;175 Show Lead.Tiss.
     TCODE    .40,   .35,     "PriParadaSuperf"           ;176 Shallow stop 1st  (Reverse order of deco plans)
-    TCODE    .40,   .35,     "Gas switch[min]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
-    TCODE    .40,   .35,     "BottomGas[l/mn]"           ;178 BottomGas[l/mn]   (Bottom gas usage, for volume estimation).
-    TCODE    .40,   .35,     "AscentGas[l/mn]"           ;179 AscentGas[l/mn]   (Ascent+Deco gas usage)
-    TCODE    .40,   .35,     "not used       "           ;180 not used
-    TCODE    .40,   .35,     "not used       "           ;181 not used
-    TCODE    .40,   .35,     "not used       "           ;182 not used
-    TCODE    .40,   .35,     "not used       "           ;183 not used
-    TCODE    .40,   .35,     "not used       "           ;184 not used
-    TCODE    .40,   .35,     "not used       "           ;185 not used
+    TCODE    .40,   .35,     "Conmu. gas[min]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
+    TCODE    .40,   .35,     "Gas Fondo[l/mn]"           ;178 BottomGas[l/mn]   (Bottom gas usage, for volume estimation).
+    TCODE    .40,   .35,     "GasAscens[l/mn]"           ;179 AscentGas[l/mn]   (Ascent+Deco gas usage)
+    TCODE    .40,   .35,     "sin uso        "           ;180 not used
+    TCODE    .40,   .35,     "sin uno        "           ;181 not used
+    TCODE    .40,   .35,     "sin uso        "           ;182 not used
+    TCODE    .40,   .35,     "sin uso        "           ;183 not used
+    TCODE    .40,   .35,     "sin uso        "           ;184 not used
+    TCODE    .40,   .35,     "sin uso        "           ;185 not used
 ; End of function descriptor I
 ;
     TCODE    .13,   .2,      "Func.Personaliz. II"       ;186 Custom Functions II
@@ -377,12 +377,12 @@
     TCODE    .20,   .155,    "-1 mbar"                   ;293 -1 mbar
     TCODE    .85,   .185,    "Alt: "                     ;294 Alt: 
 ;
-	TCODE    .20,   .125,    "Show raw data"             ;295 Show raw data
-	TCODE    .50,    .2,     "Raw Data:"                 ;296 Raw Data:
+	TCODE    .20,   .125,    "Ver datos raw"             ;295 Show raw data
+	TCODE    .50,    .2,     "DatosRaw:"                 ;296 Raw Data:
 ; Gas-setup addons:
     TCODE    .0,    .0,      "MOD:"                      ;297 MOD:                  (max operating depth of a gas).
     TCODE    .0,    .0,      "END:"                      ;298 END:                  (equivalent nitrogen depth of a gas).
     TCODE    .0,    .0,      "EAD:"                      ;299 EAD:                  (equivalent air depth of a gas).
-	TCODE	 .100,	.125,	 "Active?"					 ;300 Active?               (Enable/Disable Gas underwater)
-	TCODE    .0,    .2,      "OCR Gas Usage:"            ;301 OCR Gas Usage:        (Planned gas consumtion by tank).
+	TCODE	 .100,	.125,	 "¿Activar?"				 ;300 Active?               (Enable/Disable Gas underwater)
+	TCODE    .0,    .2,      "Uso Gas OCR:"              ;301 OCR Gas Usage:        (Planned gas consumtion by tank).
 ;=============================================================================

@@ -201,18 +201,30 @@ rs232_get_byte3:
 
 uart_115k_bootloader:
 	bcf		PIE1,RCIE				; disable interrupt for RS232
-	bcf		RCSTA,CREN				; Clear receiver status
-	bsf		RCSTA,CREN
-	bcf		PIR1,RCIF				; clear flag
+;	bcf		PIR1,RCIF				; clear flag
 	call	PLED_ClearScreen		; Clear screen
 	movlw	color_red
     call	PLED_set_color			; Set to Red
 	DISPLAYTEXTH	d'302'			; Bootloader
+	movlw	d'4'					; one second
+	movwf	uart1_temp
+uart_115k_bootloader0:
+	btfsc	PIR1,RCIF				; New byte in UART?
+	bra		uart_115k_bootloader1	; Yes, Check if 0xC1
 	WAITMS	d'250'
+	decfsz	uart1_temp,F
+	bra		uart_115k_bootloader0
+uart_115k_bootloader2:
+	DISPLAYTEXTH	d'304'			; Aborted!
+	movlw	d'8'					; Two seconds
+	movwf	uart1_temp
+uart_115k_bootloader3:
 	WAITMS	d'250'
-	WAITMS	d'50'
-	btfss	PIR1,RCIF				; New byte in UART?
-	bra		uart_115k_bootloader2	; No, Abort	
+	decfsz	uart1_temp,F
+	bra		uart_115k_bootloader3
+	goto	restart
+	
+uart_115k_bootloader1:
 	movlw	0xC1
 	cpfseq	RCREG					; 115200Baud Bootloader request?
 	bra		uart_115k_bootloader2	; No, Abort	
@@ -220,16 +232,3 @@ uart_115k_bootloader:
 	clrf	INTCON					; Interrupts disabled
 	bcf		PIR1,RCIF				; clear flag
 	goto	0x17F56					; Enter straight into bootloader. Good luck!
-uart_115k_bootloader2:
-	DISPLAYTEXTH	d'304'			; Aborted!
-	WAITMS	d'250'
-	WAITMS	d'250'
-	WAITMS	d'250'
-	WAITMS	d'250'
-	WAITMS	d'250'
-	WAITMS	d'250'
-	WAITMS	d'250'
-	WAITMS	d'250'
-	goto	restart
-	
-	

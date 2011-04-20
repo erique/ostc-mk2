@@ -1856,13 +1856,13 @@ update_batt_voltage3:
 	GETCUSTOM8	d'34'			; Color battery
 	btfsc	cc_active
 	movlw	color_yellow		; CC active
-	btfsc	cv_active
-	movlw	color_green			; CV active
+	btfsc	charge_done
+	movlw	color_green			; Charge done.
     call	PLED_set_color
 
-	movlw	.175
+	movlw	.177
 	movff	WREG,win_top		; row top (0-239)
-	movlw	.192-.175
+	movlw	.192-.177
 	movff	WREG,win_height		; row bottom (0-239)
 	movlw	.2
 	movff	WREG,win_leftx2		; column left (0-159)

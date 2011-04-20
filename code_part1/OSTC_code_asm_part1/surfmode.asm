@@ -118,7 +118,7 @@ surfloop_loop:
 	bra		surfloop_loop1				; No
 ; One Second tasks for ppO2 modes
 
-	bra		surfloop_loop1				; Do not search for sensor in CC mode
+	bra		surfloop_loop1				;
 
 surfloop_loop1:
 ; One Second tasks for all modes

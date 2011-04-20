@@ -705,6 +705,7 @@ timeout_divemenu2a:
 	bcf		display_set_setpoint
 	bcf		display_set_simulator
 	bcf		display_set_active
+	bcf		menu3_active
 	bcf		switch_left				; and debounce switches
 	bcf		switch_right
 	return
@@ -719,6 +720,7 @@ timeout_divemenu3:
 
 timeout_divemenu6:
 	; Update Simulator Mask
+	bsf		menu3_active				; So "+1" is accessible at all times
 	call	PLED_divemode_simulator_mask; Show mask
 	call	PLED_divemenu_cursor		; update cursor
 	bra		timeout_divemenu1			; Check timeout

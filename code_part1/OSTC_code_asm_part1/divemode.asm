@@ -334,7 +334,7 @@ calc_deko_divemode:
 	bra		reset_decompression_gases	; While in NDL, do not set deompression gas
 
 divemode_check_decogases:					; CALLed from Simulator
-; Copy active gases to char_I_deco_N2_ratio and char_I_deco_He_ratio
+; Copy all gases to char_I_deco_N2_ratio and char_I_deco_He_ratio
 	read_int_eeprom		d'5'			; Read He ratio
 	movff	EEDATA,char_I_deco_He_ratio+4	; And copy into hold register
 	read_int_eeprom		d'4'			; Read O2 ratio

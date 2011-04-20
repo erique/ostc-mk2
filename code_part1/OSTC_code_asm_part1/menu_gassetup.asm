@@ -1013,7 +1013,40 @@ gassetup_show_ppO2:
 
 ;=============================================================================
 gassetup_sort_gaslist:			; Sorts Gaslist according to change depth
-	return			; No sort test
+	clrf	sorted_gaslist_active	; Clear all flags
+
+	read_int_eeprom		d'33'       	; Get First gas (1-5)
+    movff   EEDATA,lo
+	bsf		STATUS,C
+gassetup_sort_gaslist2:
+	rlcf	sorted_gaslist_active,F		; Shift flag for first gas
+	decfsz	lo,F
+	bra		gassetup_sort_gaslist2
+
+	read_int_eeprom	d'28'		; Change Depth Gas1
+	tstfsz	EEDATA				; =0?
+	bsf		sorted_gaslist_active,0	; No, set active
+
+	read_int_eeprom	d'29'		; Change Depth Gas2
+	tstfsz	EEDATA				; =0?
+	bsf		sorted_gaslist_active,1; No, set active
+	
+	read_int_eeprom	d'30'		; Change Depth Gas3
+	tstfsz	EEDATA				; =0?
+	bsf		sorted_gaslist_active,2	; No, set active
+
+	read_int_eeprom	d'31'		; Change Depth Gas4
+	tstfsz	EEDATA				; =0?
+	bsf		sorted_gaslist_active,3	; No, set active
+
+	read_int_eeprom	d'32'		; Change Depth Gas5
+	tstfsz	EEDATA				; =0?
+	bsf		sorted_gaslist_active,4	; No, set active
+
+	movff	sorted_gaslist_active,EEDATA
+	clrf	EEADRH
+	write_int_eeprom		d'27'	; Store results
+	return			
 
 
 ; EEPROM Locations of Gaslist
@@ -1056,208 +1089,3 @@ gassetup_sort_gaslist:			; Sorts Gaslist according to change depth
 ; He Current:23
 ; Change: 32
 ; Active: 27,4
-
-; reset Change depths (Important for all users who upgrade from <1.60!)
-	clrf	EEADRH
-	clrf	EEDATA
-	write_int_eeprom		d'118'		; 
-	write_int_eeprom		d'119'		; 
-	write_int_eeprom		d'120'		; 
-	write_int_eeprom		d'121'		; 
-	write_int_eeprom		d'122'		; 
-	movlw	d'21'				; O2 Current
-	movwf	EEDATA	
-	write_int_eeprom		d'96'		; 
-	write_int_eeprom		d'100'		; 
-	write_int_eeprom		d'104'		; 
-	write_int_eeprom		d'108'		; 
-	write_int_eeprom		d'112'		; 
-
-	clrf	EEDATA				; He Current
-	write_int_eeprom		d'97'		; 
-	write_int_eeprom		d'101'		; 
-	write_int_eeprom		d'105'		; 
-	write_int_eeprom		d'109'		; 
-	write_int_eeprom		d'113'		; 
-
-; Find deepest Gas
-; Copy all to RAM
-	movlw	d'3'
-	movwf	EEADR
-	clrf	EEADRH
-	lfsr	FSR2,letter			; Store gases in Letter buffer (max. 26Byte!)
-gassetup_sort_gaslist1:
-	incf	EEADR,F				; Next Adress
-	call	read_eeprom			; Read byte
-	movff	EEDATA,POSTINC2		; Copy into RAM
-	movlw	d'23'				
-	cpfseq	EEADR				; All done?
-	bra		gassetup_sort_gaslist1	; No, not yet
-; Letter+0	=	EEPROM 4
-; ...
-; Letter+19 =	EEPROM 23
-	read_int_eeprom	d'28'
-	movff	EEDATA,POSTINC2		; Change Depth Gas1 -> Letter+20
-	read_int_eeprom	d'29'
-	movff	EEDATA,POSTINC2		; Change Depth Gas2 -> Letter+21
-	read_int_eeprom	d'30'
-	movff	EEDATA,POSTINC2		; Change Depth Gas3 -> Letter+22
-	read_int_eeprom	d'31'
-	movff	EEDATA,POSTINC2		; Change Depth Gas4 -> Letter+23
-	read_int_eeprom	d'32'
-	movff	EEDATA,POSTINC2		; Change Depth Gas5 -> Letter+24
-	read_int_eeprom	d'27'
-	movff	EEDATA,POSTINC2		; Active Byte 		-> Letter+25
-
-; All change depths = 0? -> Skip sort!
-	lfsr	FSR2,letter+.20		; Change depths...
-	movlw	d'5'
-	movwf	logbook_temp3		; Gas (0-4)
-	clrf	logbook_temp1		; counter
-gassetup_sort_gaslist1a:	
-	movf	POSTINC2,W
-	addwf	logbook_temp1,F		; sum
-	decfsz	logbook_temp3,F		; Loop
-	bra		gassetup_sort_gaslist1a
-
-	tstfsz	logbook_temp1		; All depths = 0?
-	bra		gassetup_sort_gaslist1b	; No
-	return						; Yes, skip all!
-
-gassetup_sort_gaslist1b:
-; Initialize sorting...
-	bcf		menubit2				; Change Start gas only 1x
-	movlw	d'99'
-	movwf	logbook_temp4		; Last Gas change depth
-
-	movff	letter+.25, logbook_temp5	; Activity flags
-
-; Done. Copy Gas #logbook_temp3 into EEPROM Place Gas 5
-	rcall	gassetup_sort_sort	; Sort!
-	movlw	d'5'					; Gas 5
-	movwf	logbook_temp2
-	rcall	gassetup_sort_store
-
-; Done. Copy Gas #logbook_temp3 into EEPROM Place Gas 4
-	rcall	gassetup_sort_sort	; Sort!
-	movlw	d'4'					; Gas 4
-	movwf	logbook_temp2
-	rcall	gassetup_sort_store
-
-; Done. Copy Gas #logbook_temp3 into EEPROM Place Gas 3
-	rcall	gassetup_sort_sort	; Sort!
-	movlw	d'3'					; Gas 3
-	movwf	logbook_temp2
-	rcall	gassetup_sort_store
-
-; Done. Copy Gas #logbook_temp3 into EEPROM Place Gas 2
-	rcall	gassetup_sort_sort	; Sort!
-	movlw	d'2'					; Gas 2
-	movwf	logbook_temp2
-	rcall	gassetup_sort_store
-
-; Done. Copy Gas #logbook_temp3 into EEPROM Place Gas 1
-	rcall	gassetup_sort_sort	; Sort!
-	movlw	d'1'					; Gas 1
-	movwf	logbook_temp2
-	bra     gassetup_sort_store
-
-;-----------------------------------------------------------------------------
-gassetup_sort_sort:
-	clrf	logbook_temp2               ; Tested gas (0-4)
-	clrf	logbook_temp1               ; Found change depth in m
-	clrf	logbook_temp3               ; Found gas (0-4)
-;	movff	letter+.25, logbook_temp5	; Activity flags
-
-	lfsr	FSR2,letter+.20             ; Change depths Gas1
-gassetup_sort_gaslist2:
-	movf	POSTINC2,W                  ; Get Change depth into WREG
-
-	cpfsgt	logbook_temp4               ; logbook_temp4 < W? Here: Change depth of last sort run
-	bra		gassetup_sort_gaslist3      ; Skip, tested depth > max. Depth from last run
-	cpfslt	logbook_temp1               ; logbook_temp1 < W?
-	bra		gassetup_sort_gaslist3      ; Skip, tested depth < max. Depth from this run
-
-    ; Is gas active?
-    ; Should not select inactive gas, because we might have several
-    ; gas with the same depth, some active, some not...
-
-	rrcf	logbook_temp5,F				; Shift into Carry bit
-	btfss	STATUS,C                    ; Was Gas active?
-	bra		gassetup_sort_gaslist3      ; No: Skip.
-
-	movwf	logbook_temp1               ; copy new depth (current run)
-	movff	logbook_temp2,logbook_temp3 ; Holds deepest Gas 0-4 of this pass
-	
-gassetup_sort_gaslist3:
-	incf	logbook_temp2,F             ; Check next Gas
-	movlw	d'5'
-	cpfseq	logbook_temp2               ; All done?
-	bra		gassetup_sort_gaslist2      ; No
-    
-    ; Done:
-	movff	logbook_temp1,logbook_temp4 ; copy new depth (Store for next run)
-
-; Debugger
-;	movff	logbook_temp2,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	logbook_temp3,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	logbook_temp4,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	logbook_temp5,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	WAITMS	d'255'
-	return
-
-gassetup_sort_store:
-	lfsr	FSR2,letter				; Point to Gas0
-	movf	logbook_temp3,W         ; 0..4
-	mullw	d'4'
-	movf	PRODL,W					; letter+(0..4)x4
-	addwf	FSR2L,F
-	movlw	d'0'
-	addwfc	FSR2H,F					; Point to Gas #logbook_temp3 (0-4)
-
-;	btfsc	menubit2				; Change Start gas only 1x
-;	bra		gassetup_sort_store2	; Skip
-;; First Gas: 33 (1-5)
-;; Was gas #logbook_temp3 first gas?
-;	read_int_eeprom		d'33'		; Get old first gas (1-5)
-;	incf	logbook_temp3,W			; Gas 1-5 -> WREG
-;	cpfseq	EEDATA					; Compare with EEDATA d'33'
-;	bra		gassetup_sort_store2	; Was not first gas!
-;	movff	logbook_temp5,EEDATA	; Copy new first gas
-;	write_int_eeprom	d'123'		; Store
-;	bsf		menubit2				; Done. Do not change again.
-
-gassetup_sort_store2:
-;call	enable_rs232	
-;movff	logbook_temp1,TXREG
-;call	rs232_wait_tx				    ; wait for UART
-
-	movf	logbook_temp2,W             ; Destination slot : 1-5
-	mullw	d'4'
-	movff	PRODL,EEADR                 ; Point to EEPROM of Gas #logbook_temp5
-	movlw	d'90'                       ; +90 Offset to new... 
-	addwf	EEADR,F                     ; ..sorted list!
-
-	movff	POSTINC2,EEDATA			; O2 Default
-	call	write_eeprom			; store in internal EEPROM
-	incf	EEADR,F					; +1
-	movff	POSTINC2,EEDATA			; He Default
-	call	write_eeprom			; store in internal EEPROM
-	incf	EEADR,F					; +1
-	movff	POSTINC2,EEDATA			; O2 Current
-	call	write_eeprom			; store in internal EEPROM
-	incf	EEADR,F					; +1
-	movff	POSTINC2,EEDATA			; He Current
-	call	write_eeprom			; store in internal EEPROM
-
-	movf	logbook_temp2,W			; Destination slot : 1-5
-    addlw   d'117'
-    movwf   EEADR
-	movff	logbook_temp1,EEDATA    ; Change depth -> EEDATA
-	call	write_eeprom			; store in internal EEPROM
-
-	return

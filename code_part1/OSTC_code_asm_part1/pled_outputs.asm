@@ -2540,7 +2540,6 @@ PLED_de_activelist:			; show (de)active gaslist
 	WIN_FONT	FT_SMALL
 	bsf		leftbind
 	
-;	movlw	d'92'	; old sorted list
 	movlw	d'2'
 	movwf	wait_temp			; here: stores eeprom address for gas list
 	movlw	d'0'
@@ -2568,7 +2567,6 @@ PLED_de_activelist_loop:
 	output_8				; outputs into Postinc2!
     PUTC    '@'
 
-;	movlw	d'117'			; old sorted list
 	movlw	d'27'
 	addwf	hi,W
 	movwf	EEADR			; Point to Change depth
@@ -2577,8 +2575,6 @@ PLED_de_activelist_loop:
 	movff	EEDATA,lo		; copy to lo
 	output_8				; outputs into Postinc2!
 	
-;	call	PLED_standard_color	
-
 ; Check if gas needs to be greyed-out (inactive)	
 	movff	sorted_gaslist_active,EEDATA	; Get flag register
 	movff	hi,lo			; copy gas number
@@ -2590,9 +2586,6 @@ PLED_de_activelist_loop1:
 	movlw	color_grey
 	btfss	STATUS,C		; test carry
 	call	PLED_set_color	; grey out inactive gases!
-
-	dcfsnz	hi,W			; First in List?
-	call	PLED_standard_color
 
 	call	word_processor	
 	call	PLED_standard_color	

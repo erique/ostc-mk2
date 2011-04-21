@@ -2532,7 +2532,16 @@ PLED_decoplan_99:
         rcall   PLED_decoplan_clear_bottom  ; Clear from next line
         return
 ;-----------------------------------------------------------------------------
-
+; Toggle gas activity flag during dive.
+; 
+; Input: sorted_gaslist_active
+;        Gaslist from eeprom[2...]
+;
+; Output: sorted_gaslist_active
+;
+; Note: Gas with a zero depth cannot be used in deco simulation, hence
+;       should not be displayed as selected here...
+;
 PLED_de_activelist:			; show (de)active gaslist
 	call	PLED_standard_color	
     DISPLAYTEXT	.254			; Close
@@ -2576,6 +2585,9 @@ PLED_de_activelist_loop:
 	movff	EEDATA,lo		; copy to lo
 	output_8				; outputs into Postinc2!
 	
+	movf    lo,w            ; Gas with a zero depth
+	bz      PLED_de_activelist_grey ; should be displayed inactive.
+	
 ; Check if gas needs to be greyed-out (inactive)	
 	movff	sorted_gaslist_active,EEDATA	; Get flag register
 	movff	hi,lo			; copy gas number
@@ -2583,11 +2595,13 @@ PLED_de_activelist_loop1:
 	rrcf	EEDATA			; roll flags into carry
 	decfsz	lo,F			; max. 5 times...
 	bra		PLED_de_activelist_loop1
+    bc      PLED_de_activelist_white
 
+PLED_de_activelist_grey:    ; grey out inactive gases!
 	movlw	color_grey
-	btfss	STATUS,C		; test carry
-	call	PLED_set_color	; grey out inactive gases!
+	call	PLED_set_color
 
+PLED_de_activelist_white:
 	call	word_processor	
 	call	PLED_standard_color	
 

@@ -26,8 +26,8 @@
 ;=============================================================================
 ; Expose internal variables, to ease debug:
     global D1, D2
-    global C1, C2, C3, C4, C5
-    global xdT, xdT2, OFF, SENS, amb_pressure
+    global C1, C2, C3, C4, C5, C6
+    global xdT, xdT2, OFF, SENS, amb_pressure, temperature
 
 ;=============================================================================
 calculate_compensation:
@@ -242,8 +242,16 @@ get_calibration_data:
 	movwf	isr1_temp
 	rcall	send_data_MS55535A
 	rcall	get_2bytes_MS5535A
+
+#ifdef TESTING
+    movlw   LOW(.18556)
+    movff   WREG,W1+0
+    movlw   HIGH(.18556)
+    movff   WREG,W1+1
+#else
 	movff	dMSB,W1+1	
 	movff	dLSB,W1+0
+#endif
 
 	movlw	d'13'
 	movwf	clock_count
@@ -251,8 +259,15 @@ get_calibration_data:
 	movwf	isr1_temp
 	rcall	send_data_MS55535A
 	rcall	get_2bytes_MS5535A
+#ifdef TESTING
+    movlw   LOW(.49183)
+    movff   WREG,W2+0
+    movlw   HIGH(.49183)
+    movff   WREG,W2+1
+#else
 	movff	dMSB,W2+1	
 	movff	dLSB,W2+0
+#endif
 
 	movlw	d'13'
 	movwf	clock_count
@@ -260,8 +275,15 @@ get_calibration_data:
 	movwf	isr1_temp
 	rcall	send_data_MS55535A
 	rcall	get_2bytes_MS5535A
+#ifdef TESTING
+    movlw   LOW(.22354)
+    movff   WREG,W3+0
+    movlw   HIGH(.22354)
+    movff   WREG,W3+1
+#else
 	movff	dMSB,W3+1	
 	movff	dLSB,W3+0
+#endif
 
 	movlw	d'13'
 	movwf	clock_count
@@ -269,8 +291,15 @@ get_calibration_data:
 	movwf	isr1_temp
 	rcall	send_data_MS55535A
 	rcall	get_2bytes_MS5535A
+#ifdef TESTING
+    movlw   LOW(.28083)
+    movff   WREG,W4+0
+    movlw   HIGH(.28083)
+    movff   WREG,W4+1
+#else
 	movff	dMSB,W4+1	
 	movff	dLSB,W4+0
+#endif
 
 ; calculate C1 (16Bit)
 	movff	W1+1, C1+1

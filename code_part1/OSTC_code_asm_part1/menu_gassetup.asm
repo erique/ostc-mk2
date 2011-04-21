@@ -659,13 +659,12 @@ next_gas_page1:
 	WIN_LEFT	.20
 	lfsr	FSR2,letter
 	OUTPUTTEXT	.105			; "Active Gas? "
-	read_int_eeprom		d'27'	; read flag register
 
-	; hi contains active gas flags in BIT0:4 ....
-
+	; Active gas flags in BIT0:4 ....
 	movff	decodata+0,lo	; Gas 0-4
 	incf	lo,F			; Gas 1-5
 
+	read_int_eeprom		d'27'	; read flag register
 active_gas_display:
 	rrcf	EEDATA			; roll flags into carry
 	decfsz	lo,F			; max. 5 times...
@@ -1012,43 +1011,38 @@ gassetup_show_ppO2:
 	return
 
 ;=============================================================================
-gassetup_sort_gaslist:			; Sorts Gaslist according to change depth
-	clrf	sorted_gaslist_active	; Clear all flags
+; Make sure first gas is marked active.
+; Note: - Gas are not soted anymore.
+;       - Gas with a depth>0 should not be forced active, or it is impossible
+;         to de-activate them.
+gassetup_sort_gaslist:
 
-	read_int_eeprom		d'33'       	; Get First gas (1-5)
-    movff   EEDATA,lo
-	bsf		STATUS,C
-gassetup_sort_gaslist2:
-	rlcf	sorted_gaslist_active,F		; Shift flag for first gas
-	decfsz	lo,F
-	bra		gassetup_sort_gaslist2
+	clrf	EEADRH                  ; Select EEPROM lower page.
+	read_int_eeprom		d'33'       ; Get First gas (1-5)
+    movff   EEDATA,lo               ; into register lo
 
-	read_int_eeprom	d'28'		; Change Depth Gas1
-	tstfsz	EEDATA				; =0?
-	bsf		sorted_gaslist_active,0	; No, set active
+	read_int_eeprom		d'27'	    ; Read selected gases
 
-	read_int_eeprom	d'29'		; Change Depth Gas2
-	tstfsz	EEDATA				; =0?
-	bsf		sorted_gaslist_active,1; No, set active
-	
-	read_int_eeprom	d'30'		; Change Depth Gas3
-	tstfsz	EEDATA				; =0?
-	bsf		sorted_gaslist_active,2	; No, set active
+    dcfsnz  lo,F                    ; If lo==1
+    bsf     EEDATA,0                ; Select Gas1
+    dcfsnz  lo,F                    ; If lo==2
+    bsf     EEDATA,1                ; Select Gas2
+    dcfsnz  lo,F
+    bsf     EEDATA,2
+    dcfsnz  lo,F
+    bsf     EEDATA,3
+    dcfsnz  lo,F
+    bsf     EEDATA,4
+    
+    ; Copy result to register:
+    movff   EEDATA,sorted_gaslist_active
+    
+    ; And write to EEPROM too, to survive next reboot:
+	write_int_eeprom    d'27'
 
-	read_int_eeprom	d'31'		; Change Depth Gas4
-	tstfsz	EEDATA				; =0?
-	bsf		sorted_gaslist_active,3	; No, set active
-
-	read_int_eeprom	d'32'		; Change Depth Gas5
-	tstfsz	EEDATA				; =0?
-	bsf		sorted_gaslist_active,4	; No, set active
-
-	movff	sorted_gaslist_active,EEDATA
-	clrf	EEADRH
-	write_int_eeprom		d'27'	; Store results
 	return			
 
-
+;=============================================================================
 ; EEPROM Locations of Gaslist
 ; Gas1: 
 ; O2 Default:4

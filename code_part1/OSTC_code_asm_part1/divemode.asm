@@ -410,83 +410,6 @@ divemode_check_decogases:					; CALLed from Simulator
 	clrf	EEDATA							; No, clear!
 	movff	EEDATA,char_I_deco_gas_change+0	; Yes!
 
-
-;	read_int_eeprom		d'97'			; Read He ratio
-;	movff	EEDATA,char_I_deco_He_ratio+4	; And copy into hold register
-;	read_int_eeprom		d'96'			; Read O2 ratio
-;	movff	char_I_deco_He_ratio+4, wait_temp			; copy into bank1 register
-;	bsf		STATUS,C					; 
-;	movlw	d'100'						; 100%
-;	subfwb	wait_temp,W					; minus He
-;	subfwb	EEDATA,F					; minus O2
-;	movff	EEDATA, char_I_deco_N2_ratio+4; = N2!
-;
-;	read_int_eeprom		d'101'			; Read He ratio
-;	movff	EEDATA,char_I_deco_He_ratio+3	; And copy into hold register
-;	read_int_eeprom		d'100'			; Read O2 ratio
-;	movff	char_I_deco_He_ratio+3, wait_temp			; copy into bank1 register
-;	bsf		STATUS,C					; 
-;	movlw	d'100'						; 100%
-;	subfwb	wait_temp,W					; minus He
-;	subfwb	EEDATA,F					; minus O2
-;	movff	EEDATA, char_I_deco_N2_ratio+3; = N2!
-;
-;	read_int_eeprom		d'105'			; Read He ratio
-;	movff	EEDATA,char_I_deco_He_ratio+2	; And copy into hold register
-;	read_int_eeprom		d'104'			; Read O2 ratio
-;	movff	char_I_deco_He_ratio+2, wait_temp			; copy into bank1 register
-;	bsf		STATUS,C					; 
-;	movlw	d'100'						; 100%
-;	subfwb	wait_temp,W					; minus He
-;	subfwb	EEDATA,F					; minus O2
-;	movff	EEDATA, char_I_deco_N2_ratio+2; = N2!
-;
-;	read_int_eeprom		d'109'			; Read He ratio
-;	movff	EEDATA,char_I_deco_He_ratio+1	; And copy into hold register
-;	read_int_eeprom		d'108'			; Read O2 ratio
-;	movff	char_I_deco_He_ratio+1, wait_temp			; copy into bank1 register
-;	bsf		STATUS,C					; 
-;	movlw	d'100'						; 100%
-;	subfwb	wait_temp,W					; minus He
-;	subfwb	EEDATA,F					; minus O2
-;	movff	EEDATA, char_I_deco_N2_ratio+1; = N2!
-;
-;	read_int_eeprom		d'113'			; Read He ratio
-;	movff	EEDATA,char_I_deco_He_ratio+0; And copy into hold register
-;	read_int_eeprom		d'112'			; Read O2 ratio
-;	movff	char_I_deco_He_ratio+0, wait_temp			; copy into bank1 register
-;	bsf		STATUS,C					; 
-;	movlw	d'100'						; 100%
-;	subfwb	wait_temp,W					; minus He
-;	subfwb	EEDATA,F					; minus O2
-;	movff	EEDATA, char_I_deco_N2_ratio+0; = N2!
-;
-; Now, set change depth. Inactive gases have depth=0!
-;	read_int_eeprom		d'118'				; read gas_change_depth Gas1
-;	btfss	sorted_gaslist_active,0			; Apply depth?
-;	clrf	EEDATA							; No, clear!
-;	movff	EEDATA,char_I_deco_gas_change+4	; Yes!
-;
-;	read_int_eeprom		d'119'				; read gas_change_depth Gas2
-;	btfss	sorted_gaslist_active,1			; Apply depth?
-;	clrf	EEDATA							; No, clear!
-;	movff	EEDATA,char_I_deco_gas_change+3	; Yes!
-;
-;	read_int_eeprom		d'120'				; read gas_change_depth Gas3
-;	btfss	sorted_gaslist_active,2			; Apply depth?
-;	clrf	EEDATA							; No, clear!
-;	movff	EEDATA,char_I_deco_gas_change+2	; Yes!
-;
-;	read_int_eeprom		d'121'				; read gas_change_depth Gas4
-;	btfss	sorted_gaslist_active,3			; Apply depth?
-;	clrf	EEDATA							; No, clear!
-;	movff	EEDATA,char_I_deco_gas_change+1	; Yes!
-;
-;	read_int_eeprom		d'122'				; read gas_change_depth Gas5
-;	btfss	sorted_gaslist_active,4			; Apply depth?
-;	clrf	EEDATA							; No, clear!
-;	movff	EEDATA,char_I_deco_gas_change+0	; Yes!
-
 ; Debugger
 ;	call	enable_rs232	
 ;	movff	char_I_deco_He_ratio+4,TXREG
@@ -1022,9 +945,7 @@ check_gas_change:					; Checks if a better gas should be selected (by user)
 	call	div16x16				; compute depth in full m -> result in xC+0
 
 check_gas_change1:					; check gas1 
-;	read_int_eeprom		d'27'		; read flag register
-	movff	sorted_gaslist_active,EEDATA	; Get flag register
-	btfss	EEDATA,0				; check active flag
+	btfss	sorted_gaslist_active,0				; check active flag
 	bra		check_gas_change2		; skip inactive gases!
 	movlw	d'1'
 	cpfseq	active_gas				; is this gas currently selected?
@@ -1044,9 +965,7 @@ check_gas_change1x:
 	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 
 check_gas_change2:					; check gas2
-;	read_int_eeprom		d'27'		; read flag register
-	movff	sorted_gaslist_active,EEDATA	; Get flag register
-	btfss	EEDATA,1				; check active flag
+	btfss	sorted_gaslist_active,1 ; check active flag
 	bra		check_gas_change3		; skip inactive gases!
 	movlw	d'2'
 	cpfseq	active_gas				; is this gas currently selected?
@@ -1066,9 +985,7 @@ check_gas_change2x:
 	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 
 check_gas_change3:					; check gas3
-;	read_int_eeprom		d'27'		; read flag register
-	movff	sorted_gaslist_active,EEDATA	; Get flag register
-	btfss	EEDATA,2				; check active flag
+	btfss	sorted_gaslist_active,2 ; check active flag
 	bra		check_gas_change4		; skip inactive gases!
 	movlw	d'3'
 	cpfseq	active_gas				; is this gas currently selected?
@@ -1088,9 +1005,7 @@ check_gas_change3x:
 	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 
 check_gas_change4:					; check gas4
-;	read_int_eeprom		d'27'		; read flag register
-	movff	sorted_gaslist_active,EEDATA	; Get flag register
-	btfss	EEDATA,3				; check active flag
+	btfss	sorted_gaslist_active,3 ; check active flag
 	bra		check_gas_change5		; skip inactive gases!
 	movlw	d'4'
 	cpfseq	active_gas				; is this gas currently selected?
@@ -1110,9 +1025,7 @@ check_gas_change4x:
 	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 
 check_gas_change5:					; check gas5
-;	read_int_eeprom		d'27'		; read flag register
-	movff	sorted_gaslist_active,EEDATA	; Get flag register
-	btfss	EEDATA,4				; check active flag
+	btfss	sorted_gaslist_active,4 ; check active flag
 	bra		check_gas_change6		; skip inactive gases!
 	movlw	d'5'
 	cpfseq	active_gas				; is this gas currently selected?
@@ -1859,28 +1772,3 @@ divemode1:
 	read_int_eeprom	d'27'
 	movff	EEDATA, sorted_gaslist_active
 	return
-
-
-;
-;	clrf	sorted_gaslist_active	; Clear all flags
-;	read_int_eeprom		d'118'		; read gas_change_depth Gas1
-;	tstfsz	EEDATA					; =0m?
-;	bsf		sorted_gaslist_active,0	; No, Set Flag for Gas1
-;
-;	read_int_eeprom		d'119'		; read gas_change_depth Gas2
-;	tstfsz	EEDATA					; =0m?
-;	bsf		sorted_gaslist_active,1	; No, Set Flag for Gas2
-;
-;	read_int_eeprom		d'120'		; read gas_change_depth Gas3
-;	tstfsz	EEDATA					; =0m?
-;	bsf		sorted_gaslist_active,2	; No, Set Flag for Gas3
-;
-;	read_int_eeprom		d'121'		; read gas_change_depth Gas4
-;	tstfsz	EEDATA					; =0m?
-;	bsf		sorted_gaslist_active,3	; No, Set Flag for Gas4
-;
-;	read_int_eeprom		d'122'		; read gas_change_depth Gas5
-;	tstfsz	EEDATA					; =0m?
-;	bsf		sorted_gaslist_active,4	; No, Set Flag for Gas5
-;	return
-;

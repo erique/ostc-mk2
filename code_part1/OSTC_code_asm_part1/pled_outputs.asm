@@ -1229,7 +1229,8 @@ PLED_grey_inactive_gas:
     cpfsgt  EEDATA                      ; is depth > 0 ?
     bra     PLED_grey_gas
 
-	read_int_eeprom		d'27'	        ; read flag register
+    clrf    EEADRH                      ; Lower page of EEPROM.
+    read_int_eeprom		d'27'	        ; read flag register
 PLED_grey_inactive_gas1:
 	rrcf	EEDATA			            ; roll flags into carry
 	decfsz	lo,F			            ; max. 5 times...

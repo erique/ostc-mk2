@@ -2367,18 +2367,18 @@ void deco_gas_volumes(void)
             time = char_O_deco_time[i];
             if( time == 0 ) break;          // End of table: done.
 
-            ascent = depth  = char_O_deco_depth[i];
+            ascent = depth  = char_O_deco_depth[i] & 0x7F;
             if( i < 31 )
-                ascent -= char_O_deco_depth[i+1];
+                ascent -= char_O_deco_depth[i+1] & 0x7F;
         }
         else
         {
             time = char_O_deco_time[31-i];
             if( time == 0 ) continue;       // not yet: still searh table.
 
-            ascent = depth = char_O_deco_depth[31-i];
+            ascent = depth = char_O_deco_depth[31-i] & 0x7F;
             if( i < 31 )
-                ascent -= char_O_deco_depth[30-i];
+                ascent -= char_O_deco_depth[30-i] & 0x7F;
         }
 
         // Gas switch depth ?

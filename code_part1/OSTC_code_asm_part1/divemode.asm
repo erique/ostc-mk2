@@ -333,27 +333,29 @@ calc_deko_divemode:
 	btfss	dekostop_active
 	bra		reset_decompression_gases	; While in NDL, do not set deompression gas
 
-divemode_check_decogases:					; CALLed from Simulator
 ; Copy all gases to char_I_deco_N2_ratio and char_I_deco_He_ratio
+divemode_check_decogases:					; CALLed from Simulator, too
+
+	clrf    EEADRH,                     ; Make sure to select eeprom bank 0
 	read_int_eeprom		d'5'			; Read He ratio
-	movff	EEDATA,char_I_deco_He_ratio+4	; And copy into hold register
+	movff	EEDATA,char_I_deco_He_ratio+0	; And copy into hold register
 	read_int_eeprom		d'4'			; Read O2 ratio
-	movff	char_I_deco_He_ratio+4, wait_temp			; copy into bank1 register
+	movff	char_I_deco_He_ratio+0, wait_temp			; copy into bank1 register
 	bsf		STATUS,C					; 
 	movlw	d'100'						; 100%
 	subfwb	wait_temp,W					; minus He
 	subfwb	EEDATA,F					; minus O2
-	movff	EEDATA, char_I_deco_N2_ratio+4; = N2!
+	movff	EEDATA, char_I_deco_N2_ratio+0; = N2!
 
 	read_int_eeprom		d'9'			; Read He ratio
-	movff	EEDATA,char_I_deco_He_ratio+3	; And copy into hold register
+	movff	EEDATA,char_I_deco_He_ratio+1	; And copy into hold register
 	read_int_eeprom		d'8'			; Read O2 ratio
-	movff	char_I_deco_He_ratio+3, wait_temp			; copy into bank1 register
+	movff	char_I_deco_He_ratio+1, wait_temp			; copy into bank1 register
 	bsf		STATUS,C					; 
 	movlw	d'100'						; 100%
 	subfwb	wait_temp,W					; minus He
 	subfwb	EEDATA,F					; minus O2
-	movff	EEDATA, char_I_deco_N2_ratio+3; = N2!
+	movff	EEDATA, char_I_deco_N2_ratio+1; = N2!
 
 	read_int_eeprom		d'13'			; Read He ratio
 	movff	EEDATA,char_I_deco_He_ratio+2	; And copy into hold register
@@ -366,49 +368,53 @@ divemode_check_decogases:					; CALLed from Simulator
 	movff	EEDATA, char_I_deco_N2_ratio+2; = N2!
 
 	read_int_eeprom		d'17'			; Read He ratio
-	movff	EEDATA,char_I_deco_He_ratio+1	; And copy into hold register
+	movff	EEDATA,char_I_deco_He_ratio+3	; And copy into hold register
 	read_int_eeprom		d'16'			; Read O2 ratio
-	movff	char_I_deco_He_ratio+1, wait_temp			; copy into bank1 register
+	movff	char_I_deco_He_ratio+3, wait_temp			; copy into bank1 register
 	bsf		STATUS,C					; 
 	movlw	d'100'						; 100%
 	subfwb	wait_temp,W					; minus He
 	subfwb	EEDATA,F					; minus O2
-	movff	EEDATA, char_I_deco_N2_ratio+1; = N2!
+	movff	EEDATA, char_I_deco_N2_ratio+3; = N2!
 
 	read_int_eeprom		d'21'			; Read He ratio
-	movff	EEDATA,char_I_deco_He_ratio+0; And copy into hold register
+	movff	EEDATA,char_I_deco_He_ratio+4; And copy into hold register
 	read_int_eeprom		d'20'			; Read O2 ratio
-	movff	char_I_deco_He_ratio+0, wait_temp			; copy into bank1 register
+	movff	char_I_deco_He_ratio+4, wait_temp			; copy into bank1 register
 	bsf		STATUS,C					; 
 	movlw	d'100'						; 100%
 	subfwb	wait_temp,W					; minus He
 	subfwb	EEDATA,F					; minus O2
-	movff	EEDATA, char_I_deco_N2_ratio+0; = N2!
+	movff	EEDATA, char_I_deco_N2_ratio+4; = N2!
+
+; Copy depth of enabled gas into char_I_deco_gas_change
+; Note gaslist_active is inited in diveloop_boot, and edited by
+; the de-activation menu. So don't reread it from eeprom here.
 
 	read_int_eeprom		d'28'				; read gas_change_depth Gas1
-	btfss	sorted_gaslist_active,0			; Apply depth?
+	btfss	gaslist_active,0                ; Apply depth?
 	clrf	EEDATA							; No, clear!
-	movff	EEDATA,char_I_deco_gas_change+4	; Yes!
+	movff	EEDATA,char_I_deco_gas_change+0	; Yes!
 
 	read_int_eeprom		d'29'				; read gas_change_depth Gas2
-	btfss	sorted_gaslist_active,1			; Apply depth?
+	btfss	gaslist_active,1    			; Apply depth?
 	clrf	EEDATA							; No, clear!
-	movff	EEDATA,char_I_deco_gas_change+3	; Yes!
+	movff	EEDATA,char_I_deco_gas_change+1	; Yes!
 
 	read_int_eeprom		d'30'				; read gas_change_depth Gas3
-	btfss	sorted_gaslist_active,2			; Apply depth?
+	btfss	gaslist_active,2    			; Apply depth?
 	clrf	EEDATA							; No, clear!
 	movff	EEDATA,char_I_deco_gas_change+2	; Yes!
 
 	read_int_eeprom		d'31'				; read gas_change_depth Gas4
-	btfss	sorted_gaslist_active,3			; Apply depth?
+	btfss	gaslist_active,3    			; Apply depth?
 	clrf	EEDATA							; No, clear!
-	movff	EEDATA,char_I_deco_gas_change+1	; Yes!
+	movff	EEDATA,char_I_deco_gas_change+3	; Yes!
 
 	read_int_eeprom		d'32'				; read gas_change_depth Gas5
-	btfss	sorted_gaslist_active,4			; Apply depth?
+	btfss	gaslist_active,4    			; Apply depth?
 	clrf	EEDATA							; No, clear!
-	movff	EEDATA,char_I_deco_gas_change+0	; Yes!
+	movff	EEDATA,char_I_deco_gas_change+4	; Yes!
 
 ; Debugger
 ;	call	enable_rs232	
@@ -447,12 +453,12 @@ divemode_check_decogases:					; CALLed from Simulator
 
 reset_decompression_gases:				; reset the deco gas while in NDL
 	ostc_debug	'F'		; Sends debug-information to screen if debugmode active
-  	clrf	lo
-	movff	lo,char_I_deco_gas_change+4
-	movff	lo,char_I_deco_gas_change+3
-	movff	lo,char_I_deco_gas_change+2
-	movff	lo,char_I_deco_gas_change+1
- 	movff	lo,char_I_deco_gas_change+0 ; clear 
+  	lfsr    FSR2,char_I_deco_gas_change
+  	clrf    POSTINC2                    ; Clear Gas1
+  	clrf    POSTINC2
+  	clrf    POSTINC2
+  	clrf    POSTINC2
+  	clrf    POSTINC2                    ; Clear Gas5
 	return
 
 calc_deko_divemode2:
@@ -933,7 +939,11 @@ check_ppO2_2:
 check_ppO2_3:
 	return		; done
 
-
+;=============================================================================
+; Compare all enabled gas in list, to see if a better one is available.
+;
+; Output: better_gas_available
+;
 check_gas_change:					; Checks if a better gas should be selected (by user)
 	bcf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 	
@@ -945,7 +955,7 @@ check_gas_change:					; Checks if a better gas should be selected (by user)
 	call	div16x16				; compute depth in full m -> result in xC+0
 
 check_gas_change1:					; check gas1 
-	btfss	sorted_gaslist_active,0				; check active flag
+	btfss	gaslist_active,0		; check active flag
 	bra		check_gas_change2		; skip inactive gases!
 	movlw	d'1'
 	cpfseq	active_gas				; is this gas currently selected?
@@ -965,7 +975,7 @@ check_gas_change1x:
 	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 
 check_gas_change2:					; check gas2
-	btfss	sorted_gaslist_active,1 ; check active flag
+	btfss	gaslist_active,1        ; check active flag
 	bra		check_gas_change3		; skip inactive gases!
 	movlw	d'2'
 	cpfseq	active_gas				; is this gas currently selected?
@@ -985,7 +995,7 @@ check_gas_change2x:
 	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 
 check_gas_change3:					; check gas3
-	btfss	sorted_gaslist_active,2 ; check active flag
+	btfss	gaslist_active,2        ; check active flag
 	bra		check_gas_change4		; skip inactive gases!
 	movlw	d'3'
 	cpfseq	active_gas				; is this gas currently selected?
@@ -1005,7 +1015,7 @@ check_gas_change3x:
 	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 
 check_gas_change4:					; check gas4
-	btfss	sorted_gaslist_active,3 ; check active flag
+	btfss	gaslist_active,3        ; check active flag
 	bra		check_gas_change5		; skip inactive gases!
 	movlw	d'4'
 	cpfseq	active_gas				; is this gas currently selected?
@@ -1025,7 +1035,7 @@ check_gas_change4x:
 	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 
 check_gas_change5:					; check gas5
-	btfss	sorted_gaslist_active,4 ; check active flag
+	btfss	gaslist_active,4        ; check active flag
 	bra		check_gas_change6		; skip inactive gases!
 	movlw	d'5'
 	cpfseq	active_gas				; is this gas currently selected?
@@ -1047,6 +1057,8 @@ check_gas_change5x:
 check_gas_change6:			;Done
 	call	PLED_active_gas_divemode; Display gas, if required (and with "*" if irequired...)
 	return
+
+;=============================================================================
 
 calculate_noflytime:
 	; calculate nofly time
@@ -1641,6 +1653,9 @@ reset_average1:
 	bcf		reset_average_depth			; Clear flag
 	return
 
+;=============================================================================
+; Setup everything to enter divemode.
+;
 diveloop_boot:	
 	ostc_debug	'Q'		; Sends debug-information to screen if debugmode active
 	clrf	max_pressure+0				; clear some variables
@@ -1649,6 +1664,7 @@ diveloop_boot:
 	clrf	avr_rel_pressure+0
 	clrf	avr_rel_pressure+1
 
+	clrf    EEADRH                      ; Make sure to select eeprom bank 0
 	call	PLED_brightness_low
 	read_int_eeprom	d'90'				; Brightness offset? (Dim>0, Normal = 0)
 	movlw	d'0'
@@ -1768,7 +1784,7 @@ divemode1:
 	subfwb	EEDATA,F					; minus O2
 	movff	EEDATA, char_I_N2_ratio		; = N2!
 
-; Configure sorted_gaslist_active flag register
+; Configure gaslist_active flag register
 	read_int_eeprom	d'27'
-	movff	EEDATA, sorted_gaslist_active
+	movff	EEDATA, gaslist_active
 	return

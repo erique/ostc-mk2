@@ -266,35 +266,35 @@ divemenu_de_activate2_exit:
 	bra		timeout_divemenu2			; quit underwater menu!
 
 divemenu_de_activate2_g1:
-	btg		sorted_gaslist_active,0		; Toggle flag
+	btg		gaslist_active,0    		; Toggle flag
 	movlw	d'2'
 	movwf	menupos						; reset cursor
 	call	PLED_de_activelist			; show (de)active gaslist
 	return
 
 divemenu_de_activate2_g2:
-	btg		sorted_gaslist_active,1		; Toggle flag
+	btg		gaslist_active,1    		; Toggle flag
 	movlw	d'3'
 	movwf	menupos						; reset cursor
 	call	PLED_de_activelist			; show (de)active gaslist
 	return
 
 divemenu_de_activate2_g3:
-	btg		sorted_gaslist_active,2		; Toggle flag
+	btg		gaslist_active,2    		; Toggle flag
 	movlw	d'4'
 	movwf	menupos						; reset cursor
 	call	PLED_de_activelist			; show (de)active gaslist
 	return
 
 divemenu_de_activate2_g4:
-	btg		sorted_gaslist_active,3		; Toggle flag
+	btg		gaslist_active,3    		; Toggle flag
 	movlw	d'5'
 	movwf	menupos						; reset cursor
 	call	PLED_de_activelist			; show (de)active gaslist
 	return
 
 divemenu_de_activate2_g5:
-	btg		sorted_gaslist_active,4		; Toggle flag
+	btg		gaslist_active,4    		; Toggle flag
 	movlw	d'6'
 	movwf	menupos						; reset cursor
 	call	PLED_de_activelist			; show (de)active gaslist

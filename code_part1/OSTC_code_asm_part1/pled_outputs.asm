@@ -2534,10 +2534,10 @@ PLED_decoplan_99:
 ;-----------------------------------------------------------------------------
 ; Toggle gas activity flag during dive.
 ; 
-; Input: sorted_gaslist_active
+; Input: gaslist_active
 ;        Gaslist from eeprom[2...]
 ;
-; Output: sorted_gaslist_active
+; Output: gaslist_active
 ;
 ; Note: Gas with a zero depth cannot be used in deco simulation, hence
 ;       should not be displayed as selected here...
@@ -2589,7 +2589,7 @@ PLED_de_activelist_loop:
 	bz      PLED_de_activelist_grey ; should be displayed inactive.
 	
 ; Check if gas needs to be greyed-out (inactive)	
-	movff	sorted_gaslist_active,EEDATA	; Get flag register
+	movff	gaslist_active,EEDATA	; Get flag register
 	movff	hi,lo			; copy gas number
 PLED_de_activelist_loop1:
 	rrcf	EEDATA			; roll flags into carry
@@ -2652,7 +2652,7 @@ PLED_gas_list_loop:
 	call	read_eeprom		; get byte (stored in EEDATA)
 	PLED_color_code		warn_gas_in_gaslist		; Color-code output	(%O2 in "EEDATA")
 ; Check if gas needs to be greyed-out (inactive)
-	movff	sorted_gaslist_active, EEDATA		; Work with sorted list
+	movff	gaslist_active, EEDATA		; Work with sorted list
 ;	read_int_eeprom		d'27'	; read flag register
 	movff	hi,lo			; copy gas number
 PLED_gas_list_loop1:

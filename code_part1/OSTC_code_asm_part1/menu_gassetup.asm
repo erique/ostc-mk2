@@ -1035,7 +1035,7 @@ gassetup_sort_gaslist:
     bsf     EEDATA,4
     
     ; Copy result to register:
-    movff   EEDATA,sorted_gaslist_active
+    movff   EEDATA,gaslist_active
     
     ; And write to EEPROM too, to survive next reboot:
 	write_int_eeprom    d'27'

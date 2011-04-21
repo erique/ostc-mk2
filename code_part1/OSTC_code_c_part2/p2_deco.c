@@ -971,8 +971,9 @@ static void gas_switch_find_current(void)
         if( N2 == char_I_deco_N2_ratio[j] 
          && He == char_I_deco_He_ratio[j] 
         )                                 
-        {                                 
-            temp_depth_limit = sim_gas_last_depth = char_I_deco_gas_change[j];
+        {
+            if( char_I_deco_gas_change[j] )
+                temp_depth_limit = sim_gas_last_depth = char_I_deco_gas_change[j];
             sim_gas_last_used  = j+1;
             break;
         }

@@ -336,10 +336,10 @@ calc_deko_divemode:
 ; Copy all gases to char_I_deco_N2_ratio and char_I_deco_He_ratio
 divemode_check_decogases:					; CALLed from Simulator, too
 
-	clrf    EEADRH,                     ; Make sure to select eeprom bank 0
-	read_int_eeprom		d'5'			; Read He ratio
+	clrf    EEADRH                      ; Make sure to select eeprom bank 0
+	read_int_eeprom		d'7'			; Read He ratio
 	movff	EEDATA,char_I_deco_He_ratio+0	; And copy into hold register
-	read_int_eeprom		d'4'			; Read O2 ratio
+	read_int_eeprom		d'6'			; Read O2 ratio
 	movff	char_I_deco_He_ratio+0, wait_temp			; copy into bank1 register
 	bsf		STATUS,C					; 
 	movlw	d'100'						; 100%
@@ -347,9 +347,9 @@ divemode_check_decogases:					; CALLed from Simulator, too
 	subfwb	EEDATA,F					; minus O2
 	movff	EEDATA, char_I_deco_N2_ratio+0; = N2!
 
-	read_int_eeprom		d'9'			; Read He ratio
+	read_int_eeprom		d'11'			; Read He ratio
 	movff	EEDATA,char_I_deco_He_ratio+1	; And copy into hold register
-	read_int_eeprom		d'8'			; Read O2 ratio
+	read_int_eeprom		d'10'			; Read O2 ratio
 	movff	char_I_deco_He_ratio+1, wait_temp			; copy into bank1 register
 	bsf		STATUS,C					; 
 	movlw	d'100'						; 100%
@@ -357,9 +357,9 @@ divemode_check_decogases:					; CALLed from Simulator, too
 	subfwb	EEDATA,F					; minus O2
 	movff	EEDATA, char_I_deco_N2_ratio+1; = N2!
 
-	read_int_eeprom		d'13'			; Read He ratio
+	read_int_eeprom		d'15'			; Read He ratio
 	movff	EEDATA,char_I_deco_He_ratio+2	; And copy into hold register
-	read_int_eeprom		d'12'			; Read O2 ratio
+	read_int_eeprom		d'14'			; Read O2 ratio
 	movff	char_I_deco_He_ratio+2, wait_temp			; copy into bank1 register
 	bsf		STATUS,C					; 
 	movlw	d'100'						; 100%
@@ -367,9 +367,9 @@ divemode_check_decogases:					; CALLed from Simulator, too
 	subfwb	EEDATA,F					; minus O2
 	movff	EEDATA, char_I_deco_N2_ratio+2; = N2!
 
-	read_int_eeprom		d'17'			; Read He ratio
+	read_int_eeprom		d'19'			; Read He ratio
 	movff	EEDATA,char_I_deco_He_ratio+3	; And copy into hold register
-	read_int_eeprom		d'16'			; Read O2 ratio
+	read_int_eeprom		d'17'			; Read O2 ratio
 	movff	char_I_deco_He_ratio+3, wait_temp			; copy into bank1 register
 	bsf		STATUS,C					; 
 	movlw	d'100'						; 100%
@@ -377,9 +377,9 @@ divemode_check_decogases:					; CALLed from Simulator, too
 	subfwb	EEDATA,F					; minus O2
 	movff	EEDATA, char_I_deco_N2_ratio+3; = N2!
 
-	read_int_eeprom		d'21'			; Read He ratio
+	read_int_eeprom		d'23'			; Read He ratio
 	movff	EEDATA,char_I_deco_He_ratio+4; And copy into hold register
-	read_int_eeprom		d'20'			; Read O2 ratio
+	read_int_eeprom		d'22'			; Read O2 ratio
 	movff	char_I_deco_He_ratio+4, wait_temp			; copy into bank1 register
 	bsf		STATUS,C					; 
 	movlw	d'100'						; 100%

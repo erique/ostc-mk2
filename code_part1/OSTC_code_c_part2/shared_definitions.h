@@ -114,7 +114,7 @@ TAB_UCHAR (char_O_hash, 16);
 bank3   udata_ovr  0x300
 #endif
 
-VAR_UCHAR (char_I_step_is_1min);
+VAR_UCHAR (char_I_step_is_1min);           // Use 1min integration for tissue and CNS.
 
 VAR_UINT  (int_I_pres_respiration);        // 
 VAR_UINT  (int_I_pres_surface);            // 

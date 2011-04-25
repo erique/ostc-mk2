@@ -169,7 +169,7 @@ simulator_show_decoplan:
         iorwf   hi,W
         bz      simulator_decoplan_notts
         
-        WIN_TOP .160
+        WIN_TOP .162
         lfsr    FSR2, letter
         OUTPUTTEXT .85                  ; TTS
         STRCAT  ": "
@@ -178,19 +178,15 @@ simulator_show_decoplan:
         STRCAT_PRINT    "'"		
 
 simulator_decoplan_notts:
-        ; Print ambient pressure in DEBUG compile, because if might
-        ; be usefull to calibrate decompression algorithm.
-#ifdef  __DEBUG
-        movff   int_I_pres_surface+0,lo
-        movff   int_I_pres_surface+1,hi
+        WIN_TOP .190                    ; Print calculated CNS before and after dive
+        STRCPY  "CNS:"
+        movff   char_O_CNS_fraction,lo  ; Current CNS, before dive.
+        output_8
 
-        WIN_TOP .190
-        lfsr    FSR2, letter
-        bsf		leftbind
-        output_16
-        bcf		leftbind
-        STRCAT_PRINT    " mbar"
-#endif
+        STRCAT  "%\x92"                 ; Right-arrow
+        movff   logbook_temp3,lo        ; Get back CNS value.
+        output_8                        ; CNS after dive.
+        STRCAT_PRINT    "%"
 
         WIN_INVERT	.1	                ; Init new Wordprocessor	
         DISPLAYTEXT	.188		        ; Sim. Results:
@@ -253,7 +249,7 @@ simulator_show_decoplan5_0:
     movlb   1
 
     ; Clear the complete stop result column:
-    WIN_BOX_BLACK   .0, .239, .82, .160		;top, bottom, left, right
+    WIN_BOX_BLACK   .0, .239, .85, .160		;top, bottom, left, right
 
 	movlw	d'10'
 	movwf	waitms_temp                 ; Row for gas list is .10+.25
@@ -316,37 +312,37 @@ simulator_show_decoplan4:
 simulator_calc_deco:
 	call	simulator_save_tissue_data  ; Stores 32 floats "pre_tissue" into bank3
 
-	bsf		simulatormode_active			; normal simulator mode
-	bsf		standalone_simulator			; Standalone Simulator active
-	bsf		no_sensor_int					; Disable sensor interrupt
-	clrf	T3CON                           ; Restart time3 counter,
-	clrf	TMR3L                           ; so the simu won't stop right away.
+	bsf		simulatormode_active        ; normal simulator mode
+	bsf		standalone_simulator        ; Standalone Simulator active
+	bsf		no_sensor_int               ; Disable sensor interrupt
+	clrf	T3CON                       ; Restart time3 counter,
+	clrf	TMR3L                       ; so the simu won't stop right away.
 	clrf	TMR3H
 
-	call	diveloop_boot					; configure gases, etc.
+	call	diveloop_boot               ; configure gases, etc.
 
     ; Save dive parameters for gas volume estimation:
     movff   logbook_temp2,char_I_bottom_depth
     movff   logbook_temp1,char_I_bottom_time
 
-	movff	logbook_temp2,xA+0              ; Bottom depth. 
+	movff	logbook_temp2,xA+0          ; Bottom depth. 
 	clrf	xA+1
 	movlw	d'100'
 	movwf	xB+0
 	clrf	xB+1
-	call	mult16x16	;xA*xB=xC			; Depth in m*100
+	call	mult16x16                   ;xA*xB=xC, Depth in m*100
 
 	movlw	LOW		d'1000'
 	addwf	xC+0,F
 	movlw	HIGH	d'1000'
-	addwfc	xC+1,F							; add 1000mBar
+	addwfc	xC+1,F                      ; add 1000mBar
 
 	movff	xC+0,sim_pressure+0
 	movff	xC+1,sim_pressure+1
 
 	call	PLED_topline_box
 	WIN_INVERT	.1
-	DISPLAYTEXT	.12                         ; "Wait..."
+	DISPLAYTEXT	.12                     ; "Wait..."
 	WIN_INVERT	.0
 
 	movff	sim_pressure+0,amb_pressure+0	; override readings with simulator values
@@ -354,6 +350,8 @@ simulator_calc_deco:
 
 	call	divemode_check_decogases    ; Checks for decogases and sets the gases
 	call	divemode_prepare_flags_for_deco
+	call    set_first_gas               ; Set current N2/He/O2 ratios.
+    call    set_actual_ppo2             ; Then configure char_I_actual_ppO2
 
     ; First minute is special: init everything.
 	movlw	d'3'                        ; Begin of deco cycle (reset table).
@@ -363,17 +361,19 @@ simulator_calc_deco:
 	movff	WREG,char_I_step_is_1min    ; 1 minute mode.
 
 	call	deco_calc_hauptroutine      ; Reset table + sim one minute for descent.
+    call	deco_calc_CNS_fraction      ; Also calculate CNS (in 1min loop)
 	movlb	b'00000001'                 ; rambank 1 selected
 
     decf    logbook_temp1,F             ; One minute done.
 
     ; Loop for bottom time duration
 simulator_calc_deco_loop2:
-	call	PLED_simulator_data         ; Update display of bottom time.
+    call	PLED_simulator_data         ; Update display of bottom time.
 
-	call	deco_calc_tissue		    ; JUST calc tissue (faster).
-	movlb	b'00000001'                 ; rambank 1 selected
-	ostc_debug	'C'	                    ; Sends debug-information to screen if debugmode active
+    call	deco_calc_tissue		    ; JUST calc tissue (faster).
+    call	deco_calc_CNS_fraction      ; Also calculate CNS (in 1min loop)
+    movlb	b'00000001'                 ; rambank 1 selected
+    ostc_debug	'C'	                    ; Sends debug-information to screen if debugmode active
 
     decfsz  logbook_temp1,F             ; Decrement bottom time,
 	bra     simulator_calc_deco_loop2   ; and loop while not finished.
@@ -399,9 +399,10 @@ simulator_calc_deco2:
 	iorwf	WREG                        ; deco_status=0 if decompression calculation done
 	bnz		simulator_calc_deco2        ; Not finished
 
+; Finished
 simulator_calc_deco3:
-    ; Finished
-	rcall	simulator_restore_tissue_data	; Restore 32 floats "pre_tissue" from bank3
+    movff   char_O_CNS_fraction,logbook_temp3   ; Save calculated CNS.     
+	rcall	simulator_restore_tissue_data	; Restore CNS & 32 floats "pre_tissue" from vault
 
 	bcf		simulatormode_active        ; normal simulator mode
 	bcf		standalone_simulator        ; Standalone Simulator active
@@ -428,7 +429,7 @@ simulator_save_tissue_data:
 simulator_restore_tissue_data:
 	bcf		restore_deco_data           ; clear restore flag
 	ostc_debug	'S'                     ; Sends debug-information to screen if debugmode active
-	call	deco_pull_tissues_from_vault
+	call	deco_pull_tissues_from_vault ; Restore CNS too...
 	movlb	0x01						; Back to RAM Bank1
 	ostc_debug	'T'                     ; Sends debug-information to screen if debugmode active
 
@@ -439,9 +440,5 @@ simulator_restore_tissue_data:
 	; Note: should not reset nofly-time here: the true value have continued to be decremented
 	;       during simulation, which is the right thing to do...
 	ostc_debug	'H'		; Sends debug-information to screen if debugmode active
-
-	; Calculate CNS	
-	call	deco_calc_CNS_fraction      ; calculate CNS
-	movlb	b'00000001'                 ; rambank 1 selected
 
 	return

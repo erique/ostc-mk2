@@ -2197,6 +2197,7 @@ void deco_clear_CNS_fraction(void)
 // optimized in v.102 : with new variables char_I_actual_ppO2 and actual_ppO2
 //
 // Input: char_I_actual_ppO2
+//        char_I_step_is_1min : use 1min steps instead of 2sec.
 // Output: char_O_CNS_fraction
 // Uses and Updates: CNS_fraction
 // Uses: acutal_ppO2
@@ -2204,49 +2205,52 @@ void deco_clear_CNS_fraction(void)
 void deco_calc_CNS_fraction(void)
 {
     overlay float actual_ppO2;
+    overlay float time_factor = 1.0f;    
     RESET_C_STACK
 
     assert( 0.0 <= CNS_fraction && CNS_fraction <= 2.5 );
     assert( char_I_actual_ppO2 > 15 );
 
     actual_ppO2 = (float)char_I_actual_ppO2 / 100.0;
+    if( char_I_step_is_1min )
+        time_factor = 30.0f;
 
     if (char_I_actual_ppO2 < 50)
-        CNS_fraction = CNS_fraction;// no changes
+        ;   // no changes
     else if (char_I_actual_ppO2 < 60)
-        CNS_fraction = 1/(-54000.0 * actual_ppO2 + 54000.0) + CNS_fraction;
+        CNS_fraction += time_factor/(-54000.0 * actual_ppO2 + 54000.0);
     else if (char_I_actual_ppO2 < 70)
-        CNS_fraction = 1/(-45000.0 * actual_ppO2 + 48600.0) + CNS_fraction;
+        CNS_fraction += time_factor/(-45000.0 * actual_ppO2 + 48600.0);
     else if (char_I_actual_ppO2 < 80)
-        CNS_fraction = 1/(-36000.0 * actual_ppO2 + 42300.0) + CNS_fraction;
+        CNS_fraction += time_factor/(-36000.0 * actual_ppO2 + 42300.0);
     else if (char_I_actual_ppO2 < 90)
-        CNS_fraction = 1/(-27000.0 * actual_ppO2 + 35100.0) + CNS_fraction;
+        CNS_fraction += time_factor/(-27000.0 * actual_ppO2 + 35100.0);
     else if (char_I_actual_ppO2 < 110)
-        CNS_fraction = 1/(-18000.0 * actual_ppO2 + 27000.0) + CNS_fraction;
+        CNS_fraction += time_factor/(-18000.0 * actual_ppO2 + 27000.0);
     else if (char_I_actual_ppO2 < 150)
-        CNS_fraction = 1/(-9000.0 * actual_ppO2 + 17100.0) + CNS_fraction;
+        CNS_fraction += time_factor/(-9000.0 * actual_ppO2 + 17100.0);
     else if (char_I_actual_ppO2 < 160)
-        CNS_fraction = 1/(-22500.0 * actual_ppO2 + 37350.0) + CNS_fraction;
+        CNS_fraction += time_factor/(-22500.0 * actual_ppO2 + 37350.0);
     else if (char_I_actual_ppO2 < 165)
-        CNS_fraction =  0.000755 + CNS_fraction; // Arieli et all.(2002): Modeling pulmonary and CNS O2 toxicity... Formula (A1) based on value for 1.55 and c=20
+        CNS_fraction += time_factor*0.000755; // Arieli et all.(2002): Modeling pulmonary and CNS O2 toxicity... Formula (A1) based on value for 1.55 and c=20
     else if (char_I_actual_ppO2 < 170)
-        CNS_fraction =  0.00102 + CNS_fraction; // example calculation: Sqrt((1.7/1.55)^20)*0.000404
+        CNS_fraction += time_factor*0.00102; // example calculation: Sqrt((1.7/1.55)^20)*0.000404
     else if (char_I_actual_ppO2 < 175)
-        CNS_fraction =  0.00136 + CNS_fraction;
+        CNS_fraction += time_factor*0.00136;
     else if (char_I_actual_ppO2 < 180)
-        CNS_fraction =  0.00180 + CNS_fraction;
+        CNS_fraction += time_factor*0.00180;
     else if (char_I_actual_ppO2 < 185)
-        CNS_fraction =  0.00237 + CNS_fraction;
+        CNS_fraction += time_factor*0.00237;
     else if (char_I_actual_ppO2 < 190)
-        CNS_fraction =  0.00310 + CNS_fraction;
+        CNS_fraction += time_factor*0.00310;
     else if (char_I_actual_ppO2 < 195)
-        CNS_fraction =  0.00401 + CNS_fraction;
+        CNS_fraction += time_factor*0.00401;
     else if (char_I_actual_ppO2 < 200)
-        CNS_fraction =  0.00517 + CNS_fraction;
+        CNS_fraction += time_factor*0.00517;
     else if (char_I_actual_ppO2 < 230)
-        CNS_fraction =  0.0209 + CNS_fraction;
+        CNS_fraction += time_factor*0.0209;
     else
-        CNS_fraction =  0.0482 + CNS_fraction; // value for 2.5
+        CNS_fraction += time_factor*0.0482; // value for 2.5
 
     if (CNS_fraction > 2.5)
         CNS_fraction = 2.5;
@@ -2429,9 +2433,12 @@ void deco_pull_tissues_from_vault(void)
     overlay unsigned char x;
     RESET_C_STACK
 
-	CNS_fraction = cns_vault;
 	for (x=0;x<32;x++)
 		pres_tissue[x] = pres_tissue_vault[x];
+    
+    // Restore both CNS variable, too.
+    CNS_fraction = cns_vault;
+    char_O_CNS_fraction = (char)(CNS_fraction * 100.0 + 0.5);
 }
 
 //////////////////////////////////////////////////////////////////////////////

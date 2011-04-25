@@ -290,34 +290,11 @@ calc_deko_divemode:
 	call	calc_average_depth	; calculate average depth
 	call	calc_velocity		; calculate vertical velocity and display if > threshold (every two seconds)
 	
-	; calculate ppO2 in 0.01Bar (e.g. 150 = 1.50 Bar ppO2)
-	movff		amb_pressure+0,xA+0     ; P_amb in milibar (1000 = 1.000 bar).
-	movff		amb_pressure+1,xA+1
-	movlw		d'10'
-	movwf		xB+0
-	clrf		xB+1
-	call		div16x16				; xC=p_amb/10 (100 = 1.00 bar).
-	movff		xC+0,xA+0
-	movff		xC+1,xA+1
-	movff		char_I_O2_ratio,xB+0
-	clrf		xB+1
-	call		mult16x16				; char_I_O2_ratio * (p_amb/10)
-	movff		xC+0,xA+0
-	movff		xC+1,xA+1
-	movlw		d'100'
-	movwf		xB+0
-	clrf		xB+1
-	call		div16x16				; xC=(char_I_O2_ratio * p_amb/10)/100
-
-; Copy ppO2 for CNS calculation
-    tstfsz      xC+1                    ; Is ppO2 > 2.55bar ?
-    setf        xC+0                    ; yes: bound to 2.55... better than wrap around.
-
-    movff		xC+0, char_I_actual_ppO2	; copy last ppO2 to buffer register
-    btfsc		FLAG_const_ppO2_mode		; do in const_ppO2_mode
-    movff		char_I_const_ppO2, char_I_actual_ppO2	; copy last ppO2 to buffer register
-
 ; Calculate CNS	
+    rcall    set_actual_ppo2            ; Set char_I_actual_ppO2
+    clrf    WREG
+    movff   WREG,char_I_step_is_1min    ; Make sure to be in 2sec mode.
+
 	call	deco_calc_CNS_fraction		; calculate CNS
 	movlb	b'00000001'					; rambank 1 selected
 
@@ -451,6 +428,36 @@ divemode_check_decogases:					; CALLed from Simulator, too
 
 	return
 
+;-----------------------------------------------------------------------------
+; calculate ppO2 in 0.01Bar (e.g. 150 = 1.50 Bar ppO2)
+set_actual_ppo2:
+	movff		amb_pressure+0,xA+0     ; P_amb in milibar (1000 = 1.000 bar).
+	movff		amb_pressure+1,xA+1
+	movlw		d'10'
+	movwf		xB+0
+	clrf		xB+1
+	call		div16x16				; xC=p_amb/10 (100 = 1.00 bar).
+	movff		xC+0,xA+0
+	movff		xC+1,xA+1
+	movff		char_I_O2_ratio,xB+0
+	clrf		xB+1
+	call		mult16x16				; char_I_O2_ratio * (p_amb/10)
+	movff		xC+0,xA+0
+	movff		xC+1,xA+1
+	movlw		d'100'
+	movwf		xB+0
+	clrf		xB+1
+	call		div16x16				; xC=(char_I_O2_ratio * p_amb/10)/100
+
+; Copy ppO2 for CNS calculation
+    tstfsz      xC+1                    ; Is ppO2 > 2.55bar ?
+    setf        xC+0                    ; yes: bound to 2.55... better than wrap around.
+
+    movff		xC+0, char_I_actual_ppO2	; copy last ppO2 to buffer register
+    btfsc		FLAG_const_ppO2_mode		; do in const_ppO2_mode
+    movff		char_I_const_ppO2, char_I_actual_ppO2	; copy last ppO2 to buffer register
+    return
+
 reset_decompression_gases:				; reset the deco gas while in NDL
 	ostc_debug	'F'		; Sends debug-information to screen if debugmode active
   	lfsr    FSR2,char_I_deco_gas_change
@@ -471,8 +478,8 @@ calc_deko_divemode2:
 
  	ostc_debug	'B'		; Sends debug-information to screen if debugmode active
 	call	divemode_prepare_flags_for_deco
-	movlw	d'0'
-	movff	WREG,char_I_step_is_1min		; 2 second deco mode
+	clrf	WREG
+	movff	WREG,char_I_step_is_1min    ; Force 2 second deco mode
 
 	clrf	TMR3L
 	clrf	TMR3H						; Reset Timer3
@@ -1746,8 +1753,8 @@ diveloop_boot_2:
 divemode1:
 	read_int_eeprom	d'36'				; Read mix 1 ppO2
 	btfsc	FLAG_const_ppO2_mode
-	movff	EEDATA,char_I_const_ppO2	; Set ppO2 setpoint if in ppO2 mode
-	movff	EEDATA, ppO2_setpoint_store	; Store also in this byte...
+	movff	EEDATA,char_I_const_ppO2    ; Set ppO2 setpoint if in ppO2 mode
+	movff	EEDATA,ppO2_setpoint_store  ; Store also in this byte...
 
 	bcf		LED_blue
 	bcf		low_battery_state			; clear flag for battery warning mode
@@ -1758,10 +1765,11 @@ divemode1:
 	btfss	simulatormode_active		; do not disable in simulator mode!					
 	call	disable_rs232				; Disable RS232
 
+; Read Start Gas and configure char_I_He_ratio, char_I_O2_ratio and char_I_N2_ratio
+set_first_gas:
 	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)
 	movff	EEDATA,active_gas			; Read start gas (1-5)
 
-; Read Start Gas and configure char_I_He_ratio, char_I_O2_ratio and char_I_N2_ratio
 	decf	active_gas,W				; Gas 0-4
 	mullw	d'4'
 	movf	PRODL,W			
@@ -1769,13 +1777,11 @@ divemode1:
 	movwf	EEADR
 	call	read_eeprom					; Read He ratio
 	movff	EEDATA,char_I_He_ratio		; And copy into hold register
-	decf	active_gas,W				; Gas 0-4
-	mullw	d'4'
-	movf	PRODL,W			
-	addlw	d'6'						; = address for O2 ratio
-	movwf	EEADR
+
+	decf	EEADR,F
 	call	read_eeprom					; Read O2 ratio
 	movff	EEDATA, char_I_O2_ratio		; O2 ratio
+
 	movff	char_I_He_ratio, wait_temp	; copy into bank1 register
 	bsf		STATUS,C					; Borrow bit
 	movlw	d'100'						; 100%

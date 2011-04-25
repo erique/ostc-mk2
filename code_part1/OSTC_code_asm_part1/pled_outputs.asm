@@ -2426,8 +2426,8 @@ PLED_decoplan_clear_bottom:
         sublw   .240                    ; No: bottom row in planning
         movff   WREG,win_height
 
-        WIN_LEFT .82                    ; Full divemenu width
-        movlw   .160-.82+1
+        WIN_LEFT .85                    ; Full divemenu width
+        movlw   .160-.85+1
         movff   WREG,win_width
 
         clrf    WREG                    ; Fill with black
@@ -2715,7 +2715,7 @@ PLED_splist_loop:
 	return						; no, return
 
 PLED_clear_divemode_menu:
-    WIN_BOX_BLACK   .0, .168, .82, .160		;top, bottom, left, right
+    WIN_BOX_BLACK   .0, .168, .85, .160		;top, bottom, left, right
 	return
 
 PLED_divemenu_cursor:

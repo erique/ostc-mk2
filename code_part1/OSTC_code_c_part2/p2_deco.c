@@ -72,8 +72,10 @@
 // 2011/02/13: [jDG] CF55 for additional gas switch delay in decoplan.
 // 2011/02/15: [jDG] Fixed inconsistencies introduced by gas switch delays.
 // 2011/03/21: [jDG] Added gas consumption (CF56 & CF57) evaluation for OCR mode.
-// 2011/04/10: [jDG] Use timer TMR3 to limit loops in calc_hauptroutine_calc_deco()
+// 2011/04/10: [jDG] Use timer TMR3 to limit loops in calc_hauptroutine_calc_deco().
 // 2011/04/15: [jDG] Store low_depth in 32bits (w/o rounding), for a better stability.
+// 2011/04/25: [jDG] Added 1mn mode for CNS calculation, to allow it for decoplanning.
+// 2011/04/27: [jDG] Fixed char_O_gradient_factor calculation when model uses gradient-factor.
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -1256,7 +1258,7 @@ static void calc_hauptroutine(void)
         // Values that should be reset just once for the full real dive.
         // This is used to record the lowest stop for the whole dive,
         // Including ACCROSS all simulated ascent.
-        low_depth = 0;
+        low_depth = 0.0;
 
         // Reset gas switch history.
         backup_gas_used  = sim_gas_last_used  = 0;
@@ -1580,13 +1582,15 @@ static void calc_limit(void)
     char_O_gtissue_no = 255;
     calc_lead_tissue_limit = 0.0;
 
-    for (ci=0;ci<16;ci++)
+    for(ci=0; ci<16;ci++)
     {
-        overlay float p = pres_tissue[ci] + (pres_tissue+16)[ci];
+        overlay float N2 = pres_tissue[ci];
+        overlay float He = (pres_tissue+16)[ci];
+        overlay float p = N2 + He;
 
         read_buhlmann_coefficients();
-        var_N2_a = (var_N2_a * pres_tissue[ci] + var_He_a * (pres_tissue+16)[ci]) / p;
-        var_N2_b = (var_N2_b * pres_tissue[ci] + var_He_b * (pres_tissue+16)[ci]) / p;
+        var_N2_a = (var_N2_a * N2 + var_He_a * He) / p;
+        var_N2_b = (var_N2_b * N2 + var_He_b * He) / p;
 
         // Apply the Eric Baker's varying gradient factor correction.
         // Note: the correction factor depends both on GF and b,
@@ -1873,32 +1877,47 @@ static void update_deco_table()
 static void calc_gradient_factor(void)
 {
     overlay float gf;
+    overlay float N2 = pres_tissue[char_O_gtissue_no];
+    overlay float He = (pres_tissue+16)[char_O_gtissue_no];
 
     assert( char_O_gtissue_no < 16 );
     assert( 0.800 <= pres_respiration && pres_respiration < 14.0 );
 
-	// tissue > respiration (entsaettigungsvorgang)
-	// gradient ist wieviel prozent an limit mit basis tissue
-	// dh. 0% = respiration == tissue
-	// dh. 100% = respiration == limit
-	temp_tissue = pres_tissue[char_O_gtissue_no] + (pres_tissue+16)[char_O_gtissue_no];
-    if( temp_tissue < pres_respiration )
+	// tissue > respiration (currently off-gasing)
+	// GF =   0% when respiration == tissue
+	// GF = 100% when respiration == limit
+    temp_tissue = N2 + He;
+    if( temp_tissue <= pres_respiration )
  		gf = 0.0;
     else
     {
-       gf = (temp_tissue - pres_respiration) 
-          / (temp_tissue - calc_lead_tissue_limit)
-          * 100.0;
-        if( gf > 255.0 ) gf = 255.0;
+        overlay float limit = calc_lead_tissue_limit;
+        // NOTE: in GF model, calc_lead_tissue_limit include already the
+        //       correction due to gradient factor. To compute the actual
+        //       current GF, we need to (re-)compute the raw ambiant-pressure
+        //       limit from the Bühlmann model.
+        if( char_I_deco_model == 1 )
+        {
+            ci = char_O_gtissue_no;
+            read_buhlmann_coefficients();
+            var_N2_a = (var_N2_a * N2 + var_He_a * He) / temp_tissue;
+            var_N2_b = (var_N2_b * N2 + var_He_b * He) / temp_tissue;
+            limit = (temp_tissue - var_N2_a) * var_N2_b;
+        }
+
+        gf = (temp_tissue  - pres_respiration) 
+           / (temp_tissue  - limit)
+           * 100.0;
+        if( gf > 254.5 ) gf = 255.0;
         if( gf < 0.0   ) gf = 0.0;
     }
-	char_O_gradient_factor = (unsigned char)gf;
+	char_O_gradient_factor = (unsigned char)(gf+0.5f);
 
 	if (char_I_deco_model == 1)		// calculate relative gradient factor
 	{
         overlay float rgf;
 
-		if( low_depth == 0 )
+		if( low_depth < 1.5 )
 			rgf = GF_high;
         else
         {
@@ -1915,8 +1934,8 @@ static void calc_gradient_factor(void)
 
 		rgf = gf / rgf; // gf is already in percent
 		if( rgf <   0.0 ) rgf =   0.0;
-		if( rgf > 255.0 ) rgf = 255.0;
-		char_O_relative_gradient_GF  = (unsigned char)rgf;
+		if( rgf > 254.5 ) rgf = 255.0;
+		char_O_relative_gradient_GF  = (unsigned char)(rgf+0.5f);
 	}	// calc relative gradient factor
 	else
 	{

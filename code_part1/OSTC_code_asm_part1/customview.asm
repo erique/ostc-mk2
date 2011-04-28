@@ -84,10 +84,12 @@ customview_1sec_average:
 	return
 	
 customview_1sec_stopwatch:
+	bsf		menu3_active                ; Set Flag
 	call	PLED_stopwatch_show2        ; Update figures only
 	return
 
 customview_1sec_marker:                 ; Do nothing extra
+	bsf		menu3_active                ; Set Flag
 customview_1sec_clock:                  ; Do nothing extra
 customview_1sec_lead_tiss:              ; Do nothing extra
 	return

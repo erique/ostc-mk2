@@ -143,10 +143,13 @@ PLED_color_code_ceiling:
 	cpfseq	lo					; =1?
 	bra		PLED_color_code_ceiling1	; No, Set to default color
 
+	movff	rel_pressure+1,hi
+	movff	rel_pressure+0,lo
+	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
+	movff	hi,xA+1
+	movff	lo,xA+0
 	movff	char_O_first_deco_depth,lo  ; Ceiling in m
 	decf	lo,F	                    ; -1
-	movff	rel_pressure+1,xA+1
-	movff	rel_pressure+0,xA+0
 	movlw	LOW		d'100'
 	movwf	xB+0
 	clrf	xB+1						; Devide/100 -> xC+0 = Depth in m

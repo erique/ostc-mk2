@@ -6,6 +6,7 @@ NEW: Display CNS in decoplan
 NEW: Colored stops in decoplan (CF55 > 0)
 NEW: 115kbauds bootloader.
 NEW: Colored battery sign when charging (yellow) or charged (green).
+BUGFIX: Apply salinity for ceiling warning
 
 New in 1.86 beta:
 BETA Version - Do NOT use for diving!

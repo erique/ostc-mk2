@@ -45,7 +45,7 @@ uartint:
 		dcfsnz	uart1_temp,F				; "e"
 		bsf		uart_send_hash				; set flag
 		dcfsnz	uart1_temp,F				; "f"
-		nop									; no longer used command "f"
+		bsf		uart_reset_battery_stats	; set flag
 		dcfsnz	uart1_temp,F				; "g"
 		bsf		uart_send_int_eeprom		; set flag
 		dcfsnz	uart1_temp,F				; "h"

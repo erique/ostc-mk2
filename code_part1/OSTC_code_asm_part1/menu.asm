@@ -45,14 +45,13 @@ menu2:
 	bsf		cursor
 	call	PLED_menu_mask
 	call	PLED_menu_cursor
-	bcf		switch_left
-	bcf		switch_right
+	rcall	wait_switches
 
 menu_loop:
 	call	check_switches_menu
 
 	btfsc	menubit2
-	bra	do_menu						; call submenu
+	bra		do_menu						; call submenu
 
 	btfss	menubit
 	goto	restart						; exit menu, restart
@@ -81,15 +80,15 @@ menu_loop:
 		
 check_switches_menu:							; checks switches
 	btfss	switch_right			
-	bra	check_switches_menu2
+	bra		check_switches_menu2
 	bsf		menubit3
 	incf	menupos,F
 	movlw	d'6'
 	cpfsgt	menupos
-	bra	refresh_cursor
+	bra		refresh_cursor
 	movlw	d'1'
 	movwf	menupos
-	bra	refresh_cursor
+	bra		refresh_cursor
 check_switches_menu2:
 	btfsc	switch_left
 	bsf		menubit2					; Enter!
@@ -115,6 +114,7 @@ refresh_cursor:
 	btfsc	cursor
 	call	PLED_menu_cursor
 	bcf		switch_right
+	bcf		switch_left
 	return
 
 more_menu:

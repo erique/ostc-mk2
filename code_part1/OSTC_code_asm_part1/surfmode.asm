@@ -197,6 +197,8 @@ surfloop_loop3:
 	goto	uart_store_tissues			; Yes!
 	btfsc	uart_115200_bootloader		; Look for 115200Baud bootloader?
 	goto	uart_115k_bootloader		; Yes!
+	btfsc	uart_reset_battery_stats	; Reset Battery stats?
+	goto	reset_battery_stats			; Yes!
 
 	bra		surfloop_loop				; loop surfacemode
 

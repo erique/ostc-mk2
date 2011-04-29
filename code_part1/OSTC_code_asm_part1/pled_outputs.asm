@@ -1864,10 +1864,10 @@ update_batt_voltage3:
 	movlw	color_green			; Charge done.
     call	PLED_set_color
 
-	movlw	.177
+	movlw	.175
 	movff	WREG,win_top		; row top (0-239)
-	movlw	.192-.177
-	movff	WREG,win_height		; row bottom (0-239)
+	movlw	.19
+	movff	WREG,win_height
 	movlw	.2
 	movff	WREG,win_leftx2		; column left (0-159)
     movff   wait_temp,win_width	; column right (0-159)

@@ -389,4 +389,5 @@
 	TCODE	 .45,	.100,	 "Bootloader"				 ;302 Bootloader
 	TCODE	 .40,	.130,	 "Please wait!"				 ;303 Please wait!
 	TCODE	 .50,	.130,	 "Aborted!"					 ;304 Aborted
+	TCODE	 .0,	.0,		 "Change:"				  	 ;305 Change:
 ;=============================================================================

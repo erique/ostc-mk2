@@ -464,7 +464,7 @@ desaturation_time_buffer res 2	; buffer for desat time
 #DEFINE	nofly_active			flag9,0	;=1: Do not fly!
 #DEFINE	ppO2_display_active		flag9,1	;=1: ppO2 value is displayed
 #DEFINE	ppO2_show_value			flag9,2	;=1: show ppO2 value!
-#DEFINE	show_startup_screen		flag9,3	;=1: Show startup screen with MD2 hash
+#DEFINE	uart_reset_battery_stats flag9,3	;=1: Reset the battery statistics (UART String FFF)
 #DEFINE	ignore_digit3			flag9,4	;=1: ignores digits 3-5 in valconv
 #DEFINE	ppO2_warn_value			flag9,5	;=1: warn about ppO2!
 #DEFINE	output_to_postinc_only	flag9,6	;=1: Do not call wordprocessor in output

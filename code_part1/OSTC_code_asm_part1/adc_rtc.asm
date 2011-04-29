@@ -120,7 +120,8 @@ get_battery_voltage4:
 
 	btfss	initialize_battery2		; battery need to be initialised?
 	bra		get_battery_no_init		; No, we have already valid values, just check for new extremas
-	
+
+get_battery_voltage_reset:	
 	; Init EEPROM for battery control
 	; Reset lowest battery seen
 	movlw	LOW			d'4200'		; reset to 4.2V
@@ -232,11 +233,40 @@ RTCinit2:
 	movwf	mins
 	movlw	.12
 	movwf	hours
-	movlw	.10
+	movlw	.5
 	movwf	day
-	movlw	.4
+	movlw	.5
 	movwf	month
 	movlw	.11
 	movwf	year
 	bsf		PIE1, TMR1IE
 	return
+
+reset_battery_stats:
+	bcf		uart_reset_battery_stats	; Clear flag
+	bcf		PIE1,RCIE					; no interrupt for UART
+	call	rs232_get_byte				; Get Byte
+	bcf		PIR1,RCIF					; clear flag
+
+	btfsc	rs232_recieve_overflow		; Byte received?
+	bra		reset_battery_stats_exit	; No, exit
+	movlw	'f'	
+	cpfseq	RCREG						; Really reset statistics?
+	bra		reset_battery_stats_exit	; No, exit
+	call	rs232_get_byte					; Get byte
+	bcf		PIR1,RCIF					; clear flag
+
+	btfsc	rs232_recieve_overflow		; Byte received?
+	bra		reset_battery_stats_exit	; No, exit
+	movlw	'f'
+	cpfseq	RCREG						; Really reset statistics?
+	bra		reset_battery_stats_exit	; No, exit
+; Yes, Reset now.
+	rcall	get_battery_voltage_reset	; Reset Statistics
+	movlw	'f'
+	movwf	TXREG
+	call	rs232_wait_tx				; Wait for uart
+
+reset_battery_stats_exit:
+	bsf		PIE1,RCIE					; re-enable interrupt for UART
+	goto	surfloop_loop				; return to surface loop

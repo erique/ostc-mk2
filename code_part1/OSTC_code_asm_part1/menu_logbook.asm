@@ -324,7 +324,7 @@ display_profile_offset3:
 	movff		SSPBUF,hi
 	movff		lo,xA+0					; calculate y-scale for profile display
 	movff		hi,xA+1
-	movlw		d'164'					; 164pixel height available
+	movlw		d'163'					; 163pixel height available
 	movwf		xB+0
 	clrf		xB+1
 	call		div16x16				; does xA/xB=xC
@@ -403,7 +403,7 @@ display_profile_offset3:
 	addwfc		xC+1					; xC:2 now holds total dive seconds!
 	movff		xC+0,xA+0				; now calculate x-scale value
 	movff		xC+1,xA+1
-	movlw		d'159'					; 159pix width available
+	movlw		d'154'					; 154pix width available
 	movwf		xB+0
 	clrf		xB+1
 	call		div16x16				; xA/xB=xC

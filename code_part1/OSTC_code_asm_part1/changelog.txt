@@ -7,6 +7,7 @@ NEW: Colored stops in decoplan (CF55 > 0)
 NEW: 115kbauds bootloader.
 NEW: Colored battery sign when charging (yellow) or charged (green).
 BUGFIX: Apply salinity for ceiling warning
+CHANGE: Gas Setup page 2 reworked
 
 New in 1.86 beta:
 BETA Version - Do NOT use for diving!

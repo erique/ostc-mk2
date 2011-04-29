@@ -133,10 +133,6 @@ menu_battery_state:
 	call	PLED_convert_date		; coverts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 	STRCAT_PRINT ") "
 	
-;menu_battery_state5:
-;	btfss	SWITCH2
-;	bra		menu_battery_state5
-	
 	bcf		switch_left
 	bcf		switch_right
 	bcf		menubit2

@@ -643,8 +643,11 @@ next_gas_page:
 	call	PLED_ClearScreen		
 	movlw	d'1'
 	movwf	menupos
-	DISPLAYTEXT	.109		; Back
-
+	bcf		first_FA				; Here: =1: -, =0: +
+	bcf		second_FA				; Here: =1: Is first gas
+	DISPLAYTEXT	.107		; Depth +/-
+	DISPLAYTEXT	.108		; Change:
+	DISPLAYTEXT	.109		; Default:
 	DISPLAYTEXT	.11			; Exit
 
 next_gas_page1:
@@ -652,10 +655,112 @@ next_gas_page1:
 	bcf		menubit2
 	bcf		menubit3
 
+	WIN_TOP		.65
+	WIN_LEFT	.20
+	lfsr	FSR2,letter
+	OUTPUTTEXT	.88			; First Gas?
+	PUTC	' '
+
+	movlw	d'33'
+	movwf	EEADR
+	call	read_eeprom		; Get current startgas 1-5 # into EEDATA
+	decf	EEDATA,W		; 0-4
+	cpfseq	decodata+0		; =current displayed gas #?
+	bra		menu_firstgas0	; no, display three spaces
+
+	OUTPUTTEXT	.96			; Yes 
+	bsf		second_FA		; Is first gas
+
+	movf	decodata+0,W		; read current value 
+	addlw	d'28'				; offset in memory
+	movwf	EEADR
+	call	read_eeprom			; Low-value
+	clrf	EEDATA				; Set change depth to zero
+	call	write_eeprom		; save result in EEPROM
+
+	bra		menu_firstgas1
+
+menu_firstgas0:
+	bcf		second_FA		; Is not first gas
+	STRCAT  "   "           ; 3 spaces.
+
+menu_firstgas1:
+	call	word_processor			
+
+
 	rcall	gassetup_title_bar2			; Displays the title bar with the current Gas info
+	WIN_TOP		.125
+	WIN_LEFT	.70
+	lfsr	FSR2,letter
+	; lo still holds change depth
+	bsf		leftbind
+	output_8
+    STRCAT_PRINT  "m "
+
+	WIN_TOP		.125
+	WIN_LEFT	.100
+	lfsr	FSR2,letter
+	
 	rcall	gassetup_show_ppO2			; Display the ppO2 of the change depth with the current gas
 
-	WIN_TOP		.65
+	movff		xC+0,sub_a+0
+	movff		xC+1,sub_a+1
+	GETCUSTOM8	d'46'					; color-code ppO2 warning [cBar]
+	mullw		d'1'					; ppo2_warning_high*1
+	movff		PRODL,sub_b+0
+	movff		PRODH,sub_b+1
+	call		sub16					;  sub_c = sub_a - sub_b	
+	btfss		neg_flag
+	bra			gassetup_color_code_ppo2_1; too high -> Warning Color!
+	call		PLED_standard_color
+	bra			gassetup_color_code_ppo2_2
+gassetup_color_code_ppo2_1:
+	call	PLED_warnings_color
+gassetup_color_code_ppo2_2:
+	call	word_processor	
+	call	PLED_standard_color
+
+	WIN_TOP		.95
+	WIN_LEFT	.95
+	lfsr	FSR2,letter
+	movlw	'+'
+	btfsc	first_FA
+	movlw	'-'
+	movwf	POSTINC2
+	call	word_processor	
+
+; Show MOD as "default"
+	WIN_TOP		.155
+	WIN_LEFT	.78
+    lfsr    FSR2, letter
+	GETCUSTOM8 .18                      ; ppO2 warnvalue in WREG
+	mullw	d'10'
+	movff	PRODL,xA+0
+	movff	PRODH,xA+1                  ; ppO2 in [0.01Bar] * 10
+
+	movf	divemins+0,W
+	addlw	0x06
+	movwf	EEADR
+	call	read_eeprom                 ; O2 value
+	movff	EEDATA,xB+0
+	clrf	xB+1
+	call	div16x16                    ; xA/xB=xC with xA as remainder
+	movlw	d'10'
+	subwf	xC+0,F                      ; Subtract 10m...
+	movff	xC+0,lo
+	movlw	d'0'
+	subwfb	xC+1,F
+	movff	xC+1,hi
+
+	btfsc	second_FA		; Is first gas?
+	clrf	lo				; Yes, display 0m
+	btfsc	second_FA		; Is first gas?
+	clrf	hi				; Yes, display 0m
+
+	output_16
+	STRCAT_PRINT  "m  "
+
+	WIN_TOP		.35
 	WIN_LEFT	.20
 	lfsr	FSR2,letter
 	OUTPUTTEXT	.105			; "Active Gas? "
@@ -681,40 +786,6 @@ active_gas_display_no:
 
 active_gas_display_end:	
 	call	word_processor	
-
-	WIN_TOP		.95
-	WIN_LEFT	.20
-	lfsr	FSR2,letter
-	OUTPUTTEXT	.88			; First Gas?
-	PUTC	' '
-
-	movlw	d'33'
-	movwf	EEADR
-	call	read_eeprom		; Get current startgas 1-5 # into EEDATA
-	decf	EEDATA,W		; 0-4
-	cpfseq	decodata+0		; =current displayed gas #?
-	bra		menu_firstgas0	; no, display three spaces
-
-	OUTPUTTEXT	.96			; Yes 
-	bra		menu_firstgas1
-
-menu_firstgas0:
-	STRCAT  "   "           ; 3 spaces.
-
-menu_firstgas1:
-	call	word_processor			
-
-	WIN_TOP		.125
-	WIN_LEFT	.20
-	lfsr	FSR2,letter
-	OUTPUTTEXT	.107		; Change+
-	call	word_processor		
-
-	WIN_TOP		.155
-	WIN_LEFT	.20
-	lfsr	FSR2,letter
-	OUTPUTTEXT	.108		; Change-
-	call	word_processor		
 
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 	call	PLED_menu_cursor
@@ -764,16 +835,16 @@ next_gas_page3:
 
 do_next_gas_page:
 	dcfsnz	menupos,F
-	bra		next_gas
-	dcfsnz	menupos,F
 	bra		toggle_active_gas
 	dcfsnz	menupos,F
 	bra		make_first_gas
 	dcfsnz	menupos,F
-	bra		change_gas_depth_plus
+	bra		change_gas_depth_plus_minus
 	dcfsnz	menupos,F
-	bra		change_gas_depth_minus
-	bra		exit_gassetup			; Exit menu
+	bra		change_gas_depth_apply
+	dcfsnz	menupos,F
+	bra		change_gas_depth_default
+	bra		next_gas
 
 make_first_gas:
 	movff	decodata+0,EEDATA		; current gas (0-4) into EEDATA
@@ -798,7 +869,7 @@ make_first_gas:
 	bsf		EEDATA,4
 	write_int_eeprom	d'27'		; write flag register
 
-	movlw	d'3'
+	movlw	d'2'
 	movwf	menupos
 	bra		next_gas_page1
 
@@ -817,17 +888,21 @@ toggle_active_gas:
 	dcfsnz	lo,F
 	btg		EEDATA,4
 	write_int_eeprom	d'27'		; write flag register
-	movlw	d'2'
+	movlw	d'1'
 	movwf	menupos
 	bra		next_gas_page1
 	
-change_gas_depth_plus:
+change_gas_depth_apply:			; Apply +1 or -1m
 	movf	decodata+0,W		; read current value 
 	addlw	d'28'				; offset in memory
 	movwf	EEADR
 	call	read_eeprom			; Low-value
 	movff	EEDATA,lo
-	
+
+	btfsc	first_FA			; Minus?
+	bra		change_gas_depth_minus	; yes, minus!
+; +1m
+
 	incf	lo,F				; increase depth
 	movlw	d'100'				; Change depth limit + 1
 	cpfseq	lo
@@ -842,28 +917,50 @@ change_gas_depth_plus2:
 	movwf	menupos
 	bra		next_gas_page1
 
-
 change_gas_depth_minus:
+	decf	lo,F				; decrease depth
+	btfss	lo,7				; 255?
+	bra		change_gas_depth_plus2	; 	no, exit
+	clrf	lo
+	bra		change_gas_depth_plus2	; exit
+
+change_gas_depth_plus_minus:
+	btg		first_FA
+	movlw	d'3'
+	movwf	menupos
+	bra		next_gas_page1
+
+change_gas_depth_default:
+	GETCUSTOM8 .18                      ; ppO2 warnvalue in WREG
+	mullw	d'10'
+	movff	PRODL,xA+0
+	movff	PRODH,xA+1                  ; ppO2 in [0.01Bar] * 10
+
+	movf	divemins+0,W
+	addlw	0x06
+	movwf	EEADR
+	call	read_eeprom                 ; O2 value
+	movff	EEDATA,xB+0
+	clrf	xB+1
+	call	div16x16                    ; xA/xB=xC with xA as remainder
+	movlw	d'10'
+	subwf	xC+0,F                      ; Subtract 10m...
+	movff	xC+0,lo
+	movlw	d'0'
+	subwfb	xC+1,F
+	movff	xC+1,hi
+
 	movf	decodata+0,W		; read current value 
 	addlw	d'28'				; offset in memory
 	movwf	EEADR
 	call	read_eeprom			; Low-value
-	movff	EEDATA,lo
-	
-	decf	lo,F				; decrease depth
-	movlw	d'255'
-	cpfseq	lo
-	bra		change_gas_depth_minus2
-	movlw	d'0'
-	movwf	lo
-
-change_gas_depth_minus2:
 	movff	lo,EEDATA			; write result
 	call	write_eeprom		; save result in EEPROM
 
 	movlw	d'5'
 	movwf	menupos
 	bra		next_gas_page1
+
 
 ; Changed v1.44se
 gassetup_title_bar2:
@@ -1000,14 +1097,8 @@ gassetup_show_ppO2:
 	call	div16x16			;xA/xB=xC with xA as remainder 	
 	movff	xC+0,lo				; ((Depth+10m)*O2)/10 = [0.01Bar] ppO2
 	movff	xC+1,hi
-
-	WIN_LEFT	.55
-	WIN_TOP		.35
-	lfsr	FSR2,letter
-	OUTPUTTEXT 	d'149'		; (ppO2:
 	output_16dp	d'3'
-	OUTPUTTEXT 	d'150'		; Bar: 
-	call	word_processor
+	OUTPUTTEXT 	d'150'		; bar: 
 	return
 
 ;=============================================================================

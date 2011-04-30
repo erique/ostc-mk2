@@ -336,23 +336,8 @@ menu_gassetup1:
     lfsr    FSR2, letter
 	WIN_LEFT	.90
 	OUTPUTTEXTH .298                    ; END:
-	GETCUSTOM8 .18				        ; ppO2 warnvalue in WREG
-	mullw	d'10'
-	movff	PRODL,xA+0
-	movff	PRODH,xA+1		            ; ppO2 in [0.01Bar] * 10
-	movf	divemins+0,W
-	addlw	0x06
-	movwf	EEADR
-	call	read_eeprom                 ; O2 value
-	movff	EEDATA,xB+0
-	clrf	xB+1
-	call	div16x16                    ; xA/xB=xC with xA as remainder
-	movlw	d'10'
-	subwf	xC+0,F                      ; Subtract 10m...
-	movff	xC+0,lo
-	movlw	d'0'
-	subwfb	xC+1,F
-	movff	xC+1,hi                     ; lo:hi holding MOD in meters
+
+	rcall	gassetup_get_mod			; compute MOD based on CF18 into lo:hi
 	movlw	d'10'
 	addwf	lo,F
 	movlw	d'0'

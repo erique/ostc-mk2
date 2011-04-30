@@ -316,24 +316,8 @@ menu_gassetup1:
     lfsr    FSR2, letter
 	OUTPUTTEXTH .297                    ; MOD:
 
-	GETCUSTOM8 .18                      ; ppO2 warnvalue in WREG
-	mullw	d'10'
-	movff	PRODL,xA+0
-	movff	PRODH,xA+1                  ; ppO2 in [0.01Bar] * 10
+	rcall	gassetup_get_mod			; compute MOD based on CF18 into lo:hi
 
-	movf	divemins+0,W
-	addlw	0x06
-	movwf	EEADR
-	call	read_eeprom                 ; O2 value
-	movff	EEDATA,xB+0
-	clrf	xB+1
-	call	div16x16                    ; xA/xB=xC with xA as remainder
-	movlw	d'10'
-	subwf	xC+0,F                      ; Subtract 10m...
-	movff	xC+0,lo
-	movlw	d'0'
-	subwfb	xC+1,F
-	movff	xC+1,hi
 	output_16
 	STRCAT_PRINT  "m  "
 
@@ -646,8 +630,6 @@ next_gas_page:
 	bcf		first_FA				; Here: =1: -, =0: +
 	bcf		second_FA				; Here: =1: Is first gas
 	DISPLAYTEXT	.107		; Depth +/-
-	DISPLAYTEXT	.108		; Change:
-	DISPLAYTEXT	.109		; Default:
 	DISPLAYTEXT	.11			; Exit
 
 next_gas_page1:
@@ -690,25 +672,27 @@ menu_firstgas1:
 
 	rcall	gassetup_title_bar2			; Displays the title bar with the current Gas info
 	WIN_TOP		.125
-	WIN_LEFT	.70
+	WIN_LEFT	.20
 	lfsr	FSR2,letter
+
+	OUTPUTTEXT	.108		; Change:
+
 	; lo still holds change depth
 	bsf		leftbind
 	output_8
     STRCAT_PRINT  "m "
 
+; Show ppO2 after change depth
 	WIN_TOP		.125
-	WIN_LEFT	.100
+	WIN_LEFT	.110
 	lfsr	FSR2,letter
-	
 	rcall	gassetup_show_ppO2			; Display the ppO2 of the change depth with the current gas
 
 	movff		xC+0,sub_a+0
 	movff		xC+1,sub_a+1
 	GETCUSTOM8	d'46'					; color-code ppO2 warning [cBar]
-	mullw		d'1'					; ppo2_warning_high*1
-	movff		PRODL,sub_b+0
-	movff		PRODH,sub_b+1
+	movwf		sub_b+0
+	clrf		sub_b+1
 	call		sub16					;  sub_c = sub_a - sub_b	
 	btfss		neg_flag
 	bra			gassetup_color_code_ppo2_1; too high -> Warning Color!
@@ -731,26 +715,12 @@ gassetup_color_code_ppo2_2:
 
 ; Show MOD as "default"
 	WIN_TOP		.155
-	WIN_LEFT	.78
+	WIN_LEFT	.20
     lfsr    FSR2, letter
-	GETCUSTOM8 .18                      ; ppO2 warnvalue in WREG
-	mullw	d'10'
-	movff	PRODL,xA+0
-	movff	PRODH,xA+1                  ; ppO2 in [0.01Bar] * 10
 
-	movf	divemins+0,W
-	addlw	0x06
-	movwf	EEADR
-	call	read_eeprom                 ; O2 value
-	movff	EEDATA,xB+0
-	clrf	xB+1
-	call	div16x16                    ; xA/xB=xC with xA as remainder
-	movlw	d'10'
-	subwf	xC+0,F                      ; Subtract 10m...
-	movff	xC+0,lo
-	movlw	d'0'
-	subwfb	xC+1,F
-	movff	xC+1,hi
+	OUTPUTTEXT	.109		; Default:
+
+	rcall	gassetup_get_mod			; compute MOD based on CF18 into lo:hi
 
 	btfsc	second_FA		; Is first gas?
 	clrf	lo				; Yes, display 0m
@@ -905,23 +875,21 @@ change_gas_depth_apply:			; Apply +1 or -1m
 
 	incf	lo,F				; increase depth
 	movlw	d'100'				; Change depth limit + 1
-	cpfseq	lo
-	bra		change_gas_depth_plus2
-	movlw	d'99'				; Change depth limit
-	movwf	lo
+	cpfslt	lo					; >99?
+	clrf	lo					; Yes, set to zero m
+
 change_gas_depth_plus2:
 	movff	lo,EEDATA			; write result
 	call	write_eeprom		; save result in EEPROM
-
 	movlw	d'4'
 	movwf	menupos
 	bra		next_gas_page1
 
 change_gas_depth_minus:
+; -1m
 	decf	lo,F				; decrease depth
-	btfss	lo,7				; 255?
-	bra		change_gas_depth_plus2	; 	no, exit
-	clrf	lo
+	btfsc	lo,7				; 255?
+	clrf	lo					; Yes, stay at zero m
 	bra		change_gas_depth_plus2	; exit
 
 change_gas_depth_plus_minus:
@@ -931,24 +899,11 @@ change_gas_depth_plus_minus:
 	bra		next_gas_page1
 
 change_gas_depth_default:
-	GETCUSTOM8 .18                      ; ppO2 warnvalue in WREG
-	mullw	d'10'
-	movff	PRODL,xA+0
-	movff	PRODH,xA+1                  ; ppO2 in [0.01Bar] * 10
+	rcall	gassetup_get_mod			; compute MOD based on CF18 into lo:hi
 
-	movf	divemins+0,W
-	addlw	0x06
-	movwf	EEADR
-	call	read_eeprom                 ; O2 value
-	movff	EEDATA,xB+0
-	clrf	xB+1
-	call	div16x16                    ; xA/xB=xC with xA as remainder
-	movlw	d'10'
-	subwf	xC+0,F                      ; Subtract 10m...
-	movff	xC+0,lo
-	movlw	d'0'
-	subwfb	xC+1,F
-	movff	xC+1,hi
+	movlw	d'99'
+	cpfslt	lo
+	movwf	lo					; limit to 99m
 
 	movf	decodata+0,W		; read current value 
 	addlw	d'28'				; offset in memory
@@ -1100,6 +1055,28 @@ gassetup_show_ppO2:
 	output_16dp	d'3'
 	OUTPUTTEXT 	d'150'		; bar: 
 	return
+
+gassetup_get_mod:
+	GETCUSTOM8 .18                      ; ppO2 warnvalue in WREG
+	mullw	d'10'
+	movff	PRODL,xA+0
+	movff	PRODH,xA+1                  ; ppO2 in [0.01Bar] * 10
+	movf	divemins+0,W
+	addlw	0x06
+	movwf	EEADR
+	call	read_eeprom                 ; O2 value
+	movff	EEDATA,xB+0
+	clrf	xB+1
+	call	div16x16                    ; xA/xB=xC with xA as remainder
+	movlw	d'10'
+	subwf	xC+0,F                      ; Subtract 10m...
+	movff	xC+0,lo
+	movlw	d'0'
+	subwfb	xC+1,F
+	movff	xC+1,hi
+	return
+
+
 
 ;=============================================================================
 ; Make sure first gas is marked active.

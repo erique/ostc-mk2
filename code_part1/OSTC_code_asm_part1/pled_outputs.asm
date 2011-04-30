@@ -3082,47 +3082,13 @@ PLED_show_end_ead_divemode:
 	bra		PLED_show_end_ead_divemode3	; No, show CC EAD and END
 
 PLED_show_end_ead_divemode2:			; Show OC EAD and END
-; Show EAD: char_I_N2_ratio/0.79*rel_pressure:2*10 -> char_I_N2_ratio*rel_pressure:2/7900 -> EAD in m
+; Show EAD:
 	WIN_LEFT	.125
 	WIN_TOP		.192
-	movff	char_I_N2_ratio,xA+0
-	clrf	xA+1
-	movff	rel_pressure+0,xB+0
-	movff	rel_pressure+1,xB+1
-	call	mult16x16                   ; xA*xB=xC
-	movlw	LOW		d'7900'
-	movwf	xB+0
-	movlw	HIGH	d'7900'
-	movwf	xB+1
-	call	div32x16  ; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
-	movff	xC+0,lo
-	movff	xC+1,hi						; lo:hi now hold EAD in m
-	lfsr	FSR2,letter
-	output_16_3							; Display only full meters
-	STRCAT_PRINT  "m"					; Display EAD
 
+; Show END:
 	WIN_LEFT	.125
 	WIN_TOP		.216
-; Show END = rel_pressure × (100 - char_I_He_ratio)/10000 -> Result in m
-	movff	char_I_He_ratio,lo			; temp
-	movlw	d'100'
-	bsf		STATUS,C	
-	subfwb	lo,W
-	movwf	xA+0
-	clrf	xA+1
-	movff	rel_pressure+0,xB+0
-	movff	rel_pressure+1,xB+1
-	call	mult16x16                   ; xA*xB=xC
-	movlw	LOW		d'10000'
-	movwf	xB+0
-	movlw	HIGH	d'10000'
-	movwf	xB+1
-	call	div32x16  ; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
-	movff	xC+0,lo
-	movff	xC+1,hi						; lo:hi now hold END in m
-	lfsr	FSR2,letter
-	output_16_3
-	STRCAT_PRINT  "m"					; Display END
 	return
 
 PLED_show_end_ead_divemode3:			; Show CC EAD, END and pO2[Diluent]
@@ -3170,6 +3136,13 @@ PLED_show_end_ead_divemode3:			; Show CC EAD, END and pO2[Diluent]
 	STRCAT_PRINT  " "					;  Display ppO2[Diluent]
 
 ; EAD and END: ToDo...
+; Show EAD:
+	WIN_LEFT	.125
+	WIN_TOP		.192
+
+; Show END:
+	WIN_LEFT	.125
+	WIN_TOP		.216
 	return
 
 

@@ -100,8 +100,8 @@
     TCODE    .40,  .35,      "Apagado   [min]"           ;039 Power Off [min]
     TCODE    .40,  .35,      "Pre-menú  [min]"           ;040 Pre-menu  [min]	(Delais to keep surface-mode menus displayed)
     TCODE    .40,  .35,      "Vel.    [m/min]"           ;041 velocity[m/min]
-    TCODE    .40,  .35,      "Activac. [mBar]"           ;042 Wake-up  [mBar]
-    TCODE    .40,  .35,      "Máx. Sup.[mBar]"           ;043 max.Surf.[mBar]
+    TCODE    .40,  .35,      "Activac. [mbar]"           ;042 Wake-up  [mbar]
+    TCODE    .40,  .35,      "Máx. Sup.[mbar]"           ;043 max.Surf.[mbar]
     TCODE    .40,  .35,      "Muestra GF  [%]"           ;044 GF display  [%]
     TCODE    .40,  .35,      "Mues.mín. O2[%]"           ;045 min. O2 Dis.[%]
     TCODE    .40,  .35,      "Menús buc.[min]"           ;046 Dive menus[min]
@@ -111,9 +111,9 @@
     TCODE    .40,  .35,      "Alarma GF 1 [%]"           ;050 GF alarm 1  [%]
     TCODE    .40,  .35,      "Mues.CNSsup.[%]"           ;051 CNSshow surf[%]
     TCODE    .40,  .35,      "Dist. Deco  [m]"           ;052 Deco Offset [m]
-    TCODE    .40,  .35,      "ppO2 bajo [Bar]"           ;053 ppO2 low  [Bar]
-    TCODE    .40,  .35,      "ppO2 alto [Bar]"           ;054 ppO2 high [Bar]
-    TCODE    .40,  .35,      "ppO2 mues.[Bar]"           ;055 ppO2 show [Bar]
+    TCODE    .40,  .35,      "ppO2 bajo [bar]"           ;053 ppO2 low  [bar]
+    TCODE    .40,  .35,      "ppO2 alto [bar]"           ;054 ppO2 high [bar]
+    TCODE    .40,  .35,      "ppO2 mues.[bar]"           ;055 ppO2 show [bar]
     TCODE    .40,  .35,      "frec. muestreo "           ;056 sampling rate  
     TCODE    .40,  .35,      "Divisor Temp   "           ;057 Divisor Temp   
     TCODE    .40,  .35,      "Divisor Datdeco"           ;058 Divisor Decodat
@@ -170,9 +170,9 @@
     TCODE    .85,   .125,    "ZH-L16 CC"                 ;104 ZH-L16 CC
     TCODE    .0,    .0,      "¿Gas Activo? "             ;105 Active Gas?
     TCODE    .10,   .2,      "Conf.Gas - Listagas"       ;106 Gas Setup - Gaslist
-    TCODE    .0,    .0,      "Prof. +"                   ;107 Depth +
-    TCODE    .0,    .0,      "Prof. -"                   ;108 Depth -
-    TCODE    .20,   .35,     "Atras"                     ;109 Back
+    TCODE    .20,   .95,     "Prof. +/-:"                ;107 Depth +/-:
+    TCODE    .20,   .125,    "Alterno:"                  ;108 Change:
+    TCODE    .20,   .155,    "Defecto:"                  ;109 Default:
     TCODE    .20,   .65,     "Menú SetPoint CCR"         ;110 CCR SetPoint Menu
     TCODE    .20,   .2,      "Menú SetPoint CCR"         ;111 CCR SetPoint Menu
     TCODE    .0,    .0,      "#SP"                       ;112 SP#
@@ -212,8 +212,8 @@
     TCODE    .52,   .120,    "OK!"                       ;146 OK!
     TCODE    .20,   .35,     "Más"                       ;147 More
     TCODE    .0,    .0,      ":.........:"               ;148 :.........:
-    TCODE    .0,    .8,      "(ppO2:"                    ;149 (ppO2:
-    TCODE    .2,    .39,     "Bar) "                     ;150 Bar) 
+    TCODE    .0,    .8,      "ppO2"                      ;149 ppO2
+    TCODE    .2,    .39,     "bar "                      ;150 bar 
     TCODE    .108,  .216,    "¿Marca?"                   ;151 Marker?
     TCODE    .85,   .125,    "L16-GF OC"                 ;152 L16-GF OC
     TCODE    .20,   .65,     "Func.Personaliz.II"        ;153 Custom FunctionsII
@@ -230,10 +230,10 @@
     TCODE    .40,   .35,     "Tope Aviso     "           ;162 Warn Ceiling
     TCODE    .40,   .35,     "Iconos TipoMezl"           ;163 Mix type icons
     TCODE    .40,   .35,     "Parp. Mejor Gas"           ;164 Blink BetterGas	(Remainder in divemode to switch to a better decompression gas).
-    TCODE    .40,   .35,     "AvisoProf[mBar]"           ;165 DepthWarn[mBar]
+    TCODE    .40,   .35,     "AvisoProf[mbar]"           ;165 DepthWarn[mbar]
     TCODE    .40,   .35,     "Aviso CNS   [%]"           ;166 CNS warning [%]
     TCODE    .40,   .35,     "Aviso GF    [%]"           ;167 GF warning  [%]
-    TCODE    .40,   .35,     "Aviso ppO2[Bar]"           ;168 ppO2 warn [Bar]
+    TCODE    .40,   .35,     "Aviso ppO2[bar]"           ;168 ppO2 warn [bar]
     TCODE    .40,   .35,     "AvisoVel[m/min]"           ;169 Vel.warn[m/min]
     TCODE    .40,   .35,     "Despl. Temp/day"           ;170 Time offset/day
     TCODE    .40,   .35,     "Mostr.Altímetro"           ;171 Show altimeter

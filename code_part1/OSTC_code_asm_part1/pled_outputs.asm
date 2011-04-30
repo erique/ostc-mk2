@@ -3077,11 +3077,13 @@ PLED_show_end_ead_divemode:
 	WIN_FONT	FT_SMALL
 	call		PLED_divemask_color	; Set Color for Divemode mask
 	lfsr	FSR2,letter
-	STRCAT_PRINT  "EAD:"
+	OUTPUTTEXTH	.299		; EAD:
+	call	word_processor
 	WIN_LEFT	.95
 	WIN_TOP		.216
 	lfsr	FSR2,letter
-	STRCAT_PRINT  "END:"
+	OUTPUTTEXTH	.298		; END:
+	call	word_processor
 	call	PLED_standard_color
 
 	btfss	FLAG_const_ppO2_mode		; are we in ppO2 mode?

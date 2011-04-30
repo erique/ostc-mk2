@@ -134,28 +134,6 @@ diveloop_loop1z
 
 	bcf		onesecupdate					; one seconds update done
 
-;	GETCUSTOM8	d'38'		; Show seconds (=1?)
-;	movwf	lo
-;	movlw	d'1'
-;	cpfseq	lo					; =1?
-;	bra		diveloop_loop2		; No, minutes only
-;	bsf		update_divetime		; Set Update flag
-;
-;
-;diveloop_loop2:	
-;	btfss	update_divetime				; display new divetime?
-;	bra		diveloop_loop3				; No
-;	btfsc	premenu						; Is the divemode menu active?
-;	bra		diveloop_loop2a				; Yes
-;	call	PLED_divemins				; Display (new) divetime!
-;	btfsc	FLAG_const_ppO2_mode		; only in const_ppO2_mode
-;	call	PLED_const_ppO2_value		; display const ppO2 setting in [Bar]
-;	btfsc	ppO2_show_value				; show ppO2?
-;	call	check_ppO2					; check ppO2 and displays warning if required
-;
-;diveloop_loop2a:
-;	bcf		update_divetime				; clear flag
-;
 diveloop_loop3:
 	btfss	menubit							; Divemode menu active?
 	call	test_switches_divemode			; No, Check switches normal

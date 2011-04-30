@@ -545,9 +545,6 @@ PLED_simulator_data:
 ;=============================================================================
 
 PLED_display_velocity:
-;	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
-;	return							; Yes, No update and return!
-
 	ostc_debug	'v'		; Sends debug-information to screen if debugmode active
 	WIN_TOP		.90
 	WIN_LEFT	.0
@@ -974,9 +971,6 @@ PLED_temp_surfmode:
 	return
 
 PLED_temp_divemode:
-;	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
-;	return								; Yes, No update and return!
-
 	ostc_debug	'u'		; Sends debug-information to screen if debugmode active
 
 ; temperature
@@ -1006,7 +1000,7 @@ PLED_temp_divemode:
     call    word_processor
 	return
 
-PLED_show_ppO2:					; Show ppO2
+PLED_show_ppO2:					; Show ppO2 (ppO2 stored in xC)
 	ostc_debug	't'		; Sends debug-information to screen if debugmode active
 	WIN_TOP		.119
 	WIN_LEFT	.0
@@ -1051,9 +1045,6 @@ PLED_active_gas_clear:					; clears active gas!
 PLED_active_gas_divemode:				; Displays current gas (e.g. 40/20) if a) He>0 or b) O2>Custom9
 	btfsc	FLAG_apnoe_mode				; Ignore in Apnoe mode
 	return
-
-;	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
-;	return								; Yes, No update and return!
 
 	WIN_INVERT	.0					; Init new Wordprocessor	
 	call	PLED_active_gas_divemode_show	; Show gas (Non-Inverted in all cases)
@@ -2972,9 +2963,6 @@ PLED_new_cf_warning:
 	return
 
 PLED_const_ppO2_value:
-;	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
-;	return								; Yes, No update and return!
-
 	ostc_debug	'j'		; Sends debug-information to screen if debugmode active
 	
 	WIN_TOP		.168
@@ -3137,8 +3125,51 @@ PLED_show_end_ead_divemode2:			; Show OC EAD and END
 	STRCAT_PRINT  "m"					; Display END
 	return
 
-PLED_show_end_ead_divemode3:			; Show CC EAD and END
-; ToDo...
+PLED_show_end_ead_divemode3:			; Show CC EAD, END and pO2[Diluent]
+; Show ppO2[Diluent]	
+	WIN_LEFT	.95
+	WIN_TOP		.168
+	call	PLED_divemask_color	; Set Color for Divemode mask
+	STRCPY_PRINT  "ppO2:"					; ppO2 of diluent
+	call	PLED_standard_color
+
+	movff		amb_pressure+0,xA+0
+	movff		amb_pressure+1,xA+1
+	movlw		d'10'
+	movwf		xB+0
+	clrf		xB+1
+	call		div16x16				; xC=p_amb/10
+	movff		xC+0,xA+0
+	movff		xC+1,xA+1
+	movff		char_I_O2_ratio,xB+0
+	clrf		xB+1
+	call		mult16x16				; char_I_O2_ratio * p_amb/10
+	movff		xC+0,lo
+	movff		xC+1,hi					; for output
+
+	WIN_LEFT	.130
+	WIN_TOP		.168
+	lfsr		FSR2,letter
+
+	movff		xC+0,sub_a+0
+	movff		xC+1,sub_a+1			; for compare
+	movlw		LOW	 d'10000'
+	movwf		sub_b+0
+	movlw		HIGH d'10000'			; ppO2 has mbar resolution...
+	movwf		sub_b+1
+	call		sub16					;  sub_c = sub_a - sub_b
+	movlw		'0'						
+	btfsc		neg_flag				; Display leading zero manually?
+	movwf		POSTINC2				; Yes!
+
+	bsf		leftbind
+	bsf		ignore_digit4
+	output_16dp	d'1'					; Show ppO2 w/o leading zero
+	bcf		ignore_digit4
+	bcf		leftbind
+	STRCAT_PRINT  " "					;  Display ppO2[Diluent]
+
+; EAD and END: ToDo...
 	return
 
 
@@ -3200,9 +3231,6 @@ PLED_topline_box2:
 	return
 
 PLED_display_cns:
-;	btfsc	multi_gf_display			; Is the Multi-GF Table displayed?
-;	return								; Yes, No update and return!
-
 	btfsc	gauge_mode			; Do not display in gauge mode
 	 return
 

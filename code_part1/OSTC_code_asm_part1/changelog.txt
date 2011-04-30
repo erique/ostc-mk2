@@ -11,6 +11,7 @@ BUGFIX: Apply salinity for ceiling warning
 CHANGE: Gas Setup page 2 reworked
 BUGFIX: x-scale in Logbook fixed
 CHANGE: Some typos in English text
+NEW: Display ppO2[Diluent] in CCR modes
 
 New in 1.86 beta:
 BETA Version - Do NOT use for diving!

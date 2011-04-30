@@ -684,7 +684,7 @@ static unsigned char calc_nextdecodepth(void)
     overlay float depth = (temp_deco - pres_surface) / 0.09985;
 
     // At most, ascent 1 minute, at 10m/min == 10.0 m.
-    overlay float min_depth = depth - 10.0;
+    overlay float min_depth = (depth > 10.0) ? (depth - 10.0) : 0.0;
     
     // Do we need to stop at current depth ?
     overlay unsigned char need_stop = 0;
@@ -733,8 +733,8 @@ static unsigned char calc_nextdecodepth(void)
                     // With alpha = currentDepth / maxDepth, hence in [0..1]
                     sim_limit( GF_high - first_stop * locked_GF_step );
 
-                // upper limit (lowest pressure tolerated):
-                assert( sim_lead_tissue_limit < pres_stop );
+                // upper limit (lowest pressure tolerated), + 1mbar for rounding...:
+                assert( sim_lead_tissue_limit < (pres_stop + 0.001) );
             }
 #endif
 
@@ -1786,8 +1786,8 @@ static void sim_limit(PARAMETER float GF_current)
         //       so that can change who is the leading gas...
         // Note: Also depends of the GF_current...
         if( char_I_deco_model == 1 )
-            p = ( p - var_N2_a * GF_current) * var_N2_b
-              / (GF_current + var_N2_b * (1.0 - GF_current));
+            p = ( p - var_N2_a * GF_current) 
+              / (GF_current / var_N2_b + 1.0 - GF_current);
         else
             p = (p - var_N2_a) * var_N2_b;
         if( p < 0.0 ) p = 0.0;
@@ -1884,8 +1884,8 @@ static void calc_gradient_factor(void)
     assert( 0.800 <= pres_respiration && pres_respiration < 14.0 );
 
 	// tissue > respiration (currently off-gasing)
-	// GF =   0% when respiration == tissue
-	// GF = 100% when respiration == limit
+	// GF =   0% when respiration == tissue, ie. bubbles are at equilibrium.
+	// GF = 100% when respiration == limit.
     temp_tissue = N2 + He;
     if( temp_tissue <= pres_respiration )
  		gf = 0.0;
@@ -2318,7 +2318,7 @@ void deco_calc_percentage(void)
 
     int_I_temp = (unsigned short)(((float)int_I_temp * (float)char_I_temp) * 0.01 );
 
-    assert( int_I_temp < 1440 );                            // Less than 24h...
+    assert( int_I_temp < 2880 );                            // Less than 48h...
 }
 
 

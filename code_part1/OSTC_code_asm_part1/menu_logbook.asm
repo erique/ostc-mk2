@@ -983,6 +983,7 @@ profile_view_get_depth_new1:
 	return									; No (0)
 
 profile_view_get_depth_new3:
+    ; read optional Tp° here, if any, and decrement timeout_counter2 by two...
 	movf		timeout_counter2,W			; number of additional bytes to ignore (0-127)
 	call		incf_eeprom_address0		; increases bytes in eeprom_address:2 with 0x8000 bank switching
 	return

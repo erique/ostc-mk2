@@ -28,9 +28,16 @@ start:
 	clrf    temp10+1
 
 	call	init
+
+	read_int_eeprom	d'92'			; Read number of CF used in this firmware	
+	movlw	0xFF					; First start value
+	cpfseq	EEDATA					; Compare 
+	bra		start2					; Normal power-on/hard reset boot
+	bra		first_start				; Reset and jump to surfmode
+start2:
 	btfsc	divemode				; Reset from Divemode?
 	call	PLED_resetdebugger		; Yes! Something went wrong, show reset informations
-
+start3:
 	clrf	STKPTR					; Clear Stackpointer
 	lfsr	FSR0, 10Bh				; Clear rambank 1-9, do not delete RTC registers
 clear_rambank:
@@ -130,7 +137,7 @@ check_firmware_new:
 	movwf	EEDATA		
 	call	write_eeprom			; write version y
 	clrf	EEADRH					; Reset EEADRH
-;	goto	reset_all_cf			; resets all custom functions bank0 and bank1 and jumps to "restart"
+	goto	reset_all_cf			; resets all custom functions bank0 and bank1 and jumps to "restart"
 ;	goto	reset_all_cf_bank1		; resets all custom functions bank1 and jumps to "restart"
 			
 restart:
@@ -349,6 +356,12 @@ screen3_loop2:
 	btfsc	switch_right				; Ack?
 	return
 	bra		screen3_loop				; loop screen
+
+first_start:
+	movlw	max_custom_number		; Defined in definitions.asm
+	movwf	EEDATA
+	write_int_eeprom	d'92'		; Store number of CF used in this firmware
+	bra		start3					; continue with normal start
 
 init:						
 	movlw	b'01101100'		; 4MHz (x4 PLL)

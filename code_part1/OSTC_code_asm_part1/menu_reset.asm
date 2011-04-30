@@ -110,11 +110,11 @@ cf_default_table0:
 
 	CF_DEFAULT    CF_INT8, 	    d'7',   d'3',   d'18'   ; minimum_velocity		    7min/min
 	CF_DEFAULT    CF_INT15,	    d'1160',d'950', 0    	; pressure_offset_divemode	1160mBar
-	CF_DEFAULT    CF_INT15,	    d'1100',d'1100', 0   	; max_surfpressure		    1100mBar
+	CF_DEFAULT    CF_INT15,	    d'1080',d'1080', 0   	; max_surfpressure		    1080mBar
 	CF_DEFAULT    CF_PERCENT,	d'20',  d'1',  d'99'   	; min_gradient_factor		20%
 	CF_DEFAULT    CF_PERCENT,	d'20',  d'1',  d'22'	; oxygen_threshold			22%
 
-	CF_DEFAULT    CF_SEC,	    d'30',  d'5',   d'30'   ; dive_menu_timeout		    30s
+	CF_DEFAULT    CF_SEC,	    d'45',  d'5',   d'60'   ; dive_menu_timeout		    45s
 	CF_DEFAULT    CF_PERCENT,   d'110', d'110', d'200' 	; saturation_multiplier		x1.10
 	CF_DEFAULT    CF_PERCENT,   d'90',  d'50',  d'90'   ; desaturation_multiplier	x0.90
 	CF_DEFAULT    CF_PERCENT,	d'60',  d'60',  d'100'	; nofly_time_ratio			60%
@@ -156,7 +156,7 @@ cf_default_table1:
 	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0       ; warn_ceiling_divemode		=1 Warn ceiling violation in divemode
 	CF_DEFAULT    CF_BOOL,      d'1',   0,      0 		; Show mix type is surfmode
 
-	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; blink_gas_divemode 		=1 blink better gas
+	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0       ; blink_gas_divemode 		=1 blink better gas
 	CF_DEFAULT    CF_INT15,     d'13000', 0,   d'13000' ; color_warn_depth_mBar		Warn depths
 	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'	; color_warn_cns_percent    Warn-%
 	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'  ; color_warn_gf_percent		Warn-%

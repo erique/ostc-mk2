@@ -137,7 +137,7 @@ check_firmware_new:
 	movwf	EEDATA		
 	call	write_eeprom			; write version y
 	clrf	EEADRH					; Reset EEADRH
-	goto	reset_all_cf			; resets all custom functions bank0 and bank1 and jumps to "restart"
+;	goto	reset_all_cf			; resets all custom functions bank0 and bank1 and jumps to "restart"
 ;	goto	reset_all_cf_bank1		; resets all custom functions bank1 and jumps to "restart"
 			
 restart:

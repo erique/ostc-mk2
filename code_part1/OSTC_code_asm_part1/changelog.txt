@@ -1,3 +1,7 @@
+New in 1.88 beta:
+BETA Version - Do NOT use for diving!
+CHANGE: CF warning window moved to upper right corner
+
 New in 1.87 beta:
 BETA Version - Do NOT use for diving!
 CHANGE: Runtime simulator faster

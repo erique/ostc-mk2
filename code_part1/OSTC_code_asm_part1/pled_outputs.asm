@@ -3177,6 +3177,7 @@ PLED_topline_box:				; Writes a filled box...
 	GETCUSTOM8		d'35'		; ... with the standard color
 PLED_topline_box2:
     WIN_BOX_COLOR   .0, .26, .0, .159	
+	call    PLED_standard_color	; Reset to standard color in case of unreadable color
 	return
 
 PLED_display_cns:

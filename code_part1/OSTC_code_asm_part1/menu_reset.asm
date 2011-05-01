@@ -334,7 +334,7 @@ reset_all_cf:
 	clrf	EEDATA
 	write_int_eeprom	d'34'		; reset deco model to ZH-L16
 	clrf	EEDATA
-	write_int_eeprom	d'35'		; Do not use O2 Sensor in CC Modes
+	write_int_eeprom	d'35'		; unused in Mk.2
 
 	clrf	EEDATA
 	write_int_eeprom	d'39'		; Disable Debugbode

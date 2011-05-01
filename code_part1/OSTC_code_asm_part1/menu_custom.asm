@@ -755,16 +755,16 @@ check_failed:
     andwf   cf_checker_counter,F
 
     ; Went wrong: draw the warning line...
-	WIN_TOP		.200
-	WIN_LEFT	.80 - (6*.7)/2          ; Center 8 chars of width 14pix.
+	WIN_TOP		.0
+	WIN_LEFT	.125
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.1					    ; Init new Wordprocessor
 	call    PLED_warnings_color
 	
-	STRCPY  " CF"
+	STRCPY  "CF"
     movff   cf_checker_counter,lo
     output_99x
-    STRCAT_PRINT " "
+	STRCAT_PRINT "!"
     
     ; When failed, increment counter modulo 64, to restart checks.
     incf    cf_checker_counter,W

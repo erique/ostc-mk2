@@ -3084,14 +3084,14 @@ PLED_show_end_ead_divemode:
 	movff   char_O_EAD,lo
 	bsf     leftbind
 	output_8                            ; Print EAD w/o leading space.
-	STRCAT_PRINT    "m"
+	STRCAT_PRINT    "m "
 
 	WIN_TOP		.216
 	lfsr	FSR2,letter
 	movff   char_O_END,lo
 	output_8                            ; Print END w/o leading space.
 	bcf		leftbind
-	STRCAT_PRINT    "m"
+	STRCAT_PRINT    "m "
 
 	btfsc	is_bailout					; In bailout mode?
 	return                              ; Yes: done.

@@ -104,7 +104,7 @@
 #include "shared_definitions.h"
 
 // Water vapour partial pressure in the lumb.
-#define ppWVapour 0.0627
+#define ppWater 0.0627
 
 // *************************
 // ** P R O T O T Y P E S **
@@ -1121,7 +1121,7 @@ static void gas_switch_set(void)
 // Input: calc_N2_ratio, calc_He_ratio : simulated gas mix.
 //        temp_deco : simulated respiration pressure + security offset (deco_distance)
 //        float_deco_distance : security factor.
-//        Water-vapor pressure inside lumbs (ppWVapour).
+//        Water-vapor pressure inside limbs (ppWater).
 //
 // Output: ppN2, ppHe.
 //
@@ -1140,7 +1140,7 @@ static void sim_alveolar_presures(void)
    	{
         // In CCR mode, use calc_XX_ratio instead of XX_ratio.
         // Note: PPO2 and ratios are known outside the lumbs, so there is no
-        //       ppWVapour in the equations below:
+        //       ppWater in the equations below:
    		if( temp_deco > deco_ppO2_change )
             deco_diluent -= const_ppO2;
    		else
@@ -1151,10 +1151,10 @@ static void sim_alveolar_presures(void)
     	    deco_diluent = temp_deco;
   	}
 
-    if( deco_diluent > ppWVapour )
+    if( deco_diluent > ppWater )
     {
-        ppN2 = calc_N2_ratio * (deco_diluent - ppWVapour);
-        ppHe = calc_He_ratio * (deco_diluent - ppWVapour);
+        ppN2 = calc_N2_ratio * (deco_diluent - ppWater);
+        ppHe = calc_He_ratio * (deco_diluent - ppWater);
     }
     else
     {
@@ -1189,7 +1189,7 @@ static void clear_tissue(void)
     for(ci=0; ci<16; ci++)
     {
         // cycle through the 16 Bühlmann tissues
-        overlay float p = N2_ratio * (pres_respiration -  ppWVapour);
+        overlay float p = N2_ratio * (pres_respiration -  ppWater);
         pres_tissue[ci] = p;
 
         // cycle through the 16 Bühlmann tissues for Helium
@@ -1398,26 +1398,26 @@ void calc_hauptroutine_update_tissues(void)
  		char_O_diluent_ppO2 = (char)(pres_diluent * (1.0 - N2_ratio - He_ratio) * 100.0 + 0.5);
     }
 
-    if( pres_diluent > ppWVapour )                                              // new in v.101
+    if( pres_diluent > ppWater )                                              // new in v.101
  	{
      	overlay float EAD, END;
 
-        ppN2 = N2_ratio * (pres_diluent - ppWVapour);                           // changed in v.101
- 		ppHe = He_ratio * (pres_diluent - ppWVapour);                           // changed in v.101
+        ppN2 = N2_ratio * (pres_diluent - ppWater);                           // changed in v.101
+ 		ppHe = He_ratio * (pres_diluent - ppWater);                           // changed in v.101
  		
  		// EAD : Equivalent Air Dive. Equivalent depth for the same N2 level
  		//       with plain air.
- 		//       ppN2 = 79% * (P_EAD - ppWVapour)
+ 		//       ppN2 = 79% * (P_EAD - ppWater)
  		//       EAD = (P_EAD - Psurface) * 10
- 		//   ie: EAD = (ppN2 / 0.7902 + ppWVapour -Psurface) * 10
- 		EAD = (ppN2 / 0.7902 + ppWVapour - pres_surface) * 9.985;
+ 		//   ie: EAD = (ppN2 / 0.7902 + ppWater -Psurface) * 10
+ 		EAD = (ppN2 / 0.7902 + ppWater - pres_surface) * 9.985;
  		if( EAD < 0.0 || EAD > 245.5 ) EAD = 0.0;
  		char_O_EAD = (char)(EAD + 0.5);
 
  		// END : Equivalent Narcotic Dive.
  		//       Here we count O2 as narcotic too. Hence everything but helium (has a narcosis factor of
  		//       0.23 btw). Hence the formula becomes:
- 		//       END * BarPerMeter * (1.0 - 0.0) - ppWVapour + Psurface == Pambient - ppHe - ppWVapour
+ 		//       END * BarPerMeter * (1.0 - 0.0) - ppWater + Psurface == Pambient - ppHe - ppWater
  		//  ie:  END = (Pambient - ppHe - Psurface) * 9.985
  		//
  		// Source cited:
@@ -1975,7 +1975,7 @@ static void calc_gradient_factor(void)
 //
 // FIXED N2_ratio
 // unchanged in v.101
-// Inputs:  int_I_pres_surface, ppWVapour, char_I_desaturation_multiplier
+// Inputs:  int_I_pres_surface, ppWater, char_I_desaturation_multiplier
 // Outputs: int_O_desaturation_time, char_O_tissue_saturation[0..31]
 //
 void deco_calc_desaturation_time(void)
@@ -1998,7 +1998,7 @@ void deco_calc_desaturation_time(void)
 
     N2_ratio = 0.7902; // FIXED sum as stated in bühlmann
     pres_surface = int_I_pres_surface * 0.001;
-    ppN2 = N2_ratio * (pres_surface - ppWVapour);
+    ppN2 = N2_ratio * (pres_surface - ppWater);
     int_O_desaturation_time = 0;
     float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
 
@@ -2118,7 +2118,7 @@ static void calc_wo_deco_step_1_min(void)
     N2_ratio = 0.7902; // FIXED, sum lt. buehlmann
     pres_respiration = int_I_pres_respiration * 0.001;  // assembler code uses different digit system
     pres_surface = int_I_pres_surface * 0.001;          // the b"uhlmann formula using pres_surface does not use the N2_ratio
-    ppN2 = N2_ratio * (pres_respiration - ppWVapour);   // ppWVapour is the extra pressure in the body
+    ppN2 = N2_ratio * (pres_respiration - ppWater);     // ppWater is the extra pressure in the body
     ppHe = 0.0;
     float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
     float_saturation_multiplier   = char_I_saturation_multiplier   * 0.01;

@@ -5,13 +5,14 @@ BUGFIX: "Active?" list in Divemode
 NEW: Display CNS in decoplan
 NEW: Colored stops in decoplan (CF55 > 0)
 NEW: 115kbaud/s bootloader
-NEW: Colored battery sign when charging (yellow) or charged (green).
+NEW: Colored battery sign when charging (yellow) or charged (green)
 CHANGE: Battery symbol filled
 BUGFIX: Apply salinity for ceiling warning
-CHANGE: Gas Setup page 2 reworked
+CHANGE: Gas Setup page 2 reworked (MOD depth default)
 BUGFIX: x-scale in Logbook fixed
 CHANGE: Some typos in English text
 NEW: Display ppO2[Diluent] in CCR modes
+NEW: Display EAD/END in OCR and CCR modes
 
 New in 1.86 beta:
 BETA Version - Do NOT use for diving!

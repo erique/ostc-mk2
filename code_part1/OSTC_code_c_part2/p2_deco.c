@@ -1365,7 +1365,7 @@ void calc_hauptroutine_data_input(void)
     }
 
     const_ppO2 = char_I_const_ppO2 * 0.01;
-    deco_ppO2_change = char_I_deco_ppO2_change / 99.95 
+    deco_ppO2_change = char_I_deco_ppO2_change / 99.85 
                      + pres_surface
                      + float_deco_distance;
     deco_ppO2 = char_I_deco_ppO2 * 0.01;
@@ -1387,24 +1387,51 @@ void calc_hauptroutine_update_tissues(void)
     assert( 0.800 < pres_respiration && pres_respiration < 14.0 );
 
 	pres_diluent = pres_respiration;
-    if (char_I_const_ppO2 != 0)													// new in v.101
+    if( char_I_const_ppO2 != 0 )												// new in v.101
     {
   		pres_diluent -= const_ppO2;                                             // new in v.101
   		pres_diluent /= N2_ratio + He_ratio;                                    // new in v.101
  	    if( pres_diluent > pres_respiration )                                   // new in v.101
   		    pres_diluent = pres_respiration;                                    // new in v.101
+
+ 		char_O_diluent = (char)(pres_diluent/pres_respiration*100.0 + 0.5);
+ 		char_O_diluent_ppO2 = (char)(pres_diluent * (1.0 - N2_ratio - He_ratio) * 100.0 + 0.5);
     }
-    if (pres_diluent > ppWVapour)                                               // new in v.101
+
+    if( pres_diluent > ppWVapour )                                              // new in v.101
  	{
+     	overlay float EAD, END;
+
         ppN2 = N2_ratio * (pres_diluent - ppWVapour);                           // changed in v.101
  		ppHe = He_ratio * (pres_diluent - ppWVapour);                           // changed in v.101
- 		char_O_diluent = (char)(pres_diluent/pres_respiration*100.0);
+ 		
+ 		// EAD : Equivalent Air Dive. Equivalent depth for the same N2 level
+ 		//       with plain air.
+ 		//       ppN2 = 79% * (P_EAD - ppWVapour)
+ 		//       EAD = (P_EAD - Psurface) * 10
+ 		//   ie: EAD = (ppN2 / 0.7902 + ppWVapour -Psurface) * 10
+ 		EAD = (ppN2 / 0.7902 + ppWVapour - pres_surface) * 9.985;
+ 		if( EAD < 0.0 || EAD > 245.5 ) EAD = 0.0;
+ 		char_O_EAD = (char)(EAD + 0.5);
+
+ 		// END : Equivalent Narcotic Dive.
+ 		//       Here we count O2 as narcotic too. Hence everything but helium (has a narcosis factor of
+ 		//       0.23 btw). Hence the formula becomes:
+ 		//       END * BarPerMeter * (1.0 - 0.0) - ppWVapour + Psurface == Pambient - ppHe - ppWVapour
+ 		//  ie:  END = (Pambient - ppHe - Psurface) * 9.985
+ 		//
+ 		// Source cited:
+ 		//       The Physiology and Medicine of Diving by Peter Bennett and David Elliott,
+ 		//       4th edition, 1993, W.B.Saunders Company Ltd, London.
+ 		END = (pres_respiration - ppHe - pres_surface) * 9.985;
+ 		if( END < 0.0 || END > 245.5 ) END = 0.0;
+ 		char_O_END = (char)(END  + 0.5);
  	}
  	else																		// new in v.101
  	{
  		ppN2 = 0.0;                                                             // new in v.101
  		ppHe = 0.0;                                                             // new in v.101
- 		char_O_diluent = 0;
+ 		char_O_EAD = char_O_END = 0;
  	}
 
  	if(!char_I_step_is_1min)

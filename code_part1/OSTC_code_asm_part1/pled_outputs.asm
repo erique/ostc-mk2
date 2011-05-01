@@ -3059,92 +3059,68 @@ PLED_const_ppO2_value1a:
 	call	PLED_standard_color
 	return
 
+;=============================================================================
+; Display EAD/END computed in calc_hauptroutine_update_tissues() every 2sec.
+;
 PLED_show_end_ead_divemode:
-	WIN_LEFT	.95
-	WIN_TOP		.192
+	call		PLED_divemask_color     ; Set Color for Divemode mask
+
 	WIN_FONT	FT_SMALL
-	call		PLED_divemask_color	; Set Color for Divemode mask
-	lfsr	FSR2,letter
-	OUTPUTTEXTH	.299		; EAD:
-	call	word_processor
 	WIN_LEFT	.95
+	WIN_TOP		.192
+	lfsr	FSR2,letter
+	OUTPUTTEXTH	.299                    ; EAD:
+	call	word_processor
+
 	WIN_TOP		.216
 	lfsr	FSR2,letter
-	OUTPUTTEXTH	.298		; END:
+	OUTPUTTEXTH	.298                    ; END:
 	call	word_processor
-	call	PLED_standard_color
 
-	btfss	FLAG_const_ppO2_mode		; are we in ppO2 mode?
-	bra		PLED_show_end_ead_divemode2	; no, show OC EAD and END
-
-; We are in CCR mode...
-	btfss	is_bailout					; In bailout mode?
-	bra		PLED_show_end_ead_divemode3	; No, show CC EAD and END
-
-PLED_show_end_ead_divemode2:			; Show OC EAD and END
-; Show EAD:
+	call	PLED_standard_color         ; Back to white.
 	WIN_LEFT	.125
 	WIN_TOP		.192
+	lfsr	FSR2,letter
+	movff   char_O_EAD,lo
+	bsf     leftbind
+	output_8                            ; Print EAD w/o leading space.
+	STRCAT_PRINT    "m"
 
-; Show END:
-	WIN_LEFT	.125
 	WIN_TOP		.216
-	return
+	lfsr	FSR2,letter
+	movff   char_O_END,lo
+	output_8                            ; Print END w/o leading space.
+	bcf		leftbind
+	STRCAT_PRINT    "m"
 
-PLED_show_end_ead_divemode3:			; Show CC EAD, END and pO2[Diluent]
-; Show ppO2[Diluent]	
+	btfsc	is_bailout					; In bailout mode?
+	return                              ; Yes: done.
+
+	btfss   FLAG_const_ppO2_mode        ; In (true) CCR mode ?
+	return                              ; No: done.
+
+; Show ppO2[Diluent]
+
 	WIN_LEFT	.95
 	WIN_TOP		.168
 	call	PLED_divemask_color	; Set Color for Divemode mask
 	STRCPY_PRINT  "ppO2:"					; ppO2 of diluent
 	call	PLED_standard_color
 
-	movff		amb_pressure+0,xA+0
-	movff		amb_pressure+1,xA+1
-	movlw		d'10'
-	movwf		xB+0
-	clrf		xB+1
-	call		div16x16				; xC=p_amb/10
-	movff		xC+0,xA+0
-	movff		xC+1,xA+1
-	movff		char_I_O2_ratio,xB+0
-	clrf		xB+1
-	call		mult16x16				; char_I_O2_ratio * p_amb/10
-	movff		xC+0,lo
-	movff		xC+1,hi					; for output
-
 	WIN_LEFT	.130
 	WIN_TOP		.168
 	lfsr		FSR2,letter
 
-	movff		xC+0,sub_a+0
-	movff		xC+1,sub_a+1			; for compare
-	movlw		LOW	 d'10000'
-	movwf		sub_b+0
-	movlw		HIGH d'10000'			; ppO2 has mbar resolution...
-	movwf		sub_b+1
-	call		sub16					;  sub_c = sub_a - sub_b
-	movlw		'0'						
-	btfsc		neg_flag				; Display leading zero manually?
-	movwf		POSTINC2				; Yes!
-
+    movff       char_O_diluent_ppO2, lo
+    clrf        hi
 	bsf		leftbind
-	bsf		ignore_digit4
-	output_16dp	d'1'					; Show ppO2 w/o leading zero
-	bcf		ignore_digit4
+	output_16dp	d'3'					; Show ppO2 w/o leading zero
 	bcf		leftbind
 	STRCAT_PRINT  " "					;  Display ppO2[Diluent]
 
-; EAD and END: ToDo...
-; Show EAD:
-	WIN_LEFT	.125
-	WIN_TOP		.192
-
-; Show END:
-	WIN_LEFT	.125
-	WIN_TOP		.216
 	return
 
+;=============================================================================
 
 PLED_show_leading_tissue:
 	call		PLED_divemask_color	; Set Color for Divemode mask

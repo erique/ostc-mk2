@@ -243,15 +243,15 @@
     TCODE    .40,   .35,     "Mostr. TejContr"           ;175 Show Lead.Tiss.
     TCODE    .40,   .35,     "PriParadaSuperf"           ;176 Shallow stop 1st  (Reverse order of deco plans)
     TCODE    .40,   .35,     "Conmu. gas[min]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
-    TCODE    .40,   .35,     "Gas Fondo[l/mn]"           ;178 BottomGas[l/mn]   (Bottom gas usage, for volume estimation).
-    TCODE    .40,   .35,     "GasAscens[l/mn]"           ;179 AscentGas[l/mn]   (Ascent+Deco gas usage)
-    TCODE    .40,   .35,     "sin uso        "           ;180 not used
+    TCODE    .40,   .35,     "Gas Fondo[/min]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
+    TCODE    .40,   .35,     "GasAscens[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
+    TCODE    .40,   .35,     "TTS@tiempo[min]"           ;180 TTS @extra[min]   (@5 variant: compute TTS for extra time at current depth)
     TCODE    .40,   .35,     "sin uno        "           ;181 not used
     TCODE    .40,   .35,     "sin uso        "           ;182 not used
     TCODE    .40,   .35,     "sin uso        "           ;183 not used
     TCODE    .40,   .35,     "sin uso        "           ;184 not used
     TCODE    .40,   .35,     "sin uso        "           ;185 not used
-; End of function descriptor I
+; End of function descriptor II
 ;
     TCODE    .13,   .2,      "Func.Personaliz. II"       ;186 Custom Functions II
     TCODE    .20,   .95,     "Ver Licencia"              ;187 Show License

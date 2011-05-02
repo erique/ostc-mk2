@@ -244,15 +244,15 @@
     TCODE    .40,   .35,     "Leitgewebe anz "           ;175 Show Lead.Tiss.
     TCODE    .40,   .35,     "Flach.StoppOben"           ;176 Shallow stop 1st  (Reverse order of deco plans)
     TCODE    .40,   .35,     "Gaswechsel[min]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
-    TCODE    .40,   .35,     "BottomGas[l/mn]"           ;178 BottomGas[l/mn]   (Bottom gas usage, for volume estimation).
-    TCODE    .40,   .35,     "Sonst.Gas[l/mn]"           ;179 AscentGas[l/mn]   (Ascent+Deco gas usage)
-    TCODE    .40,   .35,     "nicht verwendet"           ;180 not used
+    TCODE    .40,   .35,     "BottomGas[/min]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
+    TCODE    .40,   .35,     "Sonst.Gas[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
+    TCODE    .40,   .35,     "TTS @ zeit[min]"           ;180 TTS @extra[min]   (@5 variant: compute TTS for extra time at current depth)
     TCODE    .40,   .35,     "nicht verwendet"           ;181 not used
     TCODE    .40,   .35,     "nicht verwendet"           ;182 not used
     TCODE    .40,   .35,     "nicht verwendet"           ;183 not used
     TCODE    .40,   .35,     "nicht verwendet"           ;184 not used
     TCODE    .40,   .35,     "nicht verwendet"           ;185 not used
-; End of function descriptor I
+; End of function descriptor II
 ;
     TCODE    .13,   .2,      "Custom Funktionen II"      ;186 Custom Functions II
     TCODE    .20,   .95,     "Lizenz anzeigen "          ;187 Show License

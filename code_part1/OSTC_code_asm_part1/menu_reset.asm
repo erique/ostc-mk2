@@ -175,7 +175,7 @@ cf_default_table1:
 	CF_DEFAULT    CF_DECI,      d'200', d'5',   0       ; CF56 Bottom gas usage (l/min or bar/min)
 
 	CF_DEFAULT    CF_DECI,      d'200', d'5',   0       ; CF57 Ascent/deco gas usage (l/min or bar/min)
-	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'10'   ; CF58 TTS for extra time at current depth [min]
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED

@@ -75,18 +75,18 @@ customview_second:
 	bra		customview_1sec_graphs      ; Update the leading tissue
 	dcfsnz	WREG,F
 	bra		customview_1sec_ead_end		; Show END and EAD in divemode
+	dcfsnz	WREG,F
+	bra		customview_1sec_@5          ; Show TTS for extra time.
 
 	; Menupos3=0, do nothing
 	return
 
 customview_1sec_average:
-	call	PLED_total_average_show2	; Update the figures only
-	return
+	goto	PLED_total_average_show2	; Update the figures only
 	
 customview_1sec_stopwatch:
 	bsf		menu3_active                ; Set Flag
-	call	PLED_stopwatch_show2        ; Update figures only
-	return
+	goto	PLED_stopwatch_show2        ; Update figures only
 
 customview_1sec_marker:                 ; Do nothing extra
 	bsf		menu3_active                ; Set Flag
@@ -102,12 +102,13 @@ customview_1sec_graphs:                 ; Do nothing extra
 
 	call	deco_calc_desaturation_time	; calculate desaturation time
 	movlb	b'00000001'						; select ram bank 1
-	call	PLED_tissue_saturation_graph
-	return
+	goto	PLED_tissue_saturation_graph
 
 customview_1sec_ead_end:
-	call	PLED_show_end_ead_divemode
-	return
+	goto	PLED_show_end_ead_divemode
+
+customview_1sec_@5:
+    goto    PLED_show_@5
 
 ;=============================================================================
 ; Do every-minute tasks for the custom view area
@@ -127,19 +128,20 @@ customview_minute:
 	dcfsnz	WREG,F
 	bra		customview_minute_graphs	; Update the graphs
 	dcfsnz	WREG,F
-	bra		customview_minute_ead_end	; Show END and EAD in divemode
+	bra		customview_minute_ead_end   ; Show END and EAD in divemode
+	dcfsnz	WREG,F
+	bra		customview_minute_@5        ; Show TTS for extra time.
 
 	; Menupos3=0, do nothing
 	return
 
 customview_minute_clock:
-	call	PLED_diveclock2             ; Update the clock
-	return
+	goto	PLED_diveclock2             ; Update the clock
 
 customview_minute_lead_tiss:
-	call	PLED_show_leading_tissue_2  ; Update the leading tissue
-	return
+	goto	PLED_show_leading_tissue_2  ; Update the leading tissue
 
+customview_minute_@5:                   ; Do nothing extra
 customview_minute_ead_end:              ; Do nothing extra
 customview_minute_marker:               ; Do nothing extra
 customview_minute_stopwatch:            ; Do nothing extra
@@ -148,7 +150,7 @@ customview_minute_graphs:               ; Do nothing extra
 	return
 
 ;=============================================================================
-; Yes, show next customview (and delete this flag)
+; Show next customview (and delete this flag)
 
 customview_toggle:
 	bcf		menu3_active	;=1: menu entry three in divemode menu is active		
@@ -158,10 +160,11 @@ customview_toggle:
 	bra		customview_toggle_exit			; Yes, ignore custom view in divemode completely
 
 	incf	menupos3,F			            ; Number of customview to show
-	movlw	d'7'							; Max number
+	movlw	d'8'							; Max number
 	cpfsgt	menupos3			            ; Max reached?
 	bra		customview_mask		            ; No, show
 	clrf	menupos3			            ; Reset to zero (Zero=no custom view)
+
 customview_mask:	
 	call	PLED_clear_customview_divemode
 	movff	menupos3,WREG                   ; Menupos3 holds number of customview function
@@ -179,6 +182,9 @@ customview_mask:
 	bra		customview_init_graphs		    ; Show the graphs
 	dcfsnz	WREG,F
 	bra		customview_init_ead_end		    ; Show END and EAD in divemode
+	dcfsnz	WREG,F
+	bra		customview_init_@5              ; Show TTS for extra time.
+    bcf     tts_extra_time                  ; Else, CLEAR computation of @5 request.
 
 customview_init_nocustomview:
 	bra		customview_toggle_exit	
@@ -222,7 +228,29 @@ customview_init_lead_tissue:			; Show leading tissue
 	bra		    customview_toggle_exit	
 
 customview_init_ead_end:
+	btfsc		no_deco_customviews		; no-deco-mode-flag = 1
+	bra			customview_toggle		; Yes, use next Customview!
+
 	call		PLED_show_end_ead_divemode
+	bra		    customview_toggle_exit	
+
+customview_init_@5:
+ 	GETCUSTOM8	d'58'					; Extra time to simulate
+ 	iorwf       WREG,F                  ; Null ?
+ 	bz          customview_toggle       ; Yes: use next Customview !
+
+	btfsc		no_deco_customviews		; no-deco-mode-flag = 1
+	bra			customview_toggle		; Yes, use next Customview!
+
+    clrf        WREG                    ; Reset extra TTS
+    movff       WREG,int_O_extra_ascenttime+0
+    movff       WREG,int_O_extra_ascenttime+1
+    
+    movlw       1
+    movwf       apnoe_mins              ; Start compute after next cycle.
+    bsf         tts_extra_time
+    call        PLED_show_@5            ; Show (wait)
+
 	bra		    customview_toggle_exit	
 
 customview_init_graphs:					; Show tissue graph

@@ -76,6 +76,7 @@
 // 2011/04/15: [jDG] Store low_depth in 32bits (w/o rounding), for a better stability.
 // 2011/04/25: [jDG] Added 1mn mode for CNS calculation, to allow it for decoplanning.
 // 2011/04/27: [jDG] Fixed char_O_gradient_factor calculation when model uses gradient-factor.
+// 2011/05/02: [jDG] Added @+5min variant.
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -126,6 +127,8 @@ static void backup_sim_pres_tissue(void);
 static void restore_sim_pres_tissue(void);
 static void sim_tissue(PARAMETER unsigned char period);
 static void sim_limit(PARAMETER float GF_current);
+static void sim_extra_time(void);
+
 static void calc_gradient_factor(void);
 static void calc_wo_deco_step_1_min(void);
 
@@ -1224,6 +1227,10 @@ static void clear_tissue(void)
 // | +------< not finished
 // +--------< finish
 //
+// Added steps 6,5 for @+5 calculation:
+//      6 = ascent to first stop (same as 2), except continue to 7
+//      7 = same as 1, except loop to 7.
+//
 static void calc_hauptroutine(void)
 {
 	static unsigned char backup_gas_used  = 0;
@@ -1268,12 +1275,14 @@ static void calc_hauptroutine(void)
         break;
 
     case 0: //---- bottom time -----------------------------------------------
+    default:
     	calc_nullzeit();
     	check_ndl();
    	    char_O_deco_status = 2; // calc ascent next time.
     	break;
 
     case 2: //---- Simulate ascent to first stop -----------------------------
+    case 6: // @+5min variation
         // Check proposed gas at begin of ascent simulation
         sim_dive_mins = int_I_divemins;         // Init current time.
 
@@ -1286,15 +1295,17 @@ static void calc_hauptroutine(void)
 
     	sim_ascent_to_first_stop();
 
-        char_O_deco_status = 1;     // Calc stops next time (deco or gas switch).
+        // Calc stops next time (deco or gas switch).
+        char_O_deco_status = 1 | ( char_O_deco_status & 4 );
     	break;
 
     case 1: //---- Simulate stops --------------------------------------------
+    case 5: // @+5 variation.
     	calc_hauptroutine_calc_deco();
 
         // If simulation is finished, restore the GF low reference, so that
         // next ascent simulation is done from the current depth:
-    	if( char_O_deco_status == 0 )
+    	if( (char_O_deco_status & 3) == 0 )
     	{
             sim_gas_last_used  = backup_gas_used;
             sim_gas_last_depth = backup_gas_depth;
@@ -1494,9 +1505,11 @@ void calc_hauptroutine_calc_deco(void)
                 if( temp_deco <= pres_surface )
                 {
 Surface:
-    		        copy_deco_table();
-        	        calc_ascenttime();
-    		        char_O_deco_status = 0; // calc nullzeit next time.
+                    if( char_O_deco_status == 1 )  // Don't in @+5min variant.
+                        copy_deco_table();      
+
+                    calc_ascenttime();
+                    char_O_deco_status = 0;     // calc nullzeit next time.
                     char_O_deco_last_stop = 0;  // Surface reached.
     		        return;
                 }
@@ -1513,7 +1526,6 @@ Surface:
 	}
 
 	// Surface not reached, need more stops...
-    char_O_deco_status = 1; // calc more stops next time.
     char_O_deco_last_stop = temp_depth_limit;   // Reached depth.
 }
 
@@ -1524,12 +1536,18 @@ Surface:
 //       there is no need to break on more that 16 iterations
 //       (or we are already in deep shit).
 //
+// if char_O_deco_status indicate @+5 variant, add extra time at current depth,
+// before ascent.
 void sim_ascent_to_first_stop(void)
 {
     update_startvalues();
     clear_deco_table();
 
    	temp_deco = pres_respiration;       // Starts from current real depth.
+
+    // Are we doing the special @+5min variation ?
+    if(char_O_deco_status & 4)
+        sim_extra_time();
 
     // Do we have a gas switch going on ?
     if( sim_gas_delay > sim_dive_mins )
@@ -1571,6 +1589,19 @@ void sim_ascent_to_first_stop(void)
         sim_alveolar_presures();        // temp_deco --> ppN2/ppHe
 		sim_tissue(1);                  // and update tissues for 1 min.
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Simulation extra time at the current depth.
+//
+// This routine is used for @+5min feature.
+void sim_extra_time(void)
+{
+    overlay unsigned char extra = read_custom_function(58);
+    do {
+        sim_dive_mins++;                // Advance simulated time by 1 minute.
+		sim_tissue(1);                  // and update tissues for 1 min.
+    } while( --extra != 0 );
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1713,20 +1744,30 @@ void restore_sim_pres_tissue(void)
 //////////////////////////////////////////////////////////////////////////////
 // calc_ascenttime
 //
+// Summup ascent from bottom to surface, at 1 bar/min, 1min for last 3 meters,
+// and all stops.
+//
+// Result in int_O_ascenttime, or int_O_extra_ascenttime if in @+5min variant.
 static void calc_ascenttime(void)
 {
-    if (pres_respiration > pres_surface)
+    if( pres_respiration > pres_surface )
     {
         overlay unsigned char x;
+        overlay unsigned short sum;
 
         // + 0.7 to count 1 minute ascent time from 3 metre to surface
         overlay float ascent = pres_respiration - pres_surface + 0.7; 
         if (ascent < 0.0)
             ascent = 0.0;
-        int_O_ascenttime = (unsigned short)(ascent + 0.99);
+        sum = (unsigned short)(ascent + 0.99);
 
         for(x=0; x<32 && internal_deco_depth[x]; x++)
-            int_O_ascenttime += (unsigned short)internal_deco_time[x];
+            sum += (unsigned short)internal_deco_time[x];
+
+        if( char_O_deco_status == 1 )
+            int_O_ascenttime = sum;
+        else
+            int_O_extra_ascenttime = sum;
     }
     else
         int_O_ascenttime = 0;

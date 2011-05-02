@@ -497,21 +497,49 @@ calc_deko_divemode2:
 	call	word_processor
 
 calc_deko_divemode4:
+    movff   char_O_deco_status,WREG     ; Is a compute cycle finished ?
+    iorwf   WREG,F
+    btfss   STATUS,Z
+    return                              ; Return is status <> 0
 
+    ; Check if deco stops are necessary ?
 	movff	char_O_first_deco_depth,wait_temp	; copy ceiling to temp register
 	tstfsz	wait_temp							; Ceiling<0m?
 	bra		calc_deko_divemode3					; Yes!
 
-	btfsc	dekostop_active
-	call	PLED_display_ndl_mask			; Clear deco data, display nostop time
-	bcf		dekostop_active					; clear flag
+	btfsc	dekostop_active             ; Already in nodeco mode ?
+	call	PLED_display_ndl_mask       ; Clear deco data, display nostop time
+	bcf		dekostop_active             ; clear flag
 
-	clrf	decodata+0						; for profile memory
-	movff	char_O_nullzeit,decodata+1		; nostop time
+	clrf	decodata+0                  ; for profile memory
+	movff	char_O_nullzeit,decodata+1  ; nostop time
 	
-	call	PLED_display_ndl				; display no deco limit
+	call	PLED_display_ndl            ; display no deco limit
 	return
 
+calc_deko_divemode3:
+	btfss	dekostop_active             ; Already in deco mode ?
+	call	PLED_display_deko_mask      ; clear nostop time, display decodata
+	bsf		dekostop_active             ; Set flag
+
+	movff	char_O_first_deco_depth,decodata+0	; ceiling
+	movff	char_O_first_deco_time,decodata+1	; length of first stop in minues
+
+	call	PLED_display_deko           ; display decodata
+
+    ; Check if extra cycles are needed to compute @5 variant:
+    btfss   tts_extra_time              ; Is @5 displayed ?
+	return                              ; No: don't compute it.
+	
+	dcfsnz  apnoe_mins                  ; Reached count-down ?
+	return                              ; No: don't compute yet.
+	
+	movlw   .6
+	movff   WREG,char_O_deco_status     ; Stole next cycles for @5 variant.
+    
+    movlw   .2                          ; Restart countdown.
+    movwf   apnoe_mins
+    return
 ;-----------------------------------------------------------------------------
 
 divemode_prepare_flags_for_deco:
@@ -529,16 +557,7 @@ divemode_prepare_flags_for_deco:
 	movff   divemins+1,int_I_divemins+1
 	goto	restart_set_modes_and_flags			; Sets decomode (char_I_deco_model) and flags (again)
 
-calc_deko_divemode3:
-	btfss	dekostop_active
-	call	PLED_display_deko_mask              ; clear nostop time, display decodata
-	bsf		dekostop_active						; Set flag
-
-	movff	char_O_first_deco_depth,decodata+0	; ceiling
-	movff	char_O_first_deco_time,decodata+1	; length of first stop in minues
-
-	call	PLED_display_deko					; display decodata
-	return						
+;-----------------------------------------------------------------------------
 
 store_dive_data:						; CF20 seconds gone
 	bcf		store_sample				; update only any CF20 seconds
@@ -1685,8 +1704,9 @@ diveloop_boot:
 	setf	last_diluent				; to be displayed after first calculation (range: 0 to 100 [%])
 	bcf		dekostop_active	
 	bcf		is_bailout					;=1: CC mode, but bailout active!		
-	bcf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
-	
+	bcf		better_gas_available        ;=1: A better gas is available and a gas change is advised in divemode
+    bcf     tts_extra_time              ;=1: Compute TTS if extra time spent at current depth
+
 	call	get_free_EEPROM_location	; get last position in external EEPROM, may be up to 2 secs!
 
     btfss   simulatormode_active

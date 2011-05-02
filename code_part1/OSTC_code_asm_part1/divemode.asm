@@ -292,6 +292,7 @@ calc_deko_divemode:
 divemode_check_decogases:					; CALLed from Simulator, too
 
 	clrf    EEADRH                      ; Make sure to select eeprom bank 0
+	
 	read_int_eeprom		d'7'			; Read He ratio
 	movff	EEDATA,char_I_deco_He_ratio+0	; And copy into hold register
 	read_int_eeprom		d'6'			; Read O2 ratio
@@ -324,7 +325,7 @@ divemode_check_decogases:					; CALLed from Simulator, too
 
 	read_int_eeprom		d'19'			; Read He ratio
 	movff	EEDATA,char_I_deco_He_ratio+3	; And copy into hold register
-	read_int_eeprom		d'17'			; Read O2 ratio
+	read_int_eeprom		d'18'			; Read O2 ratio
 	movff	char_I_deco_He_ratio+3, wait_temp			; copy into bank1 register
 	bsf		STATUS,C					; 
 	movlw	d'100'						; 100%
@@ -1765,8 +1766,8 @@ set_first_gas:
 	movlw	d'100'						; 100%
 	subfwb	wait_temp,W					; minus He
 	bsf		STATUS,C					; Borrow bit
-	subfwb	EEDATA,F					; minus O2
-	movff	EEDATA, char_I_N2_ratio		; = N2!
+	subfwb	EEDATA,W					; minus O2
+	movff	WREG, char_I_N2_ratio		; = N2!
 
 ; Configure gaslist_active flag register
 	read_int_eeprom	d'27'

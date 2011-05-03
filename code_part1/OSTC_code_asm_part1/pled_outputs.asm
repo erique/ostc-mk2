@@ -3127,32 +3127,37 @@ PLED_show_@5:
 	call		PLED_divemask_color     ; Set Color for Divemode mask
 
 	WIN_FONT    FT_SMALL
-	WIN_LEFT	.95
-	WIN_TOP		.216
+    WIN_LEFT    .160-.63                ; 9 chars aligned right.
+    WIN_TOP     .170
+    STRCPY_PRINT "ExtraTime"            ; Title
+
+    WIN_LEFT	.102
+    WIN_TOP     .194
     STRCPY      "@"
 	GETCUSTOM8  d'58'
 	movwf       lo
 	bsf         leftbind
 	output_8
 	bcf         leftbind
-	STRCAT_PRINT "': "
+	STRCAT_PRINT "':"
+    
+	WIN_LEFT    .102+7*5                ; "@10':" is 5 chars long
+	call        PLED_standard_color 
 	
-	WIN_LEFT	.95+7*5
-	call        PLED_standard_color
 	lfsr        FSR2,letter
 	movff       int_O_extra_ascenttime+0,lo
-	movff       int_O_extra_ascenttime+1,hi
-	movf        lo,W
+    movff       int_O_extra_ascenttime+1,hi
+    movf        lo,W
 	iorwf       hi,W
 	bz          PLED_show_@5_wait
 	bsf         leftbind
 	output_16
 	bcf         leftbind
-	STRCAT_PRINT "'   "         ; From "xxx'" to "1'  " we need 2 trailing spaces
+	STRCAT_PRINT "'  "                  ; From "999'" to "1'  " we need 2 trailing spaces
 	return
 
 PLED_show_@5_wait:
-    STRCPY_PRINT "xxx'"
+    STRCPY_PRINT "xx' "
     return
 
 ;=============================================================================

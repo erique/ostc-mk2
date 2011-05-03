@@ -456,6 +456,11 @@ calc_deko_divemode2:
 	return
 
  	ostc_debug	'B'		; Sends debug-information to screen if debugmode active
+    ; Send nes state to screen, if debugmode active	
+	movff   char_O_deco_status,WREG ; Status before call
+	addlw   '0'                     ; Convert to ascii char
+	call    ostc_debug1             ; and send.
+
 	call	divemode_prepare_flags_for_deco
 	clrf	WREG
 	movff	WREG,char_I_step_is_1min    ; Force 2 second deco mode
@@ -531,7 +536,7 @@ calc_deko_divemode3:
     btfss   tts_extra_time              ; Is @5 displayed ?
 	return                              ; No: don't compute it.
 	
-	dcfsnz  apnoe_mins                  ; Reached count-down ?
+	decfsz  apnoe_mins                  ; Reached count-down ?
 	return                              ; No: don't compute yet.
 	
 	movlw   .6
@@ -540,6 +545,7 @@ calc_deko_divemode3:
     movlw   .2                          ; Restart countdown.
     movwf   apnoe_mins
     return
+    
 ;-----------------------------------------------------------------------------
 
 divemode_prepare_flags_for_deco:

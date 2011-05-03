@@ -3127,11 +3127,13 @@ PLED_show_@5:
 	call		PLED_divemask_color     ; Set Color for Divemode mask
 
 	WIN_FONT    FT_SMALL
-    WIN_LEFT    .160-.63                ; 9 chars aligned right.
+    WIN_LEFT    .160-.70                ; 10 chars aligned right.
     WIN_TOP     .170
-    STRCPY_PRINT "ExtraTime"            ; Title
+    lfsr        FSR2,letter
+    OUTPUTTEXTH .305                    ; "TTS in ..."
+    call        word_processor
 
-    WIN_LEFT	.102
+    WIN_LEFT	.97
     WIN_TOP     .194
     STRCPY      "@"
 	GETCUSTOM8  d'58'
@@ -3141,7 +3143,7 @@ PLED_show_@5:
 	bcf         leftbind
 	STRCAT_PRINT "':"
     
-	WIN_LEFT    .102+7*5                ; "@10':" is 5 chars long
+	WIN_LEFT    .97+7*5                ; "@10':" is 5 chars long
 	call        PLED_standard_color 
 	
 	lfsr        FSR2,letter

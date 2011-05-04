@@ -246,7 +246,7 @@
     TCODE    .40,   .35,     "Gaswechsel[min]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
     TCODE    .40,   .35,     "BottomGas[/min]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
     TCODE    .40,   .35,     "Sonst.Gas[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
-    TCODE    .40,   .35,     "TTS @ Zeit[min]"           ;180 Escape TTS[min]   (@5 variant: compute TTS for extra time at current depth)
+    TCODE    .40,   .35,     "TTS @ Zeit[min]"           ;180 Future TTS[min]   (@5 variant: compute TTS for extra time at current depth)
     TCODE    .40,   .35,     "nicht verwendet"           ;181 not used
     TCODE    .40,   .35,     "nicht verwendet"           ;182 not used
     TCODE    .40,   .35,     "nicht verwendet"           ;183 not used
@@ -391,5 +391,5 @@
 	TCODE	 .35,	.130,	 "Bitte Warten!"			 ;303 Please wait!
 	TCODE	 .40,	.130,	 "Abgebrochen!"				 ;304 Aborted
 ;@5 variant
-    TCODE    .0,    .0,      "TTS @+Min."                ;305 Escape TTS            (=10 chars. Title for @5 customview).
+    TCODE    .0,    .0,      "TTS @+Min."                ;305 Future TTS            (=10 chars. Title for @5 customview).
 ;=============================================================================

@@ -78,6 +78,7 @@ VAR_UINT  (int_O_gtissue_limit);
 VAR_UINT  (int_O_gtissue_press);
 VAR_UINT  (int_O_desaturation_time);       // 
 VAR_UINT  (int_O_ascenttime);              // TTS (in minutes)
+VAR_UINT  (int_O_extra_ascenttime);        // TTS for @+5min variant (in minutes)
 
 VAR_UCHAR (char_O_nullzeit);               // 
 VAR_UCHAR (char_O_deco_status);            // Deko state-machine state.

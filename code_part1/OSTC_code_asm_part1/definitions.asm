@@ -387,11 +387,11 @@ desaturation_time_buffer res 2	; buffer for desat time
 #DEFINE win_flip_screen     win_flags,0 ; 180° rotation of the OLED screen.
 
 ; Flags
-#DEFINE	FLAG_scale			flag1,0	; Wordprocessor
-#DEFINE	FLAG_truncated		flag1,1	; Wordprocessor
+#DEFINE	tts_extra_time		flag1,0	; unused
+#DEFINE	FLAG_2      		flag1,1	; unused
 #DEFINE	pre_zero_flag		flag1,2	; leading zeros
 #DEFINE neg_flag			flag1,3	; e.g. Sub_16 (sub_c = sub_a - sub_b)
-#DEFINE	FLAG_row_prime		flag1,4	; Wordproceesor
+#DEFINE	FLAG_3      		flag1,4	; unused
 #DEFINE leading_zeros		flag1,5	; display leading zeros?
 #DEFINE	show_last3			flag1,6	; show only three figures
 #DEFINE	leftbind			flag1,7	; leftbinded output
@@ -427,7 +427,7 @@ desaturation_time_buffer res 2	; buffer for desat time
 
 #DEfINE	eeprom_overflow		flag5,0	; EEPROM overflowed (>32KB)
 #DEFINE	eeprom_blockwrite	flag5,1	; EEPROM blockwrite active
-#DEFINE neg_flag_xdT		flag5,2	; xdT negative (2nd order temperature calculation)
+#DEFINE Flag_4      		flag5,2	; unused
 #DEFINE	low_battery_state	flag5,3	;=1 if battery low
 #DEFINE	DP_done				flag5,4	; valconv
 #DEFINE	DP_done2			flag5,5	; valconv
@@ -513,7 +513,7 @@ desaturation_time_buffer res 2	; buffer for desat time
 #DEFINE	display_set_simulator	flag14,4	;=1: Show Divemode simulator menu
 #DEFINE	displaytext_high		flag14,5	;=1: Show/Use Texts 255-511 in Texttable
 #DEFINE	better_gas_available	flag14,6	;=1: A better gas is available and a gas change is advised in divemode
-#DEFINE	displaytext_invert		flag14,7	;=1: inverts word prozessor output
+#DEFINE	Flag_5          		flag14,7	;=1: unused
 
 #DEFINE	restore_deco_data		flag15,0	;=1: Restore Decodata after the dive from 0x380 buffer
 #DEFINE	uart_store_tissue_data	flag15,1	;=1: Store tissue data for next simualted dive!

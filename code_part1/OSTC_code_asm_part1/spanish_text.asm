@@ -243,15 +243,15 @@
     TCODE    .40,   .35,     "Mostr. TejContr"           ;175 Show Lead.Tiss.
     TCODE    .40,   .35,     "PriParadaSuperf"           ;176 Shallow stop 1st  (Reverse order of deco plans)
     TCODE    .40,   .35,     "Conmu. gas[min]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
-    TCODE    .40,   .35,     "Gas Fondo[l/mn]"           ;178 BottomGas[l/mn]   (Bottom gas usage, for volume estimation).
-    TCODE    .40,   .35,     "GasAscens[l/mn]"           ;179 AscentGas[l/mn]   (Ascent+Deco gas usage)
-    TCODE    .40,   .35,     "sin uso        "           ;180 not used
+    TCODE    .40,   .35,     "Gas Fondo[/min]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
+    TCODE    .40,   .35,     "GasAscens[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
+    TCODE    .40,   .35,     "EscaparTTS[min]"           ;180 Escape TTS[min]   (@5 variant: compute TTS for extra time at current depth)
     TCODE    .40,   .35,     "sin uno        "           ;181 not used
     TCODE    .40,   .35,     "sin uso        "           ;182 not used
     TCODE    .40,   .35,     "sin uso        "           ;183 not used
     TCODE    .40,   .35,     "sin uso        "           ;184 not used
     TCODE    .40,   .35,     "sin uso        "           ;185 not used
-; End of function descriptor I
+; End of function descriptor II
 ;
     TCODE    .13,   .2,      "Func.Personaliz. II"       ;186 Custom Functions II
     TCODE    .20,   .95,     "Ver Licencia"              ;187 Show License
@@ -385,7 +385,10 @@
     TCODE    .0,    .0,      "EAD:"                      ;299 EAD:                  (equivalent air depth of a gas).
 	TCODE	 .100,	.125,	 "¿Activar?"				 ;300 Active?               (Enable/Disable Gas underwater)
 	TCODE    .0,    .2,      "Uso Gas OCR:"              ;301 OCR Gas Usage:        (Planned gas consumtion by tank).
+; 115k Bootloader support:
 	TCODE	 .45,	.100,	 "Bootloader"				 ;302 Bootloader
 	TCODE	 .40,	.130,	 "Please wait!"				 ;303 Please wait!
 	TCODE	 .50,	.130,	 "Aborted!"					 ;304 Aborted
+;@5 variant
+    TCODE    .0,    .0,      "EscaparTTS"                ;305 Escape TTS            (=10 chars. Title for @5 customview).
 ;=============================================================================

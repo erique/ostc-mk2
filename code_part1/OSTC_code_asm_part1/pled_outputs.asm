@@ -3121,6 +3121,48 @@ PLED_show_end_ead_divemode:
 	return
 
 ;=============================================================================
+; Display TTS after extra time at the same depth.
+;
+PLED_show_@5:
+	call		PLED_divemask_color     ; Set Color for Divemode mask
+
+	WIN_FONT    FT_SMALL
+    WIN_LEFT    .160-.70                ; 10 chars aligned right.
+    WIN_TOP     .170
+    lfsr        FSR2,letter
+    OUTPUTTEXTH .305                    ; "TTS in ..."
+    call        word_processor
+
+    WIN_LEFT	.97
+    WIN_TOP     .194
+    STRCPY      "@"
+	GETCUSTOM8  d'58'
+	movwf       lo
+	bsf         leftbind
+	output_8
+	bcf         leftbind
+	STRCAT_PRINT "':"
+    
+	WIN_LEFT    .97+7*5                ; "@10':" is 5 chars long
+	call        PLED_standard_color 
+	
+	lfsr        FSR2,letter
+	movff       int_O_extra_ascenttime+0,lo
+    movff       int_O_extra_ascenttime+1,hi
+    movf        lo,W
+	iorwf       hi,W
+	bz          PLED_show_@5_wait
+	bsf         leftbind
+	output_16
+	bcf         leftbind
+	STRCAT_PRINT "'  "                  ; From "999'" to "1'  " we need 2 trailing spaces
+	return
+
+PLED_show_@5_wait:
+    STRCPY_PRINT "xx' "
+    return
+
+;=============================================================================
 
 PLED_show_leading_tissue:
 	call		PLED_divemask_color	; Set Color for Divemode mask

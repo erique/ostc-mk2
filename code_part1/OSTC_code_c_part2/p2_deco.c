@@ -105,7 +105,9 @@
 #include "shared_definitions.h"
 
 // Water vapour partial pressure in the lumb.
-#define ppWater 0.0627
+#define ppWater     0.0627
+#define METER_TO_BAR   0.09985
+#define BAR_TO_METER   10.0150      // (1.0/METER_TO_BAR)
 
 // *************************
 // ** P R O T O T Y P E S **
@@ -684,7 +686,7 @@ static unsigned char calc_nextdecodepth(void)
 {
     //--- Max ascent speed ---------------------------------------------------
     // Recompute leading gas limit, at current depth:
-    overlay float depth = (temp_deco - pres_surface) / 0.09985;
+    overlay float depth = (temp_deco - pres_surface) * BAR_TO_METER;
 
     // At most, ascent 1 minute, at 10m/min == 10.0 m.
     overlay float min_depth = (depth > 10.0) ? (depth - 10.0) : 0.0;
@@ -706,7 +708,7 @@ static unsigned char calc_nextdecodepth(void)
         if( sim_lead_tissue_limit > pres_surface )
         {
             // Compute tolerated depth, for the leading tissue [metre]:
-            overlay float depth_tol = (sim_lead_tissue_limit - pres_surface) / 0.09985;
+            overlay float depth_tol = (sim_lead_tissue_limit - pres_surface) * BAR_TO_METER;
 
             // Deepest stop, in multiples of 3 metres.
             overlay unsigned char first_stop = 3 * (short)(0.99999 + depth_tol * 0.33333 );
@@ -725,7 +727,7 @@ static unsigned char calc_nextdecodepth(void)
             {
                 // Extra testing code to make sure the first_stop formula
                 // and rounding provides correct depth:
-                overlay float pres_stop =  first_stop * 0.09985            // Meters to bar
+                overlay float pres_stop =  first_stop * METER_TO_BAR
         	                  + pres_surface;
 
                 // Keep GF_low until a first stop depth is found:
@@ -767,7 +769,7 @@ static unsigned char calc_nextdecodepth(void)
                 else
                     next_stop = first_stop - 3;             // Index of next (upper) stop.
 
-        	    pres_stop =  next_stop * 0.09985            // Meters to bar
+        	    pres_stop =  next_stop * METER_TO_BAR
         	              + pres_surface;
 
                 // Keep GF_low until a first stop depth is found:
@@ -806,7 +808,7 @@ static unsigned char calc_nextdecodepth(void)
 		pres_gradient = sim_lead_tissue_limit - pres_surface;
 		if (pres_gradient >= 0)
  		{
- 			pres_gradient /= 0.29955; 	                            // Bar --> stop number;
+ 			pres_gradient *= BAR_TO_METER/3;                        // Bar --> stop number;
  			temp_depth_limit = 3 * (short) (pres_gradient + 0.99);  // --> metre : depth for deco
             need_stop = 1;                                          // Hit.
 
@@ -988,7 +990,7 @@ static void gas_switch_find_current(void)
     if( sim_gas_delay <= sim_dive_mins)
     {
         // Compute current depth:
-        overlay unsigned char depth = (unsigned char)((pres_respiration - pres_surface) / 0.09985);
+        overlay unsigned char depth = (unsigned char)((pres_respiration - pres_surface) * BAR_TO_METER);
         assert( depth < 130 );
 
         // And if I'm above the last decostop (with the 3m margin) ?
@@ -1376,7 +1378,7 @@ void calc_hauptroutine_data_input(void)
     }
 
     const_ppO2 = char_I_const_ppO2 * 0.01;
-    deco_ppO2_change = char_I_deco_ppO2_change / 99.85 
+    deco_ppO2_change = char_I_deco_ppO2_change * METER_TO_BAR
                      + pres_surface
                      + float_deco_distance;
     deco_ppO2 = char_I_deco_ppO2 * 0.01;
@@ -1421,22 +1423,22 @@ void calc_hauptroutine_update_tissues(void)
  		//       ppN2 = 79% * (P_EAD - ppWater)
  		//       EAD = (P_EAD - Psurface) * 10
  		//   ie: EAD = (ppN2 / 0.7902 + ppWater -Psurface) * 10
- 		EAD = (ppN2 / 0.7902 + ppWater - pres_surface) * 9.985;
+ 		EAD = (ppN2 / 0.7902 + ppWater - pres_surface) * BAR_TO_METER;
  		if( EAD < 0.0 || EAD > 245.5 ) EAD = 0.0;
- 		char_O_EAD = (char)(EAD + 0.5);
+ 		char_O_EAD = (unsigned char)(EAD + 0.5);
 
  		// END : Equivalent Narcotic Dive.
  		//       Here we count O2 as narcotic too. Hence everything but helium (has a narcosis factor of
  		//       0.23 btw). Hence the formula becomes:
  		//       END * BarPerMeter * (1.0 - 0.0) - ppWater + Psurface == Pambient - ppHe - ppWater
- 		//  ie:  END = (Pambient - ppHe - Psurface) * 9.985
+ 		//  ie:  END = (Pambient - ppHe - Psurface) * BAR_TO_METER
  		//
  		// Source cited:
  		//       The Physiology and Medicine of Diving by Peter Bennett and David Elliott,
  		//       4th edition, 1993, W.B.Saunders Company Ltd, London.
- 		END = (pres_respiration - ppHe - pres_surface) * 9.985;
+ 		END = (pres_respiration - ppHe - pres_surface) * BAR_TO_METER;
  		if( END < 0.0 || END > 245.5 ) END = 0.0;
- 		char_O_END = (char)(END  + 0.5);
+ 		char_O_END = (unsigned char)(END  + 0.5);
  	}
  	else																		// new in v.101
  	{
@@ -1492,14 +1494,14 @@ void calc_hauptroutine_calc_deco(void)
                     goto Surface;
 
                 //---- We hit a stop at temp_depth_limit ---------------------
-                temp_deco = temp_depth_limit * 0.09985      // Convert to relative bar,
+                temp_deco = temp_depth_limit * METER_TO_BAR // Convert to relative bar,
 	                      + pres_surface;                   // To absolute.
                 update_deco_table();                        // Adds a one minute stops.
             }
             else
             {
                 //---- No stop -----------------------------------------------
-                temp_deco -= 0.9985;                        // Ascend 10m, no wait.
+                temp_deco -= (10*METER_TO_BAR);             // Ascend 10m, no wait.
 
                 //---- Finish computations once surface is reached -----------
                 if( temp_deco <= pres_surface )
@@ -1557,7 +1559,7 @@ void sim_ascent_to_first_stop(void)
  	for(;;)
   	{
         // Try ascending 1 full minute.
-	    temp_deco -= 0.9985;        // 1 min, at 10m/min. ~ 1bar.
+	    temp_deco -= 10*METER_TO_BAR;   // 1 min, at 10m/min. ~ 1bar.
 
         // Compute sim_lead_tissue_limit at GF_low (deepest stop).
         sim_limit(GF_low);
@@ -1565,8 +1567,8 @@ void sim_ascent_to_first_stop(void)
         // Did we reach deepest remaining stop ?
         if( temp_deco < sim_lead_tissue_limit )
         {
-            temp_deco += 0.9985;        // Restore last correct depth,
-            break;                      // End fast ascent.
+            temp_deco += 10*METER_TO_BAR;   // Restore last correct depth,
+            break;                          // End fast ascent.
         }
 
         // Did we reach surface ?
@@ -1577,11 +1579,11 @@ void sim_ascent_to_first_stop(void)
         }
 
         // Check for gas change below new depth ?
-        temp_depth_limit = (temp_deco - pres_surface) / 0.09985;
+        temp_depth_limit = (temp_deco - pres_surface) * BAR_TO_METER;
 
         if( gas_switch_deepest() )
         {
-            temp_deco = temp_depth_limit * 0.09985 + pres_surface;
+            temp_deco = temp_depth_limit * METER_TO_BAR + pres_surface;
             break;
         }
 
@@ -1989,7 +1991,7 @@ static void calc_gradient_factor(void)
 			rgf = GF_high;
         else
         {
-            overlay float temp1 = low_depth * 0.09985;
+            overlay float temp1 = low_depth * METER_TO_BAR;
             overlay float temp2 = pres_respiration - pres_surface;
 
             if (temp2 <= 0)

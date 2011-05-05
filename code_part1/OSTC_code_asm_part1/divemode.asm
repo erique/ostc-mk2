@@ -1715,7 +1715,7 @@ diveloop_boot:
 
 	call	get_free_EEPROM_location	; get last position in external EEPROM, may be up to 2 secs!
 
-    btfss   simulatormode_active
+    btfsc   simulatormode_active
     bra     diveloop_boot_1
     ; Normal mode = Surface pressure is the pressure 30mn before dive.
 	movff	last_surfpressure_30min+0,int_I_pres_surface+0	; LOW copy surfacepressure to deco routine

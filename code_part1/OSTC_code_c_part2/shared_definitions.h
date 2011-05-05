@@ -135,8 +135,6 @@ VAR_UCHAR (char_I_GF_High_percentage);     // new in v.102
 VAR_UCHAR (char_I_GF_Low_percentage);      // new in v.102
 VAR_UCHAR (char_I_deco_distance);          // 
 VAR_UCHAR (char_I_const_ppO2);             // new in v.101
-VAR_UCHAR (char_I_deco_ppO2_change);       // new in v.101
-VAR_UCHAR (char_I_deco_ppO2);              // new in v.101
 VAR_UCHAR (char_I_depth_last_deco);        // new in v.101 unit: [m]
 VAR_UCHAR (char_I_deco_model);             // new in v.102. 0 == ZH-L16, 1 = ZH-L16-GF (Grandiant facttor)
 VAR_UCHAR (char_I_bottom_depth);           // Bottom depth for planning (used in gas volume evaluation).

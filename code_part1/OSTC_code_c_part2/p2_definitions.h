@@ -33,7 +33,7 @@
 #define	DBG_C_SURF	0x0040
 #define	DBG_HEwoHE 	0x0080
 
-#define	DBG_C_DPPO2	0x0100
+// #define	DBG_UNUSED	0x0100
 #define	DBG_C_DGAS 	0x0200
 #define	DBG_C_DIST	0x0400
 #define	DBG_C_LAST	0x0800
@@ -46,7 +46,7 @@
 #define	DBS_mode	0x0001
 #define	DBS_ppO2	0x0002
 #define	DBS_HE_sat	0x0004
-#define	DBS_ppO2chg 0x0008
+// #define	DBS_UNUSED  0x0008
                     
 #define	DBS_SAT2l	0x0010
 #define	DBS_SAT2h	0x0020

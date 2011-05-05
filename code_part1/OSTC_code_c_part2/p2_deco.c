@@ -190,8 +190,6 @@ static float  			var_He_e;       // Exposition, for current He tissue.
 
 static float            pres_diluent;               // new in v.101
 static float            const_ppO2;                 // new in v.101
-static float            deco_ppO2_change;           // new in v.101
-static float            deco_ppO2;                  // new in v.101
 
 static unsigned char    sim_gas_last_depth;             // Depth of last used gas, to detected a gas switch. 
 static unsigned char    sim_gas_last_used;              // Number of last used gas, to detected a gas switch. 
@@ -239,8 +237,6 @@ static float			DBG_pres_surface;		// new in v.108
 static float			DBG_GF_low;				// new in v.108
 static float			DBG_GF_high;			// new in v.108
 static float			DBG_const_ppO2;			// new in v.108
-static float			DBG_deco_ppO2_change;	// new in v.108
-static float			DBG_deco_ppO2;			// new in v.108
 static float			DBG_float_saturation_multiplier;	// new in v.108
 static float			DBG_float_desaturation_multiplier;	// new in v.108
 static float			DBG_float_deco_distance;			// new in v.108
@@ -320,8 +316,6 @@ static void create_dbs_set_dbg_and_ndl20mtr(void)
 	DBG_GF_low = GF_low;
 	DBG_GF_high = GF_high;
 	DBG_const_ppO2 = const_ppO2;
-	DBG_deco_ppO2_change = deco_ppO2_change;
-	DBG_deco_ppO2 = deco_ppO2;
 	DBG_deco_N2_ratio = char_I_deco_N2_ratio[0];
 	DBG_deco_He_ratio = char_I_deco_He_ratio[0];
 	DBG_deco_gas_change = deco_gas_change[0];
@@ -337,8 +331,6 @@ static void create_dbs_set_dbg_and_ndl20mtr(void)
 	for(i = 16; i < 32; i++)
 		if(pres_tissue[i])
 			int_O_DBS_bitfield |= DBS_HE_sat;
-	if(deco_ppO2_change)
-		int_O_DBS_bitfield |= DBS_ppO2chg;
 	if(float_saturation_multiplier < 0.99)
 		int_O_DBS_bitfield |= DBS_SAT2l;
 	if(float_saturation_multiplier > 1.3)
@@ -428,9 +420,6 @@ static void check_dbg(PARAMETER char is_post_check)
 		for(i = 16; i < 32; i++)
 			if(pres_tissue[i])
 				temp_DBS |= DBG_HEwoHE;
-
-	if(DBG_deco_ppO2 != deco_ppO2)
-		temp_DBS |= DBG_C_DPPO2;
 
 	if( DBG_deco_gas_change != deco_gas_change[0]
 	 || DBG_deco_N2_ratio != char_I_deco_N2_ratio[0]
@@ -1146,10 +1135,7 @@ static void sim_alveolar_presures(void)
         // In CCR mode, use calc_XX_ratio instead of XX_ratio.
         // Note: PPO2 and ratios are known outside the lumbs, so there is no
         //       ppWater in the equations below:
-   		if( temp_deco > deco_ppO2_change )
-            deco_diluent -= const_ppO2;
-   		else
-            deco_diluent -= deco_ppO2;
+        deco_diluent -= const_ppO2;
         deco_diluent /= calc_N2_ratio + calc_He_ratio;
 
         if (deco_diluent > temp_deco)
@@ -1378,10 +1364,6 @@ void calc_hauptroutine_data_input(void)
     }
 
     const_ppO2 = char_I_const_ppO2 * 0.01;
-    deco_ppO2_change = char_I_deco_ppO2_change * METER_TO_BAR
-                     + pres_surface
-                     + float_deco_distance;
-    deco_ppO2 = char_I_deco_ppO2 * 0.01;
     float_desaturation_multiplier = char_I_desaturation_multiplier * 0.01;
     float_saturation_multiplier   = char_I_saturation_multiplier   * 0.01;
     GF_low   = char_I_GF_Low_percentage  * 0.01;
@@ -1404,11 +1386,13 @@ void calc_hauptroutine_update_tissues(void)
     {
   		pres_diluent -= const_ppO2;                                             // new in v.101
   		pres_diluent /= N2_ratio + He_ratio;                                    // new in v.101
+        if( pres_diluent < 0.0 )
+            pres_diluent = 0.0;
  	    if( pres_diluent > pres_respiration )                                   // new in v.101
   		    pres_diluent = pres_respiration;                                    // new in v.101
 
- 		char_O_diluent = (char)(pres_diluent/pres_respiration*100.0 + 0.5);
- 		char_O_diluent_ppO2 = (char)(pres_diluent * (1.0 - N2_ratio - He_ratio) * 100.0 + 0.5);
+ 		char_O_diluent = (unsigned char)(pres_diluent/pres_respiration*100.0 + 0.5);
+ 		char_O_diluent_ppO2 = (unsigned char)(pres_diluent * (1.0 - N2_ratio - He_ratio) * 100.0 + 0.5);
     }
 
     if( pres_diluent > ppWater )                                              // new in v.101

@@ -242,7 +242,7 @@ customview_init_@5:
 	btfsc		no_deco_customviews		; no-deco-mode-flag = 1
 	bra			customview_toggle		; Yes, use next Customview!
 
-    clrf        WREG                    ; Reset extra TTS
+    setf        WREG                    ; WAIT marker: display "---"
     movff       WREG,int_O_extra_ascenttime+0
     movff       WREG,int_O_extra_ascenttime+1
     

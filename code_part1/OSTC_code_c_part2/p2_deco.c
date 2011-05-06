@@ -1247,6 +1247,7 @@ static void calc_hauptroutine(void)
     	clear_deco_table();
     	copy_deco_table();
     	int_O_ascenttime = 0;       // Reset DTR.
+    	int_O_extra_ascenttime = 0;
     	char_O_nullzeit = 0;        // Reset bottom time.
         char_O_deco_status = 0;     // Calc bottom-time/nullzeit next iteration.
 
@@ -1501,7 +1502,7 @@ Surface:
 
                     calc_ascenttime();
                     char_O_deco_status = 0;     // calc nullzeit next time.
-                    char_O_deco_last_stop = 0;  // Surface reached.
+                    char_O_deco_last_stop = 0;  // Surface reached (to animate menu)
     		        return;
                 }
             }
@@ -1741,27 +1742,22 @@ void restore_sim_pres_tissue(void)
 // Result in int_O_ascenttime, or int_O_extra_ascenttime if in @+5min variant.
 static void calc_ascenttime(void)
 {
-    if( pres_respiration > pres_surface )
-    {
-        overlay unsigned char x;
-        overlay unsigned short sum;
+    overlay unsigned char x;
+    overlay unsigned short sum;
 
-        // + 0.7 to count 1 minute ascent time from 3 metre to surface
-        overlay float ascent = pres_respiration - pres_surface + 0.7; 
-        if (ascent < 0.0)
-            ascent = 0.0;
-        sum = (unsigned short)(ascent + 0.99);
+    // + 0.7 to count 1 minute ascent time from 3 metre to surface
+    overlay float ascent = pres_respiration - pres_surface + 0.7; 
+    if (ascent < 0.0)
+        ascent = 0.0;
+    sum = (unsigned short)(ascent + 0.99);
 
-        for(x=0; x<32 && internal_deco_depth[x]; x++)
-            sum += (unsigned short)internal_deco_time[x];
+    for(x=0; x<32 && internal_deco_depth[x]; x++)
+        sum += (unsigned short)internal_deco_time[x];
 
-        if( char_O_deco_status == 1 )
-            int_O_ascenttime = sum;
-        else
-            int_O_extra_ascenttime = sum;
-    }
+    if( char_O_deco_status == 1 )
+        int_O_ascenttime = sum;
     else
-        int_O_ascenttime = 0;
+        int_O_extra_ascenttime = sum;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2161,6 +2157,7 @@ static void calc_wo_deco_step_1_min(void)
     char_O_deco_status = 3;     // surface new in v.102 : stays in surface state.
     char_O_nullzeit = 0;
     int_O_ascenttime = 0;
+    int_O_extra_ascenttime = 0;
     calc_gradient_factor();
 }
 

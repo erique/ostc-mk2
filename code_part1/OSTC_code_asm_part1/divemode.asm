@@ -520,18 +520,8 @@ calc_deko_divemode4:
 	movff	char_O_nullzeit,decodata+1  ; nostop time
 	
 	call	PLED_display_ndl            ; display no deco limit
-	return
 
-calc_deko_divemode3:
-	btfss	dekostop_active             ; Already in deco mode ?
-	call	PLED_display_deko_mask      ; clear nostop time, display decodata
-	bsf		dekostop_active             ; Set flag
-
-	movff	char_O_first_deco_depth,decodata+0	; ceiling
-	movff	char_O_first_deco_time,decodata+1	; length of first stop in minues
-
-	call	PLED_display_deko           ; display decodata
-
+calc_deko_divemode5:
     ; Check if extra cycles are needed to compute @5 variant:
     btfss   tts_extra_time              ; Is @5 displayed ?
 	return                              ; No: don't compute it.
@@ -545,6 +535,17 @@ calc_deko_divemode3:
     movlw   .2                          ; Restart countdown.
     movwf   apnoe_mins
     return
+
+calc_deko_divemode3:
+	btfss	dekostop_active             ; Already in deco mode ?
+	call	PLED_display_deko_mask      ; clear nostop time, display decodata
+	bsf		dekostop_active             ; Set flag
+
+	movff	char_O_first_deco_depth,decodata+0	; ceiling
+	movff	char_O_first_deco_time,decodata+1	; length of first stop in minues
+
+	call	PLED_display_deko           ; display decodata
+    bra     calc_deko_divemode5
     
 ;-----------------------------------------------------------------------------
 

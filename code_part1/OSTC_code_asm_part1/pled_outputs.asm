@@ -3109,9 +3109,16 @@ PLED_show_end_ead_divemode:
 
 	WIN_LEFT	.130
 	WIN_TOP		.168
-	lfsr		FSR2,letter
 
-    movff       char_O_diluent_ppO2, lo
+    movff       char_O_flush_ppO2, lo
+    incf        lo,W                    ; ppO2 == 2.55 ?
+    bnz         PLED_show_end_ead_divemode_1
+    
+    STRCPY_PRINT "----"                 ; YES: mark overflow.
+    return
+
+PLED_show_end_ead_divemode_1:    
+	lfsr		FSR2,letter
     clrf        hi
 	bsf		leftbind
 	output_16dp	d'3'					; Show ppO2 w/o leading zero

@@ -86,7 +86,7 @@ VAR_UCHAR (char_O_deco_last_stop);         // Depth reached during deko planning
 VAR_UCHAR (char_O_gradient_factor);        // 
 VAR_UCHAR (char_O_gtissue_no);             // 
 VAR_UCHAR (char_O_diluent);                // new in v.101
-VAR_UCHAR (char_O_diluent_ppO2);           // 2011-05-01: ppO2 from diluant (CCR mode).
+VAR_UCHAR (char_O_flush_ppO2);             // 2011-05-01: ppO2 from diluant (CCR mode).
 VAR_UCHAR (char_O_EAD);                    // 2011-05-01: Added EAD/END in deco model.
 VAR_UCHAR (char_O_END);                    // 2011-05-01: Added EAD/END in deco model.
 VAR_UCHAR (char_O_CNS_fraction);           // new in v.101

@@ -1384,6 +1384,8 @@ void calc_hauptroutine_update_tissues(void)
 	pres_diluent = pres_respiration;
     if( char_I_const_ppO2 != 0 )												// new in v.101
     {
+        overlay float flush_ppO2 = pres_respiration * (1.0 - N2_ratio - He_ratio);
+        
   		pres_diluent -= const_ppO2;                                             // new in v.101
   		pres_diluent /= N2_ratio + He_ratio;                                    // new in v.101
         if( pres_diluent < 0.0 )
@@ -1392,7 +1394,10 @@ void calc_hauptroutine_update_tissues(void)
   		    pres_diluent = pres_respiration;                                    // new in v.101
 
  		char_O_diluent = (unsigned char)(pres_diluent/pres_respiration*100.0 + 0.5);
- 		char_O_diluent_ppO2 = (unsigned char)(pres_diluent * (1.0 - N2_ratio - He_ratio) * 100.0 + 0.5);
+
+ 		if( flush_ppO2 > 2.45 ) flush_ppO2 = 2.55;
+ 		if( flush_ppO2 < 0.0  ) flush_ppO2 = 0.0;
+ 		char_O_flush_ppO2 = (unsigned char)(flush_ppO2*100.0 + 0.5);
     }
 
     if( pres_diluent > ppWater )                                              // new in v.101

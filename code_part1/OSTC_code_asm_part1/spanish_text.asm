@@ -86,7 +86,7 @@
     TCODE    .14,  .2,       "Func. Personaliz. I"       ;027 Custom Functions I
     TCODE    .20,  .2,       "Menú Reinicio"             ;028 Reset Menu
     TCODE    .35,  .2,       "Fijar Hora:"               ;029 Set Time:
-    TCODE    .100, .50,      "FijaMarc"                  ;030 SetMarker         (Add a mark in logbook profile)
+    TCODE    .100, .50,      "Marcar  "                  ;030 SetMarker         (Add a mark in logbook profile)
     TCODE    .100, .25,      "Plandeco"                  ;031 Decoplan
     TCODE    .100, .0,       "Listagas"                  ;032 Gaslist
     TCODE    .100, .50,      "ReiniMed"                  ;033 ResetAvr          (Reset average depth)
@@ -122,7 +122,7 @@
     TCODE    .40,  .35,      "Divisor Depurac"           ;061 Divisor Debug  
     TCODE    .40,  .35,      "Divisor SinUso2"           ;062 Divisor NotUse2
     TCODE    .40,  .35,      "Mues.CNSbuc.[%]"           ;063 CNSshow dive[%]
-    TCODE    .40,  .35,      "Despl. Diario  "           ;064 Logbook offset 
+    TCODE    .40,  .35,      "Despl. diario  "           ;064 Logbook offset 
     TCODE    .40,  .35,      "Ult. Deco a [m]"           ;065 Last Deco at[m]
     TCODE    .40,  .35,      "Fin Apnea   [h]"           ;066 End Apnoe   [h]
     TCODE    .40,  .35,      "Mues. volt. Bat"           ;067 Show Batt.Volts
@@ -171,7 +171,7 @@
     TCODE    .0,    .0,      "¿Gas Activo? "             ;105 Active Gas?
     TCODE    .10,   .2,      "Conf.Gas - Listagas"       ;106 Gas Setup - Gaslist
     TCODE    .20,   .95,     "Prof. +/-:"                ;107 Depth +/-:
-    TCODE    .20,   .125,    "Alterno:"                  ;108 Change:
+    TCODE    .20,   .125,    "Cambiar:"                  ;108 Change:
     TCODE    .20,   .155,    "Defecto:"                  ;109 Default:
     TCODE    .20,   .65,     "Menú SetPoint CCR"         ;110 CCR SetPoint Menu
     TCODE    .20,   .2,      "Menú SetPoint CCR"         ;111 CCR SetPoint Menu
@@ -245,7 +245,7 @@
     TCODE    .40,   .35,     "Conmu. gas[min]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
     TCODE    .40,   .35,     "Gas Fondo[/min]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
     TCODE    .40,   .35,     "GasAscens[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
-    TCODE    .40,   .35,     "EscaparTTS[min]"           ;180 Future TTS[min]   (@5 variant: compute TTS for extra time at current depth)
+    TCODE    .40,   .35,     "Futuro TTS[min]"           ;180 Future TTS[min]   (@5 variant: compute TTS for extra time at current depth)
     TCODE    .40,   .35,     "sin uno        "           ;181 not used
     TCODE    .40,   .35,     "sin uso        "           ;182 not used
     TCODE    .40,   .35,     "sin uso        "           ;183 not used
@@ -386,9 +386,9 @@
 	TCODE	 .100,	.125,	 "¿Activar?"				 ;300 Active?               (Enable/Disable Gas underwater)
 	TCODE    .0,    .2,      "Uso Gas OCR:"              ;301 OCR Gas Usage:        (Planned gas consumtion by tank).
 ; 115k Bootloader support:
-	TCODE	 .45,	.100,	 "Bootloader"				 ;302 Bootloader
-	TCODE	 .40,	.130,	 "Please wait!"				 ;303 Please wait!
-	TCODE	 .50,	.130,	 "Aborted!"					 ;304 Aborted
+	TCODE	 .45,	.100,	 "CargadorArr"				 ;302 Bootloader
+	TCODE	 .40,	.130,	 "¡EsperePorf!"				 ;303 Please wait!
+	TCODE	 .50,	.130,	 "¡Aborta!"					 ;304 Aborted
 ;@5 variant
-    TCODE    .0,    .0,      "EscaparTTS"                ;305 Future TTS            (=10 chars. Title for @5 customview).
+    TCODE    .0,    .0,      "Futuro TTS"                ;305 Future TTS            (=10 chars. Title for @5 customview).
 ;=============================================================================

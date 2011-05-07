@@ -1,6 +1,14 @@
+New in 1.89 beta:
+BETA Version - Do NOT use for diving!
+NEW: ppO2 in case of a loop flush can be displayed in CCR mode
+
+
 New in 1.88 beta:
 BETA Version - Do NOT use for diving!
 CHANGE: CF warning window moved to upper right corner
+BUGFIX: Gas4 fixed
+NEW: Future TTS (@xx Variant) in Custom View (Divemode)
+NEW: CF58 (0-10 min): Computes Future TTS in xx min
 
 New in 1.87 beta:
 BETA Version - Do NOT use for diving!

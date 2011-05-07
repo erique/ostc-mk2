@@ -168,7 +168,7 @@ cf_default_table1:
 	CF_DEFAULT    CF_BOOL,     	d'0',   0,      0       ; CF50 Show Log-Marker
 	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0 		; CF51 Show Stopwatch
 	                
-	CF_DEFAULT    CF_BOOL,     	d'1',   0,      0 		; CF52 Show Tissue Graph in Divemode
+	CF_DEFAULT    CF_BOOL,     	d'0',   0,      0 		; CF52 Show Tissue Graph in Divemode
 	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0 		; CF53 Show Laeding Tissue in Divemode
 	CF_DEFAULT    CF_BOOL,      d'0',   0,      0 		; CF54 Display shallowest stop first
 	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'10'   ; GF55 Gas switch additional delay

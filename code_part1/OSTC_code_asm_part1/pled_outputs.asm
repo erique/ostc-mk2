@@ -3105,7 +3105,12 @@ PLED_show_end_ead_divemode:
 	WIN_TOP		.168
 	call	PLED_divemask_color	; Set Color for Divemode mask
 	STRCPY_PRINT  "ppO2:"					; ppO2 of diluent
-	call	PLED_standard_color
+
+	movff	char_O_flush_ppO2,WREG			; copy to WREG
+	mullw	.100
+	movff	PRODH,xC+1
+	movff	PRODL,xC+0						; For color code
+	PLED_color_code		warn_ppo2		; Color-code output (ppO2 stored in xC)	
 
 	WIN_LEFT	.130
 	WIN_TOP		.168
@@ -3115,6 +3120,8 @@ PLED_show_end_ead_divemode:
     bnz         PLED_show_end_ead_divemode_1
     
     STRCPY_PRINT "----"                 ; YES: mark overflow.
+	call	PLED_standard_color         ; Back to white.
+
     return
 
 PLED_show_end_ead_divemode_1:    

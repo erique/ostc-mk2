@@ -3089,46 +3089,45 @@ PLED_show_end_ead_divemode:
 	WIN_TOP		.192
 	lfsr	FSR2,letter
 	OUTPUTTEXTH	.299                    ; EAD:
-	call	word_processor
+	call        word_processor
 
 	WIN_TOP		.216
-	lfsr	FSR2,letter
+	lfsr        FSR2,letter
 	OUTPUTTEXTH	.298                    ; END:
-	call	word_processor
+	call        word_processor
 
-	call	PLED_standard_color         ; Back to white.
+	call        PLED_standard_color     ; Back to white.
 	WIN_LEFT	.125
 	WIN_TOP		.192
-	lfsr	FSR2,letter
-	movff   char_O_EAD,lo
-	bsf     leftbind
+	lfsr        FSR2,letter
+	movff       char_O_EAD,lo
+	bsf         leftbind
 	output_8                            ; Print EAD w/o leading space.
-	STRCAT_PRINT    "m "
+	STRCAT_PRINT "m "
 
 	WIN_TOP		.216
-	lfsr	FSR2,letter
-	movff   char_O_END,lo
+	lfsr        FSR2,letter
+	movff       char_O_END,lo
 	output_8                            ; Print END w/o leading space.
-	bcf		leftbind
-	STRCAT_PRINT    "m "
+	bcf	        leftbind
+	STRCAT_PRINT "m "
 
-	btfsc	is_bailout					; In bailout mode?
+; Show ppO2[Flush] iff in CCR mode & not in Bailout:
+	btfsc       is_bailout              ; In bailout mode?
 	return                              ; Yes: done.
 
-	btfss   FLAG_const_ppO2_mode        ; In (true) CCR mode ?
+	btfss       FLAG_const_ppO2_mode    ; In (true) CCR mode ?
 	return                              ; No: done.
-
-; Show ppO2[Diluent]
 
 	WIN_LEFT	.95
 	WIN_TOP		.168
-	call	PLED_divemask_color	; Set Color for Divemode mask
-	STRCPY_PRINT  "ppO2:"					; ppO2 of diluent
+	call        PLED_divemask_color     ; Set Color for Divemode mask
+	STRCPY_PRINT "ppO2:"                ; ppO2 of diluent
 
-	movff	char_O_flush_ppO2,WREG			; copy to WREG
-	mullw	.100
-	movff	PRODH,xC+1
-	movff	PRODL,xC+0						; For color code
+	movff       char_O_flush_ppO2,WREG  ; copy to WREG
+	mullw       .100
+	movff       PRODH,xC+1
+	movff       PRODL,xC+0              ; For color code
 	PLED_color_code		warn_ppo2		; Color-code output (ppO2 stored in xC)	
 
 	WIN_LEFT	.130
@@ -3137,11 +3136,9 @@ PLED_show_end_ead_divemode:
     movff       char_O_flush_ppO2, lo
     incf        lo,W                    ; ppO2 == 2.55 ?
     bnz         PLED_show_end_ead_divemode_1
-    
-    STRCPY_PRINT "----"                 ; YES: mark overflow.
-	call	PLED_standard_color         ; Back to white.
 
-    return
+    STRCPY_PRINT "----"                 ; YES: mark overflow.
+	goto        PLED_standard_color     ; Back to white.
 
 PLED_show_end_ead_divemode_1:    
 	lfsr		FSR2,letter
@@ -3150,7 +3147,7 @@ PLED_show_end_ead_divemode_1:
 	output_16dp	d'3'					; Show ppO2 w/o leading zero
 	bcf		leftbind
 	STRCAT_PRINT  " "					;  Display ppO2[Diluent]
-	return
+	goto    PLED_standard_color         ; Back to white.
 
 ;=============================================================================
 ; Display TTS after extra time at the same depth.

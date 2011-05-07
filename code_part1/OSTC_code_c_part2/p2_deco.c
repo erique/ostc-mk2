@@ -1396,7 +1396,7 @@ void calc_hauptroutine_update_tissues(void)
 
  		char_O_diluent = (unsigned char)(pres_diluent/pres_respiration*100.0 + 0.5);
 
- 		if( flush_ppO2 > 2.45 ) flush_ppO2 = 2.55;
+ 		if( flush_ppO2 > 2.545) flush_ppO2 = 2.55;
  		if( flush_ppO2 < 0.0  ) flush_ppO2 = 0.0;
  		char_O_flush_ppO2 = (unsigned char)(flush_ppO2*100.0 + 0.5);
     }

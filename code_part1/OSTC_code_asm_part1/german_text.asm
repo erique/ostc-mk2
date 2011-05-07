@@ -341,7 +341,7 @@
     TCODE    .105,  .35,     "DDMMYY"                    ;260 DDMMYY
     TCODE    .105,  .35,     "YYMMDD"                    ;261 YYMMDD
     TCODE    .1,    .1,      "OSTC "                     ;262 OSTC 
-    TCODE    .65,   .168,    "Bail"                      ;263 Bail
+    TCODE    .65,   .168,    "Bail "                     ;263 Bail 
     TCODE    .7,    .48,     "Luft  "                    ;264 Air
     TCODE    .120,  .135,    "Luft  "                    ;265 Air
     TCODE    .2,    .39,     "Kalibrieren"               ;266 Calibrate

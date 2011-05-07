@@ -1,7 +1,9 @@
 New in 1.89 beta:
 BETA Version - Do NOT use for diving!
 NEW: ppO2 in case of a loop flush can be displayed in CCR mode
-
+NEW: Fixed Setpoint with color warnings
+BUGFIX: Fixed Setpoint behavior >2,55bar with CF38=ON
+NEW: Future TTS also available in no-deco phase of dive
 
 New in 1.88 beta:
 BETA Version - Do NOT use for diving!

@@ -2978,7 +2978,7 @@ PLED_const_ppO2_value:
 
 ; Yes, Display "Bail"
 	call		PLED_standard_color
-	OUTPUTTEXTH		d'263'			;"Bail"
+	OUTPUTTEXTH		d'263'			;"Bail "
 	call	word_processor
 	return
 
@@ -3026,7 +3026,7 @@ PLED_const_ppO2_value1:
 	call		sub16					; sub_c = sub_a - sub_b
 
 	btfss		neg_flag
-	bra			PLED_const_ppO2_value11			; Value in range
+	bra			PLED_const_ppO2_value11	; Value in range (lower then fix Setpoint)
 
 	; char_I_const_ppO2 < ppO2[Diluent] -> Not physically possible! -> Display actual value!
 
@@ -3035,28 +3035,47 @@ PLED_const_ppO2_value1:
 	movlw		d'100'
 	movwf		xB+0
 	clrf		xB+1
-	call		div16x16				;xA/xB=xC with xA as remainder 	
+	call		div16x16					;xA/xB=xC with xA as remainder 	
 
-	movff		xC+0,char_I_const_ppO2			; No, Overwrite with actual value
+	movff		xC+0,char_I_const_ppO2		; No, Overwrite with actual value
+	movff		xC+1,hi						; For test if ppO2>2,55Bar
 	
-	GETCUSTOM8	d'39'							; Adjust fixed SP?
+	GETCUSTOM8	d'39'						; Adjust fixed SP?
 	dcfsnz		WREG,F
-	bra			PLED_const_ppO2_value1a			; Yes!
+	bra			PLED_const_ppO2_value1a		; Yes!
 	; Do not adjust -> restore original SetPoint
 
 PLED_const_ppO2_value11:
 ; Setpoint in possible limits
 	movff		ppO2_setpoint_store,char_I_const_ppO2		; Restore Setpoint
+	clrf		hi
+	
 
 PLED_const_ppO2_value1a:
-	PLED_color_code		warn_ppo2		; Color-code output
 	movff	char_I_const_ppO2,lo
-	clrf	hi
+
+	movff	lo,WREG					; copy to WREG
+	mullw	.100
+	movff	PRODH,xC+1
+	movff	PRODL,xC+0				; For color code
+	PLED_color_code		warn_ppo2	; Color-code output (ppO2 stored in xC)	
+
+	tstfsz	hi						; >2,55bar?
+	rcall	PLED_const_ppO2_too_hi	; Yes
+
 	bsf		leftbind
 	output_16dp	d'3'
 	bcf		leftbind
-	call	word_processor
-	call	PLED_standard_color
+	STRCAT_PRINT  " "				; Display Setpoint with training zero
+	call	PLED_standard_color		; Reset color
+	return
+
+PLED_const_ppO2_too_hi:
+	movlw	'>'
+	movwf	POSTINC2				; Put ">" from WREG into buffer
+	setf	lo						; show ">2.55"
+	clrf	hi						; clear hi
+	call	PLED_warnings_color		; Set Warning color
 	return
 
 ;=============================================================================
@@ -3131,7 +3150,6 @@ PLED_show_end_ead_divemode_1:
 	output_16dp	d'3'					; Show ppO2 w/o leading zero
 	bcf		leftbind
 	STRCAT_PRINT  " "					;  Display ppO2[Diluent]
-
 	return
 
 ;=============================================================================

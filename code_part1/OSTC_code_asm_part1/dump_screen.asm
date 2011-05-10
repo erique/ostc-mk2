@@ -25,6 +25,13 @@
 ; BUGS :
 ;  * ...
 ;=============================================================================
+    CBLOCK 0x000                        
+        	ds_line                 ; Current line (0..239).
+        	ds_column               ; Current columnx2 (0..159)
+        	ds_pixel:2              ; Current pixel color.
+        	ds_count                ; Repetition count.
+    ENDC
+;=============================================================================
 
 ; Manage interface to the OSTC platform:
 dump_screen:
@@ -76,45 +83,92 @@ dump_screen_0:
     rcall       PLED_DataRead           ; Dummy pixel to skip.
 
    	movlw	    .160                    ; 160x2 columns
-	movwf	    uart1_temp
+	movwf	    ds_column
+    rcall       dump_screen_pixel_reset
+
 dump_screen_1:
     btg         LED_red                 ; LEDactivity toggle
 
     AA_CMD_WRITE    0x22                ; Re-sync data.
 
-	movlw	    .240                    ; 240 lines
-	movwf	    uart2_temp
-
     setf        TRISD                   ; PortD as input.
-    clrf        PORTD
 
+    ; Dump even column
+	movlw	    .240                    ; 240 lines, once.
+	movwf	    ds_line
 dump_screen_2:
+    rcall       PLED_DataRead           ; read pixel-high byte
+    movwf       PRODH
+    rcall       PLED_DataRead           ; read pixel-low byte
+    movwf       PRODL
+    rcall       dump_screen_pixel
 
-    rcall       PLED_DataRead           ; read first pixel-low byte
-    movwf       TXREG                   ; send
-	call		rs232_wait_tx           ; wait for UART
-
-    rcall       PLED_DataRead           ; read first pixel-high byte
-    movwf       TXREG                   ; send
-    call		rs232_wait_tx           ; wait for UART
-
-    rcall       PLED_DataRead           ; read second pixel-low byte
-    movwf       TXREG                   ; send
-    call		rs232_wait_tx           ; wait for UART
-    
-    rcall       PLED_DataRead           ; read second pixel-high byte
-    movwf       TXREG                   ; send
-    call		rs232_wait_tx           ; wait for UART
-
-
-    decfsz	    uart2_temp,F
+    decfsz	    ds_line,F
     bra		    dump_screen_2
+    rcall       dump_screen_pixel_flush
+
+    ; Dump odd column
+	movlw	    .240                    ; 240 lines, twice.
+	movwf	    ds_line
+dump_screen_3:
+    rcall       PLED_DataRead           ; read pixel-high byte
+    movwf       PRODH
+    rcall       PLED_DataRead           ; read pixel-low byte
+    movwf       PRODL
+    rcall       dump_screen_pixel
+
+    decfsz	    ds_line,F
+    bra		    dump_screen_3
+    rcall       dump_screen_pixel_flush
 
     clrf        TRISD                   ; Back to normal (PortD as output)
 
-    decfsz	    uart1_temp,F
+    decfsz	    ds_column,F
     bra		    dump_screen_1
 
     AA_CMD_WRITE    0x00        ; NOP, to stop Address Update Counter
     return
 
+;=============================================================================
+; Pixel compression
+;
+; Input: PRODH:L = pixel.
+; Output: Compressed stream on output.
+;
+dump_screen_pixel:
+    movf        PRODH,W                 ; Compare pixel-high
+    xorwf       ds_pixel+1,W
+    bnz         dump_screen_pixel_1     ; Different -> dump.
+
+    movf        PRODL,W                 ; Compare pixel-low
+    xorwf       ds_pixel+0,W
+    bnz         dump_screen_pixel_1     ; Different -> dump.
+
+    incf        ds_count,F              ; Same color: just increment.
+    return
+
+dump_screen_pixel_1:                    ; Send (pixel,count) tuple
+    movf        ds_count,W              ; Is count zero ?
+    bz          dump_screen_pixel_2     ; Yes: skip sending.
+
+    movff       ds_pixel+1,TXREG
+	call		rs232_wait_tx           ; wait for UART
+    movff       ds_pixel+0,TXREG
+	call		rs232_wait_tx           ; wait for UART
+    movff       ds_count,TXREG
+	call		rs232_wait_tx           ; wait for UART
+
+dump_screen_pixel_2:
+    movff       PRODH,ds_pixel+1        ; Save new pixel color
+    movff       PRODL,ds_pixel+0
+    movlw       1
+    movwf       ds_count                ; And set count=1.
+    return
+
+dump_screen_pixel_flush:
+    clrf        PRODH
+    clrf        PRODL
+    rcall       dump_screen_pixel_1     ; Send it
+dump_screen_pixel_reset:
+    clrf        ds_count                ; But clear count.
+    return

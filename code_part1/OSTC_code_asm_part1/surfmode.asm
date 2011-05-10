@@ -200,7 +200,7 @@ surfloop_loop3:
 	btfsc	uart_reset_battery_stats	; Reset Battery stats?
 	goto	reset_battery_stats			; Yes!
 	btfsc	uart_dump_screen            ; Dumps screen contains ?
-	goto	dump_screen     			; Yes!
+	call	dump_screen     			; Yes!
 
 	bra		surfloop_loop				; loop surfacemode
 

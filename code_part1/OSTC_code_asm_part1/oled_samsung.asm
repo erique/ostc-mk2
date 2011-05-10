@@ -532,13 +532,7 @@ PLED_DataWrite_PROD:
 ;       to make PortD an input port...
 PLED_DataRead:
 	bsf		oled_rs					; Data register.
-    nop                             ; Enable delay to read data...
 	bcf		oled_e_nwr              ; Read enable.
-    nop
-    nop
-    nop
-    nop
-    nop
 	movf	PORTD,W				    ; Read byte.
 	bsf		oled_e_nwr              ; release bus.
 	return

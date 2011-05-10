@@ -52,7 +52,7 @@ dump_screen:
 dump_screen_0:
 
     ;---- Send OLED box command for the full screen window -------------------
-	mullw       0                       ; PRODH:L <- 0
+    mullw       0                       ; PRODH:L <- 0
 
     AA_CMD_WRITE    0x35                ; VerticalStartAddress HIGH:LOW
     AA_DATA_WRITE_PROD                  ; 00:00
@@ -76,41 +76,44 @@ dump_screen_0:
     rcall       PLED_DataRead           ; Dummy pixel to skip.
 
    	movlw	    .160                    ; 160x2 columns
-	movwf	    PRODH
+	movwf	    uart1_temp
 dump_screen_1:
     btg         LED_red                 ; LEDactivity toggle
 
+    AA_CMD_WRITE    0x22                ; Re-sync data.
+
 	movlw	    .240                    ; 240 lines
-	movwf	    PRODL
+	movwf	    uart2_temp
+
+    setf        TRISD                   ; PortD as input.
+    clrf        PORTD
 
 dump_screen_2:
-    setf        TRISD                   ; PortD as input.
 
     rcall       PLED_DataRead           ; read first pixel-low byte
     movwf       TXREG                   ; send
 	call		rs232_wait_tx           ; wait for UART
-    
+
     rcall       PLED_DataRead           ; read first pixel-high byte
     movwf       TXREG                   ; send
-	call		rs232_wait_tx           ; wait for UART
-    
+    call		rs232_wait_tx           ; wait for UART
+
     rcall       PLED_DataRead           ; read second pixel-low byte
     movwf       TXREG                   ; send
-	call		rs232_wait_tx           ; wait for UART
+    call		rs232_wait_tx           ; wait for UART
     
     rcall       PLED_DataRead           ; read second pixel-high byte
     movwf       TXREG                   ; send
-	call		rs232_wait_tx           ; wait for UART
+    call		rs232_wait_tx           ; wait for UART
+
+
+    decfsz	    uart2_temp,F
+    bra		    dump_screen_2
 
     clrf        TRISD                   ; Back to normal (PortD as output)
 
-	decfsz	    PRODL,F
-	bra		    dump_screen_2
-
-    AA_CMD_WRITE    0x22                ; Sync high/low byte, again.
-
-	decfsz	    PRODH,F
-	bra		    dump_screen_1
+    decfsz	    uart1_temp,F
+    bra		    dump_screen_1
 
     AA_CMD_WRITE    0x00        ; NOP, to stop Address Update Counter
     return

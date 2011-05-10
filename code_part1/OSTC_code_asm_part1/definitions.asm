@@ -387,8 +387,8 @@ desaturation_time_buffer res 2	; buffer for desat time
 #DEFINE win_flip_screen     win_flags,0 ; 180° rotation of the OLED screen.
 
 ; Flags
-#DEFINE	tts_extra_time		flag1,0	; unused
-#DEFINE	FLAG_2      		flag1,1	; unused
+#DEFINE	tts_extra_time		flag1,0	; Showing "Future TTS" customview
+#DEFINE	uart_dump_screen    flag1,1	; Screen copy to USB.
 #DEFINE	pre_zero_flag		flag1,2	; leading zeros
 #DEFINE neg_flag			flag1,3	; e.g. Sub_16 (sub_c = sub_a - sub_b)
 #DEFINE	FLAG_3      		flag1,4	; unused

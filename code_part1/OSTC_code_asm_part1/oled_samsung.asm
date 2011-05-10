@@ -184,6 +184,15 @@ AA_CMD_WRITE macro cmd
 ;		bsf		oled_rw
 		endm
 ;
+; Input	 : data as macro parameter.
+; Output : NONE
+; Trash  : WREG
+;
+AA_DATA_WRITE macro data
+        movlw   data
+        rcall   PLED_DataWrite
+        endm
+;
 ; Input	 : PRODH:L as 16bits data.
 ; Output : NONE
 ; Trash  : NONE
@@ -514,6 +523,24 @@ PLED_DataWrite_PROD:
 	movff	PRODL,PORTD				; Move low byte to PORTD
 	bcf		oled_rw
 	bsf		oled_rw
+	return
+
+; -----------------------------
+; PLED Read data into WREG
+; -----------------------------
+; NOTE: you should "setf TRISD" before calling this function,
+;       to make PortD an input port...
+PLED_DataRead:
+	bsf		oled_rs					; Data register.
+    nop                             ; Enable delay to read data...
+	bcf		oled_e_nwr              ; Read enable.
+    nop
+    nop
+    nop
+    nop
+    nop
+	movf	PORTD,W				    ; Read byte.
+	bsf		oled_e_nwr              ; release bus.
 	return
 
 ; -----------------------------

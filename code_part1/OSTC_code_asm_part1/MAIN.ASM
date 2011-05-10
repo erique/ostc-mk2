@@ -88,6 +88,7 @@ osct_asm	code
 #include	oled_samsung.asm	; Attached in 80-System 8-Bit Mode
 #include	aa_wordprocessor.asm ; New antialiased word processor and fonts
 #include    color_processor.asm ; Color image drawing.
+#include    dump_screen.asm     ; Copy screen contains to serial interface
 #include	valconv.asm			; outputs to POSTINC2
 #include	eeprom_rs232.asm	; Internal EEPROM and RS232 Interface
 #include	menu_custom.asm		; Menu "Custom FunctionsI" and "Custom FunctionsII"

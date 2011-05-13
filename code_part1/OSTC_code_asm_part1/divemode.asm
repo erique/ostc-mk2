@@ -157,15 +157,21 @@ diveloop_loop3:
 	btfsc	toggle_customview				; Next view?
 	call	customview_toggle				; Yes, show next customview (and delete this flag)
 
-	btfsc	menubit							; Sleep only with inactive menu...
-	bra		diveloop_loop4
+	btfsc	simulatormode_active			; Is Simualtor mode active ?
+	bra		diveloop_loop4                  ; YES: don't sleep
 
-	btfsc	simulatormode_active			; Do not sleep in Simualtor mode
-	bra		diveloop_loop4
+	btfsc	menubit							; Sleep only with inactive menu...
+	bra		diveloop_loop5
 
 	sleep
 	nop
-diveloop_loop4:
+	bra		diveloop_loop					; Loop the divemode
+
+diveloop_loop4:                             ; And test screen dumps too!
+	btfsc	uart_dump_screen                ; Asked to dump screen contains ?
+	call	dump_screen     			    ; Yes!
+
+diveloop_loop5:
 	bra		diveloop_loop					; Loop the divemode
 
 timeout_premenu_divemode:

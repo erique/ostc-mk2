@@ -780,6 +780,9 @@ next_gas_page_loop:
 
 	bcf		onesecupdate	; 1 sec. functions done
 
+	btfsc	uart_dump_screen            ; Dumps screen contains ?
+	call	dump_screen     			; Yes!
+
 	btfsc	sleepmode
 	bra		exit_gassetup
 

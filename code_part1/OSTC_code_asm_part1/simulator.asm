@@ -412,18 +412,18 @@ simulator_calc_deco3:
 	WAITMS	d'250'
 	WAITMS	d'250'                      ; Wait for Pressure Sensor to get real pressure again...
 
-	movlw	d'5'                            ; Pre-Set Cursor to "Show Decoplan"
+	movlw	d'5'                        ; Pre-Set Cursor to "Show Decoplan"
 	movwf	menupos
 	movff	char_I_bottom_time,logbook_temp1    ; Restore bottom time,
 	movff   char_I_bottom_depth,logbook_temp2   ; and depth.
 	bra     menu_simulator1                 ; Done.
 
 simulator_save_tissue_data:
-	bsf		restore_deco_data		; Set restore flag
-	ostc_debug	'S'							; Sends debug-information to screen if debugmode active
+	bsf		restore_deco_data           ; Set restore flag
+	ostc_debug	'S'                     ; Sends debug-information to screen if debugmode active
 	call	deco_push_tissues_to_vault
-	movlb	0x01							; Back to RAM Bank1
-	ostc_debug	'T'							; Sends debug-information to screen if debugmode active
+	movlb	0x01                        ; Back to RAM Bank1
+	ostc_debug	'T'                     ; Sends debug-information to screen if debugmode active
 	return
 
 simulator_restore_tissue_data:

@@ -108,6 +108,9 @@ test_switches_divemode_menu:
 	btfss	switch_right
 	return
 
+	btfsc	uart_dump_screen                ; Asked to dump screen contains ?
+	call	dump_screen     			    ; Yes!
+
 	btfsc 	display_see_deco			; Is the Decoplan displayed?
 	bra		divemenu_see_decoplan2		; Yes, exit menu on left button press
 

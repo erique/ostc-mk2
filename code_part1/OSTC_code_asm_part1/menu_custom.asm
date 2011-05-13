@@ -299,6 +299,9 @@ customfunctions_loop:
 
 	bcf		onesecupdate			; end of 1sek. tasks
 
+	btfsc	uart_dump_screen            ; Dumps screen contains ?
+	call	dump_screen     			; Yes!
+
 	btfsc	sleepmode
 	bra	exit_customfunctions
 

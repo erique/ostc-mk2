@@ -76,7 +76,7 @@
 // 2011/04/15: [jDG] Store low_depth in 32bits (w/o rounding), for a better stability.
 // 2011/04/25: [jDG] Added 1mn mode for CNS calculation, to allow it for decoplanning.
 // 2011/04/27: [jDG] Fixed char_O_gradient_factor calculation when model uses gradient-factor.
-// 2011/05/02: [jDG] Added @+5min variant.
+// 2011/05/02: [jDG] Added "Future TTS" function (CF58).
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -979,7 +979,7 @@ static void gas_switch_find_current(void)
     if( sim_gas_delay <= sim_dive_mins)
     {
         // Compute current depth:
-        overlay unsigned char depth = (unsigned char)((pres_respiration - pres_surface) * BAR_TO_METER);
+        overlay unsigned char depth = (unsigned char)(0.5 + (pres_respiration - pres_surface) * BAR_TO_METER);
         assert( depth < 130 );
 
         // And if I'm above the last decostop (with the 3m margin) ?
@@ -1462,7 +1462,7 @@ void calc_hauptroutine_update_tissues(void)
 // 
 // Note: because this can be very long, break on 16 iterations, and set state
 //       to 0 when finished, or to 1 when needing to continue.
-// Note: because this might be very long (~ 66 ms by iteration in 1.84beta),
+// Note: because each iteration might be very long too (~ 66 ms in 1.84beta),
 //       break the loop when total time > 512msec.
 //
 void calc_hauptroutine_calc_deco(void)
@@ -1508,7 +1508,11 @@ Surface:
             }
         }
         else
+        {
+            // Note: if loop==0, temp_depth_limit might not be already set here.
+            temp_depth_limit = (int)(0.5 + (temp_deco - pres_surface) * BAR_TO_METER);
             update_deco_table();    // Just pass one minute.
+        }
 
         //---- Then update tissue --------------------------------------------
         sim_dive_mins++;            // Advance simulated time by 1 minute.
@@ -1527,6 +1531,9 @@ Surface:
 // Note: because we ascent with a constant speed (10m/mn, ie. 1bar/mn),
 //       there is no need to break on more that 16 iterations
 //       (or we are already in deep shit).
+//
+// Input:  pres_respiration
+// Output: temp_deco
 //
 // if char_O_deco_status indicate @+5 variant, add extra time at current depth,
 // before ascent.
@@ -1569,10 +1576,13 @@ void sim_ascent_to_first_stop(void)
         }
 
         // Check for gas change below new depth ?
-        temp_depth_limit = (temp_deco - pres_surface) * BAR_TO_METER;
+        temp_depth_limit = (int)(0.5 + (temp_deco - pres_surface) * BAR_TO_METER);
+        assert( temp_depth_limit > 0);
 
         if( gas_switch_deepest() )
         {
+            assert( temp_depth_limit > 0);
+
             temp_deco = temp_depth_limit * METER_TO_BAR + pres_surface;
             break;
         }
@@ -1894,7 +1904,7 @@ static void update_deco_table()
     for(x=0; x<32; ++x)
     {
         // Make sure deco-stops are recorded in order:
-        assert( !internal_deco_depth[x] || temp_depth_limit <= internal_deco_depth[x] );
+        assert( !internal_deco_depth[x] || temp_depth_limit <= (internal_deco_depth[x]& 0x7F) );
 
         if( (internal_deco_depth[x] & 0x7F) == temp_depth_limit )
         {
@@ -2081,7 +2091,7 @@ void deco_calc_desaturation_time(void)
         if( 0.0 < temp3 && temp3 < 1.0 )
     	{
             overlay float var_He_halftime = (buhlmann_ht+16)[ci];
-            assert( 1.51 <= var_He_halftime && var_He_halftime <= 240.03 );
+            assert( 1.5099 <= var_He_halftime && var_He_halftime <= 240.03 );
 
         	temp3 = log(1.0 - temp3) / -0.6931; // temp1 is the multiples of half times necessary.
         							 // 0.6931 is ln(2), because the math function log() calculates with a base of e  not 2 as requested.

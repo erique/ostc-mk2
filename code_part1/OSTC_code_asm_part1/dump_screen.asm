@@ -126,7 +126,7 @@ dump_screen_3:
     decfsz	    ds_column,F
     bra		    dump_screen_1
 
-    AA_CMD_WRITE    0x00        ; NOP, to stop Address Update Counter
+    AA_CMD_WRITE    0x00                ; NOP, to stop Address Update Counter
     return
 
 ;=============================================================================
@@ -134,6 +134,10 @@ dump_screen_3:
 ;
 ; Input: PRODH:L = pixel.
 ; Output: Compressed stream on output.
+; Compressed format:
+;       0ccccccc    : BLACK pixel, repeated ccccccc+1 times (1..128).
+;       11cccccc    : WHITE pixel, repeated cccccc+1 times (1..64).
+;       10cccccc HIGH LOW : color pixel (H:L) repeated ccccc+1 times (1..64).
 ;
 dump_screen_pixel:
     movf        PRODH,W                 ; Compare pixel-high
@@ -151,12 +155,30 @@ dump_screen_pixel_1:                    ; Send (pixel,count) tuple
     movf        ds_count,W              ; Is count zero ?
     bz          dump_screen_pixel_2     ; Yes: skip sending.
 
+    movf        ds_pixel+1,W            ; This is a BLACK pixel ?
+    iorwf       ds_pixel+0,W    
+    bz          dump_screen_pix_black   ; YES.
+
+    movf        ds_pixel+1,W            ; This is a white pixel ?
+    andwf       ds_pixel+0,W
+    incf        WREG
+    bz          dump_screen_pix_white   ; YES.
+
+    ; No: write the pixel itself...
+    movlw       .64                     ; Max color pixel on a single byte.
+    cpfsgt      ds_count                ; Skip if count > 64
+    movf        ds_count,W              ; W <- min(64,count)
+    subwf       ds_count,F              ; ds_count <- ds_count-W
+    decf        WREG                    ; Save as 0..63
+    iorlw       b'10000000'             ; MARK as a color pixel.
+
+    movwf       TXREG
+    call		rs232_wait_tx           ; wait for UART
     movff       ds_pixel+1,TXREG
-	call		rs232_wait_tx           ; wait for UART
+    call		rs232_wait_tx           ; wait for UART
     movff       ds_pixel+0,TXREG
-	call		rs232_wait_tx           ; wait for UART
-    movff       ds_count,TXREG
-	call		rs232_wait_tx           ; wait for UART
+    call		rs232_wait_tx           ; wait for UART
+    bra         dump_screen_pixel_1
 
 dump_screen_pixel_2:
     movff       PRODH,ds_pixel+1        ; Save new pixel color
@@ -164,6 +186,26 @@ dump_screen_pixel_2:
     movlw       1
     movwf       ds_count                ; And set count=1.
     return
+
+dump_screen_pix_black:
+    movlw       .128                    ; Max black pixel on a single byte.
+    cpfsgt      ds_count                ; Skip if count > 128
+    movf        ds_count,W              ; W <- min(128,count)
+    subwf       ds_count,F              ; ds_count <- ds_count-W
+    decf        WREG                    ; Save as 0..127
+dump_screen_pix_3:
+    movwf       TXREG
+    call        rs232_wait_tx
+    bra         dump_screen_pixel_1     ; More to dump ?
+
+dump_screen_pix_white:
+    movlw       .64                     ; Max white pixel on a single byte.
+    cpfsgt      ds_count                ; Skip if count > 64
+    movf        ds_count,W              ; W <- min(64,count)
+    subwf       ds_count,F              ; ds_count <- ds_count-W
+    decf        WREG                    ; Save as 0..63
+    iorlw       b'11000000'             ; MARK as a compressed white.
+    bra         dump_screen_pix_3
 
 dump_screen_pixel_flush:
     clrf        PRODH

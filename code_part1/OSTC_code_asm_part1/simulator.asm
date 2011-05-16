@@ -196,6 +196,9 @@ simulator_show_decoplan1:
 	bcf		switch_left
 	bcf		switch_right
 simulator_show_decoplan2:
+	btfsc	uart_dump_screen            ; Asked to dump screen contains ?
+	call	dump_screen     		    ; Yes!
+
 	btfss	onesecupdate
 	bra		simulator_show_decoplan3
 

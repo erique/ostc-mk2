@@ -335,7 +335,7 @@ display_profile_offset3:
 	addwfc		sim_pressure+1,F
 	movlw		LOW		d'164000'		; 164pixel*1000 height
 	movwf		xC+0
-	movlw		HIGH	d'164000'		; 164pixel*1000 height
+	movlw		HIGH	(d'164000' & h'FFFF') ; 164pixel*1000 height
 	movwf		xC+1
 	movlw		UPPER	d'164000'		; 164pixel*1000 height
 	movwf		xC+2
@@ -1066,6 +1066,10 @@ check_switches_logbook:
 	bsf			menubit3
 	btfsc		switch_left
 	bsf			menubit2					; Enter
+
+	btfsc	    uart_dump_screen            ; Dumps screen contains ?
+	call	    dump_screen     			; Yes!
+
 	return
 
 next_logbook3:

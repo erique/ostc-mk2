@@ -280,16 +280,16 @@ menu_custom_functions10b:
 	call	PLED_menu_cursor
 
 customfunctions_loop:
-	call	check_switches_logbook
+	call    check_switches_logbook
 
-	btfsc	menubit3
-	bra	customfunctions2		; Move cursor or generate next page
+	btfsc   menubit3
+	bra     customfunctions2		    ; Move cursor or generate next page
 
-	btfsc	menubit2
-	bra	do_customfunction		; call subfunction
+	btfsc   menubit2
+	bra     do_customfunction		    ; call subfunction
 
 	btfsc	divemode
-	goto	restart					; dive started during cf menu
+	goto	restart					    ; dive started during cf menu
 
 	btfsc	onesecupdate
 	call	timeout_surfmode
@@ -297,15 +297,12 @@ customfunctions_loop:
 	btfsc	onesecupdate
 	call	set_dive_modes
 
-	bcf		onesecupdate			; end of 1sek. tasks
-
-	btfsc	uart_dump_screen            ; Dumps screen contains ?
-	call	dump_screen     			; Yes!
+	bcf		onesecupdate			    ; end of 1sek. tasks
 
 	btfsc	sleepmode
-	bra	exit_customfunctions
+	bra     exit_customfunctions
 
-	bra	customfunctions_loop
+	bra     customfunctions_loop
 
 customfunctions2:
 	incf	menupos,F

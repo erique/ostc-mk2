@@ -303,6 +303,9 @@ alt_menu_loop:
     	bcf		    switch_right
 
 alt_menu_loop1:                         ; Wait for button.
+    	btfsc	uart_dump_screen        ; Asked to dump screen contains ?
+    	call	dump_screen     		; Yes!
+
     	btfsc   	switch_right        ; [[MENU]] button
     	bra	        alt_menu_next
 

@@ -179,21 +179,21 @@ menu_gassetup_list0:
 	cpfseq	decodata+0
 	goto	menu_gassetup_list
 
-	DISPLAYTEXT	.11			; Exit
-	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
+	DISPLAYTEXT	.11                     ; Exit
+	call	wait_switches               ; Waits until switches are released, resets flag if button stays pressed!
 	call	PLED_menu_cursor
 
 gassetup_list_loop:
 	call	check_switches_logbook
 
 	btfsc	menubit3
-	bra		gassetup_list2		; move cursor
+	bra		gassetup_list2              ; move cursor
 
 	btfsc	menubit2
-	bra		do_gassetup_list; call gas-specific submenu
+	bra		do_gassetup_list            ; call gas-specific submenu
 
 	btfsc	divemode
-	goto	restart			; dive started!
+	goto	restart                     ; dive started!
 
 	btfsc	onesecupdate
 	call	timeout_surfmode
@@ -201,7 +201,7 @@ gassetup_list_loop:
 	btfsc	onesecupdate
 	call	set_dive_modes
 
-	bcf		onesecupdate	; 1 sec. functions done
+	bcf		onesecupdate                ; 1 sec. functions done
 
 	btfsc	sleepmode
 	bra		exit_gassetup_list
@@ -779,12 +779,6 @@ next_gas_page_loop:
 	call	set_dive_modes
 
 	bcf		onesecupdate	; 1 sec. functions done
-
-	btfsc	uart_dump_screen            ; Dumps screen contains ?
-	call	dump_screen     			; Yes!
-
-	btfsc	sleepmode
-	bra		exit_gassetup
 
 	bra		next_gas_page_loop
 

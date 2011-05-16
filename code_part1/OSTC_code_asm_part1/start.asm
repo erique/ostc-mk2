@@ -309,6 +309,9 @@ startup_screen1_2:
 	bcf		switch_left
 	bcf		switch_right
 screen1_loop:
+	btfsc	uart_dump_screen                ; Asked to dump screen contains ?
+	call	dump_screen     			    ; Yes!
+
 	btfsc	onesecupdate				; do every second tasks?
 	call	set_dive_modes				; tests if depth>threshold
 	btfsc	onesecupdate				; do every second tasks?
@@ -339,6 +342,9 @@ startup_screen3a:; WARNING: Also used for decodescriptions and CF Warning screen
 	bcf		switch_left
 	bcf		switch_right
 screen3_loop:
+	btfsc	uart_dump_screen                ; Asked to dump screen contains ?
+	call	dump_screen     			    ; Yes!
+
 	btfsc	onesecupdate				; do every second tasks?
 	call	set_dive_modes				; tests if depth>threshold
 	
@@ -355,6 +361,8 @@ screen3_loop2:
 	btfsc	switch_right				; Ack?
 	return
 	bra		screen3_loop				; loop screen
+
+;=============================================================================
 
 first_start:
 	movlw	max_custom_number		; Defined in definitions.asm

@@ -78,7 +78,10 @@ menu_loop:
 
 	bra		menu_loop	
 		
-check_switches_menu:							; checks switches
+check_switches_menu:                    ; checks switches
+    btfsc	uart_dump_screen            ; Asked to dump screen contains ?
+	call	dump_screen                 ; Yes!
+
 	btfss	switch_right			
 	bra		check_switches_menu2
 	bsf		menubit3
@@ -424,6 +427,9 @@ show_rawdata:						; Displays Sensor raw data
 	bcf		switch_left
 	bcf		switch_right
 show_rawdata_loop:
+	btfsc	uart_dump_screen                ; Asked to dump screen contains ?
+	call	dump_screen     			    ; Yes!
+
 	btfsc	switch_left					; Ack?
 	bsf		menubit2
 	btfsc	switch_right				; Ack?

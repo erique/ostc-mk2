@@ -74,6 +74,21 @@
 bank2   udata_ovr  0x200
 #endif
 
+#ifdef xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    Define model dimensions.
+    NUM_COMP  is the number of compartiments in the Bühlmann ZH-L16 model, ie 16.
+    NUM_STOPS is the maximum number of stops computed by decoplanning. 
+              Note that the deapest stop is roughly limited to 3m * NUM_STOPS
+                   (this is assuming all stops up to the surface are used).
+              Note also that if the table overflow, extra stops are ignored,
+                   and not reported in TTS summing.
+    NUM_GAS   is the number of (potentially) active gas considered during
+              ascent simulation.
+#endif
+#define NUM_COMP    0x10
+#define NUM_STOPS   0x20
+#define NUM_GAS     5
+
 VAR_UINT  (int_O_gtissue_limit);
 VAR_UINT  (int_O_gtissue_press);
 VAR_UINT  (int_O_desaturation_time);       // 
@@ -94,10 +109,10 @@ VAR_UCHAR (char_O_relative_gradient_GF);   // new in v.102
 
 VAR_UCHAR (char_O_first_deco_depth);        // Depth of first stop.
 VAR_UCHAR (char_O_first_deco_time) ;        // Duration of first stop.
-TAB_UCHAR (char_O_deco_depth, 0x20);        // Fusionned decompression table:
-TAB_UCHAR (char_O_deco_time,  0x20);        // Both ZH-L16 and L16-GF models.
+TAB_UCHAR (char_O_deco_depth, NUM_STOPS);   // Fusionned decompression table:
+TAB_UCHAR (char_O_deco_time,  NUM_STOPS);   // Both ZH-L16 and L16-GF models.
 
-TAB_UCHAR (char_O_tissue_saturation, 0x20); // Compartiment desaturation time, in min.
+TAB_UCHAR (char_O_tissue_saturation, 2*NUM_COMP); // Compartiment desaturation time, in min.
 
 VAR_UINT  (int_O_DBS_bitfield);             // NOTE: 9 bytes dumped to divelog by store_dive_decodebug
 VAR_UINT  (int_O_DBS2_bitfield);
@@ -140,9 +155,9 @@ VAR_UCHAR (char_I_deco_model);             // new in v.102. 0 == ZH-L16, 1 = ZH-
 VAR_UCHAR (char_I_bottom_depth);           // Bottom depth for planning (used in gas volume evaluation).
 VAR_UCHAR (char_I_bottom_time);            // Bottom time for planning (used in gas volume evaluation).
 
-TAB_UCHAR (char_I_deco_gas_change, 5);     // new in v.101
-TAB_UCHAR (char_I_deco_N2_ratio, 5);       // new in v.101
-TAB_UCHAR (char_I_deco_He_ratio, 5);       // new in v.101
+TAB_UCHAR (char_I_deco_gas_change,NUM_GAS);// new in v.101
+TAB_UCHAR (char_I_deco_N2_ratio, NUM_GAS); // new in v.101
+TAB_UCHAR (char_I_deco_He_ratio, NUM_GAS); // new in v.101
 
 #ifdef __18CXX
 //----------------------------------------------------------------------------

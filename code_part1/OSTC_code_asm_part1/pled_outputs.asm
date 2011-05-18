@@ -2789,7 +2789,7 @@ PLED_tsg_2:
 PLED_no_graph_grid:
     
     ;---- Draw N2 Tissues ----------------------------------------------------
-	lfsr	FSR2, char_O_tissue_saturation+.000	; N2
+	lfsr	FSR2, char_O_tissue_N2_saturation
 	movlw	d'16'
 	movwf	wait_temp                   ; 16 tissues
 	clrf	waitms_temp                 ; Row offset
@@ -2835,7 +2835,7 @@ PLED_tissue_saturation_graph3:
 	bra		PLED_tissue_saturation_graph3
 
     ;---- Draw He Tissues ----------------------------------------------------
-	lfsr	FSR2, char_O_tissue_saturation+.016	; He
+	lfsr	FSR2, char_O_tissue_He_saturation
 	movlw	d'16'
 	movwf	wait_temp                   ; 16 tissues
 	clrf	waitms_temp                 ; Row offset
@@ -2895,13 +2895,9 @@ PLED_tissue_saturation_graph2:
 
 	movff	char_O_gtissue_no,wait_temp			; used as temp
 
-	lfsr	FSR1,char_O_tissue_saturation+0
-	incf	wait_temp,F			; make 1-16 of 0-15
-
-PLED_tissue_saturation_graph4:		; point to leading tissue...
-	movff	POSTINC1,lo			; copy/overwrite to lo register
-	decfsz	wait_temp,F			; count until zero
-	bra		PLED_tissue_saturation_graph4	;loop
+	lfsr	FSR1,char_O_tissue_N2_saturation
+	movf	wait_temp,W			; W <- 0-15
+	movff	PLUSW1,lo			; lo <- FSR1[W]
 
 	WIN_TOP		.62
 	WIN_FONT	FT_SMALL
@@ -3230,12 +3226,9 @@ PLED_show_leading_tissue2:
 
     STRCAT_PRINT  ") "
 
-	lfsr	FSR1,char_O_tissue_saturation+0
-	incf	wait_temp,F			; make 1-16 of 0-15
-PLED_show_leading_tissue3:		; point to leading tissue...
-	movff	POSTINC1,lo			; copy/overwrite to lo register
-	decfsz	wait_temp,F			; count until zero
-	bra		PLED_show_leading_tissue3	;loop
+	lfsr	FSR1,char_O_tissue_N2_saturation
+	movf	wait_temp,W			; W <- 0-15
+	movff	PLUSW1,lo			; lo <- FSR1[W]
 
 	WIN_LEFT	.95
 	WIN_TOP		.216

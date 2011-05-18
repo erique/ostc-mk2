@@ -112,7 +112,8 @@ VAR_UCHAR (char_O_first_deco_time) ;        // Duration of first stop.
 TAB_UCHAR (char_O_deco_depth, NUM_STOPS);   // Fusionned decompression table:
 TAB_UCHAR (char_O_deco_time,  NUM_STOPS);   // Both ZH-L16 and L16-GF models.
 
-TAB_UCHAR (char_O_tissue_saturation, 2*NUM_COMP); // Compartiment desaturation time, in min.
+TAB_UCHAR (char_O_tissue_N2_saturation, NUM_COMP); // Nitrogen compartiment desaturation time, in min.
+TAB_UCHAR (char_O_tissue_He_saturation, NUM_COMP); // Helium compartiment desaturation time, in min.
 
 VAR_UINT  (int_O_DBS_bitfield);             // NOTE: 9 bytes dumped to divelog by store_dive_decodebug
 VAR_UINT  (int_O_DBS2_bitfield);

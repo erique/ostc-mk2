@@ -410,8 +410,7 @@ divemode_check_decogases:					; CALLed from Simulator, too
 ;-----------------------------------------------------------------------------
 ; calculate ppO2 in 0.01Bar (e.g. 150 = 1.50 Bar ppO2)
 set_actual_ppo2:
-	movff		amb_pressure+0,xA+0     ; P_amb in milibar (1000 = 1.000 bar).
-	movff		amb_pressure+1,xA+1
+    SAFE_2BYTE_COPY amb_pressure, xA    ; P_amb in milibar (1000 = 1.000 bar).
 	movlw		d'10'
 	movwf		xB+0
 	clrf		xB+1
@@ -550,8 +549,8 @@ calc_deko_divemode3:
 ;-----------------------------------------------------------------------------
 
 divemode_prepare_flags_for_deco:
-	movff	amb_pressure+0,int_I_pres_respiration+0		; lo  and copy result to deco routine
-	movff	amb_pressure+1,int_I_pres_respiration+1		; hi
+    SAFE_2BYTE_COPY amb_pressure,int_I_pres_respiration ; copy result to deco routine
+
 	GETCUSTOM8	d'11'                           ; Saturation multiplier %
 	movff	WREG,char_I_saturation_multiplier
 	GETCUSTOM8	d'12'                           ; Desaturation multiplier %
@@ -587,9 +586,10 @@ store_dive_data:						; CF20 seconds gone
 	incf_eeprom_address	d'47'				; Macro, that adds 8Bit to eeprom_address:2 with banking at 0x8000
 
 store_dive_data2:
-	movf	rel_pressure+0,W				; store depth with every sample
+    SAFE_2BYTE_COPY rel_pressure, lo
+	movf	lo,W				        ; store depth with every sample
 	call	write_external_eeprom
-	movf	rel_pressure+1,W
+	movf	hi,W
 	call	write_external_eeprom
 
 ;First, find out how many bytes will append to this sample....
@@ -804,9 +804,10 @@ store_dive_decodata:
 	return
 
 store_dive_temperature:
-	movf	temperature+0,W				; append temperature to current sample!
+    SAFE_2BYTE_COPY temperature,lo
+	movf	lo,W			            ; append temperature to current sample!
 	call	write_external_eeprom
-	movf	temperature+1,W
+	movf	hi,W
 	call	write_external_eeprom
 	GETCUSTOM8	d'21'
 	movwf	divisor_temperature			; Reload divisor from CF
@@ -817,12 +818,11 @@ calc_velocity:								; called every two seconds
 	bra		do_not_display_velocity			; display velocity only in divemode
 
 calc_velocity2:
-	movff	amb_pressure+0,sub_a+0
-	movff	amb_pressure+1,sub_a+1
+    SAFE_2BYTE_COPY amb_pressure, sub_a
 	movff	last_pressure+0,sub_b+0
 	movff	last_pressure+1,sub_b+1
-	movff	amb_pressure+0,last_pressure+0	; store old value for velocity
-	movff	amb_pressure+1,last_pressure+1
+	movff	sub_a+0,last_pressure+0	; store old value for velocity
+	movff	sub_a+1,last_pressure+1
 
 	call	sub16						; sub_c = amb_pressure - last_pressure
 
@@ -869,8 +869,7 @@ check_ppO2:							    ; check current ppO2 and display warning if required
 	return
 
 check_ppO2_bail:						; In CC mode but bailout active!
-	movff		amb_pressure+0,xA+0
-	movff		amb_pressure+1,xA+1
+    SAFE_2BYTE_COPY amb_pressure, xA
 	movlw		d'10'
 	movwf		xB+0
 	clrf		xB+1
@@ -958,9 +957,8 @@ check_ppO2_3:
 ;
 check_gas_change:					; Checks if a better gas should be selected (by user)
 	bcf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
-	
-	movff	rel_pressure+0,xA+0			
-	movff	rel_pressure+1,xA+1
+
+    SAFE_2BYTE_COPY rel_pressure,xA
 	movlw	d'100'
 	movwf	xB+0
 	clrf	xB+1
@@ -1439,20 +1437,22 @@ update_divemode1:						; update any second
 	call	set_min_temp				; store min. temp if required
 
 	bcf		temp_changed			; Display temperature?
-	movf	temperature+0,W
+    SAFE_2BYTE_COPY temperature,lo
+	movf	lo,W
 	cpfseq	last_temperature+0
 	bsf		temp_changed			; Yes
-	movf	temperature+1,W
+	movf	hi,W
 	cpfseq	last_temperature+1
 	bsf		temp_changed			; Yes
 	btfsc	temp_changed	
 	call	PLED_temp_divemode		; Displays temperature
 
 	bcf		pres_changed			; Display new depth?
-	movf	amb_pressure+0,W
+    SAFE_2BYTE_COPY amb_pressure, lo
+	movf	lo,W
 	cpfseq	last_pressure+0
 	bsf		pres_changed			; Yes
-	movf	amb_pressure+1,W
+	movf	hi,W
 	cpfseq	last_pressure+1
 	bsf		pres_changed			; Yes
 
@@ -1475,32 +1475,30 @@ update_divemode60:					; update any minute
 set_max_depth:
 	movff	max_pressure+0,sub_a+0
 	movff	max_pressure+1,sub_a+1
-	movff	rel_pressure+0,sub_b+0
-	movff	rel_pressure+1,sub_b+1
-	call	sub16						; sub_c = sub_a - sub_b
+    SAFE_2BYTE_COPY rel_pressure, sub_b
+	call	sub16               ; sub_c = sub_a - sub_b
 								; max_pressure<rel_pressure -> neg_flag=1
 								; rel_pressure<=max_pressure -> neg_flag=0
 	btfss	neg_flag	
 	return
 								;max_pressure<rel_pressure
-	movff	rel_pressure+0,max_pressure+0
-	movff	rel_pressure+1,max_pressure+1
+	movff	sub_b+0,max_pressure+0
+	movff	sub_b+1,max_pressure+1
 	call	PLED_max_pressure			; No, use normal max. depth
 	return
 
 set_min_temp:
 	movff	mintemp+0,sub_a+0
 	movff	mintemp+1,sub_a+1
-	movff	temperature+0,sub_b+0
-	movff	temperature+1,sub_b+1
-	call	sub16						; sub_c = sub_a - sub_b
+    SAFE_2BYTE_COPY temperature,sub_b
+	call	sub16				; sub_c = sub_a - sub_b
 								; mintemp<T -> neg_flag=1
 								; T<=mintemp -> neg_flag=0
 	btfsc	neg_flag	
 	return
 								;mintemp>=T
-	movff	temperature+0,mintemp+0
-	movff	temperature+1,mintemp+1
+	movff	sub_b+0,mintemp+0
+	movff	sub_b+1,mintemp+1
 	return
 
 set_dive_modes:
@@ -1512,8 +1510,7 @@ set_dive_modes:
 	GETCUSTOM8	.0					; loads dive_threshold in WREG
 	movwf	sub_a+0					; dive_treshold is in cm
 	clrf	sub_a+1
-	movff	rel_pressure+0,sub_b+0
-	movff	rel_pressure+1,sub_b+1
+    SAFE_2BYTE_COPY rel_pressure, sub_b
 	call	sub16					; sub_c = sub_a - sub_b
 	
 	btfss	neg_flag	
@@ -1536,8 +1533,7 @@ set_dive_modes3:
 	movwf	sub_a+1
 	movlw	LOW		d'1075'			; hard-wired 1075mBar threshold
 	movwf	sub_a+0
-	movff	rel_pressure+0,sub_b+0
-	movff	rel_pressure+1,sub_b+1
+    SAFE_2BYTE_COPY rel_pressure, sub_b
 	call	sub16					; sub_c = sub_a - sub_b
 	
 	btfss	neg_flag	
@@ -1575,8 +1571,7 @@ calc_average_depth:
 	rcall	reset_average1			; Reset the resettable average depth
 
 	; 1. Add new 2xdepth to the Sum of depths registers
-	movff	rel_pressure+0,b0_lo
-	movff	rel_pressure+1,b0_hi	; Buffer...
+    SAFE_2BYTE_COPY rel_pressure, b0_lo	; Buffer...
 
 	movf	b0_lo,w
 	addwf	average_depth_hold+0,F
@@ -1731,8 +1726,7 @@ diveloop_boot_1:
 	movff	WREG,int_I_pres_surface+1   ; HIGH copy surfacepressure to deco routine
 
 diveloop_boot_2:
-	movff	temperature+0,mintemp+0     ; Reset Min-Temp registers
-	movff	temperature+1,mintemp+1     ; Reset Min-Temp registers
+	SAFE_2BYTE_COPY	temperature,mintemp ; Reset Min-Temp registers
 
 ; Init profile recording parameters	
 	GETCUSTOM8	d'20'                   ; sample rate

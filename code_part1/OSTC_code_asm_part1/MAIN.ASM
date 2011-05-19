@@ -82,6 +82,7 @@ HighInt:
 osct_asm	code
 #include    strings.inc
 
+#include	isr.asm				; Interrupt service routine (RTC&Sensor)
 #include	displaytext.asm		; sends texts to wordprocessor
 #include	math.asm			; mathematical functions
 #include 	wait.asm			; waitroutines
@@ -102,7 +103,6 @@ osct_asm	code
 #include	menu_ppO2.asm		; Constant ppO2 setup menu
 #include 	menu_battery.asm	; Submenu "Battery Info"
 #include	menu_gassetup.asm	; Menu "Gas Setup"
-#include	isr.asm				; Interrupt service routine (RTC&Sensor)
 #include	surfmode.asm		; Mainroutines for Surfacemode
 #include	divemode.asm		; Mainroutines for Divemode
 #include	divemode_menu.asm	; Underwater menu

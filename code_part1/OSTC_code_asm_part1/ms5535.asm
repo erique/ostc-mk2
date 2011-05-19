@@ -20,6 +20,9 @@
 ; 2005-09-26: Written by Matthias Heinrichs, info@heinrichsweikamp.com
 ; 2008-08-21: MH last updated, with second order compensation.
 ; 2011-01-19: jDG Clean up using true signed arithmetics.
+; 2011-05-19: jDG Avegaring temperature and amb_pressure in private variable,
+;                 Use signed 16bit value for temperature (compat with avg !).
+;
 ; known bugs:
 ; ToDo: 
 

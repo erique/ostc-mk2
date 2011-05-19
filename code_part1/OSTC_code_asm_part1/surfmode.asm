@@ -281,8 +281,7 @@ calc_deko_surfmode:
 	movwf	wait_temp						; Use as buffer
 	movff	wait_temp,char_I_N2_ratio		; No He at the Surface
 
-	movff	amb_pressure+0,int_I_pres_respiration+0		; copy surface air pressure to deco routine
-	movff	amb_pressure+1,int_I_pres_respiration+1		
+    SAFE_2BYTE_COPY amb_pressure,int_I_pres_respiration ; copy surface air pressure to deco routine
 	GETCUSTOM8	d'11'									; Saturation multiplier %
 	movff	WREG,char_I_saturation_multiplier
 	GETCUSTOM8	d'12'									; Desaturation multiplier %

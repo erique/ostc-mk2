@@ -105,8 +105,7 @@ PLED_color_code1:				; Color-codes the output, if required
 
 PLED_color_code_gaslist:				; %O2 in "EEDATA"
 ; Check very high ppO2 manually
-	movff		amb_pressure+0,xA+0
-	movff		amb_pressure+1,xA+1
+    SAFE_2BYTE_COPY amb_pressure,xA
 	movlw		d'10'
 	movwf		xB+0
 	clrf		xB+1
@@ -143,8 +142,7 @@ PLED_color_code_ceiling:
 	cpfseq	lo					; =1?
 	bra		PLED_color_code_ceiling1	; No, Set to default color
 
-	movff	rel_pressure+1,hi
-	movff	rel_pressure+0,lo
+    SAFE_2BYTE_COPY rel_pressure, lo
 	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
 	movff	hi,xA+1
 	movff	lo,xA+0
@@ -168,8 +166,7 @@ PLED_color_code_ceiling2:
 PLED_color_code_depth:
 	movff	hi,hi_temp
 	movff	lo,lo_temp
-	movff	rel_pressure+1,hi
-	movff	rel_pressure+0,lo
+    SAFE_2BYTE_COPY rel_pressure, lo
 	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
 	movff	lo,sub_a+0
 	movff	hi,sub_a+1
@@ -839,15 +836,13 @@ PLED_update_raw_data:
 	WIN_LEFT	.0
 	WIN_TOP		.177
 	STRCPY  "amb:"
-	movff	amb_pressure+0,lo
-	movff	amb_pressure+1,hi
+    SAFE_2BYTE_COPY amb_pressure, lo
 	output_16
 	call	word_processor
 	WIN_LEFT	.80
 	WIN_TOP		.177
 	STRCPY  "temp:"
-	movff	temperature+0,lo
-	movff	temperature+1,hi
+    SAFE_2BYTE_COPY temperature, lo
 	output_16
 	call	word_processor
 
@@ -948,16 +943,15 @@ PLED_simulator_mask:
 	
 PLED_temp_surfmode:
 	ostc_debug	'e'
-	movff	temperature+0,last_temperature+0
-	movff	temperature+1,last_temperature+1
+    SAFE_2BYTE_COPY    temperature, last_temperature
 	WIN_TOP		.100
 	WIN_LEFT	.1
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0                      ; Init new Wordprocessor
 	call	PLED_standard_color
 
-	movff	temperature+1,hi
-	movff	temperature+0,lo
+	movff	last_temperature+1,hi
+	movff	last_temperature+0,lo
 	lfsr	FSR2,letter
 
     btfss   hi,7                        ; Negative temperature ?
@@ -983,8 +977,7 @@ PLED_temp_divemode:
 	ostc_debug	'u'		; Sends debug-information to screen if debugmode active
 
 ; temperature
-	movff	temperature+0,last_temperature+0
-	movff	temperature+1,last_temperature+1
+    SAFE_2BYTE_COPY temperature, last_temperature
 
 	WIN_TOP		.216
 	WIN_LEFT	.50
@@ -992,8 +985,9 @@ PLED_temp_divemode:
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
 
-	movff	temperature+1,hi
-	movff	temperature+0,lo
+	movff	last_temperature+1,hi
+	movff	last_temperature+0,lo
+
 	lfsr	FSR2,letter
 
     btfss   hi,7                        ; Negative temperature ?
@@ -1564,8 +1558,7 @@ PLED_confirmbox_move_cursor2:
 
 PLED_depth:
 	ostc_debug	'r'		; Sends debug-information to screen if debugmode active
-	movff	rel_pressure+1,hi
-	movff	rel_pressure+0,lo
+    SAFE_2BYTE_COPY rel_pressure, lo
 	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
 
 	movlw	.039
@@ -1625,8 +1618,7 @@ pled_depth3:
 	WIN_LEFT	.40
 	PLED_color_code	warn_depth		; Color-code the output
 
-	movff	rel_pressure+1,hi
-	movff	rel_pressure+0,lo
+    SAFE_2BYTE_COPY rel_pressure, lo
 	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
 	
 	STRCPY  "."
@@ -1777,8 +1769,7 @@ update_surf_press:
 	call	PLED_warnings_color		; Yes, display ambient pressure in red
 
 	lfsr	FSR2,letter
-	movff	amb_pressure+0,lo
-	movff	amb_pressure+1,hi
+    SAFE_2BYTE_COPY amb_pressure, lo
 	bsf		leftbind
 	output_16
 	bcf		leftbind
@@ -2998,8 +2989,8 @@ PLED_const_ppO2_value:
 
 PLED_const_ppO2_value2:				; Display SetPoint
 ;Show fixed SP value
-	movff		amb_pressure+0,xA+0
-	movff		amb_pressure+1,xA+1
+    SAFE_2BYTE_COPY amb_pressure, xA
+
 	movlw		d'10'
 	movwf		xB+0
 	clrf		xB+1
@@ -3019,8 +3010,7 @@ PLED_const_ppO2_value2:				; Display SetPoint
 
 PLED_const_ppO2_value1:
 	; char_I_const_ppO2 < ppO2[Diluent] -> Not physically possible! -> Display actual value!
-	movff		amb_pressure+0,xA+0
-	movff		amb_pressure+1,xA+1
+    SAFE_2BYTE_COPY amb_pressure, xA
 	movlw		d'10'
 	movwf		xB+0
 	clrf		xB+1

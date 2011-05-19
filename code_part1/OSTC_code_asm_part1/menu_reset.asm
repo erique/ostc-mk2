@@ -284,8 +284,7 @@ do_menu_reset_decodata2:
 ; reset deco data
 	call	PLED_ClearScreen
 	DISPLAYTEXT	.25					; "Reset..."
-	movff	amb_pressure+0,int_I_pres_respiration+0		; copy surface air pressure to deco routine
-	movff	amb_pressure+1,int_I_pres_respiration+1		
+    SAFE_2BYTE_COPY amb_pressure,int_I_pres_respiration	; copy surface air pressure to deco routine
 	call	deco_clear_tissue
 	movlb	b'00000001'				; RAM Bank1 selected
 	goto	restart					; done. quit to surfmode
@@ -303,8 +302,7 @@ do_menu_reset_all2:
 
 reset_start:
 ; reset deco data
-	movff	amb_pressure+0,int_I_pres_respiration+0		; copy surface air pressure to deco routine
-	movff	amb_pressure+1,int_I_pres_respiration+1		
+    SAFE_2BYTE_COPY amb_pressure,int_I_pres_respiration	; copy surface air pressure to deco routine
 	call	deco_clear_tissue
 	movlb	b'00000001'				; RAM Bank1 selected
 

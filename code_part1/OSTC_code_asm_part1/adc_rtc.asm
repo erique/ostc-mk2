@@ -72,9 +72,9 @@ get_battery_voltage2:
 	movwf	fatal_error_code		; Battery very low!
 	bsf		enter_error_sleep		; enter error routine
 
-get_battery_voltage3:	
-	movff	amb_pressure+0,sub_b+0	
-	movff	amb_pressure+1,sub_b+1
+get_battery_voltage3:
+    SAFE_2BYTE_COPY amb_pressure, sub_b
+
 	movlw	LOW		d'15001'			; must be lower then 15001mBar
 	movwf	sub_a+0
 	movlw	HIGH	d'15001'
@@ -136,9 +136,10 @@ get_battery_voltage_reset:
 	write_int_eeprom	d'43'
 	movff	year,EEDATA
 	write_int_eeprom	d'44'
-	movff	temperature+0,EEDATA
+    SAFE_2BYTE_COPY temperature,lo
+	movff	lo,EEDATA
 	write_int_eeprom	d'45'
-	movff	temperature+1,EEDATA
+	movff	hi,EEDATA
 	write_int_eeprom	d'46'
 	; Reset charge statistics
 	clrf	EEDATA
@@ -150,9 +151,10 @@ get_battery_voltage_reset:
 	write_int_eeprom	d'52'		; total complete cycles
 	write_int_eeprom	d'53'		; total complete cycles
 	; Reset temperature extremas
-	movff	temperature+0,EEDATA	; Reset mimimum extrema
+    SAFE_2BYTE_COPY temperature,lo
+	movff	lo,EEDATA	; Reset mimimum extrema
 	write_int_eeprom	d'54'
-	movff	temperature+1,EEDATA
+	movff	hi,EEDATA
 	write_int_eeprom	d'55'
 	movff	month,EEDATA
 	write_int_eeprom	d'56'
@@ -160,9 +162,9 @@ get_battery_voltage_reset:
 	write_int_eeprom	d'57'
 	movff	year,EEDATA
 	write_int_eeprom	d'58'
-	movff	temperature+0,EEDATA	; Reset maximum extrema
+	movff	lo,EEDATA	; Reset maximum extrema
 	write_int_eeprom	d'59'
-	movff	temperature+1,EEDATA
+	movff   hi,EEDATA
 	write_int_eeprom	d'60'
 	movff	month,EEDATA
 	write_int_eeprom	d'61'
@@ -192,9 +194,10 @@ get_battery_no_init:
 	write_int_eeprom	d'43'
 	movff	year,EEDATA
 	write_int_eeprom	d'44'
-	movff	temperature+0,EEDATA
+    SAFE_2BYTE_COPY temperature,lo
+	movff	lo,EEDATA
 	write_int_eeprom	d'45'
-	movff	temperature+1,EEDATA
+	movff	hi,EEDATA
 	write_int_eeprom	d'46'
 	return
 

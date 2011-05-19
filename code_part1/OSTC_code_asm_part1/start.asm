@@ -67,12 +67,11 @@ wait_start_pressure:
 	call	pressuretest_sleep_fast	; Gets pressure without averaging (faster!)
 	bcf		sleepmode				; Normal mode again
 
-	movff	amb_pressure+0,last_surfpressure+0
-	movff	amb_pressure+1,last_surfpressure+1
-	movff	amb_pressure+0,last_surfpressure_15min+0
-	movff	amb_pressure+1,last_surfpressure_15min+1
-	movff	amb_pressure+0,last_surfpressure_30min+0
-	movff	amb_pressure+1,last_surfpressure_30min+1	; Rests all airpressure registers
+    SAFE_2BYTE_COPY amb_pressure, last_surfpressure
+	movff	last_surfpressure+0,last_surfpressure_15min+0
+	movff	last_surfpressure+1,last_surfpressure_15min+1
+	movff	last_surfpressure+0,last_surfpressure_30min+0
+	movff	last_surfpressure+1,last_surfpressure_30min+1	; Rests all airpressure registers
 
 ; Extra power-up reset (JeanDo)
 	ifdef	TESTING
@@ -91,10 +90,9 @@ wait_start_pressure:
 	movff	WREG,char_I_saturation_multiplier
 	GETCUSTOM8	d'12'					    ; Desaturation multiplier %
 	movff	WREG,char_I_desaturation_multiplier
-	movff	amb_pressure+0,int_I_pres_respiration+0 ; copy for deco routine
-	movff	amb_pressure+1,int_I_pres_respiration+1		
-	movff	amb_pressure+0,int_I_pres_surface+0     ; copy for desat routine
-	movff	amb_pressure+1,int_I_pres_surface+1		
+    SAFE_2BYTE_COPY amb_pressure,int_I_pres_respiration ; copy for deco routine
+	movff	int_I_pres_respiration+0,int_I_pres_surface+0     ; copy for desat routine
+	movff	int_I_pres_respiration+1,int_I_pres_surface+1		
 
 	call	deco_clear_tissue			    ;
 	call	deco_calc_desaturation_time     ; calculate desaturation time

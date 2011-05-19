@@ -28,7 +28,24 @@
 ; and provides accurate pressure (+/-1mBar stable) and temperature (0.1C stable)
 
 ;=============================================================================
+; Copy a 16bit value from ISR modified registers to main registers.
+; 
+; Because the ISR can happend at any time, the read should be redone if bytes
+; changed inbetween.
+;
+; NOTE: Destination might be in any bank, so be BANK SAFE on b
 
+SAFE_2BYTE_COPY MACRO  a, b
+        local   retry
+retry:
+        movf    a+1,W                   ; High byte in W, (CURRENT BANK ONLY)
+        movff   WREG,b+1                ; and destination.
+        movff   a,b                     ; Copy low byte.
+        xorwf   a+1,W                   ; High byte changed ??? (CURRENT BANK ONLY)
+        bnz     retry
+        ENDM
+
+;=============================================================================
 uartint:
 		btfsc	simulatormode_active		; are we in simulatormode?
 		bra		simulator_int				; Yes, reading is depth in m!
@@ -178,6 +195,10 @@ sensor_int_pre:
 ; NOTE: averaging (4 successive value, as recommended in the MS5535 datasheet)
 ;       is done on private variables, to avoid trashing data while reading it
 ;       from the main code.
+;
+; NOTE: Because there is no atomic 16bits load/stores, we need to check twice
+;       the read data is correct. Ie. SAFE_2BYTE_COPY is mandatory to get
+;       amb_pressure, temperaturen or rel_pressure
 ;
 sensor_int:
 		btfsc		no_sensor_int			; No sensor interrupt (because it's addressed during sleep)

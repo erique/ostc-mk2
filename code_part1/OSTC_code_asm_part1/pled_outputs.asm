@@ -953,15 +953,24 @@ PLED_temp_surfmode:
 	WIN_TOP		.100
 	WIN_LEFT	.1
 	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
+	WIN_INVERT	.0                      ; Init new Wordprocessor
 	call	PLED_standard_color
 
-	lfsr	FSR2,letter
-	movlw	'-'
-	btfsc	neg_temp			; Show "-"?
-	movwf	POSTINC2			; Yes
-	movff	temperature+0,lo
 	movff	temperature+1,hi
+	movff	temperature+0,lo
+	lfsr	FSR2,letter
+
+    btfss   hi,7                        ; Negative temperature ?
+    bra     PLED_temp_surfmode_1        ; No: continue
+
+	PUTC	'-'                         ; Display "-"
+
+    comf    hi                          ; Then, 16bit sign changes.
+    negf    lo
+    btfsc   STATUS,C
+    incf    hi
+
+PLED_temp_surfmode_1:
 	movlw	d'3'
 	movwf	ignore_digits
 	bsf		leftbind			; left orientated output
@@ -983,12 +992,21 @@ PLED_temp_divemode:
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
 
-	lfsr	FSR2,letter
-	movlw	'-'
-	btfsc	neg_temp			; Show "-"?
-	movwf	POSTINC2			; Yes
-	movff	temperature+0,lo
 	movff	temperature+1,hi
+	movff	temperature+0,lo
+	lfsr	FSR2,letter
+
+    btfss   hi,7                        ; Negative temperature ?
+    bra     PLED_temp_divemode_1        ; No: continue
+
+	PUTC	'-'                         ; Display "-"
+
+    comf    hi                          ; Then, 16bit sign changes.
+    negf    lo
+    btfsc   STATUS,C
+    incf    hi
+
+PLED_temp_divemode_1:
 	movlw	d'3'
 	movwf	ignore_digits
 	bsf		leftbind			; left orientated output

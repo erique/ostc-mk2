@@ -671,7 +671,7 @@ static void read_buhlmann_times(PARAMETER char period)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// calc_next_decodepth_GF
+// calc_nextdecodepth
 //
 // new in v.102
 //
@@ -1056,7 +1056,7 @@ static unsigned char gas_switch_deepest(void)
         overlay unsigned char j;
 
         // Loop over all enabled gas, to find the deepest one,
-        // above las gas, but below temp_depth_limit.
+        // above last used gas, but below temp_depth_limit.
         for(j=0; j<NUM_GAS; ++j)
         {
             // Gas not (yet) allowed ? Skip !

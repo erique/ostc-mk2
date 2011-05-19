@@ -53,22 +53,18 @@ sub16:
 	movf   	sub_b+1, W              ; Get the Value to be Subbed
 	subwfb 	sub_a+1, W
 	movwf  	sub_c+1
+
 	btfsc	STATUS,C
 	return							; result positve
-;  sub_c = sub_a - sub_b
-	bsf		neg_flag				; result negative
-	movff	sub_c+0,sub_b+0
-	movff	sub_c+1,sub_b+1
-	setf	sub_a
-	setf	sub_a+1
-	movf   	sub_b+0, W             	;  Get Value to be subtracted
-	subwf  	sub_a+0, W             	;  Do the High Byte
-	movwf  	sub_c+0
-	movf   	sub_b+1, W               ;  Get the Value to be Subbed
-	subwfb  sub_a+1, W
-	movwf  	sub_c+1
-    return        
 
+	bsf		neg_flag				; result negative
+
+    comf    sub_c+1                 ; 16bit sign change.
+    negf    sub_c+0
+    btfsc   STATUS,C                ; Carry to propagate ?
+    incf    sub_c+1,F               ; YES: do it.
+
+    return        
 
 mult16x16:		;xA*xB=xC
 	clrf    xC+2        	  ;  Clear the High-Order Bits

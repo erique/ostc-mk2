@@ -2003,7 +2003,7 @@ PLED_max_pressure:
 
 	movlw	.039
 	cpfslt	hi
-		bra		maxdepth_greater_99_84mtr
+    bra		maxdepth_greater_99_84mtr
 
 ; Display normal "xx.y"
 	lfsr	FSR2,letter

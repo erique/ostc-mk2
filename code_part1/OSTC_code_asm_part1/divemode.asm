@@ -1436,16 +1436,16 @@ update_divemode1:						; update any second
 	btfsc	divemode
 	call	set_min_temp				; store min. temp if required
 
-	bcf		temp_changed			; Display temperature?
+	bcf		temp_changed			    ; Display temperature?
     SAFE_2BYTE_COPY temperature,lo
 	movf	lo,W
 	cpfseq	last_temperature+0
-	bsf		temp_changed			; Yes
+	bsf		temp_changed			    ; Yes
 	movf	hi,W
 	cpfseq	last_temperature+1
-	bsf		temp_changed			; Yes
+	bsf		temp_changed			    ; Yes
 	btfsc	temp_changed	
-	call	PLED_temp_divemode		; Displays temperature
+	call	PLED_temp_divemode		    ; Displays temperature
 
 	bcf		pres_changed			; Display new depth?
     SAFE_2BYTE_COPY amb_pressure, lo
@@ -1512,7 +1512,7 @@ set_dive_modes:
 	clrf	sub_a+1
     SAFE_2BYTE_COPY rel_pressure, sub_b
 	call	sub16					; sub_c = sub_a - sub_b
-	
+
 	btfss	neg_flag	
 	bra		set_dive_modes2			; too shallow (rel_pressure<dive_threshold)
 

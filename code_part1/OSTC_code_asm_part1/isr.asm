@@ -33,15 +33,17 @@
 ; Because the ISR can happend at any time, the read should be redone if bytes
 ; changed inbetween.
 ;
-; NOTE: Destination might be in any bank, so be BANK SAFE on b
-
-SAFE_2BYTE_COPY MACRO  a, b
+; Trashes: WREG and TABLAT
+; NOTE: Destination might be in any bank, so be BANK SAFE.
+;
+SAFE_2BYTE_COPY MACRO  from, to
         local   retry
 retry:
-        movf    a+1,W                   ; High byte in W, (CURRENT BANK ONLY)
-        movff   WREG,b+1                ; and destination.
-        movff   a,b                     ; Copy low byte.
-        xorwf   a+1,W                   ; High byte changed ??? (CURRENT BANK ONLY)
+        movff   from+1,WREG             ; High byte in W.
+        movff   WREG,to+1               ; and destination.
+        movff   from+0,to+0             ; Copy low byte.
+        movff   from+1,TABLAT           ; another bank-safe read.
+        xorwf   TABLAT,W                ; High byte changed ?
         bnz     retry
         ENDM
 

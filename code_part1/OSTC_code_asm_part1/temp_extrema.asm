@@ -28,15 +28,14 @@ check_temp_extrema:			; called once every minute from Sleeploop, Surfloop and Di
 	movff	EEDATA,sub_b+0
 	read_int_eeprom d'55'
 	movff	EEDATA,sub_b+1
-	movff	temperature+0,sub_a+0
-	movff	temperature+1,sub_a+1
+	SAFE_2BYTE_COPY	temperature,sub_a
 	call	sub16					; sub_c = sub_a - sub_b
 	btfss	neg_flag				; new lowest temperature ?
 	bra		check_temp_extrema_high	
 	; Yes, store new value together with the date
-	movff	temperature+0,EEDATA
+	movff	sub_a+0,EEDATA
 	write_int_eeprom	d'54'
-	movff	temperature+1,EEDATA
+	movff	sub_a+1,EEDATA
 	write_int_eeprom	d'55'
 	movff	month,EEDATA
 	write_int_eeprom	d'56'
@@ -44,21 +43,22 @@ check_temp_extrema:			; called once every minute from Sleeploop, Surfloop and Di
 	write_int_eeprom	d'57'
 	movff	year,EEDATA
 	write_int_eeprom	d'58'
+
 	; Now check high extrema
 check_temp_extrema_high:
 	read_int_eeprom d'59'			; get highest temperature so far
 	movff	EEDATA,sub_b+0
 	read_int_eeprom d'60'
 	movff	EEDATA,sub_b+1
-	movff	temperature+0,sub_a+0
-	movff	temperature+1,sub_a+1
+	SAFE_2BYTE_COPY	temperature,sub_a
 	call	sub16					; sub_c = sub_a - sub_b
 	btfsc	neg_flag				; new highest temperature ?
 	return							; no, quit!
+
 	; Yes, store new value together with the date
-	movff	temperature+0,EEDATA
+	movff	sub_a+0,EEDATA
 	write_int_eeprom	d'59'
-	movff	temperature+1,EEDATA
+	movff	sub_a+1,EEDATA
 	write_int_eeprom	d'60'
 	movff	month,EEDATA
 	write_int_eeprom	d'61'

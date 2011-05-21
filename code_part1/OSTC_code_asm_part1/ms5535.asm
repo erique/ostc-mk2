@@ -20,6 +20,9 @@
 ; 2005-09-26: Written by Matthias Heinrichs, info@heinrichsweikamp.com
 ; 2008-08-21: MH last updated, with second order compensation.
 ; 2011-01-19: jDG Clean up using true signed arithmetics.
+; 2011-05-19: jDG Avegaring temperature and amb_pressure in private variable,
+;                 Use signed 16bit value for temperature (compat with avg !).
+;
 ; known bugs:
 ; ToDo: 
 
@@ -27,7 +30,7 @@
 ; Expose internal variables, to ease debug:
     global D1, D2
     global C1, C2, C3, C4, C5, C6
-    global xdT, xdT2, OFF, SENS, amb_pressure, temperature
+    global xdT, xdT2, OFF, SENS, amb_pressure_avg, temperature_avg
 
 ;=============================================================================
 calculate_compensation:
@@ -151,20 +154,23 @@ calc_loop_1:
     movlw   .12-.8                      ; a 12bit shift = 1 byte + 4 bits.
     call    isr_shift_C31
 
-    movlw   LOW(.1000)                  ; add 1000, and save into amb_pressure
-    addwf   isr_xC+1,W
-    movwf   amb_pressure+0
+    movlw   LOW(.1000)                  ; add 1000
+    addwf   isr_xC+1,F
     movlw   HIGH(.1000)
-    addwfc  isr_xC+2,W
-    movwf   amb_pressure+1
+    addwfc  isr_xC+2,F
 
 	btfss	simulatormode_active		; are we in simulator mode?
-	bra		calc_pressure_done			; no
+	bra		calc_compensation_2			; no
 
-	movff	sim_pressure+0,amb_pressure+0	; override readings with simulator values
-	movff	sim_pressure+1,amb_pressure+1
+	movff	sim_pressure+0,isr_xC+1	    ; override readings with simulator values
+	movff	sim_pressure+1,isr_xC+2
 	
-calc_pressure_done:
+calc_compensation_2:
+    movf    isr_xC+1,W                  ; Then sum_up to pressure averaging buffer.
+    addwf   amb_pressure_avg+0,F
+    movf    isr_xC+2,W
+    addwfc  amb_pressure_avg+1,F
+
     ; calculate temp = 200 + dT*(C6+100)/2^11
     movlw   LOW(.100)                   ; C6 + 100 --> A
     addwf   C6+0,W
@@ -179,23 +185,16 @@ calc_pressure_done:
     movlw   .11-.8                      ; A 12bit shift = 1 byte + 3 bits.
     call    isr_shift_C31
 
-    movlw   LOW(.200)                   ; Add 200, and save into temperature
-    addwf   isr_xC+1,W
-    movwf   temperature+0
+    movlw   LOW(.200)                   ; Add 200
+    addwf   isr_xC+1,F
     movlw   HIGH(.200)
-    addwfc  isr_xC+2,W
-    movwf   temperature+1
+    addwfc  isr_xC+2,F
 
-    bcf     neg_temp
-    bnn     calc_pos_temp               ; Is Temp° negativ ?
-    
-    bsf     neg_temp                    ; Yes: set flag and store -temp
-    comf    temperature+1
-    negf    temperature+0
-    btfsc   STATUS,C
-    incf    temperature+1
+    movf    isr_xC+1,W
+    addwf   temperature_avg+0,F
+    movf    isr_xC+2,W
+    addwfc  temperature_avg+1,F
 
-calc_pos_temp:
 	return			                    ; Fertig mit allem
 
 ;=============================================================================

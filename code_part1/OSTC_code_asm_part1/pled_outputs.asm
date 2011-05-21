@@ -105,8 +105,7 @@ PLED_color_code1:				; Color-codes the output, if required
 
 PLED_color_code_gaslist:				; %O2 in "EEDATA"
 ; Check very high ppO2 manually
-	movff		amb_pressure+0,xA+0
-	movff		amb_pressure+1,xA+1
+    SAFE_2BYTE_COPY amb_pressure,xA
 	movlw		d'10'
 	movwf		xB+0
 	clrf		xB+1
@@ -143,8 +142,7 @@ PLED_color_code_ceiling:
 	cpfseq	lo					; =1?
 	bra		PLED_color_code_ceiling1	; No, Set to default color
 
-	movff	rel_pressure+1,hi
-	movff	rel_pressure+0,lo
+    SAFE_2BYTE_COPY rel_pressure, lo
 	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
 	movff	hi,xA+1
 	movff	lo,xA+0
@@ -168,8 +166,7 @@ PLED_color_code_ceiling2:
 PLED_color_code_depth:
 	movff	hi,hi_temp
 	movff	lo,lo_temp
-	movff	rel_pressure+1,hi
-	movff	rel_pressure+0,lo
+    SAFE_2BYTE_COPY rel_pressure, lo
 	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
 	movff	lo,sub_a+0
 	movff	hi,sub_a+1
@@ -839,15 +836,13 @@ PLED_update_raw_data:
 	WIN_LEFT	.0
 	WIN_TOP		.177
 	STRCPY  "amb:"
-	movff	amb_pressure+0,lo
-	movff	amb_pressure+1,hi
+    SAFE_2BYTE_COPY amb_pressure, lo
 	output_16
 	call	word_processor
 	WIN_LEFT	.80
 	WIN_TOP		.177
 	STRCPY  "temp:"
-	movff	temperature+0,lo
-	movff	temperature+1,hi
+    SAFE_2BYTE_COPY temperature, lo
 	output_16
 	call	word_processor
 
@@ -948,20 +943,28 @@ PLED_simulator_mask:
 	
 PLED_temp_surfmode:
 	ostc_debug	'e'
-	movff	temperature+0,last_temperature+0
-	movff	temperature+1,last_temperature+1
+    SAFE_2BYTE_COPY    temperature, last_temperature
 	WIN_TOP		.100
 	WIN_LEFT	.1
 	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
+	WIN_INVERT	.0                      ; Init new Wordprocessor
 	call	PLED_standard_color
 
+	movff	last_temperature+1,hi
+	movff	last_temperature+0,lo
 	lfsr	FSR2,letter
-	movlw	'-'
-	btfsc	neg_temp			; Show "-"?
-	movwf	POSTINC2			; Yes
-	movff	temperature+0,lo
-	movff	temperature+1,hi
+
+    btfss   hi,7                        ; Negative temperature ?
+    bra     PLED_temp_surfmode_1        ; No: continue
+
+	PUTC	'-'                         ; Display "-"
+
+    comf    hi                          ; Then, 16bit sign changes.
+    negf    lo
+    btfsc   STATUS,C
+    incf    hi
+
+PLED_temp_surfmode_1:
 	movlw	d'3'
 	movwf	ignore_digits
 	bsf		leftbind			; left orientated output
@@ -974,8 +977,7 @@ PLED_temp_divemode:
 	ostc_debug	'u'		; Sends debug-information to screen if debugmode active
 
 ; temperature
-	movff	temperature+0,last_temperature+0
-	movff	temperature+1,last_temperature+1
+    SAFE_2BYTE_COPY temperature, last_temperature
 
 	WIN_TOP		.216
 	WIN_LEFT	.50
@@ -983,12 +985,22 @@ PLED_temp_divemode:
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
 
+	movff	last_temperature+1,hi
+	movff	last_temperature+0,lo
+
 	lfsr	FSR2,letter
-	movlw	'-'
-	btfsc	neg_temp			; Show "-"?
-	movwf	POSTINC2			; Yes
-	movff	temperature+0,lo
-	movff	temperature+1,hi
+
+    btfss   hi,7                        ; Negative temperature ?
+    bra     PLED_temp_divemode_1        ; No: continue
+
+	PUTC	'-'                         ; Display "-"
+
+    comf    hi                          ; Then, 16bit sign changes.
+    negf    lo
+    btfsc   STATUS,C
+    incf    hi
+
+PLED_temp_divemode_1:
 	movlw	d'3'
 	movwf	ignore_digits
 	bsf		leftbind			; left orientated output
@@ -1546,8 +1558,7 @@ PLED_confirmbox_move_cursor2:
 
 PLED_depth:
 	ostc_debug	'r'		; Sends debug-information to screen if debugmode active
-	movff	rel_pressure+1,hi
-	movff	rel_pressure+0,lo
+    SAFE_2BYTE_COPY rel_pressure, lo
 	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
 
 	movlw	.039
@@ -1607,8 +1618,7 @@ pled_depth3:
 	WIN_LEFT	.40
 	PLED_color_code	warn_depth		; Color-code the output
 
-	movff	rel_pressure+1,hi
-	movff	rel_pressure+0,lo
+    SAFE_2BYTE_COPY rel_pressure, lo
 	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
 	
 	STRCPY  "."
@@ -1759,8 +1769,7 @@ update_surf_press:
 	call	PLED_warnings_color		; Yes, display ambient pressure in red
 
 	lfsr	FSR2,letter
-	movff	amb_pressure+0,lo
-	movff	amb_pressure+1,hi
+    SAFE_2BYTE_COPY amb_pressure, lo
 	bsf		leftbind
 	output_16
 	bcf		leftbind
@@ -1994,7 +2003,7 @@ PLED_max_pressure:
 
 	movlw	.039
 	cpfslt	hi
-		bra		maxdepth_greater_99_84mtr
+    bra		maxdepth_greater_99_84mtr
 
 ; Display normal "xx.y"
 	lfsr	FSR2,letter
@@ -2789,7 +2798,7 @@ PLED_tsg_2:
 PLED_no_graph_grid:
     
     ;---- Draw N2 Tissues ----------------------------------------------------
-	lfsr	FSR2, char_O_tissue_saturation+.000	; N2
+	lfsr	FSR2, char_O_tissue_N2_saturation
 	movlw	d'16'
 	movwf	wait_temp                   ; 16 tissues
 	clrf	waitms_temp                 ; Row offset
@@ -2835,7 +2844,7 @@ PLED_tissue_saturation_graph3:
 	bra		PLED_tissue_saturation_graph3
 
     ;---- Draw He Tissues ----------------------------------------------------
-	lfsr	FSR2, char_O_tissue_saturation+.016	; He
+	lfsr	FSR2, char_O_tissue_He_saturation
 	movlw	d'16'
 	movwf	wait_temp                   ; 16 tissues
 	clrf	waitms_temp                 ; Row offset
@@ -2895,13 +2904,9 @@ PLED_tissue_saturation_graph2:
 
 	movff	char_O_gtissue_no,wait_temp			; used as temp
 
-	lfsr	FSR1,char_O_tissue_saturation+0
-	incf	wait_temp,F			; make 1-16 of 0-15
-
-PLED_tissue_saturation_graph4:		; point to leading tissue...
-	movff	POSTINC1,lo			; copy/overwrite to lo register
-	decfsz	wait_temp,F			; count until zero
-	bra		PLED_tissue_saturation_graph4	;loop
+	lfsr	FSR1,char_O_tissue_N2_saturation
+	movf	wait_temp,W			; W <- 0-15
+	movff	PLUSW1,lo			; lo <- FSR1[W]
 
 	WIN_TOP		.62
 	WIN_FONT	FT_SMALL
@@ -2984,8 +2989,8 @@ PLED_const_ppO2_value:
 
 PLED_const_ppO2_value2:				; Display SetPoint
 ;Show fixed SP value
-	movff		amb_pressure+0,xA+0
-	movff		amb_pressure+1,xA+1
+    SAFE_2BYTE_COPY amb_pressure, xA
+
 	movlw		d'10'
 	movwf		xB+0
 	clrf		xB+1
@@ -3005,8 +3010,7 @@ PLED_const_ppO2_value2:				; Display SetPoint
 
 PLED_const_ppO2_value1:
 	; char_I_const_ppO2 < ppO2[Diluent] -> Not physically possible! -> Display actual value!
-	movff		amb_pressure+0,xA+0
-	movff		amb_pressure+1,xA+1
+    SAFE_2BYTE_COPY amb_pressure, xA
 	movlw		d'10'
 	movwf		xB+0
 	clrf		xB+1
@@ -3230,12 +3234,9 @@ PLED_show_leading_tissue2:
 
     STRCAT_PRINT  ") "
 
-	lfsr	FSR1,char_O_tissue_saturation+0
-	incf	wait_temp,F			; make 1-16 of 0-15
-PLED_show_leading_tissue3:		; point to leading tissue...
-	movff	POSTINC1,lo			; copy/overwrite to lo register
-	decfsz	wait_temp,F			; count until zero
-	bra		PLED_show_leading_tissue3	;loop
+	lfsr	FSR1,char_O_tissue_N2_saturation
+	movf	wait_temp,W			; W <- 0-15
+	movff	PLUSW1,lo			; lo <- FSR1[W]
 
 	WIN_LEFT	.95
 	WIN_TOP		.216

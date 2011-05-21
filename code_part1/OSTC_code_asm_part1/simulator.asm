@@ -132,8 +132,9 @@ simulator_startdive:
 
 	movff	xC+0,sim_pressure+0
 	movff	xC+1,sim_pressure+1
-	
-	movff	sim_pressure+0,amb_pressure+0	; override readings with simulator values
+
+    ; This override is done in ISR too, but do it right now also:	
+	movff	sim_pressure+0,amb_pressure+0
 	movff	sim_pressure+1,amb_pressure+1
 
 	bcf		menubit2
@@ -348,7 +349,8 @@ simulator_calc_deco:
 	DISPLAYTEXT	.12                     ; "Wait..."
 	WIN_INVERT	.0
 
-	movff	sim_pressure+0,amb_pressure+0	; override readings with simulator values
+    ; This override is done in ISR too, but do it right now also:	
+	movff	sim_pressure+0,amb_pressure+0
 	movff	sim_pressure+1,amb_pressure+1
 
 	call	divemode_check_decogases    ; Checks for decogases and sets the gases

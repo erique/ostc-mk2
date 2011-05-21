@@ -77,6 +77,7 @@
 // 2011/04/25: [jDG] Added 1mn mode for CNS calculation, to allow it for decoplanning.
 // 2011/04/27: [jDG] Fixed char_O_gradient_factor calculation when model uses gradient-factor.
 // 2011/05/02: [jDG] Added "Future TTS" function (CF58).
+// 2011/05/17: [jDG] Various cleanups.
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -163,11 +164,12 @@ static float			sim_lead_tissue_limit;      // Buhlmann tolerated pressure.
 // Real context: what we are doing now.
 static float			calc_lead_tissue_limit;     // 
 
-static unsigned char	internal_deco_time[32];
-static unsigned char	internal_deco_depth[32];
+static unsigned char	internal_deco_time[NUM_STOPS];
+static unsigned char	internal_deco_depth[NUM_STOPS];
 
 static float cns_vault;
-static float pres_tissue_vault[32];
+static float pres_tissue_N2_vault[NUM_COMP];
+static float pres_tissue_He_vault[NUM_COMP];
 
 //---- Bank 5 parameters -----------------------------------------------------
 #pragma udata bank5=0x500
@@ -188,8 +190,8 @@ static float 			var_He_b;       // Bühlmann b, for current He tissue.
 static float  			var_N2_e;       // Exposition, for current N2 tissue.
 static float  			var_He_e;       // Exposition, for current He tissue.
 
-static float            pres_diluent;               // new in v.101
-static float            const_ppO2;                 // new in v.101
+static float            pres_diluent;                   // new in v.101
+static float            const_ppO2;                     // new in v.101
 
 static unsigned char    sim_gas_last_depth;             // Depth of last used gas, to detected a gas switch. 
 static unsigned char    sim_gas_last_used;              // Number of last used gas, to detected a gas switch. 
@@ -200,21 +202,24 @@ static float			calc_He_ratio;                  // Simulated (switched) helium ra
 static float			CNS_fraction;			        // new in v.101
 static float			float_saturation_multiplier;    // new in v.101
 static float			float_desaturation_multiplier;  // new in v.101
-static float			float_deco_distance;	// new in v.101
-static char			    flag_in_divemode;		// new in v.108
+static float			float_deco_distance;            // new in v.101
+static char			    flag_in_divemode;		        // new in v.108
 
-static unsigned char    deco_gas_change[5];		// new in v.109
+static unsigned char    deco_gas_change[NUM_GAS];       // new in v.109
 
 //---- Bank 6 parameters -----------------------------------------------------
 #pragma udata bank6=0x600
 
-float  pres_tissue[32];
+float  pres_tissue_N2[NUM_COMP];
+float  pres_tissue_He[NUM_COMP];
 
 //---- Bank 7 parameters -----------------------------------------------------
 #pragma udata bank7=0x700
 
-float  sim_pres_tissue[32];                 // 32 floats = 128 bytes.
-static float  sim_pres_tissue_backup[32];
+float  sim_pres_tissue_N2[NUM_COMP];             // 32 floats = 128 bytes.
+float  sim_pres_tissue_He[NUM_COMP];             // 32 floats = 128 bytes.
+static float  sim_pres_tissue_backup_N2[NUM_COMP];
+static float  sim_pres_tissue_backup_He[NUM_COMP];
 
 //---- Bank 8 parameters -----------------------------------------------------
 #pragma udata bank8=0x800
@@ -328,8 +333,8 @@ static void create_dbs_set_dbg_and_ndl20mtr(void)
 		int_O_DBS_bitfield |= DBS_mode;
 	if(const_ppO2)
 		int_O_DBS_bitfield |= DBS_ppO2;
-	for(i = 16; i < 32; i++)
-		if(pres_tissue[i])
+	for(i = 0; i < NUM_COMP; i++)
+		if(pres_tissue_He[i])
 			int_O_DBS_bitfield |= DBS_HE_sat;
 	if(float_saturation_multiplier < 0.99)
 		int_O_DBS_bitfield |= DBS_SAT2l;
@@ -417,8 +422,8 @@ static void check_dbg(PARAMETER char is_post_check)
 		temp_DBS |= DBG_C_SURF;
 
 	if( !DBS_HE_sat && !He_ratio)
-		for(i = 16; i < 32; i++)
-			if(pres_tissue[i])
+		for(i = 0; i < NUM_COMP; i++)
+			if(pres_tissue_He[i])
 				temp_DBS |= DBG_HEwoHE;
 
 	if( DBG_deco_gas_change != deco_gas_change[0]
@@ -549,9 +554,10 @@ static unsigned short tmr3(void)
 // 
 static void read_buhlmann_coefficients(void)
 {
+
 #ifndef CROSS_COMPILE
     // Note: we don't use far rom pointer, because the
-    //       24 bits is to complex, hence we have to set
+    //       24 bits is too complex, hence we have to set
     //       the UPPER page ourself...
     //       --> Set zero if tables are moved to lower pages !
     _asm
@@ -560,11 +566,17 @@ static void read_buhlmann_coefficients(void)
     _endasm
 #endif
 
-    assert( 0 <= ci && ci < 16 );
-    var_N2_a = buhlmann_a[ci];
-    var_N2_b = buhlmann_b[ci];
-    var_He_a = (buhlmann_a+16)[ci];
-    var_He_b = (buhlmann_b+16)[ci];
+    assert( 0 <= ci && ci < NUM_COMP );
+
+    // Use an interleaved array (AoS) to access coefficients with a
+    // single addressing.
+    {
+        overlay rom const float* ptr = &buhlmann_ab[4*ci];
+        var_N2_a = *ptr++;
+        var_N2_b = *ptr++;
+        var_He_a = *ptr++;
+        var_He_b = *ptr++;
+    }
 
     // Check reading consistency:
 	if(	(var_N2_a < 0.231)
@@ -596,14 +608,18 @@ static void read_buhlmann_times(PARAMETER char period)
         movwf TBLPTRU,0
     _endasm
 #endif
-    assert( 0 <= ci && ci < 16 );
+
+    assert( 0 <= ci && ci < NUM_COMP );
 
     // Integration intervals.
     switch(period)
     {
     case 0: //---- 2 sec -----------------------------------------------------
-        var_N2_e = e2secs[ci];
-        var_He_e = (e2secs+16)[ci];
+        {
+            overlay rom const float* ptr = &e2secs[2*ci];
+            var_N2_e = *ptr++;
+            var_He_e = *ptr++;
+        }
 
         // Check reading consistency:
     	if(	(var_N2_e < 0.0000363)
@@ -616,8 +632,11 @@ static void read_buhlmann_times(PARAMETER char period)
         break;
 
     case 1: //---- 1 min -----------------------------------------------------
-        var_N2_e = e1min[ci];
-        var_He_e = (e1min+16)[ci];
+       {
+            overlay rom const float* ptr = &e1min[2*ci];
+            var_N2_e = *ptr++;
+            var_He_e = *ptr++;
+        }
 
         // Check reading consistency:
     	if(	(var_N2_e < 1.09E-3)
@@ -630,8 +649,11 @@ static void read_buhlmann_times(PARAMETER char period)
         break;
 
     case 2: //---- 10 min ----------------------------------------------------
-        var_N2_e = e10min[ci];
-        var_He_e = (e10min+16)[ci];
+        {
+            overlay rom const float* ptr = &e10min[2*ci];
+            var_N2_e = *ptr++;
+            var_He_e = *ptr++;
+        }
 
         // Check reading consistency:
     	if(	(var_N2_e < 0.01085)
@@ -649,7 +671,7 @@ static void read_buhlmann_times(PARAMETER char period)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// calc_next_decodepth_GF
+// calc_nextdecodepth
 //
 // new in v.102
 //
@@ -833,11 +855,11 @@ static void copy_deco_table(void)
         overlay unsigned char x, y;
 
         //---- First: search the first non-null depth
-        for(x=31; x != 0; --x)
+        for(x=(NUM_STOPS-1); x != 0; --x)
             if( internal_deco_depth[x] != 0 ) break;
 
         //---- Second: copy to output table (in reverse order)
-        for(y=0; y<32; y++, --x)
+        for(y=0; y<NUM_STOPS; y++, --x)
         {
             char_O_deco_depth[y] = internal_deco_depth[x];
             char_O_deco_time [y] = internal_deco_time [x];
@@ -847,7 +869,7 @@ static void copy_deco_table(void)
         }
 
         //---- Third: fill table end with null
-        for(y++; y<32; y++)
+        for(y++; y<NUM_STOPS; y++)
         {
             char_O_deco_time [y] = 0;
             char_O_deco_depth[y] = 0;
@@ -857,7 +879,7 @@ static void copy_deco_table(void)
     {
         overlay unsigned char x;
 
-        for(x=0; x<32; x++)
+        for(x=0; x<NUM_STOPS; x++)
         {
             char_O_deco_depth[x] = internal_deco_depth[x];
             char_O_deco_time [x] = internal_deco_time [x];
@@ -960,7 +982,7 @@ static void gas_switch_find_current(void)
     overlay unsigned char N2 = (unsigned char)(N2_ratio * 100 + 0.5);
     overlay unsigned char He = (unsigned char)(He_ratio * 100 + 0.5);
 
-    for(j=0; j<5; ++j)
+    for(j=0; j<NUM_GAS; ++j)
     {
         // Make sure to detect if we are already breathing some gas in
         // the current list (happends when first gas do have a depth).
@@ -985,7 +1007,7 @@ static void gas_switch_find_current(void)
         // And if I'm above the last decostop (with the 3m margin) ?
         if( (sim_gas_last_depth-3) > depth )
         {
-            for(j=0; j<5; ++j)
+            for(j=0; j<NUM_GAS; ++j)
             {
                 // And If I am in the range of a valide stop ?
                 // (again, with the same 3m margin)
@@ -1034,8 +1056,8 @@ static unsigned char gas_switch_deepest(void)
         overlay unsigned char j;
 
         // Loop over all enabled gas, to find the deepest one,
-        // above las gas, but below temp_depth_limit.
-        for(j=0; j<5; ++j)
+        // above last used gas, but below temp_depth_limit.
+        for(j=0; j<NUM_GAS; ++j)
         {
             // Gas not (yet) allowed ? Skip !
             if( temp_depth_limit > deco_gas_change[j] )
@@ -1092,7 +1114,7 @@ static unsigned char gas_switch_deepest(void)
 //
 static void gas_switch_set(void)
 {
-    assert( 0 <= sim_gas_last_used && sim_gas_last_used <= 5 );
+    assert( 0 <= sim_gas_last_used && sim_gas_last_used <= NUM_GAS );
 
     if( sim_gas_last_used == 0 )
     {
@@ -1177,15 +1199,15 @@ static void clear_tissue(void)
     N2_ratio = 0.7902;
     pres_respiration = int_I_pres_respiration * 0.001;
     
-    for(ci=0; ci<16; ci++)
+    for(ci=0; ci<NUM_COMP; ci++)
     {
         // cycle through the 16 Bühlmann tissues
         overlay float p = N2_ratio * (pres_respiration -  ppWater);
-        pres_tissue[ci] = p;
+        pres_tissue_N2[ci] = p;
 
         // cycle through the 16 Bühlmann tissues for Helium
-        (pres_tissue+16)[ci] = 0.0;
-    } // for 0 to 16
+        pres_tissue_He[ci] = 0.0;
+    } // for 0 to 15
 
     clear_deco_table();
     char_O_deco_status = 0;
@@ -1446,7 +1468,7 @@ void calc_hauptroutine_update_tissues(void)
     calc_limit();
 
  	int_O_gtissue_limit = (short)(calc_lead_tissue_limit * 1000);
-	int_O_gtissue_press = (short)((pres_tissue[char_O_gtissue_no] + (pres_tissue+16)[char_O_gtissue_no]) * 1000);
+	int_O_gtissue_press = (short)((pres_tissue_N2[char_O_gtissue_no] + pres_tissue_He[char_O_gtissue_no]) * 1000);
 
     // if guiding tissue can not be exposed to surface pressure immediately
     if( calc_lead_tissue_limit > pres_surface && char_O_deco_status == 0)  
@@ -1616,19 +1638,19 @@ static void calc_tissue(PARAMETER unsigned char period)
     assert( 0.00 <= ppN2 && ppN2 < 11.2 );  // 80% N2 at 130m
     assert( 0.00 <= ppHe && ppHe < 12.6 );  // 90% He at 130m
 
-    for (ci=0;ci<16;ci++)
+    for (ci=0;ci<NUM_COMP;ci++)
     {
         read_buhlmann_times(period);        // 2 sec or 1 min period.
 
         // N2
-        temp_tissue = (ppN2 - pres_tissue[ci]) * var_N2_e;
+        temp_tissue = (ppN2 - pres_tissue_N2[ci]) * var_N2_e;
         temp_tissue_safety();
-        pres_tissue[ci] += temp_tissue;
+        pres_tissue_N2[ci] += temp_tissue;
 
         // He
-        temp_tissue = (ppHe - (pres_tissue+16)[ci]) * var_He_e;
+        temp_tissue = (ppHe - pres_tissue_He[ci]) * var_He_e;
         temp_tissue_safety();
-        (pres_tissue+16)[ci] += temp_tissue;
+        pres_tissue_He[ci] += temp_tissue;
     }
 }
 
@@ -1642,10 +1664,10 @@ static void calc_limit(void)
     char_O_gtissue_no = 255;
     calc_lead_tissue_limit = 0.0;
 
-    for(ci=0; ci<16;ci++)
+    for(ci=0; ci<NUM_COMP;ci++)
     {
-        overlay float N2 = pres_tissue[ci];
-        overlay float He = (pres_tissue+16)[ci];
+        overlay float N2 = pres_tissue_N2[ci];
+        overlay float He = pres_tissue_He[ci];
         overlay float p = N2 + He;
 
         read_buhlmann_coefficients();
@@ -1675,7 +1697,7 @@ static void calc_limit(void)
         }
     }
 
-    assert( char_O_gtissue_no < 16 );
+    assert( char_O_gtissue_no < NUM_COMP );
     assert( 0.0 <= calc_lead_tissue_limit && calc_lead_tissue_limit <= 14.0);
 }
 
@@ -1728,8 +1750,11 @@ void backup_sim_pres_tissue(void)
 {
     overlay unsigned char x;
 
-    for(x = 0; x<32; x++)
-        sim_pres_tissue_backup[x] = sim_pres_tissue[x];
+    for(x=0; x<NUM_COMP; x++)
+    {
+        sim_pres_tissue_backup_N2[x] = sim_pres_tissue_N2[x];
+        sim_pres_tissue_backup_He[x] = sim_pres_tissue_He[x];
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1739,8 +1764,11 @@ void restore_sim_pres_tissue(void)
 {
     overlay unsigned char x;
 
-    for(x = 0; x<32; x++)
-        sim_pres_tissue[x] = sim_pres_tissue_backup[x];
+    for(x=0; x<NUM_COMP; x++)
+    {
+        sim_pres_tissue_N2[x] = sim_pres_tissue_backup_N2[x];
+        sim_pres_tissue_He[x] = sim_pres_tissue_backup_He[x];
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1761,7 +1789,7 @@ static void calc_ascenttime(void)
         ascent = 0.0;
     sum = (unsigned short)(ascent + 0.99);
 
-    for(x=0; x<32 && internal_deco_depth[x]; x++)
+    for(x=0; x<NUM_STOPS && internal_deco_depth[x]; x++)
         sum += (unsigned short)internal_deco_time[x];
 
     if( char_O_deco_status == 1 )
@@ -1780,10 +1808,10 @@ void update_startvalues(void)
     overlay unsigned char x;
 
     // Start ascent simulation with current tissue partial pressures.
-  	for (x = 0;x<16;x++)
+  	for(x=0; x<NUM_COMP; x++)
   	{
-   		sim_pres_tissue[x] = pres_tissue[x];
-   		(sim_pres_tissue+16)[x] = (pres_tissue+16)[x];
+   		sim_pres_tissue_N2[x] = pres_tissue_N2[x];
+   		sim_pres_tissue_He[x] = pres_tissue_He[x];
   	}
 
     // No leading tissue (yet) for this ascent simulation.
@@ -1804,19 +1832,19 @@ static void sim_tissue(PARAMETER unsigned char period)
     assert( 0.00 <= ppN2 && ppN2 < 11.2 );  // 80% N2 at 130m
     assert( 0.00 <= ppHe && ppHe < 12.6 );  // 90% He at 130m
 
-    for(ci=0; ci<16; ci++)
+    for(ci=0; ci<NUM_COMP; ci++)
     {
         read_buhlmann_times(period);        // 1 or 10 minute(s) interval
 
         // N2
-        temp_tissue = (ppN2 - sim_pres_tissue[ci]) * var_N2_e;
+        temp_tissue = (ppN2 - sim_pres_tissue_N2[ci]) * var_N2_e;
         temp_tissue_safety();
-        sim_pres_tissue[ci] += temp_tissue;
+        sim_pres_tissue_N2[ci] += temp_tissue;
         
         // He
-        temp_tissue = (ppHe - (sim_pres_tissue+16)[ci]) * var_He_e;
+        temp_tissue = (ppHe - sim_pres_tissue_He[ci]) * var_He_e;
         temp_tissue_safety();
-        (sim_pres_tissue+16)[ci] += temp_tissue;
+        sim_pres_tissue_He[ci] += temp_tissue;
     }
 }
 
@@ -1835,10 +1863,10 @@ static void sim_limit(PARAMETER float GF_current)
     sim_lead_tissue_limit = 0.0;
     sim_lead_tissue_no = 0;             // If no one is critic, keep first tissue.
 
-    for(ci=0; ci<16; ci++)
+    for(ci=0; ci<NUM_COMP; ci++)
     {
-        overlay float N2 = sim_pres_tissue[ci];
-        overlay float He = (sim_pres_tissue+16)[ci];
+        overlay float N2 = sim_pres_tissue_N2[ci];
+        overlay float He = sim_pres_tissue_He[ci];
         overlay float p = N2 + He;
 
         read_buhlmann_coefficients();
@@ -1864,7 +1892,7 @@ static void sim_limit(PARAMETER float GF_current)
         }
     } // for ci
 
-    assert( sim_lead_tissue_no < 16 );
+    assert( sim_lead_tissue_no < NUM_COMP );
     assert( 0.0 <= sim_lead_tissue_limit && sim_lead_tissue_limit <= 14.0 );
 }
 
@@ -1877,7 +1905,7 @@ static void clear_deco_table(void)
 {
     overlay unsigned char x;
 
-    for(x=0; x<32; ++x)
+    for(x=0; x<NUM_STOPS; ++x)
     {
         internal_deco_time [x] = 0;
         internal_deco_depth[x] = 0;
@@ -1901,7 +1929,7 @@ static void update_deco_table()
     assert( temp_depth_limit < 128 );   // Can't be negativ (overflown).
     assert( temp_depth_limit > 0 );     // No stop at surface...
 
-    for(x=0; x<32; ++x)
+    for(x=0; x<NUM_STOPS; ++x)
     {
         // Make sure deco-stops are recorded in order:
         assert( !internal_deco_depth[x] || temp_depth_limit <= (internal_deco_depth[x]& 0x7F) );
@@ -1942,10 +1970,10 @@ static void update_deco_table()
 static void calc_gradient_factor(void)
 {
     overlay float gf;
-    overlay float N2 = pres_tissue[char_O_gtissue_no];
-    overlay float He = (pres_tissue+16)[char_O_gtissue_no];
+    overlay float N2 = pres_tissue_N2[char_O_gtissue_no];
+    overlay float He = pres_tissue_He[char_O_gtissue_no];
 
-    assert( char_O_gtissue_no < 16 );
+    assert( char_O_gtissue_no < NUM_COMP );
     assert( 0.800 <= pres_respiration && pres_respiration < 14.0 );
 
 	// tissue > respiration (currently off-gasing)
@@ -2018,6 +2046,8 @@ static void calc_gradient_factor(void)
 //
 void deco_calc_desaturation_time(void)
 {
+    overlay rom const float *ptr;
+
     RESET_C_STACK
 
     assert( 800 < int_I_pres_surface && int_I_pres_surface < 1100 );
@@ -2040,21 +2070,27 @@ void deco_calc_desaturation_time(void)
     int_O_desaturation_time = 0;
     float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
 
-    for (ci=0;ci<16;ci++)
+    ptr = &buhlmann_ht[0];
+    for(ci=0; ci<NUM_COMP; ci++)
     {
+        overlay float var_N2_halftime = *ptr++;
+        overlay float var_He_halftime = *ptr++;
         overlay unsigned short desat_time;    // For a particular compartiment, in min.
         overlay float temp1;
         overlay float temp2;
         overlay float temp3;
         overlay float temp4;
-    
+
+        assert( 4.0    <= var_N2_halftime && var_N2_halftime <= 635.0 );
+        assert( 1.5099 <= var_He_halftime && var_He_halftime <= 240.03 );
+
         // saturation_time (for flight) and N2_saturation in multiples of halftime
         // version v.100: 1.1 = 10 percent distance to totally clean (totally clean is not possible, would take infinite time )
         // new in version v.101: 1.07 = 7 percent distance to totally clean (totally clean is not possible, would take infinite time )
         // changes in v.101: 1.05 = 5 percent dist to totally clean is new desaturation point for display and NoFly calculations
         // N2
-        temp1 = 1.05 * ppN2 - pres_tissue[ci];
-        temp2 = ppN2 - pres_tissue[ci];
+        temp1 = 1.05 * ppN2 - pres_tissue_N2[ci];
+        temp2 = ppN2 - pres_tissue_N2[ci];
         if (temp2 >= 0.0)
         {
             temp1 = 0.0;
@@ -2064,9 +2100,6 @@ void deco_calc_desaturation_time(void)
             temp1 = temp1 / temp2;
         if( 0.0 < temp1 && temp1 < 1.0 )
         {
-            overlay float var_N2_halftime = buhlmann_ht[ci];
-            assert( 4.0 <= var_N2_halftime && var_N2_halftime <= 635.0 );
-
             // 0.6931 is ln(2), because the math function log() calculates with a base of e not 2 as requested.
             // minus because log is negative.
             temp1 = log(1.0 - temp1) / -0.6931; // temp1 is the multiples of half times necessary.
@@ -2080,19 +2113,16 @@ void deco_calc_desaturation_time(void)
         }
 
         // He
-        temp3 = 0.1 - (pres_tissue+16)[ci];
+        temp3 = 0.1 - pres_tissue_He[ci];
         if (temp3 >= 0.0)
         {
             temp3 = 0.0;
             temp4 = 0.0;
         }
         else
-            temp3 = - temp3 / (pres_tissue+16)[ci];
+            temp3 = - temp3 / pres_tissue_He[ci];
         if( 0.0 < temp3 && temp3 < 1.0 )
     	{
-            overlay float var_He_halftime = (buhlmann_ht+16)[ci];
-            assert( 1.5099 <= var_He_halftime && var_He_halftime <= 240.03 );
-
         	temp3 = log(1.0 - temp3) / -0.6931; // temp1 is the multiples of half times necessary.
         							 // 0.6931 is ln(2), because the math function log() calculates with a base of e  not 2 as requested.
         							 // minus because log is negative
@@ -2114,22 +2144,22 @@ void deco_calc_desaturation_time(void)
             int_O_desaturation_time = desat_time;
 
         // N2 saturation in multiples of halftime for display purposes
-        temp2 = temp1 * 20.0;  // 0 = 1/8, 120 = 0, 249 = 8
-        temp2 = temp2 + 80.0; // set center
+        temp2 = temp1 * 20.0;   // 0 = 1/8, 120 = 0, 249 = 8
+        temp2 = temp2 + 80.0;   // set center
         if (temp2 < 0.0)
             temp2 = 0.0;
         if (temp2 > 255.0)
             temp2 = 255.0;
-        char_O_tissue_saturation[ci] = (char)temp2;
+        char_O_tissue_N2_saturation[ci] = (char)temp2;
 
         // He saturation in multiples of halftime for display purposes
-        temp4 = temp3 * 20.0;  // 0 = 1/8, 120 = 0, 249 = 8
-        temp4 = temp4 + 80.0; // set center
+        temp4 = temp3 * 20.0;   // 0 = 1/8, 120 = 0, 249 = 8
+        temp4 = temp4 + 80.0;   // set center
         if (temp4 < 0.0)
             temp4 = 0.0;
         if (temp4 > 255.0)
             temp4 = 255.0;
-        (char_O_tissue_saturation+16)[ci] = (char)temp4;
+        char_O_tissue_He_saturation[ci] = (char)temp4;
     } // for
 }
 
@@ -2161,7 +2191,7 @@ static void calc_wo_deco_step_1_min(void)
     float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
     float_saturation_multiplier   = char_I_saturation_multiplier   * 0.01;
     
-    calc_tissue(1);  // update the pressure in the 32 tissues in accordance with the new ambient pressure
+    calc_tissue(1);  // update the pressure in the tissues N2/He in accordance with the new ambient pressure
     
     clear_deco_table();
     char_O_deco_status = 3;     // surface new in v.102 : stays in surface state.
@@ -2406,17 +2436,17 @@ void deco_calc_percentage(void)
 //
 void deco_gas_volumes(void)
 {
-    overlay float volumes[5];
+    overlay float volumes[NUM_GAS];
     overlay float bottom_usage, ascent_usage;
     overlay unsigned char i, deepest_first;
     overlay unsigned char gas;
     RESET_C_STACK
 
     //---- initialize with bottom consumption --------------------------------
-    for(i=0; i<5; ++i)                              // Nothing yet...
+    for(i=0; i<NUM_GAS; ++i)                            // Nothing yet...
         volumes[i] = 0.0;
 
-    assert(1 <= char_I_first_gas && char_I_first_gas <= 5);
+    assert(1 <= char_I_first_gas && char_I_first_gas <= NUM_GAS);
     gas = char_I_first_gas - 1;
 
     bottom_usage = read_custom_function(56) * 0.1;
@@ -2446,7 +2476,7 @@ void deco_gas_volumes(void)
     else
         volumes[gas] = 65535.0;
 
-    for(i=0; i<32; ++i)
+    for(i=0; i<NUM_STOPS; ++i)
     {
         overlay unsigned char j;
         overlay unsigned char depth, time, ascent;
@@ -2472,7 +2502,7 @@ void deco_gas_volumes(void)
         }
 
         // Gas switch depth ?
-        for(j=0; j<5; ++j)
+        for(j=0; j<NUM_GAS; ++j)
         {
             if( depth <= char_I_deco_gas_change[j] )
                 if( !char_I_deco_gas_change[gas] || (char_I_deco_gas_change[gas] > char_I_deco_gas_change[j]) )
@@ -2494,7 +2524,7 @@ void deco_gas_volumes(void)
     }
 
     //---- convert results for the ASM interface -----------------------------
-    for(i=0; i<5; ++i)
+    for(i=0; i<NUM_GAS; ++i)
         if( volumes[i] > 6553.4 )
             int_O_gas_volumes[i] = 65535;
         else
@@ -2509,8 +2539,11 @@ void deco_push_tissues_to_vault(void)
     RESET_C_STACK
 
 	cns_vault = CNS_fraction;
-	for (x=0;x<32;x++)
-		pres_tissue_vault[x] = pres_tissue[x];
+	for (x=0;x<NUM_COMP;x++)
+    {
+		pres_tissue_N2_vault[x] = pres_tissue_N2[x];
+		pres_tissue_He_vault[x] = pres_tissue_He[x];
+    }
 }
 
 void deco_pull_tissues_from_vault(void)
@@ -2518,8 +2551,11 @@ void deco_pull_tissues_from_vault(void)
     overlay unsigned char x;
     RESET_C_STACK
 
-	for (x=0;x<32;x++)
-		pres_tissue[x] = pres_tissue_vault[x];
+	for (x=0; x<NUM_COMP; x++)
+    {
+		pres_tissue_N2[x] = pres_tissue_N2_vault[x];
+		pres_tissue_He[x] = pres_tissue_He_vault[x];
+    }
     
     // Restore both CNS variable, too.
     CNS_fraction = cns_vault;

@@ -188,7 +188,6 @@ ext_ee_temp1    res 1           ; External EEPROM Temp 1		used in I2C EEPROM
 ext_ee_temp2    res 1           ; External EEPROM Temp 2		used in I2C EEPROM
 
 isr1_temp       res 1           ; ISR temp variables
-isr3_temp       res 2
 
 timer1int_counter1  res 1       ;Timer 1 counter
 timer1int_counter2  res 1       ;Timer 1 counter
@@ -235,15 +234,16 @@ xdT2            res 2
 OFF             res 2
 SENS            res 2
 
+amb_pressure_avg res 2          ; ambient pressure summing buffer[mBar]
 amb_pressure    res 2           ; ambient pressure [mBar]
 rel_pressure    res 2		    ; amb_pressure - surface pressure [mBar]
 max_pressure    res 2           ; Max. pressure for the dive [mBar]
 avr_rel_pressure res 2          ; Average rel. pressure (Average depth) for the dive [mBar], Resettable
 avr_rel_pressure_total res 2    ; Average rel. pressure (Average depth) for the dive [mBar], Non-Resettable
 last_pressure   res 2
+temperature_avg res 2           ; Temperature summing buffer.
 temperature     res 2
 last_temperature res 2
-temperature_temp res 2
 Dx              res 2
 
 last_surfpressure       res 2   ; Divemode
@@ -440,7 +440,7 @@ desaturation_time_buffer res 2	; buffer for desat time
 #DEFINE	switch_left			flag6,3	;=1: left switch pressed
 #DEFINE	switch_right		flag6,4	;=1: right switch pressed
 #DEFINE	uart_settime		flag6,5	;=1: enter time sync routine
-#DEFINE	neg_temp			flag6,6	;=1: temperature below zero
+#DEFINE	FLAG_1              flag6,6	;=1: unused
 #DEFINE	twosecupdate		flag6,7	;=1: after any two seconds
 
 #DEFINE	dekostop_active			flag7,0	;=1: in deocompression mode

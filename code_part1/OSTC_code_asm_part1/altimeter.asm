@@ -55,8 +55,7 @@ altimeter_restart:
         clrf    pressureSum+1
         clrf    pressureCount
 
-        movff   amb_pressure+0,pressureAvg+0    ; And init first average.
-        movff   amb_pressure+1,pressureAvg+1
+        SAFE_2BYTE_COPY amb_pressure, pressureAvg   ; And init first average.
 
         movlw   4                       ; And multiply AVG by 16 to be coherent.
 altimeter_reset_1:
@@ -73,9 +72,11 @@ altimeter_reset_1:
 
 altimeter_1:
         ;---- Do a bank-safe 16bit summing -----------------------------------
-        movff   amb_pressure+0,WREG
+        SAFE_2BYTE_COPY amb_pressure, lo   ; And init first average.
+
+        movff   lo,WREG
         addwf   pressureSum+0,F
-        movff   amb_pressure+1,WREG
+        movff   hi,WREG
         addwfc  pressureSum+1,F
 
         incf    pressureCount           ; Increment count too.

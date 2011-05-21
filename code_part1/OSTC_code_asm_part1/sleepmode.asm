@@ -78,8 +78,7 @@ onemin_sleep:
 	movlb	b'00000001'
 	movff	last_surfpressure_15min+0,last_surfpressure_30min+0	; save older airpressure
 	movff	last_surfpressure_15min+1,last_surfpressure_30min+1	; save older airpressure	
-	movff	amb_pressure+0,last_surfpressure_15min+0			; save new airpressure
-	movff	amb_pressure+1,last_surfpressure_15min+1			; save new airpressure
+    SAFE_2BYTE_COPY amb_pressure, last_surfpressure_15min		; save new airpressure
 
 	clrf	divemins+1				; reset counter
 	GETCUSTOM15	d'7'				; loads max_sufpressure into lo, hi
@@ -98,8 +97,7 @@ onemin_sleep1:						; not ok! Overwrite with max. "allowed" airpressure
 
 onemin_sleep2:
 ;calc_deko_sleepmode:
-	movff	amb_pressure+0,int_I_pres_respiration+0		; LOW copy pressure to deco routine
-	movff	amb_pressure+1,int_I_pres_respiration+1		; HIGH
+    SAFE_2BYTE_COPY amb_pressure, int_I_pres_respiration ; LOW copy pressure to deco routine
 	GETCUSTOM8	d'11'				; Saturation multiplier %
 	movff	WREG,char_I_saturation_multiplier
 	GETCUSTOM8	d'12'				; Desaturation multiplier %
@@ -134,8 +132,7 @@ onesec_sleep_nonofly:
 	GETCUSTOM15	d'6'				; loads pressure threshold into lo,hi
 	movff	lo,sub_a+0				; power on if ambient pressure is greater threshold
 	movff	hi,sub_a+1	
-	movff	amb_pressure+0,sub_b+0
-	movff	amb_pressure+1,sub_b+1
+    SAFE_2BYTE_COPY amb_pressure, sub_b
 	call	sub16					; sub_c = sub_a - sub_b
 	bsf		sleepmode
 	btfsc	neg_flag				; Wake up from Sleep?

@@ -27,6 +27,27 @@
 ; flag pressure_refresh is set every 500ms 
 ; and provides accurate pressure (+/-1mBar stable) and temperature (0.1C stable)
 
+;=============================================================================
+; Copy a 16bit value from ISR modified registers to main registers.
+; 
+; Because the ISR can happend at any time, the read should be redone if bytes
+; changed inbetween.
+;
+; Trashes: WREG and TABLAT
+; NOTE: Destination might be in any bank, so be BANK SAFE.
+;
+SAFE_2BYTE_COPY MACRO  from, to
+        local   retry
+retry:
+        movff   from+1,WREG             ; High byte in W.
+        movff   WREG,to+1               ; and destination.
+        movff   from+0,to+0             ; Copy low byte.
+        movff   from+1,TABLAT           ; another bank-safe read.
+        xorwf   TABLAT,W                ; High byte changed ?
+        bnz     retry
+        ENDM
+
+;=============================================================================
 uartint:
 		btfsc	simulatormode_active		; are we in simulatormode?
 		bra		simulator_int				; Yes, reading is depth in m!
@@ -64,7 +85,6 @@ uartint:
 		bra		uartint1					; No
 		bsf		uart_115200_bootloader		; Yes, set Flag
 
-
 uartint1:
 		movf	RCREG,w						; unload RCREG in stand-alone simulator mode
 		bcf		PIR1,RCIF					; Clear flag
@@ -87,6 +107,8 @@ simulator_int1:
 		movff	PRODL,sim_pressure+0		; stored for pressure overwrite
 		movff	PRODH,sim_pressure+1
 		bra		uartint1					; exit uart int
+
+;=============================================================================
 
 switch_left_int:
 		bcf		INTCON,INT0IF				; Clear flag
@@ -135,7 +157,10 @@ timer0int:
 		clrf	TMR0H
 		clrf	TMR0L
 		return
-		
+
+;=============================================================================
+;
+
 timer1int:
 		bcf		PIR1,TMR1IF					; Clear flag
 
@@ -160,6 +185,25 @@ sensor_int_pre:
 		btfsc	sleepmode					; In sleepmode?
 		return								; Yes
 
+; Sensor interput do poll the presure/temperature sensor, download results,
+; compute compensations, and store results in various shared variables.
+;
+; Input:    interupt (every 62.5msec == 16Hz), sensor,
+;           last_surfpressure:2.
+;
+; Output:   amb_pressure:2,
+;           temperature:2,
+;           rel_pressure:2,
+;           and the pressure_refresh flag.
+;
+; NOTE: averaging (4 successive value, as recommended in the MS5535 datasheet)
+;       is done on private variables, to avoid trashing data while reading it
+;       from the main code.
+;
+; NOTE: Because there is no atomic 16bits load/stores, we need to check twice
+;       the read data is correct. Ie. SAFE_2BYTE_COPY is mandatory to get
+;       amb_pressure, temperature or rel_pressure
+;
 sensor_int:
 		btfsc		no_sensor_int			; No sensor interrupt (because it's addressed during sleep)
 		return						
@@ -195,25 +239,30 @@ sensor_int:
 ;sensor_int2_plus_average:
 		rcall		sensor_int_state2
 sensor_int2_plus_average2:		
-		bcf			STATUS,C
-		rrcf		isr3_temp+1				; isr3_temp / 2
-		rrcf		isr3_temp+0
-		bcf			STATUS,C
-		rrcf		temperature_temp+1		; temperature_temp /2
-		rrcf		temperature_temp+0
+		bcf			STATUS,C            ; clear carry bit.
+		rrcf		amb_pressure_avg+1  ; amb_pressure sum / 2
+		rrcf		amb_pressure_avg+0
+		bcf			STATUS,C            ; clear carry bit, twice.
+		rrcf		amb_pressure_avg+1  ; amb_pressure sum / 4
+		rrcf		amb_pressure_avg+0
 
-		bcf			STATUS,C
-		rrcf		isr3_temp+1				; isr3_temp / 4
-		rrcf		isr3_temp+0
-		bcf			STATUS,C
-		rrcf		temperature_temp+1		; temperature_temp /4
-		rrcf		temperature_temp+0
-	
-		movff		isr3_temp+1,amb_pressure+1	; copy into actual register
-		movff		isr3_temp+0,amb_pressure+0
+		movff		amb_pressure_avg+1,amb_pressure+1	; copy into actual register
+		movff		amb_pressure_avg+0,amb_pressure+0
 
-		movff		temperature_temp+1,temperature+1
-		movff		temperature_temp+0,temperature+0
+        bcf			STATUS,C
+        btfsc       temperature_avg+1,7 ; Copy sign bit to carry
+        bsf         STATUS,C
+		rrcf		temperature_avg+1   ; Signed temperature /2
+		rrcf		temperature_avg+0
+
+        bcf			STATUS,C
+        btfsc       temperature_avg+1,7 ; Copy sign bit to carry
+        bsf         STATUS,C
+		rrcf		temperature_avg+1   ; Signed temperature /4
+		rrcf		temperature_avg+0
+
+		movff		temperature_avg+1,temperature+1
+		movff		temperature_avg+0,temperature+0
 
 		bsf			pressure_refresh 			; Set flag! Temp and pressure were updated!
 		clrf		timer1int_counter2			; Then reset State counter
@@ -228,7 +277,6 @@ comp_air_pressure0:
 		movwf		last_surfpressure+1
 
 comp_air_pressure:
-		bcf			neg_flag				
 		movf		last_surfpressure+0,W		; compensate airpressure
 		subwf   	amb_pressure+0,W             
 		movwf   	rel_pressure+0				; rel_pressure stores depth!
@@ -242,13 +290,12 @@ comp_air_pressure:
 		clrf		rel_pressure+1				; e.g. when surface air pressure dropped during the dive
 		return
 
-
 sensor_int_state1_plus_restart:
-		bcf			pressure_refresh		; clear flags
-		clrf		isr3_temp+0				; pressure average registers
-		clrf		isr3_temp+1
-		clrf		temperature_temp+0
-		clrf		temperature_temp+1
+;;;		bcf			pressure_refresh    ; clear flags
+		clrf		amb_pressure_avg+0  ; pressure average registers
+		clrf		amb_pressure_avg+1
+		clrf		temperature_avg+0
+		clrf		temperature_avg+1
 
 sensor_int_state1:
 		call		get_temperature_value	; State 1: Get temperature
@@ -258,17 +305,9 @@ sensor_int_state1:
 sensor_int_state2:
 		call		get_pressure_value		; State2: Get pressure (51us)
 		call		get_temperature_start	; and start temperature integration (73,5us)
-		call		calculate_compensation	; calculate temperature compensated pressure (233us)
-		movf		amb_pressure+0,W
-		addwf		isr3_temp+0				; average pressure
-		movf		amb_pressure+1,W
-		addwfc		isr3_temp+1
-		movf		temperature+0,W
-		addwf		temperature_temp+0		; average temperature
-		movf		temperature+1,W
-		addwfc		temperature_temp+1
-		return		
+		goto		calculate_compensation	; calculate temperature compensated pressure (233us)
 
+;=============================================================================
 
 RTCisr:			
 		clrf		timer1int_counter1		; counts to 16 (one second / 62.5ms)

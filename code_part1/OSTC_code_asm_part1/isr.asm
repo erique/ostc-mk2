@@ -93,6 +93,13 @@ uartint1:
 		return
 
 simulator_int:
+        movlw   'l'                         ; Received 'l' dump-screen command ?
+        xorwf   RCREG,W
+        bnz     simulator_int2              ; NO: skip
+		bsf		uart_dump_screen            ; YES: set flag
+		bra		uartint1                    ; and this is not a depth...
+
+simulator_int2:
 		btfsc	standalone_simulator		; ignore in standalone simulator mode
 		bra		uartint1
 

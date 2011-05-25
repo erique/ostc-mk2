@@ -110,6 +110,13 @@ simulator_int2:
 
 simulator_int1:
 		movf	RCREG,w						; depth in m
+		movwf	PRODL						; Copy
+
+		movlw	d'140'						; Limit to 130m
+		cpfslt	PRODL						; compare with value in UART
+		movwf	PRODL						; Overwrite reading
+
+		movf	PRODL,w						; depth in m
 		mullw	d'100'						; result will be mbar
 		movff	PRODL,sim_pressure+0		; stored for pressure overwrite
 		movff	PRODH,sim_pressure+1

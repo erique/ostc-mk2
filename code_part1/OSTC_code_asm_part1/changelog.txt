@@ -1,3 +1,10 @@
+New in 1.91 beta:
+BETA Version - Do NOT use for diving!
+BUGFIX: Ignore depths>130m in PC simulation
+
+New in 1.90 Stable:
+Stable release
+
 New in 1.89 beta:
 BETA Version - Do NOT use for diving!
 NEW: ppO2 in case of a loop flush can be displayed in CCR mode

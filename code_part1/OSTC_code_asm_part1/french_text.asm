@@ -92,7 +92,7 @@
     TCODE    .100, .0,       "ListeGaz"                  ;032 Gaslist
     TCODE    .100, .50,      "RazMoyn."                  ;033 ResetAvr          (Reset average depth)
     TCODE    .100, .100,     "Sortir"                    ;034 Exit              (Exit current menu)
-    TCODE    .0,   .0,       "SansAvion"                 ;035 NoFly             (No-flight count-down)
+    TCODE    .0,   .0,       "Avion"                 	 ;035 NoFly (5Char max.)             (No-flight count-down)
 ;
 ; 32 custom function descriptors I (FIXED LENGTH = 15 chars).
     TCODE    .40,  .35,      "Début Plong.[m]"           ;036 Start Dive  [m]	(depth to switch to dive mode)

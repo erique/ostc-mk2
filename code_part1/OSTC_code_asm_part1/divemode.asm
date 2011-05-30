@@ -1162,7 +1162,7 @@ end_dive:
 	call	write_external_eeprom
 	movlw	0xFA
 	call	write_external_eeprom
-	movlw	logbook_profile_version     ; Defined in definitions_vxyy.asm
+	movlw	logbook_profile_version     ; Defined in definitions.asm
 	call	write_external_eeprom
 	movf	month,W                     ; Date
 	call	write_external_eeprom
@@ -1332,6 +1332,8 @@ end_dive2:
 
 	movff	char_O_CNS_fraction,WREG	; copy into bank1
 	call	write_external_eeprom		; Stores CNS%
+
+; Add additional 10bytes here.... mH
 
 	movlw	0xFB						; Header stop
 	call	write_external_eeprom

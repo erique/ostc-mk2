@@ -288,7 +288,14 @@ display_profile_offset2:
 
 display_profile_offset3:
 	PUTC		' '
-	call		I2CREAD2				; Skip Profile version
+	call		I2CREAD2				; Read Profile version
+	movff		SSPBUF,lo				; store in lo
+
+	bsf			logbook_format_0x21		; Set flag for new 0x21 Format
+	movlw		0x21
+	cpfseq		lo						; Skip if 0x21
+	bcf			logbook_format_0x21		; Clear flag for new 0x21 Format
+
 	call		I2CREAD2				; read month
 	movff		SSPBUF,lo				; store in lo
 
@@ -442,8 +449,8 @@ display_profile_offset3:
 	call		I2CREAD2				; read Air pressure
 	movff		SSPBUF,hi
 
-	movff		lo,average_depth_hold+2
-	movff		hi,average_depth_hold+3		; Store here for correct average
+;	movff		lo,average_depth_hold+2
+;	movff		hi,average_depth_hold+3		; Store here for correct average
 
 	bsf			leftbind
 	output_16							; Air pressure before dive
@@ -504,13 +511,13 @@ display_profile_offset3:
 display_profile2d:
 	; Start Profile display
 
-	clrf		average_divesecs+0
-	clrf		average_divesecs+1			; Counts x-pixels for average
-	clrf		average_depth_hold_total+0
-	clrf		average_depth_hold_total+1
-	clrf		average_depth_hold_total+2
-	clrf		average_depth_hold_total+3	; Track average depth here...
-
+;	clrf		average_divesecs+0
+;	clrf		average_divesecs+1			; Counts x-pixels for average
+;	clrf		average_depth_hold_total+0
+;	clrf		average_depth_hold_total+1
+;	clrf		average_depth_hold_total+2
+;	clrf		average_depth_hold_total+3	; Track average depth here...
+;
 ; Write 0m X-Line..
 	movlw		color_grey	
 	call		PLED_set_color				; Make this configurable?
@@ -856,30 +863,22 @@ profileview_page3:
 	STRCAT_PRINT "%"						; Display CNS %
 
 logbook_skip_cns:
+	btfss	logbook_format_0x21
+	bra		skip_new_format_0x21_info		; Do not show remaining info from dive
+
 	WIN_TOP		.50
-
-	movff	average_divesecs+0,xB+0				; Number of samples in dive
-	movff	average_divesecs+1,xB+1				; Copy to xB:2
-
-	movff	average_depth_hold_total+0,xC+0
-	movff	average_depth_hold_total+1,xC+1
-	movff	average_depth_hold_total+2,xC+2
-	movff	average_depth_hold_total+3,xC+3
-	call	div32x16 			; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
+	call		I2CREAD2					; Read average depth 
+	movff		SSPBUF,lo
+	call		I2CREAD2					; Read average depth 
+	movff		SSPBUF,hi
 	STRCPY      "Avr:"
-	movff	xC+0,lo
-	movff	xC+1,hi
-	output_16dp	d'3'			; Average depth (Re-calculated from the drawn profile - not 100% exact!)
+	output_16dp	d'3'			; Average depth 
 	STRCAT_PRINT "m"
 
 ;	WIN_TOP		.0
 ;	WIN_LEFT	.75
-;	lfsr	FSR2,letter
-;	movff	average_divesecs+0,lo
-;	output_8
-;	call		word_processor
 
-
+skip_new_format_0x21_info:
 	bcf			menubit2
 	bcf			menubit3
 	bcf			switch_right
@@ -963,18 +962,18 @@ profile_view_get_depth:
 	return
 
 profile_view_get_depth_new1:
-	incf		average_divesecs+0,F			
-	movlw		d'0'
-	addwfc		average_divesecs+1,F			; counter for average depth
-	; add depth to average registers
-	movf		lo,W
-	addwf		average_depth_hold_total+0,F
-	movf		hi,W
-	addwfc		average_depth_hold_total+1,F
-	movlw		d'0'
-	addwfc		average_depth_hold_total+2,F
-	addwfc		average_depth_hold_total+3,F 	; Will work up to 9999mBar*60*60*24=863913600mBar
-
+;	incf		average_divesecs+0,F			
+;	movlw		d'0'
+;	addwfc		average_divesecs+1,F			; counter for average depth
+;	; add depth to average registers
+;	movf		lo,W
+;	addwf		average_depth_hold_total+0,F
+;	movf		hi,W
+;	addwfc		average_depth_hold_total+1,F
+;	movlw		d'0'
+;	addwfc		average_depth_hold_total+2,F
+;	addwfc		average_depth_hold_total+3,F 	; Will work up to 9999mBar*60*60*24=863913600mBar
+;
 	btfsc		event_occured				; Was there an event attached to this sample?
 	rcall		profile_view_get_depth_new2	; Yes, get information about this event
 
@@ -1127,7 +1126,7 @@ display_listdive1a:
 	movff		SSPBUF,lo
 	movlw		d'13'
 	cpfsgt		lo							; Skip if lo>13
-	bra			display_listdive2			; use old format
+	bra			display_listdive2			; use old (Pre 0x20) format
 
 	call		I2CREAD4					; Skip Profile version (Block read)
 	movff		SSPBUF,lo					; in new format, read month

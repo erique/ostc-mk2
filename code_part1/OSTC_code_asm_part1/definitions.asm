@@ -391,7 +391,7 @@ desaturation_time_buffer res 2	; buffer for desat time
 #DEFINE	uart_dump_screen    flag1,1	; Screen copy to USB.
 #DEFINE	pre_zero_flag		flag1,2	; leading zeros
 #DEFINE neg_flag			flag1,3	; e.g. Sub_16 (sub_c = sub_a - sub_b)
-#DEFINE	FLAG_3      		flag1,4	; unused
+#DEFINE	logbook_format_0x21	flag1,4	; =1: New 0x21 Logbook header format
 #DEFINE leading_zeros		flag1,5	; display leading zeros?
 #DEFINE	show_last3			flag1,6	; show only three figures
 #DEFINE	leftbind			flag1,7	; leftbinded output

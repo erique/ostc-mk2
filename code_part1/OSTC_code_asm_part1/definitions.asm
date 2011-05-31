@@ -34,9 +34,9 @@
 ;#DEFINE	GERMAN							; Use german_text.asm
 ;#DEFINE	SPANISH							; Use spanish_text.asm
 
-;#DEFINE	__DEBUG	; 
+#DEFINE	__DEBUG	; 
 
-#DEFINE	logbook_profile_version	0x20        ; Do not touch!
+#DEFINE	logbook_profile_version	0x21        ; Do not touch!
 #DEFINE	T0CON_debounce	b'00000000'         ; Timer0 Switch Debounce
 
 #DEFINE		FT_SMALL		.0

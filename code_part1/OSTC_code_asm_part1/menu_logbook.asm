@@ -71,21 +71,27 @@ menu_logbook1b:
 
     ;---- fast loop: check every other byte ----------------------------------
 menu_logbook2:
-    infsnz      divemins+0,F            ; increase 16Bit value
-	incf        divemins+1,F
-    infsnz      divemins+0,F            ; increase 16Bit value, twice
-	incf        divemins+1,F
+	movlw		d'2'
+	addwf		divemins+0,F
+	movlw		d'0'
+	addwfc		divemins+1,F			; increase 16Bit value, twice
 
-	movlw		0xFF					
-	cpfseq		divemins+0				; =0xFFFF ?
-	bra			menu_logbook2a			; No
-
+	movlw		0xFF
 	cpfseq		divemins+1				; =0xFFFF ?
 	bra			menu_logbook2a			; No
-
+	cpfseq		divemins+0				; =0xFFFF ?
+	bra			menu_logbook2a			; No
 	bra			menu_logbook_reset      ; yes, restart (if not empty)
 
 menu_logbook2a:
+	movlw		0x00
+	cpfseq		divemins+1				; =0x0000 ?
+	bra			menu_logbook2b			; No
+	cpfseq		divemins+0				; =0x0000 ?
+	bra			menu_logbook2b			; No
+	bra			menu_logbook_reset      ; yes, restart (if not empty)
+
+menu_logbook2b:
 	decf_eeprom_address	d'2'			; -2 to eeprom address.
 
 	call		I2CREAD					; reads one byte (Slow! Better use Blockread!)
@@ -131,6 +137,7 @@ menu_logbook_reset:
 	bra			menu_logbook3b				; No, Nothing to do
 
 	bsf			all_dives_shown				; Yes
+	bsf			logbook_page_not_empty
 	bra			menu_logbook_display_loop2	; rcall of get_free_eeprom_location not required here (faster)
 
 
@@ -456,9 +463,6 @@ display_profile_offset3:
 	call		I2CREAD2				; read Air pressure
 	movff		SSPBUF,hi
 
-;	movff		lo,average_depth_hold+2
-;	movff		hi,average_depth_hold+3		; Store here for correct average
-
 	bsf			leftbind
 	output_16							; Air pressure before dive
 	STRCAT      "mbar "
@@ -514,17 +518,13 @@ display_profile_offset3:
 	movff		SSPBUF,divisor_nuy2			; Store divisor
 	incf_eeprom_address	d'2'				; Skip 2Bytes in EEPROM (faster)
 	; 2 bytes salinity, GF
+	btfss	logbook_format_0x21				; 10byte extra?
+	bra		display_profile2d				; No
+	incf_eeprom_address	d'10'				; Skip another 10 byte from the header for 0x21 format
+	; Average Depth, spare bytes
 
 display_profile2d:
 	; Start Profile display
-
-;	clrf		average_divesecs+0
-;	clrf		average_divesecs+1			; Counts x-pixels for average
-;	clrf		average_depth_hold_total+0
-;	clrf		average_depth_hold_total+1
-;	clrf		average_depth_hold_total+2
-;	clrf		average_depth_hold_total+3	; Track average depth here...
-;
 ; Write 0m X-Line..
 	movlw		color_grey	
 	call		PLED_set_color				; Make this configurable?
@@ -969,18 +969,6 @@ profile_view_get_depth:
 	return
 
 profile_view_get_depth_new1:
-;	incf		average_divesecs+0,F			
-;	movlw		d'0'
-;	addwfc		average_divesecs+1,F			; counter for average depth
-;	; add depth to average registers
-;	movf		lo,W
-;	addwf		average_depth_hold_total+0,F
-;	movf		hi,W
-;	addwfc		average_depth_hold_total+1,F
-;	movlw		d'0'
-;	addwfc		average_depth_hold_total+2,F
-;	addwfc		average_depth_hold_total+3,F 	; Will work up to 9999mBar*60*60*24=863913600mBar
-;
 	btfsc		event_occured				; Was there an event attached to this sample?
 	rcall		profile_view_get_depth_new2	; Yes, get information about this event
 
@@ -1024,7 +1012,6 @@ logbook_event1:
 	movlw		color_cyan					; Color for Gas 6
 	call		PLED_set_color				; Set Color...
 	return		;(The two bytes indicating the manual gas change will be ignored in the standard "ignore loop" above...)
-
 
 ;Keep comments for future temperature graph
 ;	call		I2CREAD2					; ignore byte
@@ -1135,6 +1122,11 @@ display_listdive1a:
 	cpfsgt		lo							; Skip if lo>13
 	bra			display_listdive2			; use old (Pre 0x20) format
 
+	bsf			logbook_format_0x21		; Set flag for new 0x21 Format
+	movlw		0x21
+	cpfseq		lo						; Skip if 0x21
+	bcf			logbook_format_0x21		; Clear flag for new 0x21 Format
+
 	call		I2CREAD4					; Skip Profile version (Block read)
 	movff		SSPBUF,lo					; in new format, read month
 
@@ -1168,4 +1160,7 @@ display_listdive2:
 	output_16								; Divetime minutes
 	STRCAT_PRINT "'"                    	; Display header-row in list
 	incf_eeprom_address	d'37'				; 12 Bytes read from header, skip 37 Bytes in EEPROM (Remaining Header)
+	btfss	logbook_format_0x21				; 10byte extra?
+	return									; No, Done.
+	incf_eeprom_address	d'10'				; Skip another 10 byte from the header for 0x21 format
 	return

@@ -589,7 +589,7 @@ store_dive_data:						; CF20 seconds gone
 
 ; shift address for header
 ; the header will be stored after the dive
-	incf_eeprom_address	d'47'				; Macro, that adds 8Bit to eeprom_address:2 with banking at 0x8000
+	incf_eeprom_address	d'57'				; Macro, that adds 8Bit to eeprom_address:2 with banking at 0x8000
 
 store_dive_data2:
     SAFE_2BYTE_COPY rel_pressure, lo
@@ -1333,7 +1333,27 @@ end_dive2:
 	movff	char_O_CNS_fraction,WREG	; copy into bank1
 	call	write_external_eeprom		; Stores CNS%
 
-; Add additional 10bytes here.... mH
+	movff	avr_rel_pressure_total+0,WREG	; Average Depth
+	call	write_external_eeprom
+	movff	avr_rel_pressure_total+1,WREG	; Average Depth
+	call	write_external_eeprom
+	
+	clrf	WREG
+	call	write_external_eeprom			; Spare8
+	clrf	WREG
+	call	write_external_eeprom			; Spare7
+	clrf	WREG
+	call	write_external_eeprom			; Spare6
+	clrf	WREG
+	call	write_external_eeprom			; Spare5
+	clrf	WREG
+	call	write_external_eeprom			; Spare4
+	clrf	WREG
+	call	write_external_eeprom			; Spare3
+	clrf	WREG
+	call	write_external_eeprom			; Spare2
+	clrf	WREG
+	call	write_external_eeprom			; Spare1
 
 	movlw	0xFB						; Header stop
 	call	write_external_eeprom

@@ -425,7 +425,7 @@ desaturation_time_buffer res 2	; buffer for desat time
 #DEFINE	second_FD			flag4,7	; 2nd 0xFD in EEPROM found
 #DEFINE	second_FA			flag4,7	; 2nd 0xFA in EEPROM found
 
-#DEfINE	eeprom_overflow		flag5,0	; EEPROM overflowed (>32KB)
+;#DEfINE	unused flag5,0	; unused
 #DEFINE	eeprom_blockwrite	flag5,1	; EEPROM blockwrite active
 #DEFINE Flag_4      		flag5,2	; unused
 #DEFINE	low_battery_state	flag5,3	;=1 if battery low

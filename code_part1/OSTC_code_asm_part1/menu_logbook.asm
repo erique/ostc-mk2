@@ -76,9 +76,16 @@ menu_logbook2:
     infsnz      divemins+0,F            ; increase 16Bit value, twice
 	incf        divemins+1,F
 
-	btfsc		divemins+1,7            ; At 0x8000?
+	movlw		0xFF					
+	cpfseq		divemins+0				; =0xFFFF ?
+	bra			menu_logbook2a			; No
+
+	cpfseq		divemins+1				; =0xFFFF ?
+	bra			menu_logbook2a			; No
+
 	bra			menu_logbook_reset      ; yes, restart (if not empty)
 
+menu_logbook2a:
 	decf_eeprom_address	d'2'			; -2 to eeprom address.
 
 	call		I2CREAD					; reads one byte (Slow! Better use Blockread!)

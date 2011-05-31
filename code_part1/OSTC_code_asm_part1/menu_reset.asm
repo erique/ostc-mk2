@@ -456,7 +456,7 @@ reset_external_eeprom:				; deletes complete external eeprom!
 	clrf	eeprom_address+0
 	clrf	eeprom_address+1
 
-	movlw	d'2'
+	movlw	d'4'
 	movwf	temp3
 reset_eeprom02:
 	clrf	temp4
@@ -476,7 +476,7 @@ reset_eeprom1:
 	decfsz	temp4,F
 	bra		reset_eeprom01				; do this 256 times
 	decfsz	temp3,F
-	bra		reset_eeprom02				; and this all 2 times -> 512 *64Bytes = 32KB
+	bra		reset_eeprom02				; and this all 4 times -> 1024 *64Bytes = 64KB
 
 	bcf		eeprom_blockwrite			; clear blockwrite flag
 

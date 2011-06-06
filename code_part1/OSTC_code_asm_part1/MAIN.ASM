@@ -38,7 +38,7 @@ reset_v code     0x0000
 inter_v	code	0x0008
 		bra		HighInt						;High Priority Interrups
 
-inter_asm	code	0x0018							;Low Priority Interrups
+inter_asm	code	0x0018                  ;Low Priority Interrups
 ;	*** low priority interrupts not used
 		bra		HighInt						;High Priority Interrups
 

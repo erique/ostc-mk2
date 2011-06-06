@@ -1,6 +1,7 @@
 New in 1.91 beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: Ignore depths>130m in PC simulation
+BUGFIX: Avoid spurious CF55 stops with 3 gas or more.
 
 New in 1.90 Stable:
 Stable release

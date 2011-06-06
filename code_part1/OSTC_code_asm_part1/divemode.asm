@@ -1777,6 +1777,7 @@ divemode1:
 set_first_gas:
 	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)
 	movff	EEDATA,active_gas			; Read start gas (1-5)
+    movff   EEDATA,char_I_current_gas
 
 	decf	active_gas,W				; Gas 0-4
 	mullw	d'4'

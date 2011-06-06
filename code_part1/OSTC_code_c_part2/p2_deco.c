@@ -972,63 +972,21 @@ void deco_debug(void)
 //////////////////////////////////////////////////////////////////////////////
 // Find current gas in the list (if any).
 // 
-// Input:  char_I_deco_N2_ratio[] and He, to detect breathed gas.
+// Input:  char_I_current_gas.
 //
-// Output: sim_gas_depth_used
+// Output: sim_gas_last_depth, temp_depth_limit.
 //
 static void gas_switch_find_current(void)
 {
-    overlay unsigned char j;
-    overlay unsigned char N2 = (unsigned char)(N2_ratio * 100 + 0.5);
-    overlay unsigned char He = (unsigned char)(He_ratio * 100 + 0.5);
+    assert( 0 <= char_I_current_gas && char_I_current_gas <= (NUM_GAS+1) );
 
-    for(j=0; j<NUM_GAS; ++j)
+    if( (char_I_current_gas <= NUM_GAS)                 // Gas6 == manual set.
+     && char_I_deco_gas_change[char_I_current_gas-1]
+    )
     {
-        // Make sure to detect if we are already breathing some gas in
-        // the current list (happends when first gas do have a depth).
-        if( N2 == char_I_deco_N2_ratio[j] 
-         && He == char_I_deco_He_ratio[j] 
-        )                                 
-        {
-            if( char_I_deco_gas_change[j] )
-                temp_depth_limit = sim_gas_last_depth = char_I_deco_gas_change[j];
-            sim_gas_last_used  = j+1;
-            break;
-        }
-    }
-
-    // If there is no gas-switch-delay running ?
-    if( sim_gas_delay <= sim_dive_mins)
-    {
-        // Compute current depth:
-        overlay unsigned char depth = (unsigned char)(0.5 + (pres_respiration - pres_surface) * BAR_TO_METER);
-        assert( depth < 130 );
-
-        // And if I'm above the last decostop (with the 3m margin) ?
-        if( (sim_gas_last_depth-3) > depth )
-        {
-            for(j=0; j<NUM_GAS; ++j)
-            {
-                // And If I am in the range of a valide stop ?
-                // (again, with the same 3m margin)
-                if( char_I_deco_gas_change[j]
-                 && depth <= char_I_deco_gas_change[j]
-                 && depth >= (char_I_deco_gas_change[j] - 3)
-                )
-                {
-                    // Then start gas-switch timer there,
-                    sim_gas_delay = sim_dive_mins 
-                                  + read_custom_function(55);
-
-                    // And make sure decostop will be recorded at the right depth.
-                    temp_depth_limit = char_I_deco_gas_change[j];
-                    break;
-                }
-            }
-        }
-        else
-            // Make clear there is no deay anymore.
-            sim_gas_delay = 0;
+        sim_gas_last_used  = char_I_current_gas-1;
+        sim_gas_last_depth = char_I_deco_gas_change[sim_gas_last_used];
+        // temp_depth_limit = ???
     }
 }
 
@@ -1063,7 +1021,7 @@ static unsigned char gas_switch_deepest(void)
             if( temp_depth_limit > deco_gas_change[j] )
                 continue;
 
-            // Gas deeper than the current/previous one ? Skip !
+            // Gas deeper (or equal) than the current one ? Skip !
             if( sim_gas_last_depth && deco_gas_change[j] >= sim_gas_last_depth )
                 continue;
 

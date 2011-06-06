@@ -2345,6 +2345,7 @@ PLED_divemode_simulator_mask:
         DISPLAYTEXT	.251			; - 1m
         DISPLAYTEXT	.252			; +10m
         DISPLAYTEXT	.253			; -10m
+		DISPLAYTEXTH .306			; Quit Sim
         return
 
 ;-----------------------------------------------------------------------------
@@ -2674,7 +2675,7 @@ PLED_gas_list_loop1:
 	cpfseq	hi				; All gases shown?
 	bra		PLED_gas_list_loop	; No
 
-	DISPLAYTEXT		d'122'		; Gas 6..
+	DISPLAYTEXT		d'122'		; More
 	return					;  return (OC mode)
 
 PLED_splist_start:	

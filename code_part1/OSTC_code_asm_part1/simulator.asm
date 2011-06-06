@@ -24,7 +24,7 @@
 ; ToDo: 
 
 menu_simulator:
-	movlw	d'1'
+	movlw	d'3'
 	movwf	logbook_temp1		; Bottom time
 	movlw	d'15'
 	movwf	logbook_temp2		; Max. Depth

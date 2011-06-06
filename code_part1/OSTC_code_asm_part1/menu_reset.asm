@@ -104,7 +104,7 @@ cf_default_table0:
     ;                          DEFAULT   MIN     MAX
 	CF_DEFAULT    CF_CENTI,	    d'100', d'50',  d'250'  ; dive_threshold	        100cm
 	CF_DEFAULT    CF_CENTI,	    d'30',  d'10',  d'100'  ; surf_threshold        	30cm
-	CF_DEFAULT    CF_SEC,	    d'240', d'30',  d'240'  ; diveloop_timeout      	240s
+	CF_DEFAULT    CF_INT15,	    d'240', d'0',   d'600'  ; diveloop_timeout      	240s
 	CF_DEFAULT    CF_SEC,	    d'120', d'30',  d'240'  ; surfloop_timeout	        120s
 	CF_DEFAULT    CF_SEC,	    d'5',   d'1',   d'30'   ; premenu_timeout	        5s
 

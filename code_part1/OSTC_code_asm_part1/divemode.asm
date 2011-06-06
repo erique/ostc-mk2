@@ -1424,13 +1424,16 @@ timeout_divemode:
 	
 	bcf		divemode
 	incf	timeout_counter,F
-	GETCUSTOM8	d'2'					; diveloop_timeout
-	addlw	d'2'						; adds two seconds in case timout=zero!
-	btfsc	STATUS,C					; > 255?
-	movlw	d'255'						; Set to 255...
-	decf	WREG,F						; Limit to 254
-	cpfsgt	timeout_counter
-	bsf		divemode
+	movlw	d'0'
+	addwfc	timeout_counter2,F			; timeout is 15bits
+	GETCUSTOM15	d'2'					; diveloop_timeout
+	movff	lo,sub_a+0
+	movff	hi,sub_a+1
+	movff	timeout_counter, sub_b+0
+	movff	timeout_counter2, sub_b+1
+	call	sub16						;  sub_c = sub_a - sub_b
+	btfss	neg_flag					; Result negative?
+	bsf		divemode					; No, set flag
 	return
 
 timeout_divemode2:
@@ -1720,8 +1723,8 @@ diveloop_boot:
 	clrf	divesecs
 	clrf	samplesecs
 	clrf	apnoe_timeout_counter		; timeout in minutes
-	clrf 	timeout_counter				; takes care of the timeout
-	clrf 	timeout_counter2			; Here: counts to six, then store deco data and temperature
+	clrf 	timeout_counter				; takes care of the timeout (Low byte)
+	clrf 	timeout_counter2			; takes care of the timeout (High byte)
 	clrf	AlarmType					; Clear all alarms
 	bcf		event_occured				; clear flag
 	bcf		setpoint_changed			; clear flag

@@ -96,7 +96,7 @@
 ; 32 custom function descriptors I (FIXED LENGTH = 15 chars).
     TCODE    .40,  .35,      "Buceo Inic. [m]"           ;036 Start Dive  [m]	(depth to switch to dive mode)
     TCODE    .40,  .35,      "Buceo Fin.  [m]"           ;037 End Dive    [m]	(depth to switch back to surface mode)
-    TCODE    .40,  .35,      "Retras Fin[min]"           ;038 End Delay [min]  	(duration dive screen stays after end of dive)
+    TCODE    .40,  .35,      "Retras Fin[sec]"           ;038 End Delay [sec]  	(duration dive screen stays after end of dive)
     TCODE    .40,  .35,      "Apagado   [min]"           ;039 Power Off [min]
     TCODE    .40,  .35,      "Pre-menú  [min]"           ;040 Pre-menu  [min]	(Delais to keep surface-mode menus displayed)
     TCODE    .40,  .35,      "Vel.    [m/min]"           ;041 velocity[m/min]
@@ -391,4 +391,5 @@
 	TCODE	 .50,	.130,	 "¡Aborta!"					 ;304 Aborted
 ;@5 variant
     TCODE    .0,    .0,      "Futuro TTS"                ;305 Future TTS            (=10 chars. Title for @5 customview).
+    TCODE    .100,  .125,    "Quit Sim"                  ;306 Quit Sim (=8char max. Quit Simulator mode)
 ;=============================================================================

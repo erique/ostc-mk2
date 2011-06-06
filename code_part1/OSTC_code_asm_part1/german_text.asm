@@ -97,7 +97,7 @@
 ; 32 custom function descriptors I (FIXED LENGTH = 15 chars).
     TCODE    .40,  .35,      "TG Start    [m]"           ;036 Start Dive  [m]	(depth to switch to dive mode)
     TCODE    .40,  .35,      "TG Ende     [m]"           ;037 End Dive    [m]	(depth to switch back to surface mode)
-    TCODE    .40,  .35,      "TGNachlauf[min]"           ;038 End Delay [min]  	(duration dive screen stays after end of dive)
+    TCODE    .40,  .35,      "TGNachlauf[sek]"           ;038 End Delay [sec]  	(duration dive screen stays after end of dive)
     TCODE    .40,  .35,      "Standby   [min]"           ;039 Power Off [min]
     TCODE    .40,  .35,      "Pre-Menü  [min]"           ;040 Pre-menu  [min]	(Delais to keep surface-mode menus displayed)
     TCODE    .40,  .35,      "Geschw. [m/min]"           ;041 velocity[m/min]
@@ -392,4 +392,5 @@
 	TCODE	 .40,	.130,	 "Abgebrochen!"				 ;304 Aborted
 ;@5 variant
     TCODE    .0,    .0,      "TTS @+Min."                ;305 Future TTS            (=10 chars. Title for @5 customview).
+    TCODE    .100,  .125,    "Ende Sim"                  ;306 Quit Sim (=8char max. Quit Simulator mode)
 ;=============================================================================

@@ -1,7 +1,9 @@
 New in 1.91 beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: Ignore depths>130m in PC simulation
-BUGFIX: Avoid spurious CF55 stops with 3 gas or more.
+BUGFIX: Avoid spurious CF55 stops with 3 gas or more
+NEW: Allow -2:00 to +2:00 adjustement per day (CF48).
+NEW: 1/10/100 steps in CF menu
 
 New in 1.90 Stable:
 Stable release

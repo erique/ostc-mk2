@@ -273,16 +273,17 @@ set_leds_surfmode:
 	btg		LED_blue
 	return	
 
+;=============================================================================
+
 calc_deko_surfmode:
 	ostc_debug	'I'		; Sends debug-information to screen if debugmode active
 
 	movff	last_surfpressure+0,int_I_pres_surface+0	; copy surface air pressure to deco routine
 	movff	last_surfpressure+1,int_I_pres_surface+1		
-	clrf	wait_temp						; Use as buffer
-	movff	wait_temp,char_I_He_ratio		; No He at the Surface
-	movlw	d'79'							; 79% N2
-	movwf	wait_temp						; Use as buffer
-	movff	wait_temp,char_I_N2_ratio		; No He at the Surface
+	clrf	WREG                        ; Use as buffer
+	movff	WREG,char_I_He_ratio        ; No He at the Surface
+	movlw	d'79'                       ; 79% N2
+	movff	WREG,char_I_N2_ratio        ; Air at the Surface
 
     SAFE_2BYTE_COPY amb_pressure,int_I_pres_respiration ; copy surface air pressure to deco routine
 	GETCUSTOM8	d'11'									; Saturation multiplier %
@@ -299,6 +300,7 @@ calc_deko_surfmode:
 
 	return
 
+;=============================================================================
 
 test_charger:
 	bcf		TRISC,1						; CHRG_OUT output

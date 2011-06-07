@@ -379,10 +379,10 @@ RTCisr1a:
 		; Now, do the RTC routine....
 RTCisr2:
 		incf		secs,F					; adjusts seconds, minutes, hours, day, month and year. Checks for a leap year and works until 2099!
-		movlw		d'59'
-		cpfsgt		secs
-		return
-		clrf		secs
+		movlw		d'60'
+		cpfseq		secs                    ; Secs == 60 ?
+        return                              ; NO : done.
+		clrf		secs                    ; YES: increment minutes instead...
 		bsf			oneminupdate
 		incf		mins,F
 		movlw		d'59'

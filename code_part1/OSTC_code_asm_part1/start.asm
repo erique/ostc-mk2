@@ -39,7 +39,7 @@ start2:
 	call	PLED_resetdebugger		; Yes! Something went wrong, show reset informations
 start3:
 	clrf	STKPTR					; Clear Stackpointer
-	lfsr	FSR0, 10Bh				; Clear rambank 1-9, do not delete RTC registers
+	lfsr	FSR0,year+1				; Clear rambank 1-9, do not delete RTC registers
 clear_rambank:
 	clrf	POSTINC0
 	movlw	0x0A

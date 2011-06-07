@@ -570,7 +570,9 @@ divemenu_set_xgas2_exit:
 	bsf		event_occured				; set global event flag
     bsf		is_bailout					;=1: CC mode, but bailout active!		
 	clrf	lo							; clear Setpoint, PLED_const_ppO2_value now displayes "Bail"
-	movff	lo,char_I_const_ppO2		
+	movff	lo,char_I_const_ppO2
+    movlw   6
+    movff   WREG,char_I_current_gas     ; Current gas is Gas6 (manual setting).
 	bra		timeout_divemenu2			; quit underwater menu!
 
 divemenu_set_gas:
@@ -637,6 +639,7 @@ divemenu_set_gas2a:
 	cpfseq	menupos						; At the "Gas 6.." position?		
 	bra		divemenu_set_gas2b			; No, select Gas1-5 (Stored in Menupos)
 	bra		divemode_set_xgas			; Configure the extra gas
+
 divemenu_set_gas2b:
 	bsf		is_bailout					;=1: CC mode, but bailout active!		
 	clrf	lo							; clear Setpoint, PLED_const_ppO2_value now displayes "Bail"
@@ -667,6 +670,8 @@ divemenu_set_gas2b:
 	movff	EEDATA, char_I_N2_ratio		; = N2!
 	bsf		stored_gas_changed			; set event flag
 	bsf		event_occured				; set global event flag
+
+    movff   menupos,char_I_current_gas  ; Inform deco code too.
 	bra		timeout_divemenu2			; quit menu!
 	
 timeout_divemenu:

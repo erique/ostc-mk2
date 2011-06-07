@@ -54,10 +54,10 @@ sub16:
 	subwfb 	sub_a+1, W
 	movwf  	sub_c+1
 
-	btfsc	STATUS,C
-	return							; result positve
+	btfss	STATUS,N                ; Negativ result ?
+	return							; NO: result positive done.
 
-	bsf		neg_flag				; result negative
+	bsf		neg_flag				; MARK result negative
 
     comf    sub_c+1                 ; 16bit sign change.
     negf    sub_c+0

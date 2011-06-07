@@ -56,22 +56,30 @@ CF_BOOL		EQU	5	    ; Displays ON/OFF
 CF_SEC		EQU	6	    ; Displays 4:00
 CF_COLOR	EQU	7	    ; Display 240 plus a color watch (inverse video space)
 ;
-CF_TYPES    EQU 0x1F    
+CF_TYPES    EQU 0x0F    
 CF_MAX_BIT  EQU 6       ; Default is the highest safe value.
 CF_MAX      EQU (1<<CF_MAX_BIT)
 CF_MIN_BIT  EQU 5       ; Default is the lowest safe value.
 CF_MIN      EQU (1<<CF_MIN_BIT)
+CF_NEG_BIT  EQU 4       ; Allow negativ values.
+CF_NEG      EQU (1<<CF_NEG_BIT)
 ;
 CF_INT15	EQU	0x80; Default display. Flag for 15bit, typeless values.
 
-; Overlay our tmp data with some unused variables. But use more
-; meaningfull labels...
-#define cf32_x4     divemins+0      ; CF# modulus 32, time 4.
-#define cf_type     divemins+1      ; Type of the edited CF
-#define cf_value    divesecs
-#define cf_min      apnoe_mins
-#define cf_max      apnoe_secs
-            
+;=============================================================================
+; Overlay our tmp data in ACCESS0 bank
+    CBLOCK  0x010           ; Keep space for aa_wordprocessor module.
+        cf32_x4             ; CF# modulus 32, time 4.
+        cf_type             ; Type of the edited CF
+        cf_default:2
+        cf_value:2   
+        cf_min     
+        cf_max     
+        cf_step             ; Value ad add/substract: 1, 10, 100
+    ENDC
+
+;=============================================================================
+
 GETCUSTOM8	macro	custom8
 	movlw	custom8
 	call	getcustom8_1
@@ -162,7 +170,8 @@ menu_custom_functions0:
 	clrf	decodata+0				; here: # of CustomFunction
 	clrf	cf32_x4                 ; here: # of CustomFunction*4
 	bcf		first_FA				; here: =1: -, =0: +
-	bcf		second_FA				; here: =1: stepsize 1, =0: stepsize 10
+    movlw   1                       ; Stepsize: 1, 10, or 100.
+    movwf   cf_step
 
 	call	PLED_topline_box
 	WIN_INVERT	.1	; Init new Wordprocessor	
@@ -237,39 +246,42 @@ menu_custom_functions10a:
 	call	word_processor		
 
 	WIN_TOP		.95
-	STRCPY  "1/10: 1"
-	movlw	'0'
-	btfsc	second_FA
-	movwf	POSTINC2
-	STRCAT_PRINT " "
+	STRCPY  "Step:"
+    clrf    hi
+    movff   cf_step,lo
+	call	display_formated	        ; Typed display, w/o fill line.
+	STRCAT_PRINT "   "                   ; 2 spaces for "0.01"->"1"
 
 menu_custom_functions10b:
 	WIN_LEFT 	.20
 	WIN_TOP		.125
 	lfsr	FSR2,letter
-	OUTPUTTEXT	d'89'				;"Default:"
+	OUTPUTTEXT	d'89'				    ; "Default:"
 
-	call	display_customfunction	; Typed display.
+    movff   cf_default+0,lo
+    movff   cf_default+1,hi
+	call	display_customfunction	    ; Typed display.
 
 	WIN_LEFT 	.20
 	WIN_TOP		.155
 	lfsr	FSR2,letter
-	OUTPUTTEXT	d'97'				; "Current:"
+	OUTPUTTEXT	d'97'			        ; "Current:"
 
 	movf	cf32_x4,W
 	addlw	0x82
 	movwf	EEADR
 	call	read_eeprom				; Lowbyte
-	movff	EEDATA,lo
-	movff   EEDATA, cf_value        ; Backup low 8bit value.
+	movff   EEDATA,cf_value+0
 
 	movf	cf32_x4,W
 	addlw	0x83
 	movwf	EEADR
 	call	read_eeprom				; Highbyte
-	movff	EEDATA,hi
+	movff	EEDATA,cf_value+1
 
 	call    PLED_standard_color     ; Changed by color swatches, but trash EEADRH...
+    movff   cf_value+0,lo
+    movff   cf_value+1,hi
 	call	display_customfunction
 
 ; End of mask: min/max and the exit line...
@@ -334,7 +346,7 @@ customfunctions3:
 ; Read default value, type, and constraints
 ;
 ; Input: customfunction_page, cf32_x4
-; Output: hi:lo, cf_type, cf_min, cf_max.
+; Output: cf_default, cf_type, cf_min, cf_max.
 ; Trashes: TBLPTR
 
 cf_read_default:
@@ -354,12 +366,12 @@ cf_read_default:
     addwfc  TBLPTRH,F                   ; Propagate to 16bit (but not 24bits).
 
     tblrd*+
-    movff   TABLAT,lo                   ; Low byte --> lo
+    movff   TABLAT,cf_default+0         ; Low byte
     tblrd*+
-    movff   TABLAT,hi                   ; High byte --> hi
-    btfss   hi,7                        ; 15bit ?
-    clrf    hi                          ; NO: clear extra type flags
-    bcf     hi,7                        ; clear 15bit flag
+    movff   TABLAT,cf_default+1         ; High byte
+    btfss   cf_default+1,7              ; 15bit ?
+    clrf    cf_default+1                ; NO: clear extra type flags
+    bcf     cf_default+1,7              ; clear 15bit flag
     
     movff   TABLAT,cf_type              ; type (high byte) --> cf_type
 
@@ -408,16 +420,36 @@ display_minmax:
     btfsc   cf_type,7           ; A 15bit value ?
     bra     cf_no_min           ; Don't display, hence clear line...
 
-    btfss   cf_type, CF_MIN_BIT ; A min value exists ?
+    btfss   cf_type,CF_MIN_BIT  ; A min value exists ?
     bra     cf_no_min
 
+    btfss   cf_type,CF_NEG_BIT
+    bra     cf_min_unsigned
+
+    ; Uses 16bit sub for checking signed min value.
+    movff   cf_value,sub_a+0    ; A <- value
+    clrf    sub_a+1
+    btfsc   cf_value,7          ; extend sign if value < 0
+    setf    sub_a+1
+
+    movff   cf_min,sub_b+0      ; B <- min (with signed extend)
+    setf    sub_b+1             ; min have to be negativ.
+    call    sub16               ; Compute (A-B)
+
+    btfss   neg_flag            ; Result < 0 ?
+    bra     cf_min_passed       ; NO
+    bra     cf_min_failed       ; YES
+
+cf_min_unsigned:
     movf    cf_min,W            ; Retrieve current 8b value
-    subwf   cf_value,W          ; Compute (lo-min)
-    bc     cf_min_passed        ; Ok if CARRY, ie. min >= lo
+    subwf   cf_value,W          ; Compute (value-min)
+    bc      cf_min_passed       ; Ok if CARRY, ie. min >= lo
+
+cf_min_failed:
     call    PLED_warnings_color
     WIN_INVERT  1
-cf_min_passed:
-    
+
+cf_min_passed:    
     STRCAT  "> "                ; A min value follows
     movff   cf_min, lo
     rcall   display_formated
@@ -439,13 +471,33 @@ cf_no_min:
     btfss   cf_type, CF_MAX_BIT ; A max value exists ?
     bra     cf_no_max
 
+    btfss   cf_type,CF_NEG_BIT
+    bra     cf_max_unsigned
+
+    ; Uses 16bit sub for checking signed min value.
+    movff   cf_max,sub_a+0      ; A <- max (with signed extend)
+    clrf    sub_a+1             ; max have to be positiv.
+
+    movff   cf_value,sub_b+0    ; B <- value
+    clrf    sub_b+1
+    btfsc   cf_value,7          ; extend sign if value < 0
+    setf    sub_b+1
+    call    sub16               ; Compute (A-B)
+
+    btfss   neg_flag            ; Result < 0 ?
+    bra     cf_max_passed       ; NO
+    bra     cf_max_failed       ; YES
+
+cf_max_unsigned:
     movf    cf_value,W          ; Retrieve current max bound
     subwf   cf_max,W            ; Compute (max-lo)
-    bc     cf_max_passed        ; Ok if no carry, ie. max <= lo
+    bc      cf_max_passed       ; Ok if no carry, ie. max <= lo
+
+cf_max_failed:
     call    PLED_warnings_color
     WIN_INVERT  1
-cf_max_passed:
-    
+
+cf_max_passed:    
     STRCAT  "< "                ; A max value follows
     movff   cf_max, lo
     rcall   display_formated
@@ -468,14 +520,31 @@ cf_minmax_done:
 ;         cf_min, cf_max : the optional min/max.
 ;         FSR2  = current string pointer.
 display_formated:
+	movf	cf_type,W			; Just set N flags
+	bn		cf_type_80			; Keep 15bits value in old format.
+
+    ;---- handle signed values -----------------------------------------------
+    ; NOTE: only 8bit values can have a negativ flag right now.
+    btfss   cf_type,CF_NEG_BIT  ; Signed value ?
+    bra     cf_type_unsigned    ; NO: display unsigned as-is
+
+    btfss   lo,7                ; Negativ value ?
+    bra     cf_type_pos         ; NO: display positives with a + sign.
+    
+    PUTC    '-'                 ; YES: display with a - sign.
+    negf    lo                  ; and correct the said value.
+    bra     cf_type_unsigned
+
+cf_type_pos:
+    PUTC    '+'
 
 	;---- decode type --------------------------------------------------------
-	movf	cf_type,W			; Just set N/Z flags
-	bn		cf_type_neg			; Keep 15bits value in old format.
-	andlw   CF_TYPES            ; Look just at types
+cf_type_unsigned:
+	; Jump table:               ; test the value with cleared flags...
+    movf    cf_type,W
+    andlw   CF_TYPES            ; Look just at types
 	bz		cf_type_00			; 8bit standard mode
 
-	; Jump table:               ; test the value with cleared flags...
 	dcfsnz	WREG
 	bra		cf_type_01
 	dcfsnz	WREG
@@ -539,8 +608,13 @@ cf_type_06:						; Type == 6 is CF_SECS mode (mm:ss or hh:mm)
 cf_type_07:						; Type == 7 is CF_COLOR swatch.
     bcf     leftbind            ; Keep leading space (better alignement)
 	output_8
-	STRCAT_PRINT " "
 
+    movff   win_top,WREG        ; Is it the step value ?
+    xorlw   .95                 ; Line for "Step:"
+    btfsc   STATUS,Z            
+    retlw   -1                  ; YES : return
+
+	STRCAT_PRINT " "
 	movf	lo,W				; Get color.
 	call    PLED_set_color
 	movlw	.23
@@ -557,7 +631,7 @@ cf_type_00:						; 8bit mode. Or unrecognized type...
 	clrf	hi
     bsf     leftbind
 
-cf_type_neg:					; 15bit mode.
+cf_type_80: 					; 15bit mode.
 	bcf		hi,7
 	output_16
 	retlw   0
@@ -627,7 +701,30 @@ toggle_plusminus:
 ;-----------------------------------------------------------------------------
 
 toggle_oneorten:
-	btg		second_FA
+    movlw   .10                     ; Multiply step by 10,
+    mulwf   cf_step                 ; Result in PROD low.
+
+    movf    PRODH,W                 ; Check 1000
+    bz      toggle_oneorten_1       ; HIGH(new step) null == no overflow
+    movlw   .1                      ; Cycle to 1.
+    movwf   cf_step
+    bra     toggle_oneorten_3
+
+toggle_oneorten_1:                  ; Special case for mm:ss
+    movf    cf_type,W               ; Get type
+    andlw   CF_TYPES                ; w/o min/max/neg flags.
+    xorlw   CF_SEC                  ; Check for mm:ss ?
+    bnz     toggle_oneorten_2       ; no: continue
+    movlw   .100                    ; Step = 100 ?
+    xorwf   PRODL,W
+    bnz     toggle_oneorten_2       ; no: continue
+    movlw   .60                     ; yes: replace by 1:00
+    movff   WREG,cf_step
+    bra     toggle_oneorten_3       ; Done.
+
+toggle_oneorten_2:
+    movff   PRODL,cf_step           ; Just keep result.
+toggle_oneorten_3:
 	movlw	d'3'
 	movwf	menupos
 	bra		menu_custom_functions1	; also debounces switches
@@ -635,17 +732,17 @@ toggle_oneorten:
 ;-----------------------------------------------------------------------------
 
 restore_cfn_value:
-    rcall    cf_read_default        ; hi:lo is trashed by min/max display.
-
 	movf	cf32_x4,W               ; store default value
 	addlw	0x82
 	movwf	EEADR
-	movff	lo,EEDATA
+	movff	cf_default+0,EEDATA
+	movff	cf_default+0,cf_value+0
 	call	write_eeprom			; Lowbyte
 	movf	cf32_x4,W
 	addlw	0x83
 	movwf	EEADR
-	movff	hi,EEDATA
+	movff	cf_default+1,EEDATA
+	movff	cf_default+1,cf_value+1
 	call	write_eeprom			; Highbyte
 
 	movlw	d'4'
@@ -674,9 +771,7 @@ adjust_cfn_value:
 	bra		adjust_cfn_value3		    ; Store result
 
 adjust_cfn_value1:
-	movlw	d'1'
-	btfsc	second_FA			    	; -10?
-	movlw	d'10'
+    movf    cf_step,W                   ; 1, 10, 100 ?
 	
 	btfss	first_FA				    ; Minus?
 	bra		adjust_cfn_value2	    	; No, Plus
@@ -774,7 +869,7 @@ check_failed:
 
 ; Check one CF value ---------------------------------------------------------
 check_one_cf:
-    rcall   cf_read_default             ; Sets hi:lo, cf_type, cf_min, cf_max.
+    rcall   cf_read_default             ; Sets cf_value, cf_type, cf_min, cf_max.
     
     btfsc   cf_type,7                   ; A 15bit type ?
     bra     check_cf_check              ; Then we have to check it...
@@ -821,7 +916,25 @@ cf_check_8bit:
 
     btfss   cf_type,CF_MIN_BIT
     bra     check_no_min
-    
+
+    btfss   cf_type,CF_NEG_BIT
+    bra     check_min_unsigned
+
+    ; Uses 16bit sub for checking signed min value.
+    movff   lo,sub_a+0          ; A <- value
+    clrf    sub_a+1
+    btfsc   lo,7                ; extend sign if value < 0
+    setf    sub_a+1
+
+    movff   cf_min,sub_b+0      ; B <- min (with signed extend)
+    setf    sub_b+1             ; min have to be negativ.
+    call    sub16               ; Compute (A-B)
+
+    btfss   neg_flag            ; Result < 0 ?
+    bra     check_no_min        ; NO
+    retlw   0                   ; YES = FAILED
+
+check_min_unsigned:
     cpfsgt  cf_min                      ; Compare to cf_min
     bra     check_no_min                ; PASSED: continue.
     retlw   0                           ; NO: return failed.
@@ -829,7 +942,25 @@ cf_check_8bit:
 check_no_min:
     btfss   cf_type,CF_MAX_BIT          ; Is there a MAX bound ?
     retlw   -1                          ; No check: return OK.
-    
+
+    btfss   cf_type,CF_NEG_BIT
+    bra     check_max_unsigned
+
+    ; Uses 16bit sub for checking signed min value.
+    movff   cf_max,sub_a+0      ; A <- max (with signed extend)
+    clrf    sub_a+1             ; max have to be positiv.
+
+    movff   lo,sub_b+0          ; B <- value
+    clrf    sub_b+1
+    btfsc   lo,7                ; extend sign if value < 0
+    setf    sub_b+1
+    call    sub16               ; Compute (A-B)
+
+    btfss   neg_flag            ; Result < 0 ?
+    retlw   -1                  ; NO
+    retlw   0                   ; YES
+
+check_max_unsigned:
     movf    lo,W                        ; Compute value-max
     cpfslt  cf_max
     retlw   -1                          ; Bound met: return OK.

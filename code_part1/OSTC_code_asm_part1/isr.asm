@@ -375,11 +375,9 @@ RTCisr1a:
 RTCisr2:
 		incf		secs,F					; adjusts seconds, minutes, hours, day, month and year. Checks for a leap year and works until 2099!
 		movlw		d'60'
-		cpfseq		secs
-		bra         secs_60
-        return
-secs_60:
-		clrf		secs
+		cpfseq		secs                    ; Secs == 60 ?
+        return                              ; NO : done.
+		clrf		secs                    ; YES: increment minutes instead...
 		bsf			oneminupdate
 		incf		mins,F
 		movlw		d'59'

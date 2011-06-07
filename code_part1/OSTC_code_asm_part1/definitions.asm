@@ -34,7 +34,7 @@
 ;#DEFINE	GERMAN							; Use german_text.asm
 ;#DEFINE	SPANISH							; Use spanish_text.asm
 
-#DEFINE	__DEBUG	; 
+;#DEFINE	__DEBUG	; 
 
 #DEFINE	logbook_profile_version	0x21        ; Do not touch!
 #DEFINE	T0CON_debounce	b'00000000'         ; Timer0 Switch Debounce
@@ -333,6 +333,7 @@ convert_value_temp      res 3   ; used in menu_battery_state_convert_date
 time_correction_value   res 1   ; Adds to Seconds on midnight
 gaslist_active          res 1	; Holds flags for active gases
 desaturation_time_buffer res 2	; buffer for desat time
+total_divetime_seconds	res 2	; counts dive seconds regardless of CF01 (18h max.)
 
 ;=============================================================================
 ; C-code Routines

@@ -3,6 +3,9 @@ BETA Version - Do NOT use for diving!
 BUGFIX: Ignore depths>130m in PC simulation
 CHANGE: CF02 now allows delay of more then 240seconds
 NEW: "Quit Sim" in divemode simulator menu for exiting the simulation
+NEW: 64kByte Logbook (Doubled capacity compared to 1.90)
+BUGFIX: Average depth in Logbook (For dives made with >=1.91)
+
 
 New in 1.90 Stable:
 Stable release

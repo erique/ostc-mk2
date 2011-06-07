@@ -343,12 +343,17 @@ RTCisr1:
 ; Increase re-setable average depth divetime counter
 		incf		average_divesecs+0,F	; increase stopwatch registers	
 		btfsc		STATUS,Z
-		incf		average_divesecs+1,F	; increase stopwatch registers	
-
+		incf		average_divesecs+1,F	; increase stopwatch registers
+; Increase total divetime (Regardless of CF01)
+		incf		total_divetime_seconds+0,F	; increase stopwatch registers	
+		btfsc		STATUS,Z
+		incf		total_divetime_seconds+1,F	; increase stopwatch registers
+	
 		btfss		divemode2				; displayed divetime is running?
 		bra			RTCisr2					; No (e.g. too shallow)
 
-		incf		divesecs,F				; increase divetime registers
+; increase divetime registers (Displayed dive time)
+		incf		divesecs,F				
 		movlw		d'59'
 		cpfsgt		divesecs
 		bra			RTCisr1a

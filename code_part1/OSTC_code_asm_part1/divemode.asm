@@ -1337,11 +1337,12 @@ end_dive2:
 	call	write_external_eeprom
 	movff	avr_rel_pressure_total+1,WREG	; Average Depth
 	call	write_external_eeprom
-	
-	clrf	WREG
-	call	write_external_eeprom			; Spare8
-	clrf	WREG
-	call	write_external_eeprom			; Spare7
+
+	movff	total_divetime_seconds+0,WREG	; Total dive time (Regardless of CF01)
+	call	write_external_eeprom
+	movff	total_divetime_seconds+1,WREG	; Total dive time (Regardless of CF01)
+	call	write_external_eeprom
+
 	clrf	WREG
 	call	write_external_eeprom			; Spare6
 	clrf	WREG
@@ -1718,6 +1719,8 @@ diveloop_boot:
 	clrf	apnoe_secs
 	clrf	divemins+0
 	clrf	divemins+1
+	clrf 	total_divetime_seconds+0
+	clrf 	total_divetime_seconds+1
 	clrf	menupos3
 	bcf		menu3_active
 	clrf	divesecs

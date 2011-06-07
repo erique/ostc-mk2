@@ -64,11 +64,13 @@ onemin_sleep:
 	
 	call	calc_surface_interval	; Increases Surface-Interval time
 	call	nofly_timeout60			; check for no fly time
-									; adjust airpressure compensation any 15 minutes
+
+    ;---- adjust airpressure compensation any 15 minutes
 	incf	divemins+1,F			; counts to 14...
 	movlw	d'14'
 	cpfsgt	divemins+1
 	bra		onemin_sleep2			; 15 minutes not done!
+	clrf	divemins+1				; reset counter
 
 	rcall	pressuretest_sleep_fast	; Gets pressure without averaging (faster!)
 
@@ -76,27 +78,26 @@ onemin_sleep:
 
 	call	deco_calc_CNS_decrease_15min		; compute CNS decay in sleep only
 	movlb	b'00000001'
+
 	movff	last_surfpressure_15min+0,last_surfpressure_30min+0	; save older airpressure
 	movff	last_surfpressure_15min+1,last_surfpressure_30min+1	; save older airpressure	
     SAFE_2BYTE_COPY amb_pressure, last_surfpressure_15min		; save new airpressure
 
-	clrf	divemins+1				; reset counter
 	GETCUSTOM15	d'7'				; loads max_sufpressure into lo, hi
 	movff	lo,sub_a+0				; max. "allowed" airpressure in mBar
 	movff	hi,sub_a+1				
 	movff	last_surfpressure_15min+0,sub_b+0
 	movff	last_surfpressure_15min+1,sub_b+1
 	call	sub16					; sub_c = sub_a - sub_b
-	btfsc	neg_flag
-	bra		onemin_sleep1
-	bra		onemin_sleep2			; current airpressure is lower then "allowed" airpressure, ok!
-onemin_sleep1:						; not ok! Overwrite with max. "allowed" airpressure
+	btfss	neg_flag                ; Is 1080mbar < amb_pressure ?
+	bra		onemin_sleep2			; NO: current airpressure is lower then "allowed" airpressure, ok!
+
+    ; not ok! Overwrite with max. "allowed" airpressure
 	GETCUSTOM15	d'7'				; loads max_sufpressure into lo, hi
 	movff	lo,last_surfpressure_15min+0	; max. "allowed" airpressure in mBar
 	movff	hi,last_surfpressure_15min+1	; max. "allowed" airpressure in mBar
 
 onemin_sleep2:
-;calc_deko_sleepmode:
     SAFE_2BYTE_COPY amb_pressure, int_I_pres_respiration ; LOW copy pressure to deco routine
 	GETCUSTOM8	d'11'				; Saturation multiplier %
 	movff	WREG,char_I_saturation_multiplier
@@ -126,18 +127,20 @@ onesec_sleep_nonofly:
 	movlw	d'5'
 	cpfsgt	divemins+0				; here: temp variable
 	bra		onesec_sleep1			; #test_pressure_in_sleep not done yet
+	clrf	divemins+0
+
 	rcall	pressuretest_sleep_fast	; Gets pressure without averaging (faster!)
 
-									; compare current ambient pressure with threshold
+    ; compare current ambient pressure with threshold CF6==1160mbar.
 	GETCUSTOM15	d'6'				; loads pressure threshold into lo,hi
 	movff	lo,sub_a+0				; power on if ambient pressure is greater threshold
 	movff	hi,sub_a+1	
     SAFE_2BYTE_COPY amb_pressure, sub_b
-	call	sub16					; sub_c = sub_a - sub_b
+	call	sub16					; Is (1160mbar - amb_pressure) < 0 ?
 	bsf		sleepmode
 	btfsc	neg_flag				; Wake up from Sleep?
 	bcf		sleepmode				; amb_pressure>pressure_offset_divemode: wake up!
-	clrf	divemins+0				
+
 onesec_sleep1:
 	bcf		onesecupdate			; all done.
 	btfsc	switch_left
@@ -157,7 +160,7 @@ onesec_sleep1a:	; At least one button pressed....
 	bcf		switch_right
 	bcf		switch_left
 	bcf		T0CON,TMR0ON				; Stop Timer 0
-	bcf		sleepmode				; wake up!
+	bcf		sleepmode                   ; wake up!
 
     ; Restart altimeter averaging, so next averaging starts right over...
 	call    altimeter_restart

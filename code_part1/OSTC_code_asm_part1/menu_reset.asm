@@ -65,10 +65,16 @@ CFn set 1+CFn
     	if HIGH(default) > 0
     		error CF#v(CFn) "8bit default too big: ", default
     	endif
-    	if HIGH(min) > 0
-    		error CF#v(CFn) "8bit min too big: ", min
-    	endif
-    	if HIGH(max) > 0
+        if type & CF_NEG
+        	if HIGH(-min) != 0
+        		error CF#v(CFn) "8bit negativ min too big: ", min
+        	endif
+        else
+        	if HIGH(min) != 0
+        		error CF#v(CFn) "8bit min too big: ", min
+        	endif
+        endif
+    	if HIGH(max) != 0
     		error CF#v(CFn) "8bit max too big: ", max
     	endif
     	if ((type)==CF_BOOL) && ( (default)>1 )
@@ -83,7 +89,7 @@ CFn set 1+CFn
     	else
             local typeFlags
 typeFlags   set type
-            if (min)>0
+            if (min)!=0
 typeFlags       set type + CF_MIN
             endif
             if (max)>(min)
@@ -163,7 +169,7 @@ cf_default_table1:
 	CF_DEFAULT    CF_CENTI,     d'161', d'100', d'161'  ; color_warn_ppo2_cbar		ppO2 warn
 
 	CF_DEFAULT    CF_INT8,	    d'15',  d'7',   d'20'	; color_warn_celocity_mmin	warn at xx m/min
-	CF_DEFAULT    CF_SEC,	    d'42',  d'0',   d'240'  ; time_correction_value_default	Adds to Seconds on Midnight
+	CF_DEFAULT    CF_SEC+CF_NEG,d'42',  -d'120',d'120'  ; time_correction_value_default	Adds to Seconds on Midnight
 	CF_DEFAULT    CF_BOOL,      d'0',   0,      0 		; CF#49 Show Altimeter in surface mode
 	CF_DEFAULT    CF_BOOL,     	d'0',   0,      0       ; CF50 Show Log-Marker
 	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0 		; CF51 Show Stopwatch

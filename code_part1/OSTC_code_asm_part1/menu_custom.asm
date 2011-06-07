@@ -56,11 +56,13 @@ CF_BOOL		EQU	5	    ; Displays ON/OFF
 CF_SEC		EQU	6	    ; Displays 4:00
 CF_COLOR	EQU	7	    ; Display 240 plus a color watch (inverse video space)
 ;
-CF_TYPES    EQU 0x1F    
+CF_TYPES    EQU 0x0F    
 CF_MAX_BIT  EQU 6       ; Default is the highest safe value.
 CF_MAX      EQU (1<<CF_MAX_BIT)
 CF_MIN_BIT  EQU 5       ; Default is the lowest safe value.
 CF_MIN      EQU (1<<CF_MIN_BIT)
+CF_NEG_BIT  EQU 4       ; Allow negativ values.
+CF_NEG      EQU (1<<CF_NEG_BIT)
 ;
 CF_INT15	EQU	0x80; Default display. Flag for 15bit, typeless values.
 
@@ -408,16 +410,36 @@ display_minmax:
     btfsc   cf_type,7           ; A 15bit value ?
     bra     cf_no_min           ; Don't display, hence clear line...
 
-    btfss   cf_type, CF_MIN_BIT ; A min value exists ?
+    btfss   cf_type,CF_MIN_BIT  ; A min value exists ?
     bra     cf_no_min
 
+    btfss   cf_type,CF_NEG_BIT
+    bra     cf_min_unsigned
+
+    ; Uses 16bit sub for checking signed min value.
+    movff   cf_value,sub_a+0    ; A <- value
+    clrf    sub_a+1
+    btfsc   cf_value,7          ; extend sign if value < 0
+    setf    sub_a+1
+
+    movff   cf_min,sub_b+0      ; B <- min (with signed extend)
+    setf    sub_b+1             ; min have to be negativ.
+    call    sub16               ; Compute (A-B)
+
+    btfss   neg_flag            ; Result < 0 ?
+    bra     cf_min_passed       ; NO
+    bra     cf_min_failed       ; YES
+
+cf_min_unsigned:
     movf    cf_min,W            ; Retrieve current 8b value
-    subwf   cf_value,W          ; Compute (lo-min)
-    bc     cf_min_passed        ; Ok if CARRY, ie. min >= lo
+    subwf   cf_value,W          ; Compute (value-min)
+    bc      cf_min_passed       ; Ok if CARRY, ie. min >= lo
+
+cf_min_failed:
     call    PLED_warnings_color
     WIN_INVERT  1
-cf_min_passed:
-    
+
+cf_min_passed:    
     STRCAT  "> "                ; A min value follows
     movff   cf_min, lo
     rcall   display_formated
@@ -439,13 +461,33 @@ cf_no_min:
     btfss   cf_type, CF_MAX_BIT ; A max value exists ?
     bra     cf_no_max
 
+    btfss   cf_type,CF_NEG_BIT
+    bra     cf_max_unsigned
+
+    ; Uses 16bit sub for checking signed min value.
+    movff   cf_max,sub_a+0      ; A <- max (with signed extend)
+    clrf    sub_a+1             ; max have to be positiv.
+
+    movff   cf_value,sub_b+0    ; B <- value
+    clrf    sub_b+1
+    btfsc   cf_value,7          ; extend sign if value < 0
+    setf    sub_b+1
+    call    sub16               ; Compute (A-B)
+
+    btfss   neg_flag            ; Result < 0 ?
+    bra     cf_max_passed       ; NO
+    bra     cf_max_failed       ; YES
+
+cf_max_unsigned:
     movf    cf_value,W          ; Retrieve current max bound
     subwf   cf_max,W            ; Compute (max-lo)
     bc     cf_max_passed        ; Ok if no carry, ie. max <= lo
+
+cf_max_failed:
     call    PLED_warnings_color
     WIN_INVERT  1
-cf_max_passed:
-    
+
+cf_max_passed:    
     STRCAT  "< "                ; A max value follows
     movff   cf_max, lo
     rcall   display_formated
@@ -468,14 +510,31 @@ cf_minmax_done:
 ;         cf_min, cf_max : the optional min/max.
 ;         FSR2  = current string pointer.
 display_formated:
+	movf	cf_type,W			; Just set N flags
+	bn		cf_type_80			; Keep 15bits value in old format.
+
+    ;---- handle signed values -----------------------------------------------
+    ; NOTE: only 8bit values can have a negativ flag right now.
+    btfss   cf_type,CF_NEG_BIT  ; Signed value ?
+    bra     cf_type_unsigned    ; NO: display unsigned as-is
+
+    btfss   lo,7                ; Negativ value ?
+    bra     cf_type_pos         ; NO: display positives with a + sign.
+    
+    PUTC    '-'                 ; YES: display with a - sign.
+    negf    lo                  ; and correct the said value.
+    bra     cf_type_unsigned
+
+cf_type_pos:
+    PUTC    '+'
 
 	;---- decode type --------------------------------------------------------
-	movf	cf_type,W			; Just set N/Z flags
-	bn		cf_type_neg			; Keep 15bits value in old format.
-	andlw   CF_TYPES            ; Look just at types
+cf_type_unsigned:
+	; Jump table:               ; test the value with cleared flags...
+    movf    cf_type,W
+    andlw   CF_TYPES            ; Look just at types
 	bz		cf_type_00			; 8bit standard mode
 
-	; Jump table:               ; test the value with cleared flags...
 	dcfsnz	WREG
 	bra		cf_type_01
 	dcfsnz	WREG
@@ -557,7 +616,7 @@ cf_type_00:						; 8bit mode. Or unrecognized type...
 	clrf	hi
     bsf     leftbind
 
-cf_type_neg:					; 15bit mode.
+cf_type_80: 					; 15bit mode.
 	bcf		hi,7
 	output_16
 	retlw   0
@@ -821,7 +880,25 @@ cf_check_8bit:
 
     btfss   cf_type,CF_MIN_BIT
     bra     check_no_min
-    
+
+    btfss   cf_type,CF_NEG_BIT
+    bra     check_min_unsigned
+
+    ; Uses 16bit sub for checking signed min value.
+    movff   lo,sub_a+0          ; A <- value
+    clrf    sub_a+1
+    btfsc   cf_value,7          ; extend sign if value < 0
+    setf    sub_a+1
+
+    movff   cf_min,sub_b+0      ; B <- min (with signed extend)
+    setf    sub_b+1             ; min have to be negativ.
+    call    sub16               ; Compute (A-B)
+
+    btfss   neg_flag            ; Result < 0 ?
+    bra     check_no_min        ; NO
+    retlw   0                   ; YES = FAILED
+
+check_min_unsigned:
     cpfsgt  cf_min                      ; Compare to cf_min
     bra     check_no_min                ; PASSED: continue.
     retlw   0                           ; NO: return failed.
@@ -829,7 +906,25 @@ cf_check_8bit:
 check_no_min:
     btfss   cf_type,CF_MAX_BIT          ; Is there a MAX bound ?
     retlw   -1                          ; No check: return OK.
-    
+
+    btfss   cf_type,CF_NEG_BIT
+    bra     check_max_unsigned
+
+    ; Uses 16bit sub for checking signed min value.
+    movff   cf_max,sub_a+0      ; A <- max (with signed extend)
+    clrf    sub_a+1             ; max have to be positiv.
+
+    movff   lo,sub_b+0          ; B <- value
+    clrf    sub_b+1
+    btfsc   cf_value,7          ; extend sign if value < 0
+    setf    sub_b+1
+    call    sub16               ; Compute (A-B)
+
+    btfss   neg_flag            ; Result < 0 ?
+    retlw   -1                  ; NO
+    retlw   0                   ; YES
+
+check_max_unsigned:
     movf    lo,W                        ; Compute value-max
     cpfslt  cf_max
     retlw   -1                          ; Bound met: return OK.

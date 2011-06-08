@@ -40,7 +40,6 @@ start2:
 start3:
 	clrf	STKPTR					; Clear Stackpointer
 	lfsr	FSR0,year+1				; Clear rambank 1-9, do not delete RTC registers
-delete RTC registers
 clear_rambank:
 	clrf	POSTINC0
 	movlw	0x0A

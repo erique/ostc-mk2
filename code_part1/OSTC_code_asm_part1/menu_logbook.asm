@@ -1164,3 +1164,136 @@ display_listdive2:
 	return									; No, Done.
 	incf_eeprom_address	d'10'				; Skip another 10 byte from the header for 0x21 format
 	return
+
+logbook_convert_64k:
+	call	PLED_boot
+	call	PLED_ClearScreen		; Clear screen
+	movlw	color_red
+    call	PLED_set_color			; Set to Red
+	DISPLAYTEXTH	d'303'			; Please wait!
+	movlw	LOW		0x100
+	movwf	EEADR
+	movlw	HIGH 	0x100
+	movwf	EEADRH
+	movlw	0xAA
+	movwf	EEDATA		
+	call	write_eeprom			; write 0xAA to indicate the logbook is already converted
+; convert logbook:
+; Step 1: Copy 32k from 0xFE + 1 with bank switching to bank1
+; Step 2: Copy 32k from bank1 to bank0
+; Step 3: delete bank1
+	call	get_free_EEPROM_location		; Searches 0xFD, 0xFD, 0xFE and sets Pointer to 0xFE
+	rcall	incf_eeprom_bank0	; eeprom_address:2 now at 0xFE+1
+; Do Step 1:
+	;logbook_temp5 and logbook_temp6 hold address in bank1
+	;logbook_temp1 and logbook_temp2 hold address in bank0
+	movlw	HIGH	0x8000
+	movwf	logbook_temp6 
+	movlw	LOW		0x8000
+	movwf	logbook_temp5			; load address for bank1
+	movff	eeprom_address+0,logbook_temp1 
+	movff	eeprom_address+1,logbook_temp2	; load address for bank0
+	movlw	0x80
+	movwf	uart2_temp
+logbook_convert2:
+	clrf	uart1_temp				; counter for copy operation
+logbook_convert3:
+	; read source
+	movff	logbook_temp1,eeprom_address+0
+	movff	logbook_temp2,eeprom_address+1
+	call	I2CREAD
+	movff	SSPBUF,lo				; hold read value
+	rcall	incf_eeprom_bank0		; eeprom_address:2 +1 with bank switching
+	movff	eeprom_address+0,logbook_temp1
+	movff	eeprom_address+1,logbook_temp2	; write source address
+	; write target
+	movff	logbook_temp5,eeprom_address+0
+	movff	logbook_temp6,eeprom_address+1
+	movf	lo,W
+	call	I2CWRITE				; writes WREG into EEPROM@eeprom_address
+	movlw	d'1'
+	addwf	logbook_temp5,F
+	movlw	d'0'
+	addwfc	logbook_temp6,F			; increase target address
+	decfsz	uart1_temp,F	
+	bra		logbook_convert3
+	btg		LED_blue
+	decfsz	uart2_temp,F			; 32kByte done?
+	bra		logbook_convert2		; No, continue
+; Step 1 done.
+	bcf		LED_blue
+; Do Step 2:
+	movlw	HIGH	0x0000
+	movwf	logbook_temp6 
+	movlw	LOW		0x0000
+	movwf	logbook_temp5			; load address for bank0
+	movlw	HIGH	0x8000
+	movwf	logbook_temp2 
+	movlw	LOW		0x8000
+	movwf	logbook_temp1			; load address for bank1
+	movlw	0x80
+	movwf	uart2_temp
+logbook_convert4:
+	clrf	uart1_temp				; counter for copy operation
+logbook_convert5:
+	; read source
+	movff	logbook_temp1,eeprom_address+0
+	movff	logbook_temp2,eeprom_address+1
+	call	I2CREAD
+	movff	SSPBUF,lo				; hold read value
+	incf_eeprom_address	d'1'	
+	movff	eeprom_address+0,logbook_temp1
+	movff	eeprom_address+1,logbook_temp2	; write source address
+	; write target
+	movff	logbook_temp5,eeprom_address+0
+	movff	logbook_temp6,eeprom_address+1
+	movf	lo,W
+	call	I2CWRITE				; writes WREG into EEPROM@eeprom_address
+	incf_eeprom_address	d'1'
+	movff	eeprom_address+0,logbook_temp5
+	movff	eeprom_address+1,logbook_temp6	; write target address
+	decfsz	uart1_temp,F	
+	bra		logbook_convert5
+	btg		LED_red
+	decfsz	uart2_temp,F			; 32kByte done?
+	bra		logbook_convert4		; No, continue
+; Step 2 done.
+	bcf		LED_red
+	movlw	HIGH	0x8000
+	movwf	logbook_temp2 
+	movlw	LOW		0x8000
+	movwf	logbook_temp1			; load address for bank1
+	movlw	0x80
+	movwf	uart2_temp
+logbook_convert6:
+	clrf	uart1_temp				; counter for copy operation
+logbook_convert7:
+	; write target
+	movff	logbook_temp1,eeprom_address+0
+	movff	logbook_temp2,eeprom_address+1
+	movlw	0xFF
+	call	I2CWRITE				; writes WREG into EEPROM@eeprom_address
+	incf_eeprom_address	d'1'
+	movff	eeprom_address+0,logbook_temp1
+	movff	eeprom_address+1,logbook_temp2	; write target address
+	decfsz	uart1_temp,F	
+	bra		logbook_convert7
+	btg		LED_red
+	btg		LED_blue
+	decfsz	uart2_temp,F			; 32kByte done?
+	bra		logbook_convert6		; No, continue
+; Step 3 done.
+	bcf		LED_red
+	bcf		LED_blue
+	return
+
+incf_eeprom_bank0:
+	movlw		d'1'					; increase address
+	addwf		eeprom_address+0,F
+	movlw		d'0'
+	addwfc		eeprom_address+1,F
+	btfss		eeprom_address+1,7		; at address 8000?
+	return								; no, skip
+	clrf		eeprom_address+0		; Clear eeprom address
+	clrf		eeprom_address+1
+	return

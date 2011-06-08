@@ -40,6 +40,7 @@ start2:
 start3:
 	clrf	STKPTR					; Clear Stackpointer
 	lfsr	FSR0,year+1				; Clear rambank 1-9, do not delete RTC registers
+delete RTC registers
 clear_rambank:
 	clrf	POSTINC0
 	movlw	0x0A
@@ -223,6 +224,16 @@ restart_1:
 	movlw	d'1'
 	cpfseq	EEDATA
 	bcf		debug_mode				; clear flag if <> 1
+
+; Check if logbook has been converted already (Internal EEPROM 0x100=0xAA)
+	movlw	LOW		0x100
+	movwf	EEADR
+	movlw	HIGH 	0x100
+	movwf	EEADRH
+	call	read_eeprom				; read byte
+	movlw	0xAA
+	cpfseq	EEDATA					; is 0xAA already?
+	call	logbook_convert_64k		; No, convert now (And write 0xAA to internal EEPROM 0x100)
 
 	goto	surfloop				; Jump to Surfaceloop!
 	

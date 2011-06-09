@@ -121,7 +121,7 @@
     TCODE    .40,  .35,      "Diviseur NotUse"           ;059 Divisor NotUse1
     TCODE    .40,  .35,      "Diviseur ppO2  "           ;060 Divisor ppO2 
     TCODE    .40,  .35,      "Diviseur Debug "           ;061 Divisor Debug  
-    TCODE    .40,  .35,      "Diviseur NotUse"           ;062 Divisor NotUse2
+    TCODE    .40,  .35,      "Diviseur CNS   "           ;062 Divisor CNS
     TCODE    .40,  .35,      "Aff.CNSPlong[%]"           ;063 CNSshow dive[%]
     TCODE    .40,  .35,      "Décalage Carnet"           ;064 Logbook offset 
     TCODE    .40,  .35,      "Dern. Palier[m]"           ;065 Last Deco at[m]

@@ -551,7 +551,7 @@ display_profile_xscale:
 	call		I2CREAD2					; Read divisor
 	movff		SSPBUF,divisor_deco_debug	; Store divisor
 	call		I2CREAD2					; Read divisor
-	movff		SSPBUF,divisor_nuy2			; Store divisor
+	movff		SSPBUF,divisor_cns			; Store divisor
 	incf_eeprom_address	d'2'				; Skip 2Bytes in EEPROM (faster)
 	; 2 bytes salinity, GF
 	btfss	logbook_format_0x21				; 10byte extra?

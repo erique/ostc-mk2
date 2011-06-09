@@ -627,9 +627,9 @@ check_extended4:
 	movlw	d'9'				; Information length	
 	addwf	ProfileFlagByte,F	; add to ProfileFlagByte
 check_extended5:
-	decfsz	divisor_nuy2,W		; Check divisor
+	decfsz	divisor_cns,W		; Check divisor
 	bra		check_extended6		
-	movlw	d'0'				; Information length	
+	movlw	d'1'				; Information length	
 	addwf	ProfileFlagByte,F	; add to ProfileFlagByte
 check_extended6:
 
@@ -718,9 +718,9 @@ store_extended4:
 	bra		store_extended5	
 	rcall	store_dive_decodebug
 store_extended5:
-	decfsz	divisor_nuy2,F		; Check divisor
+	decfsz	divisor_cns,F		; Check divisor
 	bra		store_extended6	
-	rcall	store_dive_nuy2
+	rcall	store_dive_cns
 store_extended6:
 
 ; The next block is required to take care of "store never"
@@ -734,8 +734,8 @@ store_extended6:
 	clrf	divisor_ppo2			; And clear register again, so it will never reach zero...
 	btfsc	divisor_deco_debug,7	; Test highest Bit (Register must have been zero before the "decfsz" command!)
 	clrf	divisor_deco_debug		; And clear register again, so it will never reach zero...
-	btfsc	divisor_nuy2,7			; Test highest Bit (Register must have been zero before the "decfsz" command!)
-	clrf	divisor_nuy2			; And clear register again, so it will never reach zero...
+	btfsc	divisor_cns,7			; Test highest Bit (Register must have been zero before the "decfsz" command!)
+	clrf	divisor_cns				; And clear register again, so it will never reach zero...
 
 	ostc_debug	'D'		; Sends debug-information to screen if debugmode active
 
@@ -750,9 +750,11 @@ store_dive_data5:
 	bcf		event_occured		; Clear the global event flag
 	return						; Done. (Sample with all informations written to EEPROM)
 	
-store_dive_nuy2:
+store_dive_cns:
+	movff	char_O_CNS_fraction,WREG
+	call	write_external_eeprom		; Store in EEPROM
 	GETCUSTOM8	d'26'
-	movwf	divisor_nuy2			; Reload divisor from CF
+	movwf	divisor_cns			; Reload divisor from CF
 	return
 
 store_dive_decodebug:
@@ -1319,10 +1321,10 @@ end_dive2:
 	addwf	temp1,W		; copy to bits 0-3, result in WREG
 	call	write_external_eeprom
 
-	movlw	d'0'		; information size nuy2
+	movlw	d'1'		; information size cns
 	movwf	temp1		; copy to bits 0-3
 	swapf	temp1,F		; swap nibbels 0-3 with 4-7
-	GETCUSTOM8	d'26'	; Divisor nuy2
+	GETCUSTOM8	d'26'	; Divisor cns
 	addwf	temp1,W		; copy to bits 0-3, result in WREG
 	call	write_external_eeprom
 
@@ -1776,7 +1778,7 @@ diveloop_boot_2:
 	GETCUSTOM8	d'25'
 	movwf	divisor_deco_debug
 	GETCUSTOM8	d'26'
-	movwf	divisor_nuy2
+	movwf	divisor_cns
 
 	btfss	FLAG_apnoe_mode		; In Apnoe mode?
 	bra		divemode1

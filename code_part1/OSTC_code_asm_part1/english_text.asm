@@ -120,7 +120,7 @@
     TCODE    .40,  .35,      "Divisor NotUse1"           ;059 Divisor NotUse1
     TCODE    .40,  .35,      "Divisor ppO2   "           ;060 Divisor ppO2 
     TCODE    .40,  .35,      "Divisor Debug  "           ;061 Divisor Debug  
-    TCODE    .40,  .35,      "Divisor NotUse2"           ;062 Divisor NotUse2
+    TCODE    .40,  .35,      "Divisor CNS    "           ;062 Divisor CNS
     TCODE    .40,  .35,      "CNSshow dive[%]"           ;063 CNSshow dive[%]
     TCODE    .40,  .35,      "Logbook offset "           ;064 Logbook offset 
     TCODE    .40,  .35,      "Last Deco at[m]"           ;065 Last Deco at[m]

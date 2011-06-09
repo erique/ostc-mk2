@@ -270,7 +270,7 @@ divisor_deco            res 1
 divisor_tank            res 1
 divisor_ppo2            res 1
 divisor_deco_debug      res 1
-divisor_nuy2            res 1
+divisor_cns	            res 1
 
 timeout_counter         res 1   ; Timeout counter variables
 timeout_counter2        res 1

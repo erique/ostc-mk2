@@ -323,7 +323,7 @@
     TCODE    .50,   .145,    "LowBatt!"                  ;246 LowBatt!
     TCODE    .20,   .125,    "Simulator"                 ;247 Simulator
     TCODE    .30,   .2,      "OSTC Simulator"            ;248 OSTC Simulator
-    TCODE    .20,   .35,     "Start Dive"                ;249 Start Dive
+    TCODE    .20,   .65,     "Start Dive"                ;249 Start Dive
     TCODE    .100,  .25,     "+ 1m"                      ;250 + 1m
     TCODE    .100,  .50,     "- 1m"                      ;251 - 1m
     TCODE    .100,  .75,     "+10m"                      ;252 +10m
@@ -356,10 +356,10 @@
     TCODE    .0,    .125,    "for Details!"              ;275 for Details!
     TCODE    .20,   .95,     "Salinity: "                ;276 Salinity:
 ;
-    TCODE    .20,   .65,     "Bottom Time:"              ;277 Bottom Time:
-    TCODE    .20,   .95,     "Max. Depth:"               ;278 Max. Depth:
-    TCODE    .20,   .125,    "Calculate Deco"            ;279 Calculate Deco
-    TCODE    .20,   .155,    "Show Decoplan"             ;280 Show Decoplan
+    TCODE    .20,   .95,     "Bottom Time:"              ;277 Bottom Time:
+    TCODE    .20,   .125,    "Max. Depth:"               ;278 Max. Depth:
+    TCODE    .20,   .155,    "Calculate Deco"            ;279 Calculate Deco
+    TCODE    .0,    .0,      ""                          ;280 UNUSED
 ;
     TCODE    .93,   .170,    "Avr.Depth"                 ;281 Avr.Depth
     TCODE    .90,   .170,    "Lead Tiss."                ;282 Lead Tiss.
@@ -383,7 +383,7 @@
     TCODE    .0,    .0,      "MOD:"                      ;297 MOD:                  (max operating depth of a gas).
     TCODE    .0,    .0,      "END:"                      ;298 END:                  (equivalent nitrogen depth of a gas).
     TCODE    .0,    .0,      "EAD:"                      ;299 EAD:                  (equivalent air depth of a gas).
-	TCODE	 .100,	.125,	 "Active?"					 ;300 Active?               (Enable/Disable Gas underwater)
+	TCODE    .100,  .125,	 "Active?"					 ;300 Active?               (Enable/Disable Gas underwater)
 	TCODE    .0,    .2,      "OCR Gas Usage:"            ;301 OCR Gas Usage:        (Planned gas consumtion by tank).
 ; 115k Bootloader support:
 	TCODE	 .45,	.100,	 "Bootloader"				 ;302 Bootloader
@@ -391,5 +391,9 @@
 	TCODE	 .50,	.130,	 "Aborted!"					 ;304 Aborted
 ;@5 variant
     TCODE    .0,    .0,      "Future TTS"                ;305 Future TTS            (=10 chars. Title for @5 customview).
+;
     TCODE    .100,  .125,    "Quit Sim"                  ;306 Quit Sim (=8char max. Quit Simulator mode)
+;Dive interval
+    TCODE    .20,   .35,     "Interval:"                 ;307 Interval:
+    TCODE    .0,    .0,      "Now"                       ;308 Now
 ;=============================================================================

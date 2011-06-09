@@ -131,6 +131,7 @@ static void restore_sim_pres_tissue(void);
 static void sim_tissue(PARAMETER unsigned char period);
 static void sim_limit(PARAMETER float GF_current);
 static void sim_extra_time(void);
+static void calc_dive_interval(void);
 
 static void calc_gradient_factor(void);
 static void calc_wo_deco_step_1_min(void);
@@ -959,6 +960,14 @@ void deco_calc_wo_deco_step_1_min(void)
     RESET_C_STACK
     calc_wo_deco_step_1_min();
     deco_calc_desaturation_time();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void deco_calc_dive_interval(void)
+{
+    RESET_C_STACK
+    calc_dive_interval();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2142,9 +2151,8 @@ static void calc_wo_deco_step_1_min(void)
 	}
 
     N2_ratio = 0.7902; // FIXED, sum lt. buehlmann
-    pres_respiration = int_I_pres_respiration * 0.001;  // assembler code uses different digit system
-    pres_surface = int_I_pres_surface * 0.001;          // the b"uhlmann formula using pres_surface does not use the N2_ratio
-    ppN2 = N2_ratio * (pres_respiration - ppWater);     // ppWater is the extra pressure in the body
+    pres_respiration = pres_surface = int_I_pres_surface * 0.001;
+    ppN2 = N2_ratio * (pres_respiration - ppWater);
     ppHe = 0.0;
     float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
     float_saturation_multiplier   = char_I_saturation_multiplier   * 0.01;
@@ -2157,6 +2165,40 @@ static void calc_wo_deco_step_1_min(void)
     int_O_ascenttime = 0;
     int_O_extra_ascenttime = 0;
     calc_gradient_factor();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// calc_dive_interval
+//
+// Prepare tissue for delay before the next dive simulation.
+//
+// Inputs:  char_I_dive_interval == delay before dive (in 10' steps).
+// Outputs: pres_tissue_N2/He[], CNS_fraction
+//
+// Should be protected by deco_push_tissues_to_vault(),
+//                        deco_pull_tissues_from_vault()
+//
+// desaturation slowed down to 70,42%.
+//
+static void calc_dive_interval()
+{
+    overlay unsigned char t;
+
+    //---- Initialize simulation parameters ----------------------------------
+    N2_ratio = 0.7902; // FIXED, sum lt. buehlmann
+    pres_respiration = pres_surface = int_I_pres_surface * 0.001;
+    ppN2 = N2_ratio * (pres_respiration - ppWater);
+    ppHe = 0.0;
+    float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
+    float_saturation_multiplier   = char_I_saturation_multiplier   * 0.01;
+
+    //---- Perform simulation ------------------------------------------------
+    for(t=0; t<char_I_dive_interval; ++t)
+    {
+        calc_tissue(2);  // period = 10min.
+        CNS_fraction =  0.92587471 * CNS_fraction;  // Half-time = 90min: (1/2)^(1/9)
+    }
+    char_O_CNS_fraction = (char)(CNS_fraction * 100.0 + 0.5);
 }
 
 //////////////////////////////////////////////////////////////////////////////

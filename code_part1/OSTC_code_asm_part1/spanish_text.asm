@@ -323,7 +323,7 @@
     TCODE    .50,   .145,    "BatBaja!"                  ;246 LowBatt!
     TCODE    .20,   .125,    "Simulador"                 ;247 Simulator
     TCODE    .30,   .2,      "Simulador OSTC"            ;248 OSTC Simulator
-    TCODE    .20,   .35,     "Inicio Buc."               ;249 Start Dive
+    TCODE    .20,   .65,     "Inicio Buc."               ;249 Start Dive
     TCODE    .100,  .25,     "+ 1m"                      ;250 + 1m
     TCODE    .100,  .50,     "- 1m"                      ;251 - 1m
     TCODE    .100,  .75,     "+10m"                      ;252 +10m
@@ -356,10 +356,10 @@
     TCODE    .0,    .125,    "más Detalles!"             ;275 for Details!
     TCODE    .20,   .95,     "Salinidad:"                ;276 Salinity:
 ;
-    TCODE    .20,   .65,     "Tiempo Fondo:"             ;277 Bottom Time:
-    TCODE    .20,   .95,     "Prof. Max.:"               ;278 Max. Depth:
-    TCODE    .20,   .125,    "Calcular Deco"             ;279 Calculate Deco
-    TCODE    .20,   .155,    "Mostr. Plan Deco"          ;280 Show Decoplan
+    TCODE    .20,   .95,     "Tiempo Fondo:"             ;277 Bottom Time:
+    TCODE    .20,   .125,    "Prof. Max.:"               ;278 Max. Depth:
+    TCODE    .20,   .155,    "Calcular Deco"             ;279 Calculate Deco
+    TCODE    .0,    .0,      ""                          ;280 UNUSED
 ;
     TCODE    .93,   .170,    "ProfMedia"                 ;281 Avr.Depth
     TCODE    .90,   .170,    "TejControl"                ;282 Lead Tiss.
@@ -391,5 +391,9 @@
 	TCODE	 .50,	.130,	 "¡Aborta!"					 ;304 Aborted
 ;@5 variant
     TCODE    .0,    .0,      "Futuro TTS"                ;305 Future TTS            (=10 chars. Title for @5 customview).
+;
     TCODE    .100,  .125,    "Quit Sim"                  ;306 Quit Sim (=8char max. Quit Simulator mode)
+;Dive interval
+    TCODE    .20,   .35,     "Interval:"                 ;307 Interval:
+    TCODE    .0,    .0,      "Now"                       ;308 Now
 ;=============================================================================

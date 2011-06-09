@@ -83,6 +83,7 @@ extern void deco_calc_hauptroutine(void);
 extern void deco_clear_tissue(void);
 extern void deco_calc_percentage(void);
 extern void deco_calc_wo_deco_step_1_min(void);
+extern void deco_calc_dive_interval(void);
 extern void deco_debug(void);
 extern void deco_gradient_array(void);
 extern void deco_hash(void);

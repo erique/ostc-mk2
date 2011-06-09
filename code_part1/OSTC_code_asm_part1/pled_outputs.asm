@@ -515,28 +515,50 @@ PLED_display_deko2:
 ;       that part of the mask to be sure the numbers fit in the right places.
 PLED_simulator_data:
 	WIN_LEFT	.20
-	WIN_TOP		.65
 	WIN_FONT 	FT_SMALL
 	call	PLED_standard_color
-	lfsr	FSR2,letter
-	OUTPUTTEXTH .277                    ; Bottom Time:
-	
-	movff	logbook_temp1,lo            
+
+    ;---- Updates interval line ----------------------------------------------
+	WIN_TOP    .35
+	lfsr	    FSR2,letter
+	OUTPUTTEXTH .306                    ; Interval:
+
+	movff	    char_I_dive_interval,lo
+    movf        lo,W
+    bnz         PLED_simulator_data_1
+    OUTPUTTEXTH .307                    ; Now
+    clrf        POSTINC2                ; End buffer.
+    bra         PLED_simulator_data_2
+
+PLED_simulator_data_1:
 	bsf		leftbind
 	output_8
-	bcf		leftbind
+	STRCAT      "0min"
+
+PLED_simulator_data_2:
+    call        word_processor
+
+    ;---- Updates bottom time line -------------------------------------------
+	WIN_TOP		.95
+	lfsr        FSR2,letter
+	OUTPUTTEXTH .277                    ; Bottom Time:
+
+	movff	logbook_temp1,lo
+	bsf		leftbind
+	output_8
 	STRCAT_PRINT  "min "
 
-	WIN_LEFT	.20
-	WIN_TOP		.95
+    ;---- Updates depth line -------------------------------------------------
+	WIN_TOP		.125
 	lfsr	FSR2,letter
 	OUTPUTTEXTH .278                    ; Max. Depth:
 
 	movff	logbook_temp2,lo
 	bsf		leftbind
 	output_8
-	bcf		leftbind
 	STRCAT_PRINT  "m "
+
+	bcf		leftbind
 	return
 
 ;=============================================================================
@@ -932,13 +954,13 @@ PLED_simulator_mask:
 	call	PLED_topline_box
 	WIN_INVERT	.1	; Init new Wordprocessor	
 	DISPLAYTEXT	.248		; OSTC Simulator
-	WIN_INVERT	.0	; Init new Wordprocessor	
-	DISPLAYTEXT	.249		; Start Dive
-	DISPLAYTEXTH	.277	; Bottom Time:
-	DISPLAYTEXTH	.278	; Max. Depth:
-	DISPLAYTEXTH	.279	; Calculate Deco
-	DISPLAYTEXTH	.280	; Show Decoplan
-	DISPLAYTEXT .11			; Exit
+	WIN_INVERT	.0	; Init new Wordprocessor
+    DISPLAYTEXTH    .306                ; Interval:
+	DISPLAYTEXT	    .249                ; Start Dive
+	DISPLAYTEXTH	.277                ; Bottom Time:
+	DISPLAYTEXTH	.278                ; Max. Depth:
+	DISPLAYTEXTH	.279                ; Calculate Deco
+	DISPLAYTEXT     .11                 ; Exit
 	return
 	
 PLED_temp_surfmode:

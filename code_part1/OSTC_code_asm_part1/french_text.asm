@@ -324,7 +324,7 @@
     TCODE    .50,   .145,    "BattFaible!"               ;246 LowBatt!
     TCODE    .20,   .125,    "Simulateur"                ;247 Simulator
     TCODE    .27,   .2,      "Simulateur OSTC"           ;248 OSTC Simulator
-    TCODE    .20,   .35,     "Mode Simulation..."        ;249 Start Dive
+    TCODE    .20,   .65,     "Début Simulation..."       ;249 Start Dive
     TCODE    .100,  .25,     "+ 1m"                      ;250 + 1m
     TCODE    .100,  .50,     "- 1m"                      ;251 - 1m
     TCODE    .100,  .75,     "+10m"                      ;252 +10m
@@ -357,10 +357,10 @@
     TCODE    .0,    .125,    "pour plus de détails!"     ;275 for Details!
     TCODE    .20,   .95,     "Salinité: "                ;276 Salinity:
 ;
-    TCODE    .20,   .65,     "Temps fond:"               ;277 Bottom Time:
-    TCODE    .20,   .95,     "Prof. Max.:"               ;278 Max. Depth:
-    TCODE    .20,   .125,    "Calculer la Déco"          ;279 Calculate Deco
-    TCODE    .20,   .155,    "Voir Plan de Déco"         ;280 Show Decoplan
+    TCODE    .20,   .95,     "Temps fond:"               ;277 Bottom Time:
+    TCODE    .20,   .125,    "Prof. Max.:"               ;278 Max. Depth:
+    TCODE    .20,   .155,    "Calculer la Déco"          ;279 Calculate Deco
+    TCODE    .0,    .0,      ""                          ;280 UNUSED
 ;
     TCODE    .97,   .170,    "Prof.Moyn"                 ;281 Avr.Depth
     TCODE    .90,   .170,    "TissuDirec"                ;282 Lead Tiss.
@@ -392,4 +392,7 @@
 	TCODE	 .50,	.130,	 "Aborted!"					 ;304 Aborted
 ;@5 variant
     TCODE    .0,    .0,      "DTR Réchap"                ;305 Future TTS            (=10 chars. Title for @5 customview).
+;Dive interval
+    TCODE    .20,   .35,     "Intervalle: "               ;306 Interval:
+    TCODE    .0,    .0,      "Maintenant"                 ;307 Dive now
 ;=============================================================================

@@ -25,11 +25,13 @@
 
 menu_simulator:
 	movlw	d'1'
-	movwf	logbook_temp1		; Bottom time
+	movwf	logbook_temp1               ; Bottom time
 	movlw	d'15'
-	movwf	logbook_temp2		; Max. Depth
+	movwf	logbook_temp2               ; Max. Depth
 	movlw	d'1'
 	movwf	menupos
+    clrf    WREG                        ; Interval
+    movff   WREG,char_I_dive_interval
 
 menu_simulator1:
 	clrf	timeout_counter2
@@ -77,6 +79,8 @@ menu_simulator_loop3:
 
 menu_simulator_do:						; calls submenu
 	dcfsnz	menupos,F
+	bra		simulator_inc_interval
+	dcfsnz	menupos,F
 	bra		simulator_startdive
 	dcfsnz	menupos,F
 	bra		simulator_inc_bottomtime
@@ -84,20 +88,31 @@ menu_simulator_do:						; calls submenu
 	bra		simulator_inc_maxdepth
 	dcfsnz	menupos,F
 	bra		simulator_calc_deco
-	dcfsnz	menupos,F
-	bra		simulator_show_decoplan
+
 menu_simulator_exit:
 	movlw	d'4'
 	movwf	menupos
-	goto	more_menu2						; exit...
+	goto	more_menu2                  ; exit...
 
+simulator_inc_interval:
+    movff   char_I_dive_interval,PRODL
+    incf    PRODL,F
+    movlw   .24*6                       ; Max 24h delay.
+    cpfslt  PRODL
+    clrf    PRODL
+    movff   PRODL,char_I_dive_interval
+
+	movlw	d'1'
+	movwf	menupos
+	bra		menu_simulator2
+    
 simulator_inc_bottomtime:
 	movlw	d'2'
 	addwf	logbook_temp1,F				; Here: Bottomtime in m
 	movlw	d'199'
 	cpfslt	logbook_temp1
 	movwf	logbook_temp1
-	movlw	d'2'
+	movlw	d'3'
 	movwf	menupos
 	bra		menu_simulator2
 
@@ -107,9 +122,11 @@ simulator_inc_maxdepth:
 	movlw	d'99'
 	cpfslt	logbook_temp2
 	movwf	logbook_temp2
-	movlw	d'3'
+	movlw	d'4'
 	movwf	menupos
 	bra		menu_simulator2
+
+;=============================================================================
 
 simulator_startdive:
 	; Descent to -15m depth
@@ -117,7 +134,7 @@ simulator_startdive:
 	; Clear standalone_simulator after (any) dive
 	bsf		simulatormode_active			; normal simulator mode
 	bsf		standalone_simulator			; Standalone Simulator active
-	
+
 	movff	logbook_temp2,xA+0
 	clrf	xA+1
 	movlw	d'100'
@@ -143,14 +160,20 @@ simulator_startdive:
 	bcf		switch_left
 	bcf		switch_right
 
-	call	simulator_save_tissue_data		; Stores 32 floats "pre_tissue" into bank3
+	call	simulator_save_tissue_data  ; Stores 32 floats "pre_tissue" into bank3
 
-	movlw	d'3'                            ; Begin of deco cycle (reset table).
-	movff	WREG,char_O_deco_status         ; Reset Deco module.
+    movff   char_I_dive_interval,WREG   ; Any interval ?
+    iorlw   0                           ; Test for null
+    btfss   STATUS,Z
+    call    deco_calc_dive_interval     ; NZ: call interval subroutine.
+    movlb   1
+    
+	movlw	d'3'                        ; Begin of deco cycle (reset table).
+	movff	WREG,char_O_deco_status     ; Reset Deco module.
 
-	bsf		divemode						; Set divemode flag
-	ostc_debug	'P'							; Sends debug-information to screen if debugmode active
-	goto	diveloop						; Start Divemode
+	bsf		divemode                    ; Set divemode flag
+	ostc_debug	'P'                     ; Sends debug-information to screen if debugmode active
+	goto	diveloop                    ; Start Divemode
 
 ;=============================================================================
 ; Show decoplanning result.
@@ -194,25 +217,25 @@ simulator_decoplan_notts:
         WIN_INVERT	.0                  ; Init new Wordprocessor	
 	
 simulator_show_decoplan1:
-	bcf		switch_left
-	bcf		switch_right
+        bcf		switch_left
+        bcf		switch_right
 simulator_show_decoplan2:
-	btfsc	uart_dump_screen            ; Asked to dump screen contains ?
-	call	dump_screen     		    ; Yes!
-
-	btfss	onesecupdate
-	bra		simulator_show_decoplan3
-
-	call	timeout_surfmode
-	call	set_dive_modes
-	call	test_charger				; check if charger IC is active
-	call	get_battery_voltage			; get battery voltage
-	
-	bcf		onesecupdate				; End of one second tasks
+        btfsc	uart_dump_screen        ; Asked to dump screen contains ?
+        call	dump_screen             ; Yes!
+        
+        btfss	onesecupdate
+        bra		simulator_show_decoplan3
+        
+        call	timeout_surfmode
+        call	set_dive_modes
+        call	test_charger            ; check if charger IC is active
+        call	get_battery_voltage     ; get battery voltage
+        
+        bcf		onesecupdate            ; End of one second tasks
 
 simulator_show_decoplan3:
 	btfsc	switch_right
-	bra		simulator_show_decoplan4	; Quit display
+	bra		menu_simulator1             ; Quit display
 
 	btfsc	switch_left
 	bra		simulator_show_decoplan5	; Next decoplan-page.
@@ -236,12 +259,12 @@ simulator_show_decoplan5:
 ;---- In OCR mode, show the gas Usage special page ---------------------------
 simulator_show_decoplan5_0:    
     btfss   display_see_deco            ; Already displayed ?
-    bra     simulator_show_decoplan4    ; Exit to menu.
+    bra     menu_simulator1             ; Exit to menu.
 
 	bcf		display_see_deco			; clear flag
    
     btfsc   FLAG_const_ppO2_mode        ; In CCR mode ?
-    bra     simulator_show_decoplan4    ; YES: finished.
+    bra     menu_simulator1             ; YES: finished.
 
     ; Make sure to pass first gas
     clrf    EEADRH
@@ -308,13 +331,14 @@ simulator_show_decoplan5_1:
 ;=============================================================================
 ; OSTC Simulator: compute a new runtime
 ;
-simulator_show_decoplan4:
-	movlw	d'5'
-	movwf	menupos
-	bra		menu_simulator1
-
 simulator_calc_deco:
 	call	simulator_save_tissue_data  ; Stores 32 floats "pre_tissue" into bank3
+
+    movff   char_I_dive_interval,WREG   ; Any interval ?
+    iorlw   0                           ; Test for null
+    btfss   STATUS,Z
+    call    deco_calc_dive_interval     ; NZ: call interval subroutine.
+    movlb   1
 
 	bsf		simulatormode_active        ; normal simulator mode
 	bsf		standalone_simulator        ; Standalone Simulator active
@@ -421,7 +445,9 @@ simulator_calc_deco3:
 	movwf	menupos
 	movff	char_I_bottom_time,logbook_temp1    ; Restore bottom time,
 	movff   char_I_bottom_depth,logbook_temp2   ; and depth.
-	bra     menu_simulator1                 ; Done.
+
+	clrf	timeout_counter2            ; Restart menu timeout.
+    bra     simulator_show_decoplan     ; Done.
 
 simulator_save_tissue_data:
 	bsf		restore_deco_data           ; Set restore flag

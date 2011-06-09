@@ -156,6 +156,7 @@ VAR_UCHAR (char_I_depth_last_deco);        // new in v.101 unit: [m]
 VAR_UCHAR (char_I_deco_model);             // new in v.102. 0 == ZH-L16, 1 = ZH-L16-GF (Grandiant facttor)
 VAR_UCHAR (char_I_bottom_depth);           // Bottom depth for planning (used in gas volume evaluation).
 VAR_UCHAR (char_I_bottom_time);            // Bottom time for planning (used in gas volume evaluation).
+VAR_UCHAR (char_I_dive_interval);          // Delay before next dive simulation.
 
 TAB_UCHAR (char_I_deco_gas_change,NUM_GAS);// new in v.101
 TAB_UCHAR (char_I_deco_N2_ratio, NUM_GAS); // new in v.101

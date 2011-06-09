@@ -327,6 +327,7 @@ display_profile_offset3:
 	call		PLED_convert_date			; converts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 
 	PUTC		' '
+	PUTC		0x94						; "End of dive" icon
 	call		I2CREAD2					; hour
 	movff		SSPBUF,lo
 	output_99x			
@@ -385,15 +386,34 @@ display_profile_offset3:
 	call		mult16x16				; result is in xC:2 !
 
 	bsf			leftbind
+	PUTC		0x95					; "duration o dive" icon
 	output_16							; divetime minutes
 
+	btfss	logbook_format_0x21			; Dive made with new 0x21 format?
+	bra		display_profile_old_spacing	; No
+; Yes, get real sample time
+	incf_eeprom_address	d'35'			; Skip Bytes in EEPROM
+	call		I2CREAD2				; Total sample time in seconds
+	movff		SSPBUF,xA+0
+	call		I2CREAD2				; Total sample time in seconds
+	movff		SSPBUF,xA+1
+	movlw		LOW		d'600'
+	movwf		xB+0
+	movlw		HIGH	d'600'
+	movwf		xB+1					; A vertical line every 600 seconds
+	call		div16x16				; xA/xB=xC with xA as remainder
+	decf_eeprom_address	d'37'			; Macro, that subtracts 8Bit from eeprom_address:2
+	bra			display_profile_spacing	; continue below
+
+display_profile_old_spacing:
 ; Compute spacing between 10min lines
 	movff		lo,xA+0
 	movff		hi,xA+1					; divetime in minutes
 	movlw		d'10'
 	movwf		xB+0
 	clrf		xB+1					; A vertical line every 10 minutes
-	call		div16x16				;xA/xB=xC with xA as remainder
+	call		div16x16				; xA/xB=xC with xA as remainder
+display_profile_spacing:
 	; xC now holds number of lines
 	movlw		d'1'
 	addwf		xC+0					; Add one line...
@@ -408,20 +428,36 @@ display_profile_offset3:
 	movff		xC+1,avr_rel_pressure+1					; spacing between 10min lines (1-159)
 
 ; Restore divetime in minutes:
+	btfss	logbook_format_0x21			; Dive made with new 0x21 format?
+	bra		display_profile_old_xscale	; No
+; Yes, get real sample time
+	incf_eeprom_address	d'35'			; Skip Bytes in EEPROM
+	call		I2CREAD2				; Total sample time in seconds
+	movff		SSPBUF,xC+0
+	call		I2CREAD2				; Total sample time in seconds
+	movff		SSPBUF,xC+1
+	decf_eeprom_address	d'37'			; Macro, that subtracts 8Bit from eeprom_address:2
+	PUTC		':'
+	call		I2CREAD2				; read divetime seconds
+	movff		SSPBUF,lo
+	bra			display_profile_xscale		; continue below
+
+display_profile_old_xscale:
 	movff		lo,xA+0					; calculate x-scale for profile display
 	movff		hi,xA+1					; calculate total diveseconds first
 	movlw		d'60'					; 60seconds are one minute...
 	movwf		xB+0
 	clrf		xB+1
 	call		mult16x16				; result is in xC:2 !
-
-	PUTC		d'39'					;"'"
+	PUTC		':'
 	call		I2CREAD2				; read divetime seconds
 	movff		SSPBUF,lo
 	movf		lo,W					; add seconds to total seconds
 	addwf		xC+0
 	movlw		d'0'
 	addwfc		xC+1					; xC:2 now holds total dive seconds!
+
+display_profile_xscale:
 	movff		xC+0,xA+0				; now calculate x-scale value
 	movff		xC+1,xA+1
 	movlw		d'154'					; 154pix width available
@@ -443,7 +479,7 @@ display_profile_offset3:
 
 	bsf			leftbind
 	output_99x							; divetime seconds
-	STRCAT      "\" "
+	PUTC		' '
 	call		I2CREAD2	
 	movff		SSPBUF,lo
 	call		I2CREAD2	
@@ -1178,6 +1214,7 @@ logbook_convert_64k:
 	movlw	0xAA
 	movwf	EEDATA		
 	call	write_eeprom			; write 0xAA to indicate the logbook is already converted
+return
 ; convert logbook:
 ; Step 1: Copy 32k from 0xFE + 1 with bank switching to bank1
 ; Step 2: Copy 32k from bank1 to bank0
@@ -1259,6 +1296,7 @@ logbook_convert5:
 	bra		logbook_convert4		; No, continue
 ; Step 2 done.
 	bcf		LED_red
+; Do Step 3:
 	movlw	HIGH	0x8000
 	movwf	logbook_temp2 
 	movlw	LOW		0x8000

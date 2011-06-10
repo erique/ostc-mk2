@@ -267,6 +267,9 @@ display_profile:
 display_profile2:
 	bcf			logbook_profile_view			; clear flag for search routine
 
+	clrf		average_divesecs+0
+	clrf		average_divesecs+1				; holds amount of read samples
+
 	call		PLED_display_wait_clear
 	call		PLED_standard_color
 	WIN_TOP		.0
@@ -389,43 +392,16 @@ display_profile_offset3:
 	PUTC		0x95					; "duration o dive" icon
 	output_16							; divetime minutes
 
-	btfss	logbook_format_0x21			; Dive made with new 0x21 format?
-	bra		display_profile_old_spacing	; No
-; Yes, get real sample time
-	incf_eeprom_address	d'35'			; Skip Bytes in EEPROM
-	call		I2CREAD2				; Total sample time in seconds
-	movff		SSPBUF,xA+0
-	call		I2CREAD2				; Total sample time in seconds
-	movff		SSPBUF,xA+1
 	movlw		LOW		d'600'
-	movwf		xB+0
-	movlw		HIGH	d'600'
-	movwf		xB+1					; A vertical line every 600 seconds
-	call		div16x16				; xA/xB=xC with xA as remainder
-	decf_eeprom_address	d'37'			; Macro, that subtracts 8Bit from eeprom_address:2
-	bra			display_profile_spacing	; continue below
-
-display_profile_old_spacing:
-; Compute spacing between 10min lines
-	movff		lo,xA+0
-	movff		hi,xA+1					; divetime in minutes
-	movlw		d'10'
-	movwf		xB+0
-	clrf		xB+1					; A vertical line every 10 minutes
-	call		div16x16				; xA/xB=xC with xA as remainder
-display_profile_spacing:
-	; xC now holds number of lines
-	movlw		d'1'
-	addwf		xC+0					; Add one line...
-	movff		xC+0,xB+0
-	clrf		xB+1					; No more then 255 lines...
-	movlw		d'159'					; Available width
 	movwf		xA+0
-	clrf		xA+1
-	call		div16x16				;xA/xB=xC with xA as remainder
-	; xC now holds spacing between vertical 10min lines
-	movff		xC+0,avr_rel_pressure+0
-	movff		xC+1,avr_rel_pressure+1					; spacing between 10min lines (1-159)
+	movlw		HIGH	d'600'
+	movwf		xA+1					; A vertical line every 600 seconds
+	movff		samplesecs_value,xB+0		; Copy sampling rate
+	clrf		xB+1
+	call		div16x16				; xA/xB=xC with xA as remainder
+	movff		xC+0,average_depth_hold_total+0
+	movff		xC+1,average_depth_hold_total+1
+	;average_depth_hold_total:2 holds interval of samples for vertical 10min line
 
 ; Restore divetime in minutes:
 	btfss	logbook_format_0x21			; Dive made with new 0x21 format?
@@ -599,20 +575,9 @@ display_profile2e:
 	movff		WREG,win_height				
 	movlw		d'1'
 	movff		WREG,win_width				; "Window" Width
-display_profile2f:
 	call		PLED_box					; Inputs:  win_top, win_leftx2, win_height, win_width, win_color1, win_color2
-	movff		win_leftx2,WREG				; Get column
-	addwf		avr_rel_pressure+0,W		; Add column interval distance to win_leftx2
-	tstfsz		avr_rel_pressure+1			; >255?
-	movlw		d'255'						; Yes, make win_leftx2>159 -> Abort here
-	btfsc		STATUS,C					; A Cary from the addwf above?
-	movlw		d'255'						; Yes, make win_leftx2>159 -> Abort here
-	movff		WREG,win_leftx2				; Result in win_leftx2 again
-	movff		win_leftx2,lo				; Get win_leftx2 in Bank1...
-	movlw		d'159'						; Limit
-	cpfsgt		lo							; >159?
-	bra			display_profile2f			; No, draw another line
 
+; Draw frame around profile
 	movlw		color_blue	
 	WIN_FRAME_COLOR	.75, .239, .4, .159	;top, bottom, left, right with color in WREG
 
@@ -982,7 +947,48 @@ profile_display_fill_up2:			; Loop
 	bra			profile_display_fill_up2
 	return							; apnoe_mins and xC+0 are untouched
 
-profile_view_get_depth:						
+profile_view_get_depth:
+	incf		average_divesecs+0,F
+	movlw		d'0'
+	addwfc		average_divesecs+1,F		; Count read pixels
+
+	movf		average_divesecs+0,W
+	cpfseq		average_depth_hold_total+0
+	bra			profile_view_get_depth_no_line		; no need to draw a 10min line, continue
+	movf		average_divesecs+1,W
+	cpfseq		average_depth_hold_total+1
+	bra			profile_view_get_depth_no_line		; no need to draw a 10min line, continue
+; draw a new 10min line here...
+	clrf		average_divesecs+0
+	clrf		average_divesecs+1					; clear counting registers for next line
+
+	movlw		color_grey	
+	call		PLED_set_color						; Make this configurable?
+	movlw		d'75'
+	movff		WREG,win_top
+	incf		timeout_counter3,W	; draw one line to right to make sure it's the background of the profile
+	movff		WREG,win_leftx2		; Left border (0-159)
+	movlw		d'164'
+	movff		WREG,win_height				
+	movlw		d'1'
+	movff		WREG,win_width				; "Window" Width
+	call		PLED_box					; Inputs:  win_top, win_leftx2, win_height, win_width, win_color1, win_color2
+
+; Now restore current profile color
+	movff		average_depth_hold_total+3,active_gas	; restore color
+	dcfsnz		active_gas,F
+	movlw		color_white					; Color for Gas 1
+	dcfsnz		active_gas,F
+	movlw		color_green					; Color for Gas 2
+	dcfsnz		active_gas,F
+	movlw		color_red					; Color for Gas 3
+	dcfsnz		active_gas,F
+	movlw		color_yellow				; Color for Gas 4
+	dcfsnz		active_gas,F
+	movlw		color_violet				; Color for Gas 5
+	call		PLED_set_color				; Set Color...
+
+profile_view_get_depth_no_line:
 	call		I2CREAD2					; read first depth
 	movff		SSPBUF,lo					; low value
 	call		I2CREAD2					; read first depth
@@ -1030,6 +1036,7 @@ profile_view_get_depth_new2:
 ; Stored Gas changed!
 	call		I2CREAD2					; Read Gas#
 	movff		SSPBUF,active_gas			; store gas#
+	movff		active_gas,average_depth_hold_total+3	; keep copy to restore color after drawing 10min line
 	decf		timeout_counter2,F			; reduce counter
 	dcfsnz		active_gas,F
 	movlw		color_white					; Color for Gas 1

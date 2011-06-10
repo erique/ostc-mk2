@@ -1345,12 +1345,14 @@ end_dive2:
 	movff	total_divetime_seconds+1,WREG	; Total dive time (Regardless of CF01)
 	call	write_external_eeprom
 
-	clrf	WREG
-	call	write_external_eeprom			; Spare6
-	clrf	WREG
-	call	write_external_eeprom			; Spare5
-	clrf	WREG
-	call	write_external_eeprom			; Spare4
+	GETCUSTOM8	d'32'						; GF_lo
+	call	write_external_eeprom
+	GETCUSTOM8	d'33'						; GF_hi
+	call	write_external_eeprom
+	read_int_eeprom d'34'					; Read deco modell
+	movf	EEDATA,W
+	call	write_external_eeprom
+
 	clrf	WREG
 	call	write_external_eeprom			; Spare3
 	clrf	WREG

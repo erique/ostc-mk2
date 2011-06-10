@@ -964,11 +964,11 @@ profile_view_get_depth:
 
 	movlw		color_grey	
 	call		PLED_set_color						; Make this configurable?
-	movlw		d'75'
+	movlw		d'76'
 	movff		WREG,win_top
 	incf		timeout_counter3,W	; draw one line to right to make sure it's the background of the profile
 	movff		WREG,win_leftx2		; Left border (0-159)
-	movlw		d'164'
+	movlw		d'163'
 	movff		WREG,win_height				
 	movlw		d'1'
 	movff		WREG,win_width				; "Window" Width
@@ -1221,7 +1221,7 @@ logbook_convert_64k:
 	movlw	0xAA
 	movwf	EEDATA		
 	call	write_eeprom			; write 0xAA to indicate the logbook is already converted
-return
+;return
 ; convert logbook:
 ; Step 1: Copy 32k from 0xFE + 1 with bank switching to bank1
 ; Step 2: Copy 32k from bank1 to bank0

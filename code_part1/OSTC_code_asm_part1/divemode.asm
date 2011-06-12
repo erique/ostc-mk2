@@ -612,9 +612,9 @@ check_extended1:
 	movlw	d'2'				; Information length	
 	addwf	ProfileFlagByte,F	; add to ProfileFlagByte
 check_extended2:
-	decfsz	divisor_tank,W		; Check divisor
+	decfsz	divisor_gf,W		; Check divisor
 	bra		check_extended3		
-	movlw	d'2'				; Information length	
+	movlw	d'1'				; Information length	
 	addwf	ProfileFlagByte,F	; add to ProfileFlagByte
 check_extended3:
 	decfsz	divisor_ppo2,W		; Check divisor
@@ -706,9 +706,9 @@ store_extended1:
 	bra		store_extended2	
 	rcall	store_dive_decodata
 store_extended2:
-	decfsz	divisor_tank,F		; Check divisor
+	decfsz	divisor_gf,F		; Check divisor
 	bra		store_extended3	
-	rcall	store_dive_tankdata
+	rcall	store_dive_gf
 store_extended3:
 	decfsz	divisor_ppo2,F		; Check divisor
 	bra		store_extended4	
@@ -728,8 +728,8 @@ store_extended6:
 	clrf	divisor_temperature		; And clear register again, so it will never reach zero...
 	btfsc	divisor_deco,7			; Test highest Bit (Register must have been zero before the "decfsz" command!)
 	clrf	divisor_deco			; And clear register again, so it will never reach zero...
-	btfsc	divisor_tank,7			; Test highest Bit (Register must have been zero before the "decfsz" command!)
-	clrf	divisor_tank			; And clear register again, so it will never reach zero...
+	btfsc	divisor_gf,7			; Test highest Bit (Register must have been zero before the "decfsz" command!)
+	clrf	divisor_gf				; And clear register again, so it will never reach zero...
 	btfsc	divisor_ppo2,7			; Test highest Bit (Register must have been zero before the "decfsz" command!)
 	clrf	divisor_ppo2			; And clear register again, so it will never reach zero...
 	btfsc	divisor_deco_debug,7	; Test highest Bit (Register must have been zero before the "decfsz" command!)
@@ -793,13 +793,14 @@ store_dive_ppo2:
 	movwf	divisor_ppo2			; Reload divisor from CF
 	return
 
-store_dive_tankdata:
-	movlw	d'0'				; Dummy Tank1
-	call	write_external_eeprom
-	movlw	d'0'				; Dummy Tank2
+store_dive_gf:
+	movff	char_O_relative_gradient_GF,WREG; gradient factor relative (GF model)
+	movff	char_I_deco_model,lo
+	decfsz	lo,F							; jump over next line if char_I_deco_model == 1
+	movff	char_O_gradient_factor,WREG		; gradient factor absolute (Non-GF model)
 	call	write_external_eeprom
 	GETCUSTOM8	d'23'
-	movwf	divisor_tank			; Reload divisor from CF
+	movwf	divisor_gf			; Reload divisor from CF
 	return
 
 store_dive_decodata:
@@ -1345,13 +1346,21 @@ end_dive2:
 	movff	total_divetime_seconds+1,WREG	; Total dive time (Regardless of CF01)
 	call	write_external_eeprom
 
-	GETCUSTOM8	d'32'						; GF_lo
-	call	write_external_eeprom
-	GETCUSTOM8	d'33'						; GF_hi
-	call	write_external_eeprom
+
+
+	GETCUSTOM8	d'32'						; GF_lo -> WREG
+	movff	char_I_deco_model,lo
+	decfsz	lo,F							; jump over next line if char_I_deco_model == 1
+	movlw	d'90'							; overwrite for non-gf modes
+	call	write_external_eeprom			; write WREG into external memory
+	GETCUSTOM8	d'33'						; GF_hi -> WREG
+	movff	char_I_deco_model,lo
+	decfsz	lo,F							; jump over next line if char_I_deco_model == 1
+	movlw	d'90'							; overwrite for non-gf modes
+	call	write_external_eeprom			; write WREG into external memory
 	read_int_eeprom d'34'					; Read deco modell
 	movf	EEDATA,W
-	call	write_external_eeprom
+	call	write_external_eeprom			; write WREG into external memory
 
 	clrf	WREG
 	call	write_external_eeprom			; Spare3
@@ -1774,7 +1783,7 @@ diveloop_boot_2:
 	GETCUSTOM8	d'22'
 	movwf	divisor_deco				
 	GETCUSTOM8	d'23'
-	movwf	divisor_tank
+	movwf	divisor_gf
 	GETCUSTOM8	d'24'
 	movwf	divisor_ppo2
 	GETCUSTOM8	d'25'

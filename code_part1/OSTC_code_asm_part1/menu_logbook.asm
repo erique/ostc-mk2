@@ -521,7 +521,7 @@ display_profile_xscale:
 	bcf			divisor_deco,7
 	movff		divisor_deco,logbook_temp2	; Store as temp, too
 	call		I2CREAD2					; Read divisor
-	movff		SSPBUF,divisor_tank			; Store divisor
+	movff		SSPBUF,divisor_gf			; Store divisor
 	call		I2CREAD2					; Read divisor
 	movff		SSPBUF,divisor_ppo2			; Store divisor
 	call		I2CREAD2					; Read divisor
@@ -874,6 +874,8 @@ logbook_skip_cns:
 	btfss	logbook_format_0x21
 	bra		skip_new_format_0x21_info		; Do not show remaining info from dive
 
+; Show all new 0x21 data
+; Show average depth
 	WIN_TOP		.50
 	call		I2CREAD2					; Read average depth 
 	movff		SSPBUF,lo
@@ -883,8 +885,41 @@ logbook_skip_cns:
 	output_16dp	d'3'			; Average depth 
 	STRCAT_PRINT "m"
 
-;	WIN_TOP		.0
-;	WIN_LEFT	.75
+; Show GF settings
+	incf_eeprom_address	d'2'				; Skip total dive time
+	WIN_TOP		.0
+	WIN_LEFT	.75
+	call		I2CREAD2					; Read GF_lo
+	movff		SSPBUF,hi
+	call		I2CREAD2					; Read GF_hi
+	movff		SSPBUF,lo
+	STRCPY      "GF:"
+	output_8								; GF_hi
+	PUTC		'/'
+	movff		lo,hi						; copy GF_lo
+	output_8								; GF_lo
+	call		word_processor
+
+; Show deco model
+	WIN_TOP		.25
+	call		I2CREAD2					; Read deco modell
+	movff		SSPBUF,lo
+	lfsr		FSR2,letter
+	incf		lo,F						; +1
+	dcfsnz		lo,F						; ZH-L16 OC?
+	movlw		d'101'						; Textnumber
+	dcfsnz		lo,F						; Gauge?
+	movlw		d'102'						; Textnumber
+	dcfsnz		lo,F						; ZH-L16 CC?
+	movlw		d'104'						; Textnumber
+	dcfsnz		lo,F						; Apnoe?
+	movlw		d'138'						; Textnumber
+	dcfsnz		lo,F						; L16-GF OC?
+	movlw		d'152'						; Textnumber
+	dcfsnz		lo,F						; L16-GF CC?
+	movlw		d'236'						; Textnumber
+	call		displaytext0_low			; Outputs to POSTINC2
+	call		word_processor
 
 skip_new_format_0x21_info:
 	bcf			menubit2
@@ -1208,7 +1243,7 @@ display_listdive2:
 	incf_eeprom_address	d'10'				; Skip another 10 byte from the header for 0x21 format
 	return
 
-logbook_convert_64k:
+logbook_convert_64k:						; Converts <1.91 logbook (32kB) to 64kB variant
 	call	PLED_boot
 	call	PLED_ClearScreen		; Clear screen
 	movlw	color_red

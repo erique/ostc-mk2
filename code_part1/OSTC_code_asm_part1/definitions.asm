@@ -267,7 +267,7 @@ AlarmType               res 1   ; 0= No Alarm
 
 divisor_temperature     res 1   ; divisors for profile storage
 divisor_deco            res 1
-divisor_tank            res 1
+divisor_gf	            res 1
 divisor_ppo2            res 1
 divisor_deco_debug      res 1
 divisor_cns	            res 1

@@ -135,11 +135,11 @@ cf_default_table0:
 	CF_DEFAULT    CF_INT8,	    d'10',  d'1',   d'120'  ; sampling_rate				10s
 	CF_DEFAULT    CF_INT8,	    d'6',   d'0',   d'15'   ; sampling_divisor_temp		/6
 	CF_DEFAULT    CF_INT8,	    d'6',   d'0',   d'15'   ; sampling_divisor_deco		/6
-	CF_DEFAULT    CF_INT8,	    d'0',   d'0',   d'15'   ; sampling_divisor_tank		never
+	CF_DEFAULT    CF_INT8,	    d'6',   d'0',   d'15'   ; sampling_divisor_gf		/6
 	CF_DEFAULT    CF_INT8,	    d'0',   d'0',   d'15'   ; sampling_divisor_ppo2		never
 
 	CF_DEFAULT    CF_INT8,	    d'0',   d'0',   d'15'   ; sampling_divisor_deco2	never
-	CF_DEFAULT    CF_INT8,	    d'0',   d'0',   d'15'   ; sampling_divisor_nyu2		never
+	CF_DEFAULT    CF_INT8,	    d'12',  d'0',   d'15'   ; sampling_divisor_cns		/12
 	CF_DEFAULT    CF_PERCENT,	d'20',  d'5',   d'75'   ; cns_display_high			20%
 	CF_DEFAULT    CF_INT15,	    d'0',   d'0',   0 		; logbook_offset			No Offset, but 15Bit value
 	CF_DEFAULT    CF_INT8,	    d'3',   d'2',   d'6'	; last_deco_depth			3m

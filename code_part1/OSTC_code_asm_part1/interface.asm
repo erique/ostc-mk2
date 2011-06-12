@@ -142,10 +142,15 @@ menu_interface1:
 	DISPLAYTEXT	.16						; "Start"
 
 	call		get_free_EEPROM_location		; 
+
 	movlw		d'1'						; increase
 	addwf		eeprom_address+0,F
 	movlw		d'0'
 	addwfc	eeprom_address+1,F
+
+;For debug only
+;clrf	eeprom_address+0,F
+;clrf	eeprom_address+1,F
 
 	DISPLAYTEXT	.17						; "Data"
 

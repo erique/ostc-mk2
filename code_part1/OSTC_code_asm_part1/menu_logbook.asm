@@ -503,6 +503,7 @@ display_profile_xscale:
 	incf_eeprom_address	d'12'				; Skip 12 Bytes in EEPROM (faster) (Gaslist)
 	call		I2CREAD2					; Read start gas (1-5)
 	movff		SSPBUF,active_gas			; Store
+	movff		active_gas,average_depth_hold_total+3	; keep copy to restore color
 	incf_eeprom_address	d'5'				; Skip 5 Bytes in EEPROM (faster) (Battery, firmware)
 
 	call		I2CREAD2					; Read divisor

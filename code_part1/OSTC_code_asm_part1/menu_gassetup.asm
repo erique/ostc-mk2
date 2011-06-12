@@ -653,13 +653,14 @@ next_gas_page1:
 	OUTPUTTEXT	.96			; Yes 
 	bsf		second_FA		; Is first gas
 
-	movf	decodata+0,W		; read current value 
-	addlw	d'28'				; offset in memory
-	movwf	EEADR
-	call	read_eeprom			; Low-value
-	clrf	EEDATA				; Set change depth to zero
-	call	write_eeprom		; save result in EEPROM
-
+; Do not reset change depth (Kind request from Pascal)!
+;	movf	decodata+0,W		; read current value 
+;	addlw	d'28'				; offset in memory
+;	movwf	EEADR
+;	call	read_eeprom			; Low-value
+;	clrf	EEDATA				; Set change depth to zero
+;	call	write_eeprom		; save result in EEPROM
+;
 	bra		menu_firstgas1
 
 menu_firstgas0:

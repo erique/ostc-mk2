@@ -1298,10 +1298,10 @@ end_dive2:
 	addwf	temp1,W		; copy to bits 0-3, result in WREG
 	call	write_external_eeprom
 
-	movlw	d'2'		; information size tank
+	movlw	d'1'		; information size GF
 	movwf	temp1		; copy to bits 0-3
 	swapf	temp1,F		; swap nibbels 0-3 with 4-7
-	GETCUSTOM8	d'23'					; Divisor Tank
+	GETCUSTOM8	d'23'	; Divisor GF
 	addwf	temp1,W		; copy to bits 0-3, result in WREG
 	call	write_external_eeprom
 

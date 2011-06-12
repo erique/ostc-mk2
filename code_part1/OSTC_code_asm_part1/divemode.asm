@@ -794,10 +794,7 @@ store_dive_ppo2:
 	return
 
 store_dive_gf:
-	movff	char_O_relative_gradient_GF,WREG; gradient factor relative (GF model)
-	movff	char_I_deco_model,lo
-	decfsz	lo,F							; jump over next line if char_I_deco_model == 1
-	movff	char_O_gradient_factor,WREG		; gradient factor absolute (Non-GF model)
+	movff	char_O_gradient_factor,WREG		; gradient factor absolute
 	call	write_external_eeprom
 	GETCUSTOM8	d'23'
 	movwf	divisor_gf			; Reload divisor from CF
@@ -1346,18 +1343,20 @@ end_dive2:
 	movff	total_divetime_seconds+1,WREG	; Total dive time (Regardless of CF01)
 	call	write_external_eeprom
 
-
-
-	GETCUSTOM8	d'32'						; GF_lo -> WREG
+	movlw	d'32'							; GF_lo
 	movff	char_I_deco_model,lo
 	decfsz	lo,F							; jump over next line if char_I_deco_model == 1
-	movlw	d'90'							; overwrite for non-gf modes
+	movlw	d'11'							; Saturation Multiplier
+	call	getcustom8_1					; Get Custom function #WREG
 	call	write_external_eeprom			; write WREG into external memory
-	GETCUSTOM8	d'33'						; GF_hi -> WREG
+
+	movlw	d'33'							; GF_hi
 	movff	char_I_deco_model,lo
 	decfsz	lo,F							; jump over next line if char_I_deco_model == 1
-	movlw	d'90'							; overwrite for non-gf modes
+	movlw	d'12'							; Desaturation Multiplier
+	call	getcustom8_1					; Get Custom function #WREG
 	call	write_external_eeprom			; write WREG into external memory
+
 	read_int_eeprom d'34'					; Read deco modell
 	movf	EEDATA,W
 	call	write_external_eeprom			; write WREG into external memory

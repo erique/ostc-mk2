@@ -885,10 +885,19 @@ logbook_skip_cns:
 	output_16dp	d'3'			; Average depth 
 	STRCAT_PRINT "m"
 
-; Show GF settings
-	incf_eeprom_address	d'2'				; Skip total dive time
+	incf_eeprom_address	d'4'				; Skip total dive time and GF factors
+	call		I2CREAD						; Read deco modell
+	decf_eeprom_address	d'2'				; back to GF factos
+
 	WIN_TOP		.0
 	WIN_LEFT	.75
+
+	movff		SSPBUF,lo
+	movlw		d'3'
+	cpfsgt		lo
+	bra			logbook_show_sat
+	
+; Show GF settings
 	call		I2CREAD2					; Read GF_lo
 	movff		SSPBUF,hi
 	call		I2CREAD2					; Read GF_hi
@@ -896,10 +905,24 @@ logbook_skip_cns:
 	STRCPY      "GF:"
 	output_8								; GF_hi
 	PUTC		'/'
-	movff		lo,hi						; copy GF_lo
+	movff		hi,lo						; copy GF_lo
 	output_8								; GF_lo
 	call		word_processor
+	bra			logbook_deco_model			; Skip Sat
 
+logbook_show_sat:
+	call		I2CREAD2					; Read Saturation x 
+	movff		SSPBUF,hi
+	call		I2CREAD2					; Read Desaturation x
+	movff		SSPBUF,lo
+	STRCPY      "Sat:"
+	output_8								; Sat x
+	STRCAT      "%/"
+	movff		hi,lo						; copy Desat x
+	output_8								; Desat x
+	STRCAT_PRINT "%"
+
+logbook_deco_model:
 ; Show deco model
 	WIN_TOP		.25
 	call		I2CREAD2					; Read deco modell

@@ -903,10 +903,13 @@ change_gas_depth_default:
 	cpfslt	lo
 	movwf	lo					; limit to 99m
 
+	btfsc	second_FA			; Is first gas?
+	clrf	lo					; Yes, set to 0m
+
 	movf	decodata+0,W		; read current value 
 	addlw	d'28'				; offset in memory
 	movwf	EEADR
-	call	read_eeprom			; Low-value
+;	call	read_eeprom			; Low-value
 	movff	lo,EEDATA			; write result
 	call	write_eeprom		; save result in EEPROM
 

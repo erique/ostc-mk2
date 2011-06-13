@@ -395,7 +395,8 @@ RTCisr2:
 		return
 		clrf		hours
 		incf		day,F
-		movff		time_correction_value,secs			; Correct too slow clock
+; Test for race condition
+;		movff		time_correction_value,secs			; Correct too slow clock
 						
 check_date:
 		movff		month,isr_divB		; new month?

@@ -68,6 +68,10 @@ HighInt:
 		btfsc	INTCON3,INT1IF				; switch right
 		call	switch_right_int
 
+; Test for race condition
+		btfsc	PIR1,TMR1IF					;Timer1 INT (external 32.768kHz Clock)
+		call	timer1int
+
 		movff   prod_temp+1,PRODH
 		movff   prod_temp+0,PRODL
 		movff	wreg_temp,WREG				;restore working register

@@ -26,15 +26,7 @@ start:
 	movlb	b'00000001'				; ram bank 1 selected
 	movff	STKPTR,temp10
 	clrf    temp10+1
-
 	call	init
-
-	read_int_eeprom	d'92'			; Read number of CF used in this firmware	
-	movlw	0xFF					; First start value
-	cpfseq	EEDATA					; Compare 
-	bra		start2					; Normal power-on/hard reset boot
-	bra		first_start				; Reset and jump to surfmode
-start2:
 	btfsc	divemode				; Reset from Divemode?
 	call	PLED_resetdebugger		; Yes! Something went wrong, show reset informations
 start3:

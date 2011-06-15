@@ -96,6 +96,7 @@ menu_battery_state:
 	movff	EEDATA,lo
 	read_int_eeprom	d'55'	; TEMP_min HIGH
 	movff	EEDATA,hi
+	call	PLED_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
 	movlw	d'3'
 	movwf	ignore_digits
 	bsf		leftbind			; left orientated output
@@ -118,6 +119,7 @@ menu_battery_state:
 	movff	EEDATA,lo
 	read_int_eeprom	d'60'	; TEMP_max HIGH
 	movff	EEDATA,hi
+	call	PLED_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
 	movlw	d'3'
 	movwf	ignore_digits
 	bsf		leftbind			; left orientated output

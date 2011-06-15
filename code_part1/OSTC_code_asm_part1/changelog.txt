@@ -8,6 +8,7 @@ NEW: "Quit Sim" in divemode simulator menu for exiting the simulation
 NEW: Allow -2:00 to +2:00 adjustement per day (CF48).
 NEW: 1/10/100 steps in CF menu
 NEW: 64kByte Logbook (Doubled capacity compared to 1.90)
+BUGFIX: Negative temperatures in logbook and battery information menu
 
 New in 1.90 Stable:
 Stable release

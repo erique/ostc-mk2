@@ -865,6 +865,7 @@ PLED_update_raw_data:
 	WIN_TOP		.177
 	STRCPY  "temp:"
     SAFE_2BYTE_COPY temperature, lo
+	call	PLED_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
 	output_16
 	call	word_processor
 
@@ -975,18 +976,7 @@ PLED_temp_surfmode:
 	movff	last_temperature+1,hi
 	movff	last_temperature+0,lo
 	lfsr	FSR2,letter
-
-    btfss   hi,7                        ; Negative temperature ?
-    bra     PLED_temp_surfmode_1        ; No: continue
-
-	PUTC	'-'                         ; Display "-"
-
-    comf    hi                          ; Then, 16bit sign changes.
-    negf    lo
-    btfsc   STATUS,C
-    incf    hi
-
-PLED_temp_surfmode_1:
+	call	PLED_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
 	movlw	d'3'
 	movwf	ignore_digits
 	bsf		leftbind			; left orientated output
@@ -1011,18 +1001,7 @@ PLED_temp_divemode:
 	movff	last_temperature+0,lo
 
 	lfsr	FSR2,letter
-
-    btfss   hi,7                        ; Negative temperature ?
-    bra     PLED_temp_divemode_1        ; No: continue
-
-	PUTC	'-'                         ; Display "-"
-
-    comf    hi                          ; Then, 16bit sign changes.
-    negf    lo
-    btfsc   STATUS,C
-    incf    hi
-
-PLED_temp_divemode_1:
+	call	PLED_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
 	movlw	d'3'
 	movwf	ignore_digits
 	bsf		leftbind			; left orientated output
@@ -1906,6 +1885,17 @@ update_batt_voltage2_full:
 	movlw	d'30'
 	movwf	wait_temp
 	bra		update_batt_voltage2a
+
+PLED_convert_signed_temperature:
+   	btfss   	hi,7                    ; Negative temperature ?
+    return								; No, return
+; Yes, negative temperature!
+	PUTC		'-'                     ; Display "-"
+    comf    	hi                      ; Then, 16bit sign changes.
+    negf    	lo
+    btfsc   	STATUS,C
+    incf    	hi
+	return								; and return
 
 PLED_convert_date:	; converts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 	read_int_eeprom d'91'			; Read date format (0=MMDDYY, 1=DDMMYY, 2=YYMMDD)

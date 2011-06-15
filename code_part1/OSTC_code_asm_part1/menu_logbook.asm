@@ -459,11 +459,12 @@ display_profile_xscale:
 	call		I2CREAD2	
 	movff		SSPBUF,lo
 	call		I2CREAD2	
-	movff		SSPBUF,hi
+	movff		SSPBUF,hi				; Read min. Temperature
+	call		PLED_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
 	movlw		d'3'
 	movwf		ignore_digits
 	bsf			leftbind
-	output_16dp	d'2'						; temperature
+	output_16dp	d'2'					; temperature
 	STRCAT_PRINT "°C"                   ; Display 2nd row of details
 
 	WIN_TOP		.50

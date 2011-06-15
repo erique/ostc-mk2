@@ -118,7 +118,7 @@
     TCODE    .40,  .35,      "Abtastrate     "           ;056 sampling rate  
     TCODE    .40,  .35,      "Divisor Temp   "           ;057 Divisor Temp   
     TCODE    .40,  .35,      "Divisor Dekodat"           ;058 Divisor Decodat
-    TCODE    .40,  .35,      "Divisor frei1  "           ;059 Divisor NotUse1
+    TCODE    .40,  .35,      "Divisor GF     "           ;059 Divisor GF
     TCODE    .40,  .35,      "Divisor ppO2   "           ;060 Divisor ppO2 
     TCODE    .40,  .35,      "Divisor Debug  "           ;061 Divisor Debug  
     TCODE    .40,  .35,      "Divisor CNS    "           ;062 Divisor CNS

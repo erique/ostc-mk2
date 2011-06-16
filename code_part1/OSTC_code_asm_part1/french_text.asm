@@ -118,7 +118,7 @@
     TCODE    .40,  .35,      "Freq. Mesures  "           ;056 sampling rate  
     TCODE    .40,  .35,      "Diviseur Temp. "           ;057 Divisor Temp   
     TCODE    .40,  .35,      "Divis.Donn.Déco"           ;058 Divisor Decodat
-    TCODE    .40,  .35,      "Divisor GF     "           ;059 Divisor GF
+    TCODE    .40,  .35,      "Diviseur GF    "           ;059 Divisor GF
     TCODE    .40,  .35,      "Diviseur ppO2  "           ;060 Divisor ppO2 
     TCODE    .40,  .35,      "Diviseur Debug "           ;061 Divisor Debug  
     TCODE    .40,  .35,      "Diviseur CNS   "           ;062 Divisor CNS

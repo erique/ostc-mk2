@@ -95,9 +95,9 @@ wait_start_pressure:
 	movlb	b'00000001'									; select ram bank 1
 
 ; check firmware and reset Custom Functions after an update
-	movlw	LOW		0x101
+	movlw	d'1'
 	movwf	EEADR
-	movlw	HIGH 	0x101
+	movlw	d'1'
 	movwf	EEADRH
 	call	read_eeprom				; read current version x
 	movff	EEDATA,temp1
@@ -116,9 +116,9 @@ wait_start_pressure:
 	bra		restart					; x and y are equal -> do not reset cf
 			
 check_firmware_new:
-	movlw	LOW		0x101			; store current version in EEPROM
+	movlw	d'1'					; store current version in EEPROM
 	movwf	EEADR
-	movlw	HIGH 	0x101
+	movlw	d'1'
 	movwf	EEADRH
 	movlw	softwareversion_x
 	movwf	EEDATA		

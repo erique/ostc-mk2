@@ -451,12 +451,19 @@ reset_customfunction:
 ; Write the two bytes lo:hi into EEPROM
 reset_eeprom_value:
 	incf	EEADR,F
-	movff	lo, EEDATA				; Lowbyte Defaul value
-	call	write_eeprom
+	movff	lo, EEDATA				; Lowbyte Default value
+
+	movlw	d'127'					; Work-around to prevent writing at EEPROM 0x00 to 0x04 
+	cpfslt	EEADR					; EEADR > 127?
+	call	write_eeprom			; Yes, write!
 
 	incf	EEADR,F
 	movff	hi, EEDATA				; Highbyte default value
-	goto    write_eeprom
+
+	movlw	d'127'					; Work-around to prevent writing at EEPROM 0x00 to 0x04 
+	cpfslt	EEADR					; EEADR > 127?
+	call    write_eeprom			; Yes, write!
+	return
 
 reset_external_eeprom:				; deletes complete external eeprom!
 	clrf	eeprom_address+0

@@ -1274,14 +1274,13 @@ logbook_convert_64k:						; Converts <1.91 logbook (32kB) to 64kB variant
 	movlw	color_red
     call	PLED_set_color			; Set to Red
 	DISPLAYTEXTH	d'303'			; Please wait!
-	movlw	LOW		0x100
-	movwf	EEADR
-	movlw	HIGH 	0x100
+	clrf	EEADR
+	movlw	d'1'
 	movwf	EEADRH
 	movlw	0xAA
 	movwf	EEDATA		
 	call	write_eeprom			; write 0xAA to indicate the logbook is already converted
-;return
+	clrf	EEADRH					; Restore EEADRH
 ; convert logbook:
 ; Step 1: Copy 32k from 0xFE + 1 with bank switching to bank1
 ; Step 2: Copy 32k from bank1 to bank0

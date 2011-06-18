@@ -989,14 +989,17 @@ static void gas_switch_find_current(void)
 {
     assert( 0 <= char_I_current_gas && char_I_current_gas <= (NUM_GAS+1) );
 
-    if( (char_I_current_gas <= NUM_GAS)                 // Gas6 == manual set.
-     && char_I_deco_gas_change[char_I_current_gas-1]
-    )
+    if( char_I_current_gas <= NUM_GAS )                 // Gas1..Gas5
     {
-        sim_gas_last_used  = char_I_current_gas-1;
-        sim_gas_last_depth = char_I_deco_gas_change[sim_gas_last_used];
-        // temp_depth_limit = ???
+        sim_gas_last_used  = char_I_current_gas;
+
+        // Note: if current is first gas, we must find it, but not set
+        //       last depth change to surface.
+        if( char_I_deco_gas_change[sim_gas_last_used-1] )
+            sim_gas_last_depth = char_I_deco_gas_change[sim_gas_last_used-1];
     }
+    else
+        sim_gas_last_used = 0;                          // Gas 6 = manual set
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1038,7 +1041,7 @@ static unsigned char gas_switch_deepest(void)
             if( switch_deco < deco_gas_change[j] )
             {
                 switch_deco = deco_gas_change[j];
-                switch_last = j+1;
+                switch_last = j+1;  // 1..5
             }
         }
     }
@@ -1083,7 +1086,7 @@ static void gas_switch_set(void)
 {
     assert( 0 <= sim_gas_last_used && sim_gas_last_used <= NUM_GAS );
 
-    if( sim_gas_last_used == 0 )
+    if( sim_gas_last_used == 0 )    // Gas6 = manualy set gas.
     {
         calc_N2_ratio = N2_ratio;
 	    calc_He_ratio = He_ratio;

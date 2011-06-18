@@ -396,4 +396,6 @@
 ;Dive interval
     TCODE    .20,   .35,     "Interval:"                 ;307 Interval:
     TCODE    .0,    .0,      "Now"                       ;308 Now
+	TCODE	 .108,	.112,	 "Average"			 		 ;309 Average
+	TCODE	 .94,	.54,	 "Stopwatch"		 		 ;310 Stopwatch (BIG Stopwatch in Gauge mode)
 ;=============================================================================

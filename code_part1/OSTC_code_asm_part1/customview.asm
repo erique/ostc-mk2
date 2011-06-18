@@ -85,8 +85,15 @@ customview_1sec_average:
 	goto	PLED_total_average_show2	; Update the figures only
 	
 customview_1sec_stopwatch:
+	btfsc	gauge_mode					; In Gauge mode?
+	bra		customview_1sec_stopwatch_gauge; Yes
+
 	bsf		menu3_active                ; Set Flag
 	goto	PLED_stopwatch_show2        ; Update figures only
+
+customview_1sec_stopwatch_gauge:
+	bsf		menu3_active                ; Set Flag
+	goto	PLED_stopwatch_show_gauge  	; Update figures + Description
 
 customview_1sec_marker:                 ; Do nothing extra
 	bsf		menu3_active                ; Set Flag
@@ -198,11 +205,22 @@ customview_init_stopwatch:
 	decfsz		WREG,F					; WREG=1?	
 	bra			customview_toggle		; No, use next Customview
 
+	btfsc		gauge_mode				; In Gauge mode?
+	bra			customview_init_stopwatch_gauge	; Yes
+
 	call	PLED_stopwatch_show			; Init Stopwatch display
 	bsf		menu3_active                ; Set Flag
 	bra		customview_toggle_exit	
 
+customview_init_stopwatch_gauge:
+	call	PLED_stopwatch_show_gauge	; Init Stopwatch display
+	bsf		menu3_active                ; Set Flag
+	bra		customview_toggle_exit	
+
 customview_init_marker:					; Init Marker
+	btfsc		gauge_mode				; In Gauge mode?
+	call		PLED_clear_divemode_menu; Yes, clear BIG stopwatch
+
 	GETCUSTOM8	d'50'					; Show Marker? (=1 in WREG)
 	decfsz		WREG,F					; WREG=1?	
 	bra			customview_toggle		; No, use next Customview

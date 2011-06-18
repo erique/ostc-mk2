@@ -75,6 +75,7 @@ diveloop_loop1a:
 
 	bsf		twosecupdate					; Routines used in the "other second"
 	call	calc_average_depth				; calculate average depth
+	call	calc_velocity					; calculate vertical velocity and display if > threshold (every two seconds)
 	
 	bra		diveloop_loop1x					; Common Tasks
 

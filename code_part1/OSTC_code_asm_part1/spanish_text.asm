@@ -392,8 +392,10 @@
 ;@5 variant
     TCODE    .0,    .0,      "Futuro TTS"                ;305 Future TTS            (=10 chars. Title for @5 customview).
 ;
-    TCODE    .100,  .125,    "Quit Sim"                  ;306 Quit Sim (=8char max. Quit Simulator mode)
+    TCODE    .100,  .125,    "SalirSim"                  ;306 Quit Sim (=8char max. Quit Simulator mode)
 ;Dive interval
     TCODE    .20,   .35,     "Interval:"                 ;307 Interval:
     TCODE    .0,    .0,      "Now"                       ;308 Now
+	TCODE	 .100,	.113,	 "Promedio"			 		 ;309 Average
+	TCODE	 .116,	.54,	 "Crono."		 		 	 ;310 Stopwatch (BIG Stopwatch in Gauge mode)
 ;=============================================================================

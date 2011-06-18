@@ -396,7 +396,7 @@
     TCODE    .100,  .125,    "Quit Sim"                  ;306 Quit Sim 				(=8char max. Quit Simulator mode)
 ;Dive interval
     TCODE    .20,   .35,     "Intervalle: "              ;307 Interval:
-    TCODE    .0,    .0,      "Maintenant"                ;308 Dive now
+    TCODE    .0,    .0,      "Maintenant"                ;308 Now (7 chars min)
 	TCODE	 .108,	.112,	 "Moyenne"			 		 ;309 Average
 	TCODE	 .116,	.54,	 "Chrono"		 		 	 ;310 Stopwatch (BIG Stopwatch in Gauge mode)
 ;=============================================================================

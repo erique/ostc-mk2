@@ -96,7 +96,8 @@ menu_simulator_exit:
 
 simulator_inc_interval:
     movff   char_I_dive_interval,PRODL
-    incf    PRODL,F
+    movlw   .3
+    addwf   PRODL,F
     movlw   .24*6                       ; Max 24h delay.
     cpfslt  PRODL
     clrf    PRODL

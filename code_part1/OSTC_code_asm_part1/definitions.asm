@@ -242,8 +242,8 @@ avr_rel_pressure res 2          ; Average rel. pressure (Average depth) for the 
 avr_rel_pressure_total res 2    ; Average rel. pressure (Average depth) for the dive [mBar], Non-Resettable
 last_pressure   res 2
 temperature_avg res 2           ; Temperature summing buffer.
-temperature     res 2
-last_temperature res 2
+temperature     res 2           ; Final temperature. SIGNED.
+last_temperature res 2          ; Last displayed temperature (used to detect changes).
 Dx              res 2
 
 last_surfpressure       res 2   ; Divemode

@@ -153,6 +153,7 @@ simulator_startdive:
     ; This override is done in ISR too, but do it right now also:	
 	movff	sim_pressure+0,amb_pressure+0
 	movff	sim_pressure+1,amb_pressure+1
+	call	comp_air_pressure0				; Make sure to have depth in rel_pressure:2
 
 	bcf		menubit2
 	bcf		menubit3

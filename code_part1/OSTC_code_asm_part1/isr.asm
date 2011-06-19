@@ -181,13 +181,14 @@ timer1int:
 timer1int_debug:
 		bcf		LED_red						; LEDr off (For charge indicator)
 
-		movlw	0x08						; Timer1 int after 62.5ms (=16/second)
-		cpfslt	TMR1H						; Did we miss a 1/16 second?
-		incf	timer1int_counter1,F		; Yes, add extra 1/16 second
+;		movlw	0x08						; Timer1 int after 62.5ms (=16/second)
+;		cpfslt	TMR1H						; Did we miss a 1/16 second?
+;		incf	timer1int_counter1,F		; Yes, add extra 1/16 second
 
-;		movlw	0x10						; Timer1 int after 62.5ms (=16/second)
-;		cpfslt	TMR1H						; Did we miss another 1/16 second?
-;		incf	timer1int_counter1,F		; Yes, add another extra 1/16 second
+		btfsc	TMR1L,0						; Wait for low clock cycle
+		bra		$-2		
+		btfss	TMR1L,0
+		bra		$-2							; max. loop time: 61µs
 
 		movlw	0x08						; Timer1 int after 62.5ms (=16/second)
 		subwf	TMR1H,F			
@@ -399,7 +400,7 @@ RTCisr2:
 		return
 		clrf		hours
 		incf		day,F
-		movff		time_correction_value,secs			; Correct too slow clock
+;		movff		time_correction_value,secs			; Correct too slow clock
 						
 check_date:
 		movff		month,isr_divB		; new month?

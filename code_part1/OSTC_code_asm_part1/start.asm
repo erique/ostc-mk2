@@ -131,6 +131,10 @@ check_firmware_new:
 ;	goto	reset_all_cf			; resets all custom functions bank0 and bank1 and jumps to "restart"
 			
 restart:
+	movlw	b'00000011'
+	movwf	T3CON					; Timer3 with 32768Hz clock running
+	clrf	TMR3L
+	clrf	TMR3H
 	bcf		LED_red
 	bcf		LED_blue				; all LEDs off
 	GETCUSTOM8	d'48'				; time correction value
@@ -177,8 +181,13 @@ restart:
 	bsf		high_altitude_mode		; No, Set Flag!
 	
 	; Should we disable sleep (hardware emulator)
-	movlw	.0
-	cpfsgt	EEDATA					; >256
+restart_loop:
+	btfss	0xF81,0,A
+	bra		restart_loop
+	btfss	0xF81,1,A
+	bra		restart_loop
+	movlw	0x80
+	cpfslt	0xFB3,A
 	bsf		nsm						; NO-SLEEP-MODE : for hardware debugging
 
 	call	gassetup_sort_gaslist       ; Sorts Gaslist according to change depth

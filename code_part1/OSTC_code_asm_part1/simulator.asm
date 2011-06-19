@@ -345,7 +345,7 @@ simulator_calc_deco:
 	bsf		simulatormode_active        ; normal simulator mode
 	bsf		standalone_simulator        ; Standalone Simulator active
 	bsf		no_sensor_int               ; Disable sensor interrupt
-	clrf	T3CON                       ; Restart time3 counter,
+	clrf	T3CON                       ; Disable timer3 counter,
 	clrf	TMR3L                       ; so the simu won't stop right away.
 	clrf	TMR3H
 

@@ -176,22 +176,21 @@ timer0int:
 ;
 
 timer1int:
-		bcf		PIR1,TMR1IF					; Clear flag
-
 timer1int_debug:
 		bcf		LED_red						; LEDr off (For charge indicator)
 
-;		movlw	0x08						; Timer1 int after 62.5ms (=16/second)
-;		cpfslt	TMR1H						; Did we miss a 1/16 second?
-;		incf	timer1int_counter1,F		; Yes, add extra 1/16 second
-
 		btfsc	TMR1L,0						; Wait for low clock cycle
 		bra		$-2		
-		btfss	TMR1L,0
+		btfss	TMR1L,0						; Still high?
 		bra		$-2							; max. loop time: 61µs
 
 		movlw	0x08						; Timer1 int after 62.5ms (=16/second)
+		cpfslt	TMR1H						; Did we miss a 1/16 second?
+		incf	timer1int_counter1,F		; Yes, add extra 1/16 second
+
+		movlw	0x08						; Timer1 int after 62.5ms (=16/second)
 		subwf	TMR1H,F			
+		bcf		PIR1,TMR1IF					; Clear flag
 	
 		incf	timer1int_counter1,F		; Increase timer1 counter
 

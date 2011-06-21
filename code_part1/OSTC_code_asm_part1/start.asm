@@ -131,12 +131,13 @@ check_firmware_new:
 
 ; Reset CF48
 	movlw	d'1'
-	movwf	EEADRH					; Bank1
+	movwf	EEADRH					; EEPROM Bank1
 	clrf	EEDATA					; =0
 	write_int_eeprom	d'191'
 	write_int_eeprom	d'192'	
 	write_int_eeprom	d'193'
 	write_int_eeprom	d'194'		; Reset Default and Current Value to zero
+	clrf	EEADRH
 ;	goto	reset_all_cf			; resets all custom functions bank0 and bank1 and jumps to "restart"
 			
 restart:

@@ -1,3 +1,7 @@
+New in 1.92 beta:
+BETA Version - Do NOT use for diving!
+
+
 New in 1.91 beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: Ignore depths>130m in PC simulation

@@ -6,6 +6,7 @@ BUGFIX: Average depth in Logbook (For dives made with >=1.91)
 BUGFIX: Logbook time scale (squares are 10min * 10m)
 BUGFIX: Bühlmann half-times rounded to the minute
 BUGFIX: Protect again rare race contition on pressure/temperature
+BUGFIX: Time is now accurate
 CHANGE: CF02 now allows delay of more then 240seconds
 CHANGE: First gas do not reset change depth
 CHANGE: Logbook format 21: store & shows dive model (sat/desat or GF_low/high factors),

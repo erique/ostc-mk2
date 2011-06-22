@@ -24,10 +24,10 @@
 ; ToDo: 
 
 menu_simulator:
-	movlw	d'1'
-	movwf	logbook_temp1               ; Bottom time
+	movlw	d'3'
+	movwf	logbook_temp1		; Bottom time
 	movlw	d'15'
-	movwf	logbook_temp2               ; Max. Depth
+	movwf	logbook_temp2		; Max. Depth
 	movlw	d'1'
 	movwf	menupos
     clrf    WREG                        ; Interval
@@ -96,7 +96,8 @@ menu_simulator_exit:
 
 simulator_inc_interval:
     movff   char_I_dive_interval,PRODL
-    incf    PRODL,F
+    movlw   .3
+    addwf   PRODL,F
     movlw   .24*6                       ; Max 24h delay.
     cpfslt  PRODL
     clrf    PRODL
@@ -153,6 +154,7 @@ simulator_startdive:
     ; This override is done in ISR too, but do it right now also:	
 	movff	sim_pressure+0,amb_pressure+0
 	movff	sim_pressure+1,amb_pressure+1
+	call	comp_air_pressure0				; Make sure to have depth in rel_pressure:2
 
 	bcf		menubit2
 	bcf		menubit3
@@ -343,7 +345,7 @@ simulator_calc_deco:
 	bsf		simulatormode_active        ; normal simulator mode
 	bsf		standalone_simulator        ; Standalone Simulator active
 	bsf		no_sensor_int               ; Disable sensor interrupt
-	clrf	T3CON                       ; Restart time3 counter,
+	clrf	T3CON                       ; Disable timer3 counter,
 	clrf	TMR3L                       ; so the simu won't stop right away.
 	clrf	TMR3H
 

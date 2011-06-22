@@ -22,7 +22,7 @@
 ; ToDo:
 
 #DEFINE	softwareversion_x		d'1'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'91'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'92'		; Software version  XX.YY
 
 #DEFINE softwareversion_beta 	1 			; (and 0 for release) 
 
@@ -36,7 +36,7 @@
 
 ;#DEFINE	__DEBUG	; 
 
-#DEFINE	logbook_profile_version	0x20        ; Do not touch!
+#DEFINE	logbook_profile_version	0x21        ; Do not touch!
 #DEFINE	T0CON_debounce	b'00000000'         ; Timer0 Switch Debounce
 
 #DEFINE		FT_SMALL		.0
@@ -242,8 +242,8 @@ avr_rel_pressure res 2          ; Average rel. pressure (Average depth) for the 
 avr_rel_pressure_total res 2    ; Average rel. pressure (Average depth) for the dive [mBar], Non-Resettable
 last_pressure   res 2
 temperature_avg res 2           ; Temperature summing buffer.
-temperature     res 2
-last_temperature res 2
+temperature     res 2           ; Final temperature. SIGNED.
+last_temperature res 2          ; Last displayed temperature (used to detect changes).
 Dx              res 2
 
 last_surfpressure       res 2   ; Divemode
@@ -267,10 +267,10 @@ AlarmType               res 1   ; 0= No Alarm
 
 divisor_temperature     res 1   ; divisors for profile storage
 divisor_deco            res 1
-divisor_tank            res 1
+divisor_gf	            res 1
 divisor_ppo2            res 1
 divisor_deco_debug      res 1
-divisor_nuy2            res 1
+divisor_cns	            res 1
 
 timeout_counter         res 1   ; Timeout counter variables
 timeout_counter2        res 1
@@ -333,6 +333,7 @@ convert_value_temp      res 3   ; used in menu_battery_state_convert_date
 time_correction_value   res 1   ; Adds to Seconds on midnight
 gaslist_active          res 1	; Holds flags for active gases
 desaturation_time_buffer res 2	; buffer for desat time
+total_divetime_seconds	res 2	; counts dive seconds regardless of CF01 (18h max.)
 
 ;=============================================================================
 ; C-code Routines
@@ -426,7 +427,7 @@ desaturation_time_buffer res 2	; buffer for desat time
 #DEFINE	second_FD			flag4,7	; 2nd 0xFD in EEPROM found
 #DEFINE	second_FA			flag4,7	; 2nd 0xFA in EEPROM found
 
-#DEfINE	eeprom_overflow		flag5,0	; EEPROM overflowed (>32KB)
+;#DEfINE	unused flag5,0	; unused
 #DEFINE	eeprom_blockwrite	flag5,1	; EEPROM blockwrite active
 #DEFINE Flag_4      		flag5,2	; unused
 #DEFINE	low_battery_state	flag5,3	;=1 if battery low

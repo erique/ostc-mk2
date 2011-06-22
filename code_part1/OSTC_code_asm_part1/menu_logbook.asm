@@ -71,14 +71,27 @@ menu_logbook1b:
 
     ;---- fast loop: check every other byte ----------------------------------
 menu_logbook2:
-    infsnz      divemins+0,F            ; increase 16Bit value
-	incf        divemins+1,F
-    infsnz      divemins+0,F            ; increase 16Bit value, twice
-	incf        divemins+1,F
+	movlw		d'2'
+	addwf		divemins+0,F
+	movlw		d'0'
+	addwfc		divemins+1,F			; increase 16Bit value, twice
 
-	btfsc		divemins+1,7            ; At 0x8000?
+	movlw		0xFF
+	cpfseq		divemins+1				; =0xFFFF ?
+	bra			menu_logbook2a			; No
+	cpfseq		divemins+0				; =0xFFFF ?
+	bra			menu_logbook2a			; No
 	bra			menu_logbook_reset      ; yes, restart (if not empty)
 
+menu_logbook2a:
+	movlw		0x00
+	cpfseq		divemins+1				; =0x0000 ?
+	bra			menu_logbook2b			; No
+	cpfseq		divemins+0				; =0x0000 ?
+	bra			menu_logbook2b			; No
+	bra			menu_logbook_reset      ; yes, restart (if not empty)
+
+menu_logbook2b:
 	decf_eeprom_address	d'2'			; -2 to eeprom address.
 
 	call		I2CREAD					; reads one byte (Slow! Better use Blockread!)
@@ -124,6 +137,7 @@ menu_logbook_reset:
 	bra			menu_logbook3b				; No, Nothing to do
 
 	bsf			all_dives_shown				; Yes
+	bsf			logbook_page_not_empty
 	bra			menu_logbook_display_loop2	; rcall of get_free_eeprom_location not required here (faster)
 
 
@@ -253,6 +267,9 @@ display_profile:
 display_profile2:
 	bcf			logbook_profile_view			; clear flag for search routine
 
+	clrf		average_divesecs+0
+	clrf		average_divesecs+1				; holds amount of read samples
+
 	call		PLED_display_wait_clear
 	call		PLED_standard_color
 	WIN_TOP		.0
@@ -313,6 +330,7 @@ display_profile_offset3:
 	call		PLED_convert_date			; converts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 
 	PUTC		' '
+	PUTC		0x94						; "End of dive" icon
 	call		I2CREAD2					; hour
 	movff		SSPBUF,lo
 	output_99x			
@@ -371,43 +389,51 @@ display_profile_offset3:
 	call		mult16x16				; result is in xC:2 !
 
 	bsf			leftbind
+	PUTC		0x95					; "duration o dive" icon
 	output_16							; divetime minutes
 
-; Compute spacing between 10min lines
-	movff		lo,xA+0
-	movff		hi,xA+1					; divetime in minutes
-	movlw		d'10'
-	movwf		xB+0
-	clrf		xB+1					; A vertical line every 10 minutes
-	call		div16x16				;xA/xB=xC with xA as remainder
-	; xC now holds number of lines
-	movlw		d'1'
-	addwf		xC+0					; Add one line...
-	movff		xC+0,xB+0
-	clrf		xB+1					; No more then 255 lines...
-	movlw		d'159'					; Available width
+	movlw		LOW		d'600'
 	movwf		xA+0
-	clrf		xA+1
-	call		div16x16				;xA/xB=xC with xA as remainder
-	; xC now holds spacing between vertical 10min lines
-	movff		xC+0,avr_rel_pressure+0
-	movff		xC+1,avr_rel_pressure+1					; spacing between 10min lines (1-159)
+	movlw		HIGH	d'600'
+	movwf		xA+1					; A vertical line every 600 seconds
+	movff		samplesecs_value,xB+0		; Copy sampling rate
+	clrf		xB+1
+	call		div16x16				; xA/xB=xC with xA as remainder
+	movff		xC+0,average_depth_hold_total+0
+	movff		xC+1,average_depth_hold_total+1
+	;average_depth_hold_total:2 holds interval of samples for vertical 10min line
 
 ; Restore divetime in minutes:
+	btfss	logbook_format_0x21			; Dive made with new 0x21 format?
+	bra		display_profile_old_xscale	; No
+; Yes, get real sample time
+	incf_eeprom_address	d'35'			; Skip Bytes in EEPROM
+	call		I2CREAD2				; Total sample time in seconds
+	movff		SSPBUF,xC+0
+	call		I2CREAD2				; Total sample time in seconds
+	movff		SSPBUF,xC+1
+	decf_eeprom_address	d'37'			; Macro, that subtracts 8Bit from eeprom_address:2
+	PUTC		':'
+	call		I2CREAD2				; read divetime seconds
+	movff		SSPBUF,lo
+	bra			display_profile_xscale		; continue below
+
+display_profile_old_xscale:
 	movff		lo,xA+0					; calculate x-scale for profile display
 	movff		hi,xA+1					; calculate total diveseconds first
 	movlw		d'60'					; 60seconds are one minute...
 	movwf		xB+0
 	clrf		xB+1
 	call		mult16x16				; result is in xC:2 !
-
-	PUTC		d'39'					;"'"
+	PUTC		':'
 	call		I2CREAD2				; read divetime seconds
 	movff		SSPBUF,lo
 	movf		lo,W					; add seconds to total seconds
 	addwf		xC+0
 	movlw		d'0'
 	addwfc		xC+1					; xC:2 now holds total dive seconds!
+
+display_profile_xscale:
 	movff		xC+0,xA+0				; now calculate x-scale value
 	movff		xC+1,xA+1
 	movlw		d'154'					; 154pix width available
@@ -429,15 +455,16 @@ display_profile_offset3:
 
 	bsf			leftbind
 	output_99x							; divetime seconds
-	STRCAT      "\" "
+	PUTC		' '
 	call		I2CREAD2	
 	movff		SSPBUF,lo
 	call		I2CREAD2	
-	movff		SSPBUF,hi
+	movff		SSPBUF,hi				; Read min. Temperature
+	call		PLED_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
 	movlw		d'3'
 	movwf		ignore_digits
 	bsf			leftbind
-	output_16dp	d'2'						; temperature
+	output_16dp	d'2'					; temperature
 	STRCAT_PRINT "°C"                   ; Display 2nd row of details
 
 	WIN_TOP		.50
@@ -448,9 +475,6 @@ display_profile_offset3:
 	movff		SSPBUF,lo
 	call		I2CREAD2				; read Air pressure
 	movff		SSPBUF,hi
-
-;	movff		lo,average_depth_hold+2
-;	movff		hi,average_depth_hold+3		; Store here for correct average
 
 	bsf			leftbind
 	output_16							; Air pressure before dive
@@ -480,6 +504,7 @@ display_profile_offset3:
 	incf_eeprom_address	d'12'				; Skip 12 Bytes in EEPROM (faster) (Gaslist)
 	call		I2CREAD2					; Read start gas (1-5)
 	movff		SSPBUF,active_gas			; Store
+	movff		active_gas,average_depth_hold_total+3	; keep copy to restore color
 	incf_eeprom_address	d'5'				; Skip 5 Bytes in EEPROM (faster) (Battery, firmware)
 
 	call		I2CREAD2					; Read divisor
@@ -498,26 +523,22 @@ display_profile_offset3:
 	bcf			divisor_deco,7
 	movff		divisor_deco,logbook_temp2	; Store as temp, too
 	call		I2CREAD2					; Read divisor
-	movff		SSPBUF,divisor_tank			; Store divisor
+	movff		SSPBUF,divisor_gf			; Store divisor
 	call		I2CREAD2					; Read divisor
 	movff		SSPBUF,divisor_ppo2			; Store divisor
 	call		I2CREAD2					; Read divisor
 	movff		SSPBUF,divisor_deco_debug	; Store divisor
 	call		I2CREAD2					; Read divisor
-	movff		SSPBUF,divisor_nuy2			; Store divisor
+	movff		SSPBUF,divisor_cns			; Store divisor
 	incf_eeprom_address	d'2'				; Skip 2Bytes in EEPROM (faster)
 	; 2 bytes salinity, GF
+	btfss	logbook_format_0x21				; 10byte extra?
+	bra		display_profile2d				; No
+	incf_eeprom_address	d'10'				; Skip another 10 byte from the header for 0x21 format
+	; Average Depth, spare bytes
 
 display_profile2d:
 	; Start Profile display
-
-;	clrf		average_divesecs+0
-;	clrf		average_divesecs+1			; Counts x-pixels for average
-;	clrf		average_depth_hold_total+0
-;	clrf		average_depth_hold_total+1
-;	clrf		average_depth_hold_total+2
-;	clrf		average_depth_hold_total+3	; Track average depth here...
-;
 ; Write 0m X-Line..
 	movlw		color_grey	
 	call		PLED_set_color				; Make this configurable?
@@ -556,20 +577,9 @@ display_profile2e:
 	movff		WREG,win_height				
 	movlw		d'1'
 	movff		WREG,win_width				; "Window" Width
-display_profile2f:
 	call		PLED_box					; Inputs:  win_top, win_leftx2, win_height, win_width, win_color1, win_color2
-	movff		win_leftx2,WREG				; Get column
-	addwf		avr_rel_pressure+0,W		; Add column interval distance to win_leftx2
-	tstfsz		avr_rel_pressure+1			; >255?
-	movlw		d'255'						; Yes, make win_leftx2>159 -> Abort here
-	btfsc		STATUS,C					; A Cary from the addwf above?
-	movlw		d'255'						; Yes, make win_leftx2>159 -> Abort here
-	movff		WREG,win_leftx2				; Result in win_leftx2 again
-	movff		win_leftx2,lo				; Get win_leftx2 in Bank1...
-	movlw		d'159'						; Limit
-	cpfsgt		lo							; >159?
-	bra			display_profile2f			; No, draw another line
 
+; Draw frame around profile
 	movlw		color_blue	
 	WIN_FRAME_COLOR	.75, .239, .4, .159	;top, bottom, left, right with color in WREG
 
@@ -866,6 +876,8 @@ logbook_skip_cns:
 	btfss	logbook_format_0x21
 	bra		skip_new_format_0x21_info		; Do not show remaining info from dive
 
+; Show all new 0x21 data
+; Show average depth
 	WIN_TOP		.50
 	call		I2CREAD2					; Read average depth 
 	movff		SSPBUF,lo
@@ -875,8 +887,64 @@ logbook_skip_cns:
 	output_16dp	d'3'			; Average depth 
 	STRCAT_PRINT "m"
 
-;	WIN_TOP		.0
-;	WIN_LEFT	.75
+	incf_eeprom_address	d'4'				; Skip total dive time and GF factors
+	call		I2CREAD						; Read deco modell
+	decf_eeprom_address	d'2'				; back to GF factos
+
+	WIN_TOP		.0
+	WIN_LEFT	.75
+
+	movff		SSPBUF,lo
+	movlw		d'3'
+	cpfsgt		lo
+	bra			logbook_show_sat
+	
+; Show GF settings
+	call		I2CREAD2					; Read GF_lo
+	movff		SSPBUF,hi
+	call		I2CREAD2					; Read GF_hi
+	movff		SSPBUF,lo
+	STRCPY      "GF:"
+	output_8								; GF_hi
+	PUTC		'/'
+	movff		hi,lo						; copy GF_lo
+	output_8								; GF_lo
+	call		word_processor
+	bra			logbook_deco_model			; Skip Sat
+
+logbook_show_sat:
+	call		I2CREAD2					; Read Saturation x 
+	movff		SSPBUF,hi
+	call		I2CREAD2					; Read Desaturation x
+	movff		SSPBUF,lo
+	STRCPY      "Sat:"
+	output_8								; Sat x
+	STRCAT      "%/"
+	movff		hi,lo						; copy Desat x
+	output_8								; Desat x
+	STRCAT_PRINT "%"
+
+logbook_deco_model:
+; Show deco model
+	WIN_TOP		.25
+	call		I2CREAD2					; Read deco modell
+	movff		SSPBUF,lo
+	lfsr		FSR2,letter
+	incf		lo,F						; +1
+	dcfsnz		lo,F						; ZH-L16 OC?
+	movlw		d'101'						; Textnumber
+	dcfsnz		lo,F						; Gauge?
+	movlw		d'102'						; Textnumber
+	dcfsnz		lo,F						; ZH-L16 CC?
+	movlw		d'104'						; Textnumber
+	dcfsnz		lo,F						; Apnoe?
+	movlw		d'138'						; Textnumber
+	dcfsnz		lo,F						; L16-GF OC?
+	movlw		d'152'						; Textnumber
+	dcfsnz		lo,F						; L16-GF CC?
+	movlw		d'236'						; Textnumber
+	call		displaytext0_low			; Outputs to POSTINC2
+	call		word_processor
 
 skip_new_format_0x21_info:
 	bcf			menubit2
@@ -939,7 +1007,48 @@ profile_display_fill_up2:			; Loop
 	bra			profile_display_fill_up2
 	return							; apnoe_mins and xC+0 are untouched
 
-profile_view_get_depth:						
+profile_view_get_depth:
+	incf		average_divesecs+0,F
+	movlw		d'0'
+	addwfc		average_divesecs+1,F		; Count read pixels
+
+	movf		average_divesecs+0,W
+	cpfseq		average_depth_hold_total+0
+	bra			profile_view_get_depth_no_line		; no need to draw a 10min line, continue
+	movf		average_divesecs+1,W
+	cpfseq		average_depth_hold_total+1
+	bra			profile_view_get_depth_no_line		; no need to draw a 10min line, continue
+; draw a new 10min line here...
+	clrf		average_divesecs+0
+	clrf		average_divesecs+1					; clear counting registers for next line
+
+	movlw		color_grey	
+	call		PLED_set_color						; Make this configurable?
+	movlw		d'76'
+	movff		WREG,win_top
+	incf		timeout_counter3,W	; draw one line to right to make sure it's the background of the profile
+	movff		WREG,win_leftx2		; Left border (0-159)
+	movlw		d'163'
+	movff		WREG,win_height				
+	movlw		d'1'
+	movff		WREG,win_width				; "Window" Width
+	call		PLED_box					; Inputs:  win_top, win_leftx2, win_height, win_width, win_color1, win_color2
+
+; Now restore current profile color
+	movff		average_depth_hold_total+3,active_gas	; restore color
+	dcfsnz		active_gas,F
+	movlw		color_white					; Color for Gas 1
+	dcfsnz		active_gas,F
+	movlw		color_green					; Color for Gas 2
+	dcfsnz		active_gas,F
+	movlw		color_red					; Color for Gas 3
+	dcfsnz		active_gas,F
+	movlw		color_yellow				; Color for Gas 4
+	dcfsnz		active_gas,F
+	movlw		color_violet				; Color for Gas 5
+	call		PLED_set_color				; Set Color...
+
+profile_view_get_depth_no_line:
 	call		I2CREAD2					; read first depth
 	movff		SSPBUF,lo					; low value
 	call		I2CREAD2					; read first depth
@@ -962,18 +1071,6 @@ profile_view_get_depth:
 	return
 
 profile_view_get_depth_new1:
-;	incf		average_divesecs+0,F			
-;	movlw		d'0'
-;	addwfc		average_divesecs+1,F			; counter for average depth
-;	; add depth to average registers
-;	movf		lo,W
-;	addwf		average_depth_hold_total+0,F
-;	movf		hi,W
-;	addwfc		average_depth_hold_total+1,F
-;	movlw		d'0'
-;	addwfc		average_depth_hold_total+2,F
-;	addwfc		average_depth_hold_total+3,F 	; Will work up to 9999mBar*60*60*24=863913600mBar
-;
 	btfsc		event_occured				; Was there an event attached to this sample?
 	rcall		profile_view_get_depth_new2	; Yes, get information about this event
 
@@ -999,6 +1096,7 @@ profile_view_get_depth_new2:
 ; Stored Gas changed!
 	call		I2CREAD2					; Read Gas#
 	movff		SSPBUF,active_gas			; store gas#
+	movff		active_gas,average_depth_hold_total+3	; keep copy to restore color after drawing 10min line
 	decf		timeout_counter2,F			; reduce counter
 	dcfsnz		active_gas,F
 	movlw		color_white					; Color for Gas 1
@@ -1017,7 +1115,6 @@ logbook_event1:
 	movlw		color_cyan					; Color for Gas 6
 	call		PLED_set_color				; Set Color...
 	return		;(The two bytes indicating the manual gas change will be ignored in the standard "ignore loop" above...)
-
 
 ;Keep comments for future temperature graph
 ;	call		I2CREAD2					; ignore byte
@@ -1128,6 +1225,11 @@ display_listdive1a:
 	cpfsgt		lo							; Skip if lo>13
 	bra			display_listdive2			; use old (Pre 0x20) format
 
+	bsf			logbook_format_0x21		; Set flag for new 0x21 Format
+	movlw		0x21
+	cpfseq		lo						; Skip if 0x21
+	bcf			logbook_format_0x21		; Clear flag for new 0x21 Format
+
 	call		I2CREAD4					; Skip Profile version (Block read)
 	movff		SSPBUF,lo					; in new format, read month
 
@@ -1161,4 +1263,141 @@ display_listdive2:
 	output_16								; Divetime minutes
 	STRCAT_PRINT "'"                    	; Display header-row in list
 	incf_eeprom_address	d'37'				; 12 Bytes read from header, skip 37 Bytes in EEPROM (Remaining Header)
+	btfss	logbook_format_0x21				; 10byte extra?
+	return									; No, Done.
+	incf_eeprom_address	d'10'				; Skip another 10 byte from the header for 0x21 format
+	return
+
+logbook_convert_64k:						; Converts <1.91 logbook (32kB) to 64kB variant
+	call	PLED_boot
+	call	PLED_ClearScreen		; Clear screen
+	movlw	color_red
+    call	PLED_set_color			; Set to Red
+	DISPLAYTEXTH	d'303'			; Please wait!
+	clrf	EEADR
+	movlw	d'1'
+	movwf	EEADRH
+	movlw	0xAA
+	movwf	EEDATA		
+	call	write_eeprom			; write 0xAA to indicate the logbook is already converted
+	clrf	EEADRH					; Restore EEADRH
+; convert logbook:
+; Step 1: Copy 32k from 0xFE + 1 with bank switching to bank1
+; Step 2: Copy 32k from bank1 to bank0
+; Step 3: delete bank1
+	call	get_free_EEPROM_location		; Searches 0xFD, 0xFD, 0xFE and sets Pointer to 0xFE
+	rcall	incf_eeprom_bank0	; eeprom_address:2 now at 0xFE+1
+; Do Step 1:
+	;logbook_temp5 and logbook_temp6 hold address in bank1
+	;logbook_temp1 and logbook_temp2 hold address in bank0
+	movlw	HIGH	0x8000
+	movwf	logbook_temp6 
+	movlw	LOW		0x8000
+	movwf	logbook_temp5			; load address for bank1
+	movff	eeprom_address+0,logbook_temp1 
+	movff	eeprom_address+1,logbook_temp2	; load address for bank0
+	movlw	0x80
+	movwf	uart2_temp
+logbook_convert2:
+	clrf	uart1_temp				; counter for copy operation
+logbook_convert3:
+	; read source
+	movff	logbook_temp1,eeprom_address+0
+	movff	logbook_temp2,eeprom_address+1
+	call	I2CREAD
+	movff	SSPBUF,lo				; hold read value
+	rcall	incf_eeprom_bank0		; eeprom_address:2 +1 with bank switching
+	movff	eeprom_address+0,logbook_temp1
+	movff	eeprom_address+1,logbook_temp2	; write source address
+	; write target
+	movff	logbook_temp5,eeprom_address+0
+	movff	logbook_temp6,eeprom_address+1
+	movf	lo,W
+	call	I2CWRITE				; writes WREG into EEPROM@eeprom_address
+	movlw	d'1'
+	addwf	logbook_temp5,F
+	movlw	d'0'
+	addwfc	logbook_temp6,F			; increase target address
+	decfsz	uart1_temp,F	
+	bra		logbook_convert3
+	btg		LED_blue
+	decfsz	uart2_temp,F			; 32kByte done?
+	bra		logbook_convert2		; No, continue
+; Step 1 done.
+	bcf		LED_blue
+; Do Step 2:
+	movlw	HIGH	0x0000
+	movwf	logbook_temp6 
+	movlw	LOW		0x0000
+	movwf	logbook_temp5			; load address for bank0
+	movlw	HIGH	0x8000
+	movwf	logbook_temp2 
+	movlw	LOW		0x8000
+	movwf	logbook_temp1			; load address for bank1
+	movlw	0x80
+	movwf	uart2_temp
+logbook_convert4:
+	clrf	uart1_temp				; counter for copy operation
+logbook_convert5:
+	; read source
+	movff	logbook_temp1,eeprom_address+0
+	movff	logbook_temp2,eeprom_address+1
+	call	I2CREAD
+	movff	SSPBUF,lo				; hold read value
+	incf_eeprom_address	d'1'	
+	movff	eeprom_address+0,logbook_temp1
+	movff	eeprom_address+1,logbook_temp2	; write source address
+	; write target
+	movff	logbook_temp5,eeprom_address+0
+	movff	logbook_temp6,eeprom_address+1
+	movf	lo,W
+	call	I2CWRITE				; writes WREG into EEPROM@eeprom_address
+	incf_eeprom_address	d'1'
+	movff	eeprom_address+0,logbook_temp5
+	movff	eeprom_address+1,logbook_temp6	; write target address
+	decfsz	uart1_temp,F	
+	bra		logbook_convert5
+	btg		LED_red
+	decfsz	uart2_temp,F			; 32kByte done?
+	bra		logbook_convert4		; No, continue
+; Step 2 done.
+	bcf		LED_red
+; Do Step 3:
+	movlw	HIGH	0x8000
+	movwf	logbook_temp2 
+	movlw	LOW		0x8000
+	movwf	logbook_temp1			; load address for bank1
+	movlw	0x80
+	movwf	uart2_temp
+logbook_convert6:
+	clrf	uart1_temp				; counter for copy operation
+logbook_convert7:
+	; write target
+	movff	logbook_temp1,eeprom_address+0
+	movff	logbook_temp2,eeprom_address+1
+	movlw	0xFF
+	call	I2CWRITE				; writes WREG into EEPROM@eeprom_address
+	incf_eeprom_address	d'1'
+	movff	eeprom_address+0,logbook_temp1
+	movff	eeprom_address+1,logbook_temp2	; write target address
+	decfsz	uart1_temp,F	
+	bra		logbook_convert7
+	btg		LED_red
+	btg		LED_blue
+	decfsz	uart2_temp,F			; 32kByte done?
+	bra		logbook_convert6		; No, continue
+; Step 3 done.
+	bcf		LED_red
+	bcf		LED_blue
+	return
+
+incf_eeprom_bank0:
+	movlw		d'1'					; increase address
+	addwf		eeprom_address+0,F
+	movlw		d'0'
+	addwfc		eeprom_address+1,F
+	btfss		eeprom_address+1,7		; at address 8000?
+	return								; no, skip
+	clrf		eeprom_address+0		; Clear eeprom address
+	clrf		eeprom_address+1
 	return

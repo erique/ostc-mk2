@@ -1,9 +1,28 @@
+New in 1.92 beta:
+BETA Version - Do NOT use for diving!
+
+
 New in 1.91 beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: Ignore depths>130m in PC simulation
 BUGFIX: Avoid spurious CF55 stops with 3 gas or more
+BUGFIX: Average depth in Logbook (For dives made with >=1.91)
+BUGFIX: Logbook time scale (squares are 10min * 10m)
+BUGFIX: Bühlmann half-times rounded to the minute
+BUGFIX: Protect again rare race contition on pressure/temperature
+BUGFIX: Time is now accurate
+CHANGE: CF02 now allows delay of more then 240seconds
+CHANGE: First gas do not reset change depth
+CHANGE: Logbook format 21: store & shows dive model (sat/desat or GF_low/high factors),
+        CNS profile, GF profile.
+        WARNING: the upgrade is not reversible without loosing all your profiles.
+NEW: "Quit Sim" in divemode simulator menu for exiting the simulation
 NEW: Allow -2:00 to +2:00 adjustement per day (CF48).
 NEW: 1/10/100 steps in CF menu
+NEW: 64kByte Logbook (Doubled capacity compared to 1.90)
+NEW: Additional dive interval for simulator and decoplaning
+NEW: Negative temperatures in logbook and battery information menu
+NEW: Screen dump support
 
 New in 1.90 Stable:
 Stable release

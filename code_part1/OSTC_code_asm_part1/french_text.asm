@@ -97,7 +97,7 @@
 ; 32 custom function descriptors I (FIXED LENGTH = 15 chars).
     TCODE    .40,  .35,      "Début Plong.[m]"           ;036 Start Dive  [m]	(depth to switch to dive mode)
     TCODE    .40,  .35,      "Fin Plongée [m]"           ;037 End Dive    [m]	(depth to switch back to surface mode)
-    TCODE    .40,  .35,      "Délai Fin [min]"           ;038 End Delay [min]  	(duration dive screen stays after end of dive)
+    TCODE    .40,  .35,      "Délai Fin [sec]"           ;038 End Delay [sec]  	(duration dive screen stays after end of dive)
     TCODE    .40,  .35,      "Eteindre  [min]"           ;039 Power Off [min]
     TCODE    .40,  .35,      "Pré-menu  [min]"           ;040 Pre-menu  [min]	(Delais to keep surface-mode menus displayed)
     TCODE    .40,  .35,      "Vitesse [m/min]"           ;041 velocity[m/min]
@@ -118,10 +118,10 @@
     TCODE    .40,  .35,      "Freq. Mesures  "           ;056 sampling rate  
     TCODE    .40,  .35,      "Diviseur Temp. "           ;057 Divisor Temp   
     TCODE    .40,  .35,      "Divis.Donn.Déco"           ;058 Divisor Decodat
-    TCODE    .40,  .35,      "Diviseur NotUse"           ;059 Divisor NotUse1
+    TCODE    .40,  .35,      "Diviseur GF    "           ;059 Divisor GF
     TCODE    .40,  .35,      "Diviseur ppO2  "           ;060 Divisor ppO2 
     TCODE    .40,  .35,      "Diviseur Debug "           ;061 Divisor Debug  
-    TCODE    .40,  .35,      "Diviseur NotUse"           ;062 Divisor NotUse2
+    TCODE    .40,  .35,      "Diviseur CNS   "           ;062 Divisor CNS
     TCODE    .40,  .35,      "Aff.CNSPlong[%]"           ;063 CNSshow dive[%]
     TCODE    .40,  .35,      "Décalage Carnet"           ;064 Logbook offset 
     TCODE    .40,  .35,      "Dern. Palier[m]"           ;065 Last Deco at[m]
@@ -392,7 +392,11 @@
 	TCODE	 .50,	.130,	 "Aborted!"					 ;304 Aborted
 ;@5 variant
     TCODE    .0,    .0,      "DTR Réchap"                ;305 Future TTS            (=10 chars. Title for @5 customview).
+;
+    TCODE    .100,  .125,    "Quit Sim"                  ;306 Quit Sim 				(=8char max. Quit Simulator mode)
 ;Dive interval
-    TCODE    .20,   .35,     "Intervalle: "               ;306 Interval:
-    TCODE    .0,    .0,      "Maintenant"                 ;307 Dive now
+    TCODE    .20,   .35,     "Intervalle: "              ;307 Interval:
+    TCODE    .0,    .0,      "Maintenant"                ;308 Now (7 chars min)
+	TCODE	 .108,	.112,	 "Moyenne"			 		 ;309 Average
+	TCODE	 .116,	.54,	 "Chrono"		 		 	 ;310 Stopwatch (BIG Stopwatch in Gauge mode)
 ;=============================================================================

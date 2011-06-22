@@ -74,6 +74,8 @@ onemin_sleep:
 
 	rcall	pressuretest_sleep_fast	; Gets pressure without averaging (faster!)
 
+    SAFE_2BYTE_COPY amb_pressure_avg, amb_pressure	; copy for compatibility
+
 	call	check_temp_extrema		; Check for temperature extremas
 
 	call	deco_calc_CNS_decrease_15min		; compute CNS decay in sleep only
@@ -131,12 +133,12 @@ onesec_sleep_nonofly:
 
 	rcall	pressuretest_sleep_fast	; Gets pressure without averaging (faster!)
 
-    ; compare current ambient pressure with threshold CF6==1160mbar.
+        ; compare current ambient pressure with threshold CF6==1160mbar.
 	GETCUSTOM15	d'6'				; loads pressure threshold into lo,hi
 	movff	lo,sub_a+0				; power on if ambient pressure is greater threshold
 	movff	hi,sub_a+1	
-    SAFE_2BYTE_COPY amb_pressure, sub_b
-	call	sub16					; Is (1160mbar - amb_pressure) < 0 ?
+        SAFE_2BYTE_COPY amb_pressure_avg, sub_b
+	call	sub16					; Is (1160mbar - averaged(amb_pressure)) < 0 ?
 	bsf		sleepmode
 	btfsc	neg_flag				; Wake up from Sleep?
 	bcf		sleepmode				; amb_pressure>pressure_offset_divemode: wake up!
@@ -182,6 +184,8 @@ pressuretest_sleep_fast:				; Get pressure without averaging (Faster to save som
 	nop
 	sleep								; Wait at least 35ms (every 16.5ms Timer1 wakeup)
 	call		get_pressure_value		; State2: Get pressure (51us)
+	clrf		amb_pressure_avg+0
+	clrf		amb_pressure_avg+1			; clear for sleep routine
 	call		calculate_compensation		; calculate temperature compensated pressure (233us)
 	return
 

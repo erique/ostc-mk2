@@ -176,10 +176,13 @@ timer0int:
 ;
 
 timer1int:
-		bcf		PIR1,TMR1IF					; Clear flag
-
 timer1int_debug:
 		bcf		LED_red						; LEDr off (For charge indicator)
+
+		btfsc	TMR1L,0						; Wait for low clock cycle
+		bra		$-2		
+		btfss	TMR1L,0						; Still high?
+		bra		$-2							; max. loop time: 61µs
 
 		movlw	0x08						; Timer1 int after 62.5ms (=16/second)
 		cpfslt	TMR1H						; Did we miss a 1/16 second?
@@ -187,6 +190,7 @@ timer1int_debug:
 
 		movlw	0x08						; Timer1 int after 62.5ms (=16/second)
 		subwf	TMR1H,F			
+		bcf		PIR1,TMR1IF					; Clear flag
 	
 		incf	timer1int_counter1,F		; Increase timer1 counter
 
@@ -343,12 +347,17 @@ RTCisr1:
 ; Increase re-setable average depth divetime counter
 		incf		average_divesecs+0,F	; increase stopwatch registers	
 		btfsc		STATUS,Z
-		incf		average_divesecs+1,F	; increase stopwatch registers	
-
+		incf		average_divesecs+1,F	; increase stopwatch registers
+; Increase total divetime (Regardless of CF01)
+		incf		total_divetime_seconds+0,F	; increase stopwatch registers	
+		btfsc		STATUS,Z
+		incf		total_divetime_seconds+1,F	; increase stopwatch registers
+	
 		btfss		divemode2				; displayed divetime is running?
 		bra			RTCisr2					; No (e.g. too shallow)
 
-		incf		divesecs,F				; increase divetime registers
+; increase divetime registers (Displayed dive time)
+		incf		divesecs,F				
 		movlw		d'59'
 		cpfsgt		divesecs
 		bra			RTCisr1a

@@ -18,8 +18,8 @@
 ; known bugs:
 ; ToDo: use 2nd 32KB from external EEPROM for something
 
-incf_eeprom_address	macro	ext_ee_temp1	; Will increase eeprom_address:2 with the 8Bit value "ext_ee_temp1" and takes
-    	movlw	ext_ee_temp1                ; care of bank switching at 0x8000
+incf_eeprom_address	macro	ext_ee_temp1	; Will increase eeprom_address:2 with the 8Bit value "ext_ee_temp1"
+    	movlw	ext_ee_temp1                
     	call 	incf_eeprom_address0
 	endm
 
@@ -27,18 +27,18 @@ incf_eeprom_address0:
     	addwf		eeprom_address+0,F      ; increase address
     	movlw		d'0'
     	addwfc		eeprom_address+1,F
-
-    	btfss		eeprom_address+1,7		; at address 8000?
-    	return                              ; No, continue
-    
-    	; Yes, clear eeprom_address:2
-    	clrf		eeprom_address+0		; Clear eeprom address
-    	clrf		eeprom_address+1
-    	return								; Done.
-
+		return
+;    	btfss		eeprom_address+1,7		; at address 8000?
+;    	return                              ; No, continue
+;    
+;    	; Yes, clear eeprom_address:2
+;    	clrf		eeprom_address+0		; Clear eeprom address
+;    	clrf		eeprom_address+1
+;    	return								; Done.
+;
 ;=============================================================================
-; Will decrease eeprom_address:2 with the 8Bit value "ext_ee_temp1" and takes
-; care of bank switching at 0x8000
+; Will decrease eeprom_address:2 with the 8Bit value "ext_ee_temp1"
+
 
 decf_eeprom_address	macro	ext_ee_temp1
         movlw	ext_ee_temp1
@@ -49,13 +49,14 @@ decf_eeprom_address0:
         subwf		eeprom_address+0,F      ; decrease address: do a 16-8bits substract.
         movlw		d'0'
         subwfb		eeprom_address+1,F
-
-        btfss		eeprom_address+1,7		; at address 8000?
-        return                              ; No, done.
-
-        movlw		b'01111111'             ; yes, reset highbyte
-        movwf		eeprom_address+1
-    	return								; Done.
+		return
+;
+;        btfss		eeprom_address+1,7		; at address 8000?
+;        return                              ; No, done.
+;
+;        movlw		b'01111111'             ; yes, reset highbyte
+;        movwf		eeprom_address+1
+;    	return								; Done.
 
 ;=============================================================================
 
@@ -72,15 +73,14 @@ write_external_eeprom:				; data in WREG
 	addwf		eeprom_address+0,F
 	movlw		d'0'
 	addwfc		eeprom_address+1,F
-	bcf			eeprom_overflow		
-	btfss		eeprom_address+1,7		; at address 8000?
-	return								; no, return
-
-	clrf		eeprom_address+0		; Clear eeprom address
-	clrf		eeprom_address+1
-	bsf			eeprom_overflow			; and set overflow bit
 	return
-
+;	btfss		eeprom_address+1,7		; at address 8000?
+;	return								; no, return
+;
+;	clrf		eeprom_address+0		; Clear eeprom address
+;	clrf		eeprom_address+1
+;	return
+;
 write_external_eeprom_block:			; Writes a block of 64Byte (one page in external EEPROM without stop condition
 #ifdef TESTING
 	; When Simulating with MPLabSIM, there is no way to emulate external EEPROM...
@@ -96,20 +96,21 @@ write_external_eeprom_block:			; Writes a block of 64Byte (one page in external 
 	movlw		d'0'				; increase address
 	incf		eeprom_address+0,F	
 	addwfc		eeprom_address+1,F
-	bcf			eeprom_overflow		
-	
-	btfss		eeprom_address+1,7	; at address 8000
-	return						; no, return
-	
-	clrf		eeprom_address+0		; Clear eeprom address
-	clrf		eeprom_address+1
-	bsf			eeprom_overflow		; and set overflow bit
 	return
+
+;	btfss		eeprom_address+1,7	; at address 8000
+;	return						; no, return
+;	
+;	clrf		eeprom_address+0		; Clear eeprom address
+;	clrf		eeprom_address+1
+;	return
 I2CWRITE_BLOCK:
 	movwf		ext_ee_temp1				; Data byte in WREG
 	bsf			SSPCON2,SEN			; Start condition
 	rcall		WaitMSSP
-	movlw		b'10100110'			; Bit0=0: WRITE, Bit0=1: READ
+	movlw		b'10101110'			; Bit0=0: WRITE, Bit0=1: READ, BLOCK2
+	btfss		eeprom_address+1,7		; Access Block2?
+	movlw		b'10100110'			; No, -> Bit0=0: WRITE, Bit0=1: READ, BLOCK1
 	movwf		SSPBUF				; control byte
 	rcall		WaitMSSP	
 	rcall		I2C_WaitforACK
@@ -145,7 +146,9 @@ get_free_EEPROM_location3:
 	rcall		WaitMSSP	
 	bsf			SSPCON2,SEN			; Start condition
 	rcall		WaitMSSP
-	movlw		b'10100110'			; Bit0=0: WRITE, Bit0=1: READ
+	movlw		b'10101110'			; Bit0=0: WRITE, Bit0=1: READ, BLOCK2
+	btfss		ext_ee_temp2,7		; Access Block2?
+	movlw		b'10100110'			; No, -> Bit0=0: WRITE, Bit0=1: READ, BLOCK1
 	movwf		SSPBUF				; control byte
 	rcall		WaitMSSP	
 	btfsc		SSPCON2,ACKSTAT
@@ -160,8 +163,10 @@ get_free_EEPROM_location3:
 	
 	bsf			SSPCON2,RSEN		; Start condition
 	rcall		WaitMSSP
-	movlw		b'10100111'			; Bit0=0: WRITE, Bit0=1: READ
-	movwf		SSPBUF			; control byte
+	movlw		b'10101111'			; Bit0=0: WRITE, Bit0=1: READ, BLOCK2
+	btfss		ext_ee_temp2,7		; Access Block2?
+	movlw		b'10100111'			; No, -> Bit0=0: WRITE, Bit0=1: READ, BLOCK1
+	movwf		SSPBUF				; control byte
 	rcall		WaitMSSP	
 	rcall		I2C_WaitforACK
 
@@ -200,10 +205,16 @@ get_free_EEPROM_location2c:
 	addwf		ext_ee_temp1,F
 	movlw		d'0'
 	addwfc		ext_ee_temp2,F
-	
-	btfsc		ext_ee_temp2,7			; 0x8000 reached?
+
+	movlw		0xFF	
+	cpfseq		ext_ee_temp2			; =0xFFFF
+	bra			get_free_EEPROM_location2d	; No
+	cpfseq		ext_ee_temp1			; =0xFFFF
+	bra			get_free_EEPROM_location2d	; No
+
 	bra			get_free_EEPROM_location3b	; yes
-	
+
+get_free_EEPROM_location2d:
 	bsf			SSPCON2, ACKEN		; no, send Ack
 	rcall		WaitMSSP				
 	bra			get_free_EEPROM_location2	; and continue search
@@ -232,15 +243,14 @@ I2CREAD2_2:
 	addwf		eeprom_address+0,F
 	movlw		d'0'
 	addwfc		eeprom_address+1,F
-	bcf			eeprom_overflow		
-	btfss		eeprom_address+1,7	; at 0x8000?
-	return		; no, return
-	
-	clrf		eeprom_address+0	; Yes, clear address
-	clrf		eeprom_address+1
-	bsf			eeprom_overflow		; and set overflow bit
 	return
-
+;	btfss		eeprom_address+1,7	; at 0x8000?
+;	return		; no, return
+;	
+;	clrf		eeprom_address+0	; Yes, clear address
+;	clrf		eeprom_address+1
+;	return
+;
 I2CREAD3:						; block read start with automatic address increase 
 	rcall		I2CREAD_COMMON
 	; no Stop condition here
@@ -261,8 +271,11 @@ I2CREAD_COMMON:
 	rcall		WaitMSSP	
 	bsf			SSPCON2,SEN		; Start condition
 	rcall		WaitMSSP
-	movlw		b'10100110'		; Bit0=0: WRITE, Bit0=1: READ
-	movwf		SSPBUF			; control byte
+
+	movlw		b'10101110'			; Bit0=0: WRITE, Bit0=1: READ, BLOCK2
+	btfss		eeprom_address+1,7	; Access Block2?
+	movlw		b'10100110'			; No, -> Bit0=0: WRITE, Bit0=1: READ, BLOCK1
+	movwf		SSPBUF				; control byte
 	rcall		WaitMSSP	
 	btfsc		SSPCON2,ACKSTAT
 	bra			I2CREAD			; EEPROM NOT acknowledged, retry!	
@@ -275,8 +288,11 @@ I2CREAD_COMMON:
 	
 	bsf			SSPCON2,RSEN	; Start condition
 	rcall		WaitMSSP
-	movlw		b'10100111'		; Bit0=0: WRITE, Bit0=1: READ
-	movwf		SSPBUF			; control byte
+
+	movlw		b'10101111'			; Bit0=0: WRITE, Bit0=1: READ, BLOCK2
+	btfss		eeprom_address+1,7	; Access Block2?
+	movlw		b'10100111'			; No, -> Bit0=0: WRITE, Bit0=1: READ, BLOCK1
+	movwf		SSPBUF				; control byte
 	rcall		WaitMSSP	
 	rcall		I2C_WaitforACK
 	
@@ -290,8 +306,10 @@ I2CWRITE:
 	movwf		ext_ee_temp1				; Data byte
 	bsf			SSPCON2,SEN			; Start condition
 	rcall		WaitMSSP
-	movlw		b'10100110'			; Bit0=0: WRITE, Bit0=1: READ
-	movwf		SSPBUF			; control byte
+	movlw		b'10101110'			; Bit0=0: WRITE, Bit0=1: READ, BLOCK2
+	btfss		eeprom_address+1,7	; Access Block2?
+	movlw		b'10100110'			; No, -> Bit0=0: WRITE, Bit0=1: READ, BLOCK1
+	movwf		SSPBUF				; control byte
 	rcall		WaitMSSP	
 	rcall		I2C_WaitforACK
 	movff		eeprom_address+1,SSPBUF	; High Address byte

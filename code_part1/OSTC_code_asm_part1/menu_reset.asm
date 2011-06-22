@@ -110,7 +110,7 @@ cf_default_table0:
     ;                          DEFAULT   MIN     MAX
 	CF_DEFAULT    CF_CENTI,	    d'100', d'50',  d'250'  ; dive_threshold	        100cm
 	CF_DEFAULT    CF_CENTI,	    d'30',  d'10',  d'100'  ; surf_threshold        	30cm
-	CF_DEFAULT    CF_SEC,	    d'240', d'30',  d'240'  ; diveloop_timeout      	240s
+	CF_DEFAULT    CF_INT15,	    d'240', d'0',   d'600'  ; diveloop_timeout      	240s
 	CF_DEFAULT    CF_SEC,	    d'120', d'30',  d'240'  ; surfloop_timeout	        120s
 	CF_DEFAULT    CF_SEC,	    d'5',   d'1',   d'30'   ; premenu_timeout	        5s
 
@@ -135,11 +135,11 @@ cf_default_table0:
 	CF_DEFAULT    CF_INT8,	    d'10',  d'1',   d'120'  ; sampling_rate				10s
 	CF_DEFAULT    CF_INT8,	    d'6',   d'0',   d'15'   ; sampling_divisor_temp		/6
 	CF_DEFAULT    CF_INT8,	    d'6',   d'0',   d'15'   ; sampling_divisor_deco		/6
-	CF_DEFAULT    CF_INT8,	    d'0',   d'0',   d'15'   ; sampling_divisor_tank		never
+	CF_DEFAULT    CF_INT8,	    d'6',   d'0',   d'15'   ; sampling_divisor_gf		/6
 	CF_DEFAULT    CF_INT8,	    d'0',   d'0',   d'15'   ; sampling_divisor_ppo2		never
 
 	CF_DEFAULT    CF_INT8,	    d'0',   d'0',   d'15'   ; sampling_divisor_deco2	never
-	CF_DEFAULT    CF_INT8,	    d'0',   d'0',   d'15'   ; sampling_divisor_nyu2		never
+	CF_DEFAULT    CF_INT8,	    d'12',  d'0',   d'15'   ; sampling_divisor_cns		/12
 	CF_DEFAULT    CF_PERCENT,	d'20',  d'5',   d'75'   ; cns_display_high			20%
 	CF_DEFAULT    CF_INT15,	    d'0',   d'0',   0 		; logbook_offset			No Offset, but 15Bit value
 	CF_DEFAULT    CF_INT8,	    d'3',   d'2',   d'6'	; last_deco_depth			3m
@@ -169,7 +169,7 @@ cf_default_table1:
 	CF_DEFAULT    CF_CENTI,     d'161', d'100', d'161'  ; color_warn_ppo2_cbar		ppO2 warn
 
 	CF_DEFAULT    CF_INT8,	    d'15',  d'7',   d'20'	; color_warn_celocity_mmin	warn at xx m/min
-	CF_DEFAULT    CF_SEC+CF_NEG,d'42',  -d'120',d'120'  ; time_correction_value_default	Adds to Seconds on Midnight
+	CF_DEFAULT    CF_SEC+CF_NEG,d'0',  -d'120' ,d'120'  ; time_correction_value_default	Adds to Seconds on Midnight
 	CF_DEFAULT    CF_BOOL,      d'0',   0,      0 		; CF#49 Show Altimeter in surface mode
 	CF_DEFAULT    CF_BOOL,     	d'0',   0,      0       ; CF50 Show Log-Marker
 	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0 		; CF51 Show Stopwatch
@@ -451,18 +451,25 @@ reset_customfunction:
 ; Write the two bytes lo:hi into EEPROM
 reset_eeprom_value:
 	incf	EEADR,F
-	movff	lo, EEDATA				; Lowbyte Defaul value
-	call	write_eeprom
+	movff	lo, EEDATA				; Lowbyte Default value
+
+	movlw	d'127'					; Work-around to prevent writing at EEPROM 0x00 to 0x04 
+	cpfslt	EEADR					; EEADR > 127?
+	call	write_eeprom			; Yes, write!
 
 	incf	EEADR,F
 	movff	hi, EEDATA				; Highbyte default value
-	goto    write_eeprom
+
+	movlw	d'127'					; Work-around to prevent writing at EEPROM 0x00 to 0x04 
+	cpfslt	EEADR					; EEADR > 127?
+	call    write_eeprom			; Yes, write!
+	return
 
 reset_external_eeprom:				; deletes complete external eeprom!
 	clrf	eeprom_address+0
 	clrf	eeprom_address+1
 
-	movlw	d'2'
+	movlw	d'4'
 	movwf	temp3
 reset_eeprom02:
 	clrf	temp4
@@ -482,7 +489,7 @@ reset_eeprom1:
 	decfsz	temp4,F
 	bra		reset_eeprom01				; do this 256 times
 	decfsz	temp3,F
-	bra		reset_eeprom02				; and this all 2 times -> 512 *64Bytes = 32KB
+	bra		reset_eeprom02				; and this all 4 times -> 1024 *64Bytes = 64KB
 
 	bcf		eeprom_blockwrite			; clear blockwrite flag
 

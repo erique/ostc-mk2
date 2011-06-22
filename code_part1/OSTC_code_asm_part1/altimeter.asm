@@ -364,6 +364,7 @@ alt_menu_enable:
         movlw       4*(.49-.32) + 0x82  ; CF#49 low byte address in EEPROM
     	movwf	    EEADR
     	call	    write_eeprom
+    	clrf	    EEADRH				; Reset EEADRH for compatibility
     	bra         altimeter_menu_2
 
 ;---- Reset sea level pressure to reference ----------------------------------

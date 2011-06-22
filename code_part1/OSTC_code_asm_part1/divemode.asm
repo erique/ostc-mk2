@@ -75,6 +75,7 @@ diveloop_loop1a:
 
 	bsf		twosecupdate					; Routines used in the "other second"
 	call	calc_average_depth				; calculate average depth
+	call	calc_velocity					; calculate vertical velocity and display if > threshold (every two seconds)
 	
 	bra		diveloop_loop1x					; Common Tasks
 
@@ -589,7 +590,7 @@ store_dive_data:						; CF20 seconds gone
 
 ; shift address for header
 ; the header will be stored after the dive
-	incf_eeprom_address	d'47'				; Macro, that adds 8Bit to eeprom_address:2 with banking at 0x8000
+	incf_eeprom_address	d'57'				; Macro, that adds 8Bit to eeprom_address:2 with banking at 0x8000
 
 store_dive_data2:
     SAFE_2BYTE_COPY rel_pressure, lo
@@ -612,9 +613,9 @@ check_extended1:
 	movlw	d'2'				; Information length	
 	addwf	ProfileFlagByte,F	; add to ProfileFlagByte
 check_extended2:
-	decfsz	divisor_tank,W		; Check divisor
+	decfsz	divisor_gf,W		; Check divisor
 	bra		check_extended3		
-	movlw	d'2'				; Information length	
+	movlw	d'1'				; Information length	
 	addwf	ProfileFlagByte,F	; add to ProfileFlagByte
 check_extended3:
 	decfsz	divisor_ppo2,W		; Check divisor
@@ -627,9 +628,9 @@ check_extended4:
 	movlw	d'9'				; Information length	
 	addwf	ProfileFlagByte,F	; add to ProfileFlagByte
 check_extended5:
-	decfsz	divisor_nuy2,W		; Check divisor
+	decfsz	divisor_cns,W		; Check divisor
 	bra		check_extended6		
-	movlw	d'0'				; Information length	
+	movlw	d'1'				; Information length	
 	addwf	ProfileFlagByte,F	; add to ProfileFlagByte
 check_extended6:
 
@@ -706,9 +707,9 @@ store_extended1:
 	bra		store_extended2	
 	rcall	store_dive_decodata
 store_extended2:
-	decfsz	divisor_tank,F		; Check divisor
+	decfsz	divisor_gf,F		; Check divisor
 	bra		store_extended3	
-	rcall	store_dive_tankdata
+	rcall	store_dive_gf
 store_extended3:
 	decfsz	divisor_ppo2,F		; Check divisor
 	bra		store_extended4	
@@ -718,9 +719,9 @@ store_extended4:
 	bra		store_extended5	
 	rcall	store_dive_decodebug
 store_extended5:
-	decfsz	divisor_nuy2,F		; Check divisor
+	decfsz	divisor_cns,F		; Check divisor
 	bra		store_extended6	
-	rcall	store_dive_nuy2
+	rcall	store_dive_cns
 store_extended6:
 
 ; The next block is required to take care of "store never"
@@ -728,14 +729,14 @@ store_extended6:
 	clrf	divisor_temperature		; And clear register again, so it will never reach zero...
 	btfsc	divisor_deco,7			; Test highest Bit (Register must have been zero before the "decfsz" command!)
 	clrf	divisor_deco			; And clear register again, so it will never reach zero...
-	btfsc	divisor_tank,7			; Test highest Bit (Register must have been zero before the "decfsz" command!)
-	clrf	divisor_tank			; And clear register again, so it will never reach zero...
+	btfsc	divisor_gf,7			; Test highest Bit (Register must have been zero before the "decfsz" command!)
+	clrf	divisor_gf				; And clear register again, so it will never reach zero...
 	btfsc	divisor_ppo2,7			; Test highest Bit (Register must have been zero before the "decfsz" command!)
 	clrf	divisor_ppo2			; And clear register again, so it will never reach zero...
 	btfsc	divisor_deco_debug,7	; Test highest Bit (Register must have been zero before the "decfsz" command!)
 	clrf	divisor_deco_debug		; And clear register again, so it will never reach zero...
-	btfsc	divisor_nuy2,7			; Test highest Bit (Register must have been zero before the "decfsz" command!)
-	clrf	divisor_nuy2			; And clear register again, so it will never reach zero...
+	btfsc	divisor_cns,7			; Test highest Bit (Register must have been zero before the "decfsz" command!)
+	clrf	divisor_cns				; And clear register again, so it will never reach zero...
 
 	ostc_debug	'D'		; Sends debug-information to screen if debugmode active
 
@@ -750,9 +751,11 @@ store_dive_data5:
 	bcf		event_occured		; Clear the global event flag
 	return						; Done. (Sample with all informations written to EEPROM)
 	
-store_dive_nuy2:
+store_dive_cns:
+	movff	char_O_CNS_fraction,WREG
+	call	write_external_eeprom		; Store in EEPROM
 	GETCUSTOM8	d'26'
-	movwf	divisor_nuy2			; Reload divisor from CF
+	movwf	divisor_cns			; Reload divisor from CF
 	return
 
 store_dive_decodebug:
@@ -791,13 +794,11 @@ store_dive_ppo2:
 	movwf	divisor_ppo2			; Reload divisor from CF
 	return
 
-store_dive_tankdata:
-	movlw	d'0'				; Dummy Tank1
-	call	write_external_eeprom
-	movlw	d'0'				; Dummy Tank2
+store_dive_gf:
+	movff	char_O_gradient_factor,WREG		; gradient factor absolute
 	call	write_external_eeprom
 	GETCUSTOM8	d'23'
-	movwf	divisor_tank			; Reload divisor from CF
+	movwf	divisor_gf			; Reload divisor from CF
 	return
 
 store_dive_decodata:
@@ -1298,10 +1299,10 @@ end_dive2:
 	addwf	temp1,W		; copy to bits 0-3, result in WREG
 	call	write_external_eeprom
 
-	movlw	d'2'		; information size tank
+	movlw	d'1'		; information size GF
 	movwf	temp1		; copy to bits 0-3
 	swapf	temp1,F		; swap nibbels 0-3 with 4-7
-	GETCUSTOM8	d'23'					; Divisor Tank
+	GETCUSTOM8	d'23'	; Divisor GF
 	addwf	temp1,W		; copy to bits 0-3, result in WREG
 	call	write_external_eeprom
 
@@ -1319,10 +1320,10 @@ end_dive2:
 	addwf	temp1,W		; copy to bits 0-3, result in WREG
 	call	write_external_eeprom
 
-	movlw	d'0'		; information size nuy2
+	movlw	d'1'		; information size cns
 	movwf	temp1		; copy to bits 0-3
 	swapf	temp1,F		; swap nibbels 0-3 with 4-7
-	GETCUSTOM8	d'26'	; Divisor nuy2
+	GETCUSTOM8	d'26'	; Divisor cns
 	addwf	temp1,W		; copy to bits 0-3, result in WREG
 	call	write_external_eeprom
 
@@ -1333,7 +1334,40 @@ end_dive2:
 	movff	char_O_CNS_fraction,WREG	; copy into bank1
 	call	write_external_eeprom		; Stores CNS%
 
-; Add additional 10bytes here.... mH
+	movff	avr_rel_pressure_total+0,WREG	; Average Depth
+	call	write_external_eeprom
+	movff	avr_rel_pressure_total+1,WREG	; Average Depth
+	call	write_external_eeprom
+
+	movff	total_divetime_seconds+0,WREG	; Total dive time (Regardless of CF01)
+	call	write_external_eeprom
+	movff	total_divetime_seconds+1,WREG	; Total dive time (Regardless of CF01)
+	call	write_external_eeprom
+
+	movlw	d'32'							; GF_lo
+	movff	char_I_deco_model,lo
+	decfsz	lo,F							; jump over next line if char_I_deco_model == 1
+	movlw	d'11'							; Saturation Multiplier
+	call	getcustom8_1					; Get Custom function #WREG
+	call	write_external_eeprom			; write WREG into external memory
+
+	movlw	d'33'							; GF_hi
+	movff	char_I_deco_model,lo
+	decfsz	lo,F							; jump over next line if char_I_deco_model == 1
+	movlw	d'12'							; Desaturation Multiplier
+	call	getcustom8_1					; Get Custom function #WREG
+	call	write_external_eeprom			; write WREG into external memory
+
+	read_int_eeprom d'34'					; Read deco modell
+	movf	EEDATA,W
+	call	write_external_eeprom			; write WREG into external memory
+
+	clrf	WREG
+	call	write_external_eeprom			; Spare3
+	clrf	WREG
+	call	write_external_eeprom			; Spare2
+	clrf	WREG
+	call	write_external_eeprom			; Spare1
 
 	movlw	0xFB						; Header stop
 	call	write_external_eeprom
@@ -1404,13 +1438,16 @@ timeout_divemode:
 	
 	bcf		divemode
 	incf	timeout_counter,F
-	GETCUSTOM8	d'2'					; diveloop_timeout
-	addlw	d'2'						; adds two seconds in case timout=zero!
-	btfsc	STATUS,C					; > 255?
-	movlw	d'255'						; Set to 255...
-	decf	WREG,F						; Limit to 254
-	cpfsgt	timeout_counter
-	bsf		divemode
+	movlw	d'0'
+	addwfc	timeout_counter2,F			; timeout is 15bits
+	GETCUSTOM15	d'2'					; diveloop_timeout
+	movff	lo,sub_a+0
+	movff	hi,sub_a+1
+	movff	timeout_counter, sub_b+0
+	movff	timeout_counter2, sub_b+1
+	call	sub16						;  sub_c = sub_a - sub_b
+	btfss	neg_flag					; Result negative?
+	bsf		divemode					; No, set flag
 	return
 
 timeout_divemode2:
@@ -1695,13 +1732,15 @@ diveloop_boot:
 	clrf	apnoe_secs
 	clrf	divemins+0
 	clrf	divemins+1
+	clrf 	total_divetime_seconds+0
+	clrf 	total_divetime_seconds+1
 	clrf	menupos3
 	bcf		menu3_active
 	clrf	divesecs
 	clrf	samplesecs
 	clrf	apnoe_timeout_counter		; timeout in minutes
-	clrf 	timeout_counter				; takes care of the timeout
-	clrf 	timeout_counter2			; Here: counts to six, then store deco data and temperature
+	clrf 	timeout_counter				; takes care of the timeout (Low byte)
+	clrf 	timeout_counter2			; takes care of the timeout (High byte)
 	clrf	AlarmType					; Clear all alarms
 	bcf		event_occured				; clear flag
 	bcf		setpoint_changed			; clear flag
@@ -1744,13 +1783,13 @@ diveloop_boot_2:
 	GETCUSTOM8	d'22'
 	movwf	divisor_deco				
 	GETCUSTOM8	d'23'
-	movwf	divisor_tank
+	movwf	divisor_gf
 	GETCUSTOM8	d'24'
 	movwf	divisor_ppo2
 	GETCUSTOM8	d'25'
 	movwf	divisor_deco_debug
 	GETCUSTOM8	d'26'
-	movwf	divisor_nuy2
+	movwf	divisor_cns
 
 	btfss	FLAG_apnoe_mode		; In Apnoe mode?
 	bra		divemode1

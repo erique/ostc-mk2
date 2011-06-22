@@ -131,6 +131,8 @@ test_switches_divemode_menu:
 	movlw	d'7'						; Number of entries for this menu+1 = 7
 	btfsc	display_set_xgas			; Are we in the Gas6 menu?
 	movlw	d'7'						; Number of entries for this menu+1 = 7
+	btfsc	display_set_simulator		; Are we in the simulator menu?
+	movlw	d'7'						; Number of entries for this menu+1 = 7
 	cpfseq	menupos						; =limit?
 	bra		test_switches_divemode_menu1; No!
 	movlw	d'1'						; Yes, reset to position 1!
@@ -348,6 +350,8 @@ divemode_menu_simulator2:
 	bra		divemode_menu_simulator_p10	; Adjust +10m
 	dcfsnz	menupos,F
 	bra		divemode_menu_simulator_m10	; Adjust -10m
+	dcfsnz	menupos,F
+	bra		divemode_menu_simulator_quit; Adjust to zero m
 	bra		timeout_divemenu2			; quit underwater menu!
 
 divemode_menu_simulator_common:
@@ -366,7 +370,6 @@ divemode_menu_simulator_common:
 	movlw	HIGH	d'14000'
 	movwf	sim_pressure+1
 	return
-
 divemode_menu_simulator_common2:
 	movlw	LOW		d'1000'             ; Compare to 1bar == 0m == 1000 mbar.
 	subwf   sim_pressure+0,W
@@ -400,6 +403,13 @@ divemode_menu_simulator_p10:
 	movlw	d'4'
 	movwf	menupos						; reset cursor
 	bra		divemode_menu_simulator_common
+
+divemode_menu_simulator_quit:
+	movlw	LOW		d'1000'
+	movwf	sim_pressure+0
+	movlw	HIGH	d'1000'
+	movwf	sim_pressure+1
+	bra		timeout_divemenu2			; quit menu
 
 divemode_menu_simulator_p1:
 	movlw	d'100'

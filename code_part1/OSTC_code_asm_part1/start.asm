@@ -26,15 +26,7 @@ start:
 	movlb	b'00000001'				; ram bank 1 selected
 	movff	STKPTR,temp10
 	clrf    temp10+1
-
 	call	init
-
-	read_int_eeprom	d'92'			; Read number of CF used in this firmware	
-	movlw	0xFF					; First start value
-	cpfseq	EEDATA					; Compare 
-	bra		start2					; Normal power-on/hard reset boot
-	bra		first_start				; Reset and jump to surfmode
-start2:
 	btfsc	divemode				; Reset from Divemode?
 	call	PLED_resetdebugger		; Yes! Something went wrong, show reset informations
 start3:
@@ -67,7 +59,8 @@ wait_start_pressure:
 	call	pressuretest_sleep_fast	; Gets pressure without averaging (faster!)
 	bcf		sleepmode				; Normal mode again
 
-    SAFE_2BYTE_COPY amb_pressure, last_surfpressure
+    SAFE_2BYTE_COPY amb_pressure_avg, last_surfpressure
+	SAFE_2BYTE_COPY amb_pressure_avg, amb_pressure
 	movff	last_surfpressure+0,last_surfpressure_15min+0
 	movff	last_surfpressure+1,last_surfpressure_15min+1
 	movff	last_surfpressure+0,last_surfpressure_30min+0
@@ -102,9 +95,9 @@ wait_start_pressure:
 	movlb	b'00000001'									; select ram bank 1
 
 ; check firmware and reset Custom Functions after an update
-	movlw	LOW		0x101
+	movlw	d'1'
 	movwf	EEADR
-	movlw	HIGH 	0x101
+	movlw	d'1'
 	movwf	EEADRH
 	call	read_eeprom				; read current version x
 	movff	EEDATA,temp1
@@ -123,9 +116,9 @@ wait_start_pressure:
 	bra		restart					; x and y are equal -> do not reset cf
 			
 check_firmware_new:
-	movlw	LOW		0x101			; store current version in EEPROM
+	movlw	d'1'					; store current version in EEPROM
 	movwf	EEADR
-	movlw	HIGH 	0x101
+	movlw	d'1'
 	movwf	EEADRH
 	movlw	softwareversion_x
 	movwf	EEDATA		
@@ -135,9 +128,23 @@ check_firmware_new:
 	movwf	EEDATA		
 	call	write_eeprom			; write version y
 	clrf	EEADRH					; Reset EEADRH
-	goto	reset_all_cf			; resets all custom functions bank0 and bank1 and jumps to "restart"
+
+; Reset CF48
+	movlw	d'1'
+	movwf	EEADRH					; EEPROM Bank1
+	clrf	EEDATA					; =0
+	write_int_eeprom	d'191'
+	write_int_eeprom	d'192'	
+	write_int_eeprom	d'193'
+	write_int_eeprom	d'194'		; Reset Default and Current Value to zero
+	clrf	EEADRH
+;	goto	reset_all_cf			; resets all custom functions bank0 and bank1 and jumps to "restart"
 			
 restart:
+	movlw	b'00000011'
+	movwf	T3CON					; Timer3 with 32768Hz clock running
+	clrf	TMR3L
+	clrf	TMR3H
 	bcf		LED_red
 	bcf		LED_blue				; all LEDs off
 	GETCUSTOM8	d'48'				; time correction value
@@ -184,8 +191,13 @@ restart:
 	bsf		high_altitude_mode		; No, Set Flag!
 	
 	; Should we disable sleep (hardware emulator)
-	movlw	.0
-	cpfsgt	EEDATA					; >256
+restart_loop:
+	btfss	0xF81,0,A
+	bra		restart_loop
+	btfss	0xF81,1,A
+	bra		restart_loop
+	movlw	0x80
+	cpfslt	0xFB3,A
 	bsf		nsm						; NO-SLEEP-MODE : for hardware debugging
 
 	call	gassetup_sort_gaslist       ; Sorts Gaslist according to change depth
@@ -223,6 +235,16 @@ restart_1:
 	movlw	d'1'
 	cpfseq	EEDATA
 	bcf		debug_mode				; clear flag if <> 1
+
+; Check if logbook has been converted already (Internal EEPROM 0x100=0xAA)
+	movlw	LOW		0x100
+	movwf	EEADR
+	movlw	HIGH 	0x100
+	movwf	EEADRH
+	call	read_eeprom				; read byte
+	movlw	0xAA
+	cpfseq	EEDATA					; is 0xAA already?
+	call	logbook_convert_64k		; No, convert now (And write 0xAA to internal EEPROM 0x100)
 
 	goto	surfloop				; Jump to Surfaceloop!
 	

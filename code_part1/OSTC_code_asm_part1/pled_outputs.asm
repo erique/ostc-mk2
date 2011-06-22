@@ -521,12 +521,12 @@ PLED_simulator_data:
     ;---- Updates interval line ----------------------------------------------
 	WIN_TOP    .35
 	lfsr	    FSR2,letter
-	OUTPUTTEXTH .306                    ; Interval:
+	OUTPUTTEXTH .307                    ; Interval:
 
 	movff	    char_I_dive_interval,lo
     movf        lo,W
     bnz         PLED_simulator_data_1
-    OUTPUTTEXTH .307                    ; Now
+    OUTPUTTEXTH .308                    ; Now
     clrf        POSTINC2                ; End buffer.
     bra         PLED_simulator_data_2
 
@@ -865,6 +865,7 @@ PLED_update_raw_data:
 	WIN_TOP		.177
 	STRCPY  "temp:"
     SAFE_2BYTE_COPY temperature, lo
+	call	PLED_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
 	output_16
 	call	word_processor
 
@@ -955,7 +956,7 @@ PLED_simulator_mask:
 	WIN_INVERT	.1	; Init new Wordprocessor	
 	DISPLAYTEXT	.248		; OSTC Simulator
 	WIN_INVERT	.0	; Init new Wordprocessor
-    DISPLAYTEXTH    .306                ; Interval:
+    DISPLAYTEXTH    .307                ; Interval:
 	DISPLAYTEXT	    .249                ; Start Dive
 	DISPLAYTEXTH	.277                ; Bottom Time:
 	DISPLAYTEXTH	.278                ; Max. Depth:
@@ -975,18 +976,7 @@ PLED_temp_surfmode:
 	movff	last_temperature+1,hi
 	movff	last_temperature+0,lo
 	lfsr	FSR2,letter
-
-    btfss   hi,7                        ; Negative temperature ?
-    bra     PLED_temp_surfmode_1        ; No: continue
-
-	PUTC	'-'                         ; Display "-"
-
-    comf    hi                          ; Then, 16bit sign changes.
-    negf    lo
-    btfsc   STATUS,C
-    incf    hi
-
-PLED_temp_surfmode_1:
+	call	PLED_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
 	movlw	d'3'
 	movwf	ignore_digits
 	bsf		leftbind			; left orientated output
@@ -1011,18 +1001,7 @@ PLED_temp_divemode:
 	movff	last_temperature+0,lo
 
 	lfsr	FSR2,letter
-
-    btfss   hi,7                        ; Negative temperature ?
-    bra     PLED_temp_divemode_1        ; No: continue
-
-	PUTC	'-'                         ; Display "-"
-
-    comf    hi                          ; Then, 16bit sign changes.
-    negf    lo
-    btfsc   STATUS,C
-    incf    hi
-
-PLED_temp_divemode_1:
+	call	PLED_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
 	movlw	d'3'
 	movwf	ignore_digits
 	bsf		leftbind			; left orientated output
@@ -1585,7 +1564,7 @@ PLED_depth:
 
 	movlw	.039
 	cpfslt	hi
-    bra	depth_greater_99_84mtr
+    bra		depth_greater_99_84mtr
 
 	btfsc	depth_greater_100m			; Was depth>100m during last call
 	call	PLED_clear_depth			; Yes, clear depth area
@@ -1601,7 +1580,7 @@ PLED_depth:
 	movff	lo,sub_b+0
 	incf	sub_b+0,F
 	movlw	d'0'
-	addwfc	sub_b+1,F		; Add 1mBar offset
+	addwfc	sub_b+1,F				; Add 1mBar offset
 	call	sub16					; sub_c = sub_a - sub_b
 	btfss	neg_flag				; Depth lower then 10m?
 	rcall	depth_less_10mtr		; Yes, add extra space
@@ -1624,7 +1603,7 @@ PLED_depth:
 
 	bsf		leftbind
 	bsf		ignore_digit4
-	output_16		; Full meters in Big font
+	output_16						; Full meters in Big font
 	bcf		leftbind
 	bra		pled_depth3
 
@@ -1645,14 +1624,14 @@ pled_depth3:
 	
 	STRCPY  "."
 
-	movlw	HIGH	d'9'
+	movlw	HIGH	d'20'			; Display 0.0m if lower then 20cm
 	movwf	sub_a+1
-	movlw	LOW		d'9'
+	movlw	LOW		d'20'
 	movwf	sub_a+0
 	movff	hi,sub_b+1
 	movff	lo,sub_b+0
 	call	sub16					; sub_c = sub_a - sub_b
-	btfss	neg_flag				; Depth lower then 0.1m?
+	btfss	neg_flag				; Depth lower then 0.3m?
 	bra		pled_depth4				; Yes, display manual Zero
 
 	movlw	d'4'
@@ -1906,6 +1885,17 @@ update_batt_voltage2_full:
 	movlw	d'30'
 	movwf	wait_temp
 	bra		update_batt_voltage2a
+
+PLED_convert_signed_temperature:
+   	btfss   	hi,7                    ; Negative temperature ?
+    return								; No, return
+; Yes, negative temperature!
+	PUTC		'-'                     ; Display "-"
+    comf    	hi                      ; Then, 16bit sign changes.
+    negf    	lo
+    btfsc   	STATUS,C
+    incf    	hi
+	return								; and return
 
 PLED_convert_date:	; converts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 	read_int_eeprom d'91'			; Read date format (0=MMDDYY, 1=DDMMYY, 2=YYMMDD)
@@ -2232,6 +2222,57 @@ PLED_stopwatch_show2:
 	STRCAT_PRINT "m"
 	return
 
+PLED_stopwatch_show_gauge:
+	btfsc	menubit					; Divemode menu active?
+	return							; Yes, return
+	; BIG Stopwatch
+	call	PLED_divemask_color	; Set Color for Divemode mask
+	DISPLAYTEXTH	d'310'			; Stopwatch
+	DISPLAYTEXTH	d'309'			; Average
+	call	PLED_standard_color
+	ostc_debug	'V'		; Sends debug-information to screen if debugmode active
+	WIN_TOP		.80
+	WIN_LEFT	.90
+	WIN_FONT	FT_MEDIUM
+	call	PLED_standard_color
+
+	lfsr	FSR2,letter
+	movff	average_divesecs+0,lo				; Stopwatch
+	movff	average_divesecs+1,hi				; Stopwatch
+	movlw	d'2'
+	subwf	lo,F
+	movlw	d'0'
+	subwfb	hi,F						; Subtract 2 seconds
+	call	convert_time				; converts hi:lo in seconds to mins (hi) and secs (lo)
+	movff	lo,wait_temp
+	movff	hi,lo
+	clrf	hi	
+	movlw	d'0'
+	bcf		leftbind
+	bsf		show_last3
+	output_16_3					;Displays only 0...999
+    PUTC    ':'
+	movff	wait_temp,lo
+	output_99x
+	call	word_processor
+
+	ostc_debug	'U'				; Sends debug-information to screen if debugmode active
+	WIN_TOP		.136
+	WIN_LEFT	.90
+	WIN_FONT	FT_MEDIUM
+	call	PLED_standard_color
+	lfsr	FSR2,letter
+	movff	avr_rel_pressure+0,lo
+	movff	avr_rel_pressure+1,hi
+	call	adjust_depth_with_salinity		; computes salinity setting into lo:hi [mBar]
+	bsf		ignore_digit5					; do not display 1cm depth
+	output_16dp	d'3'
+	bcf		leftbind
+	STRCAT_PRINT "m"
+	WIN_FONT	FT_SMALL				; Reset...
+	return
+
+
 PLED_total_average_show:
 	; Non-Resettable Average
 	call		PLED_divemask_color	; Set Color for Divemode mask
@@ -2367,6 +2408,7 @@ PLED_divemode_simulator_mask:
         DISPLAYTEXT	.251			; - 1m
         DISPLAYTEXT	.252			; +10m
         DISPLAYTEXT	.253			; -10m
+		DISPLAYTEXTH .306			; Quit Sim
         return
 
 ;-----------------------------------------------------------------------------
@@ -2696,7 +2738,7 @@ PLED_gas_list_loop1:
 	cpfseq	hi				; All gases shown?
 	bra		PLED_gas_list_loop	; No
 
-	DISPLAYTEXT		d'122'		; Gas 6..
+	DISPLAYTEXT		d'122'		; More
 	return					;  return (OC mode)
 
 PLED_splist_start:	
@@ -3097,8 +3139,7 @@ PLED_const_ppO2_value1a:
 	return
 
 PLED_const_ppO2_too_hi:
-	movlw	'>'
-	movwf	POSTINC2				; Put ">" from WREG into buffer
+	PUTC	'>'
 	setf	lo						; show ">2.55"
 	clrf	hi						; clear hi
 	call	PLED_warnings_color		; Set Warning color

@@ -142,10 +142,15 @@ menu_interface1:
 	DISPLAYTEXT	.16						; "Start"
 
 	call		get_free_EEPROM_location		; 
+
 	movlw		d'1'						; increase
 	addwf		eeprom_address+0,F
 	movlw		d'0'
 	addwfc	eeprom_address+1,F
+
+;For debug only
+;clrf	eeprom_address+0,F
+;clrf	eeprom_address+1,F
 
 	DISPLAYTEXT	.17						; "Data"
 
@@ -167,14 +172,16 @@ menu_interface1:
 
 	DISPLAYTEXT .18						; "Header"
 
-	clrf		uart1_temp					; low address counter
-	clrf		uart2_temp					; high address counter
+	setf		uart1_temp					; low address counter
+	setf		uart2_temp					; high address counter
 
 menu_interface3:
 	bsf		SSPCON2,SEN					; Start condition
 	call		WaitMSSP
 
-	movlw		b'10100110'					; Bit0=0: WRITE, Bit0=1: READ
+	movlw		b'10101110'			; Bit0=0: WRITE, Bit0=1: READ, BLOCK2
+	btfss		eeprom_address+1,7	; Access Block2?
+	movlw		b'10100110'			; No, -> Bit0=0: WRITE, Bit0=1: READ, BLOCK1
 	movwf		SSPBUF					; control byte
 	call		WaitMSSP	
 	btfsc		SSPCON2,ACKSTAT
@@ -189,7 +196,10 @@ menu_interface3:
 	bsf		SSPCON2,RSEN				; Start condition
 	call		WaitMSSP
 
-	movlw		b'10100111'					; Bit0=0: WRITE, Bit0=1: READ
+	movlw		b'10101111'			; Bit0=0: WRITE, Bit0=1: READ, BLOCK2
+	btfss		eeprom_address+1,7	; Access Block2?
+	movlw		b'10100111'			; No, -> Bit0=0: WRITE, Bit0=1: READ, BLOCK1
+
 	movwf		SSPBUF					; control byte
 	call		WaitMSSP	
 	call		I2C_WaitforACK
@@ -199,27 +209,21 @@ menu_interface3:
 menu_interface2:
 	call		rs232_wait_tx				; wait for UART
 
-	bsf			SSPCON2, RCEN				; Enable recieve mode
-	call		WaitMSSP	
-
-	movff		SSPBUF, TXREG
-
 	movlw		d'1'
 	addwf		uart1_temp,F
 	movlw		d'0'
 	addwfc		uart2_temp,F
 
-	btfsc		uart2_temp,7				; 32KB done?
-	bra			menu_interface4				; Yes
-	
-	bsf			SSPCON2, ACKEN				; Ack
-	call		WaitMSSP	
-	bra			menu_interface2				; go on
+; Slow but safe...
+	call		I2CREAD2					; same as I2CREAD but with automatic address increase 
+	movff		SSPBUF, TXREG
 
-menu_interface4:
-	bsf			SSPCON2, PEN				; Stop
-	call		WaitMSSP	
-	
+	movlw		0xFF
+	cpfseq		uart2_temp					;=0xFFFF?
+	bra			menu_interface2				; No, continue
+	cpfseq		uart1_temp					;=0xFFFF?
+	bra			menu_interface2				; No, continue
+
 	DISPLAYTEXT	.20						; Done.
 
 	WAITMS	d'250'

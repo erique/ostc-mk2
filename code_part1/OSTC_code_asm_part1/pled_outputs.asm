@@ -1104,10 +1104,9 @@ PLED_active_gas_divemode_show:
 PLED_active_gas_divemode2:
 	tstfsz	hi							; He = 0 %
 	bra		PLED_active_gas_divemode3	; display gas
-										; O2 below treshold, He=0 -> Skip display!
-	movlw	d'5'
-	movwf	temp1
-	bra		PLED_display_clear_common_y1		; also returns!
+
+    call    PLED_warnings_color         ; O2 below treshold, He=0 : Bad stuff !
+    bra     PLED_active_gas_divemode4	
 
 PLED_active_gas_divemode3:
 	movlw	d'21'
@@ -1152,6 +1151,7 @@ PLED_active_gas_divemode4:
 	bcf		leftbind
 	call	word_processor
 	rcall	PLED_active_better_gas	; show *, if required
+    call    PLED_standard_color ; Back to normal (if O2<21 and He=0)
 	return
 
 PLED_display_decotype_surface:

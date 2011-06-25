@@ -58,7 +58,7 @@
 #DEFINE	warn_depth		d'1'
 #DEFINE	warn_cns		d'2'
 #DEFINE	warn_gf			d'3'
-#DEFINE	warn_ppo2		d'4'
+;#DEFINE warn_ppo2		d'4'
 #DEFINE warn_velocity	d'5'
 #DEFINE warn_ceiling	d'6'
 #DEFINE	warn_gas_in_gaslist	d'7'

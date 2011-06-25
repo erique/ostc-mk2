@@ -116,8 +116,10 @@ PLED_color_code_gaslist:				; %O2 in "EEDATA"
 	clrf		xB+1
 	call		mult16x16				; EEDATA * p_amb/10
 
-	tstfsz		xC+2						; char_I_O2_ratio * p_amb/10 > 65536, ppO2>6,55Bar?
-	bra			PLED_color_code_gaslist1	; Yes, warn in warning color
+	tstfsz		xC+2                    ; char_I_O2_ratio * p_amb/10 > 65536, ppO2>6,55Bar?
+	bra			PLED_color_code_gaslist1; Yes, warn in warning color
+	btfsc		xC+1,7                  ; > 32767, ppO2>3,276Bar?
+	bra			PLED_color_code_gaslist1; Yes, warn in warning color
 
 	movff		xC+0,sub_a+0
 	movff		xC+1,sub_a+1
@@ -199,7 +201,7 @@ PLED_color_code_cns2:
 	return
 
 PLED_color_code_gf:
-	movff	char_O_gradient_factor,lo		; gradient factor
+f	movff	char_O_gradient_factor,lo		; gradient factor
 	GETCUSTOM8	d'45'			; GF Warn [%]
 	subwf	lo,W
 	btfsc	STATUS,C
@@ -210,26 +212,33 @@ PLED_color_code_gf2:
 	call	PLED_warnings_color
 	return
 
-PLED_color_code_ppo2:
-; Check very high ppO2 manually
-	tstfsz	xC+2					; char_I_O2_ratio * p_amb/10 > 65536, ppO2>6,55Bar?
-	bra		PLED_color_code_ppo22	; Yes, warn in warning color
+;-----------------------------------------------------------------------------
+; Set color to red if ppO2 to high (and white if not).
+; Inputs: xC:3 = ppO2 (computed from divemode and O2_ratio).
+;
+PLED_color_code_ppo2:                   ; ppO2 in xC:3 (in 160*100 = 1.6000, ie. in 0.1 mbar)
+; Check very high ppO2 manually:
+    tstfsz  xC+2                        ; xC > 65535 ?
+	bra		PLED_color_code_ppo22	    ; Yes, warn in warning color
+	btfsc   xC+1,7					    ; xC > 32767, ie. ppO2>3,276Bar?
+	bra		PLED_color_code_ppo22	    ; Yes, warn in warning color
 
+; Normal checks: CF46
 	movff	xC+0,sub_a+0
 	movff	xC+1,sub_a+1
-	GETCUSTOM8	d'46'			; color-code ppO2 warning [cBar]
+	GETCUSTOM8	d'46'                   ; color-code ppO2 warning, eg. 160 cBar = 1.60 bar.
 	mullw	d'100'
 	movff	PRODL,sub_b+0
 	movff	PRODH,sub_b+1
-	call	sub16			;  sub_c = sub_a - sub_b
+	call	sub16                       ;  sub_c = sub_a - sub_b
 	btfss	neg_flag
-	bra		PLED_color_code_ppo22; Set to warning color
-	call	PLED_standard_color
-	return
-PLED_color_code_ppo22:
-	call	PLED_warnings_color
-	return
+	bra		PLED_color_code_ppo22       ; Set to warning color
+	goto	PLED_standard_color
 
+PLED_color_code_ppo22:
+	goto	PLED_warnings_color
+
+;-----------------------------------------------------------------------------
 PLED_color_code_velocity:
 	btfss	neg_flag			; Ignore for ascend!
 	bra		PLED_color_code_velocity1		; Skip check!
@@ -1018,7 +1027,7 @@ PLED_show_ppO2:					; Show ppO2 (ppO2 stored in xC)
 	WIN_TOP		.119
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
-	PLED_color_code		warn_ppo2		; Color-code output (ppO2 stored in xC)
+    call    PLED_color_code_ppo2		; Color-code output (ppO2 stored in xC:3)
 
     STRCPY  "ppO2:"
 
@@ -3124,9 +3133,10 @@ PLED_const_ppO2_value1a:
 
 	movff	lo,WREG					; copy to WREG
 	mullw	.100
+    clrf    xC+2
 	movff	PRODH,xC+1
 	movff	PRODL,xC+0				; For color code
-	PLED_color_code		warn_ppo2	; Color-code output (ppO2 stored in xC)	
+    call    PLED_color_code_ppo2 	; Color-code output (ppO2 stored in xC:3)
 
 	tstfsz	hi						; >2,55bar?
 	rcall	PLED_const_ppO2_too_hi	; Yes
@@ -3193,9 +3203,10 @@ PLED_show_end_ead_divemode:
 
 	movff       char_O_flush_ppO2,WREG  ; copy to WREG
 	mullw       .100
+    clrf        xC+2
 	movff       PRODH,xC+1
 	movff       PRODL,xC+0              ; For color code
-	PLED_color_code		warn_ppo2		; Color-code output (ppO2 stored in xC)	
+    call        PLED_color_code_ppo2	; Color-code output (ppO2 stored in xC:3)	
 
 	WIN_LEFT	.130
 	WIN_TOP		.168

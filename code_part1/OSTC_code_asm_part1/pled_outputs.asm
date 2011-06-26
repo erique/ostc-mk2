@@ -2131,6 +2131,9 @@ PLED_apnoe_clear_surface:
 
 
 PLED_display_apnoe_descent:
+	btfsc	menubit					; Divemode menu active?
+	return							; Yes, do not display/update descent time
+
 	call		PLED_divemask_color	; Set Color for Divemode mask
 	DISPLAYTEXT		d'139'			; "Descent"
 	call	PLED_standard_color

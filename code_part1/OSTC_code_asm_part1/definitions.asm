@@ -234,12 +234,12 @@ xdT2            res 2
 OFF             res 2
 SENS            res 2
 
-amb_pressure_avg res 2          ; ambient pressure summing buffer[mBar]
-amb_pressure    res 2           ; ambient pressure [mBar]
-rel_pressure    res 2		    ; amb_pressure - surface pressure [mBar]
-max_pressure    res 2           ; Max. pressure for the dive [mBar]
-avr_rel_pressure res 2          ; Average rel. pressure (Average depth) for the dive [mBar], Resettable
-avr_rel_pressure_total res 2    ; Average rel. pressure (Average depth) for the dive [mBar], Non-Resettable
+amb_pressure_avg res 2          ; ambient pressure summing buffer[mbar]
+amb_pressure    res 2           ; ambient pressure [mbar]
+rel_pressure    res 2		    ; amb_pressure - surface pressure [mbar]
+max_pressure    res 2           ; Max. pressure for the dive [mbar]
+avr_rel_pressure res 2          ; Average rel. pressure (Average depth) for the dive [mbar], Resettable
+avr_rel_pressure_total res 2    ; Average rel. pressure (Average depth) for the dive [mbar], Non-Resettable
 last_pressure   res 2
 temperature_avg res 2           ; Temperature summing buffer.
 temperature     res 2           ; Final temperature. SIGNED.
@@ -290,7 +290,7 @@ batt_voltage            res 2   ; Battery voltage in mV
 i2c_temp                res 1   ; I²C timeout counter
 i2c_temp2               res 1   ; 200
 
-sim_pressure            res 2   ; hold simulated pressure in mBar if in Simulator mode
+sim_pressure            res 2   ; hold simulated pressure in mbar if in Simulator mode
 
 profile_temp            res 2   ; temp variable for profile view
 profile_temp2           res 2   ; temp variable for profile view
@@ -460,7 +460,7 @@ total_divetime_seconds	res 2	; counts dive seconds regardless of CF01 (18h max.)
 #DEFINE	FLAG_active_descent		flag8,3	;=1: A Descent in Apnoe mode is active
 #DEFINE	display_see_deco		flag8,4	;=1: Display decoplan in Divemode
 #DEFINE	display_set_gas			flag8,5	;=1: Display Gaslist menu in Divemode
-#DEFINE	high_altitude_mode		flag8,6	;=1: Unit was manually turned on with ambient pressure <880mBar
+#DEFINE	high_altitude_mode		flag8,6	;=1: Unit was manually turned on with ambient pressure <880mbar
 #DEFINE	rs232_recieve_overflow	flag8,7	;=1: An RS232 timeout overflow occoured
 
 #DEFINE	nofly_active			flag9,0	;=1: Do not fly!

@@ -90,7 +90,7 @@ diveloop_loop1b:
 
 ; Tasks only for ppO2 mode
 diveloop_loop1c:
-	call	PLED_const_ppO2_value			; display const ppO2 setting in [Bar]
+	call	PLED_const_ppO2_value			; display const ppO2 setting in [bar]
 	call	calc_deko_divemode				; calculate decompression and display result (any two seconds)
 	btfsc	is_bailout						; Are we in Bailout mode?
 	call	check_ppO2_bail					; Yes, display ppO2 (If required)
@@ -118,7 +118,7 @@ diveloop_loop1z
 	bcf		update_divetime				; clear flag
 
 	btfsc	FLAG_const_ppO2_mode		; only in const_ppO2_mode
-	call	PLED_const_ppO2_value		; display const ppO2 setting in [Bar]
+	call	PLED_const_ppO2_value		; display const ppO2 setting in [bar]
 	btfsc	ppO2_show_value				; show ppO2?
 	call	check_ppO2					; check ppO2 and displays warning if required
 
@@ -415,7 +415,7 @@ divemode_check_decogases:					; CALLed from Simulator, too
 	return
 
 ;-----------------------------------------------------------------------------
-; calculate ppO2 in 0.01Bar (e.g. 150 = 1.50 Bar ppO2)
+; calculate ppO2 in 0.01bar (e.g. 150 = 1.50 bar ppO2)
 set_actual_ppo2:
     SAFE_2BYTE_COPY amb_pressure, xA    ; P_amb in milibar (1000 = 1.000 bar).
 	movlw		d'10'
@@ -743,7 +743,7 @@ store_extended6:
 ; SetPoint change appended to information due to compatibility reasons
 	btfss	setpoint_changed		; Check flag	
 	bra		store_dive_data5
-	movff	char_I_const_ppO2,WREG	; SetPoint in cBar
+	movff	char_I_const_ppO2,WREG	; SetPoint in cbar
 	call	write_external_eeprom
 	bcf		setpoint_changed		; Clear this event
 
@@ -838,7 +838,7 @@ calc_velocity2:
 	movlw	d'39'			;77 when called every second....
 	movwf	xB+0
 	clrf	xB+1
-	call	mult16x16					; differential pressure in mBar*77...
+	call	mult16x16					; differential pressure in mbar*77...
 	movff	xC+0,divA+0
 	movff	xC+1,divA+1
 	movlw	d'7'
@@ -888,7 +888,7 @@ check_ppO2_bail:						; In CC mode but bailout active!
 	call		mult16x16				; char_I_O2_ratio * p_amb/10
 
 ; Check very high ppO2 manually
-	tstfsz		xC+2					; char_I_O2_ratio * p_amb/10 > 65536, ppO2>6,55Bar?
+	tstfsz		xC+2					; char_I_O2_ratio * p_amb/10 > 65536, ppO2>6,55bar?
 	bra			check_ppO2_bail2		; Yes, display Value!
 
 ; Check if ppO2 should be displayed
@@ -1181,7 +1181,7 @@ end_dive:
 
 	movff	apnoe_max_pressure+0,lo
 	movff	apnoe_max_pressure+1,hi
-	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
+	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mbar]
 	movff	lo,apnoe_max_pressure+0
 	movff	hi,apnoe_max_pressure+1
 	
@@ -1194,7 +1194,7 @@ end_dive:
 end_dive1:
 	movff	max_pressure+0,lo
 	movff	max_pressure+1,hi
-	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
+	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mbar]
 	movff	lo,max_pressure+0
 	movff	hi,max_pressure+1
 	
@@ -1574,9 +1574,9 @@ set_dive_modes2:
 	return
 
 set_dive_modes3:
-	movlw	HIGH	d'1075'			; hard-wired 1075mBar threshold
+	movlw	HIGH	d'1075'			; hard-wired 1075mbar threshold
 	movwf	sub_a+1
-	movlw	LOW		d'1075'			; hard-wired 1075mBar threshold
+	movlw	LOW		d'1075'			; hard-wired 1075mbar threshold
 	movwf	sub_a+0
     SAFE_2BYTE_COPY rel_pressure, sub_b
 	call	sub16					; sub_c = sub_a - sub_b
@@ -1624,7 +1624,7 @@ calc_average_depth:
 	addwfc	average_depth_hold+1,F
 	movlw	d'0'
 	addwfc	average_depth_hold+2,F
-	addwfc	average_depth_hold+3,F ; Will work up to 9999mBar*60*60*24=863913600mBar
+	addwfc	average_depth_hold+3,F ; Will work up to 9999mbar*60*60*24=863913600mbar
 
 	movf	b0_lo,w
 	addwf	average_depth_hold+0,F
@@ -1632,7 +1632,7 @@ calc_average_depth:
 	addwfc	average_depth_hold+1,F
 	movlw	d'0'
 	addwfc	average_depth_hold+2,F
-	addwfc	average_depth_hold+3,F ; Will work up to 9999mBar*60*60*24=863913600mBar
+	addwfc	average_depth_hold+3,F ; Will work up to 9999mbar*60*60*24=863913600mbar
 
 ; Do the same for the _total registers (Non-Resettable)
 	movf	b0_lo,w
@@ -1641,7 +1641,7 @@ calc_average_depth:
 	addwfc	average_depth_hold_total+1,F
 	movlw	d'0'
 	addwfc	average_depth_hold_total+2,F
-	addwfc	average_depth_hold_total+3,F ; Will work up to 9999mBar*60*60*24=863913600mBar
+	addwfc	average_depth_hold_total+3,F ; Will work up to 9999mbar*60*60*24=863913600mbar
 
 	movf	b0_lo,w
 	addwf	average_depth_hold_total+0,F
@@ -1649,7 +1649,7 @@ calc_average_depth:
 	addwfc	average_depth_hold_total+1,F
 	movlw	d'0'
 	addwfc	average_depth_hold_total+2,F
-	addwfc	average_depth_hold_total+3,F ; Will work up to 9999mBar*60*60*24=863913600mBar
+	addwfc	average_depth_hold_total+3,F ; Will work up to 9999mbar*60*60*24=863913600mbar
 
 	; 2. Compute Average Depth on base of average_divesecs:2
 	movff	average_divesecs+0,xB+0

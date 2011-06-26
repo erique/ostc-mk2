@@ -75,7 +75,7 @@ get_battery_voltage2:
 get_battery_voltage3:
     SAFE_2BYTE_COPY amb_pressure, sub_b
 
-	movlw	LOW		d'15001'			; must be lower then 15001mBar
+	movlw	LOW		d'15001'			; must be lower then 15001mbar
 	movwf	sub_a+0
 	movlw	HIGH	d'15001'
 	movwf	sub_a+1

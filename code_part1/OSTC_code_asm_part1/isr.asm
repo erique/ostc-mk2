@@ -25,7 +25,7 @@
 ; the timer1 module interrupts every 62.5ms (16x/second)
 ; temperature and pressure is averaged over 4 measurements
 ; flag pressure_refresh is set every 500ms 
-; and provides accurate pressure (+/-1mBar stable) and temperature (0.1C stable)
+; and provides accurate pressure (+/-1mbar stable) and temperature (0.1C stable)
 
 ;=============================================================================
 ; Copy a 16bit value from ISR modified registers to main registers.
@@ -289,7 +289,7 @@ sensor_int2_plus_average2:
 		bra			comp_air_pressure			; no
 
 comp_air_pressure0:	
-		movlw		LOW		d'1000'				; yes, so simulate 1Bar surface pressure
+		movlw		LOW		d'1000'				; yes, so simulate 1bar surface pressure
 		movwf		last_surfpressure+0
 		movlw		HIGH	d'1000'
 		movwf		last_surfpressure+1

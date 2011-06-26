@@ -115,8 +115,8 @@ cf_default_table0:
 	CF_DEFAULT    CF_SEC,	    d'5',   d'1',   d'30'   ; premenu_timeout	        5s
 
 	CF_DEFAULT    CF_INT8, 	    d'7',   d'3',   d'18'   ; minimum_velocity		    7min/min
-	CF_DEFAULT    CF_INT15,	    d'1160',d'950', 0    	; pressure_offset_divemode	1160mBar
-	CF_DEFAULT    CF_INT15,	    d'1080',d'1080', 0   	; max_surfpressure		    1080mBar
+	CF_DEFAULT    CF_INT15,	    d'1160',d'950', 0    	; pressure_offset_divemode	1160mbar
+	CF_DEFAULT    CF_INT15,	    d'1080',d'1080', 0   	; max_surfpressure		    1080mbar
 	CF_DEFAULT    CF_PERCENT,	d'20',  d'1',  d'99'   	; min_gradient_factor		20%
 	CF_DEFAULT    CF_PERCENT,	d'20',  d'1',  d'22'	; oxygen_threshold			22%
 
@@ -128,9 +128,9 @@ cf_default_table0:
 
 	CF_DEFAULT    CF_PERCENT,	d'10',  d'0',  	d'100'  ; cns_display_surface		10%
 	CF_DEFAULT    CF_DECI,	    d'10',  d'0',  	d'10'	; deco_distance_for_sim		1m
-	CF_DEFAULT    CF_CENTI,     d'019', d'19', 	d'021'	; ppo2_warning_low			0.19 Bar
-	CF_DEFAULT    CF_CENTI,     d'160', d'0', 	d'160'  ; ppo2_warning_high			1.60 Bar
-	CF_DEFAULT    CF_CENTI,     d'150', d'0', 	d'150'	; ppo2_display_high			1.50 Bar
+	CF_DEFAULT    CF_CENTI,     d'019', d'19', 	d'021'	; ppo2_warning_low			0.19 bar
+	CF_DEFAULT    CF_CENTI,     d'160', d'0', 	d'160'  ; ppo2_warning_high			1.60 bar
+	CF_DEFAULT    CF_CENTI,     d'140', d'0', 	d'150'	; ppo2_display_high			1.40 bar
     
 	CF_DEFAULT    CF_INT8,	    d'10',  d'1',   d'120'  ; sampling_rate				10s
 	CF_DEFAULT    CF_INT8,	    d'6',   d'0',   d'15'   ; sampling_divisor_temp		/6
@@ -163,7 +163,7 @@ cf_default_table1:
 	CF_DEFAULT    CF_BOOL,      d'1',   0,      0 		; Show mix type is surfmode
 
 	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0       ; blink_gas_divemode 		=1 blink better gas
-	CF_DEFAULT    CF_INT15,     d'13000', 0,   d'13000' ; color_warn_depth_mBar		Warn depths
+	CF_DEFAULT    CF_INT15,     d'13000', 0,   d'13000' ; color_warn_depth_mbar		Warn depths
 	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'	; color_warn_cns_percent    Warn-%
 	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'  ; color_warn_gf_percent		Warn-%
 	CF_DEFAULT    CF_CENTI,     d'161', d'100', d'161'  ; color_warn_ppo2_cbar		ppO2 warn
@@ -370,13 +370,13 @@ reset_all_cf:
 
 	movlw	d'80'
 	movwf	EEDATA
-	write_int_eeprom	d'36'		; reset mix1 to ppO2=0.80Bar
+	write_int_eeprom	d'36'		; reset mix1 to ppO2=0.80bar
 	movlw	d'100'
 	movwf	EEDATA
-	write_int_eeprom	d'37'		; reset mix2 to ppO2=1.00Bar
+	write_int_eeprom	d'37'		; reset mix2 to ppO2=1.00bar
 	movlw	d'120'
 	movwf	EEDATA
-	write_int_eeprom	d'38'		; reset mix3 to ppO2=1.20Bar
+	write_int_eeprom	d'38'		; reset mix3 to ppO2=1.20bar
 
 	clrf	nofly_time+0			; Clear nofly time
 	clrf	nofly_time+1			; Clear nofly time

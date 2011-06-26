@@ -366,8 +366,8 @@ display_profile_offset3:
 	movwf		xC+2
 	clrf		xC+3
 
-	movff		lo,xB+0					; Max. Depth in mBar
-	movff		hi,xB+1					; Max. Depth in mBar
+	movff		lo,xB+0					; Max. Depth in mbar
+	movff		hi,xB+1					; Max. Depth in mbar
 	call		div32x16				; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
 
 	movff		xC+0,last_temperature+0	; 

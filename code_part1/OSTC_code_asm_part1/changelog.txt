@@ -1,6 +1,6 @@
 New in 1.92 beta:
 BETA Version - Do NOT use for diving!
-
+BUGFIX: warning color for ppO2>3,3bar and ppO2<6,55bar fixed
 
 New in 1.91 beta:
 BETA Version - Do NOT use for diving!
@@ -203,10 +203,10 @@ NEW: Color# = 0,4,8,192,196 and 200 (Black or very dim) is ignored  (OSTC Mk.2 O
 BUGFIX: History not updated in Simulator mode
 BUGFIX: Fixed-Setpoint (minimum) ppO2 limited to physically possible value
 NEW: Depth, CNS, GF, ppO2 and Velocity are Color-coded (OSTC Mk.2 Only)
-NEW: CF43: Depth [mBar] for color-code display (OSTC Mk.2 Only)
+NEW: CF43: Depth [mbar] for color-code display (OSTC Mk.2 Only)
 NEW: CF44: CNS [%] for color-code display (OSTC Mk.2 Only)
 NEW: CF45: GF [%] for color-code display (OSTC Mk.2 Only)
-NEW: CF46: ppO2 [cBar] for color-code display (OSTC Mk.2 Only)
+NEW: CF46: ppO2 [cbar] for color-code display (OSTC Mk.2 Only)
 NEW: CF47: Velocity [m/min] for color-code display (OSTC Mk.2 Only)
 CHANGE: Change of color layout (OSTC Mk.2 Only)
 

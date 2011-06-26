@@ -146,7 +146,7 @@ simulator_startdive:
 	movlw	LOW		d'1000'
 	addwf	xC+0,F
 	movlw	HIGH	d'1000'
-	addwfc	xC+1,F							; add 1000mBar
+	addwfc	xC+1,F							; add 1000mbar
 
 	movff	xC+0,sim_pressure+0
 	movff	xC+1,sim_pressure+1
@@ -365,7 +365,7 @@ simulator_calc_deco:
 	movlw	LOW		d'1000'
 	addwf	xC+0,F
 	movlw	HIGH	d'1000'
-	addwfc	xC+1,F                      ; add 1000mBar
+	addwfc	xC+1,F                      ; add 1000mbar
 
 	movff	xC+0,sim_pressure+0
 	movff	xC+1,sim_pressure+1

@@ -86,7 +86,7 @@ onemin_sleep:
     SAFE_2BYTE_COPY amb_pressure, last_surfpressure_15min		; save new airpressure
 
 	GETCUSTOM15	d'7'				; loads max_sufpressure into lo, hi
-	movff	lo,sub_a+0				; max. "allowed" airpressure in mBar
+	movff	lo,sub_a+0				; max. "allowed" airpressure in mbar
 	movff	hi,sub_a+1				
 	movff	last_surfpressure_15min+0,sub_b+0
 	movff	last_surfpressure_15min+1,sub_b+1
@@ -96,8 +96,8 @@ onemin_sleep:
 
     ; not ok! Overwrite with max. "allowed" airpressure
 	GETCUSTOM15	d'7'				; loads max_sufpressure into lo, hi
-	movff	lo,last_surfpressure_15min+0	; max. "allowed" airpressure in mBar
-	movff	hi,last_surfpressure_15min+1	; max. "allowed" airpressure in mBar
+	movff	lo,last_surfpressure_15min+0	; max. "allowed" airpressure in mbar
+	movff	hi,last_surfpressure_15min+1	; max. "allowed" airpressure in mbar
 
 onemin_sleep2:
     SAFE_2BYTE_COPY amb_pressure, int_I_pres_respiration ; LOW copy pressure to deco routine

@@ -339,7 +339,7 @@ menu_gassetup1:
 	GETCUSTOM8 .18				        ; ppO2 warnvalue in WREG
 	mullw	d'10'
 	movff	PRODL,xA+0
-	movff	PRODH,xA+1		            ; ppO2 in [0.01Bar] * 10
+	movff	PRODH,xA+1		            ; ppO2 in [0.01bar] * 10
 	movf	divemins+0,W
 	addlw	0x06
 	movwf	EEADR
@@ -691,7 +691,7 @@ menu_firstgas1:
 
 	movff		xC+0,sub_a+0
 	movff		xC+1,sub_a+1
-	GETCUSTOM8	d'46'					; color-code ppO2 warning [cBar]
+	GETCUSTOM8	d'46'					; color-code ppO2 warning [cbar]
 	movwf		sub_b+0
 	clrf		sub_b+1
 	call		sub16					;  sub_c = sub_a - sub_b	
@@ -1051,7 +1051,7 @@ gassetup_show_ppO2:
 	movwf	xB+0
 	clrf	xB+1
 	call	div16x16			;xA/xB=xC with xA as remainder 	
-	movff	xC+0,lo				; ((Depth+10m)*O2)/10 = [0.01Bar] ppO2
+	movff	xC+0,lo				; ((Depth+10m)*O2)/10 = [0.01bar] ppO2
 	movff	xC+1,hi
 	output_16dp	d'3'
 	OUTPUTTEXT 	d'150'		; bar: 
@@ -1061,7 +1061,7 @@ gassetup_get_mod:
 	GETCUSTOM8 .18                      ; ppO2 warnvalue in WREG
 	mullw	d'10'
 	movff	PRODL,xA+0
-	movff	PRODH,xA+1                  ; ppO2 in [0.01Bar] * 10
+	movff	PRODH,xA+1                  ; ppO2 in [0.01bar] * 10
 	movf	divemins+0,W
 	addlw	0x06
 	movwf	EEADR

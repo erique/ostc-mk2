@@ -88,13 +88,13 @@ PLED_color_code macro color_code_temp
 
 PLED_color_code1:				; Color-codes the output, if required
 	dcfsnz	WREG
-	bra		PLED_color_code_depth		; CF43 [mBar], 16Bit
+	bra		PLED_color_code_depth		; CF43 [mbar], 16Bit
 	dcfsnz	WREG
 	bra		PLED_color_code_cns			; CF44 [%]
 	dcfsnz	WREG
 	bra		PLED_color_code_gf			; CF45 [%]
 	dcfsnz	WREG
-	bra		PLED_color_code_ppo2		; CF46 [cBar]
+	bra		PLED_color_code_ppo2		; CF46 [cbar]
 	dcfsnz	WREG
 	bra		PLED_color_code_velocity	; CF47 [m/min]
 	dcfsnz	WREG
@@ -116,12 +116,15 @@ PLED_color_code_gaslist:				; %O2 in "EEDATA"
 	clrf		xB+1
 	call		mult16x16				; EEDATA * p_amb/10
 
-	tstfsz		xC+2						; char_I_O2_ratio * p_amb/10 > 65536, ppO2>6,55Bar?
+	tstfsz		xC+2						; char_I_O2_ratio * p_amb/10 > 65536, ppO2>6,55bar?
+	bra			PLED_color_code_gaslist1	; Yes, warn in warning color
+; Check if ppO2>3,30bar
+	btfsc		xC+1,7
 	bra			PLED_color_code_gaslist1	; Yes, warn in warning color
 
 	movff		xC+0,sub_a+0
 	movff		xC+1,sub_a+1
-	GETCUSTOM8	d'46'					; color-code ppO2 warning [cBar]
+	GETCUSTOM8	d'46'					; color-code ppO2 warning [cbar]
 	mullw		d'100'					; ppo2_warning_high*100
 	movff		PRODL,sub_b+0
 	movff		PRODH,sub_b+1
@@ -132,7 +135,7 @@ PLED_color_code_gaslist:				; %O2 in "EEDATA"
 	return
 
 PLED_color_code_gaslist1:
-	call	PLED_warnings_color
+	call		PLED_warnings_color
 	return
 
 PLED_color_code_ceiling:
@@ -143,7 +146,7 @@ PLED_color_code_ceiling:
 	bra		PLED_color_code_ceiling1	; No, Set to default color
 
     SAFE_2BYTE_COPY rel_pressure, lo
-	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
+	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mbar]
 	movff	hi,xA+1
 	movff	lo,xA+0
 	movff	char_O_first_deco_depth,lo  ; Ceiling in m
@@ -167,10 +170,10 @@ PLED_color_code_depth:
 	movff	hi,hi_temp
 	movff	lo,lo_temp
     SAFE_2BYTE_COPY rel_pressure, lo
-	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
+	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mbar]
 	movff	lo,sub_a+0
 	movff	hi,sub_a+1
-	GETCUSTOM15	d'43'				; Depth warn [mBar]
+	GETCUSTOM15	d'43'				; Depth warn [mbar]
 	movff	lo,sub_b+0
 	movff	hi,sub_b+1
 	call	sub16			;  sub_c = sub_a - sub_b
@@ -211,17 +214,20 @@ PLED_color_code_gf2:
 	return
 
 PLED_color_code_ppo2:
-; Check very high ppO2 manually
-	tstfsz	xC+2					; char_I_O2_ratio * p_amb/10 > 65536, ppO2>6,55Bar?
+; Check if ppO2>6,55bar
+	tstfsz	xC+2					; char_I_O2_ratio * p_amb/10 > 65536, ppO2>6,55bar?
+	bra		PLED_color_code_ppo22	; Yes, warn in warning color
+; Check if ppO2>3,30bar
+	btfsc	xC+1,7
 	bra		PLED_color_code_ppo22	; Yes, warn in warning color
 
 	movff	xC+0,sub_a+0
 	movff	xC+1,sub_a+1
-	GETCUSTOM8	d'46'			; color-code ppO2 warning [cBar]
+	GETCUSTOM8	d'46'			; color-code ppO2 warning [cbar]
 	mullw	d'100'
 	movff	PRODL,sub_b+0
 	movff	PRODH,sub_b+1
-	call	sub16			;  sub_c = sub_a - sub_b
+	call	sub16			  	;  sub_c = sub_a - sub_b
 	btfss	neg_flag
 	bra		PLED_color_code_ppo22; Set to warning color
 	call	PLED_standard_color
@@ -1019,11 +1025,10 @@ PLED_show_ppO2:					; Show ppO2 (ppO2 stored in xC)
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	PLED_color_code		warn_ppo2		; Color-code output (ppO2 stored in xC)
-
     STRCPY  "ppO2:"
 
 ; Check very high ppO2 manually
-	tstfsz		xC+2					; char_I_O2_ratio * p_amb/10 > 65536, ppO2>6,55Bar?
+	tstfsz		xC+2					; char_I_O2_ratio * p_amb/10 > 65536, ppO2>6,55bar?
 	bra			PLED_show_ppO2_3		; Yes, display fixed Value!
 
 	movff	xC+0,lo
@@ -1405,7 +1410,7 @@ PLED_active_gas_surfmode:				; Displays start gas/SP 1
 	output_16dp	d'3'		; outputs into Postinc2!
 	bcf		leftbind
 
-	STRCAT_PRINT  "Bar"
+	STRCAT_PRINT  "bar"
 	bra		PLED_active_gas_surfmode_exit
 
 PLED_active_gas_surfmode2:
@@ -1560,7 +1565,7 @@ PLED_confirmbox_move_cursor2:
 PLED_depth:
 	ostc_debug	'r'		; Sends debug-information to screen if debugmode active
     SAFE_2BYTE_COPY rel_pressure, lo
-	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
+	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mbar]
 
 	movlw	.039
 	cpfslt	hi
@@ -1580,7 +1585,7 @@ PLED_depth:
 	movff	lo,sub_b+0
 	incf	sub_b+0,F
 	movlw	d'0'
-	addwfc	sub_b+1,F				; Add 1mBar offset
+	addwfc	sub_b+1,F				; Add 1mbar offset
 	call	sub16					; sub_c = sub_a - sub_b
 	btfss	neg_flag				; Depth lower then 10m?
 	rcall	depth_less_10mtr		; Yes, add extra space
@@ -1620,7 +1625,7 @@ pled_depth3:
 	PLED_color_code	warn_depth		; Color-code the output
 
     SAFE_2BYTE_COPY rel_pressure, lo
-	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
+	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mbar]
 	
 	STRCPY  "."
 
@@ -2011,7 +2016,7 @@ PLED_max_pressure:
 	ostc_debug	'p'		; Sends debug-information to screen if debugmode active
 	movff	max_pressure+0,lo
 	movff	max_pressure+1,hi
-	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
+	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mbar]
 
 	movlw	.039
 	cpfslt	hi
@@ -2215,7 +2220,7 @@ PLED_stopwatch_show2:
 	lfsr	FSR2,letter
 	movff	avr_rel_pressure+0,lo
 	movff	avr_rel_pressure+1,hi
-	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
+	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mbar]
 	bsf		ignore_digit5		; do not display 1cm depth
 	output_16dp	d'3'
 	bcf		leftbind
@@ -2264,7 +2269,7 @@ PLED_stopwatch_show_gauge:
 	lfsr	FSR2,letter
 	movff	avr_rel_pressure+0,lo
 	movff	avr_rel_pressure+1,hi
-	call	adjust_depth_with_salinity		; computes salinity setting into lo:hi [mBar]
+	call	adjust_depth_with_salinity		; computes salinity setting into lo:hi [mbar]
 	bsf		ignore_digit5					; do not display 1cm depth
 	output_16dp	d'3'
 	bcf		leftbind
@@ -2287,7 +2292,7 @@ PLED_total_average_show2:
 	lfsr	FSR2,letter
 	movff	avr_rel_pressure_total+0,lo
 	movff	avr_rel_pressure_total+1,hi
-	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mBar]
+	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mbar]
 	bsf		ignore_digit5		; do not display 1cm depth
 	bcf		leftbind
 	output_16dp	d'3'
@@ -3106,7 +3111,7 @@ PLED_const_ppO2_value1:
 	call		div16x16					;xA/xB=xC with xA as remainder 	
 
 	movff		xC+0,char_I_const_ppO2		; No, Overwrite with actual value
-	movff		xC+1,hi						; For test if ppO2>2,55Bar
+	movff		xC+1,hi						; For test if ppO2>2,55bar
 	
 	GETCUSTOM8	d'39'						; Adjust fixed SP?
 	dcfsnz		WREG,F
@@ -3580,7 +3585,7 @@ PLED_simdata_screen3_loop:
 
 
 
-adjust_depth_with_salinity:			; computes salinity setting into lo:hi [mBar]
+adjust_depth_with_salinity:			; computes salinity setting into lo:hi [mbar]
 
 	btfsc	simulatormode_active	; Do apply salinity in Simulatormode
 	return

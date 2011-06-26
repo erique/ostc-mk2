@@ -1774,13 +1774,41 @@ update_surf_press:
 	btfsc	high_altitude_mode		; In high altitude mode?
 	call	PLED_warnings_color		; Yes, display ambient pressure in red
 
-	lfsr	FSR2,letter
     SAFE_2BYTE_COPY amb_pressure, lo
+	lfsr	FSR2,letter
+
+	movff	lo,sub_a+0
+	movff	hi,sub_a+1
+	movff	last_surfpressure_30min+0,sub_b+0
+	movff	last_surfpressure_30min+1,sub_b+1
+	call	sub16					; sub_c = sub_a - sub_b
+	btfsc	neg_flag				; Pressure lower?
+	rcall	update_surf_press2		; Yes, test threshold
+
+	tstfsz	sub_c+1					; >255mbar difference?
+	bra		update_surf_press_common; Yes, display!
+	movlw	d'5'
+	subwf	sub_c+0,W
+	btfsc	STATUS,C
+	bra		update_surf_press_common; Yes, display!
+;	PUTC	'+'						; For debug only
+    SAFE_2BYTE_COPY last_surfpressure_30min, lo	; Overwrite with stable value...
+
+update_surf_press_common:
 	bsf		leftbind
 	output_16
 	bcf		leftbind
 	STRCAT_PRINT  "mbar "
 	call	PLED_standard_color		; Reset color
+	return
+
+update_surf_press2:
+	movff	lo,sub_b+0
+	movff	hi,sub_b+1
+	movff	last_surfpressure_30min+0,sub_a+0
+	movff	last_surfpressure_30min+1,sub_a+1
+	call	sub16					; sub_c = sub_a - sub_b
+;	PUTC	'-'						; For debug only
 	return
 
 update_batt_voltage_divemode:

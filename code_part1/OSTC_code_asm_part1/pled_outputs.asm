@@ -1705,8 +1705,6 @@ PLED_desaturation_time2:
 	lfsr	FSR2,letter
 	OUTPUTTEXT	d'14'				; Desat
 	PUTC    ' '
-;	movff		int_O_desaturation_time+0,lo			; divide by 60...
-;	movff		int_O_desaturation_time+1,hi
 	movff		desaturation_time_buffer+0,lo			; divide by 60...
 	movff		desaturation_time_buffer+1,hi
 
@@ -1717,9 +1715,12 @@ PLED_desaturation_time2:
 	movwf		hi							; exchange lo and hi...
 	output_8								; Hours
 	PUTC        ':'
-	movff		hi,lo					; Minutes
+	movff		hi,lo						; Minutes
 	output_99x
 	bcf		leftbind
+	PUTC	' '
+;   clrf    WREG							; Allow up to 5 chars to avoid
+;   movff   WREG,letter+6					; collision with decotype letters
 	call	word_processor
 	return
 
@@ -1747,14 +1748,14 @@ PLED_nofly_time2:
 	movf		lo,W
 	movff		hi,lo
 	movwf		hi							; exchange lo and hi...
-	output_8								; Hours
+	output_8							; Hours
 	PUTC        ':'
 	movff		hi,lo					; Minutes
-;	decf		lo,F
-;	btfsc		lo,7					; keep Nofly time
-;	clrf		lo
 	output_99x
 	bcf		leftbind
+	PUTC	' '
+;   clrf    WREG							; Allow up to 5 chars to avoid
+;   movff   WREG,letter+6					; collision with decotype letters
 	call	word_processor
 	return
 

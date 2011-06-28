@@ -1080,18 +1080,22 @@ PLED_active_gas_divemode:				; Displays current gas (e.g. 40/20) if a) He>0 or b
 	btg		blinking_better_gas		; Toggle blink bit...
 	btfss	blinking_better_gas		; blink now?
 	return							; No, Done.
+	movlw	color_yellow			; Blink in yellow
+    call	PLED_set_color
 	WIN_INVERT	.1					; Init new Wordprocessor	
-	call	PLED_active_gas_divemode_show	; Show gas (Non-Inverted in all cases)
+	call	PLED_active_gas_divemode_show1	; Show gas (Non-Inverted in all cases)
 	WIN_INVERT	.0					; Init new Wordprocessor	
+	call	PLED_standard_color
 	return							; Done.
 
 PLED_active_gas_divemode_show:
+	call	PLED_standard_color
+PLED_active_gas_divemode_show1:
 	ostc_debug	's'		; Sends debug-information to screen if debugmode active
 ; gas
 	WIN_TOP		.192
 	WIN_LEFT	.50
 	WIN_FONT 	FT_SMALL
-	call	PLED_standard_color
 
 	movlw	d'100'						; 100% in the tank
 	movff	char_I_N2_ratio,lo			; minus N2
@@ -1128,13 +1132,10 @@ PLED_active_gas_divemode3:
     movff   WREG,letter+5		; collision with sat graphs
 	bcf		leftbind
 	call	word_processor
-;	rcall	PLED_active_better_gas	; show *, if required
-;	return
 PLED_active_better_gas:
 	WIN_TOP		.192
 	WIN_LEFT	.43
 	WIN_FONT 	FT_SMALL
-	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movlw	' '
 	btfsc	better_gas_available	;=1: A better gas is available and a gas change is advised in divemode

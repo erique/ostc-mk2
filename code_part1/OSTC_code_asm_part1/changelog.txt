@@ -1,6 +1,10 @@
 New in 1.92 beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: warning color for ppO2>3,3bar and ppO2<6,55bar fixed
+BUGFIX: Start SetPoint is attached to first depth sample in logbook profile
+BUGFIX: Simulator menu collided with descent counter in Apnea mode
+BUGFIX: Display hypoxic air in divemode (bug #41)
+CHANGE: Gas change indication is displayed in yellow
 
 New in 1.91 beta:
 BETA Version - Do NOT use for diving!

@@ -120,8 +120,8 @@ diveloop_loop1y:
 diveloop_loop1z
 	bcf		update_divetime				; clear flag
 
-	btfsc	FLAG_const_ppO2_mode		; only in const_ppO2_mode
-	call	PLED_const_ppO2_value		; display const ppO2 setting in [bar]
+;	btfsc	FLAG_const_ppO2_mode		; only in const_ppO2_mode
+;	call	PLED_const_ppO2_value		; display const ppO2 setting in [bar]
 	btfsc	ppO2_show_value				; show ppO2?
 	call	check_ppO2					; check ppO2 and displays warning if required
 

@@ -3107,6 +3107,7 @@ PLED_const_ppO2_value2:				; Display SetPoint
 	cpfslt		xC+0							; Setpoint value possible?
 	bra			PLED_const_ppO2_value1			; Yes
 
+	clrf		hi								; Reset hi
 	movff		xC+0,char_I_const_ppO2			; No, Overwrite with actual value
 	bra			PLED_const_ppO2_value1a
 
@@ -3136,19 +3137,19 @@ PLED_const_ppO2_value1:
 
 	; char_I_const_ppO2 < ppO2[Diluent] -> Not physically possible! -> Display actual value!
 
-	movff		xC+0,xA+0
+	movff		xC+0,xA+0				; xC=p_amb/10
 	movff		xC+1,xA+1
 	movlw		d'100'
 	movwf		xB+0
 	clrf		xB+1
-	call		div16x16					;xA/xB=xC with xA as remainder 	
+	call		div16x16				;xA/xB=xC with xA as remainder 	
 
-	movff		xC+0,char_I_const_ppO2		; No, Overwrite with actual value
-	movff		xC+1,hi						; For test if ppO2>2,55bar
+	movff		xC+0,char_I_const_ppO2	; No, Overwrite with actual value
+	movff		xC+1,hi					; For test if ppO2>2,55bar
 	
-	GETCUSTOM8	d'39'						; Adjust fixed SP?
+	GETCUSTOM8	d'39'					; Adjust fixed SP?
 	dcfsnz		WREG,F
-	bra			PLED_const_ppO2_value1a		; Yes!
+	bra			PLED_const_ppO2_value1a	; Yes!
 	; Do not adjust -> restore original SetPoint
 
 PLED_const_ppO2_value11:
@@ -3156,7 +3157,6 @@ PLED_const_ppO2_value11:
 	movff		ppO2_setpoint_store,char_I_const_ppO2		; Restore Setpoint
 	clrf		hi
 	
-
 PLED_const_ppO2_value1a:
 	movff	char_I_const_ppO2,lo
 
@@ -3172,7 +3172,7 @@ PLED_const_ppO2_value1a:
 	bsf		leftbind
 	output_16dp	d'3'
 	bcf		leftbind
-	STRCAT_PRINT  " "				; Display Setpoint with training zero
+	STRCAT_PRINT  " "				; Display Setpoint with trailing zero
 	call	PLED_standard_color		; Reset color
 	return
 

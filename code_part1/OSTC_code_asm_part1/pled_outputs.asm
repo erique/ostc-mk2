@@ -569,6 +569,47 @@ PLED_simulator_data_2:
 
 ;=============================================================================
 
+PLED_divemode_timeout:
+	btfsc	menubit						; Divemode menu active?
+	return								; Yes, return
+	btfsc	FLAG_apnoe_mode				; In Apnoe mode?
+	return								; Yes, return
+	btfsc	gauge_mode					; In Gauge mode?
+	return								; Yes, return
+
+	WIN_TOP		.54
+	WIN_LEFT	.112
+	WIN_FONT 	FT_SMALL
+	call	PLED_standard_color
+	STRCPY  0x94						; "End of dive" icon
+	GETCUSTOM15	d'2'					; diveloop_timeout
+	movff	lo,sub_a+0
+	movff	hi,sub_a+1
+	movff	timeout_counter, sub_b+0
+	movff	timeout_counter2, sub_b+1
+	call	sub16						;  sub_c = sub_a - sub_b
+	movff	sub_c+0,lo
+	movff	sub_c+1,hi
+	call	convert_time				; converts hi:lo in minutes to hours (hi) and minutes (lo)
+	movf	hi,W
+	movff	lo,hi
+	movwf	lo							; exchange lo and hi
+	output_99x
+	PUTC    ':'
+	movff	hi,lo
+	output_99x
+	STRCAT_PRINT " "
+	bsf		timeout_display				; Set Flag
+	return
+
+PLED_divemode_timeout_clear:
+	WIN_TOP		.54
+	WIN_LEFT	.112
+	movlw		d'6'
+	movwf		temp1
+	bcf			timeout_display				; Clear flag
+	bra			PLED_display_clear_common_y1
+
 PLED_display_velocity:
 	ostc_debug	'v'		; Sends debug-information to screen if debugmode active
 	WIN_TOP		.90

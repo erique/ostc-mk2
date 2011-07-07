@@ -85,8 +85,8 @@
 
 ;=============================================================================
 
-;#include "../OSTC_code_c_part2/shared_definitions.h"
-#include "shared_definitions.h"
+#include "../OSTC_code_c_part2/shared_definitions.h"
+;#include "shared_definitions.h"
 
 ;=============================================================================
 ; Reserve space for C-code data space. Eg.when calling log.
@@ -427,7 +427,7 @@ total_divetime_seconds	res 2	; counts dive seconds regardless of CF01 (18h max.)
 #DEFINE	second_FD			flag4,7	; 2nd 0xFD in EEPROM found
 #DEFINE	second_FA			flag4,7	; 2nd 0xFA in EEPROM found
 
-;#DEfINE	unused flag5,0	; unused
+#DEfINE	timeout_display		flag5,0	; =1: The divemode timeout is displayed
 #DEFINE	eeprom_blockwrite	flag5,1	; EEPROM blockwrite active
 #DEFINE Flag_4      		flag5,2	; unused
 #DEFINE	low_battery_state	flag5,3	;=1 if battery low

@@ -1558,8 +1558,6 @@ set_dive_modes:
 	btfsc	high_altitude_mode		; In high altitude (Fly) mode?
 	bra		set_dive_modes3			; Yes
 
-;	bcf		divemode2				; Stop time
-
 	GETCUSTOM8	.0					; loads dive_threshold in WREG
 	movwf	sub_a+0					; dive_treshold is in cm
 	clrf	sub_a+1
@@ -1572,14 +1570,24 @@ set_dive_modes:
 	btfsc	realdive				; Dive longer than one minute?
 	clrf 	timeout_counter			; Yes, reset timout counter
 
+set_dive_modes_common:
 	bsf		divemode				; (Re-)Set divemode flag
 	bsf		divemode2				; displayed divetime is running
+	btfsc	timeout_display			; Was the timeout displayed?
+	call	PLED_divemode_timeout_clear	; Yes, Clear (once)
 	return
 
 set_dive_modes2:
 	bcf		divemode2				; Stop time
 	btfss	realdive				; dive longer then one minute?
 	bcf		divemode				; no -> this was no real dive
+
+	btfss	divemode				; Are we still diving?
+	return							; No, return
+
+; Yes, show divemode timeout
+	btfss	dekostop_active			; Is a deco stop displayed?
+	call	PLED_divemode_timeout	; No, show the divemode timeout here...
 	return
 
 set_dive_modes3:
@@ -1593,10 +1601,8 @@ set_dive_modes3:
 	btfss	neg_flag	
 	bra		set_dive_modes2			; too shallow (rel_pressure<dive_threshold)
 	
-	bsf		divemode				; (Re-)Set divemode flag
-	bsf		divemode2				; displayed divetime is running
-	return
-
+	bra		set_dive_modes_common
+	
 set_powersafe:
 	btfsc	low_battery_state		; battery warning alread active?
 	bra		set_powersafe2			; Yes, but is it still required?
@@ -1744,6 +1750,7 @@ diveloop_boot:
 	cpfsgt	EEDATA
 	call	PLED_brightness_full
 
+	bcf		timeout_display
 	clrf	menupos3
 	bcf		menu3_active
 	clrf	divesecs

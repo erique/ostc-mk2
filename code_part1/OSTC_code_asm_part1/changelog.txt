@@ -1,3 +1,10 @@
+New in 1.93 beta:
+BETA Version - Do NOT use for diving!
+BUGFIX: blinking fixed setpoint if actual setpoint lower then physically possible
+BUGFIX: SetPoint recording for logbook
+BUGFIX: Divetime seconds synced with stopwatch start
+
+
 New in 1.92 beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: warning color for ppO2>3,3bar and ppO2<6,55bar fixed

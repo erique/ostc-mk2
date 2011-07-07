@@ -50,6 +50,8 @@ diveloop:
 
 	btfsc	FLAG_const_ppO2_mode		; only in const_ppO2_mode
 	bsf		setpoint_changed			; Add a setpoint change to the first depth sample in CC mode
+	btfsc	FLAG_const_ppO2_mode		; only in const_ppO2_mode
+	bsf		event_occured				; set global event flag
 
 diveloop_loop:		; The diveloop starts here
 	btfss	onesecupdate					; tasks any new second
@@ -1422,8 +1424,11 @@ change_logbook_offset2:
 end_dive_common:
 	bcf		simulatormode_active		; if we were in simulator mode
 
-	btfsc	restore_deco_data			; Restore decodata?
-	call	simulator_restore_tissue_data		; Yes!
+; In DEBUG compile, keep all simulated dives in logbook, Desat time, nofly, etc...
+    ifndef __DEBUG
+		btfsc	restore_deco_data			; Restore decodata?
+		call	simulator_restore_tissue_data		; Yes!
+	endif
 
 	goto	surfloop					; and return to surfaceloop
 
@@ -1553,7 +1558,7 @@ set_dive_modes:
 	btfsc	high_altitude_mode		; In high altitude (Fly) mode?
 	bra		set_dive_modes3			; Yes
 
-	bcf		divemode2				; Stop time
+;	bcf		divemode2				; Stop time
 
 	GETCUSTOM8	.0					; loads dive_threshold in WREG
 	movwf	sub_a+0					; dive_treshold is in cm
@@ -1572,8 +1577,9 @@ set_dive_modes:
 	return
 
 set_dive_modes2:
-	btfss	realdive					; dive longer then one minute?
-	bcf		divemode					; no -> this was no real dive
+	bcf		divemode2				; Stop time
+	btfss	realdive				; dive longer then one minute?
+	bcf		divemode				; no -> this was no real dive
 	return
 
 set_dive_modes3:
@@ -1715,16 +1721,8 @@ diveloop_boot:
 	ostc_debug	'Q'		; Sends debug-information to screen if debugmode active
 	clrf	max_pressure+0				; clear some variables
 	clrf	max_pressure+1
-
 	clrf	avr_rel_pressure+0
 	clrf	avr_rel_pressure+1
-
-	clrf    EEADRH                      ; Make sure to select eeprom bank 0
-	call	PLED_brightness_low
-	read_int_eeprom	d'90'				; Brightness offset? (Dim>0, Normal = 0)
-	movlw	d'0'
-	cpfsgt	EEDATA
-	call	PLED_brightness_full
 
 	movlw	d'1'
 	movwf	apnoe_max_pressure+0
@@ -1737,6 +1735,15 @@ diveloop_boot:
 	clrf	divemins+1
 	clrf 	total_divetime_seconds+0
 	clrf 	total_divetime_seconds+1
+	bsf		divemode2					; displayed divetime is running (Divetime starts HERE)
+
+	clrf    EEADRH                      ; Make sure to select eeprom bank 0
+	call	PLED_brightness_low
+	read_int_eeprom	d'90'				; Brightness offset? (Dim>0, Normal = 0)
+	movlw	d'0'
+	cpfsgt	EEDATA
+	call	PLED_brightness_full
+
 	clrf	menupos3
 	bcf		menu3_active
 	clrf	divesecs

@@ -627,6 +627,8 @@ divemenu_set_gas1b:
 	movff	EEDATA, char_I_const_ppO2	; Use SetPoint
 	movff	EEDATA, ppO2_setpoint_store	; Store also in this byte...
 	bsf		setpoint_changed
+	bsf		event_occured				; set global event flag
+	bra		timeout_divemenu2			; quit menu!
 
 divemenu_set_gas1a:
 	bcf		display_set_setpoint		; Clear Display Flag

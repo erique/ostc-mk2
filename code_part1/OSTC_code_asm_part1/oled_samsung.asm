@@ -617,6 +617,9 @@ PLED_boot:
 
 	bsf		oled_hv
 	WAITMS	d'32'
+	bsf		oled_hv
+	WAITMS	d'32'
+	bsf		oled_hv
 
 	movlw	0x05
 	rcall	PLED_CmdWrite

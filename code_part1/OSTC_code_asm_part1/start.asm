@@ -221,7 +221,7 @@ restart_loop:
 	bra		restart_1				; No new CF, continue with boot
 restart_01:
 ; Save new number of current CF count
-	call	PLED_boot                   ; PLED boot (Incl. Clear Screen!)
+	call	PLED_boot               ; PLED boot (Incl. Clear Screen!)
 	rcall	display_new_cf_installed; Show warning
 	movlw	max_custom_number		; Defined in definitions.asm
 	movwf	EEDATA

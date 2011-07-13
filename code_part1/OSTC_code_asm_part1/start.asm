@@ -93,6 +93,9 @@ wait_start_pressure:
 	call	calc_deko_surfmode				; calculate desaturation every minute
 	call	deco_calc_wo_deco_step_1_min	; calculate deco in surface mode 
 	movlb	b'00000001'									; select ram bank 1
+  	clrf	nofly_time+0	              	; Reset NoFly
+  	clrf	nofly_time+1    	          	; Reset NoFly
+	bcf		nofly_active                	; Clear flag
 
 ; check firmware and reset Custom Functions after an update
 	movlw	d'1'

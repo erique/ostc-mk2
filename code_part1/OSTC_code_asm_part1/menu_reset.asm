@@ -293,11 +293,12 @@ do_menu_reset_decodata2:
 
     SAFE_2BYTE_COPY amb_pressure,int_I_pres_respiration	; copy surface air pressure to deco routine
 	call		deco_clear_tissue			; Reset Decodata
-	movlb		b'00000001'						; select ram bank 1
 	call		deco_calc_desaturation_time	; calculate desaturation time
-	movlb		b'00000001'						; select ram bank 1
 	call		deco_clear_CNS_fraction			; clear CNS
 	movlb		b'00000001'						; select ram bank 1
+  	clrf		nofly_time+0        	      	; Reset NoFly
+  	clrf		nofly_time+1            	  	; Reset NoFly
+	bcf			nofly_active                	; Clear flag
 	goto	restart					; done. quit to surfmode
 
 do_menu_reset_all:
@@ -315,11 +316,11 @@ reset_start:
 ; reset deco data
     SAFE_2BYTE_COPY amb_pressure,int_I_pres_respiration	; copy surface air pressure to deco routine
 	call		deco_clear_tissue			; Reset Decodata
-	movlb		b'00000001'						; select ram bank 1
 	call		deco_calc_desaturation_time	; calculate desaturation time
-	movlb		b'00000001'						; select ram bank 1
 	call		deco_clear_CNS_fraction			; clear CNS
-	movlb		b'00000001'						; select ram bank 1
+  	clrf		nofly_time+0    	          	; Reset NoFly
+  	clrf		nofly_time+1	              	; Reset NoFly
+	bcf			nofly_active                	; Clear flag
 
 ; reset gases
 	clrf	EEADRH					; EEPROM BANK 0 !

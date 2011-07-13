@@ -3140,9 +3140,9 @@ PLED_const_ppO2_value2:				; Display SetPoint
 	;xA/xB=xC with xA as remainder 	
 	call		div16x16				; xC+0=p_amb/10
 
-;	; char_I_const_ppO2 > p_amb/10 -> Not physically possible! -> Display actual value!
-;	tstfsz	xC+1				; xC>255
-;	setf	xC+0				; Yes, set xC+0 to 2,55bar ppO2
+	; char_I_const_ppO2 > p_amb/10 -> Not physically possible! -> Display actual value!
+	tstfsz	xC+1				; xC>255
+	setf	xC+0				; Yes, set xC+0 to 2,55bar ppO2
 
 	movff		ppO2_setpoint_store,WREG
 	cpfslt		xC+0							; Setpoint value possible?

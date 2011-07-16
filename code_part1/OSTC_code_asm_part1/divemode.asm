@@ -48,9 +48,9 @@ diveloop:
 ; Startup Tasks for deco modes
 	call	PLED_display_ndl_mask		; display "no stop" if not in gauge or apnoe mode
 
-	btfsc	FLAG_const_ppO2_mode		; only in const_ppO2_mode
+	btfss	FLAG_const_ppO2_mode		; only in const_ppO2_mode
+	bra		diveloop_loop				; OC modes, skip
 	bsf		setpoint_changed			; Add a setpoint change to the first depth sample in CC mode
-	btfsc	FLAG_const_ppO2_mode		; only in const_ppO2_mode
 	bsf		event_occured				; set global event flag
 
 diveloop_loop:		; The diveloop starts here

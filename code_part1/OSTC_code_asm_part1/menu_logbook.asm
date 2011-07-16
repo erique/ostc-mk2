@@ -137,7 +137,6 @@ menu_logbook_reset:
 	bra			menu_logbook3b				; No, Nothing to do
 
 	bsf			all_dives_shown				; Yes
-	bsf			logbook_page_not_empty
 	bra			menu_logbook_display_loop2	; rcall of get_free_eeprom_location not required here (faster)
 
 

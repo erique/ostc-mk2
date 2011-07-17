@@ -372,6 +372,12 @@ display_profile_offset3:
 	movff		xC+0,last_temperature+0	; 
 	movff		xC+1,last_temperature+1	; = Pixels/10m (For scale, draw any xx rows a scale-line)
 
+	movf		last_temperature+0,W
+	iorwf		last_temperature+1,W		; last_temperature:2 = Null?
+	bnz			display_profile_offset4		; No, continue
+	incf		last_temperature+1,F		; Yes, make last_temperature+1>1 to make "display_profile2e" working
+
+display_profile_offset4:
 	bsf			leftbind
 	output_16dp	d'3'					; max. depth
 	STRCAT      "m "

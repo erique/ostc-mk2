@@ -120,7 +120,7 @@ simulator_inc_bottomtime:
 simulator_inc_maxdepth:
 	movlw	d'3'
 	addwf	logbook_temp2,F				; Here: Maxdepth in m
-	movlw	d'99'
+	movlw	d'120'
 	cpfslt	logbook_temp2
 	movwf	logbook_temp2
 	movlw	d'4'

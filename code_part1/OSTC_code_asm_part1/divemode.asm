@@ -985,15 +985,15 @@ check_gas_change1:					; check gas1
 	bra		check_gas_change2		; Yes, skip depth check
 check_gas_change1x:	
 	read_int_eeprom		d'28'		; read gas_change_depth
-	movlw	d'3'
-	cpfsgt	EEDATA					; Change depth>3m?
+	movlw	minimum_change_depth
+	cpfsgt	EEDATA					; Change depth>minimum_change_depth?
 	bra		check_gas_change2		; No, Change depth not deep enough, skip!
 	movf	xC+0,W					; load depth in m into WREG
 	cpfsgt	EEDATA					; gas_change_depth < current depth?
 	bra		check_gas_change2		; No, check next gas
-	movlw	d'3'
-	subwf	EEDATA,W				; Change depth-3m
-	cpfslt	xC+0					; current depth<Change depth-3m?
+	movlw	better_gas_window
+	subwf	EEDATA,W				; Change depth-better_gas_window
+	cpfslt	xC+0					; current depth<Change depth-better_gas_window?
 	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 
 check_gas_change2:					; check gas2
@@ -1005,15 +1005,15 @@ check_gas_change2:					; check gas2
 	bra		check_gas_change3		; Yes, skip depth check
 check_gas_change2x:	
 	read_int_eeprom		d'29'		; read gas_change_depth
-	movlw	d'3'
-	cpfsgt	EEDATA					; Change depth>3m?
+	movlw	minimum_change_depth
+	cpfsgt	EEDATA					; Change depth>minimum_change_depth?
 	bra		check_gas_change3		; No, Change depth not deep enough, skip!
 	movf	xC+0,W					; load depth in m into WREG
 	cpfsgt	EEDATA					; gas_change_depth < current depth?
 	bra		check_gas_change3		; No, check next gas
-	movlw	d'3'
-	subwf	EEDATA,W				; Change depth-3m
-	cpfslt	xC+0					; current depth<Change depth-3m?
+	movlw	better_gas_window
+	subwf	EEDATA,W				; Change depth-better_gas_window
+	cpfslt	xC+0					; current depth<Change depth-better_gas_window?
 	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 
 check_gas_change3:					; check gas3
@@ -1025,15 +1025,15 @@ check_gas_change3:					; check gas3
 	bra		check_gas_change4		; Yes, skip depth check
 check_gas_change3x:	
 	read_int_eeprom		d'30'		; read gas_change_depth
-	movlw	d'3'
-	cpfsgt	EEDATA					; Change depth>3m?
+	movlw	minimum_change_depth
+	cpfsgt	EEDATA					; Change depth>minimum_change_depth?
 	bra		check_gas_change4		; No, Change depth not deep enough, skip!
 	movf	xC+0,W					; load depth in m into WREG
 	cpfsgt	EEDATA					; gas_change_depth < current depth?
 	bra		check_gas_change4		; No, check next gas
-	movlw	d'3'
-	subwf	EEDATA,W				; Change depth-3m
-	cpfslt	xC+0					; current depth<Change depth-3m?
+	movlw	better_gas_window
+	subwf	EEDATA,W				; Change depth-better_gas_window
+	cpfslt	xC+0					; current depth<Change depth-better_gas_window?
 	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 
 check_gas_change4:					; check gas4
@@ -1045,15 +1045,15 @@ check_gas_change4:					; check gas4
 	bra		check_gas_change5		; Yes, skip depth check
 check_gas_change4x:	
 	read_int_eeprom		d'31'		; read gas_change_depth
-	movlw	d'3'
-	cpfsgt	EEDATA					; Change depth>3m?
+	movlw	minimum_change_depth
+	cpfsgt	EEDATA					; Change depth>minimum_change_depth?
 	bra		check_gas_change5		; No, Change depth not deep enough, skip!
 	movf	xC+0,W					; load depth in m into WREG
 	cpfsgt	EEDATA					; gas_change_depth < current depth?
 	bra		check_gas_change5		; No, check next gas
-	movlw	d'3'
-	subwf	EEDATA,W				; Change depth-3m
-	cpfslt	xC+0					; current depth<Change depth-3m?
+	movlw	better_gas_window
+	subwf	EEDATA,W				; Change depth-better_gas_window
+	cpfslt	xC+0					; current depth<Change depth-better_gas_window?
 	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 
 check_gas_change5:					; check gas5
@@ -1065,15 +1065,15 @@ check_gas_change5:					; check gas5
 	bra		check_gas_change6		; Yes, skip depth check
 check_gas_change5x:	
 	read_int_eeprom		d'32'		; read gas_change_depth
-	movlw	d'3'
-	cpfsgt	EEDATA					; Change depth>3m?
+	movlw	minimum_change_depth
+	cpfsgt	EEDATA					; Change depth>minimum_change_depth?
 	bra		check_gas_change6		; No, Change depth not deep enough, skip!
 	movf	xC+0,W					; load depth in m into WREG
 	cpfsgt	EEDATA					; gas_change_depth < current depth?
 	bra		check_gas_change6		; No, check next gas
-	movlw	d'3'
-	subwf	EEDATA,W				; Change depth-3m
-	cpfslt	xC+0					; current depth<Change depth-3m?
+	movlw	better_gas_window
+	subwf	EEDATA,W				; Change depth-better_gas_window
+	cpfslt	xC+0					; current depth<Change depth-better_gas_window?
 	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 
 check_gas_change6:			;Done
@@ -1556,11 +1556,14 @@ set_min_temp:
 
 set_dive_modes:
 	btfsc	high_altitude_mode		; In high altitude (Fly) mode?
-	bra		set_dive_modes3			; Yes
+	bra		set_dive_modes3			; Yes!
 
+set_dive_modes0:
 	GETCUSTOM8	.0					; loads dive_threshold in WREG
 	movwf	sub_a+0					; dive_treshold is in cm
 	clrf	sub_a+1
+
+set_dive_modes1:
     SAFE_2BYTE_COPY rel_pressure, sub_b
 	call	sub16					; sub_c = sub_a - sub_b
 
@@ -1590,19 +1593,16 @@ set_dive_modes2:
 	call	PLED_divemode_timeout	; No, show the divemode timeout here...
 	return
 
-set_dive_modes3:
-	movlw	HIGH	d'1075'			; hard-wired 1075mbar threshold
+set_dive_modes3:					; High-altitude mode
+	btfsc	realdive				; dive longer then one minute?
+	bra		set_dive_modes0			; Yes -> this is a real dive -> Use CF00 threshold for ascend
+
+	movlw	HIGH	d'300'			; hard-wired 300cm threshold
 	movwf	sub_a+1
-	movlw	LOW		d'1075'			; hard-wired 1075mbar threshold
+	movlw	LOW		d'300'			; hard-wired 300cm threshold
 	movwf	sub_a+0
-    SAFE_2BYTE_COPY rel_pressure, sub_b
-	call	sub16					; sub_c = sub_a - sub_b
-	
-	btfss	neg_flag	
-	bra		set_dive_modes2			; too shallow (rel_pressure<dive_threshold)
-	
-	bra		set_dive_modes_common
-	
+	bra		set_dive_modes1
+
 set_powersafe:
 	btfsc	low_battery_state		; battery warning alread active?
 	bra		set_powersafe2			; Yes, but is it still required?

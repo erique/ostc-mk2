@@ -43,6 +43,12 @@
 #DEFINE		FT_MEDIUM		.1
 #DEFINE		FT_LARGE		.2
 
+; "Better Gas" behavior
+; better_gas_window <= minimum_change_depth !
+; minimum_change_depth >=5 !
+#DEFINE	minimum_change_depth	.3 			; [m]
+#DEFINE	better_gas_window		.3			; [m]
+
 ; Color Definitions: 8Bit RGB b'RRRGGGBB'
 #DEFINE	color_red		d'224'
 #DEFINE	color_violet	d'235'
@@ -85,8 +91,8 @@
 
 ;=============================================================================
 
-#include "../OSTC_code_c_part2/shared_definitions.h"
-;#include "shared_definitions.h"
+;#include "../OSTC_code_c_part2/shared_definitions.h"
+#include "shared_definitions.h"
 
 ;=============================================================================
 ; Reserve space for C-code data space. Eg.when calling log.

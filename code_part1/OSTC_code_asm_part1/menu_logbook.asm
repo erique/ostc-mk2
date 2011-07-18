@@ -29,7 +29,6 @@
 
 menu_logbook:
 	bcf			return_from_profileview				; clear some flags
-;call	enable_rs232
 menu_logbook1:
 	bcf			logbook_header_drawn
 	call		PLED_ClearScreen				; Clear screen

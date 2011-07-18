@@ -383,40 +383,6 @@ divemode_check_decogases:					; CALLed from Simulator, too
 	btfss	gaslist_active,4    			; Apply depth?
 	clrf	EEDATA							; No, clear!
 	movff	EEDATA,char_I_deco_gas_change+4	; Yes!
-
-; Debugger
-;	call	enable_rs232	
-;	movff	char_I_deco_He_ratio+4,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio+4,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_He_ratio+3,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio+3,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_He_ratio+2,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio+2,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_He_ratio+1,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio+1,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_He_ratio,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_N2_ratio,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_gas_change5,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_gas_change4,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_gas_change3,TXREG
-;	call	rs232_wait_tx				; wait for UART	
-;	movff	char_I_deco_gas_change2,TXREG
-;	call	rs232_wait_tx				; wait for UART
-;	movff	char_I_deco_gas_change,TXREG
-;	call	rs232_wait_tx				; wait for UART
-
 	return
 
 ;-----------------------------------------------------------------------------

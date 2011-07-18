@@ -31,7 +31,6 @@ surfloop:
 	call	PLED_brightness_full			;max. brightness
 	
 	call 	I2CReset
-	call	enable_rs232
 	call	PLED_boot
 	call	PLED_serial						; Show OSTC serial and firmware version
 	call	PLED_clock						; display time
@@ -328,7 +327,12 @@ test_charger:
 
 	bsf		TRISC,1						; CHRG_OUT high impedance
 
-	; Charger inactive or ready
+	; -> Charger inactive or ready
+
+	; Disable when no USB power is attached
+	btfsc	RCSTA,7						; RS232 already disabled
+	call	disable_rs232				; No, disable UART module
+
 	btfss	charge_done					; charge done?
 	bra		test_charger2				; No, add incomplete cycle!
 	
@@ -396,6 +400,9 @@ test_charger2:
 	return	
 
 show_cv_active:							; CV mode
+	; Enable only when USB power attached
+	btfss	RCSTA,7						; RS232 already enabled?
+	call	enable_rs232				; No, start UART module
 	bsf		LED_red
 	WAITMS	d'100'
 	bcf		LED_red
@@ -405,6 +412,9 @@ show_cv_active:							; CV mode
 	return
 
 show_cc_active:							; CC mode
+	; Enable only when USB power attached
+	btfss	RCSTA,7						; RS232 already enabled?
+	call	enable_rs232				; No, start UART module
 	bsf		LED_red
 	bsf		charge_started				; Charger started in CC mode
 	bcf		charge_done					; Charge cycle not finished

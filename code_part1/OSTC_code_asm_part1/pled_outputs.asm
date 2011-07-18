@@ -562,7 +562,7 @@ PLED_simulator_data_2:
 	movff	logbook_temp2,lo
 	bsf		leftbind
 	output_8
-	STRCAT_PRINT  "m "
+	STRCAT_PRINT  "m  "
 
 	bcf		leftbind
 	return

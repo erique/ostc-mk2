@@ -1,5 +1,7 @@
+New in 1.95 beta:
+
 New in 1.94 beta:
-BETA Version - Do NOT use for diving!
+Pre-Release for 2.0 Stable
 BUGFIX: CNS was not cleared with a "Reset Deco"
 CHANGE: Max. depth for simulator now 120m
 BUGFIX: Ascend threshold in high altitude mode

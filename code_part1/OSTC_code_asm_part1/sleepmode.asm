@@ -132,6 +132,7 @@ onesec_sleep_nonofly:
 	clrf	divemins+0
 
 	rcall	pressuretest_sleep_fast	; Gets pressure without averaging (faster!)
+    SAFE_2BYTE_COPY amb_pressure_avg, amb_pressure	; copy for compatibility
 
         ; compare current ambient pressure with threshold CF6==1160mbar.
 	GETCUSTOM15	d'6'				; loads pressure threshold into lo,hi

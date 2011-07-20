@@ -58,6 +58,7 @@ wait_start_pressure:
 	bsf		sleepmode				; Routine only works in sleepmode...
 	call	pressuretest_sleep_fast	; Gets pressure without averaging (faster!)
 	bcf		sleepmode				; Normal mode again
+    SAFE_2BYTE_COPY amb_pressure_avg, amb_pressure	; copy for compatibility
 
     SAFE_2BYTE_COPY amb_pressure_avg, last_surfpressure
 	SAFE_2BYTE_COPY amb_pressure_avg, amb_pressure

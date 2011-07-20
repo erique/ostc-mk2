@@ -1,4 +1,5 @@
 New in 1.95 beta:
+CHANGE: 0.98bar equal 10m depths with salinity set to 1.00kg/l
 
 New in 1.94 beta:
 Pre-Release for 2.0 Stable

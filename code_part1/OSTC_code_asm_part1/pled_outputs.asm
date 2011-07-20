@@ -3678,7 +3678,7 @@ adjust_depth_with_salinity:			; computes salinity setting into lo:hi [mbar]
 	movff	lo,xA+0
 	movff	hi,xA+1
 
-	movlw	d'100'
+	movlw	d'102'					; 0,98bar/10m
 	movwf	xB+0
 	clrf	xB+1
 	

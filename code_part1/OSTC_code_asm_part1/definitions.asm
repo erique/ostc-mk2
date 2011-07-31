@@ -51,16 +51,20 @@
 #DEFINE	better_gas_window		.3			; [m]
 
 ; Color Definitions: 8Bit RGB b'RRRGGGBB'
-#DEFINE	color_red		d'224'
-#DEFINE	color_violet	d'235'
-#DEFINE	color_blue		d'199'
-#DEFINE	color_green	b'00011100'
-#DEFINE	color_yellow 	d'253'
-#DEFINE	color_white b'11111111'
-#DEFINE	color_black b'00000000'
-#DEFINE	color_deepblue b'00000010'
-#DEFINE	color_grey	d'74'
-#DEFINE	color_cyan	d'223'
+#DEFINE	color_red	    	b'11100000'     ; (7,0,0)
+#DEFINE	color_dark_red	    b'10000101'     ; (4,1,1)
+#DEFINE	color_violet    	b'11101011'     ; (7,2,3)
+#DEFINE	color_blue		    b'11000111'     ; (6,1,3)
+#DEFINE	color_green	        b'00011100'     ; (0,7,0)
+#DEFINE color_dark_green    b'00111001'     ; (1,6,1)
+#DEFINE	color_yellow 	    b'11111101'     ; (7,7,1)
+#DEFINE	color_white         b'11111111'     ; (7,7,3)
+#DEFINE	color_black         b'00000000'     ; (0,0,0)
+#DEFINE	color_deepblue      b'00000010'     ; (0,0,2)
+#DEFINE	color_grey	        b'01001010'     ; (2,2,2)
+#DEFINE	color_cyan	        b'11011111'     ; (6,7,3)
+#DEFINE color orange        b'11111000'     ; (7,6,0)
+#DEFINE color_pink          b'11111010'     ; (7,6,2)
 
 #DEFINE	warn_depth		d'1'
 #DEFINE	warn_cns		d'2'
@@ -335,6 +339,11 @@ logbook_temp3           res 1   ; Temp used in logbook display&Divemode&Gassetup
 logbook_temp4           res 1   ; Temp used in logbook display&Divemode&Gassetup
 logbook_temp5           res 1   ; Temp used in logbook display&Divemode&Gassetup
 logbook_temp6           res 1   ; Temp used in logbook display&Divemode&Gassetup
+logbook_cur_depth       res 2   ; Current depth, for drawing profile.
+logbook_cur_tp          res 2   ; Current temperature, for drawing profile.
+logbook_last_tp         res 1   ; Y of the last item in Tp° curve.
+logbook_min_tp          res 2   ; Min temperature, for drawing profile.
+logbook_ceiling         res 1   ; Current ceiling, for drawing profile.
 
 convert_value_temp      res 3   ; used in menu_battery_state_convert_date
 time_correction_value   res 1   ; Adds to Seconds on midnight

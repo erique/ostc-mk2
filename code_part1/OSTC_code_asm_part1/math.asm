@@ -45,7 +45,7 @@ div16:
 	return
 
 sub16:
-;  sub_c = sub_a - sub_b
+;  sub_c = sub_a - sub_b (with signed values)
 	bcf		neg_flag
 	movf   	sub_b+0, W             	; Get Value to be subtracted
 	subwf  	sub_a+0, W             	; Do the High Byte
@@ -55,6 +55,28 @@ sub16:
 	movwf  	sub_c+1
 
 	btfss	STATUS,N                ; Negativ result ?
+	return							; NO: result positive done.
+
+	bsf		neg_flag				; MARK result negative
+
+    comf    sub_c+1                 ; 16bit sign change.
+    negf    sub_c+0
+    btfsc   STATUS,C                ; Carry to propagate ?
+    incf    sub_c+1,F               ; YES: do it.
+
+    return        
+
+subU16:
+;  sub_c = sub_a - sub_b (with UNSIGNED values)
+	bcf		neg_flag
+	movf   	sub_b+0, W             	; Get Value to be subtracted
+	subwf  	sub_a+0, W             	; Do the High Byte
+	movwf  	sub_c+0
+	movf   	sub_b+1, W              ; Get the Value to be Subbed
+	subwfb 	sub_a+1, W
+	movwf  	sub_c+1
+
+	btfsc	STATUS,C                ; Borrow to propagate ? (B == /CARRY)
 	return							; NO: result positive done.
 
 	bsf		neg_flag				; MARK result negative

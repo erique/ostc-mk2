@@ -127,12 +127,36 @@ pixel_write_noflip_H:
     	bra     PLED_DataWrite_PROD   
 
 ;-----------------------------------------------------------------------------
+; Writes a vertical line of half-pixel at position (win_top,win_leftx2,win_height).
+; Inputs: win_leftx2, win_top, win_height, win_color:2
+; Trashed: WREG, PROD, TABLAT, TBLPTRL
+half_vertical_line:
+        movff   win_leftx2,WREG         ; Init X position.
+        mullw   2
+        rcall   pixel_write_col320      ; Start Address Vertical (.0 - .319)
+
+        clrf    TABLAT                  ; Loop index.
+
+half_vertical_line_loop:
+        movff   win_height,WREG         ; Index reached height (Bank0 read) ?
+        xorwf   TABLAT,W
+        btfsc   STATUS,Z                ; Equals ?
+        return                          ; Yes: done.
+        movff   win_top,WREG            ; Y = top + index (Bank0 read)
+        addwf   TABLAT,W
+        rcall   half_pixel_write_1
+        incf    TABLAT,F                ; index++
+        bra     half_vertical_line_loop
+
+;-----------------------------------------------------------------------------
 ; Writes one half-pixel at position (win_top,win_leftx2).
 ; Inputs: win_leftx2, win_top, win_color:2
 ; Trashed: WREG, PROD
 half_pixel_write:
     	movff  	win_top,WREG            ; d'0' ... d'239'
 
+; Variant with Y position in WREG.
+half_pixel_write_1:
         movff   win_flags,PRODL         ; BEWARE: bank0 bit-test
     	btfsc   PRODL,0                 ; 180° rotation ?
     	sublw   .239                    ; 239-Y --> Y

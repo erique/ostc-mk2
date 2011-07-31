@@ -352,6 +352,7 @@ display_profile_offset3:
 	incf		sim_pressure+0,F		; increase one, because there may be a remainder
 	movlw		d'0'
 	addwfc		sim_pressure+1,F
+	
 	movlw		LOW		d'164000'		; 164pixel*1000 height
 	movwf		xC+0
 	movlw		HIGH	(d'164000' & h'FFFF') ; 164pixel*1000 height
@@ -389,7 +390,7 @@ display_profile_offset4:
 	call		mult16x16				; result is in xC:2 !
 
 	bsf			leftbind
-	PUTC		0x95					; "duration o dive" icon
+	PUTC		0x95					; "duration of dive" icon
 	output_16							; divetime minutes
 
 	movlw		LOW		d'600'
@@ -455,18 +456,28 @@ display_profile_xscale:
 
 	bsf			leftbind
 	output_99x							; divetime seconds
-	PUTC		' '
+	STRCAT_PRINT    " "
+	
+	WIN_LEFT    .05 + 7*.15
+	lfsr        FSR2,letter
+
 	call		I2CREAD2	
 	movff		SSPBUF,lo
 	call		I2CREAD2	
 	movff		SSPBUF,hi				; Read min. Temperature
+    movff       lo,logbook_min_tp+0     ; Backup min Tp° too.
+	movff       hi,logbook_min_tp+1
+	movlw       color_pink              ; Use same color as tp° curve
+	call        PLED_set_color
+
 	call		PLED_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
 	movlw		d'3'
 	movwf		ignore_digits
 	bsf			leftbind
 	output_16dp	d'2'					; temperature
 	STRCAT_PRINT "°C"                   ; Display 2nd row of details
-
+    call        PLED_standard_color     ; Back to normal
+    
 	WIN_TOP		.50
 	WIN_LEFT	.05
 	lfsr		FSR2,letter
@@ -503,25 +514,22 @@ display_profile_xscale:
 
 	incf_eeprom_address	d'12'				; Skip 12 Bytes in EEPROM (faster) (Gaslist)
 	call		I2CREAD2					; Read start gas (1-5)
-	movff		SSPBUF,active_gas			; Store
-	movff		active_gas,average_depth_hold_total+3	; keep copy to restore color
+	movff		SSPBUF,average_depth_hold_total+3	; keep copy to restore color
+    rcall       profile_display_color       ; Back to normal profile color.
 	incf_eeprom_address	d'5'				; Skip 5 Bytes in EEPROM (faster) (Battery, firmware)
 
+	call		I2CREAD2					; Read Tp° divisor
+	movf		SSPBUF,W
+	andlw       0x0F                        ; Clear extra bits.
+	movwf       divisor_temperature	        ; Store divisor
+	movwf       logbook_temp1               ; Store to tp° counter too.
+
 	call		I2CREAD2					; Read divisor
-	movff		SSPBUF,divisor_temperature	; Store divisor
-	bcf			divisor_temperature,4		; Clear information length
-	bcf			divisor_temperature,5
-	bcf			divisor_temperature,6
-	bcf			divisor_temperature,7
-	incf		divisor_temperature,F		; increase divisor 
-	movff		divisor_temperature,logbook_temp1		; Store as temp, too
-	call		I2CREAD2					; Read divisor
-	movff		SSPBUF,divisor_deco			; Store divisor
-	bcf			divisor_deco,4				; Clear information length
-	bcf			divisor_deco,5
-	bcf			divisor_deco,6
-	bcf			divisor_deco,7
-	movff		divisor_deco,logbook_temp2	; Store as temp, too
+	movf        SSPBUF,W
+	andlw       0x0F
+	movwf       divisor_deco      			; Store divisor
+	movwf		logbook_temp2               ; Store as temp, too
+
 	call		I2CREAD2					; Read divisor
 	movff		SSPBUF,divisor_gf			; Store divisor
 	call		I2CREAD2					; Read divisor
@@ -593,22 +601,11 @@ display_profile2e:
 	movwf		timeout_counter3			; here: used as colum x2 (Start at Colum 5)
 	movlw		d'75'						; Zero-m row
 	movwf		apnoe_mins					; here: used for fill between rows
+    movwf       logbook_last_tp             ; Initialise for Tp° curve too.
 	incf		timeout_counter3,W			; Init Column
 
+    
     INIT_PIXEL_WROTE timeout_counter3       ; pixel x2			(Also sets standard Color!)
-
-	dcfsnz		active_gas,F
-	movlw		color_white					; Color for Gas 1
-	dcfsnz		active_gas,F
-	movlw		color_green					; Color for Gas 2
-	dcfsnz		active_gas,F
-	movlw		color_red					; Color for Gas 3
-	dcfsnz		active_gas,F
-	movlw		color_yellow				; Color for Gas 4
-	dcfsnz		active_gas,F
-	movlw		color_violet				; Color for Gas 5
-	call		PLED_set_color				; Set Color...
-
 
 profile_display_loop:
 	movff		profile_temp+0,profile_temp2+0
@@ -619,33 +616,123 @@ profile_display_loop:
 	incf		profile_temp2+0,F					; Zero, Increase!
 
 profile_display_loop2:
-	rcall		profile_view_get_depth		; reads depth, ignores temp and profile data	-> hi, lo
+	rcall		profile_view_get_depth		; reads depth, temp and profile data
 
 	btfsc		second_FD					; end-of profile reached?
 	bra			profile_display_loop_done	; Yes, skip all remaining pixels
 
+    ;---- Draw Ceiling curve, if any ---------------------------------------------
+    movf        divisor_deco,W
+    bz          profile_display_skip_deco
+    
+    movf        logbook_ceiling,W           ; Any deco ceiling ?
+    bz          profile_display_skip_deco
+
+	mullw       .100                        ; Yes: convert to mbar
+	movff       PRODL,sub_a+0
+	movff       PRODH,sub_a+1
+	movff       logbook_cur_depth+0,sub_b+0    ; Compare with UNSIGNED current depth (16bits)
+	movff       logbook_cur_depth+1,sub_b+1
+	call        subU16                      ; set (or not) neg_flag
+
+    movlw       color_dark_green            ; Dark green if Ok,
+    btfss       neg_flag
+    movlw       color_dark_red              ; Or dark red if ceiling overflown.
+    call        PLED_set_color
+    
+	movff       PRODL,xA+0
+	movff       PRODH,xA+1
 	movff		sim_pressure+0,xB+0			; devide pressure in mbar/quant for row offsett
 	movff		sim_pressure+1,xB+1
-	movff		lo,xA+0
-	movff		hi,xA+1
+	call		div16x16					; xA/xB=xC
+	
+	movlw		d'76'                       ; Starts right after the top blue line.
+	movff		WREG,win_top
+	movff		timeout_counter3,win_leftx2 ; Left border (0-159)
+	movff		xC+0,win_height				
+	call		half_vertical_line			; Inputs:  win_top, win_leftx2, win_height, win_color1, win_color2
+profile_display_skip_deco:
+
+    ;---- Draw Tp° curve, if any ---------------------------------------------
+    movf        divisor_temperature,W
+    bz          profile_display_skip_temp
+
+    movlw       LOW((.153*.8)/.100)         ; fixed tp° scale: (10.0° * scale8 )/153pix
+ 	movwf		xB+0
+    movlw       HIGH((.153*.8)/.100)
+ 	movwf		xB+1
+
+	movf        logbook_cur_tp+0,W
+	subwf       logbook_min_tp+0,W
+	movwf       xA+0
+    movf		logbook_cur_tp+1,W
+    subwfb      logbook_min_tp+1,W
+    movwf       xA+1
+    call		mult16x16					; xA*xB=xC
+
+    ; scale: divide by 8. Don't bother about CARRY for the high byte.
+	rrcf        xC+1,F
+	rrcf        xC+0,F
+	rrcf        xC+1,F
+	rrcf        xC+0,F
+	rrcf        xC+1,F
+	rrcf        xC+0,F
+
+    movlw       .75
+    subwf       xC+0,F						; Upside-down: Y = .75 + (.153 - result)
+
+    movlw       color_pink
+    call        PLED_set_color
+
+    movff       logbook_last_tp,xC+1
+	call		profile_display_fill		; In this column between this row (xC+0) and the last row (apnoe_mins)
+    movff       xC+0,logbook_last_tp
+    PIXEL_WRITE timeout_counter3,xC+0       ; Set col(0..159) x row (0..239), put a std color pixel.
+profile_display_skip_temp:
+
+    ;---- Draw depth curve ---------------------------------------------------
+	movff		sim_pressure+0,xB+0			; devide pressure in mbar/quant for row offsett
+	movff		sim_pressure+1,xB+1
+	movff		logbook_cur_depth+0,xA+0
+	movff		logbook_cur_depth+1,xA+1
 	call		div16x16					; xA/xB=xC
 	movlw		d'75'
 	addwf		xC+0,F						; add 75 pixel offset to result
 	
-	btfsc		STATUS,C						; Ignore potential profile errors
+	btfsc		STATUS,C                    ; Ignore potential profile errors
 	movff		apnoe_mins,xC+0
 
+    rcall       profile_display_color       ; Back to normal profile color.
+    movff       apnoe_mins,xC+1
 	call		profile_display_fill		; In this column between this row (xC+0) and the last row (apnoe_mins)
 	movff		xC+0,apnoe_mins				; Store last row for fill routine
 	incf		timeout_counter3,F
 
     PIXEL_WRITE timeout_counter3,xC+0       ; Set col(0..159) x row (0..239), put a std color pixel.
 
+    ;---- Draw CNS curve, if any ---------------------------------------------
+    movf        divisor_cns,W
+    bz          profile_display_skip_cns
+    ;
+    ; TODO HERE 
+    ;
+profile_display_skip_cns:
+
+    ;---- Draw GF curve, if any ----------------------------------------------
+    movf        divisor_gf,W
+    bz          profile_display_skip_gf
+    ;
+    ; TODO HERE 
+    ;
+profile_display_skip_gf:
+
+    ;---- All curves done.
+    
 profile_display_skip_loop1:					; skips readings!
 	dcfsnz		profile_temp2+0,F
 	bra			profile_display_loop3		; check 16bit....
 
-	rcall		profile_view_get_depth		; reads depth, ignores temp and profile data
+	rcall		profile_view_get_depth		; reads depth, temp and profile data
 	bra			profile_display_skip_loop1
 
 profile_display_loop3:
@@ -682,7 +769,24 @@ display_profile_loop:
 	goto		restart						; Enter Divemode if required
 	bra			display_profile_loop		; wait for something to do
 
+;=============================================================================
+profile_display_color:
+    movff       average_depth_hold_total+3,active_gas ; Restore gas color.
+	dcfsnz		active_gas,F
+	movlw		color_white					; Color for Gas 1
+	dcfsnz		active_gas,F
+	movlw		color_green					; Color for Gas 2
+	dcfsnz		active_gas,F
+	movlw		color_red					; Color for Gas 3
+	dcfsnz		active_gas,F
+	movlw		color_yellow				; Color for Gas 4
+	dcfsnz		active_gas,F
+	movlw		color_violet				; Color for Gas 5
+	dcfsnz		active_gas,F
+	movlw		color_cyan					; Color for Gas 6
+	goto		PLED_set_color				; Set Color...
 
+;=============================================================================
 profileview_page2:
     WIN_BOX_BLACK   .0, .74, .0, .159		;top, bottom, left, right
 
@@ -799,8 +903,6 @@ profileview_page2:
 	output_8
 	call		word_processor				; Display Gas information
 	bcf			leftbind					; Clear flag
-
-
 
 	WIN_TOP		.50
 	lfsr		FSR2,letter	
@@ -969,22 +1071,23 @@ display_profile3_loop:
 	goto		restart						; Enter Divemode if required
 	bra			display_profile3_loop		; wait for something to do
 	
-
-
-profile_display_fill:		; In this column between this row (xC+0) and the last row (apnoe_mins), keep xC+0!!
-; First, check if xC+0>apnoe_mins or xC+0<aponoe_mins
+;=============================================================================
+; Draw a vertical line between xC+1 and xC+0, at current X position.
+;
+; Note: should keep xC+0
+; Note: ascending or descending !
+;
+profile_display_fill:
+    ; First, check if xC+0>apnoe_mins or xC+0<aponoe_mins
 	movf	xC+0,W
-	cpfseq	apnoe_mins				; xC+0 = apone_mins?
+	cpfseq	xC+1				    ; xC+0 = apone_mins?
 	bra		profile_display_fill2	; No!
 	return
 
 profile_display_fill2:	
-	movf	xC+0,W
-	cpfsgt	apnoe_mins				; apnoe_mins>xC+0?
+	cpfsgt	xC+1				    ; apnoe_mins>xC+0?
 	bra		profile_display_fill_up	; Yes!
 
-profile_display_fill_down:			; Fill downwards from apone_mins to xC+0!
-	movff		apnoe_mins,xC+1		; Copy
 profile_display_fill_down2:			; Loop	
 	decf		xC+1,F
 
@@ -996,16 +1099,16 @@ profile_display_fill_down2:			; Loop
 	return							; apnoe_mins and xC+0 are untouched
 
 profile_display_fill_up:			; Fill upwards from xC+0 to apone_mins!
-	movff		xC+0,xC+1			; Copy
-profile_display_fill_up2:			; Loop	
-	decf		xC+1,F
+	incf		xC+1,F
 
     HALF_PIXEL_WRITE    xC+1        ; Updates just row (0..239)
 
-	movf		apnoe_mins,W
+	movf		xC+0,W
 	cpfseq		xC+1				; Loop until xC+1=apnoe_mins
-	bra			profile_display_fill_up2
+	bra			profile_display_fill_up
 	return							; apnoe_mins and xC+0 are untouched
+
+;=============================================================================
 
 profile_view_get_depth:
 	incf		average_divesecs+0,F
@@ -1034,25 +1137,11 @@ profile_view_get_depth:
 	movff		WREG,win_width				; "Window" Width
 	call		PLED_box					; Inputs:  win_top, win_leftx2, win_height, win_width, win_color1, win_color2
 
-; Now restore current profile color
-	movff		average_depth_hold_total+3,active_gas	; restore color
-	dcfsnz		active_gas,F
-	movlw		color_white					; Color for Gas 1
-	dcfsnz		active_gas,F
-	movlw		color_green					; Color for Gas 2
-	dcfsnz		active_gas,F
-	movlw		color_red					; Color for Gas 3
-	dcfsnz		active_gas,F
-	movlw		color_yellow				; Color for Gas 4
-	dcfsnz		active_gas,F
-	movlw		color_violet				; Color for Gas 5
-	call		PLED_set_color				; Set Color...
-
 profile_view_get_depth_no_line:
 	call		I2CREAD2					; read first depth
-	movff		SSPBUF,lo					; low value
+	movff		SSPBUF,logbook_cur_depth+0  ; low value
 	call		I2CREAD2					; read first depth
-	movff		SSPBUF,hi					; high value
+	movff		SSPBUF,logbook_cur_depth+1  ; high value
 	call		I2CREAD2					; read Profile Flag Byte
 	movff		SSPBUF,timeout_counter2		; Read Profile Flag Byte
 
@@ -1062,10 +1151,10 @@ profile_view_get_depth_no_line:
 	bcf			timeout_counter2,7			; Clear Event Byte Flag (If any)
 	; timeout_counter2 now holds the number of additional bytes to ignore (0-127)
 	movlw		0xFD						; end of profile bytes?
-	cpfseq		lo
+	cpfseq		logbook_cur_depth+0
 	bra			profile_view_get_depth_new1	; no 0xFD
 	movlw		0xFD						; end of profile bytes?
-	cpfseq		hi
+	cpfseq		logbook_cur_depth+1
 	bra			profile_view_get_depth_new1	; no 0xFD
 	bsf			second_FD					; End found! Set Flag! Skip remaining pixels!
 	return
@@ -1073,13 +1162,41 @@ profile_view_get_depth_no_line:
 profile_view_get_depth_new1:
 	btfsc		event_occured				; Was there an event attached to this sample?
 	rcall		profile_view_get_depth_new2	; Yes, get information about this event
+    
+    ;---- Read Tp°, if any AND divisor reached AND bytes available -----------
+    movf        divisor_temperature,W       ; Is Tp° divisor null ?
+    bz          profile_view_get_depth_no_tp; Yes: no Tp° curve.
+    decf        logbook_temp1,F             ; Decrement tp° counter
+    bnz         profile_view_get_depth_no_tp; No temperature this time
+    
+    call		I2CREAD2					; Tp° low
+	movff		SSPBUF,logbook_cur_tp+0
+    call		I2CREAD2					; Tp° high
+	movff		SSPBUF,logbook_cur_tp+1
+	decf        timeout_counter2,F
+	decf        timeout_counter2,F
+	movff       divisor_temperature,logbook_temp1   ; Restart counter.
+    
+    ;---- Read deco, if any AND divisor=0 AND bytes available ----------------
+profile_view_get_depth_no_tp:
+    movf        divisor_deco,W
+    bz          profile_view_get_depth_no_deco
+    decf        logbook_temp2,F
+    bnz         profile_view_get_depth_no_deco
+    
+    call		I2CREAD2
+	movff		SSPBUF,logbook_ceiling
+	decf        timeout_counter2,F
+	movff       divisor_deco,logbook_temp2  ; Restart counter.
 
-	tstfsz		timeout_counter2			; Any bytes to ignore
-	bra			profile_view_get_depth_new3	; Yes (1-127)
-	return									; No (0)
-
-profile_view_get_depth_new3:
-    ; read optional Tp° here, if any, and decrement timeout_counter2 by two...
+    ;---- Read GF, if any AND divisor=0 AND bytes available ------------------
+profile_view_get_depth_no_deco:
+    
+    movf        timeout_counter2,W          ; No more extra bytes ?
+    btfsc       STATUS,Z
+    return                                  ; No: done.
+    
+    ; Then skip remaining bytes...
 	movf		timeout_counter2,W			; number of additional bytes to ignore (0-127)
 	call		incf_eeprom_address0		; increases bytes in eeprom_address:2 with 0x8000 bank switching
 	return
@@ -1095,32 +1212,17 @@ profile_view_get_depth_new2:
 	return									; No, return
 ; Stored Gas changed!
 	call		I2CREAD2					; Read Gas#
-	movff		SSPBUF,active_gas			; store gas#
-	movff		active_gas,average_depth_hold_total+3	; keep copy to restore color after drawing 10min line
+	movff		SSPBUF,average_depth_hold_total+3
+    rcall       profile_display_color       ; Back to normal profile color.
+
 	decf		timeout_counter2,F			; reduce counter
-	dcfsnz		active_gas,F
-	movlw		color_white					; Color for Gas 1
-	dcfsnz		active_gas,F
-	movlw		color_green					; Color for Gas 2
-	dcfsnz		active_gas,F
-	movlw		color_red					; Color for Gas 3
-	dcfsnz		active_gas,F
-	movlw		color_yellow				; Color for Gas 4
-	dcfsnz		active_gas,F
-	movlw		color_violet				; Color for Gas 5
-	call		PLED_set_color				; Set Color...
 	return
 
 logbook_event1:
-	movlw		color_cyan					; Color for Gas 6
-	call		PLED_set_color				; Set Color...
+    movlw       6                           ; Just color backup to 6
+    movwf       average_depth_hold_total+3
+    rcall       profile_display_color       ; Back to normal profile color.
 	return		;(The two bytes indicating the manual gas change will be ignored in the standard "ignore loop" above...)
-
-;Keep comments for future temperature graph
-;	call		I2CREAD2					; ignore byte
-;	decfsz		timeout_counter2,F			; reduce counter
-;	bra			profile_view_get_depth_new3	; Loop
-;	return
 
 exit_profileview:
 	bcf			sleepmode

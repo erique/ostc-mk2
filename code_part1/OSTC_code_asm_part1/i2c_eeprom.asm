@@ -28,14 +28,7 @@ incf_eeprom_address0:
     	movlw		d'0'
     	addwfc		eeprom_address+1,F
 		return
-;    	btfss		eeprom_address+1,7		; at address 8000?
-;    	return                              ; No, continue
-;    
-;    	; Yes, clear eeprom_address:2
-;    	clrf		eeprom_address+0		; Clear eeprom address
-;    	clrf		eeprom_address+1
-;    	return								; Done.
-;
+
 ;=============================================================================
 ; Will decrease eeprom_address:2 with the 8Bit value "ext_ee_temp1"
 
@@ -50,13 +43,6 @@ decf_eeprom_address0:
         movlw		d'0'
         subwfb		eeprom_address+1,F
 		return
-;
-;        btfss		eeprom_address+1,7		; at address 8000?
-;        return                              ; No, done.
-;
-;        movlw		b'01111111'             ; yes, reset highbyte
-;        movwf		eeprom_address+1
-;    	return								; Done.
 
 ;=============================================================================
 

@@ -289,7 +289,7 @@ do_menu_reset_decodata:
 do_menu_reset_decodata2:
 ; reset deco data
 	call	PLED_ClearScreen
-	DISPLAYTEXT	.25					; "Reset..."
+	DISPLAYTEXT	.25					    ; "Reset..."
 
     SAFE_2BYTE_COPY amb_pressure,int_I_pres_respiration	; copy surface air pressure to deco routine
 	call		deco_clear_tissue			; Reset Decodata

@@ -75,20 +75,16 @@ menu_logbook2:
 	movlw		d'0'
 	addwfc		divemins+1,F			; increase 16Bit value, twice
 
-	movlw		0xFF
-	cpfseq		divemins+1				; =0xFFFF ?
-	bra			menu_logbook2a			; No
-	cpfseq		divemins+0				; =0xFFFF ?
-	bra			menu_logbook2a			; No
-	bra			menu_logbook_reset      ; yes, restart (if not empty)
+    incf        divemins+1,W            ; = 0xFF.. ?
+    bnz         menu_logbook2a          ; No.
+    incf        divemins+0,W            ; = 0x..FF ?
+    bz          menu_logbook_reset      ; Yes: FFFF --> loop.
 
 menu_logbook2a:
-	movlw		0x00
-	cpfseq		divemins+1				; =0x0000 ?
-	bra			menu_logbook2b			; No
-	cpfseq		divemins+0				; =0x0000 ?
-	bra			menu_logbook2b			; No
-	bra			menu_logbook_reset      ; yes, restart (if not empty)
+    movf        divemins+1,W            ; = 0x00.. ?
+    bnz         menu_logbook2b          ; No.
+    movf        divemins+0,W            ; = 0x..00 ?
+    bz          menu_logbook_reset      ; yes, restart (if not empty)
 
 menu_logbook2b:
 	decf_eeprom_address	d'2'			; -2 to eeprom address.

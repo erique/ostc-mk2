@@ -58,6 +58,9 @@ tcode_idx set tcode_idx+1
 #ifdef FRENCH
 #define LANGUAGE_FILE "french_text.asm"
 #endif
+#ifdef RUSSIAN
+#define LANGUAGE_FILE "russian_text.asm"
+#endif
 #ifndef LANGUAGE_FILE
 #define LANGUAGE_FILE "english_text.asm"
 #endif

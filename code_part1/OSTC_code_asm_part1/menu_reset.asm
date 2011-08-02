@@ -299,7 +299,7 @@ do_menu_reset_decodata2:
   	clrf		nofly_time+0        	      	; Reset NoFly
   	clrf		nofly_time+1            	  	; Reset NoFly
 	bcf			nofly_active                	; Clear flag
-	goto	restart					; done. quit to surfmode
+	goto		restart							; done. quit to surfmode
 
 do_menu_reset_all:
 	call	PLED_confirmbox				; Returns WREG=0 for Cancel (Or Timeout) and WREG=1 for OK!
@@ -318,6 +318,7 @@ reset_start:
 	call		deco_clear_tissue			; Reset Decodata
 	call		deco_calc_desaturation_time	; calculate desaturation time
 	call		deco_clear_CNS_fraction			; clear CNS
+	movlb		b'00000001'						; select ram bank 1
   	clrf		nofly_time+0    	          	; Reset NoFly
   	clrf		nofly_time+1	              	; Reset NoFly
 	bcf			nofly_active                	; Clear flag

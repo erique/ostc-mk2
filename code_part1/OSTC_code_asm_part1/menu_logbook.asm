@@ -657,37 +657,34 @@ profile_display_skip_deco:
     movf        divisor_temperature,W
     bz          profile_display_skip_temp
 
-    movlw       LOW((.153*.8)/.100)         ; fixed tp° scale: (10.0° * scale8 )/153pix
+    movlw       LOW((.153*.256)/.370)         ; fixed tp° scale: (-2 .. +35°C * scaleé56 )/153pix
  	movwf		xB+0
-    movlw       HIGH((.153*.8)/.100)
+    movlw       HIGH((.153*.256)/.370)
  	movwf		xB+1
 
-	movf        logbook_cur_tp+0,W
-	subwf       logbook_min_tp+0,W
+	movf        logbook_cur_tp+0,W          ; Current Tp° - (-2.0°C) == Tp° + 20.
+	addlw       LOW(.20)                    ; Low byte.
 	movwf       xA+0
     movf		logbook_cur_tp+1,W
-    subwfb      logbook_min_tp+1,W
+    btfsc       STATUS,C                    ; Propagate carry, if any
+    incf        WREG
     movwf       xA+1
     call		mult16x16					; xA*xB=xC
 
-    ; scale: divide by 8. Don't bother about CARRY for the high byte.
-	rrcf        xC+1,F
-	rrcf        xC+0,F
-	rrcf        xC+1,F
-	rrcf        xC+0,F
-	rrcf        xC+1,F
-	rrcf        xC+0,F
-
-    movlw       .75
-    subwf       xC+0,F						; Upside-down: Y = .75 + (.153 - result)
+    ; scale: divide by 256, ie. take just high byte.
+    movf        xC+1,W
+    sublw       .75+.153      				; Upside-down: Y = .75 + (.153 - result)
+    movwf       xC+0
 
     movlw       color_pink
     call        PLED_set_color
 
     movff       logbook_last_tp,xC+1
-	call		profile_display_fill		; In this column between this row (xC+0) and the last row (apnoe_mins)
+	call		profile_display_fill		; In this column between this row (xC+0) and the last row (xC+1)
     movff       xC+0,logbook_last_tp
-    PIXEL_WRITE timeout_counter3,xC+0       ; Set col(0..159) x row (0..239), put a std color pixel.
+
+    PIXEL_WRITE timeout_counter3,xC+0       ; Set col(0..159) x row (0..239), put a current color pixel.
+
 profile_display_skip_temp:
 
     ;---- Draw depth curve ---------------------------------------------------
@@ -703,12 +700,13 @@ profile_display_skip_temp:
 	movff		apnoe_mins,xC+0
 
     rcall       profile_display_color       ; Back to normal profile color.
-    movff       apnoe_mins,xC+1
-	call		profile_display_fill		; In this column between this row (xC+0) and the last row (apnoe_mins)
-	movff		xC+0,apnoe_mins				; Store last row for fill routine
-	incf		timeout_counter3,F
 
+    movff       apnoe_mins,xC+1
+	call		profile_display_fill		; In this column between this row (xC+0) and the last row (xC+1)
+	movff		xC+0,apnoe_mins				; Store last row for fill routine
     PIXEL_WRITE timeout_counter3,xC+0       ; Set col(0..159) x row (0..239), put a std color pixel.
+
+	incf		timeout_counter3,F
 
     ;---- Draw CNS curve, if any ---------------------------------------------
     movf        divisor_cns,W
@@ -1085,6 +1083,15 @@ profile_display_fill:
 	return
 
 profile_display_fill2:	
+    ; Make sure to init X position.
+    movf    timeout_counter3,W
+    mullw   2
+    decf    PRODL,F
+    movlw   0
+    subwfb  PRODH,F
+    call    pixel_write_col320
+
+	movf	xC+0,W
 	cpfsgt	xC+1				    ; apnoe_mins>xC+0?
 	bra		profile_display_fill_up	; Yes!
 

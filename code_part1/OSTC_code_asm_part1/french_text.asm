@@ -391,12 +391,12 @@
 	TCODE	 .40,	.130,	 "Attendez SVP!"			 ;303 Please wait!
 	TCODE	 .50,	.130,	 "Annulée!"					 ;304 Aborted
 ;@5 variant
-    TCODE    .0,    .0,      "DTR Réchap"                ;305 Future TTS            (=10 chars. Title for @5 customview).
+    TCODE    .0,    .0,      " Futur DTR"                ;305 Future TTS            (=10 chars. Title for @5 customview).
 ;
-    TCODE    .100,  .125,    "Sort.Sim"                  ;306 Quit Sim 				(=8char max. Quit Simulator mode)
+    TCODE    .100,  .125,    "Stop Sim"                  ;306 Quit Sim 				(=8char max. Quit Simulator mode)
 ;Dive interval
-    TCODE    .20,   .35,     "Intervalle: "              ;307 Interval:
-    TCODE    .0,    .0,      "Maintenant"                ;308 Now (7 chars min)
+    TCODE    .20,   .35,     "Intervale:"                ;307 Interval:
+    TCODE    .0,    .0,      "Non    "                   ;308 Now (7 chars min)
 	TCODE	 .108,	.112,	 "Moyenne"			 		 ;309 Average
 	TCODE	 .116,	.54,	 "Chrono"		 		 	 ;310 Stopwatch (BIG Stopwatch in Gauge mode)
 ;=============================================================================

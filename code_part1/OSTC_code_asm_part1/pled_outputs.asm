@@ -539,7 +539,7 @@ PLED_simulator_data:
 PLED_simulator_data_1:
 	bsf		leftbind
 	output_8
-	STRCAT      "0min"
+	STRCAT      "0min "
 
 PLED_simulator_data_2:
     call        word_processor

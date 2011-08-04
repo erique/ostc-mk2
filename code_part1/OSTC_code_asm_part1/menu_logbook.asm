@@ -23,6 +23,22 @@
 ; known bugs: 
 ; ToDo: 
 
+;=============================================================================
+; Temp data, local to this module, moved to ACCES0 area.
+;
+    CBLOCK 0x010                ; Keep space for aa_wordprocessor's temp.
+        count_temperature       ; Current sample count for temperature divisor
+        count_deco              ; Current sample count for deco (ceiling) divisor
+        logbook0_ptr:2          ; Loogbook pointer inside EEPROM Bank0
+        logbook1_ptr:2          ; Loogbook pointer inside EEPROM Bank1
+        logbook_cur_depth:2     ; Current depth, for drawing profile.
+        logbook_cur_tp:2        ; Current temperature, for drawing profile.
+        logbook_last_tp         ; Y of the last item in Tp° curve.
+        logbook_min_tp:2        ; Min temperature, for drawing profile.
+        logbook_ceiling         ; Current ceiling, for drawing profile.
+    ENDC
+
+;=============================================================================
 ; searches external EEPROM for dive headers and displays them in a list
 ; a detailed view with all informations and profile can be selected
 ; does not require a FAT, will work with other profile intervals as ten seconds, too
@@ -47,8 +63,8 @@ menu_logbook1a:
 	call 		I2CReset					; Reset I2C Bus
 	call		get_free_EEPROM_location	; search from "here" backwards through the external memory
 
-	movff		eeprom_address+0,logbook_temp5
-	movff		eeprom_address+1,logbook_temp6	; Store Pointer to 0xFE (From 0xFD, 0xFD, 0xFE sequence) for faster display
+	movff		eeprom_address+0,logbook1_ptr+0
+	movff		eeprom_address+1,logbook1_ptr+1	; Store Pointer to 0xFE (From 0xFD, 0xFD, 0xFE sequence) for faster display
 
 menu_logbook1a_no_get_free:				; Without repeated search for dive
 	clrf		divemins+0					; Here: used as temp variables
@@ -253,8 +269,8 @@ display_profile:
 
 	clrf		divenumber						; search from scratch
 
-	movff		logbook_temp5,eeprom_address+0
-	movff		logbook_temp6,eeprom_address+1	; Restore Pointer to 0xFE (From 0xFD, 0xFD, 0xFE sequence) for faster display
+	movff		logbook1_ptr+0,eeprom_address+0
+	movff		logbook1_ptr+1,eeprom_address+1	; Restore Pointer to 0xFE (From 0xFD, 0xFD, 0xFE sequence) for faster display
 
 	bra			menu_logbook1a_no_get_free		; Start Search for Dive (Without get_free_EEPROM_location)
 
@@ -522,13 +538,13 @@ display_profile_xscale:
 	movf		SSPBUF,W
 	andlw       0x0F                        ; Clear extra bits.
 	movwf       divisor_temperature	        ; Store divisor
-	movwf       logbook_temp1               ; Store to tp° counter too.
+	movwf       count_temperature           ; Store to tp° counter too.
 
 	call		I2CREAD2					; Read divisor
 	movf        SSPBUF,W
 	andlw       0x0F
 	movwf       divisor_deco      			; Store divisor
-	movwf		logbook_temp2               ; Store as temp, too
+	movwf		count_deco                  ; Store as temp, too
 
 	call		I2CREAD2					; Read divisor
 	movff		SSPBUF,divisor_gf			; Store divisor
@@ -1173,7 +1189,7 @@ profile_view_get_depth_new1:
     ;---- Read Tp°, if any AND divisor reached AND bytes available -----------
     movf        divisor_temperature,W       ; Is Tp° divisor null ?
     bz          profile_view_get_depth_no_tp; Yes: no Tp° curve.
-    decf        logbook_temp1,F             ; Decrement tp° counter
+    decf        count_temperature,F         ; Decrement tp° counter
     bnz         profile_view_get_depth_no_tp; No temperature this time
     
     call		I2CREAD2					; Tp° low
@@ -1182,19 +1198,19 @@ profile_view_get_depth_new1:
 	movff		SSPBUF,logbook_cur_tp+1
 	decf        timeout_counter2,F
 	decf        timeout_counter2,F
-	movff       divisor_temperature,logbook_temp1   ; Restart counter.
+	movff       divisor_temperature,count_temperature   ; Restart counter.
     
     ;---- Read deco, if any AND divisor=0 AND bytes available ----------------
 profile_view_get_depth_no_tp:
     movf        divisor_deco,W
     bz          profile_view_get_depth_no_deco
-    decf        logbook_temp2,F
+    decf        count_deco,F
     bnz         profile_view_get_depth_no_deco
     
     call		I2CREAD2
 	movff		SSPBUF,logbook_ceiling
 	decf        timeout_counter2,F
-	movff       divisor_deco,logbook_temp2  ; Restart counter.
+	movff       divisor_deco,count_deco     ; Restart counter.
 
     ;---- Read GF, if any AND divisor=0 AND bytes available ------------------
 profile_view_get_depth_no_deco:
@@ -1394,101 +1410,101 @@ logbook_convert_64k:						; Converts <1.91 logbook (32kB) to 64kB variant
 ; Step 1: Copy 32k from 0xFE + 1 with bank switching to bank1
 ; Step 2: Copy 32k from bank1 to bank0
 ; Step 3: delete bank1
-	call	get_free_EEPROM_location		; Searches 0xFD, 0xFD, 0xFE and sets Pointer to 0xFE
-	rcall	incf_eeprom_bank0	; eeprom_address:2 now at 0xFE+1
+	call	get_free_EEPROM_location    ; Searches 0xFD, 0xFD, 0xFE and sets Pointer to 0xFE
+	rcall	incf_eeprom_bank0	        ; eeprom_address:2 now at 0xFE+1
 ; Do Step 1:
-	;logbook_temp5 and logbook_temp6 hold address in bank1
-	;logbook_temp1 and logbook_temp2 hold address in bank0
+	;logbook1_ptr+0 and logbook1_ptr+1 hold address in bank1
+	;logbook0_ptr+0 and logbook0_ptr+1 hold address in bank0
 	movlw	HIGH	0x8000
-	movwf	logbook_temp6 
+	movwf	logbook1_ptr+1 
 	movlw	LOW		0x8000
-	movwf	logbook_temp5			; load address for bank1
-	movff	eeprom_address+0,logbook_temp1 
-	movff	eeprom_address+1,logbook_temp2	; load address for bank0
+	movwf	logbook1_ptr+0			    ; load address for bank1
+	movff	eeprom_address+0,logbook0_ptr+0 
+	movff	eeprom_address+1,logbook0_ptr+1	; load address for bank0
 	movlw	0x80
 	movwf	uart2_temp
 logbook_convert2:
-	clrf	uart1_temp				; counter for copy operation
+	clrf	uart1_temp				    ; counter for copy operation
 logbook_convert3:
 	; read source
-	movff	logbook_temp1,eeprom_address+0
-	movff	logbook_temp2,eeprom_address+1
+	movff	logbook0_ptr+0,eeprom_address+0
+	movff	logbook0_ptr+1,eeprom_address+1
 	call	I2CREAD
 	movff	SSPBUF,lo				; hold read value
 	rcall	incf_eeprom_bank0		; eeprom_address:2 +1 with bank switching
-	movff	eeprom_address+0,logbook_temp1
-	movff	eeprom_address+1,logbook_temp2	; write source address
+	movff	eeprom_address+0,logbook0_ptr+0
+	movff	eeprom_address+1,logbook0_ptr+1	; write source address
 	; write target
-	movff	logbook_temp5,eeprom_address+0
-	movff	logbook_temp6,eeprom_address+1
+	movff	logbook1_ptr+0,eeprom_address+0
+	movff	logbook1_ptr+1,eeprom_address+1
 	movf	lo,W
-	call	I2CWRITE				; writes WREG into EEPROM@eeprom_address
+	call	I2CWRITE				    ; writes WREG into EEPROM@eeprom_address
 	movlw	d'1'
-	addwf	logbook_temp5,F
+	addwf	logbook1_ptr+0,F
 	movlw	d'0'
-	addwfc	logbook_temp6,F			; increase target address
+	addwfc	logbook1_ptr+1,F            ; increase target address
 	decfsz	uart1_temp,F	
 	bra		logbook_convert3
 	btg		LED_blue
-	decfsz	uart2_temp,F			; 32kByte done?
-	bra		logbook_convert2		; No, continue
+	decfsz	uart2_temp,F			    ; 32kByte done?
+	bra		logbook_convert2		    ; No, continue
 ; Step 1 done.
 	bcf		LED_blue
 ; Do Step 2:
 	movlw	HIGH	0x0000
-	movwf	logbook_temp6 
+	movwf	logbook1_ptr+1 
 	movlw	LOW		0x0000
-	movwf	logbook_temp5			; load address for bank0
+	movwf	logbook1_ptr+0              ; load address for bank0
 	movlw	HIGH	0x8000
-	movwf	logbook_temp2 
+	movwf	logbook0_ptr+1 
 	movlw	LOW		0x8000
-	movwf	logbook_temp1			; load address for bank1
+	movwf	logbook0_ptr+0		        ; load address for bank1
 	movlw	0x80
 	movwf	uart2_temp
 logbook_convert4:
-	clrf	uart1_temp				; counter for copy operation
+	clrf	uart1_temp				    ; counter for copy operation
 logbook_convert5:
 	; read source
-	movff	logbook_temp1,eeprom_address+0
-	movff	logbook_temp2,eeprom_address+1
+	movff	logbook0_ptr+0,eeprom_address+0
+	movff	logbook0_ptr+1,eeprom_address+1
 	call	I2CREAD
 	movff	SSPBUF,lo				; hold read value
 	incf_eeprom_address	d'1'	
-	movff	eeprom_address+0,logbook_temp1
-	movff	eeprom_address+1,logbook_temp2	; write source address
+	movff	eeprom_address+0,logbook0_ptr+0
+	movff	eeprom_address+1,logbook0_ptr+1    ; write source address
 	; write target
-	movff	logbook_temp5,eeprom_address+0
-	movff	logbook_temp6,eeprom_address+1
+	movff	logbook1_ptr+0,eeprom_address+0
+	movff	logbook1_ptr+1,eeprom_address+1
 	movf	lo,W
-	call	I2CWRITE				; writes WREG into EEPROM@eeprom_address
+	call	I2CWRITE				    ; writes WREG into EEPROM@eeprom_address
 	incf_eeprom_address	d'1'
-	movff	eeprom_address+0,logbook_temp5
-	movff	eeprom_address+1,logbook_temp6	; write target address
+	movff	eeprom_address+0,logbook1_ptr+0
+	movff	eeprom_address+1,logbook1_ptr+1; write target address
 	decfsz	uart1_temp,F	
 	bra		logbook_convert5
 	btg		LED_red
-	decfsz	uart2_temp,F			; 32kByte done?
-	bra		logbook_convert4		; No, continue
+	decfsz	uart2_temp,F			    ; 32kByte done?
+	bra		logbook_convert4		    ; No, continue
 ; Step 2 done.
 	bcf		LED_red
 ; Do Step 3:
 	movlw	HIGH	0x8000
-	movwf	logbook_temp2 
+	movwf	logbook0_ptr+1 
 	movlw	LOW		0x8000
-	movwf	logbook_temp1			; load address for bank1
+	movwf	logbook0_ptr+0              ; load address for bank1
 	movlw	0x80
 	movwf	uart2_temp
 logbook_convert6:
-	clrf	uart1_temp				; counter for copy operation
+	clrf	uart1_temp				    ; counter for copy operation
 logbook_convert7:
 	; write target
-	movff	logbook_temp1,eeprom_address+0
-	movff	logbook_temp2,eeprom_address+1
+	movff	logbook0_ptr+0,eeprom_address+0
+	movff	logbook0_ptr+1,eeprom_address+1
 	movlw	0xFF
 	call	I2CWRITE				; writes WREG into EEPROM@eeprom_address
 	incf_eeprom_address	d'1'
-	movff	eeprom_address+0,logbook_temp1
-	movff	eeprom_address+1,logbook_temp2	; write target address
+	movff	eeprom_address+0,logbook0_ptr+0
+	movff	eeprom_address+1,logbook0_ptr+1	; write target address
 	decfsz	uart1_temp,F	
 	bra		logbook_convert7
 	btg		LED_red

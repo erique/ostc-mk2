@@ -1,3 +1,6 @@
+New in 1.96 beta:
+NEW: Logbook displays ceilings and temperature curve.
+
 New in 1.95 beta:
 CHANGE: 0.98bar equal 10m depths with salinity set to 1.00kg/l
 

@@ -549,7 +549,7 @@ PLED_simulator_data_2:
 	lfsr        FSR2,letter
 	OUTPUTTEXTH .277                    ; Bottom Time:
 
-	movff	logbook_temp1,lo
+	movff	sim_btm_time,lo
 	bsf		leftbind
 	output_8
 	STRCAT_PRINT  "min "
@@ -559,7 +559,7 @@ PLED_simulator_data_2:
 	lfsr	FSR2,letter
 	OUTPUTTEXTH .278                    ; Max. Depth:
 
-	movff	logbook_temp2,lo
+	movff	sim_btm_depth,lo
 	bsf		leftbind
 	output_8
 	STRCAT_PRINT  "m  "

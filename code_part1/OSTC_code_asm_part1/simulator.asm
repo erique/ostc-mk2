@@ -23,11 +23,22 @@
 ; known bugs:
 ; ToDo: 
 
+;=============================================================================
+; Temp data, local to this module, moved to ACCES0 area.
+;
+    CBLOCK tmp                  ; Into safe (from C library) area.
+        sim_btm_time            ; Simulated bottom time
+        sim_btm_depth           ; Simulated max depth
+        sim_CNS                 ; Backup CNS value during decoplanning.
+    ENDC
+
+;=============================================================================
+
 menu_simulator:
 	movlw	d'3'
-	movwf	logbook_temp1		; Bottom time
+	movwf	sim_btm_time		; Bottom time
 	movlw	d'15'
-	movwf	logbook_temp2		; Max. Depth
+	movwf	sim_btm_depth		; Max. Depth
 	movlw	d'1'
 	movwf	menupos
     clrf    WREG                        ; Interval
@@ -109,20 +120,20 @@ simulator_inc_interval:
     
 simulator_inc_bottomtime:
 	movlw	d'2'
-	addwf	logbook_temp1,F				; Here: Bottomtime in m
+	addwf	sim_btm_time,F				; Here: Bottomtime in m
 	movlw	d'199'
-	cpfslt	logbook_temp1
-	movwf	logbook_temp1
+	cpfslt	sim_btm_time
+	movwf	sim_btm_time
 	movlw	d'3'
 	movwf	menupos
 	bra		menu_simulator2
 
 simulator_inc_maxdepth:
 	movlw	d'3'
-	addwf	logbook_temp2,F				; Here: Maxdepth in m
+	addwf	sim_btm_depth,F				; Here: Maxdepth in m
 	movlw	d'120'
-	cpfslt	logbook_temp2
-	movwf	logbook_temp2
+	cpfslt	sim_btm_depth
+	movwf	sim_btm_depth
 	movlw	d'4'
 	movwf	menupos
 	bra		menu_simulator2
@@ -136,7 +147,7 @@ simulator_startdive:
 	bsf		simulatormode_active			; normal simulator mode
 	bsf		standalone_simulator			; Standalone Simulator active
 
-	movff	logbook_temp2,xA+0
+	movff	sim_btm_depth,xA+0
 	clrf	xA+1
 	movlw	d'100'
 	movwf	xB+0
@@ -210,7 +221,7 @@ simulator_decoplan_notts:
         output_8
 
         STRCAT  "%\x92"                 ; Right-arrow
-        movff   logbook_temp3,lo        ; Get back CNS value.
+        movff   sim_CNS,lo              ; Get back CNS value.
         output_8                        ; CNS after dive.
         STRCAT_PRINT    "%"
 
@@ -352,10 +363,10 @@ simulator_calc_deco:
 	call	diveloop_boot               ; configure gases, etc.
 
     ; Save dive parameters for gas volume estimation:
-    movff   logbook_temp2,char_I_bottom_depth
-    movff   logbook_temp1,char_I_bottom_time
+    movff   sim_btm_depth,char_I_bottom_depth
+    movff   sim_btm_time,char_I_bottom_time
 
-	movff	logbook_temp2,xA+0          ; Bottom depth. 
+	movff	sim_btm_depth,xA+0          ; Bottom depth. 
 	clrf	xA+1
 	movlw	d'100'
 	movwf	xB+0
@@ -395,7 +406,7 @@ simulator_calc_deco:
     call	deco_calc_CNS_fraction      ; Also calculate CNS (in 1min loop)
 	movlb	b'00000001'                 ; rambank 1 selected
 
-    decf    logbook_temp1,F             ; One minute done.
+    decf    sim_btm_time,F              ; One minute done.
 
     ; Loop for bottom time duration
 simulator_calc_deco_loop2:
@@ -406,7 +417,7 @@ simulator_calc_deco_loop2:
     movlb	b'00000001'                 ; rambank 1 selected
     ostc_debug	'C'	                    ; Sends debug-information to screen if debugmode active
 
-    decfsz  logbook_temp1,F             ; Decrement bottom time,
+    decfsz  sim_btm_time,F              ; Decrement bottom time,
 	bra     simulator_calc_deco_loop2   ; and loop while not finished.
 
     ; No the bottom time is finish, restart a full ascent simulation,
@@ -420,7 +431,7 @@ simulator_calc_deco2:
 	call	deco_calc_hauptroutine		; calc_tissue
 	movlb	b'00000001'                 ; rambank 1 selected
 
-    movff   char_O_deco_last_stop,logbook_temp2
+    movff   char_O_deco_last_stop,sim_btm_depth
     call    PLED_simulator_data         ; Animate ascent simu.
 
 	dcfsnz	timeout_counter2,F			; Abort loop (max. 256 tries)?
@@ -432,7 +443,7 @@ simulator_calc_deco2:
 
 ; Finished
 simulator_calc_deco3:
-    movff   char_O_CNS_fraction,logbook_temp3   ; Save calculated CNS.     
+    movff   char_O_CNS_fraction,sim_CNS ; Save calculated CNS.     
 	rcall	simulator_restore_tissue_data	; Restore CNS & 32 floats "pre_tissue" from vault
 
 	bcf		simulatormode_active        ; normal simulator mode
@@ -445,8 +456,8 @@ simulator_calc_deco3:
 
 	movlw	d'5'                        ; Pre-Set Cursor to "Show Decoplan"
 	movwf	menupos
-	movff	char_I_bottom_time,logbook_temp1    ; Restore bottom time,
-	movff   char_I_bottom_depth,logbook_temp2   ; and depth.
+	movff	char_I_bottom_time,sim_btm_time    ; Restore bottom time,
+	movff   char_I_bottom_depth,sim_btm_depth   ; and depth.
 
 	clrf	timeout_counter2            ; Restart menu timeout.
     bra     simulator_show_decoplan     ; Done.

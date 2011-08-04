@@ -96,13 +96,20 @@
 
 ;=============================================================================
 
-;#include "../OSTC_code_c_part2/shared_definitions.h"
-#include "shared_definitions.h"
+#include "../OSTC_code_c_part2/shared_definitions.h"
+;#include "shared_definitions.h"
 
 ;=============================================================================
 ; Reserve space for C-code data space. Eg.when calling log.
 ; Note: overlayed with md_hash temporary space.
 c_code_data_stack   EQU 0x800
+
+;=============================================================================
+; ACCESS0 data
+;
+tmp0            udata_acs 0x04C     ; Bank 0 ACCESS area for small tmp data.
+tmp             equ       0x04C
+                res .20             ; What is left from the C library.
 
 ;=============================================================================
 ; BANK0 data
@@ -332,18 +339,6 @@ decoplan_page           res 1   ; used in PLED_MultiGF,...
 temp10                  res 2   ; used in customview
 
 fatal_error_code        res 1   ; holds error code value 
-
-logbook_temp1           res 1   ; Temp used in logbook display&Divemode&Gassetup
-logbook_temp2           res 1   ; Temp used in logbook display&Divemode&Gassetup
-logbook_temp3           res 1   ; Temp used in logbook display&Divemode&Gassetup
-logbook_temp4           res 1   ; Temp used in logbook display&Divemode&Gassetup
-logbook_temp5           res 1   ; Temp used in logbook display&Divemode&Gassetup
-logbook_temp6           res 1   ; Temp used in logbook display&Divemode&Gassetup
-logbook_cur_depth       res 2   ; Current depth, for drawing profile.
-logbook_cur_tp          res 2   ; Current temperature, for drawing profile.
-logbook_last_tp         res 1   ; Y of the last item in Tp° curve.
-logbook_min_tp          res 2   ; Min temperature, for drawing profile.
-logbook_ceiling         res 1   ; Current ceiling, for drawing profile.
 
 convert_value_temp      res 3   ; used in menu_battery_state_convert_date
 time_correction_value   res 1   ; Adds to Seconds on midnight

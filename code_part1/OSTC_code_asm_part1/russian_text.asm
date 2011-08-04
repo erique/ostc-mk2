@@ -22,6 +22,7 @@
 ; 2011/02/02 : Jean-Do Gascuel : split into different files for multi-lingual support
 ; 2011/07/25 : Sergei V. Rozinov: Russian translation.
 ; 2011/07/28 : Sergei V. Rozinov: Corrected.
+; 2011/08/04 : Sergei V. Rozinov: Adapted for firmware 1.95+
 ;
 ; known bugs:
 ; ToDo:
@@ -96,37 +97,37 @@
     TCODE    .0,   .0,       "Нелєт"                     ;035 NoFly		        (No-flight count-down)
 ;
 ; 32 custom function descriptors I (FIXED LENGTH = 15 chars).
-    TCODE    .40,  .35,      "Начало погр.[m]"           ;036 Start Dive  [m]	(depth to switch to dive mode)
-    TCODE    .40,  .35,      "Конец погр. [m]"           ;037 End Dive    [m]	(depth to switch back to surface mode)
-    TCODE    .40,  .35,      "Жду после [min]"           ;038 End Delay [min]  	(duration dive screen stays after end of dive)
-    TCODE    .40,  .35,      "Отключение[min]"           ;039 Power Off [min]
-    TCODE    .40,  .35,      "Пред-меню [min]"           ;040 Pre-menu  [min]	(Delais to keep surface-mode menus displayed)
-    TCODE    .40,  .35,      "Скорость[m/min]"           ;041 velocity[m/min]
-    TCODE    .40,  .35,      "Автовключ[mbar]"           ;042 Wake-up  [mbar]
-    TCODE    .40,  .35,      "max. Верх[mbar]"           ;043 max.Surf.[mbar]
+    TCODE    .40,  .35,      "Начало погр.[м]"           ;036 Start Dive  [m]	(depth to switch to dive mode)
+    TCODE    .40,  .35,      "Конец погр. [м]"           ;037 End Dive    [m]	(depth to switch back to surface mode)
+    TCODE    .40,  .35,      "Жду после [сек]"           ;038 End Delay [sec]  	(duration dive screen stays after end of dive)
+    TCODE    .40,  .35,      "Отключение[мин]"           ;039 Power Off [min]
+    TCODE    .40,  .35,      "Пред-меню [мин]"           ;040 Pre-menu  [min]	(Delais to keep surface-mode menus displayed)
+    TCODE    .40,  .35,      "Скорость[м/мин]"           ;041 velocity[m/min]
+    TCODE    .40,  .35,      "Автовключ[мбар]"           ;042 Wake-up  [mbar]
+    TCODE    .40,  .35,      "max. Верх[мбар]"           ;043 max.Surf.[mbar]
     TCODE    .40,  .35,      "Показать GF [%]"           ;044 GF display  [%]
     TCODE    .40,  .35,      "min.O2 показ[%]"           ;045 min. O2 Dis.[%]
-    TCODE    .40,  .35,      "Меню погр.[min]"           ;046 Dive menus[min]
+    TCODE    .40,  .35,      "Меню погр.[мин]"           ;046 Dive menus[min]
     TCODE    .40,  .35,      "Насыщение x [%]"           ;047 Saturate x  [%]
     TCODE    .40,  .35,      "Рассыщение x[%]"           ;048 Desaturate x[%]
     TCODE    .40,  .35,      "Нелєт фактор[%]"           ;049 NoFly Ratio [%]	(Grandient factor tolerance for no-flight countdown).
     TCODE    .40,  .35,      "GF тревога 1[%]"           ;050 GF alarm 1  [%]
     TCODE    .40,  .35,      "CNS наверху [%]"           ;051 CNSshow surf[%]
-    TCODE    .40,  .35,      "Деко ниже   [m]"           ;052 Deco Offset [m]
-    TCODE    .40,  .35,      "ppO2 низк [bar]"           ;053 ppO2 low  [bar]
-    TCODE    .40,  .35,      "ppO2 высок[bar]"           ;054 ppO2 high [bar]
-    TCODE    .40,  .35,      "ppO2 показ[bar]"           ;055 ppO2 show [bar]
+    TCODE    .40,  .35,      "Деко ниже   [м]"           ;052 Deco Offset [m]
+    TCODE    .40,  .35,      "ppO2 низк [бар]"           ;053 ppO2 low  [bar]
+    TCODE    .40,  .35,      "ppO2 высок[бар]"           ;054 ppO2 high [bar]
+    TCODE    .40,  .35,      "ppO2 показ[бар]"           ;055 ppO2 show [bar]
     TCODE    .40,  .35,      "Интервал данных"           ;056 sampling rate
     TCODE    .40,  .35,      "Делитель темпер"           ;057 Divisor Temp
     TCODE    .40,  .35,      "Делитель деко  "           ;058 Divisor Decodat
-    TCODE    .40,  .35,      "Делитель неисп1"           ;059 Divisor NotUse1
+    TCODE    .40,  .35,      "Делитель GF    "           ;059 Divisor GF
     TCODE    .40,  .35,      "Делитель ppO2  "           ;060 Divisor ppO2
     TCODE    .40,  .35,      "Делитель дебаг "           ;061 Divisor Debug
-    TCODE    .40,  .35,      "Делитель неисп2"           ;062 Divisor NotUse2
+    TCODE    .40,  .35,      "Делитель CNS   "           ;062 Divisor CNS
     TCODE    .40,  .35,      "CNS показать[%]"           ;063 CNSshow dive[%]
     TCODE    .40,  .35,      "Номер в журнале"           ;064 Logbook offset
-    TCODE    .40,  .35,      "Крайняя деко[m]"           ;065 Last Deco at[m]
-    TCODE    .40,  .35,      "Конец Apnoe [h]"           ;066 End Apnoe   [h]
+    TCODE    .40,  .35,      "Крайняя деко[м]"           ;065 Last Deco at[m]
+    TCODE    .40,  .35,      "Конец Apnoe [ч]"           ;066 End Apnoe   [h]
     TCODE    .40,  .35,      "Показ напр.бат."           ;067 Show Batt.Volts
 ; End of function descriptor I
 ;
@@ -215,7 +216,7 @@
     TCODE    .20,   .35,     "Далее"            	     ;147 More
     TCODE    .0,    .0,      ":.........:"               ;148 :.........:
     TCODE    .0,    .8,      "ppO2"                      ;149 ppO2
-    TCODE    .2,    .39,     "bar "                      ;150 bar
+    TCODE    .2,    .39,     "бар "                      ;150 bar
     TCODE    .108,  .216,    "Маркер?"                   ;151 Marker?
     TCODE    .85,   .125,    "L16-GF OC"                 ;152 L16-GF OC
     TCODE    .20,   .65,     "Доп. Параметры II"	     ;153 Custom FunctionsII
@@ -232,11 +233,11 @@
     TCODE    .40,   .35,     "Предупреж. стоп"           ;162 Warn Ceiling
     TCODE    .40,   .35,     "Картинки газов "           ;163 Mix type icons
     TCODE    .40,   .35,     "Напом. лучш.газ"           ;164 Blink BetterGas	(Remainder in divemode to switch to a better decompression gas).
-	TCODE    .40,   .35,     "Трев.глуб[mbar]"           ;165 DepthWarn[mbar]
+	TCODE    .40,   .35,     "Трев.глуб[мбар]"           ;165 DepthWarn[mbar]
     TCODE    .40,   .35,     "CNS предупр.[%]"           ;166 CNS warning [%]
     TCODE    .40,   .35,     "GF предупр. [%]"           ;167 GF warning  [%]
-    TCODE    .40,   .35,     "ppO2 пред.[bar]"           ;168 ppO2 warn [bar]
-    TCODE    .40,   .35,     "Скор.пр.[m/min]"           ;169 Vel.warn[m/min]
+    TCODE    .40,   .35,     "ppO2 пред.[бар]"           ;168 ppO2 warn [bar]
+    TCODE    .40,   .35,     "Скор.пр.[м/мин]"           ;169 Vel.warn[m/min]
     TCODE    .40,   .35,     "Коррекция часов"           ;170 Time offset/day
     TCODE    .40,   .35,     "Показ альтиметр"           ;171 Show altimeter
     TCODE    .40,   .35,     "Показать маркер"           ;172 Show Log-Marker
@@ -244,10 +245,10 @@
     TCODE    .40,   .35,     "Показ граф. ткн"           ;174 ShowTissueGraph
     TCODE    .40,   .35,     "Показ глав. ткн"           ;175 Show Lead.Tiss.
     TCODE    .40,   .35,     "Мелк.ост.вверху"           ;176 Shallow stop 1st  (Reverse order of deco plans)
-    TCODE    .40,   .35,     "Перекл.газ[min]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
-    TCODE    .40,   .35,     "Донн.расх[/min]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
-    TCODE    .40,   .35,     "Подъ.расх[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
-    TCODE    .40,   .35,     "Будущ. TTS[min]"           ;180 Future TTS[min]   (@5 variant: compute TTS for extra time at current depth)
+    TCODE    .40,   .35,     "Перекл.газ[мин]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
+    TCODE    .40,   .35,     "Донн.расх[/мин]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
+    TCODE    .40,   .35,     "Подъ.расх[/мин]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
+    TCODE    .40,   .35,     "Будущ. TTS[мин]"           ;180 Future TTS[min]   (@5 variant: compute TTS for extra time at current depth)
     TCODE    .40,   .35,     "Не используется"           ;181 not used
     TCODE    .40,   .35,     "Не используется"           ;182 not used
     TCODE    .40,   .35,     "Не используется"           ;183 not used
@@ -325,7 +326,7 @@
     TCODE    .50,   .145,    "Батарея!"                  ;246 LowBatt!
     TCODE    .20,   .125,    "Планировщик"               ;247 Simulator
     TCODE    .30,   .2,      "OSTC Планировщик"          ;248 OSTC Simulator
-    TCODE    .20,   .35,     "Начать имитацию"           ;249 Start Dive
+    TCODE    .20,   .65,     "Начать имитацию"           ;249 Start Dive
     TCODE    .100,  .25,     "+ 1м"                      ;250 + 1m
     TCODE    .100,  .50,     "- 1м"                      ;251 - 1m
     TCODE    .100,  .75,     "+10м"                      ;252 +10m
@@ -358,10 +359,10 @@
     TCODE    .0,    .125,    "для информации!"           ;275 for Details!
     TCODE    .20,   .95,     "Соленость: "               ;276 Salinity:
 ;
-    TCODE    .20,   .65,     "Время на дне :"            ;277 Bottom Time:
-    TCODE    .20,   .95,     "Макс. глубина:"            ;278 Max. Depth:
-    TCODE    .20,   .125,    "Вычислить деко"            ;279 Calculate Deco
-    TCODE    .20,   .155,    "Показать план"             ;280 Show Decoplan
+    TCODE    .20,   .95,     "Время на дне :"            ;277 Bottom Time:
+    TCODE    .20,   .125,    "Макс. глубина:"            ;278 Max. Depth:
+    TCODE    .20,   .155,    "Вычислить деко"            ;279 Calculate Deco
+    TCODE    .20,   .155,    ""                          ;280 UNUSED
 ;
     TCODE    .107,  .170,    "С®едняя"                   ;281 Avr.Depth
     TCODE    .90,   .170,    "Глав ткань"                ;282 Lead Tiss.
@@ -374,9 +375,9 @@
     TCODE    .10,   .1,      "Настройка альтиметра"      ;288 Set Altimeter
     TCODE    .20,   .35,     "Уров.моря: "               ;289 Sea ref:
     TCODE    .0,    .0,      "Включен? : "               ;290 Enabled:
-    TCODE    .20,   .95,     "Умолчание: 1013 mbar"      ;291 Default: 1013 mbar
-    TCODE    .20,   .125,    "+1 mbar"                   ;292 +1 mbar
-    TCODE    .20,   .155,    "-1 mbar"                   ;293 -1 mbar
+    TCODE    .20,   .95,     "Умолчание: 1013 мбар"      ;291 Default: 1013 mbar
+    TCODE    .20,   .125,    "+1 мбар"                   ;292 +1 mbar
+    TCODE    .20,   .155,    "-1 мбар"                   ;293 -1 mbar
     TCODE    .85,   .185,    "Alt: "                     ;294 Alt:
 ;
 	TCODE    .20,   .125,    "Показать дамп"             ;295 Show raw data
@@ -389,14 +390,14 @@
 	TCODE    .0,    .2,      "Расход OCR газов:"         ;301 OCR Gas Usage:        (Planned gas consumtion by tank).
 ; 115k Bootloader support:
 	TCODE	 .45,	.100,	 "Загрузчик"				 ;302 Bootloader
-	TCODE	 .40,	.130,	 "Пожалуйста ждите!"    	 ;303 Please wait!
+	TCODE	 .19,	.130,	 "Пожалуйста ждите!"    	 ;303 Please wait!
 	TCODE	 .50,	.130,	 "Прервано!"				 ;304 Aborted
 ;@5 variant
     TCODE    .0,    .0,      "Будущ. TTS"                ;305 Future TTS            (=10 chars. Title for @5 customview).
-    TCODE    .100,  .125,    "Quit Sim"                  ;306 Quit Sim (=8char max. Quit Simulator mode)
+    TCODE    .100,  .125,    "Выход"                     ;306 Quit Sim (=8char max. Quit Simulator mode)
 ;Dive interval
-    TCODE    .20,   .35,     "Interval:"                 ;307 Interval:
-    TCODE    .0,    .0,      "Now    "                   ;308 Now (7 chars min)
-	TCODE	 .108,	.112,	 "Average"			 		 ;309 Average
-	TCODE	 .94,	.54,	 "Stopwatch"		 		 ;310 Stopwatch (BIG Stopwatch in Gauge mode)
+    TCODE    .20,   .35,     "Интервал:"                 ;307 Interval:
+    TCODE    .0,    .0,      "Сейчас "                   ;308 Now (7 chars min)
+	TCODE	 .108,	.112,	 "С®едняя"			 		 ;309 Average
+	TCODE	 .115,	.54,	 "Тайме®"			 		 ;310 Stopwatch (BIG Stopwatch in Gauge mode)
 ;=============================================================================

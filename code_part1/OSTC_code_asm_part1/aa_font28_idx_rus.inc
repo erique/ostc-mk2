@@ -1,9 +1,9 @@
 ;==========================================================================
-; Font index exported by fontconv.php 1.00 2011-08-02 00:31:07 rvs $
+; Font index exported by fontconv.php 1.00 2011-08-04 03:58:46 rvs $
 ;==========================================================================
-aa_font28_chars		EQU	.149
+aa_font28_chars		EQU	.151
 aa_font28_firstChar	EQU	' '
-aa_font28_lastChar	EQU	'´'
+aa_font28_lastChar	EQU	'¶'
 ;
 aa_font28_idx:
 			DW	aa_font28_bits+0x0000	;   Space
@@ -122,37 +122,39 @@ aa_font28_idx:
 			DW	aa_font28_bits+0x0F9C	; ‘ 91
 			DW	aa_font28_bits+0x0FE7	; ’ 92
 			DW	aa_font28_bits+0x100C	; “ 93
-			DW	aa_font28_bits+0x1023	; Û 94
-			DW	aa_font28_bits+0x1048	; Ü 95
-			DW	aa_font28_bits+0x1069	; Ý 96
-			DW	aa_font28_bits+0x10A6	; Þ 97
-			DW	aa_font28_bits+0x10CB	; ß 98
-			DW	aa_font28_bits+0x10F6	; á 99
-			DW	aa_font28_bits+0x1133	; â 9A
-			DW	aa_font28_bits+0x1162	; ã 9B
-			DW	aa_font28_bits+0x1177	; ä 9C
-			DW	aa_font28_bits+0x11A0	; æ 9D
-			DW	aa_font28_bits+0x11C5	; ç 9E
-			DW	aa_font28_bits+0x11FA	; è 9F
-			DW	aa_font28_bits+0x120F	; é A0
-			DW	aa_font28_bits+0x1232	; ê A1
-			DW	aa_font28_bits+0x1253	; ë A2
-			DW	aa_font28_bits+0x126C	; ì A3
-			DW	aa_font28_bits+0x1287	; ¤ A4
-			DW	aa_font28_bits+0x12AC	; í A5
-			DW	aa_font28_bits+0x12C1	; ï A6
-			DW	aa_font28_bits+0x12D6	; ò A7
-			DW	aa_font28_bits+0x12EF	; ô A8
-			DW	aa_font28_bits+0x1314	; ö A9
-			DW	aa_font28_bits+0x132D	; ÷ AA
-			DW	aa_font28_bits+0x1342	; ø AB
-			DW	aa_font28_bits+0x135B	; ù AC
-			DW	aa_font28_bits+0x1378	; ú AD
-			DW	aa_font28_bits+0x139D	; ® AE
-			DW	aa_font28_bits+0x13BE	; û AF
-			DW	aa_font28_bits+0x13E3	; ° B0
-			DW	aa_font28_bits+0x13FC	; ü B1
-			DW	aa_font28_bits+0x141D	; ý B2
-			DW	aa_font28_bits+0x1450	; þ B3
-			DW	aa_font28_bits+0x1475	; ÿ B4
-			DW	aa_font28_bits+0x149E	; END OF INDEX
+			DW	aa_font28_bits+0x1031	; ” 94
+			DW	aa_font28_bits+0x1056	; • 95
+			DW	aa_font28_bits+0x1083	; Û 96
+			DW	aa_font28_bits+0x10A8	; Ü 97
+			DW	aa_font28_bits+0x10C9	; Ý 98
+			DW	aa_font28_bits+0x1106	; Þ 99
+			DW	aa_font28_bits+0x112B	; ß 9A
+			DW	aa_font28_bits+0x1156	; á 9B
+			DW	aa_font28_bits+0x1193	; â 9C
+			DW	aa_font28_bits+0x11C2	; ã 9D
+			DW	aa_font28_bits+0x11D7	; ä 9E
+			DW	aa_font28_bits+0x1200	; æ 9F
+			DW	aa_font28_bits+0x1225	; ç A0
+			DW	aa_font28_bits+0x125A	; è A1
+			DW	aa_font28_bits+0x126F	; é A2
+			DW	aa_font28_bits+0x1292	; ê A3
+			DW	aa_font28_bits+0x12B3	; ¤ A4
+			DW	aa_font28_bits+0x12D8	; ë A5
+			DW	aa_font28_bits+0x12F1	; ì A6
+			DW	aa_font28_bits+0x130C	; í A7
+			DW	aa_font28_bits+0x1321	; ï A8
+			DW	aa_font28_bits+0x1336	; ò A9
+			DW	aa_font28_bits+0x134F	; ô AA
+			DW	aa_font28_bits+0x1374	; ö AB
+			DW	aa_font28_bits+0x138D	; ÷ AC
+			DW	aa_font28_bits+0x13A2	; ø AD
+			DW	aa_font28_bits+0x13BB	; ® AE
+			DW	aa_font28_bits+0x13DC	; ù AF
+			DW	aa_font28_bits+0x13F9	; ° B0
+			DW	aa_font28_bits+0x1412	; ú B1
+			DW	aa_font28_bits+0x1437	; û B2
+			DW	aa_font28_bits+0x145C	; ü B3
+			DW	aa_font28_bits+0x147D	; ý B4
+			DW	aa_font28_bits+0x14B0	; þ B5
+			DW	aa_font28_bits+0x14D5	; ÿ B6
+			DW	aa_font28_bits+0x14FE	; END OF INDEX

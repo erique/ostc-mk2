@@ -419,14 +419,31 @@ show_rawdata:						; Displays Sensor raw data
 
 	call	PLED_static_raw_data
 
+    
 	clrf	timeout_counter2
 	bcf		sleepmode
-	bcf		menubit2
 	bcf		menubit3
 	bsf		menubit
+	
+show_rawdata_loop:
+    rcall   show_rawdata_wait
+
+	btfsc	menubit2
+	bra     show_rawdata_next
+
+	btfsc	onesecupdate
+	call	PLED_update_raw_data
+
+	bcf		onesecupdate				; End of one second tasks, if any.
+
+    goto    show_rawdata_loop
+
+show_rawdata_wait:
+	bcf		menubit2
 	bcf		switch_left
 	bcf		switch_right
-show_rawdata_loop:
+
+show_rawdata_wait_1:
 	btfsc	uart_dump_screen                ; Asked to dump screen contains ?
 	call	dump_screen     			    ; Yes!
 
@@ -436,7 +453,7 @@ show_rawdata_loop:
 	bsf		menubit2
 
 	btfsc	menubit2
-	bra		show_rawdata_exit
+	return
 
 	btfss	menubit
 	goto	restart						; exit menu, restart and enter surfmode
@@ -445,12 +462,7 @@ show_rawdata_loop:
 	call	timeout_surfmode
 
 	btfsc	onesecupdate
-	call	PLED_update_raw_data
-
-	btfsc	onesecupdate
 	call	set_dive_modes
-
-	bcf		onesecupdate				; End of one second tasks
 
 	btfsc	sleepmode
 	bra		show_rawdata_exit			; Exit
@@ -458,7 +470,35 @@ show_rawdata_loop:
 	btfsc	divemode
 	goto	restart						; exit menu, restart and enter divemode
 
-	bra		show_rawdata_loop
+	btfsc	onesecupdate
+	return
+
+	bra		show_rawdata_wait_1
+
+; Display blank/red/green/blue screens until click, to test OLED ageing.
+show_rawdata_next:
+    setf    WREG
+    WIN_BOX_COLOR   .0,.240,.0,.160
+    rcall   show_rawdata_screen_wait
+    movlw   color_red
+    WIN_BOX_COLOR   .0,.240,.0,.160
+    rcall   show_rawdata_screen_wait
+    movlw   color_green
+    WIN_BOX_COLOR   .0,.240,.0,.160
+    rcall   show_rawdata_screen_wait
+    movlw   color_blue
+    WIN_BOX_COLOR   .0,.240,.0,.160
+    rcall   show_rawdata_screen_wait
+    bra     show_rawdata_exit
+
+show_rawdata_screen_wait:
+    rcall   show_rawdata_wait
+	bcf		onesecupdate				; No dynamic update here...
+
+	btfsc	menubit2
+    return
+
+    bra     show_rawdata_screen_wait
 
 show_rawdata_exit:	
 	movlw	d'4'

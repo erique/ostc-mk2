@@ -710,6 +710,14 @@ profile_display_skip_deco:
     sublw       .75+.153      				; Upside-down: Y = .75 + (.153 - result)
     movwf       xC+0
 
+	; Check limits
+	movlw		d'75'
+	movwf		xC+1
+	cpfsgt		xC+0
+	movff		xC+1,xC+0
+	
+	
+
     movlw       color_pink
     call        PLED_set_color
 

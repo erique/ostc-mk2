@@ -340,7 +340,7 @@ simulator_show_decoplan5_2:
     STRCPY  "= "
 
     bsf     leftbind
-    output_16dp .4                      ; 1 decimal.
+    output_16                           ; No decimal anymore.
     bcf     leftbind
     call    word_processor              ; No unit: can be bars or litters.
     

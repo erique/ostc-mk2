@@ -2596,10 +2596,10 @@ void deco_gas_volumes(void)
 
     //---- convert results for the ASM interface -----------------------------
     for(i=0; i<NUM_GAS; ++i)
-        if( volumes[i] > 6553.4 )
+        if( volumes[i] > 65534.0 )
             int_O_gas_volumes[i] = 65535;
         else
-            int_O_gas_volumes[i] = (unsigned short)(volumes[i]*10.0 + 0.5);
+            int_O_gas_volumes[i] = (unsigned short)(volumes[i] + 0.5);
 }
 
 //////////////////////////////////////////////////////////////////////////////

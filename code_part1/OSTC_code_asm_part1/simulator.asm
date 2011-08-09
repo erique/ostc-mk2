@@ -216,15 +216,30 @@ simulator_show_decoplan:
 
 simulator_decoplan_notts:
         WIN_TOP .190                    ; Print calculated CNS before and after dive
+
+        incf    sim_CNS,W               ; Detect CNS simulation overflow.
+        bz      simulator_decoplan_cns_1
+
+        movlw   .100                    ; Detect if CNS > 100%
+        cpfslt  sim_CNS
+        call    PLED_warnings_color     ; Yes: draw in red !
+
         STRCPY  "CNS:"
         movff   char_O_CNS_fraction,lo  ; Current CNS, before dive.
         output_8
-
         STRCAT  "%\x92"                 ; Right-arrow
+       
         movff   sim_CNS,lo              ; Get back CNS value.
         output_8                        ; CNS after dive.
         STRCAT_PRINT    "%"
+        bra     simulator_decoplan_cns_2
 
+simulator_decoplan_cns_1:
+        call    PLED_warnings_color     ; Yes: draw in red !
+        STRCPY_PRINT    "CNS > 250%"
+
+simulator_decoplan_cns_2:
+        call    PLED_standard_color     ; Back to normal.
         WIN_INVERT	.1	                ; Init new Wordprocessor	
         DISPLAYTEXT	.188		        ; Sim. Results:
         WIN_INVERT	.0                  ; Init new Wordprocessor	

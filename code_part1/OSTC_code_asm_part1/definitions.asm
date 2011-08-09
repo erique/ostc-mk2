@@ -358,6 +358,7 @@ total_divetime_seconds	res 2	; counts dive seconds regardless of CF01 (18h max.)
     extern deco_calc_wo_deco_step_1_min
     extern deco_calc_dive_interval
     extern deco_clear_CNS_fraction
+    extern deco_calc_CNS_planning
     extern deco_clear_tissue
     extern deco_hash    
     extern deco_pull_tissues_from_vault

@@ -407,6 +407,7 @@ simulator_calc_deco:
 	movlb	b'00000001'                 ; rambank 1 selected
 
     decf    sim_btm_time,F              ; One minute done.
+    bz      simulator_calc_deco_loop_end
 
     ; Loop for bottom time duration
 simulator_calc_deco_loop2:
@@ -420,7 +421,8 @@ simulator_calc_deco_loop2:
     decfsz  sim_btm_time,F              ; Decrement bottom time,
 	bra     simulator_calc_deco_loop2   ; and loop while not finished.
 
-    ; No the bottom time is finish, restart a full ascent simulation,
+    ; Now the bottom time is finish, restart a full ascent simulation:
+simulator_calc_deco_loop_end:
 	movlw	d'0'
 	movff	WREG,char_I_step_is_1min    ; Back to 2 second deco mode
 
@@ -443,6 +445,7 @@ simulator_calc_deco2:
 
 ; Finished
 simulator_calc_deco3:
+    call    deco_calc_CNS_planning      ; Compute cNS after full ascent.
     movff   char_O_CNS_fraction,sim_CNS ; Save calculated CNS.     
 	rcall	simulator_restore_tissue_data	; Restore CNS & 32 floats "pre_tissue" from vault
 
@@ -462,6 +465,8 @@ simulator_calc_deco3:
 	clrf	timeout_counter2            ; Restart menu timeout.
     bra     simulator_show_decoplan     ; Done.
 
+;=============================================================================
+
 simulator_save_tissue_data:
 	bsf		restore_deco_data           ; Set restore flag
 	ostc_debug	'S'                     ; Sends debug-information to screen if debugmode active
@@ -469,6 +474,8 @@ simulator_save_tissue_data:
 	movlb	0x01                        ; Back to RAM Bank1
 	ostc_debug	'T'                     ; Sends debug-information to screen if debugmode active
 	return
+
+;=============================================================================
 
 simulator_restore_tissue_data:
 	bcf		restore_deco_data           ; clear restore flag

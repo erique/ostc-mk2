@@ -2311,44 +2311,40 @@ void deco_clear_CNS_fraction(void)
 //////////////////////////////////////////////////////////////////////////////
 // deco_calc_CNS_fraction
 //
-// new in v.101
-// optimized in v.102 : with new variables char_I_actual_ppO2 and actual_ppO2
-//
-// Input: char_I_actual_ppO2
-//        char_I_step_is_1min : use 1min steps instead of 2sec.
-// Output: char_O_CNS_fraction
-// Uses and Updates: CNS_fraction
-// Uses: acutal_ppO2
+// Input:  char_I_actual_ppO2   : Current condition (in decibars).
+//         char_I_step_is_1min  : use 1min or 10min steps instead of 2sec.
+//         CNS_fraction         : velue before period.
+// Output: CNS_fraction, char_O_CNS_fraction
 //
 void deco_calc_CNS_fraction(void)
 {
-    overlay float actual_ppO2;
     overlay float time_factor = 1.0f;    
     RESET_C_STACK
 
     assert( 0.0 <= CNS_fraction && CNS_fraction <= 2.5 );
     assert( char_I_actual_ppO2 > 15 );
 
-    actual_ppO2 = (float)char_I_actual_ppO2 / 100.0;
-    if( char_I_step_is_1min )
+    if( char_I_step_is_1min == 1 )
         time_factor = 30.0f;
+    else if( char_I_step_is_1min == 2  )
+        time_factor = 300.0f;
 
     if (char_I_actual_ppO2 < 50)
         ;   // no changes
     else if (char_I_actual_ppO2 < 60)
-        CNS_fraction += time_factor/(-54000.0 * actual_ppO2 + 54000.0);
+        CNS_fraction += time_factor/(-540.0 * char_I_actual_ppO2 + 54000.0);
     else if (char_I_actual_ppO2 < 70)
-        CNS_fraction += time_factor/(-45000.0 * actual_ppO2 + 48600.0);
+        CNS_fraction += time_factor/(-450.0 * char_I_actual_ppO2 + 48600.0);
     else if (char_I_actual_ppO2 < 80)
-        CNS_fraction += time_factor/(-36000.0 * actual_ppO2 + 42300.0);
+        CNS_fraction += time_factor/(-360.0 * char_I_actual_ppO2 + 42300.0);
     else if (char_I_actual_ppO2 < 90)
-        CNS_fraction += time_factor/(-27000.0 * actual_ppO2 + 35100.0);
+        CNS_fraction += time_factor/(-270.0 * char_I_actual_ppO2 + 35100.0);
     else if (char_I_actual_ppO2 < 110)
-        CNS_fraction += time_factor/(-18000.0 * actual_ppO2 + 27000.0);
+        CNS_fraction += time_factor/(-180.0 * char_I_actual_ppO2 + 27000.0);
     else if (char_I_actual_ppO2 < 150)
-        CNS_fraction += time_factor/(-9000.0 * actual_ppO2 + 17100.0);
+        CNS_fraction += time_factor/( -90.0 * char_I_actual_ppO2 + 17100.0);
     else if (char_I_actual_ppO2 < 160)
-        CNS_fraction += time_factor/(-22500.0 * actual_ppO2 + 37350.0);
+        CNS_fraction += time_factor/(-225.0 * char_I_actual_ppO2 + 37350.0);
     else if (char_I_actual_ppO2 < 165)
         CNS_fraction += time_factor*0.000755; // Arieli et all.(2002): Modeling pulmonary and CNS O2 toxicity... Formula (A1) based on value for 1.55 and c=20
     else if (char_I_actual_ppO2 < 170)
@@ -2371,12 +2367,84 @@ void deco_calc_CNS_fraction(void)
         CNS_fraction += time_factor*0.0482; // value for 2.5
 
     if (CNS_fraction > 2.5)
-        CNS_fraction = 2.5;
+        CNS_fraction = 2.55;
     if (CNS_fraction < 0.0)
         CNS_fraction = 0.0;
 
-    char_O_CNS_fraction = (char)((CNS_fraction + 0.005)* 100.0);
+    char_O_CNS_fraction = (unsigned char)(100.0f * CNS_fraction + 0.5f );
 }
+
+//////////////////////////////////////////////////////////////////////////////
+// deco_calc_CNS_planning
+//
+// Input:
+// Output:
+void deco_calc_CNS_planning(void)
+{
+    RESET_C_STACK
+    
+    // Uses 1min CNS period:
+    char_I_step_is_1min = 1;
+    
+    //---- Retrieve bottom Gas used, and set variables.
+    sim_gas_last_used  = char_I_first_gas;
+    sim_gas_last_depth = 0;                 // Surface gas marker.
+    gas_switch_set();                       // Sets initial calc_N2/He_ratio
+
+    //---- CCR mode : do the full TTS at once --------------------------------
+    if( char_I_const_ppO2 != 0 )
+    {
+        overlay unsigned char t;
+        char_I_actual_ppO2 = char_I_const_ppO2;
+        for(t=0; t<int_O_ascenttime; ++t)
+            deco_calc_CNS_fraction();
+    }
+    else //---- OC mode : have to follow all gas switches... -----------------
+    {
+        overlay unsigned char i = 0;            // Decostop loop counter
+        overlay float actual_ppO2;
+        overlay unsigned char time, t;
+
+        //---- Ascent to surface delay
+        // NOTE: count as if time is spent with bottom pressure,
+        //       AND the bottom gas
+        actual_ppO2 = (char_I_bottom_depth * METER_TO_BAR - ppWater)
+                    * (1.0 - calc_N2_ratio - calc_He_ratio);
+        if( actual_ppO2 < 0.0  ) actual_ppO2 = 0.0;
+        if( actual_ppO2 > 2.50 ) actual_ppO2 = 2.55;
+        char_I_actual_ppO2 = (unsigned char)(100.0 * actual_ppO2 + 0.5);
+
+        // Ascent time (rounded up):
+        time = (unsigned char)(0.1 * char_I_bottom_depth + 0.5);
+
+        for(t=0; t<time; ++t)
+            deco_calc_CNS_fraction();
+
+        //---- Do all further stops
+        for(i=0; i<NUM_STOPS; ++i)
+        {
+            //---- Get next stop
+            time             = char_O_deco_time[i];
+            temp_depth_limit = char_O_deco_depth[i] & 0x7F;
+            if( time == 0 ) break;          // End of table: done.
+    
+            //---- Gas Switch ?
+            if( char_O_deco_depth[i] & 0x80 )
+                gas_switch_deepest();
+        
+            //---- Convert Depth and N2_ratio to ppO2
+            actual_ppO2 = (temp_depth_limit * METER_TO_BAR - ppWater)
+                        * (1.0 - calc_N2_ratio - calc_He_ratio);
+            if( actual_ppO2 < 0.0  ) actual_ppO2 = 0.0;
+            if( actual_ppO2 > 2.50 ) actual_ppO2 = 2.55;
+            char_I_actual_ppO2 = (unsigned char)(100.0 * actual_ppO2 + 0.5);
+
+            //---- Apply the stop
+            for(t=0; t<time; ++t)
+                deco_calc_CNS_fraction();
+        }
+    }    
+}    
 
 //////////////////////////////////////////////////////////////////////////////
 // deco_calc_CNS_decrease_15min

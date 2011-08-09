@@ -390,24 +390,6 @@ display_profile_offset3:
 	incf		last_temperature+1,F		; Yes, make last_temperature+1>1 to make "display_profile2e" working
 
 display_profile_offset4:
-; Offset to Salinity
-	incf_eeprom_address	d'33'				; Macro, that adds 8Bit to eeprom_address:2
-	call		I2CREAD						; Read Salinity
-	movff		SSPBUF,wait_temp			; Copy Salinity
-	decf_eeprom_address	d'33'				; Macro, that subtracts 8Bit from eeprom_address:2
-
-	movff	lo,xA+0
-	movff	hi,xA+1
-	movlw	d'102'					; 0,98bar/10m
-	movwf	xB+0
-	clrf	xB+1
-	call	mult16x16				;xA*xB=xC (lo:hi * 100)
-	movff	wait_temp,xB+0			; Salinity
-	clrf	xB+1
-	call	div32x16  				; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
-	movff	xC+0,lo
-	movff	xC+1,hi					; restore lo and hi with updated value
-
 	bsf			leftbind
 	output_16dp	d'3'					; max. depth
 	STRCAT      "m "
@@ -1404,28 +1386,11 @@ display_listdive2:
 	call		I2CREAD4					; Block read
 	movff		SSPBUF,hi
 
-; Offset to Salinity
-	incf_eeprom_address	d'33'				; Macro, that adds 8Bit to eeprom_address:2
-	call		I2CREAD						; Read Salinity
-	movff		SSPBUF,wait_temp			; Copy Salinity
-	decf_eeprom_address	d'33'				; Macro, that subtracts 8Bit from eeprom_address:2
-	movff	lo,xA+0
-	movff	hi,xA+1
-	movlw	d'102'					; 0,98bar/10m
-	movwf	xB+0
-	clrf	xB+1
-	call	mult16x16				;xA*xB=xC (lo:hi * 100)
-	movff	wait_temp,xB+0			; Salinity
-	clrf	xB+1
-	call	div32x16  				; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
-	movff	xC+0,lo
-	movff	xC+1,hi					; restore lo and hi with updated value
-
 	bsf			leftbind
 	bsf			ignore_digit5				; Do not display 1cm figure
 	output_16dp	d'3'						; max. depth
 	STRCAT      "m "
-	call		I2CREAD3					; Block read start
+	call		I2CREAD4					; Block read
 	movff		SSPBUF,lo					; read divetime in minutes
 	call		I2CREAD4					; Block read
 	movff		SSPBUF,hi					; read divetime in minutes

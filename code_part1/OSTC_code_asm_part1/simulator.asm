@@ -461,6 +461,7 @@ simulator_calc_deco2:
 ; Finished
 simulator_calc_deco3:
     call    deco_calc_CNS_planning      ; Compute cNS after full ascent.
+	movlb	0x01						; Back to RAM Bank1
     movff   char_O_CNS_fraction,sim_CNS ; Save calculated CNS.     
 	rcall	simulator_restore_tissue_data	; Restore CNS & 32 floats "pre_tissue" from vault
 

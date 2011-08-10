@@ -2371,7 +2371,7 @@ void deco_calc_CNS_fraction(void)
     if (CNS_fraction < 0.0)
         CNS_fraction = 0.0;
 
-    char_O_CNS_fraction = (unsigned char)(100.0f * CNS_fraction + 0.5f );
+    char_O_CNS_fraction = (unsigned char)(100.0 * CNS_fraction + 0.5);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2388,20 +2388,20 @@ void deco_calc_CNS_planning(void)
     
     //---- Retrieve bottom Gas used, and set variables.
     sim_gas_last_used  = char_I_first_gas;
-    sim_gas_last_depth = 0;                 // Surface gas marker.
-    gas_switch_set();                       // Sets initial calc_N2/He_ratio
+    sim_gas_last_depth = 0;             // Surface gas marker.
+    gas_switch_set();                   // Sets initial calc_N2/He_ratio
 
     //---- CCR mode : do the full TTS at once --------------------------------
     if( char_I_const_ppO2 != 0 )
     {
-        overlay unsigned char t;
+        overlay unsigned short t;       // Needs 16bits here !
         char_I_actual_ppO2 = char_I_const_ppO2;
         for(t=0; t<int_O_ascenttime; ++t)
             deco_calc_CNS_fraction();
     }
     else //---- OC mode : have to follow all gas switches... -----------------
     {
-        overlay unsigned char i = 0;            // Decostop loop counter
+        overlay unsigned char i = 0;    // Decostop loop counter
         overlay float actual_ppO2;
         overlay unsigned char time, t;
 
@@ -2426,7 +2426,7 @@ void deco_calc_CNS_planning(void)
             //---- Get next stop
             time             = char_O_deco_time[i];
             temp_depth_limit = char_O_deco_depth[i] & 0x7F;
-            if( time == 0 ) break;          // End of table: done.
+            if( time == 0 ) break;      // End of table: done.
     
             //---- Gas Switch ?
             if( char_O_deco_depth[i] & 0x80 )

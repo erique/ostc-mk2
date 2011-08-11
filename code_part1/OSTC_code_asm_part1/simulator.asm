@@ -224,7 +224,7 @@ simulator_decoplan_notts:
         cpfslt  sim_CNS
         call    PLED_warnings_color     ; Yes: draw in red !
 
-        STRCPY  "CNS:"
+        STRCPY  TXT_CNS4
         movff   char_O_CNS_fraction,lo  ; Current CNS, before dive.
         output_8
         STRCAT  "%\x92"                 ; Right-arrow
@@ -236,7 +236,7 @@ simulator_decoplan_notts:
 
 simulator_decoplan_cns_1:
         call    PLED_warnings_color     ; Yes: draw in red !
-        STRCPY_PRINT    "CNS > 250%"
+        STRCPY_PRINT    TXT_CNSGR10
 
 simulator_decoplan_cns_2:
         call    PLED_standard_color     ; Back to normal.

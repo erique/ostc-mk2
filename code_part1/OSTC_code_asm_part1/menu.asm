@@ -560,7 +560,7 @@ show_salinity_value:
 	bsf		leftbind
 	output_16dp	d'3'
 	bcf		leftbind
-	STRCAT_PRINT "kg/l"
+	STRCAT_PRINT TXT_KGL4
 	return
 
 toggle_salinity_reset2:

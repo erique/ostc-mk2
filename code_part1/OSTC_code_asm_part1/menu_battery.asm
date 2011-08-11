@@ -75,7 +75,7 @@ menu_battery_state:
 	bsf		leftbind
 	output_16dp	d'2'
 	bcf		leftbind
-	STRCAT_PRINT "V"
+	STRCAT_PRINT TXT_VOLT1
 
 	WIN_TOP		.125
 	lfsr	FSR2,letter

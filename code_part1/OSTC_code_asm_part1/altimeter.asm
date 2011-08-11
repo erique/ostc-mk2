@@ -114,7 +114,7 @@ altimeter_display:
         WIN_FONT    .0
         call    PLED_standard_color
 
-        STRCPY  "Alt: "
+        STRCPY  TXT_ALT5
 
         movff   altitude+0,lo           ; BANK-SAFE read altitude
         movff   altitude+1,hi
@@ -132,7 +132,7 @@ altimeter_2:
         output_16
         bcf     leftbind
 
-        STRCAT_PRINT "m    "
+        STRCAT_PRINT TXT_METER5
         return
 
 ;=============================================================================
@@ -257,7 +257,7 @@ altimeter_menu_2:
         bsf         leftbind
         output_16
         
-        STRCAT_PRINT    " mbar  "
+        STRCAT_PRINT	TXT_MBAR7
         
         WIN_TOP     .65                 ; Action enable
         lfsr        FSR2, letter
@@ -296,7 +296,7 @@ altimeter_menu_3:
         bsf         leftbind
         output_16
         bcf         leftbind
-        STRCAT_PRINT    "m    "
+        STRCAT_PRINT    TXT_METER5
 
 alt_menu_loop:
         call        PLED_menu_cursor    ; Display cursor

@@ -55,7 +55,7 @@ menu_gassetup_list:
 	movf	waitms_temp,W		; Load row into WREG
 	movff	WREG,win_top
 	lfsr	FSR2,letter
-	PUTC	'G'
+	PUTC	TXT_GAS_C
 	movff	decodata+0,lo		
 	incf	lo,F				
 	bsf		leftbind
@@ -131,7 +131,7 @@ menu_gassetup_Nx:
 
 ; New v1.44se
 menu_gassetup_O2:
-    STRCAT  "O2 "
+    STRCAT  TXT_O2_3
 	output_8
 	bra 	menu_gassetup_list0
 
@@ -140,13 +140,13 @@ menu_gassetup_Air:
 	cpfseq	lo					; o2 = 21%
 	call menu_gassetup_Err
 
-    STRCAT  "AIR "
+    STRCAT  TXT_AIR4
 	output_8
 	bra 	menu_gassetup_list0
 
 ; New v1.44se
 menu_gassetup_Err:
-    STRCAT  "ERR "
+    STRCAT  TXT_ERR4
 	output_8
 
 ; Changed v1.44se
@@ -160,14 +160,14 @@ menu_gassetup_list0:
 	movff	WREG,win_top
 	lfsr	FSR2,letter
 
-    STRCAT  " in "
+    STRCAT  TXT_IN4
 	movf	decodata+0,W		; read current value 
 	addlw	d'28'				; offset in memory
 	movwf	EEADR
 	call	read_eeprom			; Low-value
 	movff	EEDATA,lo
 	output_8
-    PUTC	'm'
+    PUTC	TXT_METER_C
 	movf    decodata+0,W
 	call	PLED_grey_inactive_gas			; Sets Greyvalue for inactive gases
 	call	word_processor	
@@ -301,7 +301,7 @@ menu_gassetup1:
 
 	WIN_LEFT	.20
 	WIN_TOP		.65	
-	STRCPY  "O2: "
+	STRCPY  TXT_O2_4
 
 	movf	divemins+0,W
 	addlw	0x06
@@ -319,11 +319,11 @@ menu_gassetup1:
 	rcall	gassetup_get_mod			; compute MOD based on CF18 into lo:hi
 
 	output_16
-	STRCAT_PRINT  "m  "
+	STRCAT_PRINT  TXT_METER3
 
 	WIN_LEFT	.20
 	WIN_TOP		.95
-	STRCPY  "He: "
+	STRCPY  TXT_HE4
 	movf	divemins+0,W
 	addlw	0x07
 	movwf	EEADR
@@ -384,7 +384,7 @@ menu_gassetup1:
 	subwfb	xC+1,F
 	movff	xC+1,hi
 	output_16
-	STRCAT_PRINT  "m  "
+	STRCAT_PRINT  TXT_METER3
 
     WIN_LEFT    .20
 	WIN_TOP		.125
@@ -681,7 +681,7 @@ menu_firstgas1:
 	; lo still holds change depth
 	bsf		leftbind
 	output_8
-    STRCAT_PRINT  "m "
+    STRCAT_PRINT  TXT_METER2
 
 ; Show ppO2 after change depth
 	WIN_TOP		.125
@@ -729,7 +729,7 @@ gassetup_color_code_ppo2_2:
 	clrf	hi				; Yes, display 0m
 
 	output_16
-	STRCAT_PRINT  "m  "
+	STRCAT_PRINT  TXT_METER3
 
 	WIN_TOP		.35
 	WIN_LEFT	.20
@@ -987,7 +987,7 @@ gassetup_title_bar3:			; O2 Check
 
 ; New v1.44se
 gassetup_title_bar4:
-    STRCAT  "O2 "
+    STRCAT  TXT_O2_3
 	output_8
 	bra 	gassetup_title_bar7
 
@@ -996,37 +996,37 @@ gassetup_title_bar5:
 	cpfseq	lo					; o2 = 21%
 	bra 	gassetup_title_bar6
 
-    STRCAT  "AIR "
+    STRCAT  TXT_AIR4
 	output_8
 	bra 	gassetup_title_bar7
 
 ; New v1.44se
 gassetup_title_bar6:		; ERROR
-    STRCAT  "ERR "
+    STRCAT  TXT_ERR4
 	output_8
 	bra 	gassetup_title_bar7
 
 gassetup_title_bar7:
-    STRCAT  " in "
+    STRCAT  TXT_IN4
 	movf	decodata+0,W		; read current value 
 	addlw	d'28'				; offset in memory
 	movwf	EEADR
 	call	read_eeprom			; Low-value
 	movff	EEDATA,lo
 	output_8
-    STRCAT_PRINT  "m "
+    STRCAT_PRINT  TXT_METER2
 
 	WIN_INVERT	.0	; Init new Wordprocessor	
 	return
 
 ; New v1.44se
 gassetup_write_Nx:
-    STRCAT  "NX "
+    STRCAT  TXT_NX3
 	return
 
 ; New v1.44se
 gassetup_write_Tx:
-    STRCAT  "TX "
+    STRCAT  TXT_TX3
 	return
 
 gassetup_show_ppO2:

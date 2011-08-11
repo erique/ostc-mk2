@@ -392,7 +392,7 @@ display_profile_offset3:
 display_profile_offset4:
 	bsf			leftbind
 	output_16dp	d'3'					; max. depth
-	STRCAT      "m "
+	STRCAT      TXT_METER2
 	call		I2CREAD2				; divetime in minutes	
 	movff		SSPBUF,lo
 	call		I2CREAD2	
@@ -505,7 +505,7 @@ display_profile_xscale:
 
 	bsf			leftbind
 	output_16							; Air pressure before dive
-	STRCAT      "mbar "
+	STRCAT      TXT_MBAR5
 	OUTPUTTEXT  .014                    ; Desat
 	PUTC        ' '
 
@@ -820,7 +820,7 @@ profileview_page2:
 	bsf			leftbind
 	WIN_TOP		.0
 	WIN_LEFT	.0
-	STRCPY      "G1:"
+	STRCPY      TXT_G1_3
 	call		I2CREAD2					; Gas1 current O2
 	movff		SSPBUF,lo
 	output_99x
@@ -833,7 +833,7 @@ profileview_page2:
 	movlw		color_green					; Color for Gas 2
 	call		PLED_set_color				; Set Color...
 	WIN_TOP		.25
-	STRCPY      "G2:"
+	STRCPY      TXT_G2_3
 	call		I2CREAD2					; Gas2 current O2
 	movff		SSPBUF,lo
 	output_8
@@ -846,7 +846,7 @@ profileview_page2:
 	movlw		color_red					; Color for Gas 3
 	call		PLED_set_color				; Set Color...
 	WIN_TOP		.50
-	STRCPY      "G3:"
+	STRCPY      TXT_G3_3
 	call		I2CREAD2					; Gas3 current O2
 	movff		SSPBUF,lo
 	output_8
@@ -860,7 +860,7 @@ profileview_page2:
 	call		PLED_set_color				; Set Color...
 	WIN_TOP		.0
 	WIN_LEFT	.60
-	STRCPY      "G4:"
+	STRCPY      TXT_G4_3
 	call		I2CREAD2					; Gas4 current O2
 	movff		SSPBUF,lo
 	output_8
@@ -873,7 +873,7 @@ profileview_page2:
 	movlw		color_violet				; Color for Gas 5
 	call		PLED_set_color				; Set Color...
 	WIN_TOP		.25
-	STRCPY      "G5:"
+	STRCPY      TXT_G5_3
 	call		I2CREAD2					; Gas5 current O2
 	movff		SSPBUF,lo
 	output_8
@@ -886,7 +886,7 @@ profileview_page2:
 	movlw		color_cyan					; Color for Gas 6
 	call		PLED_set_color				; Set Color...
 	WIN_TOP		.50
-	STRCPY      "G6:"
+	STRCPY      TXT_G6_3
 	call		I2CREAD2					; Gas6 current O2
 	movff		SSPBUF,lo
 	output_8
@@ -899,7 +899,7 @@ profileview_page2:
 	call		PLED_standard_color
 	WIN_TOP		.0
 	WIN_LEFT	.120
-	STRCPY      "1st:"
+	STRCPY      TXT_1ST4
 	call		I2CREAD2					; Start Gas
 	movff		SSPBUF,lo
 	output_8
@@ -938,7 +938,7 @@ profileview_page2:
 	bsf		leftbind
 	output_16dp	d'2'			; e.g. 3.45V
 	bcf		leftbind
-	STRCAT_PRINT  "V"
+	STRCAT_PRINT  TXT_VOLT1
 
 	bcf			leftbind					; Clear flag
 
@@ -983,7 +983,7 @@ profileview_page3:
 	movff	SSPBUF,lo
 	clrf	hi
 	output_16dp	d'3'
-	STRCAT_PRINT "kg/l"
+	STRCAT_PRINT TXT_KGL4
 
 	call		I2CREAD2					; Read CNS%
 
@@ -992,7 +992,7 @@ profileview_page3:
 
 	movff		SSPBUF,lo
 	WIN_TOP		.25
-	STRCPY      "CNS:"
+	STRCPY      TXT_CNS4
 	output_8
 	STRCAT_PRINT "%"						; Display CNS %
 
@@ -1007,9 +1007,9 @@ logbook_skip_cns:
 	movff		SSPBUF,lo
 	call		I2CREAD2					; Read average depth 
 	movff		SSPBUF,hi
-	STRCPY      "Avr:"
+	STRCPY      TXT_AVR4
 	output_16dp	d'3'			; Average depth 
-	STRCAT_PRINT "m"
+	STRCAT_PRINT TXT_METER1
 
 	incf_eeprom_address	d'4'				; Skip total dive time and GF factors
 	call		I2CREAD						; Read deco modell
@@ -1029,7 +1029,7 @@ logbook_skip_cns:
 	movff		SSPBUF,lo
 	call		I2CREAD2					; Read GF_hi
 	movff		SSPBUF,hi
-	STRCPY      "GF:"
+	STRCPY      TXT_GF3
 	output_8								; GF_lo
 	PUTC		'/'
 	movff		hi,lo						; copy GF_hi
@@ -1042,7 +1042,7 @@ logbook_show_sat:
 	movff		SSPBUF,hi
 	call		I2CREAD2					; Read Desaturation x
 	movff		SSPBUF,lo
-	STRCPY      "Sat:"
+	STRCPY      TXT_SAT4
 	output_8								; Sat x
 	STRCAT      "%/"
 	movff		hi,lo						; copy Desat x
@@ -1389,7 +1389,7 @@ display_listdive2:
 	bsf			leftbind
 	bsf			ignore_digit5				; Do not display 1cm figure
 	output_16dp	d'3'						; max. depth
-	STRCAT      "m "
+	STRCAT      TXT_METER2
 	call		I2CREAD4					; Block read
 	movff		SSPBUF,lo					; read divetime in minutes
 	call		I2CREAD4					; Block read

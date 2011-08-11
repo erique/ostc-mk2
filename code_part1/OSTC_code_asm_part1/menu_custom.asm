@@ -246,7 +246,7 @@ menu_custom_functions10a:
 	call	word_processor		
 
 	WIN_TOP		.95
-	STRCPY  "Step:"
+	STRCPY  TXT_STEP5
     clrf    hi
     movff   cf_step,lo
 	call	display_formated	        ; Typed display, w/o fill line.
@@ -856,7 +856,7 @@ check_failed:
 	WIN_INVERT	.1					    ; Init new Wordprocessor
 	call    PLED_warnings_color
 	
-	STRCPY  "CF"
+	STRCPY  TXT_CF2
     movff   cf_checker_counter,lo
     output_99x
 	STRCAT_PRINT "!"

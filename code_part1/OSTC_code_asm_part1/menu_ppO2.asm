@@ -105,7 +105,7 @@ menu_const_ppO21:
 	bsf		leftbind
 	output_16dp	d'3'
 	bcf		leftbind
-	STRCAT_PRINT "bar "
+	STRCAT_PRINT TXT_BAR4
 
 	WIN_LEFT 	.20
 	WIN_TOP		.95

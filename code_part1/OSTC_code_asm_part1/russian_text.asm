@@ -59,6 +59,48 @@
 ;   you will have to adjust position. A char is 7 pixels wide.
 ;
 ;=============================================================================
+; Define's section
+;   Definition			"translation"                    ; English original
+#IFNDEF	TXT_DEFINED
+#DEFINE	TXT_DEFINED
+                                                                 ; 'G'         
+#DEFINE	TXT_GAS_C		'Г'                              ; 'm'         
+#DEFINE	TXT_METER_C		'м'                              ; "m    "     
+#DEFINE	TXT_METER5		"м    "                          ; "m  "       
+#DEFINE	TXT_METER3		"м  "                            ; "m "        
+#DEFINE	TXT_METER2		"м "                             ; "m"         
+#DEFINE	TXT_METER1		"м"                              ; " mbar  "   
+#DEFINE	TXT_MBAR7		" мбар  "                        ; "mbar "     
+#DEFINE	TXT_MBAR5		"мбар "                          ; "bar "      
+#DEFINE	TXT_BAR4		"бар "                           ; "Alt: "     
+#DEFINE	TXT_ALT5		"Альт "                          ; "kg/l"      
+#DEFINE	TXT_KGL4		"кг/л"                           ; "V"         
+#DEFINE	TXT_VOLT1		"V"                              ; "Step:"     
+#DEFINE	TXT_STEP5		"Шаг: "                          ; "CF"        
+#DEFINE	TXT_CF2			"ДП"                             ; "O2: "      
+#DEFINE	TXT_O2_4		"O2: "                           ; "O2 "       
+#DEFINE	TXT_O2_3		"O2 "                            ; "AIR "      
+#DEFINE	TXT_AIR4		"AIR "                           ; "ERR "      
+#DEFINE	TXT_ERR4		"ERR "                           ; "He: "      
+#DEFINE	TXT_HE4			"He: "                           ; "NX "       
+#DEFINE	TXT_NX3			"NX "                            ; "TX "       
+#DEFINE	TXT_TX3			"TX "                            ; " in "      
+#DEFINE	TXT_IN4			" на "                           ; "G1:"       
+#DEFINE	TXT_G1_3		"Г1:"                            ; "G2:"       
+#DEFINE	TXT_G2_3		"Г2:"                            ; "G3:"       
+#DEFINE	TXT_G3_3		"Г3:"                            ; "G4:"       
+#DEFINE	TXT_G4_3		"Г4:"                            ; "G5:"       
+#DEFINE	TXT_G5_3		"Г5:"                            ; "G6:"       
+#DEFINE	TXT_G6_3		"Г6:"                            ; "1st:"      
+#DEFINE	TXT_1ST4		"Нач:"                           ; "CNS:"      
+#DEFINE	TXT_CNS4		"ЦНС:"                           ; "CNS > 250%"
+#DEFINE	TXT_CNSGR10		"ЦНС > 250%"                     ; "Avr:"      
+#DEFINE	TXT_AVR4		"Срд:"                           ; "GF:"       
+#DEFINE	TXT_GF3			"ГФ:"                            ; "Sat:"      
+#DEFINE	TXT_SAT4		"Сат:"
+
+#ENDIF
+;=============================================================================
 ;   macro     X     Y        "translation"               ; English original
     TCODE    .0,   .0,       "Расчет MD2 хэша"           ;001 Building MD2 Hash
     TCODE    .0,   .25,      "Пожалуйста ждите..."       ;002 Please Wait...
@@ -91,7 +133,7 @@
     TCODE    .15,  .2,       "Установка времени:"        ;029 Set Time:
     TCODE    .100, .50,      "Маркер"                    ;030 SetMarker         (Add a mark in logbook profile)
     TCODE    .100, .25,      "Декоплан"                  ;031 Decoplan
-    TCODE    .100, .0,       "Мои Газы"                  ;032 Gaslist
+    TCODE    .100, .0,       "Мои газы"                  ;032 Gaslist
     TCODE    .100, .50,      "Сбр.Сред"                  ;033 ResetAvr          (Reset average depth)
     TCODE    .100, .100,     "Выход"                     ;034 Exit		        (Exit current menu)
     TCODE    .0,   .0,       "Нелєт"                     ;035 NoFly		        (No-flight count-down)
@@ -105,14 +147,14 @@
     TCODE    .40,  .35,      "Скорость[м/мин]"           ;041 velocity[m/min]
     TCODE    .40,  .35,      "Автовключ[мбар]"           ;042 Wake-up  [mbar]
     TCODE    .40,  .35,      "max. Верх[мбар]"           ;043 max.Surf.[mbar]
-    TCODE    .40,  .35,      "Показать GF [%]"           ;044 GF display  [%]
-    TCODE    .40,  .35,      "min.O2 показ[%]"           ;045 min. O2 Dis.[%]
+    TCODE    .40,  .35,      "Показать ГФ [%]"           ;044 GF display  [%]
+    TCODE    .40,  .35,      "мин.O2 показ[%]"           ;045 min. O2 Dis.[%]
     TCODE    .40,  .35,      "Меню погр.[мин]"           ;046 Dive menus[min]
     TCODE    .40,  .35,      "Насыщение x [%]"           ;047 Saturate x  [%]
     TCODE    .40,  .35,      "Рассыщение x[%]"           ;048 Desaturate x[%]
     TCODE    .40,  .35,      "Нелєт фактор[%]"           ;049 NoFly Ratio [%]	(Grandient factor tolerance for no-flight countdown).
-    TCODE    .40,  .35,      "GF тревога 1[%]"           ;050 GF alarm 1  [%]
-    TCODE    .40,  .35,      "CNS наверху [%]"           ;051 CNSshow surf[%]
+    TCODE    .40,  .35,      "ГФ тревога 1[%]"           ;050 GF alarm 1  [%]
+    TCODE    .40,  .35,      "ЦНС наверху [%]"           ;051 CNSshow surf[%]
     TCODE    .40,  .35,      "Деко ниже   [м]"           ;052 Deco Offset [m]
     TCODE    .40,  .35,      "ppO2 низк [бар]"           ;053 ppO2 low  [bar]
     TCODE    .40,  .35,      "ppO2 высок[бар]"           ;054 ppO2 high [bar]
@@ -120,11 +162,11 @@
     TCODE    .40,  .35,      "Интервал данных"           ;056 sampling rate
     TCODE    .40,  .35,      "Делитель темпер"           ;057 Divisor Temp
     TCODE    .40,  .35,      "Делитель деко  "           ;058 Divisor Decodat
-    TCODE    .40,  .35,      "Делитель GF    "           ;059 Divisor GF
+    TCODE    .40,  .35,      "Делитель ГФ    "           ;059 Divisor GF
     TCODE    .40,  .35,      "Делитель ppO2  "           ;060 Divisor ppO2
     TCODE    .40,  .35,      "Делитель дебаг "           ;061 Divisor Debug
-    TCODE    .40,  .35,      "Делитель CNS   "           ;062 Divisor CNS
-    TCODE    .40,  .35,      "CNS показать[%]"           ;063 CNSshow dive[%]
+    TCODE    .40,  .35,      "Делитель ЦНС   "           ;062 Divisor CNS
+    TCODE    .40,  .35,      "ЦНС показать[%]"           ;063 CNSshow dive[%]
     TCODE    .40,  .35,      "Номер в журнале"           ;064 Logbook offset
     TCODE    .40,  .35,      "Крайняя деко[м]"           ;065 Last Deco at[m]
     TCODE    .40,  .35,      "Конец Apnoe [ч]"           ;066 End Apnoe   [h]
@@ -203,7 +245,7 @@
     TCODE    .10,   .25,     "режима погружения!   "     ;134 Divemode! Please help
     TCODE    .10,   .50,     "Сообщите об ошибке,  "     ;135 and report the Debug
     TCODE    .10,   .75,     "отправьте отчет ниже!"     ;136 Information below!
-    TCODE    .100,  .75,     "Бэйлаут"                   ;137 Bailout
+    TCODE    .100,  .75,     "На запас"                  ;137 Bailout
     TCODE    .85,   .125,    "Apnoe    "                 ;138 Apnoe
     TCODE    .112,  .120,    "В воде"                    ;139 Descent
     TCODE    .105,  .60,     "Наверху"                   ;140 Surface
@@ -222,8 +264,8 @@
     TCODE    .20,   .65,     "Доп. Параметры II"	     ;153 Custom FunctionsII
 ;
 ; 32 custom function descriptors II (FIXED LENGTH = 15 chars).
-    TCODE    .40,   .35,     "GF Low      [%]"           ;154 GF Low      [%]
-    TCODE    .40,   .35,     "GF High     [%]"           ;155 GF High     [%]
+    TCODE    .40,   .35,     "ГФ ниж. гран[%]"           ;154 GF Low      [%]
+    TCODE    .40,   .35,     "ГФ верх.гран[%]"           ;155 GF High     [%]
     TCODE    .40,   .35,     "Цвет#   батареи"           ;156 Color# Battery
     TCODE    .40,   .35,     "Цвет#  стардарт"           ;157 Color# Standard
     TCODE    .40,   .35,     "Цвет# под водой"           ;158 Color# Divemask
@@ -234,8 +276,8 @@
     TCODE    .40,   .35,     "Картинки газов "           ;163 Mix type icons
     TCODE    .40,   .35,     "Напом. лучш.газ"           ;164 Blink BetterGas	(Remainder in divemode to switch to a better decompression gas).
 	TCODE    .40,   .35,     "Трев.глуб[мбар]"           ;165 DepthWarn[mbar]
-    TCODE    .40,   .35,     "CNS предупр.[%]"           ;166 CNS warning [%]
-    TCODE    .40,   .35,     "GF предупр. [%]"           ;167 GF warning  [%]
+    TCODE    .40,   .35,     "ЦНС предупр.[%]"           ;166 CNS warning [%]
+    TCODE    .40,   .35,     "ГФ предупр. [%]"           ;167 GF warning  [%]
     TCODE    .40,   .35,     "ppO2 пред.[бар]"           ;168 ppO2 warn [bar]
     TCODE    .40,   .35,     "Скор.пр.[м/мин]"           ;169 Vel.warn[m/min]
     TCODE    .40,   .35,     "Коррекция часов"           ;170 Time offset/day
@@ -286,7 +328,7 @@
     TCODE    .0,    .125,    "Задайте 3 Сетпоинта"       ;210 Configure the 3
     TCODE    .0,    .155,    "в меню настройки   "       ;211 SetPoints in CCR -
     TCODE    .0,    .185,    "CCR. Доступно до 5 "       ;212 Setup menu. 5 bail-
-    TCODE    .0,    .215,    "Бэйлаут-смесей.    "       ;213 outs are available.
+    TCODE    .0,    .215,    "запасных смесей.   "       ;213 outs are available.
 ; Apnoemode description
     TCODE    .0,    .35,     "Алгоритм: Apnoe    "       ;214 Decotype: Apnoe
     TCODE    .0,    .65,     "OSTC2 показывает   "       ;215 OSTC2 will display
@@ -299,16 +341,16 @@
     TCODE    .0,    .35,     "Алгоритм: L16-GF OC"       ;221 Decotype: L16-GF OC
     TCODE    .0,    .65,     "Расчет декомпрессии"       ;222 Decompression cal-
     TCODE    .0,    .95,     "с методом градиент-"       ;223 culations with the
-    TCODE    .0,    .125,    "фактора (GF_lo/GF  "       ;224 GF-Method (GF_lo/GF
-    TCODE    .0,    .155,    "_hi). Уточн. ДП32 &"       ;225 _hi). Check CF32 &
+    TCODE    .0,    .125,    "фактора (ГФниж/ГФ  "       ;224 GF-Method (GF_lo/GF
+    TCODE    .0,    .155,    "врх). Уточн. ДП32 &"       ;225 _hi). Check CF32 &
     TCODE    .0,    .185,    "ДП33!Открытый цикл,"       ;226 CF33! Open Circuit
     TCODE    .0,    .215,    "глубокие остановки."       ;227 with Deep Stops.
 ; Multi GF CC mode description
     TCODE    .0,    .35,     "Алгоритм: L16-GF CC"       ;228 Decotype: L16-GF CC
     TCODE    .0,    .65,     "Расчет декомпрессии"       ;229 Decompression cal-
     TCODE    .0,    .95,     "с методом градиент-"       ;230 culations with the
-    TCODE    .0,    .125,    "фактора (GF_lo/GF  "       ;231 GF-Method (GF_lo/GF
-    TCODE    .0,    .155,    "_hi). Уточн. ДП32 &"       ;232 _hi). Check CF32 &
+    TCODE    .0,    .125,    "фактора (ГФниж/ГФ  "       ;231 GF-Method (GF_lo/GF
+    TCODE    .0,    .155,    "врх). Уточн. ДП32 &"       ;232 _hi). Check CF32 &
     TCODE    .0,    .185,    "ДП33!Закрытый цикл,"       ;233 CF33!Closed Circuit
     TCODE    .0,    .215,    "глубокие остановки."       ;234 with Deep Stops.
 ;
@@ -343,9 +385,9 @@
     TCODE    .105,  .35,     "DDMMYY"                    ;260 DDMMYY
     TCODE    .105,  .35,     "YYMMDD"                    ;261 YYMMDD
     TCODE    .1,    .1,      "OSTC "                     ;262 OSTC
-    TCODE    .65,   .168,    "Bail "                     ;263 Bail
-    TCODE    .7,    .48,     "Air   "                    ;264 Air
-    TCODE    .120,  .135,    "Air   "                    ;265 Air
+    TCODE    .65,   .168,    "Запас"                     ;263 Bail
+    TCODE    .7,    .48,     "Возд."                     ;264 Air
+    TCODE    .120,  .135,    "Возд."                     ;265 Air
     TCODE    .2,    .39,     "Калибровка"                ;266 Calibrate
     TCODE    .0,    .216,    "Макс."                     ;267 Max.
     TCODE    .10,   .8,      "не"                        ;268 not
@@ -378,7 +420,7 @@
     TCODE    .20,   .95,     "Умолчание: 1013 мбар"      ;291 Default: 1013 mbar
     TCODE    .20,   .125,    "+1 мбар"                   ;292 +1 mbar
     TCODE    .20,   .155,    "-1 мбар"                   ;293 -1 mbar
-    TCODE    .85,   .185,    "Alt: "                     ;294 Alt:
+    TCODE    .78,   .185,    "Альт: "                    ;294 Alt:
 ;
 	TCODE    .20,   .125,    "Показать дамп"             ;295 Show raw data
 	TCODE    .50,    .2,     "Дамп:"                     ;296 Raw Data:

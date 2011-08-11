@@ -36,6 +36,7 @@
 ;#DEFINE	RUSSIAN							; Use russian_text.asm
 
 ;#DEFINE	__DEBUG	; 
+;#DEFINE	DISPLAY_TEST	; Enables Display-Test in RAW data menu
 
 #DEFINE	logbook_profile_version	0x21        ; Do not touch!
 #DEFINE	T0CON_debounce	b'00000000'         ; Timer0 Switch Debounce
@@ -96,8 +97,8 @@
 
 ;=============================================================================
 
-#include "../OSTC_code_c_part2/shared_definitions.h"
-;#include "shared_definitions.h"
+;#include "../OSTC_code_c_part2/shared_definitions.h"
+#include "shared_definitions.h"
 
 ;=============================================================================
 ; Reserve space for C-code data space. Eg.when calling log.

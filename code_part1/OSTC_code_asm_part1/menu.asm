@@ -477,6 +477,11 @@ show_rawdata_wait_1:
 
 ; Display blank/red/green/blue screens until click, to test OLED ageing.
 show_rawdata_next:
+	; display test draws more power then allowed -> potential hardware risk!
+#ifndef DISPLAY_TEST
+	bra     show_rawdata_exit
+#endif
+
     setf    WREG
     WIN_BOX_COLOR   .0,.240,.0,.160
     rcall   show_rawdata_screen_wait

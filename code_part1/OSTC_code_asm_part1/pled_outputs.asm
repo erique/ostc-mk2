@@ -470,7 +470,7 @@ PLED_display_deko:
 	lfsr	FSR2,letter
 	movff	char_O_first_deco_depth,lo  ; Ceiling in m
 	output_99
-	PUTC    'm'
+	PUTC    TXT_METER_C
 	movff	char_O_first_deco_time,lo   ; length of first stop in m
 	output_99
 	STRCAT_PRINT "'"
@@ -508,7 +508,7 @@ PLED_display_deko2:
 	WIN_FONT 	FT_SMALL
 	PLED_color_code		warn_gf		; Color-code Output
 
-	STRCPY  "GF:"
+	STRCPY  TXT_GF3
 	movff	char_O_gradient_factor,lo		; gradient factor
 	output_8
 	STRCAT_PRINT  "% "
@@ -539,7 +539,7 @@ PLED_simulator_data:
 PLED_simulator_data_1:
 	bsf		leftbind
 	output_8
-	STRCAT      "0min "
+	STRCAT      TXT_0MIN5
 
 PLED_simulator_data_2:
     call        word_processor
@@ -552,7 +552,7 @@ PLED_simulator_data_2:
 	movff	sim_btm_time,lo
 	bsf		leftbind
 	output_8
-	STRCAT_PRINT  "min "
+	STRCAT_PRINT  TXT_MIN4
 
     ;---- Updates depth line -------------------------------------------------
 	WIN_TOP		.125
@@ -562,7 +562,7 @@ PLED_simulator_data_2:
 	movff	sim_btm_depth,lo
 	bsf		leftbind
 	output_8
-	STRCAT_PRINT  "m  "
+	STRCAT_PRINT  TXT_METER3
 
 	bcf		leftbind
 	return
@@ -726,7 +726,7 @@ PLED_show_cf11_cf12_cf29:; Display saturations/desaturation multiplier and last 
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
-	STRCPY  "BSat:"
+	STRCPY  TXT_BSAT5
 
 	GETCUSTOM8	d'11'
 	movwf	lo
@@ -735,7 +735,7 @@ PLED_show_cf11_cf12_cf29:; Display saturations/desaturation multiplier and last 
 	STRCAT_PRINT  "%"
 
 	WIN_TOP		.50
-	STRCPY  "BDes:"
+	STRCPY  TXT_BDES5
 
 	GETCUSTOM8	d'12'
 	movwf	lo
@@ -745,12 +745,12 @@ PLED_show_cf11_cf12_cf29:; Display saturations/desaturation multiplier and last 
 
 PLED_show_cf11_cf12_cf29_2:
 	WIN_TOP		.75
-    STRCPY  "Last:"
+    STRCPY  TXT_LAST5
 	GETCUSTOM8	d'29'
 	movwf	lo
 	bsf		leftbind
 	output_8
-	STRCAT_PRINT  "m"
+	STRCAT_PRINT  TXT_METER1
 
 	bcf		leftbind
 	return
@@ -764,7 +764,7 @@ PLED_show_cf32_cf33_cf29:; Display GF_LOW, GF_HIGH and last deco in the customvi
 	GETCUSTOM8	d'32'				; GF_lo
 	movwf	lo
 
-    STRCPY  "GF_lo:"
+    STRCPY  TXT_GFLO6
 	bsf		leftbind
 	output_8
 	STRCAT_PRINT  "%"
@@ -772,7 +772,7 @@ PLED_show_cf32_cf33_cf29:; Display GF_LOW, GF_HIGH and last deco in the customvi
 	WIN_TOP		.50
 	GETCUSTOM8	d'33'				; GF_hi
 	movwf	lo
-    STRCPY  "GF_hi:"
+    STRCPY  TXT_GFHI6
 	bsf		leftbind
 	output_8
 	STRCAT_PRINT  "%"
@@ -1066,7 +1066,7 @@ PLED_show_ppO2:					; Show ppO2 (ppO2 stored in xC)
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	PLED_color_code		warn_ppo2		; Color-code output (ppO2 stored in xC)
-    STRCPY  "ppO2:"
+    STRCPY  TXT_PPO2_5
 
 ; Check very high ppO2 manually
 	tstfsz		xC+2					; char_I_O2_ratio * p_amb/10 > 65536, ppO2>6,55bar?
@@ -1214,10 +1214,10 @@ PLED_display_decotype_surface:
 
 ;ZH-L16
 	WIN_TOP		.125
-    STRCPY_PRINT "O"
+    STRCPY_PRINT TXT_OC_O1
 
 	WIN_TOP		.150
-    STRCPY_PRINT "C"
+    STRCPY_PRINT TXT_OC_C1
 	return		
 
 show_decotype_surface2:
@@ -1235,10 +1235,14 @@ show_decotype_surface3:
     WIN_TOP		.125
     call	PLED_standard_color
     
-    STRCPY_PRINT "C"
+    STRCPY_PRINT TXT_CC_C1_1
     
     WIN_TOP		.150
+#IF TXT_CC_C1_1 == TXT_CC_C2_1
     call	word_processor              ; Twice the same string.
+#ELSE
+    STRCPY_PRINT TXT_CC_C2_1
+#ENDIF
     return
 
 show_decotype_surface4:
@@ -1255,10 +1259,10 @@ show_decotype_surface6:
     bra		show_decotype_surface6
     ; Multi-GF OC
     WIN_TOP		.125
-    STRCPY_PRINT "G"
+    STRCPY_PRINT TXT_GF_G1
     
     WIN_TOP		.150
-    STRCPY_PRINT "F"
+    STRCPY_PRINT TXT_GF_F1
     return
 
 ;-----------------------------------------------------------------------------
@@ -1327,7 +1331,7 @@ PLED_pre_dive_screen2_loop:
 	movlw	d'4'
 	addwf	wait_temp,F			; Increase eeprom address for gas list
 	
-	STRCPY  "G"
+	STRCPY  TXT_GAS1
 	movff	hi,lo			; copy gas number
 	output_8				; display gas number
 	STRCAT  ": "
@@ -1386,7 +1390,7 @@ PLED_pre_dive_screen3_loop:
 	WIN_LEFT	.90
 	movff	waitms_temp,win_top ; Set Row
 	
-	STRCPY  "SP"
+	STRCPY  TXT_SP2
 	movff	apnoe_mins,lo       ; copy gas number
 	output_8			        ; display gas number
 	STRCAT  ": "
@@ -1416,7 +1420,7 @@ PLED_pre_dive_screen3_loop:
 
 	WIN_LEFT	.90
 	WIN_TOP		.100
-	STRCPY  "Dil:"
+	STRCPY  TXT_DIL4
 	output_8				; O2 Ratio
 	PUTC    '/'
 	movff	hi,lo
@@ -1452,7 +1456,7 @@ PLED_active_gas_surfmode:				; Displays start gas/SP 1
 	output_16dp	d'3'		; outputs into Postinc2!
 	bcf		leftbind
 
-	STRCAT_PRINT  "bar"
+	STRCAT_PRINT  TXT_BAR3
 	bra		PLED_active_gas_surfmode_exit
 
 PLED_active_gas_surfmode2:
@@ -1841,7 +1845,7 @@ update_surf_press_common:
 	bsf		leftbind
 	output_16
 	bcf		leftbind
-	STRCAT_PRINT  "mbar "
+	STRCAT_PRINT  TXT_MBAR5
 	call	PLED_standard_color		; Reset color
 	return
 
@@ -1884,7 +1888,7 @@ update_batt_voltage:
 	bsf		leftbind
 	output_16dp	d'2'			; e.g. 3.45V
 	bcf		leftbind
-	STRCAT_PRINT  "V "
+	STRCAT_PRINT  TXT_VOLT2
 	return
 	
 update_batt_voltage2:
@@ -2298,7 +2302,7 @@ PLED_stopwatch_show2:
 	bsf		ignore_digit5		; do not display 1cm depth
 	output_16dp	d'3'
 	bcf		leftbind
-	STRCAT_PRINT "m"
+	STRCAT_PRINT TXT_METER1
 	return
 
 PLED_stopwatch_show_gauge:
@@ -2347,7 +2351,7 @@ PLED_stopwatch_show_gauge:
 	bsf		ignore_digit5					; do not display 1cm depth
 	output_16dp	d'3'
 	bcf		leftbind
-	STRCAT_PRINT "m"
+	STRCAT_PRINT TXT_METER1
 	WIN_FONT	FT_SMALL				; Reset...
 	return
 
@@ -2370,7 +2374,7 @@ PLED_total_average_show2:
 	bsf		ignore_digit5		; do not display 1cm depth
 	bcf		leftbind
 	output_16dp	d'3'
-	STRCAT_PRINT "m"
+	STRCAT_PRINT TXT_METER1
 	return
 
 ;=============================================================================
@@ -2463,7 +2467,7 @@ PLED_divemode_set_xgas:				; Displayes the "Set Gas" menu
 	WIN_FONT	FT_SMALL
 	call	PLED_standard_color
 
-    STRCPY  "G6:"
+    STRCPY  TXT_G6_3
 	read_int_eeprom	d'24'			; Get Gas6 %O2
 	movff	EEDATA,lo
 	bcf		leftbind
@@ -2518,7 +2522,7 @@ PLED_decoplan_nstd_stop:
 	    lfsr	FSR2,letter
 	    bsf     leftbind
 	    output_8					    ; outputs into Postinc2!
-        STRCAT_PRINT "m "
+        STRCAT_PRINT TXT_METER2
 
         ;---- Print duration -------------------------------------------------
 	    WIN_LEFT	.140
@@ -2780,7 +2784,7 @@ PLED_gas_list_loop:
 	WIN_LEFT	.100
 	movff	waitms_temp,win_top ; Set Row
 	
-	STRCPY  "G"
+	STRCPY  TXT_GAS1
 	movff	hi,lo			; copy gas number
 	output_8				; display gas number
     PUTC    ':'
@@ -2842,7 +2846,7 @@ PLED_splist_loop:
 	movff	waitms_temp,win_top ; Set Row
 	WIN_LEFT	.100
 	
-	STRCPY  "SP"
+	STRCPY  TXT_SP2
 	movff	decoplan_index,lo	; copy gas number
 	output_8				; display gas number
     PUTC    ':'
@@ -3033,13 +3037,13 @@ PLED_tissue_saturation_graph2:
     btfsc   divemode
     movlw   .169+7                      ; divemode
     movff   WREG,win_top
-	STRCPY_PRINT  "N2"
+	STRCPY_PRINT  TXT_N2_2
 
 	movlw	.120-.30                    ; surfmode: 30pix above bottom border
     btfsc   divemode
     movlw   .239-.30                    ; divemode
     movff   WREG,win_top
-	STRCPY_PRINT  "He"
+	STRCPY_PRINT  TXT_HE2
 	
     ;---- Draw scale and O2[16]% ---------------------------------------------
     btfsc   divemode
@@ -3249,14 +3253,14 @@ PLED_show_end_ead_divemode:
 	movff       char_O_EAD,lo
 	bsf         leftbind
 	output_8                            ; Print EAD w/o leading space.
-	STRCAT_PRINT "m "
+	STRCAT_PRINT TXT_METER2
 
 	WIN_TOP		.216
 	lfsr        FSR2,letter
 	movff       char_O_END,lo
 	output_8                            ; Print END w/o leading space.
 	bcf	        leftbind
-	STRCAT_PRINT "m "
+	STRCAT_PRINT TXT_METER2
 
 ; Show ppO2[Flush] iff in CCR mode & not in Bailout:
 	btfsc       is_bailout              ; In bailout mode?
@@ -3268,7 +3272,7 @@ PLED_show_end_ead_divemode:
 	WIN_LEFT	.95
 	WIN_TOP		.168
 	call        PLED_divemask_color     ; Set Color for Divemode mask
-	STRCPY_PRINT "ppO2:"                ; ppO2 of diluent
+	STRCPY_PRINT TXT_PPO2_5                ; ppO2 of diluent
 
 	movff       char_O_flush_ppO2,WREG  ; copy to WREG
 	mullw       .100
@@ -3362,11 +3366,11 @@ PLED_show_leading_tissue_2:
 	movlw	d'16'
 	cpfslt	wait_temp
 	bra		PLED_show_leading_tissue_he
-	STRCAT  "N2"
+	STRCAT  TXT_N2_2
 	bra		PLED_show_leading_tissue2
 
 PLED_show_leading_tissue_he:	
-    STRCAT  "He"
+    STRCAT  TXT_HE2
 
 PLED_show_leading_tissue2:	
 	WIN_LEFT	.95
@@ -3417,7 +3421,7 @@ PLED_display_cns:
 	WIN_FONT 	FT_SMALL
 	PLED_color_code		warn_cns		; Color-code CNS output
 	
-	STRCPY  "CNS:"
+	STRCPY  TXT_CNS4
 	movff	char_O_CNS_fraction,lo
 	bsf		leftbind
 	output_8
@@ -3442,7 +3446,7 @@ PLED_display_cns_surface:
 	WIN_INVERT	.0					; Init new Wordprocessor
 	PLED_color_code		warn_cns		; Color-code CNS output
 	
-	STRCPY  "CNS:"
+	STRCPY  TXT_CNS4
 	movff	char_O_CNS_fraction,lo
 	bsf		leftbind
 	output_8
@@ -3522,7 +3526,7 @@ PLED_simdata_screen2_loop:
 	movlw	d'4'
 	addwf	wait_temp,F			; Increase eeprom address for gas list
 	
-	STRCPY  "G"
+	STRCPY  TXT_GAS1
 	movff	hi,lo			; copy gas number
 	output_8				; display gas number
 	PUTC    ':'
@@ -3542,7 +3546,7 @@ PLED_simdata_screen2_loop:
 	movff	EEDATA,lo		; Change depth in m
 	movff	lo,divemins		; Store for grey-out
 	output_99				; outputs into Postinc2!
-    PUTC    'm'
+    PUTC    TXT_METER_C
 
     ; Check if gas is first gas ?
 	read_int_eeprom d'33'	            ; First gas (1-5)?
@@ -3612,7 +3616,7 @@ PLED_simdata_screen3_loop:
 	WIN_LEFT	.0
 	movff	waitms_temp,win_top ; Set Row
 	
-	STRCPY  "SP"
+	STRCPY  TXT_SP2
 	movff	decoplan_index,lo   ; copy gas number
 	output_8				; display gas number
 	STRCAT  ": "
@@ -3647,7 +3651,7 @@ PLED_simdata_screen3_loop:
 	WIN_LEFT	.0
 	WIN_TOP		.110
 
-	STRCPY  "Dil:"
+	STRCPY  TXT_DIL4
 	output_8				; O2 Ratio
 	STRCAT  "/"
 	movff	hi,lo

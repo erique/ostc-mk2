@@ -23,6 +23,7 @@
 ; 2011/07/25 : Sergei V. Rozinov: Russian translation.
 ; 2011/07/28 : Sergei V. Rozinov: Corrected.
 ; 2011/08/04 : Sergei V. Rozinov: Adapted for firmware 1.95+
+; 2011/08/12 : Sergei V. Rozinov: Complete translation patch
 ;
 ; known bugs:
 ; ToDo:
@@ -60,44 +61,65 @@
 ;
 ;=============================================================================
 ; Define's section
-;   Definition			"translation"                    ; English original
+;   Definition			     translation                 ; English original
 #IFNDEF	TXT_DEFINED
 #DEFINE	TXT_DEFINED
-                                                                 ; 'G'         
-#DEFINE	TXT_GAS_C		'Г'                              ; 'm'         
-#DEFINE	TXT_METER_C		'м'                              ; "m    "     
-#DEFINE	TXT_METER5		"м    "                          ; "m  "       
-#DEFINE	TXT_METER3		"м  "                            ; "m "        
-#DEFINE	TXT_METER2		"м "                             ; "m"         
-#DEFINE	TXT_METER1		"м"                              ; " mbar  "   
-#DEFINE	TXT_MBAR7		" мбар  "                        ; "mbar "     
-#DEFINE	TXT_MBAR5		"мбар "                          ; "bar "      
-#DEFINE	TXT_BAR4		"бар "                           ; "Alt: "     
-#DEFINE	TXT_ALT5		"Альт "                          ; "kg/l"      
-#DEFINE	TXT_KGL4		"кг/л"                           ; "V"         
-#DEFINE	TXT_VOLT1		"V"                              ; "Step:"     
-#DEFINE	TXT_STEP5		"Шаг: "                          ; "CF"        
-#DEFINE	TXT_CF2			"ДП"                             ; "O2: "      
-#DEFINE	TXT_O2_4		"O2: "                           ; "O2 "       
-#DEFINE	TXT_O2_3		"O2 "                            ; "AIR "      
-#DEFINE	TXT_AIR4		"AIR "                           ; "ERR "      
-#DEFINE	TXT_ERR4		"ERR "                           ; "He: "      
-#DEFINE	TXT_HE4			"He: "                           ; "NX "       
-#DEFINE	TXT_NX3			"NX "                            ; "TX "       
-#DEFINE	TXT_TX3			"TX "                            ; " in "      
-#DEFINE	TXT_IN4			" на "                           ; "G1:"       
-#DEFINE	TXT_G1_3		"Г1:"                            ; "G2:"       
-#DEFINE	TXT_G2_3		"Г2:"                            ; "G3:"       
-#DEFINE	TXT_G3_3		"Г3:"                            ; "G4:"       
-#DEFINE	TXT_G4_3		"Г4:"                            ; "G5:"       
-#DEFINE	TXT_G5_3		"Г5:"                            ; "G6:"       
-#DEFINE	TXT_G6_3		"Г6:"                            ; "1st:"      
-#DEFINE	TXT_1ST4		"Нач:"                           ; "CNS:"      
-#DEFINE	TXT_CNS4		"ЦНС:"                           ; "CNS > 250%"
-#DEFINE	TXT_CNSGR10		"ЦНС > 250%"                     ; "Avr:"      
-#DEFINE	TXT_AVR4		"Срд:"                           ; "GF:"       
-#DEFINE	TXT_GF3			"ГФ:"                            ; "Sat:"      
-#DEFINE	TXT_SAT4		"Сат:"
+                                                                 
+#DEFINE	TXT_GAS_C		     'Г'                         ; 'G'         
+#DEFINE	TXT_GAS1			 "Г"                         ; "G"
+#DEFINE	TXT_METER_C		     'м'                         ; 'm'         
+#DEFINE	TXT_METER5		     "м    "                     ; "m    "     
+#DEFINE	TXT_METER3		     "м  "                       ; "m  "       
+#DEFINE	TXT_METER2		     "м "                        ; "m "        
+#DEFINE	TXT_METER1		     "м"                         ; "m"         
+#DEFINE	TXT_MBAR7		     " мбар  "                   ; " mbar  "   
+#DEFINE	TXT_MBAR5		     "мбар "                     ; "mbar "     
+#DEFINE	TXT_BAR4		     "бар "                      ; "bar "      
+#DEFINE	TXT_BAR3			 "бар"                       ; "bar"
+#DEFINE	TXT_ALT5		     "Альт "                     ; "Alt: "     
+#DEFINE	TXT_KGL4		     "кг/л"                      ; "kg/l"      
+#DEFINE	TXT_VOLT2			 "V "                        ; "V "
+#DEFINE	TXT_VOLT1		     "V"                         ; "V"         
+#DEFINE	TXT_STEP5		     "Шаг: "                     ; "Step:"     
+#DEFINE	TXT_CF2			     "ДП"                        ; "CF"        
+#DEFINE	TXT_O2_4		     "O2: "                      ; "O2: "      
+#DEFINE	TXT_O2_3		     "O2 "                       ; "O2 "       
+#DEFINE	TXT_AIR4		     "AIR "                      ; "AIR "      
+#DEFINE	TXT_ERR4		     "ERR "                      ; "ERR "      
+#DEFINE	TXT_HE4			     "He: "                      ; "He: "      
+#DEFINE	TXT_NX3			     "NX "                       ; "NX "       
+#DEFINE	TXT_TX3			     "TX "                       ; "TX "       
+#DEFINE	TXT_IN4			     " на "                      ; " in "      
+#DEFINE	TXT_G1_3		     "Г1:"                       ; "G1:"       
+#DEFINE	TXT_G2_3		     "Г2:"                       ; "G2:"       
+#DEFINE	TXT_G3_3		     "Г3:"                       ; "G3:"       
+#DEFINE	TXT_G4_3		     "Г4:"                       ; "G4:"       
+#DEFINE	TXT_G5_3		     "Г5:"                       ; "G5:"       
+#DEFINE	TXT_G6_3		     "Г6:"                       ; "G6:"       
+#DEFINE	TXT_1ST4		     "Нач:"                      ; "1st:"      
+#DEFINE	TXT_CNS4		     "ЦНС:"                      ; "CNS:"      
+#DEFINE	TXT_CNSGR10		     "ЦНС > 250%"                ; "CNS > 250%"
+#DEFINE	TXT_AVR4		     "Срд:"                      ; "Avr:"      
+#DEFINE	TXT_GF3			     "ГФ:"                       ; "GF:"       
+#DEFINE	TXT_SAT4		     "Сат:"                      ; "Sat:"      
+#DEFINE	TXT_0MIN5			 "0мин "                     ; "0min "
+#DEFINE	TXT_MIN4			 "мин "                      ; "min "  
+#DEFINE	TXT_BSAT5			 "КСат:"                     ; "BSat:" 
+#DEFINE	TXT_BDES5			 "КДес:"                     ; "BDes:" 
+#DEFINE	TXT_LAST5			 "Стоп:"                     ; "Last:" 
+#DEFINE	TXT_GFLO6			 "ГФниж:"                    ; "GF_lo:"
+#DEFINE	TXT_GFHI6			 "ГФврх:"                    ; "GF_hi:"
+#DEFINE	TXT_PPO2_5			 "ppO2:"                     ; "ppO2:" 
+#DEFINE	TXT_OC_O1			 "O"                         ; "O"     
+#DEFINE	TXT_OC_C1			 "C"                         ; "C"     
+#DEFINE	TXT_CC_C1_1			 "C"                         ; "C"     
+#DEFINE	TXT_CC_C2_1			 "C"                         ; "C"     
+#DEFINE	TXT_GF_G1			 "G"                         ; "G"     
+#DEFINE	TXT_GF_F1			 "F"                         ; "F"     
+#DEFINE	TXT_SP2				 "СП"                        ; "SP"    
+#DEFINE	TXT_DIL4			 "Дил:"                      ; "Dil:"  
+#DEFINE	TXT_N2_2			 "N2"                        ; "N2"    
+#DEFINE	TXT_HE2				 "He"                        ; "He"    
 
 #ENDIF
 ;=============================================================================
@@ -169,7 +191,7 @@
     TCODE    .40,  .35,      "ЦНС показать[%]"           ;063 CNSshow dive[%]
     TCODE    .40,  .35,      "Номер в журнале"           ;064 Logbook offset
     TCODE    .40,  .35,      "Крайняя деко[м]"           ;065 Last Deco at[m]
-    TCODE    .40,  .35,      "Конец Apnoe [ч]"           ;066 End Apnoe   [h]
+    TCODE    .40,  .35,      "Конец Апноэ [ч]"           ;066 End Apnoe   [h]
     TCODE    .40,  .35,      "Показ напр.бат."           ;067 Show Batt.Volts
 ; End of function descriptor I
 ;
@@ -210,8 +232,8 @@
     TCODE    .20,   .35,     "Доп. Параметры I"          ;099 Custom FunctionsI
     TCODE    .20,   .125,    "Алгоритм:"                 ;100 Decotype:
     TCODE    .85,   .125,    "ZH-L16 OC"                 ;101 ZH-L16 OC
-    TCODE    .85,   .125,    "Gauge    "                 ;102 Gauge
-    TCODE    .85,   .125,    "Gauge"                     ;103 Gauge
+    TCODE    .85,   .125,    "Таймер   "                 ;102 Gauge
+    TCODE    .85,   .125,    "Таймер"                    ;103 Gauge
     TCODE    .85,   .125,    "ZH-L16 CC"                 ;104 ZH-L16 CC
     TCODE    .0,    .0,      "Активный Газ? "            ;105 Active Gas?
     TCODE    .10,   .2,      "Настройка газов"	         ;106 Gas Setup - Gaslist
@@ -220,11 +242,11 @@
 	TCODE	 .20,	.155,	 "Умолчание:"			  	 ;109 Default:
     TCODE    .20,   .65,     "Сетпоинты CCR"             ;110 CCR SetPoint Menu
     TCODE    .20,   .2,      "Меню сетпоинтов CCR"       ;111 CCR SetPoint Menu
-    TCODE    .0,    .0,      "SP#"                       ;112 SP#
+    TCODE    .0,    .0,      "СП#"                       ;112 SP#
     TCODE    .20,   .95,     "Состояние батареи"         ;113 Battery Info
     TCODE    .17,   .2,      "Информация батареи"        ;114 Battery Information
     TCODE    .0,    .9,      "Циклов:"                   ;115 Cycles:
-    TCODE    .85,   .125,    "Apnoe"                     ;116 Apnoe
+    TCODE    .85,   .125,    "Апноэ"                     ;116 Apnoe
     TCODE    .0,    .18,     "Посл. зарядка:"            ;117 Last Complete:
     TCODE    .0,    .27,     "Минимум Vбат:"             ;118 Lowest Vbatt:
     TCODE    .0,    .36,     "Минимум дата:"             ;119 Lowest at:
@@ -246,7 +268,7 @@
     TCODE    .10,   .50,     "Сообщите об ошибке,  "     ;135 and report the Debug
     TCODE    .10,   .75,     "отправьте отчет ниже!"     ;136 Information below!
     TCODE    .100,  .75,     "На запас"                  ;137 Bailout
-    TCODE    .85,   .125,    "Apnoe    "                 ;138 Apnoe
+    TCODE    .85,   .125,    "Апноэ     "                ;138 Apnoe
     TCODE    .112,  .120,    "В воде"                    ;139 Descent
     TCODE    .105,  .60,     "Наверху"                   ;140 Surface
     TCODE    .65,   .2,      "Откл?"                     ;141 Quit?
@@ -301,7 +323,7 @@
     TCODE    .20,   .2,      "Доп. Параметры II"         ;186 Custom Functions II
     TCODE    .20,   .95,     "Показать лицензию"         ;187 Show License
     TCODE    .0,    .2,      "Результаты:"               ;188 Sim. Results:
-    TCODE    .90,   .25,     "Поверхн."                  ;189 Surface
+    TCODE    .90,   .25,     "Надводный"                 ;189 Surface
     TCODE    .0,    .0,      "ppO2 +"                    ;190 ppO2 +
     TCODE    .0,    .0,      "ppO2 -"                    ;191 ppO2 -
     TCODE    .0,    .0,      "Дил."                      ;192 Dil.			       (Rebreather diluent)
@@ -314,7 +336,7 @@
     TCODE    .0,    .185,    "в меню настройки.  "       ;198 in Gassetup menu.
     TCODE    .0,    .215,    "Уточн. ДП11 & ДП12!"       ;199 Check CF11 & CF12 !
 ; Gaugemode description
-    TCODE    .0,    .35,     "Алгоритм: Gauge    "       ;200 Decotype: Gauge
+    TCODE    .0,    .35,     "Алгоритм: Таймер   "       ;200 Decotype: Gauge
     TCODE    .0,    .65,     "Время под водой в  "       ;201 Divetime will be in
     TCODE    .0,    .95,     "виде Минуты:Секунды"       ;202 Minutes:Seconds.
     TCODE    .0,    .125,    "OSTC2 не вычисляет "       ;203 OSTC2 will not
@@ -330,7 +352,7 @@
     TCODE    .0,    .185,    "CCR. Доступно до 5 "       ;212 Setup menu. 5 bail-
     TCODE    .0,    .215,    "запасных смесей.   "       ;213 outs are available.
 ; Apnoemode description
-    TCODE    .0,    .35,     "Алгоритм: Apnoe    "       ;214 Decotype: Apnoe
+    TCODE    .0,    .35,     "Алгоритм: Апноэ    "       ;214 Decotype: Apnoe
     TCODE    .0,    .65,     "OSTC2 показывает   "       ;215 OSTC2 will display
     TCODE    .0,    .95,     "каждое погружение  "       ;216 each descent separ-
     TCODE    .0,    .125,    "отдельно в Мин:Сек."       ;217 ately in Min:Sec.

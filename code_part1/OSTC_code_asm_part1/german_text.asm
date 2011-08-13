@@ -57,6 +57,69 @@
 ;   you will have to adjust position. A char is 7 pixels wide.
 ;
 ;=============================================================================
+; Define's section
+;   Definition			     translation                 ; English original
+#IFNDEF	TXT_DEFINED                                                           
+#DEFINE	TXT_DEFINED                                                           
+                                                                              
+#DEFINE	TXT_GAS_C		     'G'                         ; 'G'                    
+#DEFINE	TXT_GAS1			 "G"                         ; "G"
+#DEFINE	TXT_METER_C		     'm'                         ; 'm'                    
+#DEFINE	TXT_METER5		     "m    "                     ; "m    "                
+#DEFINE	TXT_METER3		     "m  "                       ; "m  "                  
+#DEFINE	TXT_METER2		     "m "                        ; "m "                   
+#DEFINE	TXT_METER1		     "m"                         ; "m"                    
+#DEFINE	TXT_MBAR7		     " mbar  "                   ; " mbar  "              
+#DEFINE	TXT_MBAR5		     "mbar "                     ; "mbar "                
+#DEFINE	TXT_BAR4		     "bar "                      ; "bar "                 
+#DEFINE	TXT_BAR3			 "bar"                       ; "bar"
+#DEFINE	TXT_ALT5		     "Alt: "                     ; "Alt: "                
+#DEFINE	TXT_KGL4		     "kg/l"                      ; "kg/l"                 
+#DEFINE	TXT_VOLT2			 "V "                        ; "V "
+#DEFINE	TXT_VOLT1		     "V"                         ; "V"                    
+#DEFINE	TXT_STEP5		     "Step:"                     ; "Step:"                
+#DEFINE	TXT_CF2			     "CF"                        ; "CF"                   
+#DEFINE	TXT_O2_4		     "O2: "                      ; "O2: "                 
+#DEFINE	TXT_O2_3		     "O2 "                       ; "O2 "                  
+#DEFINE	TXT_AIR4		     "AIR "                      ; "AIR "                 
+#DEFINE	TXT_ERR4		     "ERR "                      ; "ERR "                 
+#DEFINE	TXT_HE4			     "He: "                      ; "He: "                 
+#DEFINE	TXT_NX3			     "NX "                       ; "NX "                  
+#DEFINE	TXT_TX3			     "TX "                       ; "TX "                  
+#DEFINE	TXT_IN4			     " in "                      ; " in "                 
+#DEFINE	TXT_G1_3		     "G1:"                       ; "G1:"                  
+#DEFINE	TXT_G2_3		     "G2:"                       ; "G2:"                  
+#DEFINE	TXT_G3_3		     "G3:"                       ; "G3:"                  
+#DEFINE	TXT_G4_3		     "G4:"                       ; "G4:"                  
+#DEFINE	TXT_G5_3		     "G5:"                       ; "G5:"                  
+#DEFINE	TXT_G6_3		     "G6:"                       ; "G6:"                  
+#DEFINE	TXT_1ST4		     "1st:"                      ; "1st:"                 
+#DEFINE	TXT_CNS4		     "CNS:"                      ; "CNS:"                 
+#DEFINE	TXT_CNSGR10		     "CNS > 250%"                ; "CNS > 250%"           
+#DEFINE	TXT_AVR4		     "Avr:"                      ; "Avr:"                 
+#DEFINE	TXT_GF3			     "GF:"                       ; "GF:"                  
+#DEFINE	TXT_SAT4		     "Sat:"                      ; "Sat:"                 
+#DEFINE	TXT_0MIN5			 "0min "                     ; "0min "
+#DEFINE	TXT_MIN4			 "min "                      ; "min "  
+#DEFINE	TXT_BSAT5			 "BSat:"                     ; "BSat:" 
+#DEFINE	TXT_BDES5			 "BDes:"                     ; "BDes:" 
+#DEFINE	TXT_LAST5			 "Last:"                     ; "Last:" 
+#DEFINE	TXT_GFLO6			 "GF_lo:"                    ; "GF_lo:"
+#DEFINE	TXT_GFHI6			 "GF_hi:"                    ; "GF_hi:"
+#DEFINE	TXT_PPO2_5			 "ppO2:"                     ; "ppO2:" 
+#DEFINE	TXT_OC_O1			 "O"                         ; "O"     
+#DEFINE	TXT_OC_C1			 "C"                         ; "C"     
+#DEFINE	TXT_CC_C1_1			 "C"                         ; "C"     
+#DEFINE	TXT_CC_C2_1			 "C"                         ; "C"     
+#DEFINE	TXT_GF_G1			 "G"                         ; "G"     
+#DEFINE	TXT_GF_F1			 "F"                         ; "F"     
+#DEFINE	TXT_SP2				 "SP"                        ; "SP"    
+#DEFINE	TXT_DIL4			 "Dil:"                      ; "Dil:"  
+#DEFINE	TXT_N2_2			 "N2"                        ; "N2"    
+#DEFINE	TXT_HE2				 "He"                        ; "He"    
+                                                                         
+#ENDIF                                                                   
+;=============================================================================
 ;   macro     X     Y        "translation"               ; English original
     TCODE    .0,   .0,       "Erstelle MD2 Hash"         ;001 Building MD2 Hash
     TCODE    .0,   .25,      "Bitte warten..."           ;002 Please Wait...

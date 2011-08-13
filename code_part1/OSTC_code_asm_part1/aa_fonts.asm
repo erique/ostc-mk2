@@ -145,6 +145,7 @@ aa_font28_end:
 	endif
 
 ;---- MEDIUM font description and data ---------------------------------------
+#ifndef RUSSIAN
 aa_font48_block:
 			DB	0x27, 0x3B					; ' char
 			DB	'"', 0x3C
@@ -159,6 +160,22 @@ aa_font48_block:
 #include	"aa_font48_idx.inc"
 #include	"aa_font48.inc"
 aa_font48_end:
+#else
+aa_font48_block:
+			DB	0x27, 0x3B
+			DB	0x22, 0x3C
+			DB	0xEC, 0x3D
+			DB	0x20, 0x3E
+			DB	0				; End of translation table
+			DB	aa_font48_firstChar			; To be substracted
+			DB	aa_font48_chars				; Max value
+			DB	0x3E-aa_font48_firstChar
+			DB	aa_font48_height + 0x80
+;
+#include	"aa_font48_idx_rus.inc"				; SHOULD FOLLOW !
+#include	"aa_font48_rus.inc"
+aa_font48_end:
+#endif
 ; Make sure this is coherent...
 	if aa_font48_nbbits != 3
 		error MEDIUM fount should be encoded with 3bits anti-aliasing...

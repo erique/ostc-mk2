@@ -714,7 +714,7 @@ store_extended6:
 ; SetPoint change appended to information due to compatibility reasons
 	btfss	setpoint_changed		; Check flag	
 	bra		store_dive_data5
-	movff	char_I_const_ppO2,WREG	; SetPoint in cbar
+	movff	ppO2_setpoint_store,WREG	; SetPoint in cbar
 	call	write_external_eeprom
 	bcf		setpoint_changed		; Clear this event
 

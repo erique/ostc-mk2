@@ -1,8 +1,10 @@
-New in 1.96 beta:
+New in 1.97 beta:
 NEW: Logbook displays ceilings and temperature curve.
 BUGFIX: Decoplanner accumulates CNS during ascent.
 NEW: Decoplanner warns in red if CNS is too high.
 NEW: Decoplanner OC volumes in liters (or bars), up to 65000.
+NEW: Released also in Russian language
+BUGFIX: SetPoint store in Profile
 
 New in 1.95 beta:
 CHANGE: 0.98bar equal 10m depths with salinity set to 1.00kg/l

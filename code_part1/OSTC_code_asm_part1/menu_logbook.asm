@@ -35,6 +35,7 @@
         logbook_cur_tp:2        ; Current temperature, for drawing profile.
         logbook_last_tp         ; Y of the last item in Tp° curve.
         logbook_min_tp:2        ; Min temperature, for drawing profile.
+        logbook_max_tp:2        ; Maximum temperature, for drawing profile.
         logbook_ceiling         ; Current ceiling, for drawing profile.
     ENDC
 
@@ -620,7 +621,16 @@ display_profile2e:
     movwf       logbook_last_tp             ; Initialise for Tp° curve too.
 	incf		timeout_counter3,W			; Init Column
 
+    movlw       LOW(-.100)                  ; Initialize max tp° to -10.0 °C.
+    movwf       logbook_max_tp+0
+    movlw       HIGH 0xFFFF & (-.100)
+    movwf       logbook_max_tp+1
     
+    setf        logbook_cur_tp+0            ; Initialize Tp°, before the first recorded point.
+    setf        logbook_cur_tp+1
+    clrf        logbook_last_tp             ; Also reset previous Y for Tp°
+    clrf        logbook_ceiling             ; Ceiling = 0, correct value for no ceiling.
+
     INIT_PIXEL_WROTE timeout_counter3       ; pixel x2			(Also sets standard Color!)
 
 profile_display_loop:
@@ -673,6 +683,11 @@ profile_display_skip_deco:
     movf        divisor_temperature,W
     bz          profile_display_skip_temp
 
+	movf        logbook_cur_tp+0,W          ; Did we had already a valid Tp°C record ?
+	andwf       logbook_cur_tp+1,W
+	incf        WREG
+	bz          profile_display_skip_temp   ; No: just skip drawing.
+
     movlw       LOW((.153*.256)/.370)         ; fixed tp° scale: (-2 .. +35°C * scaleé56 )/153pix
  	movwf		xB+0
     movlw       HIGH((.153*.256)/.370)
@@ -697,14 +712,15 @@ profile_display_skip_deco:
 	movwf		xC+1
 	cpfsgt		xC+0
 	movff		xC+1,xC+0
-	
-	
 
     movlw       color_pink
     call        PLED_set_color
 
-    movff       logbook_last_tp,xC+1
+    movf        logbook_last_tp,W           ; do we have a valid previous value ?
+    bz          profile_display_temp_1      ; No: skip the vertical line.
+    movwf       xC+1
 	call		profile_display_fill		; In this column between this row (xC+0) and the last row (xC+1)
+profile_display_temp_1:	
     movff       xC+0,logbook_last_tp
 
     PIXEL_WRITE timeout_counter3,xC+0       ; Set col(0..159) x row (0..239), put a current color pixel.
@@ -1208,6 +1224,18 @@ profile_view_get_depth_new1:
 	decf        timeout_counter2,F
 	decf        timeout_counter2,F
 	movff       divisor_temperature,count_temperature   ; Restart counter.
+    
+    ; Compute Tp° max on the fly...
+    movff       logbook_cur_tp+0,sub_a+0    ; Compare cur_tp > max_tp ?
+    movff       logbook_cur_tp+1,sub_a+1
+    movff       logbook_max_tp+0,sub_b+0
+    movff       logbook_max_tp+1,sub_b+1
+    call        sub16                       ; SIGNED sub_a - sub_b
+    btfsc       neg_flag
+    bra         profile_view_get_depth_no_tp
+    
+    movff       logbook_cur_tp+0,logbook_max_tp+0
+    movff       logbook_cur_tp+1,logbook_max_tp+1
     
     ;---- Read deco, if any AND divisor=0 AND bytes available ----------------
 profile_view_get_depth_no_tp:

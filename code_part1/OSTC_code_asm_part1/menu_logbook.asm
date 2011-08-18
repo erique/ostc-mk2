@@ -484,7 +484,7 @@ display_profile_xscale:
 	movff		SSPBUF,hi				; Read min. Temperature
     movff       lo,logbook_min_tp+0     ; Backup min Tp° too.
 	movff       hi,logbook_min_tp+1
-	movlw       color_pink              ; Use same color as tp° curve
+	movlw       color_orange            ; Use same color as tp° curve
 	call        PLED_set_color
 
 	call		PLED_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
@@ -650,7 +650,7 @@ profile_display_loop2:
     ;---- Draw Ceiling curve, if any ---------------------------------------------
     movf        divisor_deco,W
     bz          profile_display_skip_deco
-    
+
     movf        logbook_ceiling,W           ; Any deco ceiling ?
     bz          profile_display_skip_deco
 
@@ -671,12 +671,18 @@ profile_display_loop2:
 	movff		sim_pressure+0,xB+0			; devide pressure in mbar/quant for row offsett
 	movff		sim_pressure+1,xB+1
 	call		div16x16					; xA/xB=xC
-	
+
 	movlw		d'76'                       ; Starts right after the top blue line.
 	movff		WREG,win_top
 	movff		timeout_counter3,win_leftx2 ; Left border (0-159)
 	movff		xC+0,win_height				
 	call		half_vertical_line			; Inputs:  win_top, win_leftx2, win_height, win_color1, win_color2
+
+; Horizontal bar: jaggy line, so don't keep it.
+;   movlw		d'75'
+;   addwf		xC+0,F						; add 75 pixel offset to result
+;   PIXEL_WRITE timeout_counter3,xC+0       ; Set col(0..159) x row (0..239), put a current color pixel.
+
 profile_display_skip_deco:
 
     ;---- Draw Tp° curve, if any ---------------------------------------------
@@ -688,7 +694,7 @@ profile_display_skip_deco:
 	incf        WREG
 	bz          profile_display_skip_temp   ; No: just skip drawing.
 
-    movlw       LOW((.153*.256)/.370)         ; fixed tp° scale: (-2 .. +35°C * scaleé56 )/153pix
+    movlw       LOW((.153*.256)/.370)         ; fixed tp° scale: (-2 .. +35°C * scale256 )/153pix
  	movwf		xB+0
     movlw       HIGH((.153*.256)/.370)
  	movwf		xB+1
@@ -713,7 +719,7 @@ profile_display_skip_deco:
 	cpfsgt		xC+0
 	movff		xC+1,xC+0
 
-    movlw       color_pink
+    movlw       color_orange
     call        PLED_set_color
 
     movf        logbook_last_tp,W           ; do we have a valid previous value ?

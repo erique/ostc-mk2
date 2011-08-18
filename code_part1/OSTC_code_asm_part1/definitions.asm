@@ -64,7 +64,7 @@
 #DEFINE	color_deepblue      b'00000010'     ; (0,0,2)
 #DEFINE	color_grey	        b'01001010'     ; (2,2,2)
 #DEFINE	color_cyan	        b'11011111'     ; (6,7,3)
-#DEFINE color orange        b'11111000'     ; (7,6,0)
+#DEFINE color_orange        b'11111000'     ; (7,6,0)
 #DEFINE color_pink          b'11111010'     ; (7,6,2)
 
 #DEFINE	warn_depth		d'1'

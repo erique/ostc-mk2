@@ -131,13 +131,16 @@ pixel_write_noflip_H:
 ; Inputs: win_leftx2, win_top, win_height, win_color:2
 ; Trashed: WREG, PROD, TABLAT, TBLPTRL
 half_vertical_line:
-        movff   win_leftx2,WREG         ; Init X position.
-        mullw   2
-        rcall   pixel_write_col320      ; Start Address Vertical (.0 - .319)
-
         clrf    TABLAT                  ; Loop index.
 
 half_vertical_line_loop:
+        movff   win_leftx2,WREG         ; Init X position.
+        mullw   2
+        movf    TABLAT,W                ; Get loop index
+        andlw   1                       ; Just low bit
+        xorwf   PRODL,F                 ; And use it to jitter current X position
+        rcall   pixel_write_col320      ; Start Address Vertical (.0 - .319)
+
         movff   win_height,WREG         ; Index reached height (Bank0 read) ?
         xorwf   TABLAT,W
         btfsc   STATUS,Z                ; Equals ?

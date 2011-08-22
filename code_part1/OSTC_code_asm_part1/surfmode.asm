@@ -278,6 +278,7 @@ calc_deko_surfmode:
 
 	movff	last_surfpressure+0,int_I_pres_surface+0	; copy surface air pressure to deco routine
 	movff	last_surfpressure+1,int_I_pres_surface+1		
+calc_deko_surfmode2:
 	clrf	WREG                        ; Use as buffer
 	movff	WREG,char_I_He_ratio        ; No He at the Surface
 	movlw	d'79'                       ; 79% N2

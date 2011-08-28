@@ -125,7 +125,7 @@ osct_asm	code
 #include	aa_fonts.asm
 
 ;=============================================================================
-    MESSG "OSTC - diving computer code,  Copyright (C) 2010 HeinrichsWeikamp GbR"
+    MESSG "OSTC - diving computer code,  Copyright (C) 2011 HeinrichsWeikamp"
     MESSG "This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the"
     MESSG "Free Software Foundation, either version 3 of the License, or (at your option) any later version."
     MESSG "This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY"

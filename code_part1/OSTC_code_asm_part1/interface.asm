@@ -146,7 +146,7 @@ menu_interface1:
 	movlw		d'1'						; increase
 	addwf		eeprom_address+0,F
 	movlw		d'0'
-	addwfc	eeprom_address+1,F
+	addwfc		eeprom_address+1,F
 
 ;For debug only
 ;clrf	eeprom_address+0,F

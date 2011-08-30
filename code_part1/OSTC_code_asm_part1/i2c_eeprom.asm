@@ -127,6 +127,7 @@ get_free_EEPROM_location:			; Searches 0xFD, 0xFD, 0xFE and sets Pointer to 0xFE
 	clrf		ext_ee_temp2		; high address counter
 	bcf			second_FD			; clear flags
 	bcf			first_FD
+	bcf			eeprom_switched_b1
 get_free_EEPROM_location3:
 	bsf			SSPCON2, PEN		; Stop condition
 	rcall		WaitMSSP	
@@ -157,6 +158,15 @@ get_free_EEPROM_location3:
 	rcall		I2C_WaitforACK
 
 get_free_EEPROM_location2:
+	btfsc		eeprom_switched_b1			; Switched to Block1 already?
+	bra			get_free_EEPROM_location2_x	; Yes, skip this check!
+
+	btfsc		ext_ee_temp2,7				; Access Block1?
+	bsf			eeprom_switched_b1			; Yes, and set the flag so this check is skipped in the rest of this routine
+	btfsc		ext_ee_temp2,7				; Access Block1?
+	bra			get_free_EEPROM_location3	; Yes, initiate new read sequence in block1
+
+get_free_EEPROM_location2_x:
 	bsf			SSPCON2, RCEN		; Enable recieve mode
 	rcall		WaitMSSP	
 	btfsc		first_FD

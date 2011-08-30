@@ -21,10 +21,10 @@
 ; known bugs:
 ; ToDo:
 
-#DEFINE	softwareversion_x		d'1'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'98'		; Software version  XX.YY
+#DEFINE	softwareversion_x		d'2'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'0'		; Software version  XX.YY
 
-#DEFINE softwareversion_beta 	1 			; (and 0 for release) 
+#DEFINE softwareversion_beta 	0 			; (and 0 for release) 
 
 #DEFINE	max_custom_number		d'58'		; Number of last used custom function
 
@@ -455,7 +455,7 @@ total_divetime_seconds	res 2	; counts dive seconds regardless of CF01 (18h max.)
 #DEFINE	switch_left			flag6,3	;=1: left switch pressed
 #DEFINE	switch_right		flag6,4	;=1: right switch pressed
 #DEFINE	uart_settime		flag6,5	;=1: enter time sync routine
-#DEFINE	FLAG_1              flag6,6	;=1: unused
+#DEFINE	eeprom_switched_b1  flag6,6	;=1: EEPROM read switched to bank1
 #DEFINE	twosecupdate		flag6,7	;=1: after any two seconds
 
 #DEFINE	dekostop_active			flag7,0	;=1: in deocompression mode

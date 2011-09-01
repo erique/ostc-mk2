@@ -1,3 +1,6 @@
+New in 2.01 beta:
+BUGFIX: No decodata in logbook for apnea dives
+
 New in 2.00 Stable:
 Stable release
 BUGFIX: Fixing 32kB boundary read for logbook

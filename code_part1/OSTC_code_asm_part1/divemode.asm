@@ -561,7 +561,7 @@ store_dive_data:						; CF20 seconds gone
 
 ; shift address for header
 ; the header will be stored after the dive
-	incf_eeprom_address	d'57'				; Macro, that adds 8Bit to eeprom_address:2 with banking at 0x8000
+	incf_eeprom_address	d'57'				; Macro, that adds 8Bit to eeprom_address:2
 
 store_dive_data2:
     SAFE_2BYTE_COPY rel_pressure, lo
@@ -778,6 +778,9 @@ store_dive_decodata:
 	movf	decodata+1,W				; no stop time of length of first stop
 	call	write_external_eeprom
 	GETCUSTOM8	d'22'
+	
+	btfsc	FLAG_apnoe_mode				; in Apnoe mode?
+	movlw	d'0'					; Yes, set to zero
 	movwf	divisor_deco			; Reload divisor from CF
 	return
 
@@ -1764,6 +1767,8 @@ diveloop_boot_2:
 	GETCUSTOM8	d'21'
 	movwf	divisor_temperature         ; load divisors for profile storage
 	GETCUSTOM8	d'22'
+	btfsc	FLAG_apnoe_mode				; in Apnoe mode?
+	movlw	d'0'					; Yes, set to zero
 	movwf	divisor_deco				
 	GETCUSTOM8	d'23'
 	movwf	divisor_gf

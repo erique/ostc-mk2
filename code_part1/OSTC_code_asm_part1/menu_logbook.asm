@@ -154,7 +154,7 @@ menu_logbook_reset:
 
 menu_logbook4:
 	; Adjust eeprom_address to set pointer on first headerbyte
-	incf_eeprom_address	d'2'            ; Macro, that adds 8Bit to eeprom_address:2 with banking at 0x8000
+	incf_eeprom_address	d'2'            ; Macro, that adds 8Bit to eeprom_address:2
 
 	btfss		logbook_profile_view			; Display profile (search routine is used in profileview, too)
 	bra			menu_logbook_display_loop		; No, display overwiev list
@@ -328,10 +328,10 @@ display_profile_offset3:
 	movff		SSPBUF,lo				; store in lo
 
 ; Offset to SamplingRate
-	incf_eeprom_address	d'32'				; Macro, that adds 8Bit to eeprom_address:2 with banking at 0x8000
+	incf_eeprom_address	d'32'				; Macro, that adds 8Bit to eeprom_address:2
 	call		I2CREAD						; Read Sampling rate
 	movff		SSPBUF,samplesecs_value		; Copy sampling rate
-	decf_eeprom_address	d'32'				; Macro, that subtracts 8Bit from eeprom_address:2 with banking at 0x8000
+	decf_eeprom_address	d'32'				; Macro, that subtracts 8Bit from eeprom_address:2
 
 	movff		lo,convert_value_temp+0		; Month (in lo, see above)
 	call		I2CREAD2					; Day

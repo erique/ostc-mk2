@@ -437,8 +437,13 @@ cf_bank1_end:
 ; Write WREG:lo twice, w/o any type clearing, pre-incrementing EEADR
 reset_gas:
     movwf   lo
-    rcall   reset_eeprom_value      ; First pair
-    goto    reset_eeprom_value      ; Second pair.
+	incf	EEADR,F
+	movff	lo, EEDATA				; Lowbyte Default value
+	call	write_eeprom
+	incf	EEADR,F
+	movff	hi, EEDATA				; Highbyte default value
+	call    write_eeprom
+	return
 
 reset_customfunction:
     tblrd*+

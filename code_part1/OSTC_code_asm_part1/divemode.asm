@@ -1270,6 +1270,8 @@ end_dive2:
 	movwf	temp1		; copy to bits 0-3
 	swapf	temp1,F		; swap nibbels 0-3 with 4-7
 	GETCUSTOM8	d'22'	; Divisor deco
+	btfsc	FLAG_apnoe_mode		; in Apnoe mode?
+	movlw	d'0'				; Yes, set to zero
 	addwf	temp1,W		; copy to bits 0-3, result in WREG
 	call	write_external_eeprom
 

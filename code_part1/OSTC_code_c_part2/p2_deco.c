@@ -1547,34 +1547,34 @@ void sim_ascent_to_first_stop(void)
     //---- Loop until first stop, gas switch, or surface is reached ----------
  	for(;;)
   	{
-        overlay short tmp;              // Rounded distance to surface.
+        overlay float old_deco = temp_deco;     // Pamb backup (bars)
 
         // Try ascending 1 full minute.
-	    temp_deco -= 10*METER_TO_BAR;   // 1 min, at 10m/min. ~ 1bar.
+        temp_deco -= 10*METER_TO_BAR;   // 1 min, at 10m/min. ~ 1bar.
+        if( temp_deco < pres_surface )  // But don't go over surface.
+            temp_deco = pres_surface;
 
-        // Compute sim_lead_tissue_limit at GF_low (deepest stop).
+        // Recompute sim_lead_tissue_limit at GF_low (deepest stop), because
+        // one minute passed.
         sim_limit(GF_low);
 
         // Did we reach deepest remaining stop ?
         if( temp_deco < sim_lead_tissue_limit )
         {
-            temp_deco += 10*METER_TO_BAR;   // Restore last correct depth,
-            break;                          // End fast ascent.
+            temp_deco = old_deco;           // Restore last correct depth,
+            break;                          // Do no spend a minute more.
         }
 
         // Did we reach surface ?
         // NOTE: we should round BEFORE checking surface is reached.
-        tmp = (short)(0.5 + (temp_deco - pres_surface) * BAR_TO_METER);
-        if( tmp <= 0 )
+        temp_depth_limit = (unsigned char)(0.5 + (temp_deco - pres_surface) * BAR_TO_METER);
+        if( temp_depth_limit == 0 )
         {
             temp_deco = pres_surface;   // Yes: finished !
             break;
         }
 
         // Check for gas change below new depth ?
-        assert( 0 < tmp && tmp < 255);
-        temp_depth_limit = (unsigned char)tmp;
-
         if( gas_switch_deepest() )
         {
             assert( temp_depth_limit > 0);

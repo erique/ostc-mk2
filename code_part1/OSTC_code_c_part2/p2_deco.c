@@ -1547,6 +1547,8 @@ void sim_ascent_to_first_stop(void)
     //---- Loop until first stop, gas switch, or surface is reached ----------
  	for(;;)
   	{
+        overlay short tmp;              // Rounded distance to surface.
+
         // Try ascending 1 full minute.
 	    temp_deco -= 10*METER_TO_BAR;   // 1 min, at 10m/min. ~ 1bar.
 
@@ -1561,15 +1563,17 @@ void sim_ascent_to_first_stop(void)
         }
 
         // Did we reach surface ?
-        if( temp_deco <= pres_surface )
+        // NOTE: we should round BEFORE checking surface is reached.
+        tmp = (short)(0.5 + (temp_deco - pres_surface) * BAR_TO_METER);
+        if( tmp <= 0 )
         {
             temp_deco = pres_surface;   // Yes: finished !
             break;
         }
 
         // Check for gas change below new depth ?
-        temp_depth_limit = (int)(0.5 + (temp_deco - pres_surface) * BAR_TO_METER);
-        assert( temp_depth_limit > 0);
+        assert( 0 < tmp && tmp < 255);
+        temp_depth_limit = (unsigned char)tmp;
 
         if( gas_switch_deepest() )
         {

@@ -124,7 +124,7 @@ static void clear_tissue(void);
 static void calc_ascenttime(void);
 static void update_startvalues(void);
 static void clear_deco_table(void);
-static void update_deco_table(void);
+static unsigned char update_deco_table(void);
 
 static void backup_sim_pres_tissue(void);
 static void restore_sim_pres_tissue(void);
@@ -1478,7 +1478,8 @@ void calc_hauptroutine_calc_deco(void)
                 //---- We hit a stop at temp_depth_limit ---------------------
                 temp_deco = temp_depth_limit * METER_TO_BAR // Convert to relative bar,
 	                      + pres_surface;                   // To absolute.
-                update_deco_table();                        // Adds a one minute stops.
+                if( !update_deco_table() )                  // Adds a one minute stops.
+                    goto Surface;                           // Deco table full: abort...
             }
             else
             {
@@ -1489,12 +1490,12 @@ void calc_hauptroutine_calc_deco(void)
                 if( temp_deco <= pres_surface )
                 {
 Surface:
-                    if( char_O_deco_status == 1 )  // Don't in @+5min variant.
+                    if( char_O_deco_status == 1 )   // Don't in @+5min variant.
                         copy_deco_table();      
 
                     calc_ascenttime();
-                    char_O_deco_status = 0;     // calc nullzeit next time.
-                    char_O_deco_last_stop = 0;  // Surface reached (to animate menu)
+                    char_O_deco_status = 0;         // calc nullzeit next time.
+                    char_O_deco_last_stop = 0;      // Surface reached (to animate menu)
     		        return;
                 }
             }
@@ -1503,7 +1504,8 @@ Surface:
         {
             // Note: if loop==0, temp_depth_limit might not be already set here.
             temp_depth_limit = (int)(0.5 + (temp_deco - pres_surface) * BAR_TO_METER);
-            update_deco_table();    // Just pass one minute.
+            if( !update_deco_table() )  // Just pass one minute.
+                goto Surface;           // Deco table full: abort...
         }
 
         //---- Then update tissue --------------------------------------------
@@ -1897,7 +1899,7 @@ static void clear_deco_table(void)
 //      internal_deco_depth[] : depth (in metres) of each stops.
 //      internal_deco_time [] : time (in minutes) of each stops.
 //
-static void update_deco_table()
+static unsigned char update_deco_table()
 {
     overlay unsigned char x;
     assert( temp_depth_limit < 128 );   // Can't be negativ (overflown).
@@ -1914,7 +1916,7 @@ static void update_deco_table()
 	        if( internal_deco_time[x] < 255 )
             {
                 internal_deco_time[x]++;
-                return;
+                return 1;
             }
             // But store extra in the next stop...
         }
@@ -1926,13 +1928,14 @@ static void update_deco_table()
                 internal_deco_depth[x] |= 0x80;
 
             internal_deco_time[x]  = 1;
-            return;
+            return 1;
         }
     }
 
     // Can't store stops at more than 96m.
     // Or stops at less that 3m too.
     // Just do nothing with that...
+    return 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2325,7 +2328,7 @@ void deco_calc_CNS_fraction(void)
     overlay float time_factor = 1.0f;    
     RESET_C_STACK
 
-    assert( 0.0 <= CNS_fraction && CNS_fraction <= 2.5 );
+    assert( 0.0 <= CNS_fraction && CNS_fraction <= 2.56 );
     assert( char_I_actual_ppO2 > 15 );
 
     if( char_I_step_is_1min == 1 )

@@ -1062,7 +1062,7 @@ PLED_temp_divemode:
 
 PLED_show_ppO2:					; Show ppO2 (ppO2 stored in xC)
 	ostc_debug	't'		; Sends debug-information to screen if debugmode active
-	WIN_TOP		.119
+	WIN_TOP		.117
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	PLED_color_code		warn_ppo2		; Color-code output (ppO2 stored in xC)
@@ -1089,7 +1089,7 @@ PLED_show_ppO2_3:
 PLED_show_ppO2_clear:					; Clear ppO2
 	movlw	d'10'
 	movwf	temp1
-	WIN_TOP		.120
+	WIN_TOP		.117
 	WIN_LEFT	.0
 	call	PLED_display_clear_common_y1
 	return

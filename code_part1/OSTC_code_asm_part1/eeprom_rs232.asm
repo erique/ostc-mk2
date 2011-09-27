@@ -126,7 +126,7 @@ enable_rs232:				;IO Ports must be input in order to activate the module
 	movlw	b'00001000'
 	movwf	BAUDCON
 	clrf	SPBRGH
-	movlw	d'34'				; Take care of the baud rate when changing Fosc!
+	movlw	SPBRG_VALUE			; Take care of the baud rate when changing Fosc!
 	movwf	SPBRG
 	clrf	RCREG
 	clrf	PIR1

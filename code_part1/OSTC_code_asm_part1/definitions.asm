@@ -41,6 +41,19 @@
 #DEFINE	logbook_profile_version	0x21        ; Do not touch!
 #DEFINE	T0CON_debounce	b'00000000'         ; Timer0 Switch Debounce
 
+
+; CPU Speed Settings
+; Standard 16MHz mode
+;	#DEFINE	SPBRG_VALUE 	d'34'
+;  	#DEFINE	OSCCON_VALUE  	b'01101100'		; 4MHz (x4 PLL)
+;	#DEFINE	SSPADD_VALUE	d'8'			; 400kHz I2C clock @ 16MHz Fcy
+;	#DEFINE	T0CON_VALUE		b'00011111'		; Timer0
+; Experimental 32MHz mode
+	#DEFINE	SPBRG_VALUE 	d'68'
+  	#DEFINE	OSCCON_VALUE  	b'01111100'		; 8MHz (x4 PLL)
+	#DEFINE	SSPADD_VALUE	d'16'			; 400kHz I2C clock @ 32MHz Fcy
+	#DEFINE	T0CON_VALUE 	b'00010000'		; Timer0
+
 #DEFINE		FT_SMALL		.0
 #DEFINE		FT_MEDIUM		.1
 #DEFINE		FT_LARGE		.2
@@ -97,8 +110,8 @@
 
 ;=============================================================================
 
-;#include "../OSTC_code_c_part2/shared_definitions.h"
-#include "shared_definitions.h"
+#include "../OSTC_code_c_part2/shared_definitions.h"
+;#include "shared_definitions.h"
 
 ;=============================================================================
 ; Reserve space for C-code data space. Eg.when calling log.

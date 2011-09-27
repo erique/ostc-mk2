@@ -395,9 +395,8 @@ first_start:
 	bra		start3					; continue with normal start
 
 init:						
-	movlw	b'01101100'		; 4MHz (x4 PLL)
+	movlw	OSCCON_VALUE
 	movwf	OSCCON
-
 	movlw	b'00010001'		; I/O Ports
 	movwf	TRISA
 	clrf	PORTA
@@ -417,7 +416,7 @@ init:
 	movlw	b'01000000'		; Bit6: PPL enable
 	movwf	OSCTUNE
 
-	movlw	b'00011111'		; Timer0
+	movlw	T0CON_VALUE		; Timer0
 	movwf	T0CON
 
 	movlw	b'00000111'		; Timer1
@@ -449,7 +448,8 @@ init:
 	movwf	SSPCON1
 	movlw	b'00000000'
 	movwf	SSPCON2
-	movlw	d'8'			; 400kHz I2C clock @ 16MHz Fcy
+
+	movlw	SSPADD_VALUE	; I²C Speed
 	movwf	SSPADD
 
 	clrf	CCP1CON			; PWM Module off
@@ -468,7 +468,8 @@ init:
 	movlw	b'00001000'
 	movwf	BAUDCON
 	clrf	SPBRGH
-	movlw	d'34'
+
+	movlw	SPBRG_VALUE
 	movwf	SPBRG
 	clrf	RCREG
 	clrf	PIR1

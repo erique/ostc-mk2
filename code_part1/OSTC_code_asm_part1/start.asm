@@ -142,6 +142,9 @@ check_firmware_new:
 	write_int_eeprom	d'193'
 	write_int_eeprom	d'194'		; Reset Default and Current Value to zero
 	clrf	EEADRH
+
+; reset gases (Bug in 2.0 stable)
+	call	reset_gases
 ;	goto	reset_all_cf			; resets all custom functions bank0 and bank1 and jumps to "restart"
 			
 restart:
@@ -395,8 +398,9 @@ first_start:
 	bra		start3					; continue with normal start
 
 init:						
-	movlw	OSCCON_VALUE
+	movlw	b'01101100'		; 4MHz (x4 PLL)
 	movwf	OSCCON
+
 	movlw	b'00010001'		; I/O Ports
 	movwf	TRISA
 	clrf	PORTA
@@ -416,7 +420,7 @@ init:
 	movlw	b'01000000'		; Bit6: PPL enable
 	movwf	OSCTUNE
 
-	movlw	T0CON_VALUE		; Timer0
+	movlw	b'00011111'		; Timer0
 	movwf	T0CON
 
 	movlw	b'00000111'		; Timer1
@@ -448,8 +452,7 @@ init:
 	movwf	SSPCON1
 	movlw	b'00000000'
 	movwf	SSPCON2
-
-	movlw	SSPADD_VALUE	; I²C Speed
+	movlw	d'8'			; 400kHz I2C clock @ 16MHz Fcy
 	movwf	SSPADD
 
 	clrf	CCP1CON			; PWM Module off
@@ -468,8 +471,7 @@ init:
 	movlw	b'00001000'
 	movwf	BAUDCON
 	clrf	SPBRGH
-
-	movlw	SPBRG_VALUE
+	movlw	d'34'
 	movwf	SPBRG
 	clrf	RCREG
 	clrf	PIR1

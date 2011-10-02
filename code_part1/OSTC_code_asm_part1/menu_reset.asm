@@ -324,23 +324,7 @@ reset_start:
 	bcf			nofly_active                	; Clear flag
 
 ; reset gases
-	clrf	EEADRH					; EEPROM BANK 0 !
-
-	movlw	d'3'					; address of first gas-1
-	movwf	EEADR
-	clrf	hi						; He part (default for all gases: 0%)
-	movlw	d'21'					; O2 part (21%)
-	rcall	reset_gas               ; saves default and current value for gas #1
-	movlw	d'21'					; O2 part (21%)
-	rcall	reset_gas               ; saves default and current value for gas #2
-	movlw	d'21'					; O2 part (21%)
-	rcall	reset_gas               ; saves default and current value for gas #3
-	movlw	d'21'					; O2 part (21%)
-	rcall	reset_gas               ; saves default and current value for gas #4
-	movlw	d'21'					; O2 part (21%)
-	rcall	reset_gas               ; saves default and current value for gas #5
-	movlw	d'21'					; O2 part (21%)
-	rcall	reset_gas               ; saves default and current value for gas #6
+	rcall	reset_gases
 
 reset_all_cf:
 	movlw	d'1'
@@ -434,14 +418,44 @@ cf_bank1_end:
 ;call	reset_external_eeprom	; delete profile memory
 	goto	restart					; all reset, quit to surfmode
 
+reset_gases:
+	clrf	EEADRH					; EEPROM BANK 0 !
+
+	movlw	d'3'					; address of first gas-1
+	movwf	EEADR
+	clrf	hi						; He part (default for all gases: 0%)
+	movlw	d'21'					; O2 part (21%)
+	rcall	reset_gas               ; saves current value for gas #1
+	movlw	d'21'					; O2 part (21%)
+	rcall	reset_gas               ; saves default value for gas #1
+	movlw	d'21'					; O2 part (21%)
+	rcall	reset_gas               ; saves current value for gas #2
+	movlw	d'21'					; O2 part (21%)
+	rcall	reset_gas               ; saves default value for gas #2
+	movlw	d'21'					; O2 part (21%)
+	rcall	reset_gas               ; saves current value for gas #3
+	movlw	d'21'					; O2 part (21%)
+	rcall	reset_gas               ; saves default value for gas #3
+	movlw	d'21'					; O2 part (21%)
+	rcall	reset_gas               ; saves current value for gas #4
+	movlw	d'21'					; O2 part (21%)
+	rcall	reset_gas               ; saves default value for gas #4
+	movlw	d'21'					; O2 part (21%)
+	rcall	reset_gas               ; saves current value for gas #5
+	movlw	d'21'					; O2 part (21%)
+	rcall	reset_gas               ; saves default value for gas #5
+	movlw	d'21'					; O2 part (21%)
+	rcall	reset_gas               ; saves current value for gas #6
+	return
+
 ; Write WREG:lo twice, w/o any type clearing, pre-incrementing EEADR
 reset_gas:
     movwf   lo
 	incf	EEADR,F
-	movff	lo, EEDATA				; Lowbyte Default value
+	movff	lo, EEDATA				; O2 Default value
 	call	write_eeprom
 	incf	EEADR,F
-	movff	hi, EEDATA				; Highbyte default value
+	movff	hi, EEDATA				; He default value
 	call    write_eeprom
 	return
 

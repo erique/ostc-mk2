@@ -142,6 +142,9 @@ check_firmware_new:
 	write_int_eeprom	d'193'
 	write_int_eeprom	d'194'		; Reset Default and Current Value to zero
 	clrf	EEADRH
+
+; reset gases (Bug in 2.0 stable)
+	call	reset_gases
 ;	goto	reset_all_cf			; resets all custom functions bank0 and bank1 and jumps to "restart"
 			
 restart:

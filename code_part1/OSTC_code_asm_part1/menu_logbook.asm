@@ -944,7 +944,7 @@ profileview_page2:
 	movlw		.2							; Check firmware x > 1
 	cpfslt		hi							; <2?
 	bsf			show_cns_in_logbook			; No, set flag
-	output_8
+	output_99x
 	call		word_processor				; Display Gas information
 	bcf			leftbind					; Clear flag
 

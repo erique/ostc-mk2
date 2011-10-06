@@ -430,8 +430,8 @@ reset_MS5535A_one:
 	nop
 	nop
 	nop
-	nop
-	nop
+	btfsc	OSCCON,4			; 32MHz Mode?
+	rcall	MS5535A_extra_wait	; Yes
 	bcf		sensor_CLK	
 	return	
 
@@ -443,11 +443,19 @@ reset_MS5535A_zero:
 	nop
 	nop
 	nop
-	nop
-	nop
+	btfsc	OSCCON,4			; 32MHz Mode?
+	rcall	MS5535A_extra_wait	; Yes
 	bcf		sensor_CLK	
 	return	
 
+MS5535A_extra_wait:
+	nop
+	nop
+	nop
+	nop
+	nop
+	return
+	
 reset_MS5535A:
 	rcall	reset_MS5535A_one			;0
 	rcall	reset_MS5535A_zero
@@ -487,8 +495,8 @@ get_2bytes_MS5535A:
 	nop
 	nop
 	nop
-	nop
-	nop
+	btfsc	OSCCON,4			; 32MHz Mode?
+	rcall	MS5535A_extra_wait	; Yes
 	bcf		sensor_CLK	
 	return
 
@@ -498,8 +506,8 @@ recieve_loop:
 	nop
 	nop
 	nop
-	nop
-	nop
+	btfsc	OSCCON,4			; 32MHz Mode?
+	rcall	MS5535A_extra_wait	; Yes
 	bcf		sensor_CLK	
 	btfss	sensor_SDI	;MSB first
 	bcf		STATUS,C
@@ -521,39 +529,39 @@ send_data_MS55535A:
 	nop
 	nop
 	nop
-	nop
-	nop
+	btfsc	OSCCON,4			; 32MHz Mode?
+	rcall	MS5535A_extra_wait	; Yes
 	bcf		sensor_CLK	
 	nop
 	nop
 	nop
 	nop
-	nop
-	nop
+	btfsc	OSCCON,4			; 32MHz Mode?
+	rcall	MS5535A_extra_wait	; Yes
 	bsf		sensor_CLK	
 	nop
 	nop
 	nop
 	nop
-	nop
-	nop
+	btfsc	OSCCON,4			; 32MHz Mode?
+	rcall	MS5535A_extra_wait	; Yes
 	bcf		sensor_CLK	
 	nop
 	nop
 	nop
 	nop
-	nop
-	nop
+	btfsc	OSCCON,4			; 32MHz Mode?
+	rcall	MS5535A_extra_wait	; Yes
 	bsf		sensor_CLK	
 	nop
 	nop
 	nop
 	nop
-	nop
-	nop
+	btfsc	OSCCON,4			; 32MHz Mode?
+	rcall	MS5535A_extra_wait	; Yes
 	bcf		sensor_CLK	
 	; now send 8 bytes from isr_temp1 and fill-up with zeros
-datenbits:
+databits:
 	btfss	isr1_temp,7	;MSB first
 	bcf		sensor_SDO
 	btfsc	isr1_temp,7	;MSB first
@@ -566,10 +574,10 @@ datenbits:
 	nop
 	nop
 	nop
-	nop
-	nop
+	btfsc	OSCCON,4			; 32MHz Mode?
+	rcall	MS5535A_extra_wait	; Yes
 	bcf		sensor_CLK	
 
 	decfsz	clock_count,F
-	bra		datenbits
+	bra		databits
 	return

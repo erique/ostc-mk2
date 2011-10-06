@@ -99,6 +99,8 @@ surfloop3:
     ; Desaturation time needs:
     ;   int_I_pres_surface
     ;   char_I_desaturation_multiplier
+	movlw	d'0'
+	movff	WREG,char_I_deco_model	    ; ZH-L16
 	GETCUSTOM8	d'12'					; Desaturation multiplier %
 	movff	WREG,char_I_desaturation_multiplier
 

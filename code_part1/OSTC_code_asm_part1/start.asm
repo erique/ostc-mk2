@@ -272,7 +272,7 @@ restart_set_modes_and_flags:		    ; "Call"ed from divemode, as well!
 ; Pre-load modes for OC, GF 90/90 and no Aponoe or Gauge.
 	bcf		no_deco_customviews		    ; Clear no-deco-mode-flag
 	movlw	d'0'
-	movff	WREG,char_I_deco_model	    ; Clear Flagbyte 
+	movff	WREG,char_I_deco_model	    ; ZH-L16
 ; Load GF values into RAM
 	movlw	d'90'
 	movff	WREG,char_I_GF_Low_percentage

@@ -35,8 +35,8 @@ WAIT10USX2	nop
 			nop
 			nop
 			nop
-			nop
 JumpIn10us:
+			nop
 			nop
 			nop
 			nop
@@ -85,8 +85,8 @@ WAITMSX2	nop
 			nop
 			nop
 			nop
-			nop
 JumpInMSX:
+			nop
 			nop
 			nop
 			nop

@@ -560,6 +560,10 @@ PLED_DataWrite_PROD:
 PLED_DataRead:
 	bsf		oled_rs					; Data register.
 	bcf		oled_e_nwr              ; Read enable.
+	nop
+	nop
+	nop
+	nop
 	movf	PORTD,W				    ; Read byte.
 	bsf		oled_e_nwr              ; release bus.
 	return

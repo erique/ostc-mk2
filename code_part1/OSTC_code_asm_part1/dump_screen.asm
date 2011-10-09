@@ -72,9 +72,18 @@ dump_screen_0:
     AA_DATA_WRITE   0x00
     AA_DATA_WRITE   0xEF
 
+    btfss       win_flip_screen         ; OSTC 2N have a flipped screen,
+    bra         dump_screen_mk2         ; So we should start 239 instead.
+    movlw       LOW(.239)
+    movwf       PRODL
+    movlw       HIGH(.239)
+    movwf       PRODH
+dump_screen_mk2:    
+
     AA_CMD_WRITE    0x20                ; Start Address Horizontal (.0 - .239)
     AA_DATA_WRITE_PROD                  ; 00:00
 
+    mullw       0                       ; Make sure PROD is 0 again.
     AA_CMD_WRITE    0x21                ; Start Address Vertical (.0 - .319)
     AA_DATA_WRITE_PROD                  ; 00:00
 

@@ -308,8 +308,8 @@
     TCODE    .40,   .35,     "Conmu. gas[min]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
     TCODE    .40,   .35,     "Gas Fondo[/min]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
     TCODE    .40,   .35,     "GasAscens[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
-    TCODE    .40,   .35,     "Futuro TTS[min]"           ;180 Future TTS[min]   (@5 variant: compute TTS for extra time at current depth)
-    TCODE    .40,   .35,     "sin uno        "           ;181 not used
+    TCODE    .40,   .35,     "Futuro TTS[min]"           ;180 Future TTS[min]   (Compute TTS for extra time at current depth)
+    TCODE    .40,   .35,     "Cave Warning[l]"           ;181 Cave Warning[l]   (Consomation warning for cave divers)
     TCODE    .40,   .35,     "sin uso        "           ;182 not used
     TCODE    .40,   .35,     "sin uso        "           ;183 not used
     TCODE    .40,   .35,     "sin uso        "           ;184 not used
@@ -455,10 +455,12 @@
 ;@5 variant
     TCODE    .0,    .0,      "Futuro TTS"                ;305 Future TTS            (=10 chars. Title for @5 customview).
 ;
-    TCODE    .100,  .125,    "SalirSim"                  ;306 Quit Sim (=8char max. Quit Simulator mode)
+    TCODE    .100,  .125,    "SalirSim"                  ;306 Quit Sim              (=8char max. Quit Simulator mode)
 ;Dive interval
     TCODE    .20,   .35,     "Interval:"                 ;307 Interval:
-    TCODE    .0,    .0,      "Now    "                   ;308 Now (7 chars min)
+    TCODE    .0,    .0,      "Now    "                   ;308 Now                   (7 chars min)
 	TCODE	 .100,	.113,	 "Promedio"			 		 ;309 Average
-	TCODE	 .116,	.54,	 "Crono."		 		 	 ;310 Stopwatch (BIG Stopwatch in Gauge mode)
+	TCODE	 .116,	.54,	 "Crono."		 		 	 ;310 Stopwatch             (BIG Stopwatch in Gauge mode)
+; Cave consomation
+    TCODE    .0,    .0,      "Cave Bail."                ;311 Cave Bail.           (=10 chars.)
 ;=============================================================================

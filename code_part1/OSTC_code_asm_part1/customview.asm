@@ -77,6 +77,8 @@ customview_second:
 	bra		customview_1sec_ead_end		; Show END and EAD in divemode
 	dcfsnz	WREG,F
 	bra		customview_1sec_@5          ; Show TTS for extra time.
+	dcfsnz	WREG,F
+	bra		customview_1sec_cave_bailout; Show Cave conso prediction.
 
 	; Menupos3=0, do nothing
 	return
@@ -117,6 +119,9 @@ customview_1sec_ead_end:
 customview_1sec_@5:
     goto    PLED_show_@5
 
+customview_1sec_cave_bailout:
+    goto    PLED_show_cave_bailout
+
 ;=============================================================================
 ; Do every-minute tasks for the custom view area
 
@@ -138,6 +143,8 @@ customview_minute:
 	bra		customview_minute_ead_end   ; Show END and EAD in divemode
 	dcfsnz	WREG,F
 	bra		customview_minute_@5        ; Show TTS for extra time.
+	dcfsnz	WREG,F
+	bra		customview_minute_cave_bailout; Show Cave consomation prediction.
 
 	; Menupos3=0, do nothing
 	return
@@ -148,6 +155,7 @@ customview_minute_clock:
 customview_minute_lead_tiss:
 	goto	PLED_show_leading_tissue_2  ; Update the leading tissue
 
+customview_minute_cave_bailout:         ; Do nothing extra
 customview_minute_@5:                   ; Do nothing extra
 customview_minute_ead_end:              ; Do nothing extra
 customview_minute_marker:               ; Do nothing extra
@@ -167,31 +175,34 @@ customview_toggle:
 	bra		customview_toggle_exit			; Yes, ignore custom view in divemode completely
 
 	incf	menupos3,F			            ; Number of customview to show
-	movlw	d'8'							; Max number
+	movlw	d'9'							; Max number
 	cpfsgt	menupos3			            ; Max reached?
 	bra		customview_mask		            ; No, show
 	clrf	menupos3			            ; Reset to zero (Zero=no custom view)
 
 customview_mask:	
 	call	PLED_clear_customview_divemode
+    bcf     tts_extra_time                  ; By default, CLEAR computation of @5 request.
+
 	movff	menupos3,WREG                   ; Menupos3 holds number of customview function
 	dcfsnz	WREG,F
-	bra		customview_init_stopwatch		; Show the Stopwatch
+	bra		customview_init_stopwatch		; 1: Show the Stopwatch
 	dcfsnz	WREG,F
-	bra		customview_init_marker			; Show the Marker-Menu
+	bra		customview_init_marker			; 2: Show the Marker-Menu
 	dcfsnz	WREG,F
-	bra		customview_init_clock			; Show the clock
+	bra		customview_init_clock			; 3: Show the clock
 	dcfsnz	WREG,F
-	bra		customview_init_lead_tissue		; Show the leading tissue
+	bra		customview_init_lead_tissue		; 4: Show the leading tissue
 	dcfsnz	WREG,F
-	bra		customview_init_average			; Show Total average depth
+	bra		customview_init_average			; 5: Show Total average depth
 	dcfsnz	WREG,F
-	bra		customview_init_graphs		    ; Show the graphs
+	bra		customview_init_graphs		    ; 6: Show the graphs
 	dcfsnz	WREG,F
-	bra		customview_init_ead_end		    ; Show END and EAD in divemode
+	bra		customview_init_ead_end		    ; 7: Show END and EAD in divemode
 	dcfsnz	WREG,F
-	bra		customview_init_@5              ; Show TTS for extra time.
-    bcf     tts_extra_time                  ; Else, CLEAR computation of @5 request.
+	bra		customview_init_@5              ; 8: Show TTS for extra time.
+	dcfsnz	WREG,F
+	bra		customview_init_cave_bailout    ; 9: Show Cave consomation prediction.
 
 customview_init_nocustomview:
 	bra		customview_toggle_exit	
@@ -271,6 +282,15 @@ customview_init_@5:
 
 	bra		    customview_toggle_exit	
 
+customview_init_cave_bailout:
+ 	GETCUSTOM15	d'59'					; Conso level warning set ?
+ 	movf        lo,W
+ 	iorwf       hi,W
+ 	bz          customview_toggle       ; No: jump to next Customview !
+
+    call        PLED_show_cave_bailout
+	bra		    customview_toggle_exit	
+    
 customview_init_graphs:					; Show tissue graph
  	GETCUSTOM8	d'52'					; Show Tissue Graph? (=1 in WREG)
 	decfsz		WREG,F					; WREG=1?	

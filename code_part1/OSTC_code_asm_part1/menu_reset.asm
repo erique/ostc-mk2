@@ -170,7 +170,7 @@ cf_default_table1:
 
 	CF_DEFAULT    CF_INT8,	    d'15',  d'7',   d'20'	; color_warn_celocity_mmin	warn at xx m/min
 	CF_DEFAULT    CF_SEC+CF_NEG,d'0',  -d'120' ,d'120'  ; time_correction_value_default	Adds to Seconds on Midnight
-	CF_DEFAULT    CF_BOOL,      d'0',   0,      0 		; CF#49 Show Altimeter in surface mode
+	CF_DEFAULT    CF_BOOL,      d'0',   0,      0 		; CF49 Show Altimeter in surface mode
 	CF_DEFAULT    CF_BOOL,     	d'0',   0,      0       ; CF50 Show Log-Marker
 	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0 		; CF51 Show Stopwatch
 	                
@@ -178,11 +178,11 @@ cf_default_table1:
 	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0 		; CF53 Show Laeding Tissue in Divemode
 	CF_DEFAULT    CF_BOOL,      d'0',   0,      0 		; CF54 Display shallowest stop first
 	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'10'   ; GF55 Gas switch additional delay
-	CF_DEFAULT    CF_DECI,      d'200', d'5',   0       ; CF56 Bottom gas usage (l/min or bar/min)
+	CF_DEFAULT    CF_DECI,      d'200', d'5',   d'250'  ; CF56 Bottom gas usage (l/min or bar/min)
 
-	CF_DEFAULT    CF_DECI,      d'200', d'5',   0       ; CF57 Ascent/deco gas usage (l/min or bar/min)
+	CF_DEFAULT    CF_DECI,      d'200', d'5',   d'250'  ; CF57 Ascent/deco gas usage (l/min or bar/min)
 	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'10'   ; CF58 TTS for extra time at current depth [min]
-	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+	CF_DEFAULT    CF_INT15,     d'0',   d'0',   d'7000' ; CF59 Cave conso warning [l]
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	                

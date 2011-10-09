@@ -309,8 +309,8 @@
     TCODE    .40,   .35,     "Gaswechsel[min]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
     TCODE    .40,   .35,     "BottomGas[/min]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
     TCODE    .40,   .35,     "Sonst.Gas[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
-    TCODE    .40,   .35,     "TTS @ Zeit[min]"           ;180 Future TTS[min]   (@5 variant: compute TTS for extra time at current depth)
-    TCODE    .40,   .35,     "nicht verwendet"           ;181 not used
+    TCODE    .40,   .35,     "TTS @ Zeit[min]"           ;180 Future TTS[min]   (Compute TTS for extra time at current depth)
+    TCODE    .40,   .35,     "Cave Warning[l]"           ;181 Cave Warning[l]   (Consomation warning for cave divers)
     TCODE    .40,   .35,     "nicht verwendet"           ;182 not used
     TCODE    .40,   .35,     "nicht verwendet"           ;183 not used
     TCODE    .40,   .35,     "nicht verwendet"           ;184 not used
@@ -456,10 +456,12 @@
 ;@5 variant
     TCODE    .0,    .0,      "TTS @+Min."                ;305 Future TTS            (=10 chars. Title for @5 customview).
 ;
-    TCODE    .100,  .125,    "Ende Sim"                  ;306 Quit Sim (=8char max. Quit Simulator mode)
+    TCODE    .100,  .125,    "Ende Sim"                  ;306 Quit Sim              (=8char max. Quit Simulator mode)
 ;Dive interval
     TCODE    .20,   .35,     "Interval:"                 ;307 Interval:
-    TCODE    .0,    .0,      "Jetzt  "                   ;308 Now (7 chars min)
+    TCODE    .0,    .0,      "Jetzt  "                   ;308 Now                   (7 chars min)
 	TCODE	 .109,	.113,	 "D-Tiefe"	 	 		 	 ;309 Average
-	TCODE	 .109,	.54,	 "Stopuhr"		 		 	 ;310 Stopwatch (BIG Stopwatch in Gauge mode)
+	TCODE	 .109,	.54,	 "Stopuhr"		 		 	 ;310 Stopwatch             (BIG Stopwatch in Gauge mode)
+; Cave consomation
+    TCODE    .0,    .0,      "Cave Bail."                ;311 Cave Bail.            (=10 chars.)
 ;=============================================================================

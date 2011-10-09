@@ -309,8 +309,8 @@
     TCODE    .40,   .35,     "Gas switch[min]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
     TCODE    .40,   .35,     "BottomGas[/min]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
     TCODE    .40,   .35,     "AscentGas[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
-    TCODE    .40,   .35,     "Future TTS[min]"           ;180 Future TTS[min]   (@5 variant: compute TTS for extra time at current depth)
-    TCODE    .40,   .35,     "not used       "           ;181 not used
+    TCODE    .40,   .35,     "Future TTS[min]"           ;180 Future TTS[min]   (Compute TTS for extra time at current depth)
+    TCODE    .40,   .35,     "Cave Warning[l]"           ;181 Cave Warning[l]   (Consomation warning for cave divers)
     TCODE    .40,   .35,     "not used       "           ;182 not used
     TCODE    .40,   .35,     "not used       "           ;183 not used
     TCODE    .40,   .35,     "not used       "           ;184 not used
@@ -453,13 +453,16 @@
 	TCODE	 .45,	.100,	 "Bootloader"				 ;302 Bootloader
 	TCODE	 .40,	.130,	 "Please wait!"				 ;303 Please wait!
 	TCODE	 .50,	.130,	 "Aborted!"					 ;304 Aborted
-;@5 variant
+; @5 variant
     TCODE    .0,    .0,      "Future TTS"                ;305 Future TTS            (=10 chars. Title for @5 customview).
 ;
-    TCODE    .100,  .125,    "Quit Sim"                  ;306 Quit Sim (=8char max. Quit Simulator mode)
-;Dive interval
+    TCODE    .100,  .125,    "Quit Sim"                  ;306 Quit Sim              (=8char max. Quit Simulator mode)
+; Dive interval
     TCODE    .20,   .35,     "Interval:"                 ;307 Interval:
-    TCODE    .0,    .0,      "Now    "                   ;308 Now (7 chars min)
+    TCODE    .0,    .0,      "Now    "                   ;308 Now                   (7 chars min)
 	TCODE	 .108,	.112,	 "Average"			 		 ;309 Average
-	TCODE	 .94,	.54,	 "Stopwatch"		 		 ;310 Stopwatch (BIG Stopwatch in Gauge mode)
+;
+	TCODE	 .94,	.54,	 "Stopwatch"		 		 ;310 Stopwatch             (BIG Stopwatch in Gauge mode)
+; Cave consomation
+    TCODE    .0,    .0,      "Cave Bail."                ;311 Cave Bail.            (=10 chars.)
 ;=============================================================================

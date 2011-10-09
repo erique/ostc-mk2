@@ -3348,6 +3348,94 @@ PLED_show_@5_wait:
     return
 
 ;=============================================================================
+; Display cave consomation prediction (and warning).
+;
+PLED_show_cave_bailout:
+	WIN_FONT    FT_SMALL
+    WIN_LEFT    .160-.70                ; 10 chars aligned right.
+    WIN_TOP     .170
+	call		PLED_divemask_color     ; Set Color for Divemode mask
+    lfsr        FSR2,letter
+
+    OUTPUTTEXTH .311                    ; "Cave Bail."
+    call        word_processor
+    
+;   WIN_TOP     .240 - 24               ; DO NOT display liter units, as this
+;   WIN_LEFT    .160 - 7                ; can be Bars also...
+;   STRCPY_PRINT "l"
+
+	WIN_FONT    FT_MEDIUM
+    WIN_LEFT	.90
+    WIN_TOP     .201                    ; 170 + 24 + 14/2 + 32 + 14/2 = 240.
+	call        PLED_standard_color 
+	lfsr        FSR2,letter
+    
+    ;---- Compute divetime in seconds
+	movff	    divemins+0,xA+0
+	movff	    divemins+1,xA+1
+	movlw	    d'60'
+	movwf	    xB+0
+	clrf	    xB+1
+	call	    mult16x16               ; xC:4=xA:2*xB:2
+	movf	    divesecs,W
+	addwf	    xC+0,W
+	movwf       xA+0
+	movlw	    d'0'
+	addwfc	    xC+1,W
+	movwf       xA+1                    ; xA:2 holds total dive seconds
+	
+	;---- Multiply by SAC, and divide by 600 (SAC in 0.1 liters per minutes)
+    GETCUSTOM8	d'56'			        ; Get bottom SAC
+    movwf       xB+0
+    clrf        xB+1
+	call	    mult16x16               ; xC:4=xA:2*xB:2
+
+	movlw       LOW(.600)
+	movwf       xB+0
+	movlw       HIGH(.600)
+	movwf       xB+1
+	call	    div32x16                ; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
+
+    ;---- Multiply by average pressure [absolute, in bar]
+    movff       xC+0,xA+0               ; Get result (in xC+0, noy xC+2 !) into xA
+    movff       xC+1,xA+1
+    
+    movf        avr_rel_pressure_total+0,W  ; Add surface pressure to get absolute pressure
+    addwf       last_surfpressure_30min+0,W
+    movwf       xB+0
+    movf        avr_rel_pressure_total+1,W
+    addwfc      last_surfpressure_30min+1,W
+    movwf       xB+1                    ; --> Into xB
+
+	call	    mult16x16               ; xC:4=xA:2*xB:2
+	
+	movlw       LOW(.1000)              ; Pressure was in milibar, so divide by 1000.
+	movwf       xB+0
+	movlw       HIGH(.1000)
+	movwf       xB+1
+	call	    div32x16                ; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
+
+    ;---- Go RED when limit is exceeded
+    movff       xC+0,sub_a+0
+    movff       xC+1,sub_a+1
+    GETCUSTOM15 d'59'			        ; Get Cave bailout alarm threshold
+    movff       lo, sub_b+0
+    movff       hi, sub_b+1
+    call        sub16                   ; Computes prediction - limit
+    btfss       neg_flag                ; Negativ ?
+    call        PLED_warnings_color     ; NO: go RED.
+    
+    ;---- Then display...
+	movff       xC+0,lo
+	movff       xC+1,hi
+
+    bcf         leftbind
+    output_16
+    call        word_processor
+	WIN_FONT    FT_SMALL
+	return
+
+;=============================================================================
 
 PLED_show_leading_tissue:
 	call		PLED_divemask_color	; Set Color for Divemode mask

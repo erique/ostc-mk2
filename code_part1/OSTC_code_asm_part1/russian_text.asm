@@ -456,12 +456,14 @@
 	TCODE	 .45,	.100,	 "Загрузчик"				 ;302 Bootloader
 	TCODE	 .19,	.130,	 "Пожалуйста ждите!"    	 ;303 Please wait!
 	TCODE	 .50,	.130,	 "Прервано!"				 ;304 Aborted
-;@5 variant
+; @5 variant
     TCODE    .0,    .0,      "Будущ. TTS"                ;305 Future TTS            (=10 chars. Title for @5 customview).
-    TCODE    .100,  .125,    "Выход"                     ;306 Quit Sim (=8char max. Quit Simulator mode)
-;Dive interval
+    TCODE    .100,  .125,    "Выход"                     ;306 Quit Sim              (=8char max. Quit Simulator mode)
+; Dive interval
     TCODE    .20,   .35,     "Интервал:"                 ;307 Interval:
-    TCODE    .0,    .0,      "Сейчас "                   ;308 Now (7 chars min)
+    TCODE    .0,    .0,      "Сейчас "                   ;308 Now                   (7 chars min)
 	TCODE	 .108,	.112,	 "С®едняя"			 		 ;309 Average
-	TCODE	 .115,	.54,	 "Тайме®"			 		 ;310 Stopwatch (BIG Stopwatch in Gauge mode)
+	TCODE	 .115,	.54,	 "Тайме®"			 		 ;310 Stopwatch             (BIG Stopwatch in Gauge mode)
+; Cave consomation
+    TCODE    .0,    .0,      "Cave Bail."                ;311 Cave Bail.            (=10 chars.)
 ;=============================================================================

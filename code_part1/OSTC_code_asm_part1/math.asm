@@ -88,6 +88,8 @@ subU16:
 
     return        
 
+;=============================================================================
+
 mult16x16:		;xA*xB=xC
 	clrf    xC+2        	  ;  Clear the High-Order Bits
 	clrf    xC+3
@@ -119,6 +121,7 @@ mult16x16:		;xA*xB=xC
 	addwfc  xC+3, f
 	return
 
+;=============================================================================
 
 div16x16:						;xA/xB=xC with xA as remainder 	
 								;uses divB as temp variable
@@ -177,6 +180,8 @@ div16x16_4:
 
         bra    div16x16_2              ; Next bit.
 
+;=============================================================================
+
 div32x16:  ; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
 	; Setup
 	movlw		.32		; setup shift counter
@@ -206,12 +211,12 @@ div32x16_2
 	movf		xB+1,W
 	subwf		sub_b+1,W	; check if a>d
 	btfss		STATUS,Z
-	goto		div32x16_3
+	bra         div32x16_3
 	movf		xB+0,W
 	subwf		sub_b+0,W	; if msb equal then check lsb
 div32x16_3
 	btfss		STATUS,C	; carry set if d>a
-	goto		div32x16_4
+	bra         div32x16_4
 	movf		xB+0,W	; d-a into d
 	subwf		sub_b+0,F
 	btfss		STATUS,C
@@ -225,7 +230,7 @@ div32x16_4
 	rlcf		xC+2,F
 	rlcf		xC+3,F
 	decfsz		divB,F	; loop until all bits checked
-	goto		div32x16_2
+	bra         div32x16_2
 	return
 
 ;=============================================================================

@@ -70,6 +70,7 @@ surfloop3:
 	clrf 	timeout_counter3
 	bcf		premenu						; clear premenu flag
 	bcf		menubit						; clear menu flag
+	clrf	timer1int_counter2			; reset state counter
 	bcf		pressure_refresh
 	clrf	last_pressure+0
 	clrf	last_pressure+1

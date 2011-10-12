@@ -17,10 +17,10 @@
 
 ; Customviews for divemode
 ; written by: Matthias Heinrichs, info@heinrichsweikamp.com
-; written: 101212
 ; history:
-;   2010-12-12: [MH] last updated
+;   2010-12-12: [MH]  First updated
 ;   2011-01-04: [jDG] Saturation graphs in customview divemode
+;   2011-10-10: [jDG] Added Cave live gas counter
 ; known bugs:
 ; ToDo:
 

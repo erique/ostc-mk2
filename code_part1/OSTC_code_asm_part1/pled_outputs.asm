@@ -3384,15 +3384,15 @@ PLED_show_cave_bailout:
 	addwfc	    xC+1,W
 	movwf       xA+1                    ; xA:2 holds total dive seconds
 	
-	;---- Multiply by SAC, and divide by 600 (SAC in 0.1 liters per minutes)
+	;---- Multiply by SAC, and divide by 60 (SAC inliters per minutes)
     GETCUSTOM8	d'56'			        ; Get bottom SAC
     movwf       xB+0
     clrf        xB+1
 	call	    mult16x16               ; xC:4=xA:2*xB:2
 
-	movlw       LOW(.600)
+	movlw       LOW(.60)
 	movwf       xB+0
-	movlw       HIGH(.600)
+	movlw       HIGH(.60)
 	movwf       xB+1
 	call	    div32x16                ; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
 

@@ -1,5 +1,6 @@
 New in 2.02 beta:
 NEW: Cave divers consomation display and alarm (CF59).
+CHANGE: SAC (CF56/CF57) in range 5..50 l/min (no more decimal).
 NEW: 32MhZ mode: computes twice faster.
 BUGFIX: Hang when deco table is full (more than 32 stops).
 

@@ -2508,14 +2508,14 @@ void deco_calc_percentage(void)
 //          char_I_first_gas is the bottom gas.
 //          decoplan (char_O_deco_depth, char_O_deco_time).
 //          CF#54 == TRUE if shallowest stop first.
-//          CF#56 == bottom deci-liters/minutes (0.5 .. 50.0) or bar/min.
-//          CF#57 == deco deci-liters/minutes (0.5 .. 50.0) or bar/min.
+//          CF#56 == bottom liters/minutes (5 .. 50) or bar/min.
+//          CF#57 == deco liters/minutes (5 .. 50) or bar/min.
 // Output:  int_O_gas_volumes[0..4] in litters * 0.1
 //
 void deco_gas_volumes(void)
 {
     overlay float volumes[NUM_GAS];
-    overlay float bottom_usage, ascent_usage;
+    overlay float bottom_usage, deco_usage;
     overlay unsigned char i, deepest_first;
     overlay unsigned char gas;
     RESET_C_STACK
@@ -2527,7 +2527,7 @@ void deco_gas_volumes(void)
     assert(1 <= char_I_first_gas && char_I_first_gas <= NUM_GAS);
     gas = char_I_first_gas - 1;
 
-    bottom_usage = read_custom_function(56) * 0.1;
+    bottom_usage = (float) read_custom_function(56);
     if( bottom_usage > 0.0 )
         volumes[gas]
             = (char_I_bottom_depth*0.1 + 1.0)           // Use Psurface = 1.0 bar.
@@ -2539,18 +2539,18 @@ void deco_gas_volumes(void)
     //---- Ascent usage ------------------------------------------------------
 
     deepest_first = read_custom_function(54) == 0;
-    ascent_usage  = read_custom_function(57) * 0.1; // In liter/minutes.
+    deco_usage  = (float) read_custom_function(57); // In liter/minutes.
 
     // Usage up to the first stop:
     //  - computed at MAX depth (easier, safer),
     //  - with an ascent speed of 10m/min.
     //  - with ascent litter / minutes.
     //  - still using bottom gas:
-    if( ascent_usage > 0.0 )
+    if( deco_usage > 0.0 )
         volumes[gas]
             += (char_I_bottom_depth*0.1 + 1.0)          // Depth -> bar
              * (char_I_bottom_depth - char_O_first_deco_depth) * 0.1  // ascent time (min)
-             * ascent_usage;                            // Consumption ( xxx / min @ 1 bar)
+             * deco_usage;                              // Consumption ( xxx / min @ 1 bar)
     else
         volumes[gas] = 65535.0;
 
@@ -2589,14 +2589,14 @@ void deco_gas_volumes(void)
 
         // usage during stop:
         // Note: because first gas is not in there, increment gas+1
-        if( ascent_usage > 0.0 )
+        if( deco_usage > 0.0 )
             volumes[gas] += (depth*0.1 + 1.0)   // depth --> bar.
                           * time                // in minutes.
-                          * ascent_usage        // in xxx / min @ 1bar.
+                          * deco_usage          // in xxx / min @ 1bar.
             // Plus usage during ascent to the next stop, at 10m/min.
                           + (depth*0.1  + 1.0)
                           * ascent*0.1          // metre --> min
-                          * ascent_usage;
+                          * deco_usage;
         else
             volumes[gas] = 65535.0;
     }

@@ -47,7 +47,7 @@
 ; define the display format. Also stores min/max bounds into the PROM table.
 ; And provides surfacemode checking of all parameters.
 
-CF_INT8		EQU	0	; Default display, 8 or 15 bits values.
+CF_INT8		EQU	0       ; Default display, 8 or 15 bits values.
 CF_PERCENT	EQU	1	    ; Displays 110%
 CF_DECI		EQU	2	    ; Displays 1.6
 CF_CENTI	EQU	3	    ; Displays 1.50

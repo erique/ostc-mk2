@@ -3370,19 +3370,9 @@ PLED_show_cave_bailout:
 	call        PLED_standard_color 
 	lfsr        FSR2,letter
     
-    ;---- Compute divetime in seconds
-	movff	    divemins+0,xA+0
-	movff	    divemins+1,xA+1
-	movlw	    d'60'
-	movwf	    xB+0
-	clrf	    xB+1
-	call	    mult16x16               ; xC:4=xA:2*xB:2
-	movf	    divesecs,W
-	addwf	    xC+0,W
-	movwf       xA+0
-	movlw	    d'0'
-	addwfc	    xC+1,W
-	movwf       xA+1                    ; xA:2 holds total dive seconds
+    ;---- Retrieve divetime in seconds (since last reset)
+	movff	    average_divesecs+0,xA+0
+	movff	    average_divesecs+1,xA+1
 	
 	;---- Multiply by SAC, and divide by 60 (SAC inliters per minutes)
     GETCUSTOM8	d'56'			        ; Get bottom SAC
@@ -3400,10 +3390,10 @@ PLED_show_cave_bailout:
     movff       xC+0,xA+0               ; Get result (in xC+0, noy xC+2 !) into xA
     movff       xC+1,xA+1
     
-    movf        avr_rel_pressure_total+0,W  ; Add surface pressure to get absolute pressure
+    movf        avr_rel_pressure+0,W    ; Add surface pressure to get absolute pressure
     addwf       last_surfpressure_30min+0,W
     movwf       xB+0
-    movf        avr_rel_pressure_total+1,W
+    movf        avr_rel_pressure+1,W
     addwfc      last_surfpressure_30min+1,W
     movwf       xB+1                    ; --> Into xB
 

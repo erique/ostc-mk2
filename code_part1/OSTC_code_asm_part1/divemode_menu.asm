@@ -194,15 +194,24 @@ test_switches_divemode_menu3:
 	bra		timeout_divemenu2			; Quit divemode menu
 
 divemode_menu3:
-	movff	menupos3,temp1              ; copy
-	dcfsnz	temp1,F
+	dcfsnz	menupos3,W                  ; copy
 	bra		toggle_stopwatch			; Toggle Stopwatch/Average register
-	dcfsnz	temp1,F
+	dcfsnz	WREG,F
 	bra		set_marker					; Set Marker
-	dcfsnz	temp1,F
+	dcfsnz	WREG,F
 	bra		divemode_menu3_nothing		; clock...
-	dcfsnz	temp1,F
+	dcfsnz	WREG,F
 	bra		divemode_menu3_nothing		; leading tissue...
+	dcfsnz	WREG,F
+	bra		divemode_menu3_nothing	    ; Average depth (not resetable)
+	dcfsnz	WREG,F
+	bra		divemode_menu3_nothing	    ; Graphs...
+	dcfsnz	WREG,F
+	bra		divemode_menu3_nothing      ; END/EAD in divemode
+	dcfsnz	WREG,F
+	bra		divemode_menu3_nothing      ; Futur TTS...
+	dcfsnz	WREG,F
+	bra		toggle_stopwatch            ; Cave bailout prediction.
 
 divemode_menu3_nothing:
 	bra		timeout_divemenu2			; Quit divemode menu

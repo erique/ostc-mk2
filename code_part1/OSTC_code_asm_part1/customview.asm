@@ -27,33 +27,43 @@
 ;=============================================================================
 ; Show the customview-dependent entry for the divemode menu
 ;
-customview_menu_entry3:		
-;	bcf		menu3_active	;=1: menu entry three in divemode menu is active
-
+customview_menu_entry3:
 	movff	menupos3,WREG	            ; copy
 	dcfsnz	WREG,F
 	bra		customview_menu3_stopwatch  ; Show the stopwatch option in divemode menu
 	dcfsnz	WREG,F
 	bra		customview_menu3_marker     ; Show the marker option in divemode menu
 	dcfsnz	WREG,F
-	bra		customview_menu3_clock      ; Show the clock option in divemode menu
+	bra		customview_menu3_clock      ; Show nothing
 	dcfsnz	WREG,F
-	bra		customview_menu3_lead_tiss  ; Show the leading tissue option in divemode menu
-	; Menupos3=0, do nothing
+	bra		customview_menu3_lead_tiss  ; Show nothing
+	dcfsnz	WREG,F
+	bra		customview_menu3_average    ; Show nothing
+	dcfsnz	WREG,F
+	bra		customview_menu3_graphs     ; Show nothing
+	dcfsnz	WREG,F
+	bra		customview_menu3_ead_end    ; Show nothing
+	dcfsnz	WREG,F
+	bra		customview_menu3_@5         ; Show nothing
+	dcfsnz	WREG,F
+	bra		customview_menu3_cave_bailout; Show reset option
 	return
 
+customview_menu3_cave_bailout:
 customview_menu3_stopwatch:
-;	bsf		menu3_active                ; Set Flag
 	DISPLAYTEXT	.33                     ; ResetAvr
 	return
 
 customview_menu3_marker:
-;	bsf		menu3_active                ; Set Flag
 	DISPLAYTEXT	.30                     ; Set Marker
 	return
 
 customview_menu3_clock:                 ; No menu entry
-customview_menu3_lead_tiss              ; No menu entry
+customview_menu3_lead_tiss:
+customview_menu3_average:
+customview_menu3_graphs:
+customview_menu3_ead_end:
+customview_menu3_@5:
 	return
 
 ;=============================================================================
@@ -120,6 +130,7 @@ customview_1sec_@5:
     goto    PLED_show_@5
 
 customview_1sec_cave_bailout:
+	bsf		menu3_active                ; Set Flag
     goto    PLED_show_cave_bailout
 
 ;=============================================================================
@@ -168,7 +179,7 @@ customview_minute_graphs:               ; Do nothing extra
 ; Show next customview (and delete this flag)
 
 customview_toggle:
-	bcf		menu3_active	;=1: menu entry three in divemode menu is active		
+	bcf		menu3_active	            ;=1: menu entry three in divemode menu is active		
 	ostc_debug	'X'		; Sends debug-information to screen if debugmode active
 	
 	btfsc	FLAG_apnoe_mode					; In Apnoe mode?
@@ -238,7 +249,7 @@ customview_init_marker:					; Init Marker
 
     call        PLED_standard_color
 	DISPLAYTEXT d'151'				    ; Set Marker?
-	bsf			menu3_active                ; Set Flag
+	bsf			menu3_active            ; Set Flag
 	bra		    customview_toggle_exit	
 
 customview_init_clock:					; Init Clock
@@ -288,6 +299,7 @@ customview_init_cave_bailout:
  	iorwf       hi,W
  	bz          customview_toggle       ; No: jump to next Customview !
 
+	bsf			menu3_active            ; Set Flag
     call        PLED_show_cave_bailout
 	bra		    customview_toggle_exit	
     

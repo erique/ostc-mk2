@@ -661,7 +661,69 @@ PLED_boot:
 	return
 
 
-PLED_brightness_full:
+PLED_brightness_full: ;mH
+; Mid
+	movlw	0x70
+	rcall	PLED_CmdWrite
+	movlw	0x1B
+	rcall	PLED_DataWrite
+	movlw	0x80
+	rcall	PLED_DataWrite
+	movlw	0x71
+	rcall	PLED_CmdWrite
+	movlw	0x1F
+	rcall	PLED_DataWrite
+	movlw	0x00
+	rcall	PLED_DataWrite
+	movlw	0x72
+	rcall	PLED_CmdWrite
+	movlw	0x22
+	rcall	PLED_DataWrite
+	movlw	0x00
+	rcall	PLED_DataWrite
+
+	movlw	0x73
+	rcall	PLED_CmdWrite
+	movlw	0x17
+	rcall	PLED_DataWrite
+	movlw	0x11
+	rcall	PLED_DataWrite
+	movlw	0x74
+	rcall	PLED_CmdWrite
+	movlw	0x1A
+	rcall	PLED_DataWrite
+	movlw	0x0E
+	rcall	PLED_DataWrite
+
+	movlw	0x75
+	rcall	PLED_CmdWrite
+	movlw	0x1D
+	rcall	PLED_DataWrite
+	movlw	0x15
+	rcall	PLED_DataWrite
+	movlw	0x76
+	rcall	PLED_CmdWrite
+	movlw	0x18
+	rcall	PLED_DataWrite
+	movlw	0x11
+	rcall	PLED_DataWrite
+
+	movlw	0x77
+	rcall	PLED_CmdWrite
+	movlw	0x1E
+	rcall	PLED_DataWrite
+	movlw	0x18
+	rcall	PLED_DataWrite
+	movlw	0x78
+	rcall	PLED_CmdWrite
+	movlw	0x1D
+	rcall	PLED_DataWrite
+	movlw	0x11
+	rcall	PLED_DataWrite
+	return
+
+;PLED_brightness_full:
+; Full
 	movlw	0x70
 	rcall	PLED_CmdWrite
 	movlw	0x1F
@@ -719,10 +781,11 @@ PLED_brightness_full:
 	rcall	PLED_DataWrite
 	movlw	0x15
 	rcall	PLED_DataWrite
-	
 	return
 
+
 PLED_brightness_low:
+;Low
 	movlw	0x70
 	rcall	PLED_CmdWrite
 	movlw	0x14

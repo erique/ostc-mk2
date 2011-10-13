@@ -461,7 +461,7 @@
     TCODE    .20,   .35,     "Interval:"                 ;307 Interval:
     TCODE    .0,    .0,      "Jetzt  "                   ;308 Now                   (7 chars min)
 	TCODE	 .109,	.113,	 "D-Tiefe"	 	 		 	 ;309 Average
-	TCODE	 .109,	.54,	 "Stopuhr"		 		 	 ;310 Stopwatch             (BIG Stopwatch in Gauge mode)
+	TCODE	 .109,	.54,	 "Stoppuhr"		 		 	 ;310 Stopwatch             (BIG Stopwatch in Gauge mode)
 ; Cave consomation
     TCODE    .0,    .0,      "Cave Bail."                ;311 Cave Bail.            (=10 chars.)
 ;=============================================================================

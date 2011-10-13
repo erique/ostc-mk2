@@ -22,7 +22,7 @@
 ; ToDo:
 
 #DEFINE	softwareversion_x		d'2'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'2'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'3'		; Software version  XX.YY
 
 #DEFINE softwareversion_beta 	1 			; (and 0 for release) 
 
@@ -110,8 +110,9 @@
 
 ;=============================================================================
 
-;#include "../OSTC_code_c_part2/shared_definitions.h"
-#include "ostc2_code/code_part1/OSTC_code_c_part2/shared_definitions.h"
+#include "../OSTC_code_c_part2/shared_definitions.h"
+;#include "ostc2_code/code_part1/OSTC_code_c_part2/shared_definitions.h"
+;include "shared_definitions.h"
 
 ;=============================================================================
 ; Reserve space for C-code data space. Eg.when calling log.

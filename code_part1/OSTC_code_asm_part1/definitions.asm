@@ -111,6 +111,7 @@
 ;=============================================================================
 
 #include "../OSTC_code_c_part2/shared_definitions.h"
+#include "ostc2_code/code_part1/OSTC_code_c_part2/shared_definitions.h"
 
 ;=============================================================================
 ; Reserve space for C-code data space. Eg.when calling log.

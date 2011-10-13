@@ -110,7 +110,7 @@
 
 ;=============================================================================
 
-#include "../OSTC_code_c_part2/shared_definitions.h"
+;#include "../OSTC_code_c_part2/shared_definitions.h"
 #include "ostc2_code/code_part1/OSTC_code_c_part2/shared_definitions.h"
 
 ;=============================================================================
@@ -541,7 +541,7 @@ total_divetime_seconds	res 2	; counts dive seconds regardless of CF01 (18h max.)
 #DEFINE	display_set_simulator	flag14,4	;=1: Show Divemode simulator menu
 #DEFINE	displaytext_high		flag14,5	;=1: Show/Use Texts 255-511 in Texttable
 #DEFINE	better_gas_available	flag14,6	;=1: A better gas is available and a gas change is advised in divemode
-#DEFINE	Flag_5          		flag14,7	;=1: unused
+#DEFINE	s_unlock_after_sleep	flag14,7	;=1: Sensor unlocked for divemode and battery history
 
 #DEFINE	restore_deco_data		flag15,0	;=1: Restore Decodata after the dive from 0x380 buffer
 #DEFINE	uart_store_tissue_data	flag15,1	;=1: Store tissue data for next simualted dive!

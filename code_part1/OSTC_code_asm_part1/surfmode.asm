@@ -24,7 +24,8 @@
 
 surfloop:
 ; Boot tasks for all modes
-	call	restart_set_modes_and_flags	; Sets decomode flags
+	bcf		s_unlock_after_sleep			; Lock sensor results
+	call	restart_set_modes_and_flags		; Sets decomode flags
 	clrf	lo
 	movff	lo,char_I_const_ppO2			; reset to standard mode, OSTC assumes Air breathing at the surface!
 
@@ -71,7 +72,7 @@ surfloop3:
 	bcf		premenu						; clear premenu flag
 	bcf		menubit						; clear menu flag
 	clrf	timer1int_counter2			; reset state counter
-	bcf		pressure_refresh
+	bcf		pressure_refresh			; Start new sensor run
 	clrf	last_pressure+0
 	clrf	last_pressure+1
 	clrf	last_temperature+0
@@ -126,7 +127,6 @@ surfloop_loop1:
 	call	PLED_clock					; update clock
 	call	test_charger				; check if charger IC is active
 	call	timeout_surfmode			; check timeout 
-	call	get_battery_voltage			; get battery voltage
 	call	update_batt_voltage			; display battery voltage
 	call	timeout_premenu				; timeout premenu
 	call	set_leds_surfmode			; Sets Warning and No-Fly LEDs
@@ -143,25 +143,27 @@ surfloop_loop2:
 	call	test_switches_surfmode		; check switches
 
 ; Sensor tasks for all modes
-	btfsc	pressure_refresh			; new pressure available?
-	call	update_surf_press			; display surface pressure
-	btfsc	pressure_refresh			; new temperature available?
-	call	PLED_temp_surfmode			; Displays temperature
-	btfsc	pressure_refresh			; new pressure available?
-	call	set_dive_modes				; tests if depth>threshold
-	
-	; jDG TESTS =========================
 	btfss	pressure_refresh			; new pressure available?
-	bra     surfloop_loop3
+	bra		surfloop_loop2a				; no
+
+	btfss	s_unlock_after_sleep		; sensor results locked?
+	bra		surfloop_loop3				; Yes, ignore
+
+; New sensor value available
+	call	update_surf_press			; display surface pressure
+	call	PLED_temp_surfmode			; Displays temperature
+	call	set_dive_modes				; tests if depth>threshold
 	call    altimeter_calc
     movf    menupos3,W                  ; Get customview status.
     bnz     surfloop_loop3              ; Already used ?
     call    altimeter_display
-surfloop_loop3:
-	; jDG TESTS =========================
+	call	get_battery_voltage			; get battery voltage
 
+surfloop_loop3:
+	bsf		s_unlock_after_sleep		; unlock sensor results
 	bcf		pressure_refresh			; until new pressure is available
 
+surfloop_loop2a:
 ; One minute tasks for all modes
 	btfsc	oneminupdate				; do every minute tasks
 	call	update_surfloop60			; yes, e.g. update time and date

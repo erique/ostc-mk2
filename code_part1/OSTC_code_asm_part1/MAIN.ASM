@@ -1,6 +1,6 @@
 
 ; OSTC - diving computer code
-; Copyright (C) 2008 HeinrichsWeikamp GbR
+; Copyright (C) 2008-2011 HeinrichsWeikamp GbR
 
 ;    This program is free software: you can redistribute it and/or modify
 ;    it under the terms of the GNU General Public License as published by
@@ -16,8 +16,6 @@
 ;    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-;    it under the terms of the GNU General Public License as published by
-;    the Free Software Foundation, either versio
 ; includes and isr
 ; written by: Matthias Heinrichs, info@heinrichsweikamp.com
 ; written: 041013

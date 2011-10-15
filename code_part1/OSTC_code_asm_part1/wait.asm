@@ -81,66 +81,22 @@ JumpIn10us:
 			goto	WAIT10USX2
 			return
 ; ==========================================================
-; 	WAIT 1 MILLISECOND  -  16 MHZ
+; 	WAIT 1 MILLISECOND  -  Working with TMR1
 ; ==========================================================
-	IFDEF	SPEED_16MHz
 WAITMS		macro	waitms_temp
 			movlw	waitms_temp
-			call WAITMSX
+			call 	WAITMSX
 			endm
-	ENDIF
 
-	IFDEF	SPEED_32MHz
-WAITMS		macro	waitms_temp
-			movlw	waitms_temp
-			call WAITMSX
-			movlw	waitms_temp
-			call WAITMSX
-			endm
-	ENDIF
+WAITMSX		movwf	waitms_temp			; Holds number of ms to wait
 
-WAITMSX		movwf	waitms_temp
-			goto	JumpInMSX
-WAITMSX2	nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-JumpInMSX:
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			nop
-			WAIT10US d'99'
-			decfsz	waitms_temp,1
-			goto	WAITMSX2
+WAITMSX1:
+			movf	TMR1L,W
+			addlw	d'66'				; 66*15,26µs ~ 1ms
+
+WAITMSX2	cpfseq	TMR1L
+			bra		WAITMSX2			; loop here...
+
+			decfsz	waitms_temp,F
+			bra		WAITMSX1
 			return

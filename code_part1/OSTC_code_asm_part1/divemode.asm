@@ -1121,6 +1121,8 @@ end_dive:
 	movlb	b'00000001'                 ; select ram bank 1
     call	calc_deko_surfmode2			; work-around for nofly bug
 	rcall	calculate_noflytime         ; Calc NoFly time
+    movff	int_O_desaturation_time+0,desaturation_time_buffer+0
+    movff	int_O_desaturation_time+1,desaturation_time_buffer+1
 	ostc_debug	'H'                     ; Sends debug-information to screen if debugmode active
 										; store header and ...
 	movlw	0xFD						; .... End-of-Profile Bytes

@@ -237,12 +237,23 @@ update_surfloop60_2:
 	return
 
 nofly_timeout60:
+	movf	desaturation_time_buffer+0,W; Is Desat null ?
+    iorwf   desaturation_time_buffer+1,W
+    rcall	nofly_timeout60_0           ; No...
+
     movf    nofly_time+0,W              ; Is nofly null ?
     iorwf   nofly_time+1,W
     bnz     nofly_timeout60_1           ; No...
     
 	bcf		nofly_active                ; Clear flag
 	bcf		LED_blue                    ; Clear led.
+	return
+
+nofly_timeout60_0:
+	movlw	d'1'
+	subwf	desaturation_time_buffer+0,F
+	movlw	d'0'
+	subwfb	desaturation_time_buffer+1,F              ; reduce by one
 	return
 
 nofly_timeout60_1:
@@ -298,10 +309,6 @@ calc_deko_surfmode2:
 	call	deco_calc_wo_deco_step_1_min    ; calculate deco in surface mode 
 	movlb	b'00000001'									; select ram bank 1
 	ostc_debug	'J'		; Sends debug-information to screen if debugmode active
-
-    movff	int_O_desaturation_time+0,desaturation_time_buffer+0
-    movff	int_O_desaturation_time+1,desaturation_time_buffer+1
-
 	return
 
 ;=============================================================================
@@ -406,7 +413,7 @@ test_charger2:
 	return	
 
 show_cv_active:							; CV mode
-	; Enable only when USB power attached
+	; Enable RS232 only when USB power attached
 	btfss	RCSTA,7						; RS232 already enabled?
 	call	enable_rs232				; No, start UART module
 	bsf		LED_red

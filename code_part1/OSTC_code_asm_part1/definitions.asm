@@ -35,7 +35,7 @@
 ;#DEFINE	SPANISH							; Use spanish_text.asm
 ;#DEFINE	RUSSIAN							; Use russian_text.asm
 
-;#DEFINE	__DEBUG	; 
+#DEFINE	__DEBUG	; 
 ;#DEFINE	DISPLAY_TEST	; Enables Display-Test in RAW data menu
 
 #DEFINE	logbook_profile_version	0x21        ; Do not touch!
@@ -48,11 +48,13 @@
 ;  	#DEFINE	OSCCON_VALUE  	b'01101100'		; 4MHz (x4 PLL)
 ;	#DEFINE	SSPADD_VALUE	d'8'			; 400kHz I2C clock @ 16MHz Fcy
 ;	#DEFINE	T0CON_VALUE		b'00011111'		; Timer0
+; 	#DEFINE	SPEED_16MHz
 ; Experimental 32MHz mode
 	#DEFINE	SPBRG_VALUE 	d'68'
   	#DEFINE	OSCCON_VALUE  	b'01111100'		; 8MHz (x4 PLL)
 	#DEFINE	SSPADD_VALUE	d'16'			; 400kHz I2C clock @ 32MHz Fcy
 	#DEFINE	T0CON_VALUE 	b'00010000'		; Timer0
+ 	#DEFINE	SPEED_32MHz
 
 #DEFINE		FT_SMALL		.0
 #DEFINE		FT_MEDIUM		.1
@@ -110,8 +112,8 @@
 
 ;=============================================================================
 
-#include "../OSTC_code_c_part2/shared_definitions.h"
-;#include "ostc2_code/code_part1/OSTC_code_c_part2/shared_definitions.h"
+;#include "../OSTC_code_c_part2/shared_definitions.h"
+#include "ostc2_code/code_part1/OSTC_code_c_part2/shared_definitions.h"
 ;include "shared_definitions.h"
 
 ;=============================================================================

@@ -20,10 +20,22 @@
 ; ==========================================================
 ; 	WAIT 10 MICROSECONDS  -  16 MHZ
 ; ==========================================================
+
+	IFDEF	SPEED_16MHz
 WAIT10US 	macro	wait_temp
 			movlw	wait_temp
 			call	WAIT10USX
 			endm
+	ENDIF
+
+	IFDEF	SPEED_32MHz
+WAIT10US 	macro	wait_temp
+			movlw	wait_temp
+			call	WAIT10USX
+			movlw	wait_temp
+			call	WAIT10USX
+			endm
+	ENDIF
 
 WAIT10USX	movwf	wait_temp
 			goto	JumpIn10us
@@ -71,10 +83,22 @@ JumpIn10us:
 ; ==========================================================
 ; 	WAIT 1 MILLISECOND  -  16 MHZ
 ; ==========================================================
+	IFDEF	SPEED_16MHz
 WAITMS		macro	waitms_temp
 			movlw	waitms_temp
 			call WAITMSX
 			endm
+	ENDIF
+
+	IFDEF	SPEED_32MHz
+WAITMS		macro	waitms_temp
+			movlw	waitms_temp
+			call WAITMSX
+			movlw	waitms_temp
+			call WAITMSX
+			endm
+	ENDIF
+
 WAITMSX		movwf	waitms_temp
 			goto	JumpInMSX
 WAITMSX2	nop

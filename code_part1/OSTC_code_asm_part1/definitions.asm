@@ -22,7 +22,7 @@
 ; ToDo:
 
 #DEFINE	softwareversion_x		d'2'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'3'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'4'		; Software version  XX.YY
 
 #DEFINE softwareversion_beta 	1 			; (and 0 for release) 
 
@@ -35,7 +35,7 @@
 ;#DEFINE	SPANISH							; Use spanish_text.asm
 ;#DEFINE	RUSSIAN							; Use russian_text.asm
 
-#DEFINE	__DEBUG	; 
+;#DEFINE	__DEBUG	; 
 ;#DEFINE	DISPLAY_TEST	; Enables Display-Test in RAW data menu
 
 #DEFINE	logbook_profile_version	0x21        ; Do not touch!

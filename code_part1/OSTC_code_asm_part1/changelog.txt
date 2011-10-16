@@ -1,7 +1,9 @@
 New in 2.03 beta:
-
+BETA Version - Do NOT use for diving!
+BUGFIX: Logbook write
 
 New in 2.02 beta:
+BETA Version - Do NOT use for diving!
 NEW: Cave divers consomation display and alarm (CF59).
 CHANGE: SAC (CF56/CF57) in range 5..50 l/min (no more decimal).
 NEW: 32MhZ mode: computes twice faster.

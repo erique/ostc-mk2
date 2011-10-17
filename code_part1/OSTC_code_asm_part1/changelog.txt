@@ -1,3 +1,7 @@
+New in 2.04 beta:
+BETA Version - Do NOT use for diving!
+BUGFIX: Missed surface pressure for CNS in decoplan
+
 New in 2.03 beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: Logbook write

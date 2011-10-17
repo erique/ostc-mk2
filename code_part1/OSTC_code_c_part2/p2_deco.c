@@ -518,11 +518,16 @@ void assert_failed(PARAMETER short int line)
 //////////////////////////////////////////////////////////////////////////////
 // Read CF values from the C code.
 
+#ifdef CROSS_COMPILE
+// Full description of the OSTC EEPROM map, including CF values.
+#   include "OSTC_eeprom.h"
+#endif
+
 static short read_custom_function(PARAMETER unsigned char cf)
 {
 #ifdef CROSS_COMPILE
-    extern unsigned short custom_functions[];
-    return custom_functions[cf];
+    return (cf & 32) ? eeprom.bank1_CF[cf-32].value
+                     : eeprom.bank0_CF[cf   ].value;
 #else
     extern unsigned char hi, lo;
     extern void getcustom15();
@@ -2384,8 +2389,15 @@ void deco_calc_CNS_fraction(void)
 //////////////////////////////////////////////////////////////////////////////
 // deco_calc_CNS_planning
 //
-// Input:
-// Output:
+// Compute CNS during predicetd ascent.
+//
+// Note:    Needs a call to deco_push_tissues_to_vault(), 
+//          deco_pull_tissues_from_vault() to avoid trashing everything...
+//
+// Input:   CNS_fraction, char_O_deco_time[], char_O_deco_depth[]
+// Output:  CNS_fraction, char_O_CNS_fraction
+// Trashed: char_I_actual_ppO2
+//
 void deco_calc_CNS_planning(void)
 {
     RESET_C_STACK
@@ -2415,7 +2427,7 @@ void deco_calc_CNS_planning(void)
         //---- Ascent to surface delay
         // NOTE: count as if time is spent with bottom pressure,
         //       AND the bottom gas
-        actual_ppO2 = (char_I_bottom_depth * METER_TO_BAR - ppWater)
+        actual_ppO2 = (pres_surface + char_I_bottom_depth * METER_TO_BAR - ppWater)
                     * (1.0 - calc_N2_ratio - calc_He_ratio);
         if( actual_ppO2 < 0.0  ) actual_ppO2 = 0.0;
         if( actual_ppO2 > 2.50 ) actual_ppO2 = 2.55;
@@ -2440,7 +2452,7 @@ void deco_calc_CNS_planning(void)
                 gas_switch_deepest();
         
             //---- Convert Depth and N2_ratio to ppO2
-            actual_ppO2 = (temp_depth_limit * METER_TO_BAR - ppWater)
+            actual_ppO2 = (pres_surface + temp_depth_limit * METER_TO_BAR - ppWater)
                         * (1.0 - calc_N2_ratio - calc_He_ratio);
             if( actual_ppO2 < 0.0  ) actual_ppO2 = 0.0;
             if( actual_ppO2 > 2.50 ) actual_ppO2 = 2.55;
@@ -2450,7 +2462,10 @@ void deco_calc_CNS_planning(void)
             for(t=0; t<time; ++t)
                 deco_calc_CNS_fraction();
         }
-    }    
+    }
+
+    // Back to normal mode...
+    char_I_step_is_1min = 0;
 }    
 
 //////////////////////////////////////////////////////////////////////////////

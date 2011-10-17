@@ -28,7 +28,7 @@
 	#include <P18F4685.INC>					;processor specific variable definitions
 
 	#include	definitions.asm				; Defines, I/O Ports and variables
-
+    #include    "../OSTC_code_c_part2/shared_definitions.h"
 
 reset_v code     0x0000
         goto	start						; Start!

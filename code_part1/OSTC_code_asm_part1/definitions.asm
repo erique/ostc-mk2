@@ -111,12 +111,6 @@
 	CONFIG	STVREN = OFF         ;Stack full/underflow will not cause Reset
 
 ;=============================================================================
-
-;#include "../OSTC_code_c_part2/shared_definitions.h"
-#include "ostc2_code/code_part1/OSTC_code_c_part2/shared_definitions.h"
-;include "shared_definitions.h"
-
-;=============================================================================
 ; Reserve space for C-code data space. Eg.when calling log.
 ; Note: overlayed with md_hash temporary space.
 c_code_data_stack   EQU 0x800

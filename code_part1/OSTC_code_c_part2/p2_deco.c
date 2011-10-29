@@ -2396,12 +2396,24 @@ void deco_calc_CNS_fraction(void)
 //
 // Input:   CNS_fraction, char_O_deco_time[], char_O_deco_depth[]
 // Output:  CNS_fraction, char_O_CNS_fraction
-// Trashed: char_I_actual_ppO2
 //
 void deco_calc_CNS_planning(void)
 {
+    overlay unsigned char  backup_gas_last_depth;
+    overlay unsigned char  backup_gas_last_used;
+    overlay unsigned short backup_gas_delay;
+    overlay unsigned short backup_dive_mins;
+    overlay unsigned char  backup_actual_ppO2;
+
     RESET_C_STACK
-    
+
+    // Backup state machine
+    backup_gas_last_depth = sim_gas_last_depth;
+    backup_gas_last_used  = sim_gas_last_used;
+    backup_gas_delay      = sim_gas_delay;
+    backup_dive_mins      = sim_dive_mins;
+    backup_actual_ppO2    = char_I_actual_ppO2;
+
     // Uses 1min CNS period:
     char_I_step_is_1min = 1;
     
@@ -2437,7 +2449,10 @@ void deco_calc_CNS_planning(void)
         time = (unsigned char)(0.1 * char_I_bottom_depth + 0.5);
 
         for(t=0; t<time; ++t)
+        {
             deco_calc_CNS_fraction();
+            sim_dive_mins++;
+        }
 
         //---- Do all further stops
         for(i=0; i<NUM_STOPS; ++i)
@@ -2460,12 +2475,20 @@ void deco_calc_CNS_planning(void)
 
             //---- Apply the stop
             for(t=0; t<time; ++t)
+            {
                 deco_calc_CNS_fraction();
+                sim_dive_mins++;
+            }
         }
     }
 
     // Back to normal mode...
     char_I_step_is_1min = 0;
+    sim_gas_last_depth  = backup_gas_last_depth;
+    sim_gas_last_used   = backup_gas_last_used;
+    sim_gas_delay       = backup_gas_delay;
+    sim_dive_mins       = backup_dive_mins;
+    char_I_actual_ppO2  = backup_actual_ppO2;
 }    
 
 //////////////////////////////////////////////////////////////////////////////

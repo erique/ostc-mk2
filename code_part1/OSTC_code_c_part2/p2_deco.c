@@ -110,6 +110,9 @@
 #define METER_TO_BAR   0.09985
 #define BAR_TO_METER   10.0150      // (1.0/METER_TO_BAR)
 
+// Surface security factor
+#define SURFACE_DESAT_FACTOR    0.7042
+
 // *************************
 // ** P R O T O T Y P E S **
 // *************************
@@ -907,7 +910,7 @@ static void temp_tissue_safety(void)
 
 	if( char_I_deco_model == 0 )
 	{
-		if (temp_tissue < 0.0)
+		if( temp_tissue < 0.0 )
 			temp_tissue *= float_desaturation_multiplier;
  		else
 			temp_tissue *= float_saturation_multiplier;
@@ -2050,7 +2053,7 @@ void deco_calc_desaturation_time(void)
     pres_surface = int_I_pres_surface * 0.001;
     ppN2 = N2_ratio * (pres_surface - ppWater);
     int_O_desaturation_time = 0;
-    float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
+    float_desaturation_multiplier = char_I_desaturation_multiplier * (0.01 * SURFACE_DESAT_FACTOR);
 
     ptr = &buhlmann_ht[0];
     for(ci=0; ci<NUM_COMP; ci++)
@@ -2169,7 +2172,7 @@ static void calc_wo_deco_step_1_min(void)
     pres_respiration = pres_surface = int_I_pres_surface * 0.001;
     ppN2 = N2_ratio * (pres_respiration - ppWater);
     ppHe = 0.0;
-    float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
+    float_desaturation_multiplier = char_I_desaturation_multiplier * (0.01 * SURFACE_DESAT_FACTOR);
     float_saturation_multiplier   = char_I_saturation_multiplier   * 0.01;
     
     calc_tissue(1);  // update the pressure in the tissues N2/He in accordance with the new ambient pressure
@@ -2198,22 +2201,31 @@ static void calc_wo_deco_step_1_min(void)
 static void calc_dive_interval()
 {
     overlay unsigned char t;
+    overlay unsigned char backup_model;
 
     //---- Initialize simulation parameters ----------------------------------
     N2_ratio = 0.7902; // FIXED, sum lt. buehlmann
     pres_respiration = pres_surface = int_I_pres_surface * 0.001;
     ppN2 = N2_ratio * (pres_respiration - ppWater);
     ppHe = 0.0;
-    float_desaturation_multiplier = char_I_desaturation_multiplier / 142.0; // new in v.101	(70,42%/100.=142)
+    float_desaturation_multiplier = char_I_desaturation_multiplier * (0.01 * SURFACE_DESAT_FACTOR);
     float_saturation_multiplier   = char_I_saturation_multiplier   * 0.01;
 
+    // Make sure SURFACE_DESAT_FACTOR is applyed:
+    backup_model = char_I_deco_model;
+    char_I_deco_model = 0;
+
     //---- Perform simulation ------------------------------------------------
+    
     for(t=0; t<char_I_dive_interval; ++t)
     {
         calc_tissue(2);  // period = 10min.
         CNS_fraction =  0.92587471 * CNS_fraction;  // Half-time = 90min: (1/2)^(1/9)
     }
     char_O_CNS_fraction = (char)(CNS_fraction * 100.0 + 0.5);
+    
+    //---- Restore model -----------------------------------------------------
+    char_I_deco_model = backup_model;
 }
 
 //////////////////////////////////////////////////////////////////////////////

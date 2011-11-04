@@ -1,6 +1,7 @@
 New in 2.04 beta:
 BETA Version - Do NOT use for diving!
-BUGFIX: Missed surface pressure for CNS in decoplan
+BUGFIX: Missing surface pressure for CNS in decoplan.
+BUGFIX: Surface desat factor missing for Interval planning in GF mode.
 
 New in 2.03 beta:
 BETA Version - Do NOT use for diving!

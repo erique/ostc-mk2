@@ -311,7 +311,7 @@
     TCODE    .40,   .35,     "Sonst.Gas[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
     TCODE    .40,   .35,     "TTS @ Zeit[min]"           ;180 Future TTS[min]   (Compute TTS for extra time at current depth)
     TCODE    .40,   .35,     "Cave Warning[l]"           ;181 Cave Warning[l]   (Consomation warning for cave divers)
-    TCODE    .40,   .35,     "nicht verwendet"           ;182 not used
+    TCODE    .40,   .35,     "Graph. Velocity"           ;182 Graph. Velocity	(Show a graphical representation of the ascend speed)
     TCODE    .40,   .35,     "nicht verwendet"           ;183 not used
     TCODE    .40,   .35,     "nicht verwendet"           ;184 not used
     TCODE    .40,   .35,     "nicht verwendet"           ;185 not used

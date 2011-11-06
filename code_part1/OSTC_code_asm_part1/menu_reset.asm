@@ -156,7 +156,7 @@ cf_default_table1:
 	CF_DEFAULT    CF_COLOR,     d'255', 0,      0 		; color_standard1			Color Standard: White
 	CF_DEFAULT    CF_COLOR,     d'62',  0,      0 		; color_divemask			Color Divemask: Light green
     
-	CF_DEFAULT    CF_COLOR,     d'224', 0,      0 		; color_warnings			Color Warnings: Red
+	CF_DEFAULT    CF_COLOR,     d'224', 0,      0 		; CF37 color_warnings			Color Warnings: Red
 	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; show_seconds_divemode		=1 Show the seconds in Divemode
 	CF_DEFAULT    CF_BOOL,     	0,      0,      0 		; Adjust SetPoint if Diluent ppO2 > SetPoint
 	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0       ; warn_ceiling_divemode		=1 Warn ceiling violation in divemode
@@ -168,8 +168,8 @@ cf_default_table1:
 	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'  ; color_warn_gf_percent		Warn-%
 	CF_DEFAULT    CF_CENTI,     d'161', d'100', d'161'  ; color_warn_ppo2_cbar		ppO2 warn
 
-	CF_DEFAULT    CF_INT8,	    d'15',  d'7',   d'20'	; color_warn_celocity_mmin	warn at xx m/min
-	CF_DEFAULT    CF_SEC+CF_NEG,d'0',  -d'120' ,d'120'  ; time_correction_value_default	Adds to Seconds on Midnight
+	CF_DEFAULT    CF_INT8,	    d'15',  d'7',   d'20'	; CF47 color_warn_celocity_mmin	warn at xx m/min
+	CF_DEFAULT    CF_SEC+CF_NEG,d'0',  -d'120' ,d'120'  ; CF48 time_correction_value_default	Adds to Seconds on Midnight
 	CF_DEFAULT    CF_BOOL,      d'0',   0,      0 		; CF49 Show Altimeter in surface mode
 	CF_DEFAULT    CF_BOOL,     	d'0',   0,      0       ; CF50 Show Log-Marker
 	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0 		; CF51 Show Stopwatch
@@ -183,7 +183,7 @@ cf_default_table1:
 	CF_DEFAULT    CF_INT8,      d'20',  d'5',   d'50'   ; CF57 Ascent/deco gas usage (SAC l/min)
 	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'10'   ; CF58 TTS for extra time at current depth [min]
 	CF_DEFAULT    CF_INT15,     d'0',   d'0',   d'7000' ; CF59 Cave conso warning [l]
-	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+	CF_DEFAULT    CF_BOOL,     	0,   	0,      0 		; CF60 Show Graphical ascend speed indicator
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	                
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED

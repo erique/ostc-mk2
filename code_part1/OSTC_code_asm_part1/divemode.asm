@@ -80,7 +80,7 @@ diveloop_loop1a:
 
 	bsf		twosecupdate					; Routines used in the "other second"
 	call	calc_average_depth				; calculate average depth
-	call	calc_velocity					; calculate vertical velocity and display if > threshold (every two seconds)
+;	call	calc_velocity					; calculate vertical velocity and display if > threshold (every two seconds)
 	
 	bra		diveloop_loop1x					; Common Tasks
 
@@ -137,6 +137,8 @@ diveloop_loop1z
 	call	set_leds_divemode				; Sets warnings, if required. Also Sets buzzer
 	btfsc	enter_error_sleep				; Enter Fatal Error Routine?
 	call	fatal_error_sleep				; Yes (In Sleepmode_vxx.asm!)
+
+	call	calc_velocity					; calculate vertical velocity and display if > threshold
 
 	bcf		onesecupdate					; one seconds update done
 
@@ -278,7 +280,7 @@ calc_deko_divemode:
 	bsf		twosecupdate		; No, but next second!
 	; Routines used in the "other second"
 	call	calc_average_depth	; calculate average depth
-	call	calc_velocity		; calculate vertical velocity and display if > threshold (every two seconds)
+;	call	calc_velocity		; calculate vertical velocity and display if > threshold (every two seconds)
 	
 ; Calculate CNS	
     rcall    set_actual_ppo2            ; Set char_I_actual_ppO2
@@ -809,7 +811,8 @@ calc_velocity2:
 
 	movff	sub_c+0,xA+0
 	movff	sub_c+1,xA+1
-	movlw	d'39'			;77 when called every second....
+	;movlw	d'39'						;77 when called every second....
+	movlw	d'77'						;77 when called every second....
 	movwf	xB+0
 	clrf	xB+1
 	call	mult16x16					; differential pressure in mbar*77...
@@ -820,12 +823,11 @@ calc_velocity2:
 	call	div16						; devided by 2^7 equals velocity in m/min
 
 	movlw	d'99'
-	cpfsgt	divA
+	cpfsgt	divA						; Limit to 99m/min max.
 	bra		calc_velocity3
 	movwf	divA						; divA=99
 
 calc_velocity3:
-
 	GETCUSTOM8	d'5'					; threshold for display vertical velocity
 	subwf	divA+0,W					; 
 
@@ -834,6 +836,17 @@ calc_velocity3:
 
 update_velocity:
 	bsf		display_velocity
+
+	GETCUSTOM8	d'60'		; use graphic velocity (=1)?
+	movwf	lo
+	movlw	d'1'
+	cpfseq	lo					; =1?
+	bra		update_velocity1	; No
+
+	call	PLED_display_velocity_graphical
+	return
+
+update_velocity1:
 	call	PLED_display_velocity
 	return
 

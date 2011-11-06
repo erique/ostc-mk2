@@ -610,6 +610,91 @@ PLED_divemode_timeout_clear:
 	bcf			timeout_display				; Clear flag
 	bra			PLED_display_clear_common_y1
 
+PLED_display_velocity_graphical:
+	btfss	neg_flag
+	bra		PLED_display_velocity_clear	; No display for descend speed, clear instead
+	bsf		pled_velocity_display
+	; divA+0 holding the ascend speed in m/min
+	movff	divA+0,hi	; Copy
+	WIN_BOX_BLACK	 .20, .90, .65, .75		; Clear graphic display
+	GETCUSTOM8		d'36'					; Divemode mask
+    WIN_FRAME_COLOR   .20, .90, .65, .75	; Outer frame
+	GETCUSTOM8		d'36'					; Divemode mask
+	WIN_FRAME_COLOR   .20+.10, .90-.10, .65, .75	; Inner frames
+	GETCUSTOM8		d'36'					; Divemode mask
+	WIN_FRAME_COLOR   .20+.20, .90-.20, .65, .75	;
+	GETCUSTOM8		d'36'					; Divemode mask
+	WIN_FRAME_COLOR   .20+.30, .90-.30, .65, .75	;
+	
+	GETCUSTOM8		d'47'					; color_warn_celocity_mmin	
+	movwf	xA+0
+	clrf	xA+1
+	movlw	.5
+	movwf	xB+0							; Threshold for color warning (5 color normal + 2 color warning)
+	clrf	xB+1
+	call	div16x16						;xA/xB=xC with xA as remainder 	
+	; xC+0 holds stepsize in m/min (e.g. =3 for 15m/min warning treshold)
+	movff	hi,xA+0							; Velocity in m/min
+	clrf	xA+1
+	movff	xC+0,xB+0						; Step size
+	clrf	xB+1
+	call	div16x16						;xA/xB=xC with xA as remainder 	
+	; xC+0 now holds amount of segments to show
+
+	movlw	d'7'
+	cpfslt	xC+0
+	bra		PLED_graph_vel_7
+	movlw	d'6'
+	cpfslt	xC+0
+	bra		PLED_graph_vel_6
+	movlw	d'5'
+	cpfslt	xC+0
+	bra		PLED_graph_vel_5
+	movlw	d'4'
+	cpfslt	xC+0
+	bra		PLED_graph_vel_4
+	movlw	d'3'
+	cpfslt	xC+0
+	bra		PLED_graph_vel_3
+	movlw	d'2'
+	cpfslt	xC+0
+	bra		PLED_graph_vel_2
+	movlw	d'1'
+	cpfslt	xC+0
+	bra		PLED_graph_vel_1
+	bra		PLED_graph_vel_0			; Should not happen...
+
+PLED_graph_vel_7:
+	GETCUSTOM8		d'37'					; Color warning
+    WIN_BOX_COLOR   .22, .22+.6, .67, .73	; Fill box
+PLED_graph_vel_6:
+	GETCUSTOM8		d'37'					; Color warning
+    WIN_BOX_COLOR   .32, .32+.6, .67, .73	; Fill box
+PLED_graph_vel_5:
+    WIN_BOX_STD   	.42, .42+.6, .67, .73	; Fill box
+PLED_graph_vel_4:
+    WIN_BOX_STD   	.52, .52+.6, .67, .73	; Fill box
+PLED_graph_vel_3:
+    WIN_BOX_STD   	.62, .62+.6, .67, .73	; Fill box
+PLED_graph_vel_2:
+    WIN_BOX_STD   	.72, .72+.6, .67, .73	; Fill box
+PLED_graph_vel_1:
+    WIN_BOX_STD   	.82, .82+.6, .67, .73	; Fill box
+PLED_graph_vel_0:
+;	WIN_TOP		.90
+;	WIN_LEFT	.0
+;	WIN_FONT 	FT_SMALL
+;	lfsr	FSR2,letter
+;	movff	xC+0,lo
+;	output_99
+;	PUTC	' '
+;	movff	divA+0,lo
+;	output_99
+;	PUTC	' '
+;	call	word_processor
+	return
+
+
 PLED_display_velocity:
 	ostc_debug	'v'		; Sends debug-information to screen if debugmode active
 	WIN_TOP		.90
@@ -630,6 +715,16 @@ PLED_display_velocity:
 	return
 
 PLED_display_velocity_clear:
+	GETCUSTOM8	d'60'			; use graphic velocity (=1)?
+	movwf	lo
+	movlw	d'1'
+	cpfseq	lo					; =1?
+	bra		PLED_display_velocity_clear1	; No, clear text display
+	WIN_BOX_BLACK	 .20, .90, .65, .75		; Clear graphic display
+	return
+
+
+PLED_display_velocity_clear1:
 	movlw	d'8'
 	movwf	temp1
 	WIN_TOP		.90

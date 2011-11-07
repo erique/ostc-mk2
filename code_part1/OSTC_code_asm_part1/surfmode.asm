@@ -36,6 +36,7 @@ surfloop:
 	call	PLED_serial						; Show OSTC serial and firmware version
 	call	PLED_clock						; display time
 	call	update_date						; display date
+	call	get_battery_voltage				; get battery voltage
 	movff	last_surfpressure_30min+0,int_I_pres_respiration+0		; copy surface air pressure to deco routine
 	movff	last_surfpressure_30min+1,int_I_pres_respiration+1		; 30min old values 
 	movff	last_surfpressure_30min+0,int_I_pres_surface+0			; copy surface air pressure to deco routine

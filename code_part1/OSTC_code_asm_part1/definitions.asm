@@ -34,6 +34,7 @@
 ;#DEFINE	GERMAN							; Use german_text.asm
 ;#DEFINE	SPANISH							; Use spanish_text.asm
 ;#DEFINE	RUSSIAN							; Use russian_text.asm
+;#DEFINE	TURKISH							; Use turkish_text.asm
 
 ;#DEFINE	__DEBUG	; 
 ;#DEFINE	DISPLAY_TEST	; Enables Display-Test in RAW data menu

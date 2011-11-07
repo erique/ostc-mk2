@@ -4,6 +4,7 @@ BUGFIX: Missing surface pressure for CNS in decoplan.
 BUGFIX: Surface desat factor missing for Interval planning in GF mode.
 CHANGE: Velocity display updated every second
 NEW: CF60: Show graphical velocity indicator (Ascend only)
+NEW: Added turkish language
 
 New in 2.03 beta:
 BETA Version - Do NOT use for diving!

@@ -29,7 +29,7 @@
 
 	#include	definitions.asm				; Defines, I/O Ports and variables
 ;    #include    "../OSTC_code_c_part2/shared_definitions.h"
-     #include    "C:\Mk2\ostc2_code\code_part1\OSTC_code_c_part2\shared_definitions.h"
+    #include    shared_definitions.h
 
 reset_v code     0x0000
         goto	start						; Start!

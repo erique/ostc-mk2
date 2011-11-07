@@ -80,7 +80,7 @@ diveloop_loop1a:
 
 	bsf		twosecupdate					; Routines used in the "other second"
 	call	calc_average_depth				; calculate average depth
-;	call	calc_velocity					; calculate vertical velocity and display if > threshold (every two seconds)
+	call	calc_velocity					; calculate vertical velocity and display if > threshold (every two seconds)
 	
 	bra		diveloop_loop1x					; Common Tasks
 
@@ -138,7 +138,6 @@ diveloop_loop1z
 	btfsc	enter_error_sleep				; Enter Fatal Error Routine?
 	call	fatal_error_sleep				; Yes (In Sleepmode_vxx.asm!)
 
-	call	calc_velocity					; calculate vertical velocity and display if > threshold
 
 	bcf		onesecupdate					; one seconds update done
 
@@ -280,7 +279,7 @@ calc_deko_divemode:
 	bsf		twosecupdate		; No, but next second!
 	; Routines used in the "other second"
 	call	calc_average_depth	; calculate average depth
-;	call	calc_velocity		; calculate vertical velocity and display if > threshold (every two seconds)
+	call	calc_velocity		; calculate vertical velocity and display if > threshold (every two seconds)
 	
 ; Calculate CNS	
     rcall    set_actual_ppo2            ; Set char_I_actual_ppO2
@@ -811,8 +810,7 @@ calc_velocity2:
 
 	movff	sub_c+0,xA+0
 	movff	sub_c+1,xA+1
-	;movlw	d'39'						;77 when called every second....
-	movlw	d'77'						;77 when called every second....
+	movlw	d'39'						;77 when called every second....
 	movwf	xB+0
 	clrf	xB+1
 	call	mult16x16					; differential pressure in mbar*77...

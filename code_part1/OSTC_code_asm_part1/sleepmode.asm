@@ -62,9 +62,6 @@ onemin_sleep:
 	btfsc	enter_error_sleep		; Enter Fatal Error Routine?
 	call	fatal_error_sleep		; Yes (In Sleepmode_vxx.asm!)
 	
-	call	calc_surface_interval	; Increases Surface-Interval time
-	call	nofly_timeout60			; check for no fly time
-
     ;---- adjust airpressure compensation any 15 minutes
 	incf	divemins+1,F			; counts to 14...
 	movlw	d'14'

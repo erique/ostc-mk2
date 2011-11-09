@@ -610,9 +610,13 @@ PLED_divemode_timeout_clear:
 	bcf			timeout_display				; Clear flag
 	bra			PLED_display_clear_common_y1
 
+PLED_display_velocity_graphical_clear:
+	WIN_BOX_BLACK	 .20, .90, .65, .75		; Clear graphic display
+	bra		PLED_display_velocity			; Continue with normal output
+
 PLED_display_velocity_graphical:
 	btfss	neg_flag
-	bra		PLED_display_velocity_clear	; No display for descend speed, clear instead
+	bra		PLED_display_velocity_graphical_clear
 	bsf		pled_velocity_display
 	; divA+0 holding the ascend speed in m/min
 	movff	divA+0,hi	; Copy
@@ -641,6 +645,7 @@ PLED_display_velocity_graphical:
 	call	div16x16						;xA/xB=xC with xA as remainder 	
 	; xC+0 now holds amount of segments to show
 
+	movff	hi,divA+0	; Copy back for numeric output
 	movlw	d'7'
 	cpfslt	xC+0
 	bra		PLED_graph_vel_7
@@ -681,19 +686,6 @@ PLED_graph_vel_2:
 PLED_graph_vel_1:
     WIN_BOX_STD   	.82, .82+.6, .67, .73	; Fill box
 PLED_graph_vel_0:
-;	WIN_TOP		.90
-;	WIN_LEFT	.0
-;	WIN_FONT 	FT_SMALL
-;	lfsr	FSR2,letter
-;	movff	xC+0,lo
-;	output_99
-;	PUTC	' '
-;	movff	divA+0,lo
-;	output_99
-;	PUTC	' '
-;	call	word_processor
-	return
-
 
 PLED_display_velocity:
 	ostc_debug	'v'		; Sends debug-information to screen if debugmode active
@@ -721,8 +713,6 @@ PLED_display_velocity_clear:
 	cpfseq	lo					; =1?
 	bra		PLED_display_velocity_clear1	; No, clear text display
 	WIN_BOX_BLACK	 .20, .90, .65, .75		; Clear graphic display
-	return
-
 
 PLED_display_velocity_clear1:
 	movlw	d'8'

@@ -388,6 +388,10 @@ RTCisr2:
         return                              ; NO : done.
 		clrf		secs                    ; YES: increment minutes instead...
 		bsf			oneminupdate
+
+		btfss		divemode				; In Divemode?
+		rcall		check_nofly_desat_time	; No, so reduce NoFly and Desat and increase interval
+
 		incf		mins,F
 		movlw		d'59'
 		cpfsgt		mins
@@ -439,3 +443,50 @@ check_date:
 		movwf		month
 		incf		year,F				
 		return
+
+check_nofly_desat_time:
+	bcf		nofly_active                ; Clear flag
+    movf    nofly_time+0,W              ; Is nofly null ?
+    iorwf   nofly_time+1,W
+    bz     	check_nofly_desat_time2     ; yes...
+
+	bsf		nofly_active                ; Set flag (again)
+	movlw	d'1'
+	subwf	nofly_time+0,F
+	movlw	d'0'
+	subwfb	nofly_time+1,F               ; reduce by one
+
+check_nofly_desat_time2:
+	movff	desaturation_time_buffer+0,lo
+	movff	desaturation_time_buffer+1,hi
+
+    movf    lo,W			             ; Is Desat null ?
+    iorwf   hi,W
+    bz     	check_nofly_desat_time3      ; yes...
+
+	movlw	d'1'
+	subwf	lo,F
+	movlw	d'0'
+	subwfb	hi,F		              	; reduce by one...
+
+	movff		lo,desaturation_time_buffer+0	; ...and copy back
+	movff		hi,desaturation_time_buffer+1
+
+check_nofly_desat_time3:
+	; Now increase interval timer
+	movff		desaturation_time_buffer+0,lo
+	movff		desaturation_time_buffer+1,hi
+	tstfsz		lo							;=0?
+	bra			calc_surface_interval2		; No
+	tstfsz		hi							;=0?
+	bra			calc_surface_interval2		; No
+	clrf		surface_interval+0
+	clrf		surface_interval+1			; Clear surface interval timer
+	return									; Done.
+
+calc_surface_interval2:						; Increase surface interval timer 
+	movlw		d'1'
+	addwf		surface_interval+0,F
+	movlw		d'0'
+	addwfc		surface_interval+1,F
+	return									; Done

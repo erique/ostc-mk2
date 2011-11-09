@@ -217,7 +217,6 @@ update_surfloop60:
 	call	calc_deko_surfmode			; calculate desaturation every minute
 	call	check_temp_extrema			; check for new temperature extremas
 	call	PLED_custom_text			; Displays custom text
-	call	calc_surface_interval		; Increases Surface-Interval time
 	call	surfcustomview_minute		; Do every-minute tasks for the custom view area
 
 	btfsc	gauge_mode					; Ignore in gauge mode
@@ -233,54 +232,7 @@ update_surfloop60:
 	bra		update_surfloop60_2
 
 update_surfloop60_2:
-	call	nofly_timeout60				; checks if nofly time is > 0
 	bcf		oneminupdate				
-	return
-
-nofly_timeout60:
-	movf	desaturation_time_buffer+0,W; Is Desat null ?
-    iorwf   desaturation_time_buffer+1,W
-    rcall	nofly_timeout60_0           ; No...
-
-    movf    nofly_time+0,W              ; Is nofly null ?
-    iorwf   nofly_time+1,W
-    bnz     nofly_timeout60_1           ; No...
-    
-	bcf		nofly_active                ; Clear flag
-	bcf		LED_blue                    ; Clear led.
-	return
-
-nofly_timeout60_0:
-	movlw	d'1'
-	subwf	desaturation_time_buffer+0,F
-	movlw	d'0'
-	subwfb	desaturation_time_buffer+1,F              ; reduce by one
-	return
-
-nofly_timeout60_1:
-	bsf		nofly_active                ; Set flag
-	movlw	d'1'
-	subwf	nofly_time+0,F
-	movlw	d'0'
-	subwfb	nofly_time+1,F              ; reduce by one
-	return
-
-calc_surface_interval:
-	movff		int_O_desaturation_time+0,lo			; divide by 60...
-	movff		int_O_desaturation_time+1,hi
-	tstfsz		lo							;=0?
-	bra			calc_surface_interval2		; No
-	tstfsz		hi							;=0?
-	bra			calc_surface_interval2		; No
-	clrf		surface_interval+0
-	clrf		surface_interval+1			; Clear surface interval timer
-	return
-
-calc_surface_interval2:						; Increase surface interval timer 
-	movlw		d'1'
-	addwf		surface_interval+0,F
-	movlw		d'0'
-	addwfc		surface_interval+1,F
 	return
 
 set_leds_surfmode:	

@@ -149,7 +149,7 @@ diveloop_loop3:
 	call	test_switches_divemode_menu		; Yes, check switches divemode menu
 
 	btfss	divemode						; Dive finished?
-	bra		end_dive						; Dive finished!
+	goto	end_dive						; Dive finished!
 
 	btfsc	pressure_refresh				; new pressure available?
 	call	update_divemode1				; Yes, display new depth
@@ -190,6 +190,7 @@ timeout_premenu_divemode:
 
 	bcf		premenu                         ; Yes, so clear "Menu?" and clear pre_menu bit
 	call	PLED_menu_clear                 ; Remove "Menu?"
+	call	PLED_divemode_mask				; And redraw mask (Redraw missing "T" from "Tauchzeit" in german text version)
 	return
 
 divemode_apnoe_tasks:                       ; 1 sec. Apnoe tasks

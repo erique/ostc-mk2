@@ -610,13 +610,13 @@ PLED_divemode_timeout_clear:
 	bcf			timeout_display				; Clear flag
 	bra			PLED_display_clear_common_y1
 
-PLED_display_velocity_graphical_clear:
+PLED_display_velocity_graph_clr:
 	WIN_BOX_BLACK	 .20, .90, .65, .75		; Clear graphic display
 	bra		PLED_display_velocity			; Continue with normal output
 
 PLED_display_velocity_graphical:
 	btfss	neg_flag
-	bra		PLED_display_velocity_graphical_clear
+	bra		PLED_display_velocity_graph_clr
 	bsf		pled_velocity_display
 	; divA+0 holding the ascend speed in m/min
 	movff	divA+0,hi	; Copy

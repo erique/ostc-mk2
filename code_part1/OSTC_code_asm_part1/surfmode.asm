@@ -29,7 +29,7 @@ surfloop:
 	clrf	lo
 	movff	lo,char_I_const_ppO2			; reset to standard mode, OSTC assumes Air breathing at the surface!
 
-	call	PLED_brightness_full			;max. brightness
+	call	PLED_brightness_full			; max. brightness
 	
 	call 	I2CReset
 	call	PLED_boot

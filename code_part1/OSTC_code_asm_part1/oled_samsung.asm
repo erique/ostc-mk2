@@ -661,7 +661,9 @@ PLED_boot:
 	return
 
 
-PLED_brightness_full: ;mH
+PLED_brightness_full: ; Choose between Eco and High...
+	btfsc	oled_brightness_high		; OLED brightness (=0: Eco, =1: High)
+	bra		PLED_brightness_full_high
 ; Mid
 	movlw	0x70
 	rcall	PLED_CmdWrite
@@ -722,7 +724,7 @@ PLED_brightness_full: ;mH
 	rcall	PLED_DataWrite
 	return
 
-;PLED_brightness_full:
+PLED_brightness_full_high:
 ; Full
 	movlw	0x70
 	rcall	PLED_CmdWrite

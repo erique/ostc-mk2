@@ -422,7 +422,7 @@
     TCODE    .20,   .95,     "Tiempo Fondo:"             ;277 Bottom Time:
     TCODE    .20,   .125,    "Prof. Max.:"               ;278 Max. Depth:
     TCODE    .20,   .155,    "Calcular Deco"             ;279 Calculate Deco
-    TCODE    .0,    .0,      ""                          ;280 UNUSED
+    TCODE    .20,   .155,    "Brightness:"          	 ;280 Brightness:
 ;
     TCODE    .93,   .170,    "ProfMedia"                 ;281 Avr.Depth
     TCODE    .90,   .170,    "TejControl"                ;282 Lead Tiss.
@@ -463,4 +463,7 @@
 	TCODE	 .116,	.54,	 "Crono."		 		 	 ;310 Stopwatch             (BIG Stopwatch in Gauge mode)
 ; Cave consomation
     TCODE    .0,    .0,      "Cave Bail."                ;311 Cave Bail.           (=10 chars.)
+; OLED Brightness settings
+    TCODE    .103,  .155,    "Eco "	    	             ;312 Eco 					(Same length as #313!)
+    TCODE    .103,  .155,    "High" 	                 ;313 High					(Same length as #312!)
 ;=============================================================================

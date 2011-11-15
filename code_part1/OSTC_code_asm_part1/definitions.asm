@@ -453,7 +453,7 @@ total_divetime_seconds	res 2	; counts dive seconds regardless of CF01 (18h max.)
 
 #DEfINE	timeout_display		flag5,0	; =1: The divemode timeout is displayed
 #DEFINE	eeprom_blockwrite	flag5,1	; EEPROM blockwrite active
-#DEFINE Flag_4      		flag5,2	; unused
+#DEFINE oled_brightness_high flag5,2	; =1: High brightness, =0: Eco mode
 #DEFINE	low_battery_state	flag5,3	;=1 if battery low
 #DEFINE	DP_done				flag5,4	; valconv
 #DEFINE	DP_done2			flag5,5	; valconv

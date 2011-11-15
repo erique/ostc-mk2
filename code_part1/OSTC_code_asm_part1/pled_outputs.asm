@@ -1053,7 +1053,7 @@ PLED_more_setup_menu_mask:
 	DISPLAYTEXT		.129	; Debug: 
 	DISPLAYTEXT		.187	; Show License
 	DISPLAYTEXTH	.295	; Show raw data	
-	
+	DISPLAYTEXTH	.280 	; Brightness:
 	DISPLAYTEXT .11			; Exit
 	return	
 

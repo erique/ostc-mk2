@@ -424,7 +424,7 @@
     TCODE    .20,   .95,     "Dip Zaman:"                ;277 Bottom Time:
     TCODE    .20,   .125,    "Derinlik :"                ;278 Max. Depth:
     TCODE    .20,   .155,    "Deko Hesapla     "         ;279 Calculate Deco
-    TCODE    .0,    .0,      ""                          ;280 UNUSED
+   	TCODE    .20,   .155,    "Brightness:"          	 ;280 Brightness:
 ;
     TCODE    .107,   .170,   "Ort.Der"                   ;281 Avr.Depth
     TCODE    .90,   .170,    "Kompartman"                ;282 Lead Tiss.
@@ -463,4 +463,10 @@
     TCODE    .0,    .0,      "simdi  "                   ;308 Now (7 chars min)
     TCODE   .10,   .113,     "Ortalama" 	 		 	 ;309 Average
     TCODE   .109,  .54,	     "Krono. "		 		 	 ;310 Stopwatch (BIG Stopwatch in Gauge mode)
+; Cave consomation
+    TCODE    .0,    .0,      "Cave Bail."                ;311 Cave Bail.            (=10 chars.)
+; OLED Brightness settings
+    TCODE    .103,  .155,    "Eco "	    	             ;312 Eco 					(Same length as #313!)
+    TCODE    .103,  .155,    "High" 	                 ;313 High					(Same length as #312!)
+
 ;=============================================================================

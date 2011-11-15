@@ -356,20 +356,21 @@ more_setup_menu3a:
 	call	show_debugstate
 	call	show_dateformat
 	call	PLED_menu_cursor
+	call	toggle_brightness_show
 	bcf		switch_left
 	bcf		switch_right
 
 more_setup_menu_loop:
 	call	check_switches_menu
 
-	movlw	d'5'				; x-1 menu entries
-	cpfseq	menupos
-	bra		more_setup_menu_loop2
-	movlw	d'6'
-	movwf	menupos
-	call	PLED_menu_cursor
-more_setup_menu_loop2:
-
+;	movlw	d'5'				; x-1 menu entries
+;	cpfseq	menupos
+;	bra		more_setup_menu_loop2
+;	movlw	d'6'
+;	movwf	menupos
+;	call	PLED_menu_cursor
+;more_setup_menu_loop2:
+;
 	btfsc	menubit2
 	bra		do_more_setup_menu						; call submenu
 
@@ -405,7 +406,7 @@ do_more_setup_menu:								; calls submenu
 	dcfsnz	menupos,F
 	bra		show_rawdata
 	dcfsnz	menupos,F
-	bra		setup_menu						; spare
+	bra		toggle_brightness		; toggle between ECO and HIGH
 	movlw	d'5'					; set cursor to "More again"
 	movwf	menupos
 	bra		setup_menu2						; exit...
@@ -602,6 +603,51 @@ show_dateformat3:
 	DISPLAYTEXTH	.261			; YY/MM/DD = 2 
 	return
 
+toggle_brightness:
+	movlw	LOW		0x104
+	movwf	EEADR
+	movlw	HIGH 	0x104
+	movwf	EEADRH					; OLED brightness (=0: Eco, =1: High)
+	call	read_eeprom				; read byte
+	bcf		oled_brightness_high	; Eco mode
+	movlw	.0
+	cpfseq	EEDATA					; High?
+	bsf		oled_brightness_high	; Yes!
+
+	; Value loaded, now toggle it...
+	btg		oled_brightness_high
+
+	; ...Display it...
+	rcall	toggle_brightness_show
+	call	PLED_brightness_full	; Set OLED
+
+	; ...and write it again to EEPROM
+	movlw	LOW		0x104
+	movwf	EEADR
+	movlw	HIGH 	0x104
+	movwf	EEADRH					; OLED brightness (=0: Eco, =1: High)
+	movlw	.0
+	btfsc	oled_brightness_high
+	movlw	.1
+	movwf	EEDATA
+	call	write_eeprom			; write byte
+	clrf	EEADRH					; Reset EEADRH	
+
+	movlw	d'5'
+	movwf	menupos
+	bcf		switch_right
+	bra		more_setup_menu3a			; return to menu loop
+
+toggle_brightness_show:
+	btfsc	oled_brightness_high
+	bra		toggle_brightness_show2
+	DISPLAYTEXTH	.312			; Eco
+	return
+toggle_brightness_show2:
+	DISPLAYTEXTH	.313			; High
+	return
+
+	
 toggle_debugmode:
 	read_int_eeprom	d'39'				; Read status
 	incf	EEDATA,F
@@ -618,7 +664,7 @@ toggle_debugmode1:
 	movlw	d'2'
 	movwf	menupos
 	bcf		switch_right
-	bra		more_setup_menu3a			; return to manu loop
+	bra		more_setup_menu3a			; return to menu loop
 
 show_debugstate:
 	read_int_eeprom	d'39'

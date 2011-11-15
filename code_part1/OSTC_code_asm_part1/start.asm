@@ -251,6 +251,18 @@ restart_1:
 	cpfseq	EEDATA					; is 0xAA already?
 	call	logbook_convert_64k		; No, convert now (And write 0xAA to internal EEPROM 0x100)
 
+; Set OLED brightness flag
+	movlw	LOW		0x104
+	movwf	EEADR
+	movlw	HIGH 	0x104
+	movwf	EEADRH					; OLED brightness (=0: Eco, =1: High)
+	call	read_eeprom				; read byte
+	bcf		oled_brightness_high	; Eco mode
+	movlw	.0
+	cpfseq	EEDATA					; High?
+	bsf		oled_brightness_high	; Yes!
+
+	clrf	EEADRH					; Reset EEADRH
 	goto	surfloop				; Jump to Surfaceloop!
 	
 

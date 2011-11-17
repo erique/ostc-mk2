@@ -1,6 +1,10 @@
 New in 2.05 beta:
 BETA Version - Do NOT use for diving!
+
+New in 2.05 beta:
+BETA Version - Do NOT use for diving!
 BUGFIX: German text layout in Divemode
+NEW: Always show numeric velocity...
 NEW: OLED Brightness setting
 
 New in 2.04 beta:

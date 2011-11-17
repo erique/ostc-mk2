@@ -466,6 +466,6 @@
 ; Cave consomation
     TCODE    .0,    .0,      "Bail. Sout"                ;311 Cave Bail.            (=10 chars.)
 ; OLED Brightness settings
-    TCODE    .103,  .155,    "Eco "	    	             ;312 Eco 					(Same length as #313!)
+    TCODE    .103,  .155,    "Eco  "	    	         ;312 Eco 					(Same length as #313!)
     TCODE    .103,  .155,    "Forte" 	                 ;313 High					(Same length as #312!)
 ;=============================================================================

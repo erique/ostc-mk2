@@ -311,7 +311,7 @@
     TCODE    .40,   .35,     "Dip Gazi [/min]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
     TCODE    .40,   .35,     "Inis Gazi[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
     TCODE    .40,   .35,     "TTS @+Min [min]"           ;180 Future TTS[min]   (@5 variant: compute TTS for extra time at current depth)
-    TCODE    .40,   .35,     "Graph. Velocity"           ;182 Graph. Velocity	(Show a graphical representation of the ascend speed)
+    TCODE    .40,   .35,     "Hiz Goster     "           ;182 Graph. Velocity	(Show a graphical representation of the ascend speed)
     TCODE    .40,   .35,     "Kullanim Disi  "           ;182 not used
     TCODE    .40,   .35,     "Kullanim Disi  "           ;183 not used
     TCODE    .40,   .35,     "Kullanim Disi  "           ;184 not used
@@ -424,7 +424,7 @@
     TCODE    .20,   .95,     "Dip Zaman:"                ;277 Bottom Time:
     TCODE    .20,   .125,    "Derinlik :"                ;278 Max. Depth:
     TCODE    .20,   .155,    "Deko Hesapla     "         ;279 Calculate Deco
-   	TCODE    .20,   .155,    "Brightness:"          	 ;280 Brightness:
+   	TCODE    .20,   .155,    "Parlaklik:"            	 ;280 Brightness:
 ;
     TCODE    .107,   .170,   "Ort.Der"                   ;281 Avr.Depth
     TCODE    .90,   .170,    "Kompartman"                ;282 Lead Tiss.
@@ -466,7 +466,7 @@
 ; Cave consomation
     TCODE    .0,    .0,      "Cave Bail."                ;311 Cave Bail.            (=10 chars.)
 ; OLED Brightness settings
-    TCODE    .103,  .155,    "Eco "	    	             ;312 Eco 					(Same length as #313!)
-    TCODE    .103,  .155,    "High" 	                 ;313 High					(Same length as #312!)
+    TCODE    .103,  .155,    "Dusuk "    	             ;312 Eco 					(Same length as #313!)
+    TCODE    .103,  .155,    "Parlak" 	                 ;313 High					(Same length as #312!)
 
 ;=============================================================================

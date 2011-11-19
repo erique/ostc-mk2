@@ -1058,7 +1058,10 @@ check_gas_change5x:
 	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 
 check_gas_change6:			;Done
-	call	PLED_active_gas_divemode; Display gas, if required (and with "*" if irequired...)
+	btfsc	FLAG_const_ppO2_mode	; in ppO2 mode?
+	bcf		better_gas_available	; Yes, do not blink better gas
+
+	call	PLED_active_gas_divemode; Display gas, if required (and with "*" if required...)
 	return
 
 ;=============================================================================

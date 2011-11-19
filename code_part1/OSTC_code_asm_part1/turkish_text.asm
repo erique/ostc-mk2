@@ -408,11 +408,13 @@
     TCODE    .65,   .168,    "Bail "                     ;263 Bail 
     TCODE    .7,    .48,     "Hava  "                    ;264 Air
     TCODE    .120,  .135,    "Hava  "                    ;265 Air
-    TCODE    .2,    .39,     "Kalibre Et "               ;266 Calibrate
-    TCODE    .0,    .216,    "Max"                       ;267 Max.
-    TCODE    .10,   .8,      "Hayir"                     ;268 not
-    TCODE    .10,   .16,     "Bulundu! "                 ;269 found!
-    TCODE    .0,    .0,      "mV:"                       ;270 mV:
+
+    TCODE    .0,    .0,      ""             			 ;266 unused
+    TCODE    .0,    .0,      ""         	             ;267 unused
+    TCODE    .0,    .0,      ""     	                 ;268 unused
+    TCODE    .0,    .0,      ""		                   	 ;269 unused
+    TCODE    .0,    .0,      ""		                     ;270 unused
+
 ; New CFs Warning
     TCODE    .10,   .2,      "Yeni Fonksiyonlar   "      ;271 New CF added!
     TCODE    .0,    .35,     "Yeni Fonksiyonlar     "    ;272 New CustomFunctions

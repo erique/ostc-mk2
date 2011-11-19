@@ -410,11 +410,13 @@
     TCODE    .65,   .168,    "Запас"                     ;263 Bail
     TCODE    .7,    .48,     "Возд."                     ;264 Air
     TCODE    .120,  .135,    "Возд."                     ;265 Air
-    TCODE    .2,    .39,     "Калибровка"                ;266 Calibrate
-    TCODE    .0,    .216,    "Макс."                     ;267 Max.
-    TCODE    .10,   .8,      "не"                        ;268 not
-    TCODE    .10,   .16,     "найден!"                   ;269 found!
-    TCODE    .0,    .0,      "mV:"                       ;270 mV:
+
+    TCODE    .0,    .0,      ""             			 ;266 unused
+    TCODE    .0,    .0,      ""         	             ;267 unused
+    TCODE    .0,    .0,      ""     	                 ;268 unused
+    TCODE    .0,    .0,      ""		                   	 ;269 unused
+    TCODE    .0,    .0,      ""		                     ;270 unused
+
 ; New CFs Warning
     TCODE    .24,   .2,      "Добавлены ДП!"             ;271 New CF added!
     TCODE    .0,    .35,     "Новые Доп. Параметры"      ;272 New CustomFunctions
@@ -426,7 +428,7 @@
     TCODE    .20,   .95,     "Время на дне :"            ;277 Bottom Time:
     TCODE    .20,   .125,    "Макс. глубина:"            ;278 Max. Depth:
     TCODE    .20,   .155,    "Вычислить деко"            ;279 Calculate Deco
-    TCODE    .20,   .155,    ""                          ;280 UNUSED
+    TCODE    .20,   .155,    "Brightness:"          	 ;280 Brightness:
 ;
     TCODE    .107,  .170,    "С®едняя"                   ;281 Avr.Depth
     TCODE    .90,   .170,    "Глав ткань"                ;282 Lead Tiss.
@@ -466,4 +468,7 @@
 	TCODE	 .115,	.54,	 "Тайме®"			 		 ;310 Stopwatch             (BIG Stopwatch in Gauge mode)
 ; Cave consomation
     TCODE    .0,    .0,      "Cave Bail."                ;311 Cave Bail.            (=10 chars.)
+; OLED Brightness settings
+    TCODE    .103,  .155,    "Eco "	    	             ;312 Eco 					(Same length as #313!)
+    TCODE    .103,  .155,    "High" 	                 ;313 High					(Same length as #312!)
 ;=============================================================================

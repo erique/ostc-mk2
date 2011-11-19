@@ -407,11 +407,13 @@
     TCODE    .65,   .168,    "Bail "                     ;263 Bail 
     TCODE    .7,    .48,     "Air   "                    ;264 Air
     TCODE    .120,  .135,    "Air   "                    ;265 Air
-    TCODE    .2,    .39,     "Calibrate"                 ;266 Calibrate
-    TCODE    .0,    .216,    "Max."                      ;267 Max.
-    TCODE    .10,   .8,      "not"                       ;268 not
-    TCODE    .10,   .16,     "found!"                    ;269 found!
-    TCODE    .0,    .0,      "mV:"                       ;270 mV:
+
+    TCODE    .0,    .0,      ""             			 ;266 unused
+    TCODE    .0,    .0,      ""         	             ;267 unused
+    TCODE    .0,    .0,      ""     	                 ;268 unused
+    TCODE    .0,    .0,      ""		                   	 ;269 unused
+    TCODE    .0,    .0,      ""		                     ;270 unused
+
 ; New CFs Warning
     TCODE    .24,   .2,      "New CF added!"             ;271 New CF added!
     TCODE    .0,    .35,     "New CustomFunctions"       ;272 New CustomFunctions

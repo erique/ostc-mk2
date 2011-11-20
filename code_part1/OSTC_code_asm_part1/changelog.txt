@@ -1,5 +1,9 @@
-New in 2.05 beta:
+New in 2.06 beta:
 BETA Version - Do NOT use for diving!
+NEW: NDL analytic model (Erik Baker's formula)
+BUGFIX: CCR air mode: should not blink for my bailout (bug #66)
+BUGFIX: N2_ratio/He_ratio[] not inited at boot time.
+CHANGE: Turkish text for velocity.
 
 New in 2.05 beta:
 BETA Version - Do NOT use for diving!

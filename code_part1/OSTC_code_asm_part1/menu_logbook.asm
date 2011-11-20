@@ -1300,13 +1300,9 @@ exit_profileview:
 	movff		mintemp+0, divenumber
 	decf		divenumber,F
 	bcf			all_dives_shown
-
-	decf		menupos2,F	
-
 	clrf		menupos3					; here: used row on current page
 	movlw		d'5'
 	movwf		menupos						; here: active row on current page
-	incf		menupos2,F					; start new page
 	call		PLED_ClearScreen			; clear details/profile
 	goto		menu_logbook1b					; start search
 

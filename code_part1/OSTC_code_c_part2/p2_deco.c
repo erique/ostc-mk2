@@ -103,7 +103,7 @@
 
 #include "p2_definitions.h"
 #define TEST_MAIN
-#include "shared_definitions.h"
+#include "../OSTC_code_asm_part1/shared_definitions.h"
 
 // Water vapour partial pressure in the lumb.
 #define ppWater     0.0627
@@ -129,8 +129,6 @@ static void update_startvalues(void);
 static void clear_deco_table(void);
 static unsigned char update_deco_table(void);
 
-static void backup_sim_pres_tissue(void);
-static void restore_sim_pres_tissue(void);
 static void sim_tissue(PARAMETER unsigned char period);
 static void sim_limit(PARAMETER float GF_current);
 static void sim_extra_time(void);
@@ -193,6 +191,8 @@ static float 			var_He_a;       // Bühlmann a, for current He tissue.
 static float 			var_He_b;       // Bühlmann b, for current He tissue.
 static float  			var_N2_e;       // Exposition, for current N2 tissue.
 static float  			var_He_e;       // Exposition, for current He tissue.
+static float            var_N2_ht;      // Half-time for current N2 tissue.
+static float            var_He_ht;      // Half-time for current N2 tissue.
 
 static float            pres_diluent;                   // new in v.101
 static float            const_ppO2;                     // new in v.101
@@ -216,14 +216,12 @@ static unsigned char    deco_gas_change[NUM_GAS];       // new in v.109
 
 float  pres_tissue_N2[NUM_COMP];
 float  pres_tissue_He[NUM_COMP];
+float  sim_pres_tissue_N2[NUM_COMP];             // 16 floats = 64 bytes.
+float  sim_pres_tissue_He[NUM_COMP];             // 16 floats = 64 bytes.
 
 //---- Bank 7 parameters -----------------------------------------------------
 #pragma udata bank7=0x700
-
-float  sim_pres_tissue_N2[NUM_COMP];             // 32 floats = 128 bytes.
-float  sim_pres_tissue_He[NUM_COMP];             // 32 floats = 128 bytes.
-static float  sim_pres_tissue_backup_N2[NUM_COMP];
-static float  sim_pres_tissue_backup_He[NUM_COMP];
+// EMPTY ...
 
 //---- Bank 8 parameters -----------------------------------------------------
 #pragma udata bank8=0x800
@@ -680,11 +678,40 @@ static void read_buhlmann_times(PARAMETER char period)
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// read buhlmann tables for compatriment ci
+// 
+static void read_buhlmann_ht(void)
+{
+
+#ifndef CROSS_COMPILE
+    // Note: we don't use far rom pointer, because the
+    //       24 bits is to complex, hence we have to set
+    //       the UPPER page ourself...
+    //       --> Set zero if tables are moved to lower pages !
+    _asm
+        movlw 1
+        movwf TBLPTRU,0
+    _endasm
+#endif
+
+    assert( 0 <= ci && ci < NUM_COMP );
+    {
+        overlay rom const float* ptr = &buhlmann_ht[2*ci];
+        var_N2_ht = *ptr++;
+        var_He_ht = *ptr++;
+    }    
+
+    assert( 4.0    <= var_N2_ht && var_N2_ht <= 635.0 );
+    assert( 1.5099 <= var_He_ht && var_He_ht <= 240.03 );
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // calc_nextdecodepth
 //
 // new in v.102
 //
 // INPUT, changing during dive:
+//      temp_deco
 //      low_depth
 //
 // INPUT, fixed during dive:
@@ -717,7 +744,7 @@ static unsigned char calc_nextdecodepth(void)
     assert( depth >= -0.2 );        // Allow for 200mbar of weather change.
 
     //---- ZH-L16 + GRADIENT FACTOR model ------------------------------------
-	if (char_I_deco_model == 1)
+	if( char_I_deco_model != 0 )
 	{
         if( depth >= low_depth )
             sim_limit( GF_low );
@@ -1113,7 +1140,7 @@ static void gas_switch_set(void)
 //////////////////////////////////////////////////////////////////////////////
 //
 // Input: calc_N2_ratio, calc_He_ratio : simulated gas mix.
-//        temp_deco : simulated respiration pressure + security offset (deco_distance)
+//        temp_deco : simulated respiration pressure
 //        float_deco_distance : security factor.
 //        Water-vapor pressure inside limbs (ppWater).
 //
@@ -1265,6 +1292,9 @@ static void calc_hauptroutine(void)
 
     case 0: //---- bottom time -----------------------------------------------
     default:
+        gas_switch_find_current();              // Lookup for current gas & time.
+        gas_switch_set();                       // setup calc_ratio's
+
     	calc_nullzeit();
     	check_ndl();
    	    char_O_deco_status = 2; // calc ascent next time.
@@ -1274,9 +1304,6 @@ static void calc_hauptroutine(void)
     case 6: // @+5min variation
         // Check proposed gas at begin of ascent simulation
         sim_dive_mins = int_I_divemins;         // Init current time.
-
-        gas_switch_find_current();              // Lookup for current gas & time.
-        gas_switch_set();                       // setup calc_ratio's
 
         backup_gas_used  = sim_gas_last_used;   // And save for later simu steps.
         backup_gas_depth = sim_gas_last_depth;  // And save for later simu steps.
@@ -1667,7 +1694,7 @@ static void calc_limit(void)
         //       *BUT* calc_tissue() is used to compute bottom time,
         //       hence what would happend at surface,
         //       hence at GF_high.
-        if( char_I_deco_model == 1 )
+        if( char_I_deco_model != 0 )
             p = ( p - var_N2_a * GF_high) * var_N2_b
               / (GF_high + var_N2_b * (1.0 - GF_high));
         else
@@ -1690,68 +1717,69 @@ static void calc_limit(void)
 //
 // calculates the remaining bottom time
 //
-// unchanged in v.101
+// 2011-11-20 jDG: Changed (beta 2.06) to use Eric Baker's direct NDL formula.
+//
+// Input:  pres_respiration
+// Output: char_O_nullzeit
 //
 static void calc_nullzeit(void)
 {
-    overlay unsigned char loop;
-    update_startvalues();
-    
-	char_O_nullzeit = 0;
-	for(loop = 1; loop <= 17; loop++)
-	{
-  		backup_sim_pres_tissue();
-  		sim_tissue(2);      // 10 min.
-        sim_limit(GF_high);
+    overlay float Pin;
 
-		if( sim_lead_tissue_limit > pres_surface )  // changed in v.102 , if guiding tissue can not be exposed to surface pressure immediately
+    temp_deco = pres_respiration;
+    sim_alveolar_presures();
+    Pin = ppN2 + ppHe;
+
+    char_O_nullzeit = 240;
+    for(ci=0; ci<NUM_COMP; ci++)
+    {
+        //---- Compute composite A/B values and half times for the mix -------
+        overlay float N2 = pres_tissue_N2[ci];
+        overlay float He = pres_tissue_He[ci];
+        overlay float p = N2 + He;
+
+        read_buhlmann_ht();
+        var_N2_ht = (var_N2_ht * N2 + var_He_ht * He) / p;
+
+        read_buhlmann_coefficients();
+        var_N2_a = (var_N2_a * N2 + var_He_a * He) / p;
+        var_N2_b = (var_N2_b * N2 + var_He_b * He) / p;
+        
+        //---- Calc time for that tissue -------------------------------------
+        // Erik Baker's formula:
+        // M0 (M-value at surface) = var_N2_a + pres_surface/var_N2_b
+        // Pin = respirated pressure ppN2 + ppHe
+        // p   = pressure inside tissue
+        // 0.6931 = log(2)
+        // NDL(ci) = log((Pin - p)/(Pin - M0))/log(2) * ht
+        //
+        if( Pin > p )   // Only when on-gasing
         {
-  		    restore_sim_pres_tissue();
-            break;
+            overlay float M0 = (var_N2_a + pres_surface/var_N2_b);
+
+            // Apply security margin when using the GF model
+            if( char_I_deco_model != 0 )
+                M0 = GF_high * (M0 - pres_surface) + pres_surface;
+
+            if( Pin > M0 )
+            {
+                overlay unsigned char indl;
+
+                overlay float ndl = log((Pin - p)/(Pin - M0)) * var_N2_ht/0.6931;
+
+                // Apply non-GF model security margins:
+                // Saturation factor will be applied to gas loading, accelerating
+                // loading, hence we should decrease NDL accordingly.
+                if( char_I_deco_model == 0)
+                    ndl /= float_saturation_multiplier;
+
+                if( ndl <   0.0f ) ndl = 0.0f;
+                if( ndl > 254.5f ) ndl = 255.0f;
+                indl = (unsigned char)(ndl + 0.5f);
+                if( indl < char_O_nullzeit )
+                    char_O_nullzeit = indl;
+            }
         }
-        // Validate once we know its good.
-  		char_O_nullzeit += 10;
- 	}
-
- 	if (char_O_nullzeit < 60)
- 	{
-     	for(loop=1; loop <= 10; loop++)
-		{
-   			sim_tissue(1);  // 1 min
-            sim_limit(GF_high);
-
-    		if( sim_lead_tissue_limit > pres_surface)  // changed in v.102 , if guiding tissue can not be exposed to surface pressure immediately
-                break;
-   			char_O_nullzeit++;
-  		}
- 	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// backup_sim_pres_tissue
-//
-void backup_sim_pres_tissue(void)
-{
-    overlay unsigned char x;
-
-    for(x=0; x<NUM_COMP; x++)
-    {
-        sim_pres_tissue_backup_N2[x] = sim_pres_tissue_N2[x];
-        sim_pres_tissue_backup_He[x] = sim_pres_tissue_He[x];
-    }
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// restore_sim_pres_tissue
-//
-void restore_sim_pres_tissue(void)
-{
-    overlay unsigned char x;
-
-    for(x=0; x<NUM_COMP; x++)
-    {
-        sim_pres_tissue_N2[x] = sim_pres_tissue_backup_N2[x];
-        sim_pres_tissue_He[x] = sim_pres_tissue_backup_He[x];
     }
 }
 
@@ -1862,7 +1890,7 @@ static void sim_limit(PARAMETER float GF_current)
         //       Actual values are in the 1.5 .. 1.0 range (for a GF=30%),
         //       so that can change who is the leading gas...
         // Note: Also depends of the GF_current...
-        if( char_I_deco_model == 1 )
+        if( char_I_deco_model != 0 )
             p = ( p - var_N2_a * GF_current) 
               / (GF_current / var_N2_b + 1.0 - GF_current);
         else
@@ -1974,7 +2002,7 @@ static void calc_gradient_factor(void)
         //       correction due to gradient factor. To compute the actual
         //       current GF, we need to (re-)compute the raw ambiant-pressure
         //       limit from the Bühlmann model.
-        if( char_I_deco_model == 1 )
+        if( char_I_deco_model != 0 )
         {
             ci = char_O_gtissue_no;
             read_buhlmann_coefficients();
@@ -1991,7 +2019,7 @@ static void calc_gradient_factor(void)
     }
 	char_O_gradient_factor = (unsigned char)(gf+0.5f);
 
-	if (char_I_deco_model == 1)		// calculate relative gradient factor
+	if( char_I_deco_model != 0 )        // calculate relative gradient factor
 	{
         overlay float rgf;
 
@@ -2031,23 +2059,10 @@ static void calc_gradient_factor(void)
 //
 void deco_calc_desaturation_time(void)
 {
-    overlay rom const float *ptr;
-
     RESET_C_STACK
 
     assert( 800 < int_I_pres_surface && int_I_pres_surface < 1100 );
     assert( 0 < char_I_desaturation_multiplier && char_I_desaturation_multiplier <= 100 );
-
-#ifndef CROSS_COMPILE
-    // Note: we don't use far rom pointer, because the
-    //       24 bits is to complex, hence we have to set
-    //       the UPPER page ourself...
-    //       --> Set zero if tables are moved to lower pages !
-    _asm
-        movlw 1
-        movwf TBLPTRU,0
-    _endasm
-#endif
 
     N2_ratio = 0.7902; // FIXED sum as stated in bühlmann
     pres_surface = int_I_pres_surface * 0.001;
@@ -2055,19 +2070,15 @@ void deco_calc_desaturation_time(void)
     int_O_desaturation_time = 0;
     float_desaturation_multiplier = char_I_desaturation_multiplier * (0.01 * SURFACE_DESAT_FACTOR);
 
-    ptr = &buhlmann_ht[0];
     for(ci=0; ci<NUM_COMP; ci++)
     {
-        overlay float var_N2_halftime = *ptr++;
-        overlay float var_He_halftime = *ptr++;
         overlay unsigned short desat_time;    // For a particular compartiment, in min.
         overlay float temp1;
         overlay float temp2;
         overlay float temp3;
         overlay float temp4;
 
-        assert( 4.0    <= var_N2_halftime && var_N2_halftime <= 635.0 );
-        assert( 1.5099 <= var_He_halftime && var_He_halftime <= 240.03 );
+        read_buhlmann_ht();
 
         // saturation_time (for flight) and N2_saturation in multiples of halftime
         // version v.100: 1.1 = 10 percent distance to totally clean (totally clean is not possible, would take infinite time )
@@ -2088,7 +2099,7 @@ void deco_calc_desaturation_time(void)
             // 0.6931 is ln(2), because the math function log() calculates with a base of e not 2 as requested.
             // minus because log is negative.
             temp1 = log(1.0 - temp1) / -0.6931; // temp1 is the multiples of half times necessary.
-            temp2 = var_N2_halftime * temp1 / float_desaturation_multiplier; // time necessary (in minutes ) for complete desaturation (see comment about 5 percent) , new in v.101: float_desaturation_multiplier
+            temp2 = var_N2_ht * temp1 / float_desaturation_multiplier; // time necessary (in minutes ) for complete desaturation (see comment about 5 percent) , new in v.101: float_desaturation_multiplier
 
         }
         else
@@ -2111,7 +2122,7 @@ void deco_calc_desaturation_time(void)
         	temp3 = log(1.0 - temp3) / -0.6931; // temp1 is the multiples of half times necessary.
         							 // 0.6931 is ln(2), because the math function log() calculates with a base of e  not 2 as requested.
         							 // minus because log is negative
-        	temp4 = var_He_halftime * temp3 / float_desaturation_multiplier; // time necessary (in minutes ) for "complete" desaturation, new in v.101 float_desaturation_multiplier
+        	temp4 = var_He_ht * temp3 / float_desaturation_multiplier; // time necessary (in minutes ) for "complete" desaturation, new in v.101 float_desaturation_multiplier
     	}
         else
     	{

@@ -303,7 +303,7 @@ calc_deko_divemode:
 	bra		reset_decompression_gases	; While in NDL, do not set deompression gas
 
 ; Copy all gases to char_I_deco_N2_ratio and char_I_deco_He_ratio
-divemode_check_decogases:					; CALLed from Simulator, too
+divemode_check_decogases:               ; CALLed from Simulator, too
 
 	clrf    EEADRH                      ; Make sure to select eeprom bank 0
 	

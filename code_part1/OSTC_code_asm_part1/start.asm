@@ -58,19 +58,22 @@ wait_start_pressure:
 	bsf		sleepmode				; Routine only works in sleepmode...
 	call	pressuretest_sleep_fast	; Gets pressure without averaging (faster!)
 	bcf		sleepmode				; Normal mode again
-    SAFE_2BYTE_COPY amb_pressure_avg, amb_pressure	; copy for compatibility
 
-    SAFE_2BYTE_COPY amb_pressure_avg, last_surfpressure
-	SAFE_2BYTE_COPY amb_pressure_avg, amb_pressure
+  Ifdef TESTING
+    movlw   LOW(.1000)
+    movwf   amb_pressure+0
+    movlw   HIGH(.1000)
+    movwf   amb_pressure+1
+  Else
+    SAFE_2BYTE_COPY amb_pressure_avg, amb_pressure	; copy for compatibility
+  Endif
+
+    movff   amb_pressure+0,last_surfpressure+0
+    movff   amb_pressure+1,last_surfpressure+1
 	movff	last_surfpressure+0,last_surfpressure_15min+0
 	movff	last_surfpressure+1,last_surfpressure_15min+1
 	movff	last_surfpressure+0,last_surfpressure_30min+0
 	movff	last_surfpressure+1,last_surfpressure_30min+1	; Rests all airpressure registers
-
-; Extra power-up reset (JeanDo)
-	ifdef	TESTING
-		call 	do_menu_reset_all2
-	endif
 
 ; reset deco data
 	ostc_debug	'0'		; Sends debug-information to screen if debugmode active
@@ -84,9 +87,16 @@ wait_start_pressure:
 	movff	WREG,char_I_saturation_multiplier
 	GETCUSTOM8	d'12'					    ; Desaturation multiplier %
 	movff	WREG,char_I_desaturation_multiplier
-    SAFE_2BYTE_COPY amb_pressure,int_I_pres_respiration ; copy for deco routine
-	movff	int_I_pres_respiration+0,int_I_pres_surface+0     ; copy for desat routine
+    movff   amb_pressure+0,int_I_pres_respiration+0         ; copy for deco routine
+    movff   amb_pressure+1,int_I_pres_respiration+1
+	movff	int_I_pres_respiration+0,int_I_pres_surface+0   ; copy for desat routine
 	movff	int_I_pres_respiration+1,int_I_pres_surface+1		
+
+; Extra power-up reset (JeanDo)
+	ifdef	TESTING
+        call	reset_gases
+		call 	reset_all_cf
+	endif
 
 	call	deco_clear_tissue			    ;
 	call	deco_calc_desaturation_time     ; calculate desaturation time
@@ -195,6 +205,7 @@ restart:
 	bsf		high_altitude_mode		; No, Set Flag!
 	
 	; Should we disable sleep (hardware emulator)
+  Ifndef TESTING
 restart_loop:
 	btfss	0xF81,0,A
 	bra		restart_loop
@@ -203,6 +214,7 @@ restart_loop:
 	movlw	0x80
 	cpfslt	0xFB3,A
 	bsf		nsm						; NO-SLEEP-MODE : for hardware debugging
+  Endif
 
 	call	gassetup_sort_gaslist       ; Sorts Gaslist according to change depth
 	WIN_TOP		.0

@@ -310,7 +310,7 @@ do_menu_reset_all:
 
 do_menu_reset_all2:
 	call	PLED_ClearScreen
-	DISPLAYTEXT	.25					; "Reset..."
+	DISPLAYTEXT	.25					    ; "Reset..."
 
 reset_start:
 ; reset deco data
@@ -325,6 +325,8 @@ reset_start:
 
 ; reset gases
 	rcall	reset_gases
+	rcall   reset_all_cf
+	goto	restart					; all reset, quit to surfmode
 
 reset_all_cf:
 	movlw	d'1'
@@ -416,7 +418,7 @@ cf_bank1_end:
 	clrf	EEADRH					; EEPROM BANK 0 !
 
 ;call	reset_external_eeprom	; delete profile memory
-	goto	restart					; all reset, quit to surfmode
+    return
 
 reset_gases:
 	clrf	EEADRH					; EEPROM BANK 0 !

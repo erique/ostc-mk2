@@ -78,6 +78,8 @@
 // 2011/04/27: [jDG] Fixed char_O_gradient_factor calculation when model uses gradient-factor.
 // 2011/05/02: [jDG] Added "Future TTS" function (CF58).
 // 2011/05/17: [jDG] Various cleanups.
+// 2011/08/08: [jDG] Computes CNS during deco planning ascent.
+// 2011/11/24: [jDG] Slightly faster and better NDL computation.
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -1193,6 +1195,7 @@ static void sim_alveolar_presures(void)
 //
 static void clear_tissue(void)
 {
+    overlay float p;
 	flag_in_divemode = 0;
 	int_O_DBS_bitfield = 0;
 	int_O_DBS2_bitfield = 0;
@@ -1204,15 +1207,15 @@ static void clear_tissue(void)
     N2_ratio = 0.7902;
     pres_respiration = int_I_pres_respiration * 0.001;
     
+    p = N2_ratio * (pres_respiration -  ppWater);
     for(ci=0; ci<NUM_COMP; ci++)
     {
-        // cycle through the 16 Bühlmann tissues
-        overlay float p = N2_ratio * (pres_respiration -  ppWater);
+        // cycle through the 16 Bühlmann N2 tissues
         pres_tissue_N2[ci] = p;
 
         // cycle through the 16 Bühlmann tissues for Helium
         pres_tissue_He[ci] = 0.0;
-    } // for 0 to 15
+    }
 
     clear_deco_table();
     char_O_deco_status = 0;
@@ -1342,6 +1345,7 @@ static void calc_hauptroutine(void)
 void calc_hauptroutine_data_input(void)
 {
     overlay short int_temp;
+    overlay unsigned char g;
     
     pres_respiration    = int_I_pres_respiration * 0.001;
     pres_surface        = int_I_pres_surface     * 0.001;
@@ -1358,37 +1362,13 @@ void calc_hauptroutine_data_input(void)
     int_temp = (int_I_pres_respiration - int_I_pres_surface)
              + MBAR_REACH_GASCHANGE_AUTO_CHANGE_OFF;
     
-    deco_gas_change[0] = 0;
-    deco_gas_change[1] = 0;
-    deco_gas_change[2] = 0;
-    deco_gas_change[3] = 0;
-    deco_gas_change[4] = 0;
-
     // Gas are selectable if we did not pass the change depth by more than 1.50m:
-    if(char_I_deco_gas_change[0])
+    for(g=0; g < NUM_GAS; ++g)
     {
-        if( int_temp > 100 *(short)char_I_deco_gas_change[0] )
-        	deco_gas_change[0] = char_I_deco_gas_change[0];
-    }
-    if(char_I_deco_gas_change[1])
-    {
-        if( int_temp > 100 *(short)char_I_deco_gas_change[1] )
-        	deco_gas_change[1] = char_I_deco_gas_change[1];
-    }
-    if(char_I_deco_gas_change[2])
-    {
-        if( int_temp > 100 *(short)char_I_deco_gas_change[2] )
-        	deco_gas_change[2] = char_I_deco_gas_change[2];
-    }
-    if(char_I_deco_gas_change[3])
-    {
-        if( int_temp > 100 *(short)char_I_deco_gas_change[3] )
-        	deco_gas_change[3] = char_I_deco_gas_change[3];
-    }
-    if(char_I_deco_gas_change[4])
-    {
-        if( int_temp > 100 *(short)char_I_deco_gas_change[4] )
-        	deco_gas_change[4] = char_I_deco_gas_change[4];
+        deco_gas_change[g] = 0;
+        if(char_I_deco_gas_change[g])
+            if( int_temp > 100 *(short)char_I_deco_gas_change[g] )
+            	deco_gas_change[g] = char_I_deco_gas_change[g];
     }
 
     const_ppO2 = char_I_const_ppO2 * 0.01;
@@ -1717,69 +1697,86 @@ static void calc_limit(void)
 //
 // calculates the remaining bottom time
 //
-// 2011-11-20 jDG: Changed (beta 2.06) to use Eric Baker's direct NDL formula.
+// NOTE: Erik Baker's closed formula works for Nitroxes. Trimix adds a second
+//       exponential term to the M-value equation, making it impossible to
+//       invert... So we have to make a fast-simu until we find a better way.
 //
 // Input:  pres_respiration
 // Output: char_O_nullzeit
 //
 static void calc_nullzeit(void)
 {
-    overlay float Pin;
-
+    //---- Compute ppN2 and ppHe ---------------------------------------------
     temp_deco = pres_respiration;
     sim_alveolar_presures();
-    Pin = ppN2 + ppHe;
 
     char_O_nullzeit = 240;
     for(ci=0; ci<NUM_COMP; ci++)
     {
-        //---- Compute composite A/B values and half times for the mix -------
-        overlay float N2 = pres_tissue_N2[ci];
-        overlay float He = pres_tissue_He[ci];
-        overlay float p = N2 + He;
-
-        read_buhlmann_ht();
-        var_N2_ht = (var_N2_ht * N2 + var_He_ht * He) / p;
+        //---- Read A/B values and loading factor for N2 and He --------------
+        overlay float tN2 = pres_tissue_N2[ci];
+        overlay float tHe = pres_tissue_He[ci];
+        overlay float t = tN2 + tHe;
+        overlay unsigned char ndl;
+        overlay unsigned char period = 10;
 
         read_buhlmann_coefficients();
-        var_N2_a = (var_N2_a * N2 + var_He_a * He) / p;
-        var_N2_b = (var_N2_b * N2 + var_He_b * He) / p;
+        read_buhlmann_times(2);             // Starts with a 10min period.
         
-        //---- Calc time for that tissue -------------------------------------
-        // Erik Baker's formula:
-        // M0 (M-value at surface) = var_N2_a + pres_surface/var_N2_b
-        // Pin = respirated pressure ppN2 + ppHe
-        // p   = pressure inside tissue
-        // 0.6931 = log(2)
-        // NDL(ci) = log((Pin - p)/(Pin - M0))/log(2) * ht
-        //
-        if( Pin > p )   // Only when on-gasing
+        //---- Simulate for that tissue --------------------------------------
+        // NOTE: No need to simulate for longuer than the already found NDL.
+        for(ndl=0; ndl<char_O_nullzeit;)
         {
-            overlay float M0 = (var_N2_a + pres_surface/var_N2_b);
+            //---- Compute updated mix M-value at surface
+            overlay float a = (var_N2_a * tN2 + var_He_a * tHe) / t;
+            overlay float b = (var_N2_b * tN2 + var_He_b * tHe) / t;
+            overlay float M0 = (a + pres_surface/b);
 
-            // Apply security margin when using the GF model
-            if( char_I_deco_model != 0 )
+            //---- Add 10min/1min to N2/He tissues
+            overlay float dTN2 = (ppN2 - tN2) * var_N2_e;
+            overlay float dTHe = (ppHe - tHe) * var_He_e;
+
+            //---- Apply security margin when using the non-GF model
+            if( char_I_deco_model == 0 )
+            {
+                dTN2 *= float_saturation_multiplier;
+                dTHe *= float_saturation_multiplier;
+            }
+            else // Or GF-based model
                 M0 = GF_high * (M0 - pres_surface) + pres_surface;
 
-            if( Pin > M0 )
+            //---- Simulate off-gasing while going to surface
+            // TODO !
+            // dTN2 -= exp( ... ascent time ... ppN2...)
+            // dTHe -= exp( ... ascent time ... ppHe...)
+
+            //---- Still ok to surface after 1 or 10 minutes ?
+            if( t + dTN2 + dTHe <= M0 )
             {
-                overlay unsigned char indl;
-
-                overlay float ndl = log((Pin - p)/(Pin - M0)) * var_N2_ht/0.6931;
-
-                // Apply non-GF model security margins:
-                // Saturation factor will be applied to gas loading, accelerating
-                // loading, hence we should decrease NDL accordingly.
-                if( char_I_deco_model == 0)
-                    ndl /= float_saturation_multiplier;
-
-                if( ndl <   0.0f ) ndl = 0.0f;
-                if( ndl > 254.5f ) ndl = 255.0f;
-                indl = (unsigned char)(ndl + 0.5f);
-                if( indl < char_O_nullzeit )
-                    char_O_nullzeit = indl;
+                tN2 += dTN2;    // YES: apply gas loadings,
+                tHe += dTHe;
+                t = tN2 + tHe;
+                ndl += period;  // increment NDL,
+                continue;       // and loop.
             }
+
+            //---- Should we retry with smaller steps ?
+            if( period == 10 )
+            {
+                read_buhlmann_times(1); // 1min coefs.
+                period = 1;
+                continue;
+            }
+
+            //---- ELSE make a linear approx for the last minute
+            // Usefull to have a meneaingfull rounding of NDL
+            ndl += (unsigned char)(0.5f + (M0-t)/(dTN2+dTHe));
+            break;
         }
+
+        // Keep the shortest NDL found
+        if( ndl < char_O_nullzeit )
+            char_O_nullzeit = ndl;
     }
 }
 
@@ -2209,7 +2206,7 @@ static void calc_wo_deco_step_1_min(void)
 //
 // desaturation slowed down to 70,42%.
 //
-static void calc_dive_interval()
+static void calc_dive_interval(void)
 {
     overlay unsigned char t;
     overlay unsigned char backup_model;
@@ -2227,7 +2224,6 @@ static void calc_dive_interval()
     char_I_deco_model = 0;
 
     //---- Perform simulation ------------------------------------------------
-    
     for(t=0; t<char_I_dive_interval; ++t)
     {
         calc_tissue(2);  // period = 10min.
@@ -2412,7 +2408,7 @@ void deco_calc_CNS_fraction(void)
 //////////////////////////////////////////////////////////////////////////////
 // deco_calc_CNS_planning
 //
-// Compute CNS during predicetd ascent.
+// Compute CNS during predicted ascent.
 //
 // Note:    Needs a call to deco_push_tissues_to_vault(), 
 //          deco_pull_tissues_from_vault() to avoid trashing everything...
@@ -2600,7 +2596,7 @@ void deco_gas_volumes(void)
     //---- Ascent usage ------------------------------------------------------
 
     deepest_first = read_custom_function(54) == 0;
-    deco_usage  = (float) read_custom_function(57); // In liter/minutes.
+    deco_usage    = (float) read_custom_function(57); // In liter/minutes.
 
     // Usage up to the first stop:
     //  - computed at MAX depth (easier, safer),

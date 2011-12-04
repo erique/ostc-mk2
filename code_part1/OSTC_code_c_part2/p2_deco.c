@@ -758,9 +758,15 @@ static unsigned char calc_nextdecodepth(void)
         {
             // Compute tolerated depth, for the leading tissue [metre]:
             overlay float depth_tol = (sim_lead_tissue_limit - pres_surface) * BAR_TO_METER;
+            overlay unsigned char first_stop;
+
+            // If ascent is VERY fast, this can be lower than the actual depth... Because
+            // this happends only in simulation, just forget about it:
+            if( depth_tol > depth )
+                depth_tol = depth;
 
             // Deepest stop, in multiples of 3 metres.
-            overlay unsigned char first_stop = 3 * (short)(0.99999 + depth_tol * 0.33333 );
+            first_stop = 3 * (short)(0.99999 + depth_tol * 0.33333 );
             assert( first_stop < 128 );
 
             // Is it a new deepest needed stop ? If yes this is the reference for

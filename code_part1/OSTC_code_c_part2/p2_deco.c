@@ -2235,7 +2235,8 @@ static void calc_dive_interval(void)
         calc_tissue(2);  // period = 10min.
         CNS_fraction =  0.92587471 * CNS_fraction;  // Half-time = 90min: (1/2)^(1/9)
     }
-    char_O_CNS_fraction = (char)(CNS_fraction * 100.0 + 0.5);
+    assert( 0.0 <= CNS_fraction && CNS_fraction <= 2.56 );
+    char_O_CNS_fraction = (unsigned char)(CNS_fraction * 100.0 + 0.5);
     
     //---- Restore model -----------------------------------------------------
     char_I_deco_model = backup_model;
@@ -2403,9 +2404,9 @@ void deco_calc_CNS_fraction(void)
     else
         CNS_fraction += time_factor*0.0482; // value for 2.5
 
-    if (CNS_fraction > 2.5)
+    if( CNS_fraction > 2.5 )
         CNS_fraction = 2.55;
-    if (CNS_fraction < 0.0)
+    if( CNS_fraction < 0.0 )
         CNS_fraction = 0.0;
 
     char_O_CNS_fraction = (unsigned char)(100.0 * CNS_fraction + 0.5);
@@ -2530,10 +2531,10 @@ void deco_calc_CNS_planning(void)
 void deco_calc_CNS_decrease_15min(void)
 {
     RESET_C_STACK
-    assert( 0.0 <= CNS_fraction && CNS_fraction <= 2.5 );
+    assert( 0.0 <= CNS_fraction && CNS_fraction <= 2.56 );
 
     CNS_fraction =  0.890899 * CNS_fraction;
-    char_O_CNS_fraction = (char)(CNS_fraction * 100.0 + 0.5);
+    char_O_CNS_fraction = (unsigned char)(CNS_fraction * 100.0 + 0.5);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2700,7 +2701,7 @@ void deco_pull_tissues_from_vault(void)
     
     // Restore both CNS variable, too.
     CNS_fraction = cns_vault;
-    char_O_CNS_fraction = (char)(CNS_fraction * 100.0 + 0.5);
+    char_O_CNS_fraction = (unsigned char)(CNS_fraction * 100.0 + 0.5);
 }
 
 //////////////////////////////////////////////////////////////////////////////

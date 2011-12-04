@@ -98,7 +98,9 @@ wait_start_pressure:
 		call 	reset_all_cf
 	endif
 
-	call	deco_clear_tissue			    ;
+	call    deco_clear_tissue
+	movlb   b'00000001'                     ; select ram bank 1
+
     call    divemode_check_decogases        ; Setup N2/He ratio array
 	call	deco_calc_desaturation_time     ; calculate desaturation time
 	call	deco_clear_CNS_fraction			; clear CNS

@@ -283,7 +283,7 @@ calc_deko_divemode:
 	call	calc_velocity		; calculate vertical velocity and display if > threshold (every two seconds)
 	
 ; Calculate CNS	
-    rcall    set_actual_ppo2            ; Set char_I_actual_ppO2
+    rcall   set_actual_ppo2             ; Set char_I_actual_ppO2
     clrf    WREG
     movff   WREG,char_I_step_is_1min    ; Make sure to be in 2sec mode.
 
@@ -298,64 +298,54 @@ calc_deko_divemode:
 	call	PLED_display_cns			; Show CNS
 	call	check_gas_change			; Checks if a better gas should be selected (by user)
 
-; Check for decompression gases if in decomode
-	btfss	dekostop_active
-	bra		reset_decompression_gases	; While in NDL, do not set deompression gas
+;NOTE: always set full gas list, because the user can switch gas,
+;      even in NDL mode...
 
 ; Copy all gases to char_I_deco_N2_ratio and char_I_deco_He_ratio
 divemode_check_decogases:               ; CALLed from Simulator, too
-
 	clrf    EEADRH                      ; Make sure to select eeprom bank 0
 	
-	read_int_eeprom		d'7'			; Read He ratio
-	movff	EEDATA,char_I_deco_He_ratio+0	; And copy into hold register
-	read_int_eeprom		d'6'			; Read O2 ratio
-	movff	char_I_deco_He_ratio+0, wait_temp			; copy into bank1 register
-	bsf		STATUS,C					; 
-	movlw	d'100'						; 100%
-	subfwb	wait_temp,W					; minus He
-	subfwb	EEDATA,F					; minus O2
-	movff	EEDATA, char_I_deco_N2_ratio+0; = N2!
+;;;; FIXME BANK1 ???
 
-	read_int_eeprom		d'11'			; Read He ratio
-	movff	EEDATA,char_I_deco_He_ratio+1	; And copy into hold register
-	read_int_eeprom		d'10'			; Read O2 ratio
-	movff	char_I_deco_He_ratio+1, wait_temp			; copy into bank1 register
-	bsf		STATUS,C					; 
-	movlw	d'100'						; 100%
-	subfwb	wait_temp,W					; minus He
-	subfwb	EEDATA,F					; minus O2
-	movff	EEDATA, char_I_deco_N2_ratio+1; = N2!
+    read_int_eeprom		d'7'			; Read He ratio
+    movff	EEDATA,char_I_deco_He_ratio+0	; And copy into hold register
+    read_int_eeprom		d'6'			; Read O2 ratio
+    movff	char_I_deco_He_ratio+0,WREG ; Get back He -> WREG
+    addwf   EEDATA,W                    ; O2 + He -> WREG
+    sublw   d'100'                      ; 100 - (O2 + He) -> WREG
+    movff	WREG, char_I_deco_N2_ratio+0; Push N2 to C code;
+
+    read_int_eeprom		d'11'			; Read He ratio
+    movff	EEDATA,char_I_deco_He_ratio+1	; And copy into hold register
+    read_int_eeprom		d'10'			; Read O2 ratio
+    movff	char_I_deco_He_ratio+1,WREG ; Get back He -> WREG
+    addwf   EEDATA,W                    ; O2 + He -> WREG
+    sublw   d'100'                      ; 100 - (O2 + He) -> WREG
+    movff	WREG, char_I_deco_N2_ratio+1; Push N2 to C code;
 
 	read_int_eeprom		d'15'			; Read He ratio
 	movff	EEDATA,char_I_deco_He_ratio+2	; And copy into hold register
 	read_int_eeprom		d'14'			; Read O2 ratio
-	movff	char_I_deco_He_ratio+2, wait_temp			; copy into bank1 register
-	bsf		STATUS,C					; 
-	movlw	d'100'						; 100%
-	subfwb	wait_temp,W					; minus He
-	subfwb	EEDATA,F					; minus O2
-	movff	EEDATA, char_I_deco_N2_ratio+2; = N2!
+    movff	char_I_deco_He_ratio+2,WREG ; Get back He -> WREG
+    addwf   EEDATA,W                    ; O2 + He -> WREG
+    sublw   d'100'                      ; 100 - (O2 + He) -> WREG
+    movff	WREG, char_I_deco_N2_ratio+2; Push N2 to C code;
 
 	read_int_eeprom		d'19'			; Read He ratio
 	movff	EEDATA,char_I_deco_He_ratio+3	; And copy into hold register
 	read_int_eeprom		d'18'			; Read O2 ratio
-	movff	char_I_deco_He_ratio+3, wait_temp			; copy into bank1 register
-	bsf		STATUS,C					; 
-	movlw	d'100'						; 100%
-	subfwb	wait_temp,W					; minus He
-	subfwb	EEDATA,F					; minus O2
-	movff	EEDATA, char_I_deco_N2_ratio+3; = N2!
+    movff	char_I_deco_He_ratio+3,WREG ; Get back He -> WREG
+    addwf   EEDATA,W                    ; O2 + He -> WREG
+    sublw   d'100'                      ; 100 - (O2 + He) -> WREG
+    movff	WREG, char_I_deco_N2_ratio+3; Push N2 to C code;
 
 	read_int_eeprom		d'23'			; Read He ratio
 	movff	EEDATA,char_I_deco_He_ratio+4; And copy into hold register
 	read_int_eeprom		d'22'			; Read O2 ratio
-	movff	char_I_deco_He_ratio+4, wait_temp			; copy into bank1 register
-	bsf		STATUS,C					; 
-	movlw	d'100'						; 100%
-	subfwb	wait_temp,W					; minus He
-	subfwb	EEDATA,F					; minus O2
-	movff	EEDATA, char_I_deco_N2_ratio+4; = N2!
+    movff	char_I_deco_He_ratio+4,WREG ; Get back He -> WREG
+    addwf   EEDATA,W                    ; O2 + He -> WREG
+    sublw   d'100'                      ; 100 - (O2 + He) -> WREG
+    movff	WREG, char_I_deco_N2_ratio+4; Push N2 to C code;
 
 ; Copy depth of enabled gas into char_I_deco_gas_change
 ; Note gaslist_active is inited in diveloop_boot, and edited by

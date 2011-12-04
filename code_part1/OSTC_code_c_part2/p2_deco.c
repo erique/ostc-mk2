@@ -1024,13 +1024,13 @@ void deco_debug(void)
 //////////////////////////////////////////////////////////////////////////////
 // Find current gas in the list (if any).
 // 
-// Input:  char_I_current_gas.
+// Input:  char_I_current_gas = 1..6
 //
-// Output: sim_gas_last_depth, temp_depth_limit.
+// Output: sim_gas_last_depth = 0..5, temp_depth_limit.
 //
 static void gas_switch_find_current(void)
 {
-    assert( 0 <= char_I_current_gas && char_I_current_gas <= (NUM_GAS+1) );
+    assert( 0 < char_I_current_gas && char_I_current_gas <= (NUM_GAS+1) );
 
     if( char_I_current_gas <= NUM_GAS )                 // Gas1..Gas5
     {

@@ -1,7 +1,8 @@
 New in 2.06 beta:
 BETA Version - Do NOT use for diving!
-CHANGE: NDL faster/more precise simu (but no closed formula for trimix).
+CHANGE: NDL routine faster/more precise simulation
 BUGFIX: CCR air mode: should not blink for my bailout (bug #66)
+BUGFIX: Spurious stop order when simulating deadly fast ascent
 BUGFIX: N2_ratio/He_ratio[] not inited at boot time.
 CHANGE: Turkish text for velocity.
 

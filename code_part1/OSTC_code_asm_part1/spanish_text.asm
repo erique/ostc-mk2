@@ -408,7 +408,7 @@
     TCODE    .120,  .135,    "Aire  "                    ;265 Air
 
     TCODE    .0,    .0,      ""             			 ;266 unused
-    TCODE    .0,    .0,      ""         	             ;267 unused
+    TCODE    .0,    .216,    "Max."                      ;267 Max.
     TCODE    .0,    .0,      ""     	                 ;268 unused
     TCODE    .0,    .0,      ""		                   	 ;269 unused
     TCODE    .0,    .0,      ""		                     ;270 unused

@@ -1744,7 +1744,7 @@ diveloop_boot:
 	clrf	average_depth_hold_total+1
 	clrf	average_depth_hold_total+2
 	clrf	average_depth_hold_total+3	; Clear Non-Resettable Average
-	bcf		depth_greater_100m			; clear flag
+	bcf		depth_greater_100			; clear flag
 	setf	last_diluent				; to be displayed after first calculation (range: 0 to 100 [%])
 	bcf		dekostop_active	
 	bcf		is_bailout					;=1: CC mode, but bailout active!		

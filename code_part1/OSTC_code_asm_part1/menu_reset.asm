@@ -187,7 +187,7 @@ cf_default_table1:
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	                
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
-	CF_DEFAULT    CF_BOOL,      d'0',   0,      0		; CF63 Imperial units (feet,fahrenheit)
+	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 cf_default_table2:
 

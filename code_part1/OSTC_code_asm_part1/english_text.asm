@@ -68,10 +68,7 @@
 #DEFINE	TXT_METER5		     "m    "                     ; "m    "                
 #DEFINE	TXT_METER3		     "m  "                       ; "m  "                  
 #DEFINE	TXT_METER2		     "m "                        ; "m "                   
-#DEFINE	TXT_METER1		     "m"                         ; "m"
-#DEFINE	TXT_FOOT_C		     'f'                         ; 'f'
-#DEFINE	TXT_FOOT4		     "ft  "                      ; "ft  "
-#DEFINE	TXT_FOOT2		     "ft"                        ; "ft"
+#DEFINE	TXT_METER1		     "m"                         ; "m"                    
 #DEFINE	TXT_MBAR7		     " mbar  "                   ; " mbar  "              
 #DEFINE	TXT_MBAR5		     "mbar "                     ; "mbar "                
 #DEFINE	TXT_BAR4		     "bar "                      ; "bar "                 
@@ -317,7 +314,7 @@
     TCODE    .40,   .35,     "Graph. Velocity"           ;182 Graph. Velocity	(Show a graphical representation of the ascend speed)
     TCODE    .40,   .35,     "not used       "           ;183 not used
     TCODE    .40,   .35,     "not used       "           ;184 not used
-    TCODE    .40,   .35,     "Imperial units "           ;185 Show depth in feet and temperature in Fahrenheit
+    TCODE    .40,   .35,     "not used       "           ;185 not used
 ; End of function descriptor II
 ;
     TCODE    .13,   .2,      "Custom Functions II"       ;186 Custom Functions II
@@ -473,11 +470,4 @@
 ; OLED Brightness settings
     TCODE    .103,  .155,    "Eco "	    	             ;312 Eco 					(Same length as #313!)
     TCODE    .103,  .155,    "High" 	                 ;313 High					(Same length as #312!)
-; Simulator menu with imperial units
-    TCODE    .100,  .25,     "+  1ft"                    ;314 +1ft
-    TCODE    .100,  .50,     "-  1ft"                    ;315 -1ft
-    TCODE    .100,  .75,     "+ 10ft"                    ;316 +10ft
-    TCODE    .100,  .100,    "- 10ft"                    ;317 -10ft
-
-    TCODE    .0,    .0,      "ft/min"                    ;318 ft/min
 ;=============================================================================

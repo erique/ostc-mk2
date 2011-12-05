@@ -351,20 +351,6 @@ divemode_menu_simulator:
 divemode_menu_simulator2:
 	dcfsnz	menupos,F
 	bra		timeout_divemenu2			; close underwater menu!
-	GETCUSTOM8  d'63'                   ; Check CF#63 Conversion to imperial units
-	btfss   WREG,0                      ; Enabled ?
-	bra divemode_menu_simulator3        ; NO
-	dcfsnz	menupos,F
-	bra		divemode_menu_simulator_p1ft	; Adjust +1ft
-	dcfsnz	menupos,F
-	bra		divemode_menu_simulator_m1ft	; Adjust -1ft
-	dcfsnz	menupos,F
-	bra		divemode_menu_simulator_p10ft	; Adjust +10ft
-	dcfsnz	menupos,F
-	bra		divemode_menu_simulator_m10ft	; Adjust -10ft
-	bra divemode_menu_simulator4
-
-divemode_menu_simulator3:
 	dcfsnz	menupos,F
 	bra		divemode_menu_simulator_p1	; Adjust +1m
 	dcfsnz	menupos,F
@@ -373,8 +359,6 @@ divemode_menu_simulator3:
 	bra		divemode_menu_simulator_p10	; Adjust +10m
 	dcfsnz	menupos,F
 	bra		divemode_menu_simulator_m10	; Adjust -10m
-
-divemode_menu_simulator4:
 	dcfsnz	menupos,F
 	bra		divemode_menu_simulator_quit; Adjust to zero m
 	bra		timeout_divemenu2			; quit underwater menu!
@@ -429,25 +413,6 @@ divemode_menu_simulator_p10:
 	movwf	menupos						; reset cursor
 	bra		divemode_menu_simulator_common
 
-divemode_menu_simulator_m10ft:
-	movlw	LOW		d'305'
-	subwf	sim_pressure+0,F
-	movlw	HIGH	d'305'
-	subwfb	sim_pressure+1,F
-	movlw	d'5'
-	movwf	menupos						; reset cursor
-	bra		divemode_menu_simulator_common
-
-divemode_menu_simulator_p10ft:
-	movlw	LOW		d'305'
-	addwf	sim_pressure+0,F
-	movlw	HIGH	d'305'
-	addwfc	sim_pressure+1,F
-
-	movlw	d'4'
-	movwf	menupos						; reset cursor
-	bra		divemode_menu_simulator_common
-
 divemode_menu_simulator_quit:
 	movlw	LOW		d'1000'
 	movwf	sim_pressure+0
@@ -466,24 +431,6 @@ divemode_menu_simulator_p1:
 
 divemode_menu_simulator_m1:
 	movlw	d'100'
-	subwf	sim_pressure+0,F
-	movlw	d'0'
-	subwfb	sim_pressure+1,F
-	movlw	d'3'
-	movwf	menupos						; reset cursor
-	bra		divemode_menu_simulator_common
-
-divemode_menu_simulator_p1ft:
-	movlw	d'30'
-	addwf	sim_pressure+0,F
-	movlw	d'0'
-	addwfc	sim_pressure+1,F
-	movlw	d'2'
-	movwf	menupos						; reset cursor
-	bra		divemode_menu_simulator_common
-
-divemode_menu_simulator_m1ft:
-	movlw	d'30'
 	subwf	sim_pressure+0,F
 	movlw	d'0'
 	subwfb	sim_pressure+1,F

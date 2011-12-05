@@ -357,7 +357,6 @@ time_correction_value   res 1   ; Adds to Seconds on midnight
 gaslist_active          res 1	; Holds flags for active gases
 desaturation_time_buffer res 2	; buffer for desat time
 total_divetime_seconds	res 2	; counts dive seconds regardless of CF01 (18h max.)
-temp11					res 1	; used for unit conversion
 
 ;=============================================================================
 ; C-code Routines
@@ -529,7 +528,7 @@ temp11					res 1	; used for unit conversion
 #DEFINE	display_set_active		flag13,2	;=1: De/Activate gases underwater menu is visible
 #DEFINE	deco_mode_changed		flag13,3	;=1: The Decomode was changes, show decomode description!
 #DEFINE	pled_velocity_display	flag13,4	;=1: Velocity is displayed 
-#DEFINE depth_greater_100		flag13,5	;=1: Depth is greater then 100 units
+#DEFINE depth_greater_100m		flag13,5	;=1: Depth is greater then 100m
 #DEFINE	display_set_setpoint	flag13,6	;=1: SetPoint list active
 #DEFINE	toggle_customview		flag13,7	;=1: Next customview
 
@@ -548,7 +547,7 @@ temp11					res 1	; used for unit conversion
 #DEFINE	blinking_better_gas		flag15,3	;=1: Gas is currently blinking
 #DEFINE	menu3_active			flag15,4	;=1: menu entry three in divemode menu is active
 #DEFINE no_deco_customviews		flag15,5	;=1: Selected mode is Apnoe or Gauge
-#DEFINE	maxdepth_greater_100  	flag15,6	;=1: Max Depth greater>100 units
+#DEFINE	maxdepth_greater_100m	flag15,6	;=1: Max Depth greater>100m
 #DEFINE	show_cns_in_logbook		flag15,7	;=1: Show CNS value in logbook (>= V1.84)
 
 

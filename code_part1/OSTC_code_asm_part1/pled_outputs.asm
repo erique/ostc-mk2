@@ -463,43 +463,19 @@ PLED_display_deko:
 
 	ostc_debug	'y'		; Sends debug-information to screen if debugmode active
 	WIN_TOP		.80
+	WIN_LEFT	.94
 	WIN_FONT 	FT_MEDIUM
 	WIN_INVERT	.0                      ; Init new Wordprocessor
 	PLED_color_code		warn_ceiling    ; Color-code Output
 	lfsr	FSR2,letter
 	movff	char_O_first_deco_depth,lo  ; Ceiling in m
-	GETCUSTOM8  d'63'				; Check CF#63 Conversion to imperial units
-	btfss   WREG,0					; Enabled ?
-	bra		PLED_display_deko3		; NO
-	WIN_LEFT	.80
-	clrf	hi
-	call	convert_meters_to_feet2	; converts meters to feet, don't check CF#63
-	output_16_3
-	call word_processor
-
-	WIN_TOP		.91
-	WIN_LEFT	.115
-	WIN_FONT 	FT_SMALL
-	lfsr	FSR2,letter
-	STRCPY_PRINT TXT_FOOT2          ; Print 'ft' in small font
-
-	WIN_TOP		.80
-	WIN_LEFT	.130
-	WIN_FONT 	FT_MEDIUM
-	lfsr	FSR2,letter
-	bra		PLED_display_deko4
-
-PLED_display_deko3:
-	WIN_LEFT	.94
 	output_99
 	PUTC    TXT_METER_C
-
-PLED_display_deko4:	
-	movff	char_O_first_deco_time,lo   ; length of first stop in min
+	movff	char_O_first_deco_time,lo   ; length of first stop in m
 	output_99
 	STRCAT_PRINT "'"
 	WIN_FONT 	FT_SMALL
-
+	
 ;PLED_display_deko1:
 	ostc_debug	'x'		; Sends debug-information to screen if debugmode active
 	
@@ -585,17 +561,6 @@ PLED_simulator_data_2:
 
 	movff	sim_btm_depth,lo
 	bsf		leftbind
-	GETCUSTOM8  d'63'				; Check CF#63 Conversion to imperial units
-	btfss   WREG,0					; Enabled ?
-	bra		PLED_simulator_data_3	; NO
-	clrf	hi
-	call	convert_meters_to_feet2	; converts meters to feet, don't check CF#63
-	output_16_3
-	STRCAT_PRINT  TXT_FOOT4
-	bcf		leftbind
-	return
-
-PLED_simulator_data_3:
 	output_8
 	STRCAT_PRINT  TXT_METER3
 
@@ -734,21 +699,9 @@ PLED_display_velocity:
 	movlw	'+'
 	movwf	POSTINC2
 	movff	divA+0,lo
-	GETCUSTOM8  d'63'                               ; Check CF#63 Conversion to imperial units
-	btfss   WREG,0                                  ; Enabled ?
-	bra     PLED_display_velocity2  ; NO
-	clrf    hi
-	call    convert_meters_to_feet2 ; converts meters to feet, don't check CF#63
-	output_16_3
-	OUTPUTTEXTH     d'318'                  ; ft/min
-	bra     PLED_display_velocity3
- 
-PLED_display_velocity2:
 	output_99
 	OUTPUTTEXT	d'83'			; m/min
-
-PLED_display_velocity3:
- 	call	word_processor
+	call	word_processor
 	call	PLED_standard_color
 	bsf		pled_velocity_display
 	return
@@ -762,7 +715,7 @@ PLED_display_velocity_clear:
 	WIN_BOX_BLACK	 .20, .90, .65, .75		; Clear graphic display
 
 PLED_display_velocity_clear1:
-	movlw	d'10'
+	movlw	d'8'
 	movwf	temp1
 	WIN_TOP		.90
 	WIN_LEFT	.0
@@ -881,17 +834,6 @@ PLED_show_cf11_cf12_cf29_2:
 	GETCUSTOM8	d'29'
 	movwf	lo
 	bsf		leftbind
-	GETCUSTOM8  d'63'					; Check CF#63 Conversion to imperial units
-	btfss   WREG,0						; Enabled ?
-	bra		PLED_show_cf11_cf12_cf29_3	; NO
-	clrf	hi
-	call	convert_meters_to_feet2
-	output_16
-	STRCAT_PRINT  TXT_FOOT2
-	bcf		leftbind
-	return
-
-PLED_show_cf11_cf12_cf29_3:
 	output_8
 	STRCAT_PRINT  TXT_METER1
 
@@ -1055,7 +997,6 @@ PLED_update_raw_data:
 	WIN_TOP		.177
 	STRCPY  "temp:"
     SAFE_2BYTE_COPY temperature, lo
-	call    convert_celsius_to_fahrenheit
 	call	PLED_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
 	output_16
 	call	word_processor
@@ -1167,19 +1108,12 @@ PLED_temp_surfmode:
 	movff	last_temperature+1,hi
 	movff	last_temperature+0,lo
 	lfsr	FSR2,letter
-	call    convert_celsius_to_fahrenheit
 	call	PLED_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
 	movlw	d'3'
 	movwf	ignore_digits
 	bsf		leftbind			; left orientated output
 	output_16dp	d'2'
 	bcf		leftbind
-	GETCUSTOM8  d'63'                       ; Check CF#63 Conversion to imperial units
-	btfss   WREG,0                          ; Enabled ?
-	bra PLED_show_C                         ; NO
-	STRCAT_PRINT  "°F "
-	return
-PLED_show_C:
 	STRCAT_PRINT  "°C "
 	return
 
@@ -1199,7 +1133,6 @@ PLED_temp_divemode:
 	movff	last_temperature+0,lo
 
 	lfsr	FSR2,letter
-	call    convert_celsius_to_fahrenheit
 	call	PLED_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
 	movlw	d'3'
 	movwf	ignore_digits
@@ -1763,16 +1696,15 @@ PLED_confirmbox_move_cursor2:
 PLED_depth:
 	ostc_debug	'r'		; Sends debug-information to screen if debugmode active
     SAFE_2BYTE_COPY rel_pressure, lo
-	call	adjust_depth_with_salinity	; computes salinity setting into lo:hi [mbar]
-	call	convert_meters_to_feet		; converts meters to feet
+	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mbar]
 
 	movlw	.039
 	cpfslt	hi
-    bra		pled_depth_full_units_only
+    bra		depth_greater_99_84mtr
 
-	btfsc	depth_greater_100			; Was depth>100 during last call
+	btfsc	depth_greater_100m			; Was depth>100m during last call
 	call	PLED_clear_depth			; Yes, clear depth area
-	bcf		depth_greater_100			; Do this once only...
+	bcf		depth_greater_100m			; Do this once only...
 
 	lfsr	FSR2,letter
 
@@ -1786,8 +1718,8 @@ PLED_depth:
 	movlw	d'0'
 	addwfc	sub_b+1,F				; Add 1mbar offset
 	call	sub16					; sub_c = sub_a - sub_b
-	btfss	neg_flag				; Depth lower then 10?
-	rcall	depth_less_10   		; Yes, add extra space
+	btfss	neg_flag				; Depth lower then 10m?
+	rcall	depth_less_10mtr		; Yes, add extra space
 
 	WIN_TOP		.24
 	WIN_LEFT	.0
@@ -1802,7 +1734,7 @@ PLED_depth:
 	movff	hi,sub_b+1
 	movff	lo,sub_b+0
 	call	sub16					; sub_c = sub_a - sub_b
-	btfss	neg_flag				; Depth lower then 1?
+	btfss	neg_flag				; Depth lower then 1m?
 	bra		pled_depth2				; Yes, display manual Zero
 
 	bsf		leftbind
@@ -1817,10 +1749,6 @@ pled_depth2:
 pled_depth3:
 	call	word_processor
 	bcf		ignore_digit4
-
-	GETCUSTOM8  d'63'               ; Check CF#63 Conversion to imperial units
-	btfsc   WREG,0                  ; Enabled ?
-	bra		pled_depth6             ; YES, don't print any fractions
 
 	WIN_FONT 	FT_MEDIUM
 	WIN_TOP		.50
@@ -1854,16 +1782,14 @@ pled_depth4:
 pled_depth5:
 	call	word_processor			; decimeters in medium font
 	bcf		ignore_digit5
-
-pled_depth6:
 	WIN_FONT 	FT_SMALL
 	return
 
-pled_depth_full_units_only:			; Display only in full meters or feet
-	btfss	depth_greater_100			; Is depth>100 already?
+depth_greater_99_84mtr:			; Display only in full meters
+	btfss	depth_greater_100m			; Is depth>100m already?
 	call	PLED_clear_depth			; No, clear depth area and set flag
 	; Depth is already in hi:lo
-	; Show depth in Full units
+	; Show depth in Full meters
 	; That means ignore figure 4 and 5
 	lfsr	FSR2,letter
 	WIN_TOP		.24
@@ -1881,13 +1807,13 @@ pled_depth_full_units_only:			; Display only in full meters or feet
 	WIN_FONT 	FT_SMALL
 	return
 	
-depth_less_10:
+depth_less_10mtr:
 	PUTC    ' '
 	return
 
 PLED_clear_depth			; No, clear depth area and set flag
     WIN_BOX_BLACK   .24, .90, .0, .90		;top, bottom, left, right
-	bsf		depth_greater_100			; Set Flag
+	bsf		depth_greater_100m			; Set Flag
 	return
 
 PLED_desaturation_time:	
@@ -2251,15 +2177,10 @@ PLED_max_pressure:
 	movff	max_pressure+0,lo
 	movff	max_pressure+1,hi
 	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mbar]
-	call	convert_meters_to_feet			; converts meters to feet
-
-	GETCUSTOM8  d'63'                       ; Check CF#63 Conversion to imperial units
-	btfsc	WREG,0                          ; Enabled ?
-	bra		PLED_maxdepth_full_units_only   ; YES, don't print any feet fractions
 
 	movlw	.039
 	cpfslt	hi
-    bra		PLED_maxdepth_full_units_only
+    bra		maxdepth_greater_99_84mtr
 
 ; Display normal "xx.y"
 	lfsr	FSR2,letter
@@ -2277,11 +2198,11 @@ PLED_max_pressure:
 	WIN_FONT 	FT_SMALL
 	return
 
-PLED_maxdepth_full_units_only:		; Display only in full units (meters or feet)
-	btfss	maxdepth_greater_100	; Is max.depth>100 already?
+maxdepth_greater_99_84mtr:			; Display only in full meters
+	btfss	maxdepth_greater_100m	; Is max.depth>100m already?
 	call	PLED_clear_maxdepth		; No, clear maxdepth area and set flag
 	; max Depth is already in hi:lo
-	; Show max depth in Full units
+	; Show max depth in Full meters
 	; That means ignore figure 4 and 5
 	lfsr	FSR2,letter
 	call	PLED_standard_color
@@ -2301,7 +2222,7 @@ PLED_maxdepth_full_units_only:		; Display only in full units (meters or feet)
 
 PLED_clear_maxdepth:
     WIN_BOX_BLACK   .184, .215, .0, .41		;top, bottom, left, right
-	bsf		maxdepth_greater_100	; Set Flag
+	bsf		maxdepth_greater_100m	; Set Flag
 	return
 
 PLED_divemins:
@@ -2455,6 +2376,7 @@ PLED_stopwatch_show2:
 	ostc_debug	'U'				; Sends debug-information to screen if debugmode active
 
 	WIN_TOP		.216
+	WIN_LEFT	.110
 	WIN_FONT	FT_SMALL
 	call	PLED_standard_color
 
@@ -2462,20 +2384,6 @@ PLED_stopwatch_show2:
 	movff	avr_rel_pressure+0,lo
 	movff	avr_rel_pressure+1,hi
 	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mbar]
-	GETCUSTOM8  d'63'				; Check CF#63 Conversion to imperial units
-	btfss   WREG,0					; Enabled ?
-	bra PLED_stopwatch_show3		; NO
-	WIN_LEFT	.124
-	call	convert_meters_to_feet2	; converts meters to feet, don't check CF#63
-	bsf		ignore_digit4			; do not display feet fractions
-	output_16
-	bcf		ignore_digit4
-	bcf		leftbind
-	STRCAT_PRINT TXT_FOOT2
-	return
-
-PLED_stopwatch_show3:
-	WIN_LEFT	.110
 	bsf		ignore_digit5		; do not display 1cm depth
 	output_16dp	d'3'
 	bcf		leftbind
@@ -2517,33 +2425,14 @@ PLED_stopwatch_show_gauge:
 	call	word_processor
 
 	ostc_debug	'U'				; Sends debug-information to screen if debugmode active
-	WIN_TOP		.137
+	WIN_TOP		.136
+	WIN_LEFT	.90
 	WIN_FONT	FT_MEDIUM
 	call	PLED_standard_color
 	lfsr	FSR2,letter
 	movff	avr_rel_pressure+0,lo
 	movff	avr_rel_pressure+1,hi
 	call	adjust_depth_with_salinity		; computes salinity setting into lo:hi [mbar]
-	GETCUSTOM8  d'63'						; Check CF#63 Conversion to imperial units
-	btfss   WREG,0							; Enabled ?
-	bra PLED_stopwatch_show_gauge2			; NO
-	WIN_LEFT	.110
-	call	convert_meters_to_feet2			; converts meters to feet, don't check CF#63
-	bsf		ignore_digit4					; do not display feet fractions
-	output_16
-	bcf		ignore_digit4
-	bcf		leftbind
-	call	word_processor
-
-	WIN_TOP		.149
-	WIN_LEFT	.145
-	WIN_FONT	FT_SMALL
-	lfsr	FSR2,letter
-	STRCPY_PRINT TXT_FOOT2
-	return
-
-PLED_stopwatch_show_gauge2:
-	WIN_LEFT	.90
 	bsf		ignore_digit5					; do not display 1cm depth
 	output_16dp	d'3'
 	bcf		leftbind
@@ -2558,7 +2447,8 @@ PLED_total_average_show:
 	DISPLAYTEXTH	d'281'			; Avr.Depth
 
 PLED_total_average_show2:
-	WIN_TOP		.193
+	WIN_TOP		.192
+	WIN_LEFT	.110
 	WIN_FONT	FT_SMALL
 	call	PLED_standard_color
 
@@ -2566,20 +2456,6 @@ PLED_total_average_show2:
 	movff	avr_rel_pressure_total+0,lo
 	movff	avr_rel_pressure_total+1,hi
 	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mbar]
-	GETCUSTOM8  d'63'                       ; Check CF#63 Conversion to imperial units
-	btfss   WREG,0                          ; Enabled ?
-	bra PLED_total_average_show3            ; NO
-	WIN_LEFT	.124
-	call	convert_meters_to_feet2			; converts meters to feet, don't check CF#63
-	bsf		ignore_digit4					; do not display feet fractions
-	bcf		leftbind
-	output_16
-	bcf		ignore_digit4
-	STRCAT_PRINT TXT_FOOT2
-	return
-
-PLED_total_average_show3:
-	WIN_LEFT	.110
 	bsf		ignore_digit5		; do not display 1cm depth
 	bcf		leftbind
 	output_16dp	d'3'
@@ -2696,17 +2572,6 @@ PLED_divemode_set_xgas:				; Displayes the "Set Gas" menu
 PLED_divemode_simulator_mask:
 	    call    PLED_standard_color
         DISPLAYTEXT	.254			; Close
-		GETCUSTOM8  d'63'                       ; Check CF#63 Conversion to imperial units
-		btfss   WREG,0                          ; Enabled ?
-		bra PLED_divemode_simulator_mask2       ; NO
-        DISPLAYTEXTH .314			; +  1ft
-        DISPLAYTEXTH .315			; -  1ft
-        DISPLAYTEXTH .316			; + 10ft
-        DISPLAYTEXTH .317			; - 10ft
-		DISPLAYTEXTH .306			; Quit Sim
-        return
-
-PLED_divemode_simulator_mask2:
         DISPLAYTEXT	.250			; + 1m
         DISPLAYTEXT	.251			; - 1m
         DISPLAYTEXT	.252			; +10m
@@ -2726,7 +2591,7 @@ PLED_divemode_simulator_mask2:
 PLED_decoplan_show_stop:
         ;---- Print depth ----------------------------------------------------
         WIN_LEFT .100
-
+        
         btfss   lo,7                    ; Bit set ?
         bra     PLED_decoplan_std_stop  ; No : Just an usual stop.
 
@@ -2741,22 +2606,9 @@ PLED_decoplan_std_stop:
 PLED_decoplan_nstd_stop:        
 	    lfsr	FSR2,letter
 	    bsf     leftbind
-		GETCUSTOM8  d'63'					; Check CF#63
-		btfss   WREG,0						; Enabled ?
-		bra     PLED_decoplan_nstd_stop2    ; NO
-		movff   hi,temp11					; save hi
-		clrf    hi							; 
-		call    convert_meters_to_feet2		; converts meters to feet, don't check CF#63
-		output_16_3
-        STRCAT_PRINT "  "
-		movff   temp11,hi					; restore hi
-		bra     PLED_decoplan_nstd_stop3
-
-PLED_decoplan_nstd_stop2:
 	    output_8					    ; outputs into Postinc2!
         STRCAT_PRINT TXT_METER2
 
-PLED_decoplan_nstd_stop3:
         ;---- Print duration -------------------------------------------------
 	    WIN_LEFT	.140
 	    lfsr	FSR2,letter
@@ -3098,7 +2950,7 @@ PLED_splist_loop:
 	return						; no, return
 
 PLED_clear_divemode_menu:
-    WIN_BOX_BLACK   .0, .168, .82, .160		;top, bottom, left, right
+    WIN_BOX_BLACK   .0, .168, .85, .160		;top, bottom, left, right
 	return
 
 PLED_divemenu_cursor:
@@ -3485,27 +3337,6 @@ PLED_show_end_ead_divemode:
 	lfsr        FSR2,letter
 	movff       char_O_EAD,lo
 	bsf         leftbind
-	GETCUSTOM8  d'63'						; Check CF#63
-	btfss       WREG,0						; Enabled ?
-	bra         PLED_show_end_ead_divemode2 ; NO: return
-	clrf        hi							; clear hi
-	call        convert_meters_to_feet2		; converts meters to feet, don't check CF#63
-	output_16								; Print EAD w/o leading space.
-	bcf	        leftbind
-	STRCAT_PRINT TXT_FOOT2
-
-	WIN_TOP     .216
-	lfsr        FSR2,letter
-	movff       char_O_END,lo
-	clrf        hi							; clear hi
-	call        convert_meters_to_feet2		; converts meters to feet, don't check CF#63
-	bsf	        leftbind
-	output_16	                            ; Print END w/o leading space.
-	bcf	        leftbind
-	STRCAT_PRINT TXT_FOOT2
-	bra         PLED_show_end_ead_divemode3
-
-PLED_show_end_ead_divemode2:
 	output_8                            ; Print EAD w/o leading space.
 	STRCAT_PRINT TXT_METER2
 
@@ -3516,7 +3347,6 @@ PLED_show_end_ead_divemode2:
 	bcf	        leftbind
 	STRCAT_PRINT TXT_METER2
 
-PLED_show_end_ead_divemode3:
 ; Show ppO2[Flush] iff in CCR mode & not in Bailout:
 	btfsc       is_bailout              ; In bailout mode?
 	return                              ; Yes: done.
@@ -4029,71 +3859,4 @@ adjust_depth_with_salinity:			; computes salinity setting into lo:hi [mbar]
 	movff	xC+0,lo
 	movff	xC+1,hi					; restore lo and hi with updated value
 	
-	return
-
-
-convert_meters_to_feet:             ; convert value in lo:hi from meters to feet
-
-    GETCUSTOM8  d'63'               ; Check CF#63
-    btfss   WREG,0                  ; Enabled ?
-    return                          ; NO: return
-
-convert_meters_to_feet2:
-	movff	lo,xA+0
-	movff	hi,xA+1
-
-	movlw	LOW d'328'              ; 328feet/100m
-	movwf	xB+0
-	movlw	HIGH d'328'
-	movwf	xB+1
-
-	call	mult16x16			    ; xA*xB=xC (lo:hi * 328)
-
-	movlw	d'50'                   ; round up
-	addwf	xC+0,F
-	movlw	0
-	addwfc	xC+1,F
-	addwfc	xC+2,F
-	addwfc	xC+3,F
-
-	movlw	d'100'					
-	movwf	xB+0
-	clrf	xB+1
-
-	call	div32x16  			    ; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
-
-	movff	xC+0,lo
-	movff	xC+1,hi				    ; restore lo and hi with updated value
-
-	return
-
-convert_celsius_to_fahrenheit:		; convert value in lo:hi from celsius to fahrenheit
-
-    GETCUSTOM8  d'63'               ; Check CF#63
-    btfss   WREG,0                  ; Enabled ?
-    return                          ; NO: return
-
-	movff	lo,xA+0
-	movff	hi,xA+1
-
-	movlw	d'18'                   ; 1C = 1.8F
-	movwf	xB+0
-	clrf	xB+1
-
-	call	mult16x16               ;xA*xB=xC (lo:hi * 18)
-
-	movlw	d'10'
-	movwf	xB+0
-	clrf	xB+1
-
-	call	div32x16                ; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
-
-    movlw	LOW d'320'              ; 0C = 32F
-	addwf	xC+0,F
-	movlw	HIGH d'320'
-	addwfc	xC+1,F
-
-	movff	xC+0,lo
-	movff	xC+1,hi                 ; restore lo and hi with updated value
-
 	return

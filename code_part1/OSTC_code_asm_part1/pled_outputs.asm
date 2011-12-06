@@ -1878,8 +1878,8 @@ PLED_nofly_time2:
 	bsf			leftbind
 	movf		lo,W
 	movff		hi,lo
-	movwf		hi							; exchange lo and hi...
-	output_8							; Hours
+	movwf		hi                      ; exchange lo and hi...
+	output_8                            ; Hours
 	PUTC        ':'
 	movff		hi,lo					; Minutes
 	output_99x
@@ -2020,7 +2020,7 @@ update_batt_voltage2:
 	movwf	wait_temp					; Minimum = 3
 
 update_batt_voltage2a:
-    WIN_BOX_STD .181, .187, .32, .34
+    WIN_BOX_STD .181, .187, .32, .34    ; Battery nose
 
 update_batt_voltage3:
 	GETCUSTOM8	d'34'			; Color battery
@@ -2030,17 +2030,17 @@ update_batt_voltage3:
 	movlw	color_green			; Charge done.
     call	PLED_set_color
 
-	movlw	.175
-	movff	WREG,win_top		; row top (0-239)
-	movlw	.19
-	movff	WREG,win_height
-	movlw	.2
-	movff	WREG,win_leftx2		; column left (0-159)
+	movlw   .175
+	movff   WREG,win_top		; row top (0-239)
+	movlw   .19
+	movff   WREG,win_height
+	movlw   .2
+	movff   WREG,win_leftx2		; column left (0-159)
     movff   wait_temp,win_width	; column right (0-159)
-	call	PLED_box
-	call		PLED_standard_color
+	call    PLED_box
+	call    PLED_standard_color
 	return
-		
+
 update_batt_voltage2_empty:
 	movlw	d'1'
 	movwf	wait_temp
@@ -2265,7 +2265,6 @@ PLED_display_apnoe_surface:
 	call		PLED_divemask_color	; Set Color for Divemode mask
 	DISPLAYTEXT	d'140'			; "SURFACE"
 	call	PLED_standard_color
-
 
 	WIN_TOP		.85
 	WIN_LEFT	.90
@@ -3592,6 +3591,8 @@ PLED_display_cns:
 	STRCAT_PRINT "%"
 	return
 
+;-----------------------------------------------------------------------------
+;
 PLED_display_cns_surface:
 ; Check if CNS should be displayed
 	movff	char_O_CNS_fraction,lo		; copy into bank1
@@ -3614,9 +3615,32 @@ PLED_display_cns_surface:
 	bsf		leftbind
 	output_8
 	bcf		leftbind
-	STRCAT_PRINT "%"
+	STRCAT_PRINT "% "
 	return
 
+;-----------------------------------------------------------------------------
+; Display GF at furface, if > CF8.
+;
+PLED_display_gf_surface:
+        movff	char_O_gradient_factor,lo   ; gradient factor
+        GETCUSTOM8	d'8'                ; threshold for display
+        cpfslt	lo                      ; show value?
+        bra		PLED_display_gf_surf_1  ; YES: do it.
+        return
+
+PLED_display_gf_surf_1:
+        WIN_TOP	    .175
+        WIN_LEFT	.45
+        WIN_FONT 	FT_SMALL
+        PLED_color_code		warn_gf		; Color-code Output
+
+        STRCPY  TXT_GF3
+        movff   char_O_gradient_factor,lo		; gradient factor
+        output_8
+        STRCAT_PRINT  "%  "
+        goto    PLED_standard_color
+
+;-----------------------------------------------------------------------------
 
 PLED_custom_text:
 	read_int_eeprom	d'64'
@@ -3693,7 +3717,7 @@ PLED_simdata_screen2_loop:
 	movff	hi,lo			; copy gas number
 	output_8				; display gas number
 	PUTC    ':'
-	movff	wait_temp, EEADR; Gas #hi: %O2 - Set address in internal EEPROM
+	movff	wait_temp, EEADR            ; Gas #hi: %O2 - Set address in internal EEPROM
 	call	read_eeprom		; get byte (stored in EEDATA)
 	movff	EEDATA,lo		; copy to lo
 	output_8				; outputs into Postinc2!

@@ -128,16 +128,23 @@ surfloop_loop1:
 	call	PLED_clock					; update clock
 	call	test_charger				; check if charger IC is active
 	call	timeout_surfmode			; check timeout 
-	call	update_batt_voltage			; display battery voltage
+    call    update_batt_voltage			; display battery voltage
 	call	timeout_premenu				; timeout premenu
 	call	set_leds_surfmode			; Sets Warning and No-Fly LEDs
 	call    check_customfunctions       ; Checks CF functions and displays warning symbol if something critical is wrong
 	call	PLED_display_decotype_surface	; Show deco mode
 	call	surfcustomview_second		; Do every-second tasks for the custom view area
 	call    dive_type_icons             ; Draw Air/Nitrox/Trimix color icon.
-	btfsc	enter_error_sleep			; Enter Fatal Error Routine?
-	call	fatal_error_sleep			; Yes (In Sleepmode.asm!)
-	bcf		onesecupdate				; every second tasks done
+
+; Every 2 seconds, overwrite with GF value (if needed to display)
+    btfsc   secs,1                      ; Alternating every 2sec (if needed)
+    call    PLED_display_cns_surface    ; Display CNS (if > CF15).
+    btfss   secs,1
+    call    PLED_display_gf_surface     ; Display GF (if > CF8).
+
+    btfsc	enter_error_sleep			; Enter Fatal Error Routine?
+    call	fatal_error_sleep			; Yes (In Sleepmode.asm!)
+    bcf		onesecupdate				; every second tasks done
 	
 surfloop_loop2:	
 ; Tasks approx. every 50ms for all modes
@@ -225,7 +232,6 @@ update_surfloop60:
 	bra		update_surfloop60_2
 
 ; One Minute tasks for deco modes
-	call	PLED_display_cns_surface	; Update surface CNS display (If allowed by CF15)
 	call	PLED_nofly_time				; display nofly time
 	call	PLED_desaturation_time		; display desaturation time
 	btfsc	premenu						; Not when "Menu?" is displayed!

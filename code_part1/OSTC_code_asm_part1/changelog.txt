@@ -1,3 +1,6 @@
+New in 2.07 beta:
+NEW: Added GF surface display (when > CF08).
+
 New in 2.06 beta:
 BETA Version - Do NOT use for diving!
 CHANGE: NDL routine faster/more precise simulation

@@ -503,7 +503,13 @@ simulator_restore_tissue_data:
 	ostc_debug	'G'		; Sends debug-information to screen if debugmode active
 	call	deco_calc_desaturation_time	; calculate desaturation time
 	movlb	b'00000001'                 ; select ram bank 1
-	
+
+	; Reset gradient factor until next computation, to avoid spurious
+	; displays after  simulation.
+	clrf    WREG
+	movff   WREG,char_O_gradient_factor
+	movff   WREG,char_O_relative_gradient_GF
+
 	; Note: should not reset nofly-time here: the true value have continued to be decremented
 	;       during simulation, which is the right thing to do...
 	ostc_debug	'H'		; Sends debug-information to screen if debugmode active

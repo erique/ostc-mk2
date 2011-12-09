@@ -18,7 +18,7 @@
 ; ToDo: 
 	
 ; ==========================================================
-; 	WAIT 10 MICROSECONDS  -  16 MHZ
+; 	WAIT 10 MICROSECONDS  -  16 Mhz and 32 Mhz
 ; ==========================================================
 
 	IFDEF	SPEED_16MHz
@@ -88,8 +88,9 @@ WAITMS		macro	waitms_temp
 			call 	WAITMSX
 			endm
 
-WAITMSX		movwf	waitms_temp			; Holds number of ms to wait
+WAITMSX     movwf	waitms_temp			; Holds number of ms to wait
 
+            ASSERT_BANK1    .10002      ; Make sure we are in bank1
     Ifdef TESTING
             return                      ; In emulation, just skips waits
     Endif

@@ -303,9 +303,9 @@ calc_deko_divemode:
 
 ; Copy all gases to char_I_deco_N2_ratio and char_I_deco_He_ratio
 divemode_check_decogases:               ; CALLed from Simulator, too
-	clrf    EEADRH                      ; Make sure to select eeprom bank 0
-	
-;;;; FIXME BANK1 ???
+    ASSERT_BANK1    .10001              ; Just make sure everything is correct.
+
+	clrf    EEADRH                      ; Make sure to select eeprom bank 0	
 
     read_int_eeprom		d'7'			; Read He ratio
     movff	EEDATA,char_I_deco_He_ratio+0	; And copy into hold register

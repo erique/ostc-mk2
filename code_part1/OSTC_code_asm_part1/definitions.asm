@@ -358,6 +358,21 @@ gaslist_active          res 1	; Holds flags for active gases
 desaturation_time_buffer res 2	; buffer for desat time
 total_divetime_seconds	res 2	; counts dive seconds regardless of CF01 (18h max.)
 
+ASSERT_BANK1    MACRO   tag
+    Ifdef   __DEBUG
+        local @end
+        movlw   1
+        xorwf   BSR,W
+        bz      @end
+        
+        movlw   low(tag)
+        movff   WREG,temp10+0
+        movlw   high(tag)
+        movff   WREG,temp10+0
+        call    PLED_resetdebugger
+@end:
+    Endif
+    ENDM
 ;=============================================================================
 ; C-code Routines
 ; PART 2

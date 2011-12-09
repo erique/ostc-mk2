@@ -102,11 +102,13 @@ wait_start_pressure:
 	movlb   b'00000001'                     ; select ram bank 1
 
     call    divemode_check_decogases        ; Setup N2/He ratio array
+
+	call	calc_deko_surfmode				; calculate desaturation for one minute
+
 	call	deco_calc_desaturation_time     ; calculate desaturation time
 	call	deco_clear_CNS_fraction			; clear CNS
-	call	calc_deko_surfmode				; calculate desaturation every minute
-	call	deco_calc_wo_deco_step_1_min	; calculate deco in surface mode 
-	movlb	b'00000001'									; select ram bank 1
+	movlb   b'00000001'                     ; select ram bank 1
+
   	clrf	nofly_time+0	              	; Reset NoFly
   	clrf	nofly_time+1    	          	; Reset NoFly
 	bcf		nofly_active                	; Clear flag

@@ -1771,8 +1771,10 @@ static void calc_nullzeit(void)
             }
 
             //---- ELSE make a linear approx for the last minute
-            // Usefull to have a meneaingfull rounding of NDL
-            ndl += (unsigned char)(0.5f + (M0-t)/(dTN2+dTHe));
+            // Usefull to have a meaningfull rounding of NDL.
+            // But ONLY it positive (negativ casted to unsigned is bad).
+            if( M0 > t )
+                ndl += (unsigned char)(0.5f + (M0-t)/(dTN2+dTHe));
             break;
         }
 

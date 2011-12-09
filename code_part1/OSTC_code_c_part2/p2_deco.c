@@ -1306,7 +1306,10 @@ static void calc_hauptroutine(void)
 
     	calc_nullzeit();
     	check_ndl();
-   	    char_O_deco_status = 2; // calc ascent next time.
+    	if( char_O_nullzeit > 0 )               // Some NDL time left ?
+       	    char_O_deco_status = 0;             // YES: recalc ndl next time.
+       	else
+       	    char_O_deco_status = 2;             // NO: calc ascent next time.
     	break;
 
     case 2: //---- Simulate ascent to first stop -----------------------------
@@ -1460,13 +1463,6 @@ void calc_hauptroutine_update_tissues(void)
 
  	int_O_gtissue_limit = (short)(calc_lead_tissue_limit * 1000);
 	int_O_gtissue_press = (short)((pres_tissue_N2[char_O_gtissue_no] + pres_tissue_He[char_O_gtissue_no]) * 1000);
-
-    // if guiding tissue can not be exposed to surface pressure immediately
-    if( calc_lead_tissue_limit > pres_surface && char_O_deco_status == 0)  
- 	{
-  		char_O_nullzeit = 0;    // deco necessary
-  		char_O_deco_status = 2; // calculate ascent on next iteration.
- 	}
 }
 
 

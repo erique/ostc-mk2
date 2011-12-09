@@ -90,6 +90,9 @@ WAITMS		macro	waitms_temp
 
 WAITMSX		movwf	waitms_temp			; Holds number of ms to wait
 
+    Ifdef TESTING
+            return                      ; In emulation, just skips waits
+    Endif
 WAITMSX1:
 			movf	TMR1L,W
 			addlw	d'66'				; 66*15,26µs ~ 1ms

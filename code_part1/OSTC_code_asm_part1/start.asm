@@ -24,7 +24,7 @@
 
 start:
 	movlb	b'00000001'				; ram bank 1 selected
-	movff	STKPTR,temp10
+	movff	STKPTR,temp10           ; Save stack pointer, for crash reports.
 	clrf    temp10+1
 	call	init
 	btfsc	divemode				; Reset from Divemode?
@@ -59,12 +59,20 @@ wait_start_pressure:
 	call	pressuretest_sleep_fast	; Gets pressure without averaging (faster!)
 	bcf		sleepmode				; Normal mode again
 
-  Ifdef TESTING
-    movlw   LOW(.1000)
-    movwf   amb_pressure+0
-    movlw   HIGH(.1000)
-    movwf   amb_pressure+1
-  Else
+; Extra power-up reset (JeanDo emulator)
+	Ifdef	TESTING
+        call	reset_gases
+		call 	reset_all_cf
+		call    reset_external_eeprom
+
+        movlw   LOW(.1000)
+        movwf   amb_pressure+0
+        movlw   HIGH(.1000)
+        movwf   amb_pressure+1
+	Endif
+
+; Get real pressure (if not in emulator mode)
+  Ifndef TESTING
     SAFE_2BYTE_COPY amb_pressure_avg, amb_pressure	; copy for compatibility
   Endif
 
@@ -91,12 +99,6 @@ wait_start_pressure:
     movff   amb_pressure+1,int_I_pres_respiration+1
 	movff	int_I_pres_respiration+0,int_I_pres_surface+0   ; copy for desat routine
 	movff	int_I_pres_respiration+1,int_I_pres_surface+1		
-
-; Extra power-up reset (JeanDo)
-	ifdef	TESTING
-        call	reset_gases
-		call 	reset_all_cf
-	endif
 
 	call    deco_clear_tissue
 	movlb   b'00000001'                     ; select ram bank 1

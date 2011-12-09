@@ -267,6 +267,7 @@ calc_deko_surfmode2:
 
 	call	deco_calc_wo_deco_step_1_min    ; calculate deco in surface mode 
 	movlb	b'00000001'									; select ram bank 1
+
 	ostc_debug	'J'		; Sends debug-information to screen if debugmode active
 	return
 

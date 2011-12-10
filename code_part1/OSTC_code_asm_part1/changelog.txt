@@ -1,5 +1,9 @@
 New in 2.07 beta:
+BETA Version - Do NOT use for diving!
 NEW: Added GF surface display (when > CF08).
+BUGFIX: spurious random NDL>0 during deco dive
+CHANGE: Moved "Bailout" to top of SetPoint list
+CHANGE: Speed optimizations in deco code
 
 New in 2.06 beta:
 BETA Version - Do NOT use for diving!
@@ -31,7 +35,7 @@ New in 2.02 beta:
 BETA Version - Do NOT use for diving!
 NEW: Cave divers consomation display and alarm (CF59).
 CHANGE: SAC (CF56/CF57) in range 5..50 l/min (no more decimal).
-NEW: 32MhZ mode: computes twice faster.
+NEW: 32MHz mode: computes twice faster.
 BUGFIX: Hang when deco table is full (more than 32 stops).
 
 New in 2.01 beta:

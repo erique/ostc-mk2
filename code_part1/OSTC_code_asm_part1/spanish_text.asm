@@ -263,7 +263,7 @@
     TCODE    .0,    .25,     "del Modo Buceo. Ayudar"    ;134 Divemode! Please help
     TCODE    .0,    .50,     "reportando Información"    ;135 and report the Debug 
     TCODE    .0,    .75,     "de Depuración debajo!"     ;136 Information below!
-    TCODE    .100,  .75,     "Bailout"                   ;137 Bailout
+    TCODE    .100,  .0,      "Bailout"                   ;137 Bailout
     TCODE    .85,   .125,    "Apnea    "                 ;138 Apnoe    
     TCODE    .105,  .120,    "Descen."                   ;139 Descent
     TCODE    .105,  .60,     "Superf."                   ;140 Surface

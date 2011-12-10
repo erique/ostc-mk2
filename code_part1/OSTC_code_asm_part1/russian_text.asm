@@ -267,7 +267,7 @@
     TCODE    .10,   .25,     "режима погружения!   "     ;134 Divemode! Please help
     TCODE    .10,   .50,     "Сообщите об ошибке,  "     ;135 and report the Debug
     TCODE    .10,   .75,     "отправьте отчет ниже!"     ;136 Information below!
-    TCODE    .100,  .75,     "На запас"                  ;137 Bailout
+    TCODE    .100,  .0,      "На запас"                  ;137 Bailout
     TCODE    .85,   .125,    "Апноэ     "                ;138 Apnoe
     TCODE    .112,  .120,    "В воде"                    ;139 Descent
     TCODE    .105,  .60,     "Наверху"                   ;140 Surface

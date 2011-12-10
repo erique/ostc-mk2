@@ -265,7 +265,7 @@
     TCODE    .10,   .25,     "Dalis Modu! Lütfen asa"    ;134 Divemode! Please help
     TCODE    .10,   .50,     "gidaki hata kodunu ra"     ;135 and report the Debug
     TCODE    .10,   .75,     "porlayin.     "            ;136 Information below!
-    TCODE    .100,  .75,     "Bailout"                   ;137 Bailout
+    TCODE    .100,  .0,      "Bailout"                   ;137 Bailout
     TCODE    .85,   .125,    "Apnea    "                 ;138 Apnoe
     TCODE    .105,  .120,    "Yüksel "                   ;139 Descent
     TCODE    .105,  .60,     "Yüzey  "                   ;140 Surface

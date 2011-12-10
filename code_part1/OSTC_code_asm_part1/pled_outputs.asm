@@ -2917,7 +2917,7 @@ PLED_splist_start:
 	; list three SP in Gaslist
 	movlw	d'35'				; 36 = current SP position in EEPROM
 	movwf	wait_temp			; here: stores eeprom address for gas list
-	movlw	d'231'
+	movlw	d'0'
 	movwf	waitms_temp			; here: stores row for gas list
 	clrf 	decoplan_index	    ; here: SP counter
 

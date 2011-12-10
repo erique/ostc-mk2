@@ -264,7 +264,7 @@
     TCODE    .10,   .25,     "Divemode! Please help"     ;134 Divemode! Please help
     TCODE    .10,   .50,     "and report the Debug "     ;135 and report the Debug 
     TCODE    .10,   .75,     "Information below!"        ;136 Information below!
-    TCODE    .100,  .75,     "Bailout"                   ;137 Bailout
+    TCODE    .100,  .0,	     "Bailout"                   ;137 Bailout
     TCODE    .85,   .125,    "Apnoe    "                 ;138 Apnoe    
     TCODE    .105,  .120,    "Descent"                   ;139 Descent
     TCODE    .105,  .60,     "Surface"                   ;140 Surface

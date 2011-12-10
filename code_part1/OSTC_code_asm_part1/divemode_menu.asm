@@ -209,7 +209,7 @@ divemode_menu3:
 	dcfsnz	WREG,F
 	bra		divemode_menu3_nothing      ; END/EAD in divemode
 	dcfsnz	WREG,F
-	bra		divemode_menu3_nothing      ; Futur TTS...
+	bra		divemode_menu3_nothing      ; Future TTS...
 	dcfsnz	WREG,F
 	bra		toggle_stopwatch            ; Cave bailout prediction.
 
@@ -621,7 +621,7 @@ divemenu_set_gas2:
 	call	PLED_show_ppO2_clear		; Clear ppO2 value
 	
 divemenu_set_gas1:
-	movlw	d'4'				
+	movlw	d'1'				
 	cpfseq	menupos						; At the "Bailout" position?		
 	bra		divemenu_set_gas1b			; No, select SetPoint 1-3
 	bsf		select_bailoutgas			; Set Flag
@@ -629,6 +629,7 @@ divemenu_set_gas1:
 	bra		divemenu_set_gas_2			; Configure the extra gas / Select Bailout
 
 divemenu_set_gas1b:
+	decf	menupos,F					; Adjust 1-3 to 0-2...
 	movlw	d'35'						; offset in memory
 	addwf	menupos,W					; add SP number 0-2
 	movwf	EEADR

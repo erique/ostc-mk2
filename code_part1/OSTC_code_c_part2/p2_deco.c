@@ -108,7 +108,7 @@
 #include "../OSTC_code_asm_part1/shared_definitions.h"
 
 // Water vapour partial pressure in the lumb.
-#define ppWater     0.0627
+#define ppWater        0.0627
 #define METER_TO_BAR   0.09985
 #define BAR_TO_METER   10.0150      // (1.0/METER_TO_BAR)
 
@@ -563,7 +563,6 @@ static unsigned short tmr3(void)
 // 
 static void read_buhlmann_coefficients(void)
 {
-
 #ifndef CROSS_COMPILE
     // Note: we don't use far rom pointer, because the
     //       24 bits is too complex, hence we have to set
@@ -675,7 +674,7 @@ static void read_buhlmann_times(PARAMETER char period)
         break;
 
     default:
-            assert(0);  // Never go there...
+        assert(0);  // Never go there...
     }
 }
 
@@ -1229,7 +1228,6 @@ static void clear_tissue(void)
     int_O_ascenttime = 0;
     char_O_gradient_factor = 0;
     char_O_relative_gradient_GF = 0;
-    char_I_depth_last_deco = 0;		// for compatibility with v.101pre_no_last_deco
 
     calc_lead_tissue_limit = 0.0;
     char_O_gtissue_no = 0;

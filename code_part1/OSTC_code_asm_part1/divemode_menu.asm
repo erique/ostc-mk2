@@ -156,6 +156,8 @@ test_switches_divemode_menu1:
 
 test_switches_divemode_menu1a:
 	call	PLED_divemenu_cursor		; update cursor
+	btfsc	display_set_gas				; In Gaslist or Setpoint list menu?
+	call	PLED_show_change_depth		; Yes, show change depth for gas #menupos
 	return
 
 test_switches_divemode_menu3:
@@ -595,6 +597,7 @@ divemenu_set_gas_2:
 	movlw	d'1'
 	movwf	menupos						; reset cursor
 	call	PLED_divemenu_cursor		; update cursor
+	call	PLED_show_change_depth		; And show the first change depth
 	return
 
 divemenu_set_setpoint:

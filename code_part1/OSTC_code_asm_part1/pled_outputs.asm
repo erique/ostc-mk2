@@ -2845,6 +2845,39 @@ PLED_de_activelist_white:
 
 	return					;  return 
 
+PLED_show_change_depth:		; Yes, show change depth for gas #menupos
+	btfsc	display_set_setpoint	; In Setpoint list?
+	return							; Yes, return.
+	movlw	color_yellow			; Blink in yellow
+    call	PLED_set_color
+	WIN_LEFT	.95
+	WIN_TOP		.150
+	WIN_FONT	FT_SMALL
+
+	movlw	.6
+	cpfslt	menupos							; <6?
+	bra		PLED_show_change_depth_clear	; Yes!
+
+	bsf		leftbind
+	STRCPY  TXT_GAS1
+	movff	menupos,lo
+	output_8					; Show gas number
+    STRCAT      " in "
+	decf	menupos,W
+	addlw	d'28'				; offset in memory
+	movwf	EEADR
+	call	read_eeprom			; Low-value
+	movff	EEDATA,lo
+	output_8					; Show gas number
+    STRCAT_PRINT  "m "
+	bcf		leftbind
+	call	PLED_standard_color
+	return
+
+PLED_show_change_depth_clear:
+	STRCPY_PRINT  "         "
+	return
+
 
 PLED_gas_list:
 	ostc_debug	'm'		; Sends debug-information to screen if debugmode active

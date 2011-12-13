@@ -1,3 +1,7 @@
+New in 2.08 beta:
+BETA Version - Do NOT use for diving!
+NEW: Show change gas depth below gaslist (in divemode)
+
 New in 2.07 beta:
 BETA Version - Do NOT use for diving!
 NEW: Added GF surface display (when > CF08).

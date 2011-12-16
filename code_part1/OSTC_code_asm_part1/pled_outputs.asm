@@ -1694,7 +1694,7 @@ PLED_confirmbox_move_cursor2:
 
 
 PLED_depth:
-	ostc_debug	'r'		; Sends debug-information to screen if debugmode active
+;	ostc_debug	'r'		; Sends debug-information to screen if debugmode active
     SAFE_2BYTE_COPY rel_pressure, lo
 	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mbar]
 

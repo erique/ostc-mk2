@@ -166,22 +166,36 @@ rs232_get_byte3:
 	nop
 	nop
 	nop
-	btfsc 	PIR1,RCIF		; data arrived?
-	return	
-
 	nop
 	nop
 	nop
 	nop
 	btfsc 	PIR1,RCIF		; data arrived?
 	return	
-
+	nop
+	nop
+	nop
+	nop
 	nop
 	nop
 	nop
 	nop
 	btfsc 	PIR1,RCIF		; data arrived?
 	return	
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	btfsc 	PIR1,RCIF		; data arrived?
+	return	
+	nop
+	nop
+	nop
+	nop
 	nop
 	nop
 	nop

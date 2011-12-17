@@ -1,3 +1,8 @@
+New in 2.09 beta:
+BETA Version - Do NOT use for diving!
+BUGFIX: small layout fixes
+BUGFIX: Show NDL after deco is done
+
 New in 2.08 beta:
 BETA Version - Do NOT use for diving!
 NEW: Show change gas depth below gaslist (in divemode)

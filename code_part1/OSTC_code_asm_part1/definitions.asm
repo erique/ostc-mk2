@@ -29,14 +29,13 @@
 #DEFINE	max_custom_number		d'58'		; Number of last used custom function
 
 ; International extension. Selecting messages source:
-#DEFINE    ENGLISH                         ; Use english_text.asm
+;#DEFINE    ENGLISH                         ; Use english_text.asm
 ;#DEFINE	FRENCH  						; Use french_text.asm
-;#DEFINE	GERMAN							; Use german_text.asm
+#DEFINE	GERMAN							; Use german_text.asm
 ;#DEFINE	SPANISH							; Use spanish_text.asm
 ;#DEFINE	RUSSIAN							; Use russian_text.asm
 ;#DEFINE	TURKISH							; Use turkish_text.asm
 
-;#DEFINE	__DEBUG	; 
 ;#DEFINE	DISPLAY_TEST	; Enables Display-Test in RAW data menu
 
 #DEFINE	logbook_profile_version	0x21        ; Do not touch!

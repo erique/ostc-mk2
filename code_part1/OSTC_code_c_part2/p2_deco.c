@@ -1058,12 +1058,15 @@ static void calc_hauptroutine(void)
         gas_switch_set();                       // setup calc_ratio's
 
     	calc_nullzeit();
-    /*	if( char_O_nullzeit > 0 )               // Some NDL time left ?
-       	    char_O_deco_status = 0;             // YES: recalc ndl next time.
-       	else
-       	    char_O_deco_status = 2;             // NO: calc ascent next time.
-	*/
- 	    char_O_deco_status = 2;		            // calc ascent next time.
+        if( char_O_nullzeit > 0 )               // Some NDL time left ?
+        {
+            char_O_deco_status = 0;             // YES: recalc ndl next time.
+            clear_deco_table();                 // Also clear stops !
+            copy_deco_table();
+            char_O_deco_last_stop = 0;          // And last stop (OSTC menu anim)
+        }
+        else
+            char_O_deco_status = 2;             // NO: calc ascent next time.
     	break;
 
     case 2: //---- Simulate ascent to first stop -----------------------------
@@ -1288,7 +1291,7 @@ Surface:
         sim_tissue(1);              // Simulate compartiments for 1 minute.
 	}
 
-	// Surface not reached, need more stops...
+	// Surface not reached, need more stops... for menu animation.
     char_O_deco_last_stop = temp_depth_limit;   // Reached depth.
 }
 
@@ -1508,8 +1511,8 @@ static void calc_nullzeit(void)
             // dTN2 -= exp( ... ascent time ... ppN2...)
             // dTHe -= exp( ... ascent time ... ppHe...)
 
-            //---- Still ok to surface after 1 or 10 minutes ?
-            if( t + dTN2 + dTHe <= M0 )
+            //---- Ok now, and still ok to surface after 1 or 10 minutes ?
+            if( (t <= M0) && (t + dTN2 + dTHe <= M0) )
             {
                 tN2 += dTN2;    // YES: apply gas loadings,
                 tHe += dTHe;

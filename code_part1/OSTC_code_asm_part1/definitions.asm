@@ -31,7 +31,7 @@
 ; International extension. Selecting messages source:
 ;#DEFINE    ENGLISH                         ; Use english_text.asm
 ;#DEFINE	FRENCH  						; Use french_text.asm
-#DEFINE	GERMAN							; Use german_text.asm
+;#DEFINE	GERMAN							; Use german_text.asm
 ;#DEFINE	SPANISH							; Use spanish_text.asm
 ;#DEFINE	RUSSIAN							; Use russian_text.asm
 ;#DEFINE	TURKISH							; Use turkish_text.asm

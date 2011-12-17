@@ -722,26 +722,7 @@ store_dive_cns:
 	return
 
 store_dive_decodebug:
-    ; Dump 9 bytes, int_O_DBS_bitfield .. char_O_NDL_at_20mtr
-    lfsr    FSR2, int_O_DBS_bitfield
-    movf    POSTINC2,W
-	call	write_external_eeprom		; Store in EEPROM
-    movf    POSTINC2,W
-	call	write_external_eeprom		; Store in EEPROM
-    movf    POSTINC2,W
-	call	write_external_eeprom		; Store in EEPROM
-    movf    POSTINC2,W
-	call	write_external_eeprom		; Store in EEPROM
-    movf    POSTINC2,W
-	call	write_external_eeprom		; Store in EEPROM
-    movf    POSTINC2,W
-	call	write_external_eeprom		; Store in EEPROM
-    movf    POSTINC2,W
-	call	write_external_eeprom		; Store in EEPROM
-    movf    POSTINC2,W
-	call	write_external_eeprom		; Store in EEPROM
-    movf    POSTINC2,W
-	call	write_external_eeprom		; Store in EEPROM
+	; do something here
 	GETCUSTOM8	d'25'
 	movwf	divisor_deco_debug			; Reload divisor from CF
 	return
@@ -1296,7 +1277,7 @@ end_dive2:
 	addwf	temp1,W		; copy to bits 0-3, result in WREG
 	call	write_external_eeprom
 
-	movlw	d'9'		; information size Decodebug
+	movlw	d'0'		; information size Decodebug
 	movwf	temp1		; copy to bits 0-3
 	swapf	temp1,F		; swap nibbels 0-3 with 4-7
 	GETCUSTOM8	d'25'	; Divisor Decodebug

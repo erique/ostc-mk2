@@ -248,7 +248,7 @@
     TCODE    .0,    .36,     "Mínimo el:"                ;119 Lowest at:
     TCODE    .0,    .45,     "Tmín:"                     ;120 Tmin:
     TCODE    .0,    .54,     "Tmáx:"                     ;121 Tmax:
-    TCODE    .100,  .125,    "Más"                    	 ;122 More (Gaslist)
+    TCODE    .100,  .124,    "Más"                    	 ;122 More (Gaslist)
     TCODE    .100,  .25,     "O2 +"                      ;123 O2 +
     TCODE    .100,  .50,     "O2 -"                      ;124 O2 -
     TCODE    .100,  .75,     "He +"                      ;125 He +

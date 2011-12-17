@@ -115,12 +115,6 @@ TAB_UCHAR (char_O_deco_time,  NUM_STOPS);   // Both ZH-L16 and L16-GF models.
 TAB_UCHAR (char_O_tissue_N2_saturation, NUM_COMP); // Nitrogen compartiment desaturation time, in min.
 TAB_UCHAR (char_O_tissue_He_saturation, NUM_COMP); // Helium compartiment desaturation time, in min.
 
-VAR_UINT  (int_O_DBS_bitfield);             // NOTE: 9 bytes dumped to divelog by store_dive_decodebug
-VAR_UINT  (int_O_DBS2_bitfield);
-VAR_UINT  (int_O_DBG_pre_bitfield);
-VAR_UINT  (int_O_DBG_post_bitfield);
-VAR_UCHAR (char_O_NDL_at_20mtr);
-
 TAB_UINT (int_O_gas_volumes, 5);            // Volumes evaluation for each gas tank, in 0.1 liters.
 
 TAB_UCHAR (char_O_hash, 16);

@@ -23,6 +23,7 @@
 // history:
 // 12/25/10 v110: [jDG] split in three files (deco.c, main.c, definitions.h)
 
+/*
 #define	DBG_c_gas	0x0001
 #define	DBG_c_ppO2	0x0002
 #define	DBG_RUN 	0x0004
@@ -72,6 +73,8 @@
 #define DBS2_DESAT2h 0x0020
 #define	DBS2_GFDneg  0x0040
 
+*/
+
 #define	MBAR_REACH_GASCHANGE_AUTO_CHANGE_OFF	150
 
 // *************************
@@ -84,7 +87,7 @@ extern void deco_clear_tissue(void);
 extern void deco_calc_percentage(void);
 extern void deco_calc_wo_deco_step_1_min(void);
 extern void deco_calc_dive_interval(void);
-extern void deco_debug(void);
+//extern void deco_debug(void);
 extern void deco_gradient_array(void);
 extern void deco_hash(void);
 extern void deco_calc_desaturation_time(void);

@@ -160,7 +160,7 @@ menu_gassetup_list0:
 	movff	WREG,win_top
 	lfsr	FSR2,letter
 
-    STRCAT  TXT_IN4
+    STRCAT  TXT_AT4
 	movf	decodata+0,W		; read current value 
 	addlw	d'28'				; offset in memory
 	movwf	EEADR
@@ -1007,7 +1007,7 @@ gassetup_title_bar6:		; ERROR
 	bra 	gassetup_title_bar7
 
 gassetup_title_bar7:
-    STRCAT  TXT_IN4
+    STRCAT  TXT_AT4
 	movf	decodata+0,W		; read current value 
 	addlw	d'28'				; offset in memory
 	movwf	EEADR

@@ -2851,7 +2851,7 @@ PLED_show_change_depth:		; Yes, show change depth for gas #menupos
 	movlw	color_yellow			; Blink in yellow
     call	PLED_set_color
 	WIN_LEFT	.95
-	WIN_TOP		.150
+	WIN_TOP		.148
 	WIN_FONT	FT_SMALL
 
 	movlw	.6
@@ -2862,14 +2862,14 @@ PLED_show_change_depth:		; Yes, show change depth for gas #menupos
 	STRCPY  TXT_GAS1
 	movff	menupos,lo
 	output_8					; Show gas number
-    STRCAT      " in "
+    STRCAT  TXT_AT4				; " at "
 	decf	menupos,W
 	addlw	d'28'				; offset in memory
 	movwf	EEADR
 	call	read_eeprom			; Low-value
 	movff	EEDATA,lo
 	output_8					; Show gas number
-    STRCAT_PRINT  "m "
+    STRCAT_PRINT  TXT_METER2	; "m "
 	bcf		leftbind
 	call	PLED_standard_color
 	return

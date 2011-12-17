@@ -8,7 +8,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 // OSTC - diving computer code
-// Copyright (C) 2008 HeinrichsWeikamp GbR
+// Copyright (C) 2011 HeinrichsWeikamp GbR
 //
 //    This program is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -80,6 +80,7 @@
 // 2011/05/17: [jDG] Various cleanups.
 // 2011/08/08: [jDG] Computes CNS during deco planning ascent.
 // 2011/11/24: [jDG] Slightly faster and better NDL computation.
+// 2011/12/17: [mH] Remove of the useless debug stuff
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -236,22 +237,6 @@ static char	  md_pi_subst[256];
 
 static char	  md_state[48];		        // DONT MOVE !! // has to be at the beginning of bank 9 for the asm code!!!
 
-// internal, dbg:
-static unsigned char	DBG_char_I_deco_model;	// new in v.108.
-static unsigned char	DBG_char_I_depth_last_deco;			// new in v.108
-static unsigned char	DBG_deco_gas_change;	// new in v.108
-static unsigned char    DBG_deco_N2_ratio;		// new in v.108
-static unsigned char	DBG_deco_He_ratio;		// new in v.108
-static float			DBG_pres_surface;		// new in v.108
-static float			DBG_GF_low;				// new in v.108
-static float			DBG_GF_high;			// new in v.108
-static float			DBG_const_ppO2;			// new in v.108
-static float			DBG_float_saturation_multiplier;	// new in v.108
-static float			DBG_float_desaturation_multiplier;	// new in v.108
-static float			DBG_float_deco_distance;			// new in v.108
-static float			DBG_N2_ratio;			// new in v.108
-static float			DBG_He_ratio;			// new in v.108
-
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 ///////////////////////////// THE LOOKUP TABLES //////////////////////////////
@@ -296,177 +281,6 @@ rom const rom unsigned short md_pi[] =
 // moved from 0x0D000 to 0x0C000 in v.108
 
 #pragma code p2_deco = 0x0C000
-
-//////////////////////////////////////////////////////////////////////////////
-// DBS - debug on start of dive
-//
-static void create_dbs_set_dbg_and_ndl20mtr(void)
-{
-    overlay char i;                     // Local loop index.
-
-    //---- Reset DEBUG bit fields --------------------------------------------
-	int_O_DBS_bitfield = 0;
-	int_O_DBS2_bitfield = 0;
-	if(int_O_DBG_pre_bitfield & DBG_RUN)
-		int_O_DBG_pre_bitfield = DBG_RESTART;
-	else
-		int_O_DBG_pre_bitfield = DBG_RUN;
-	int_O_DBG_post_bitfield = 0;
-	
-	//---- Set 20meters ND limit ---------------------------------------------
-	char_O_NDL_at_20mtr = 255;
-
-    //---- Copy all dive parameters ------------------------------------------
-	DBG_N2_ratio = N2_ratio;
-	DBG_He_ratio = He_ratio;
-	DBG_char_I_deco_model = char_I_deco_model;
-	DBG_char_I_depth_last_deco = char_I_depth_last_deco;
-	DBG_pres_surface = pres_surface;
-	DBG_GF_low = GF_low;
-	DBG_GF_high = GF_high;
-	DBG_const_ppO2 = const_ppO2;
-	DBG_deco_N2_ratio = char_I_deco_N2_ratio[0];
-	DBG_deco_He_ratio = char_I_deco_He_ratio[0];
-	DBG_deco_gas_change = deco_gas_change[0];
-	DBG_float_saturation_multiplier = float_saturation_multiplier;
-	DBG_float_desaturation_multiplier = float_desaturation_multiplier;
-	DBG_float_deco_distance = float_deco_distance;
-
-    //---- Setup some error (?) conditions -----------------------------------
-	if(char_I_deco_model)
-		int_O_DBS_bitfield |= DBS_mode;
-	if(const_ppO2)
-		int_O_DBS_bitfield |= DBS_ppO2;
-	for(i = 0; i < NUM_COMP; i++)
-		if(pres_tissue_He[i])
-			int_O_DBS_bitfield |= DBS_HE_sat;
-	if(float_saturation_multiplier < 0.99)
-		int_O_DBS_bitfield |= DBS_SAT2l;
-	if(float_saturation_multiplier > 1.3)
-		int_O_DBS_bitfield |= DBS_SAT2h;
-	if(GF_low < 0.19)
-		int_O_DBS_bitfield |= DBS_GFLOW2l;
-	if(GF_low > 1.01)
-		int_O_DBS_bitfield |= DBS_GFLOW2h;
-	if(GF_high < 0.6)
-		int_O_DBS_bitfield |= DBS_GFHGH2l;
-	if(GF_high > 1.01)
-		int_O_DBS_bitfield |= DBS_GFHGH2h;
-	if((N2_ratio + He_ratio) > 0.95)
-		int_O_DBS_bitfield |= DBS_GASO22l;
-	if((N2_ratio + He_ratio) < 0.05)
-		int_O_DBS_bitfield |= DBS_GASO22h;
-	if(float_deco_distance > 0.25)
-		int_O_DBS_bitfield |= DBS_DIST2h;
-	if(char_I_depth_last_deco > 8)
-		int_O_DBS_bitfield |= DBS_LAST2h;
-	if(DBG_deco_gas_change && ((char_I_deco_N2_ratio[0] + char_I_deco_He_ratio[0]) > 95))
-		int_O_DBS_bitfield |= DBS_DECOO2l;
-	if(DBG_deco_gas_change && ((char_I_deco_N2_ratio[0] + char_I_deco_He_ratio[0]) <  5))
-		int_O_DBS_bitfield |= DBS_DECOO2h;
-	if(pres_respiration > 3.0)
-		int_O_DBS2_bitfield |= DBS2_PRES2h;
-	if(pres_surface - pres_respiration > 0.2)
-		int_O_DBS2_bitfield |= DBS2_PRES2l;
-	if(pres_surface < 0.75)
-		int_O_DBS2_bitfield |= DBS2_SURF2l;
-	if(pres_surface > 1.11)
-		int_O_DBS2_bitfield |= DBS2_SURF2h;
-	if(float_desaturation_multiplier < 0.70)
-		int_O_DBS2_bitfield |= DBS2_DESAT2l;
-	if(float_desaturation_multiplier > 1.01)
-		int_O_DBS2_bitfield |= DBS2_DESAT2h;
-	if(GF_low > GF_high)
-		int_O_DBS2_bitfield |= DBS2_GFDneg;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// DBG - set DBG to end_of_dive
-//
-static void set_dbg_end_of_dive(void)
-{
-	int_O_DBG_pre_bitfield &= (~DBG_RUN);
-	int_O_DBG_post_bitfield &= (~DBG_RUN);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// DBG - NDL at first 20 m. hit
-//
-static void check_ndl(void)
-{
-	if( char_O_NDL_at_20mtr == 255      // Still in NDL mode ?
-	 && int_I_pres_respiration > 3000   // And we hit the 20m limit ?
-	)
-	{
-		char_O_NDL_at_20mtr = char_O_nullzeit;  // change to max bottom time.
-		if( char_O_NDL_at_20mtr == 255)         // and avoid confusion.
-			char_O_NDL_at_20mtr = 254;
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// DBG - multi main during dive
-//
-static void check_dbg(PARAMETER char is_post_check)
-{
-	overlay unsigned short temp_DBS = 0;
-    overlay unsigned char i;            // Local loop index.
-
-	if( (DBG_N2_ratio != N2_ratio) || (DBG_He_ratio != He_ratio) )
-		temp_DBS |= DBG_c_gas;
-	if(DBG_const_ppO2 != const_ppO2)
-		temp_DBS |= DBG_c_ppO2;
-	if( DBG_float_saturation_multiplier != float_saturation_multiplier
-     || DBG_float_desaturation_multiplier != float_desaturation_multiplier
-    )
-		temp_DBS |= DBG_CdeSAT;
-	if(DBG_char_I_deco_model != char_I_deco_model)
-		temp_DBS |= DBG_C_MODE;
-	if(DBG_pres_surface != pres_surface)
-		temp_DBS |= DBG_C_SURF;
-
-	if( !DBS_HE_sat && !He_ratio)
-		for(i = 0; i < NUM_COMP; i++)
-			if(pres_tissue_He[i])
-				temp_DBS |= DBG_HEwoHE;
-
-	if( DBG_deco_gas_change != deco_gas_change[0]
-	 || DBG_deco_N2_ratio != char_I_deco_N2_ratio[0]
-	 || DBG_deco_He_ratio != char_I_deco_He_ratio[0] )
-		temp_DBS |= DBG_C_DGAS;
-
-	if(DBG_float_deco_distance != float_deco_distance)
-		temp_DBS |= DBG_C_DIST;
-	if(DBG_char_I_depth_last_deco != char_I_depth_last_deco)
-		temp_DBS |= DBG_C_LAST;
-	if( DBG_GF_low != GF_low
-	 || DBG_GF_high != GF_high )
-		temp_DBS |= DBG_C_GF;
-	if(pres_respiration > 13.0)
-		temp_DBS |= DBG_PHIGH;
-	if(pres_surface - pres_respiration > 0.2)
-		temp_DBS |= DBG_PLOW;
-	if(is_post_check)
-		int_O_DBG_post_bitfield |= temp_DBS;
-	else
-		int_O_DBG_pre_bitfield |= temp_DBS;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// DBG - prior to calc. of dive
-//
-static void check_pre_dbg(void)
-{
-	check_dbg(0);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// DBG - after decocalc of dive
-//
-static void check_post_dbg(void)
-{
-	check_dbg(1);
-}
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -585,18 +399,6 @@ static void read_buhlmann_coefficients(void)
         var_He_a = *ptr++;
         var_He_b = *ptr++;
     }
-
-    // Check reading consistency:
-	if(	(var_N2_a < 0.231)
-	 || (var_N2_a > 1.27)
-	 || (var_N2_b < 0.504)
-	 || (var_N2_b > 0.966)
-	 || (var_He_a < 0.510)
-	 || (var_He_a > 1.75)
-	 || (var_He_b < 0.423)
-	 || (var_He_b > 0.927)
-    )
-        int_O_DBG_pre_bitfield |= DBG_ZH16ERR;       
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -628,15 +430,6 @@ static void read_buhlmann_times(PARAMETER char period)
             var_N2_e = *ptr++;
             var_He_e = *ptr++;
         }
-
-        // Check reading consistency:
-    	if(	(var_N2_e < 0.0000363)
-    	 || (var_N2_e > 0.00577)
-    	 || (var_He_e < 0.0000961)
-    	 || (var_He_e > 0.150)
-        )
-            int_O_DBG_pre_bitfield |= DBG_ZH16ERR;
-
         break;
 
     case 1: //---- 1 min -----------------------------------------------------
@@ -645,15 +438,6 @@ static void read_buhlmann_times(PARAMETER char period)
             var_N2_e = *ptr++;
             var_He_e = *ptr++;
         }
-
-        // Check reading consistency:
-    	if(	(var_N2_e < 1.09E-3)
-    	 || (var_N2_e > 0.1592)
-    	 || (var_He_e < 0.00288)
-    	 || (var_He_e > 0.3682)
-        )
-            int_O_DBG_pre_bitfield |= DBG_ZH16ERR;
-
         break;
 
     case 2: //---- 10 min ----------------------------------------------------
@@ -662,15 +446,6 @@ static void read_buhlmann_times(PARAMETER char period)
             var_N2_e = *ptr++;
             var_He_e = *ptr++;
         }
-
-        // Check reading consistency:
-    	if(	(var_N2_e < 0.01085)
-    	 || (var_N2_e > 0.82323)
-    	 || (var_He_e < 0.02846)
-    	 || (var_He_e > 0.98986)
-        )
-            int_O_DBG_pre_bitfield |= DBG_ZH16ERR;
-
         break;
 
     default:
@@ -1012,13 +787,6 @@ void deco_calc_dive_interval(void)
     calc_dive_interval();
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
-void deco_debug(void)
-{
-    RESET_C_STACK
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 // Find current gas in the list (if any).
@@ -1202,11 +970,6 @@ static void clear_tissue(void)
 {
     overlay float p;
 	flag_in_divemode = 0;
-	int_O_DBS_bitfield = 0;
-	int_O_DBS2_bitfield = 0;
-	int_O_DBG_pre_bitfield = 0;
-	int_O_DBG_post_bitfield = 0;
-	char_O_NDL_at_20mtr = 255;
 
     // Kludge: the 0.0002 of 0.7902 are missing with standard air.
     N2_ratio = 0.7902;
@@ -1261,14 +1024,6 @@ static void calc_hauptroutine(void)
 
 	calc_hauptroutine_data_input();
 
-	if(!flag_in_divemode)
-	{
-		flag_in_divemode = 1;
-		create_dbs_set_dbg_and_ndl20mtr();
-	}
-	else
-		check_pre_dbg();
-
 	calc_hauptroutine_update_tissues();
 	calc_gradient_factor();
 
@@ -1303,17 +1058,21 @@ static void calc_hauptroutine(void)
         gas_switch_set();                       // setup calc_ratio's
 
     	calc_nullzeit();
-    	check_ndl();
-    	if( char_O_nullzeit > 0 )               // Some NDL time left ?
+    /*	if( char_O_nullzeit > 0 )               // Some NDL time left ?
        	    char_O_deco_status = 0;             // YES: recalc ndl next time.
        	else
        	    char_O_deco_status = 2;             // NO: calc ascent next time.
+	*/
+ 	    char_O_deco_status = 2;		            // calc ascent next time.
     	break;
 
     case 2: //---- Simulate ascent to first stop -----------------------------
     case 6: // @+5min variation
         // Check proposed gas at begin of ascent simulation
         sim_dive_mins = int_I_divemins;         // Init current time.
+
+       	gas_switch_find_current();              // Lookup for current gas & time.
+        gas_switch_set();                       // setup calc_ratio's
 
         backup_gas_used  = sim_gas_last_used;   // And save for later simu steps.
         backup_gas_depth = sim_gas_last_depth;  // And save for later simu steps.
@@ -1340,7 +1099,6 @@ static void calc_hauptroutine(void)
     	break;
 	}
 
-	check_post_dbg();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2171,12 +1929,6 @@ static void calc_wo_deco_step_1_min(void)
     assert( 800 < int_I_pres_respiration && int_I_pres_respiration < 1100 );
     assert( 100 <= char_I_saturation_multiplier && char_I_saturation_multiplier < 200 );
     assert( 0 < char_I_desaturation_multiplier && char_I_desaturation_multiplier <= 100 );
-
-	if(flag_in_divemode)
-	{
-		flag_in_divemode = 0;
-		set_dbg_end_of_dive();
-	}
 
     N2_ratio = 0.7902; // FIXED, sum lt. buehlmann
     pres_respiration = pres_surface = int_I_pres_surface * 0.001;

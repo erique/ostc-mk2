@@ -89,7 +89,7 @@
 #DEFINE	TXT_HE4			     "He: "                      ; "He: "      
 #DEFINE	TXT_NX3			     "NX "                       ; "NX "       
 #DEFINE	TXT_TX3			     "TX "                       ; "TX "       
-#DEFINE	TXT_IN4			     " на "                      ; " in "      
+#DEFINE	TXT_AT4			     " на "                      ; " at "
 #DEFINE	TXT_G1_3		     "Г1:"                       ; "G1:"       
 #DEFINE	TXT_G2_3		     "Г2:"                       ; "G2:"       
 #DEFINE	TXT_G3_3		     "Г3:"                       ; "G3:"       
@@ -252,7 +252,7 @@
     TCODE    .0,    .36,     "Минимум дата:"             ;119 Lowest at:
     TCODE    .0,    .45,     "Tmin:"                     ;120 Tmin:
     TCODE    .0,    .54,     "Tmax:"                     ;121 Tmax:
-    TCODE    .100,  .125,    "Далее"		          	 ;122 More (Gaslist)
+    TCODE    .100,  .124,    "Далее"		          	 ;122 More (Gaslist)
     TCODE    .100,  .25,     "O2 +"                      ;123 O2 +
     TCODE    .100,  .50,     "O2 -"                      ;124 O2 -
     TCODE    .100,  .75,     "He +"                      ;125 He +

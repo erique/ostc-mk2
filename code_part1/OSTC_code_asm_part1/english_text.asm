@@ -86,7 +86,7 @@
 #DEFINE	TXT_HE4			     "He: "                      ; "He: "                 
 #DEFINE	TXT_NX3			     "NX "                       ; "NX "                  
 #DEFINE	TXT_TX3			     "TX "                       ; "TX "                  
-#DEFINE	TXT_IN4			     " in "                      ; " in "                 
+#DEFINE	TXT_AT4			     " at "                      ; " at "
 #DEFINE	TXT_G1_3		     "G1:"                       ; "G1:"                  
 #DEFINE	TXT_G2_3		     "G2:"                       ; "G2:"                  
 #DEFINE	TXT_G3_3		     "G3:"                       ; "G3:"                  
@@ -249,7 +249,7 @@
     TCODE    .0,    .36,     "Lowest at:"                ;119 Lowest at:
     TCODE    .0,    .45,     "Tmin:"                     ;120 Tmin:
     TCODE    .0,    .54,     "Tmax:"                     ;121 Tmax:
-    TCODE    .100,  .125,    "More"                    	 ;122 More (Gaslist)
+    TCODE    .100,  .124,    "More"                    	 ;122 More (Gaslist)
     TCODE    .100,  .25,     "O2 +"                      ;123 O2 +
     TCODE    .100,  .50,     "O2 -"                      ;124 O2 -
     TCODE    .100,  .75,     "He +"                      ;125 He +

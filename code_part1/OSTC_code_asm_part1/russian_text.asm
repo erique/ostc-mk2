@@ -313,8 +313,8 @@
     TCODE    .40,   .35,     "Донн.расх[/мин]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
     TCODE    .40,   .35,     "Подъ.расх[/мин]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
     TCODE    .40,   .35,     "Будущ. TTS[мин]"           ;180 Future TTS[min]   (@5 variant: compute TTS for extra time at current depth)
-    TCODE    .40,   .35,     "Не используется"           ;181 not used
-    TCODE    .40,   .35,     "Не используется"           ;182 not used
+    TCODE    .40,   .35,     "Пещер. Пред.[л]"           ;181 Cave Warning[l]   (Consomation warning for cave divers)
+    TCODE    .40,   .35,     "График скорости"           ;182 (Show a graphical representation of the ascend speed)
     TCODE    .40,   .35,     "Не используется"           ;183 not used
     TCODE    .40,   .35,     "Не используется"           ;184 not used
     TCODE    .40,   .35,     "Не используется"           ;185 not used
@@ -428,7 +428,7 @@
     TCODE    .20,   .95,     "Время на дне :"            ;277 Bottom Time:
     TCODE    .20,   .125,    "Макс. глубина:"            ;278 Max. Depth:
     TCODE    .20,   .155,    "Вычислить деко"            ;279 Calculate Deco
-    TCODE    .20,   .155,    "Brightness:"          	 ;280 Brightness:
+    TCODE    .20,   .155,    "Яркость:"			       	 ;280 Brightness:
 ;
     TCODE    .107,  .170,    "С®едняя"                   ;281 Avr.Depth
     TCODE    .90,   .170,    "Глав ткань"                ;282 Lead Tiss.
@@ -467,8 +467,8 @@
 	TCODE	 .108,	.112,	 "С®едняя"			 		 ;309 Average
 	TCODE	 .115,	.54,	 "Тайме®"			 		 ;310 Stopwatch             (BIG Stopwatch in Gauge mode)
 ; Cave consomation
-    TCODE    .0,    .0,      "Cave Bail."                ;311 Cave Bail.            (=10 chars.)
+    TCODE    .0,    .0,      "Пещер.Зап."                ;311 Cave Bail.            (=10 chars.)
 ; OLED Brightness settings
-    TCODE    .103,  .155,    "Eco "	    	             ;312 Eco 					(Same length as #313!)
-    TCODE    .103,  .155,    "High" 	                 ;313 High					(Same length as #312!)
+    TCODE    .103,  .155,    "Норм"	    	             ;312 Eco 					(Same length as #313!)
+    TCODE    .103,  .155,    "Ярко" 	                 ;313 High					(Same length as #312!)
 ;=============================================================================

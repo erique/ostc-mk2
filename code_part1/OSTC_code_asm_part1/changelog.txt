@@ -1,4 +1,5 @@
-New in 2.09 beta:
+
+New in 2.10 beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: Spurious logbook read issue
 BUGFIX: Improved stability for bootloader v2

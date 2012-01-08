@@ -359,10 +359,17 @@ I2CReset:						; Something went wrong (Slave holds SDA low?)
 I2CReset_1:
 	bsf			PORTC,3			; SCL=1
 	nop
+	nop
+	nop
+	nop
 	btfsc		PORTC,4			; SDA=1?
-	bra		I2CReset_2		; =1, SDA has been released from slave
+	bra			I2CReset_2		; =1, SDA has been released from slave
 	bcf			PORTC,3			; SCL=0	
+	nop
+	nop
 	bcf			PORTC,3
+	nop
+	nop
 	decfsz		i2c_temp,F
 	bra		I2CReset_1			; check for nine clock cycles
 I2CReset_2:

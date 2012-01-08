@@ -165,6 +165,7 @@ restart:
 	movlw	b'00000011'
 	movwf	T3CON					; Timer3 with 32768Hz clock running
 	clrf	TMR3L
+	nop
 	clrf	TMR3H
 	bcf		LED_red
 	bcf		LED_blue				; all LEDs off
@@ -474,7 +475,7 @@ init:
 	movwf	ADCON2
 
 	clrf	SSPCON1			; Set I²C Mode
-	movlw	b'00000000'
+	movlw	SSPSTAT_VALUE
 	movwf	SSPSTAT
 	movlw	b'00101000'
 	movwf	SSPCON1

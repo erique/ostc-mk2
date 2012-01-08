@@ -22,7 +22,7 @@
 ; ToDo:
 
 #DEFINE	softwareversion_x		d'2'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'09'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'10'		; Software version  XX.YY
 
 #DEFINE softwareversion_beta 	1 			; (and 0 for release) 
 
@@ -46,13 +46,16 @@
 ; Standard 16MHz mode
 ;	#DEFINE	SPBRG_VALUE 	d'34'
 ;  	#DEFINE	OSCCON_VALUE  	b'01101100'		; 4MHz (x4 PLL)
+;	#DEFINE	SSPSTAT_VALUE	b'00000000'		; with slew rate control (400kHz)
 ;	#DEFINE	SSPADD_VALUE	d'8'			; 400kHz I2C clock @ 16MHz Fcy
 ;	#DEFINE	T0CON_VALUE		b'00011111'		; Timer0
 ; 	#DEFINE	SPEED_16MHz
 ; Experimental 32MHz mode
 	#DEFINE	SPBRG_VALUE 	d'68'
   	#DEFINE	OSCCON_VALUE  	b'01111100'		; 8MHz (x4 PLL)
-	#DEFINE	SSPADD_VALUE	d'16'			; 400kHz I2C clock @ 32MHz Fcy
+;	#DEFINE	SSPADD_VALUE	d'16'			; 400kHz I2C clock @ 32MHz Fcy
+	#DEFINE	SSPADD_VALUE	d'32'			; 200kHz I2C clock @ 32MHz Fcy
+	#DEFINE	SSPSTAT_VALUE	b'00000000'		; with slew rate control
 	#DEFINE	T0CON_VALUE 	b'00010000'		; Timer0
  	#DEFINE	SPEED_32MHz
 

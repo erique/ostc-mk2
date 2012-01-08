@@ -435,6 +435,7 @@ calc_deko_divemode2:
 	movff	WREG,char_I_step_is_1min    ; Force 2 second deco mode
 
 	clrf	TMR3L
+	nop									; See errata DS80284E-page 2
 	clrf	TMR3H						; Reset Timer3
 
 	call	deco_calc_hauptroutine		; calc_tissue

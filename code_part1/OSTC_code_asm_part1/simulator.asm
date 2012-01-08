@@ -373,6 +373,7 @@ simulator_calc_deco:
 	bsf		no_sensor_int               ; Disable sensor interrupt
 	clrf	T3CON                       ; Disable timer3 counter,
 	clrf	TMR3L                       ; so the simu won't stop right away.
+	nop
 	clrf	TMR3H
 
 	call	diveloop_boot               ; configure gases, etc.

@@ -369,13 +369,13 @@ I2CReset_2:
 	bsf			TRISC,3			; SCL	Input
 	clrf		SSPCON1			; set I²C Mode
 	WAITMS		d'10'				; Reset-Timeout for I2C devices
-	movlw		b'00000000'
+	movlw		SSPSTAT_VALUE
 	movwf		SSPSTAT
 	movlw		b'00101000'
 	movwf		SSPCON1
 	movlw		b'00000000'
 	movwf		SSPCON2
-	movlw		d'8'				; 400kHz I2C clock @ 16MHz Fcy
+	movlw		SSPADD_VALUE
 	movwf		SSPADD
 	bcf			LED_red
 	ostc_debug	'O'		; Sends debug-information to screen if debugmode active

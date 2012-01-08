@@ -1,5 +1,10 @@
 New in 2.09 beta:
 BETA Version - Do NOT use for diving!
+BUGFIX: Spurious logbook read issue
+BUGFIX: Improved stability for bootloader v2
+
+New in 2.09 beta:
+BETA Version - Do NOT use for diving!
 BUGFIX: small layout fixes
 BUGFIX: Show NDL after deco is done
 

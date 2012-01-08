@@ -215,17 +215,19 @@ rs232_get_byte3:
 
 uart_115k_bootloader:
 	bcf		PIE1,RCIE				; disable interrupt for RS232
-;	bcf		PIR1,RCIF				; clear flag
 	call	PLED_ClearScreen		; Clear screen
 	movlw	color_red
     call	PLED_set_color			; Set to Red
 	DISPLAYTEXTH	d'302'			; Bootloader
-	movlw	d'4'					; one second
+	bcf		RCSTA,CREN				; Clear receiver status
+	bsf		RCSTA,CREN
+	bcf		PIR1,RCIF				; clear flag
+	movlw	d'200'					; one second
 	movwf	uart1_temp
 uart_115k_bootloader0:
 	btfsc	PIR1,RCIF				; New byte in UART?
 	bra		uart_115k_bootloader1	; Yes, Check if 0xC1
-	WAITMS	d'250'
+	WAITMS	d'5'
 	decfsz	uart1_temp,F
 	bra		uart_115k_bootloader0
 uart_115k_bootloader2:

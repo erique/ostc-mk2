@@ -204,6 +204,7 @@ get_battery_no_init:
 RTCinit:						; resets RTC 
 	movlw	0x80
 	movwf	TMR1H
+	nop							; See errata DS80284E-page 2
 	clrf	TMR1L
 
 ; Reset RTC if any part of the time/date is out of range

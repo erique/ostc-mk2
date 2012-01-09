@@ -2210,7 +2210,7 @@ void deco_calc_CNS_planning(void)
         //---- Ascent to surface delay
         // NOTE: count as if time is spent with bottom pressure,
         //       AND the bottom gas
-        actual_ppO2 = (pres_surface + char_I_bottom_depth * METER_TO_BAR - ppWater)
+        actual_ppO2 = (pres_surface + char_I_bottom_depth * METER_TO_BAR)
                     * (1.0 - calc_N2_ratio - calc_He_ratio);
         if( actual_ppO2 < 0.0  ) actual_ppO2 = 0.0;
         if( actual_ppO2 > 2.50 ) actual_ppO2 = 2.55;
@@ -2239,7 +2239,7 @@ void deco_calc_CNS_planning(void)
                     gas_switch_set();
         
             //---- Convert Depth and N2_ratio to ppO2
-            actual_ppO2 = (pres_surface + temp_depth_limit * METER_TO_BAR - ppWater)
+            actual_ppO2 = (pres_surface + temp_depth_limit * METER_TO_BAR)
                         * (1.0 - calc_N2_ratio - calc_He_ratio);
             if( actual_ppO2 < 0.0  ) actual_ppO2 = 0.0;
             if( actual_ppO2 > 2.50 ) actual_ppO2 = 2.55;

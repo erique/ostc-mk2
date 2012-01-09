@@ -866,17 +866,11 @@ static unsigned char gas_switch_deepest(void)
 
         sim_gas_last_depth = switch_deco;
         sim_gas_last_used  = switch_last;
-        sim_gas_delay = read_custom_function(55);
+        sim_gas_delay      = read_custom_function(55)
+                           + sim_dive_mins;
+        temp_depth_limit = switch_deco;
 
-        // Apply depth correction ONLY if CF#55 is not null:
-        if( sim_gas_delay > 0 )
-        {
-            sim_gas_delay += sim_dive_mins;
-            temp_depth_limit = switch_deco;
-            return 1;
-        }
-        
-        return 0;
+        return 1;
     }
 
     sim_gas_delay = 0;
@@ -1720,7 +1714,7 @@ static unsigned char update_deco_table()
         if( internal_deco_depth[x] == 0 )
         {
             internal_deco_depth[x] = temp_depth_limit;
-            if( sim_gas_delay > sim_dive_mins )
+            if( sim_gas_delay >= sim_dive_mins )
                 internal_deco_depth[x] |= 0x80;
 
             internal_deco_time[x]  = 1;
@@ -2241,7 +2235,8 @@ void deco_calc_CNS_planning(void)
     
             //---- Gas Switch ?
             if( char_O_deco_depth[i] & 0x80 )
-                gas_switch_deepest();
+                if( gas_switch_deepest() )
+                    gas_switch_set();
         
             //---- Convert Depth and N2_ratio to ppO2
             actual_ppO2 = (pres_surface + temp_depth_limit * METER_TO_BAR - ppWater)

@@ -157,9 +157,9 @@ altitude        res 2           ; Last computed altitude [m]
 ;
 bank1 udata 0x100               ;Bank 1
 
-wreg_temp       res 1           ;variables used for context saving during ISR 
-status_temp     res 1
-bsr_temp        res 1
+;wreg_temp       res 1           ;variables used for context saving during ISR 
+;status_temp     res 1
+;bsr_temp        res 1
 prod_temp       res 2           ;Trashed by isr_mult16x16, for sensor compensations
 
 secs            res 1           ;realtime clock

@@ -341,6 +341,46 @@ display_profile_offset3:
 	call		PLED_convert_date			; converts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 
 	PUTC		' '
+
+	btfss	logbook_format_0x21			; Dive made with new 0x21 format?
+	bra		display_end_of_divetime
+
+	PUTC		0x93						; "Start of dive" icon
+	call		I2CREAD2					; hour
+	movff		SSPBUF,lo
+	call		I2CREAD2					; minute
+	movf		lo,W
+	mullw		.60
+	movff		SSPBUF,WREG
+	addwf		PRODL,F
+	movlw		.0
+	addwfc		PRODH,F					; PRODH:PRODL has end-of-dive time in minutes
+
+	incf_eeprom_address	d'39'			; Skip Bytes in EEPROM
+	call		I2CREAD2				; Total sample time in seconds
+	movff		SSPBUF,lo
+	call		I2CREAD2				; Total sample time in seconds
+	movff		SSPBUF,hi
+	decf_eeprom_address	d'41'			; Macro, that subtracts 8Bit from eeprom_address:2
+	call		convert_time			; converts hi:lo in seconds to mins (hi) and seconds (lo)
+	clrf		sub_b+1
+	movff		hi,sub_b+0
+	movff		PRODL,sub_a+0
+	movff		PRODH,sub_a+1
+	call		subU16					; sub_c = sub_a - sub_b (with UNSIGNED values)
+	; sub_c:2 holds entry time in minutes
+	movff		sub_c+0,lo
+	movff		sub_c+1,hi
+	call		convert_time			; converts hi:lo in minutes to hours (hi) and minutes (lo)	
+	movff		lo,PRODL				; temp
+	movff		hi,lo
+	output_99x							; hour
+	PUTC		':'
+	movff		PRODL,lo			
+	output_99x							; minute
+	bra			logbook_divetime_common		; Skip end-of-divetime
+	
+display_end_of_divetime:
 	PUTC		0x94						; "End of dive" icon
 	call		I2CREAD2					; hour
 	movff		SSPBUF,lo
@@ -349,7 +389,9 @@ display_profile_offset3:
 	call		I2CREAD2					; Minute
 	movff		SSPBUF,lo
 	output_99x			
-	call		word_processor				; Display 1st row of details
+
+logbook_divetime_common:
+	call		word_processor			; Display 1st row of details
 
 	WIN_TOP		.25
 	WIN_LEFT	.05

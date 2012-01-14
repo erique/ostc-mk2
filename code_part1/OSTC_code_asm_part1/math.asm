@@ -44,8 +44,7 @@ div16:
 	bra		div16
 	return
 
-sub16:
-;  sub_c = sub_a - sub_b (with signed values)
+sub16:	;  sub_c = sub_a - sub_b (with signed values)
 	bcf		neg_flag
 	movf   	sub_b+0, W             	; Get Value to be subtracted
 	subwf  	sub_a+0, W             	; Do the High Byte
@@ -66,8 +65,7 @@ sub16:
 
     return        
 
-subU16:
-;  sub_c = sub_a - sub_b (with UNSIGNED values)
+subU16:	;  sub_c = sub_a - sub_b (with UNSIGNED values)
 	bcf		neg_flag
 	movf   	sub_b+0, W             	; Get Value to be subtracted
 	subwf  	sub_a+0, W             	; Do the High Byte

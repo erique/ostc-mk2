@@ -85,7 +85,7 @@
 #DEFINE	TXT_HE4			     "He: "                      ; "He: "                 
 #DEFINE	TXT_NX3			     "NX "                       ; "NX "                  
 #DEFINE	TXT_TX3			     "TX "                       ; "TX "                  
-#DEFINE	TXT_IN4			     " in "                      ; " in "                 
+#DEFINE	TXT_AT4			     " at "                      ; " at "
 #DEFINE	TXT_G1_3		     "G1:"                       ; "G1:"                  
 #DEFINE	TXT_G2_3		     "G2:"                       ; "G2:"                  
 #DEFINE	TXT_G3_3		     "G3:"                       ; "G3:"                  

@@ -102,7 +102,7 @@ extern void deco_gas_volumes(void);
 // **         Allow compile on VisualC          **
 // ***********************************************
 
-#ifdef WIN32
+#if defined(WIN32) || defined(UNIX) 
     // Some keywords just dont exists on Visual C++:
 #   define CROSS_COMPILE
 #   define __18CXX
@@ -111,10 +111,12 @@ extern void deco_gas_volumes(void);
 #   define overlay
 #   define PARAMETER
 
-#include <assert.h>
+#   include <assert.h>
 
     // Avoid warnings about float/double mismatches:
-#   pragma warning(disable: 4244 4068 4305)
+#   ifdef WIN32
+#       pragma warning(disable: 4244 4068 4305)
+#   endif
 #else
 #   define PARAMETER static
 #   ifdef __DEBUG

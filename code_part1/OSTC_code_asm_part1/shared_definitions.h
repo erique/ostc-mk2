@@ -69,7 +69,9 @@
 #ifdef __18CXX
     //---- BANK 2 DATA -------------------------------------------------------
     // Gather all data C-code --> ASM-code
-#   pragma udata overlay bank2=0x200
+#   ifndef UNIX
+#       pragma udata overlay bank2=0x200
+#   endif
 #else
 bank2   udata_ovr  0x200
 #endif
@@ -122,7 +124,9 @@ TAB_UCHAR (char_O_hash, 16);
 #ifdef __18CXX
     //---- BANK 3 DATA -------------------------------------------------------
     // Gather all data ASM-code --> C-code
-#   pragma udata overlay bank3=0x300
+#   ifndef UNIX
+#       pragma udata overlay bank3=0x300
+#   endif
 #else
     ; In ASM, put the same bank, in overlay mode, at the same address
 bank3   udata_ovr  0x300

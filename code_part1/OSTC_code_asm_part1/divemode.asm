@@ -249,23 +249,15 @@ apnoe_calc_maxdepth:
 	return
 
 set_leds_divemode:
-	movff	char_O_gradient_factor,lo		; gradient factor absolute
-
-	GETCUSTOM8	d'14'		; threshold for LED warning
-	cpfslt	lo				; 
-	call	warn_gf1		; show warning, set flags
-
-	movff	char_I_deco_model,lo
-		decfsz	lo,W		; jump over return if char_I_deco_model == 1
-	return
-
+	movff	char_O_gradient_factor,lo			; gradient factor absolute (Non-GF model)
+	movff	char_I_deco_model,hi
+	decfsz	hi,F		; jump over next line if char_I_deco_model == 1
 	movff	char_O_relative_gradient_GF,lo		; gradient factor relative (GF model)
-
-	GETCUSTOM8	d'14'		; threshold for LED warning
-	cpfslt	lo				; 
-	call	warn_gf1		; show warning, set flags
-
-	return
+	
+	GETCUSTOM8	d'14'		; threshold for LED warning into WREG
+	cpfslt	lo				; Lower then actual warning?
+	rcall	warn_gf1		; No, show warning and set flags
+	return					; Yes, return
 
 warn_gf1:
 	movlw		d'2'			; Type of Alarm

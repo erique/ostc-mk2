@@ -89,7 +89,8 @@ customview_second:
 	bra		customview_1sec_@5          ; Show TTS for extra time.
 	dcfsnz	WREG,F
 	bra		customview_1sec_cave_bailout; Show Cave conso prediction.
-
+	dcfsnz	WREG,F
+	bra		customview_1sec_pSCR_ppO2	; Show/Update pSCR ppO2
 	; Menupos3=0, do nothing
 	return
 
@@ -133,6 +134,10 @@ customview_1sec_cave_bailout:
 	bsf		menu3_active                ; Set Flag
     goto    PLED_show_cave_bailout
 
+customview_1sec_pSCR_ppO2:
+	goto	PLED_show_pSCR_ppO2			; Yes, compute and show value
+	
+
 ;=============================================================================
 ; Do every-minute tasks for the custom view area
 
@@ -156,6 +161,8 @@ customview_minute:
 	bra		customview_minute_@5        ; Show TTS for extra time.
 	dcfsnz	WREG,F
 	bra		customview_minute_cave_bailout; Show Cave consomation prediction.
+	dcfsnz	WREG,F
+	bra		customview_minute_pSCR_ppO2; Show pSCR ppO2 level
 
 	; Menupos3=0, do nothing
 	return
@@ -173,6 +180,7 @@ customview_minute_marker:               ; Do nothing extra
 customview_minute_stopwatch:            ; Do nothing extra
 customview_minute_average:				; Do nothing extra
 customview_minute_graphs:               ; Do nothing extra
+customview_minute_pSCR_ppO2:            ; Do nothing extra
 	return
 
 ;=============================================================================
@@ -186,7 +194,7 @@ customview_toggle:
 	bra		customview_toggle_exit			; Yes, ignore custom view in divemode completely
 
 	incf	menupos3,F			            ; Number of customview to show
-	movlw	d'9'							; Max number
+	movlw	d'10'							; Max number
 	cpfsgt	menupos3			            ; Max reached?
 	bra		customview_mask		            ; No, show
 	clrf	menupos3			            ; Reset to zero (Zero=no custom view)
@@ -214,6 +222,8 @@ customview_mask:
 	bra		customview_init_@5              ; 8: Show TTS for extra time.
 	dcfsnz	WREG,F
 	bra		customview_init_cave_bailout    ; 9: Show Cave consomation prediction.
+	dcfsnz	WREG,F
+	bra		customview_init_pSCR_ppo2	    ; 10: Show ppO2 for pSCR users
 
 customview_init_nocustomview:
 	bra		customview_toggle_exit	
@@ -318,6 +328,15 @@ customview_init_graphs:					; Show tissue graph
 	movlb	    b'00000001'             ; select ram bank 1
 	call	    PLED_tissue_saturation_graph
 
+	bra         customview_toggle_exit
+
+customview_init_pSCR_ppo2:
+ 	GETCUSTOM8	d'61'					; Show pSCR ppO2?
+	decfsz		WREG,F					; WREG=1?	
+	bra			customview_toggle		; No, use next Customview
+
+    call        PLED_show_pSCR_ppO2		; Yes, compute and show value
+	
 	bra         customview_toggle_exit
 
 customview_toggle_exit:

@@ -44,6 +44,26 @@ div16:
 	bra		div16
 	return
 
+sub32:  ;xC:4=xC:4-sub_c:4 (Warning: sub_c+3 trashes sub_a+0!)
+	movf    sub_c+0, W
+	subwf   xC+0, F
+
+	movf    sub_c+1, W
+	BTFSS    STATUS, C
+	incfsz sub_c+1, W
+	subwf xC+1, F
+
+	movf    sub_c+2, W
+	BTFSS    STATUS, C
+	incfsz sub_c+2, W
+	subwf xC+2, F
+
+	movf    sub_c+3, W
+	BTFSS    STATUS, C
+	incfsz sub_c+3, W
+	subwf xC+3, F
+	return
+
 sub16:	;  sub_c = sub_a - sub_b (with signed values)
 	bcf		neg_flag
 	movf   	sub_b+0, W             	; Get Value to be subtracted

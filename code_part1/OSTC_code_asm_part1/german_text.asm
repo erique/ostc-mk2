@@ -312,9 +312,9 @@
     TCODE    .40,   .35,     "TTS @ Zeit[min]"           ;180 Future TTS[min]   (Compute TTS for extra time at current depth)
     TCODE    .40,   .35,     "Cave Warning[l]"           ;181 Cave Warning[l]   (Consomation warning for cave divers)
     TCODE    .40,   .35,     "Graph. Velocity"           ;182 Graph. Velocity	(Show a graphical representation of the ascend speed)
-    TCODE    .40,   .35,     "nicht verwendet"           ;183 not used
-    TCODE    .40,   .35,     "nicht verwendet"           ;184 not used
-    TCODE    .40,   .35,     "nicht verwendet"           ;185 not used
+    TCODE    .40,   .35,     "Show pSCR ppO2 "           ;183 Show pSCR ppO2	(Show the ppO2 for pSCR divers)
+    TCODE    .40,   .35,     "pSCR O2 Drop[%]"           ;184 pSCR O2 Drop[%]	(pSCR O2 drop in percent)
+    TCODE    .40,   .35,     "pSCR lung ratio"           ;185 pSCR lung ratio	(pSCR counterlung ratio)
 ; End of function descriptor II
 ;
     TCODE    .13,   .2,      "Custom Funktionen II"      ;186 Custom Functions II
@@ -408,7 +408,7 @@
     TCODE    .7,    .48,     "Luft  "                    ;264 Air
     TCODE    .120,  .135,    "Luft  "                    ;265 Air
 
-    TCODE    .0,    .0,      ""             			 ;266 unused
+    TCODE    .0,    .0,      "pSCR Info"             	 ;266 pSCR Info (Must be 9Chars!)
 	TCODE    .0,    .216,    "Max."                      ;267 Max.
     TCODE    .0,    .0,      ""     	                 ;268 unused
     TCODE    .0,    .0,      ""		                   	 ;269 unused

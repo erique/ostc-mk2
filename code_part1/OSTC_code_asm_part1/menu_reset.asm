@@ -184,11 +184,11 @@ cf_default_table1:
 	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'10'   ; CF58 TTS for extra time at current depth [min]
 	CF_DEFAULT    CF_INT15,     d'0',   d'0',   d'7000' ; CF59 Cave conso warning [l]
 	CF_DEFAULT    CF_BOOL,     	0,   	0,      0 		; CF60 Show Graphical ascend speed indicator
-	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+	CF_DEFAULT    CF_BOOL,      0,      0,      0 		; CF61 Show pSCR ppO2
 	                
-	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
-	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
-	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
+	CF_DEFAULT    CF_PERCENT,   .4,     .0,     .100	; CF62 pSCR O2 Drop
+	CF_DEFAULT    CF_INT8,      .10,    .0,     .100 	; CF63 pSCR counterlung ratio
+;	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 cf_default_table2:
 
 ;=============================================================================

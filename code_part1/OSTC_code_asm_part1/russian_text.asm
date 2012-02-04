@@ -315,9 +315,9 @@
     TCODE    .40,   .35,     "Будущ. TTS[мин]"           ;180 Future TTS[min]   (@5 variant: compute TTS for extra time at current depth)
     TCODE    .40,   .35,     "Пещер. Пред.[л]"           ;181 Cave Warning[l]   (Consomation warning for cave divers)
     TCODE    .40,   .35,     "График скорости"           ;182 (Show a graphical representation of the ascend speed)
-    TCODE    .40,   .35,     "Не используется"           ;183 not used
-    TCODE    .40,   .35,     "Не используется"           ;184 not used
-    TCODE    .40,   .35,     "Не используется"           ;185 not used
+    TCODE    .40,   .35,     "Show pSCR ppO2 "           ;183 Show pSCR ppO2	(Show the ppO2 for pSCR divers)
+    TCODE    .40,   .35,     "pSCR O2 Drop[%]"           ;184 pSCR O2 Drop[%]	(pSCR O2 drop in percent)
+    TCODE    .40,   .35,     "pSCR lung ratio"           ;185 pSCR lung ratio	(pSCR counterlung ratio)
 ; End of function descriptor II
 ;
     TCODE    .20,   .2,      "Доп. Параметры II"         ;186 Custom Functions II
@@ -411,7 +411,7 @@
     TCODE    .7,    .48,     "Возд."                     ;264 Air
     TCODE    .120,  .135,    "Возд."                     ;265 Air
 
-    TCODE    .0,    .0,      ""             			 ;266 unused
+    TCODE    .0,    .0,      "pSCR Info"             	 ;266 pSCR Info (Must be 9Chars!)
     TCODE    .0,    .216,    "Макс."                     ;267 Max.
     TCODE    .0,    .0,      ""     	                 ;268 unused
     TCODE    .0,    .0,      ""		                   	 ;269 unused

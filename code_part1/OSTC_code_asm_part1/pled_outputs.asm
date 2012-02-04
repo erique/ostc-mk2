@@ -3465,6 +3465,98 @@ PLED_show_@5_wait:
     return
 
 ;=============================================================================
+; Display pSCR ppO2
+; (Pressure[mbar]*char_I_O2_ratio)-(100-char_I_O2_ratio)*CF61*CF62*10
+PLED_show_pSCR_ppO2:
+	WIN_FONT    FT_SMALL
+    WIN_LEFT    .160-.63                ; 9 chars aligned right.
+    WIN_TOP     .170
+	call		PLED_divemask_color     ; Set Color for Divemode mask
+    lfsr        FSR2,letter
+    OUTPUTTEXTH .266                    ; "pSCR Info"
+    call        word_processor;			   pCCR
+
+	movff	char_I_O2_ratio,WREG
+	sublw	.100			; 100-char_I_O2_ratio -> WREG
+	mullw	.10				; (100-char_I_O2_ratio)*10 -> PROD:2
+	movff	PRODL,xA+0
+	movff	PRODH,xA+1
+	GETCUSTOM8  d'62'		; O2 Drop
+	movff	WREG,xB+0
+	clrf	xB+1
+	call	mult16x16	;xA*xB=xC -> (100-char_I_O2_ratio)*10*CF61
+	movff	xC+0,xA+0
+	movff	xC+1,xA+1
+ 	GETCUSTOM8  d'63'		; Lung ratio
+	movff	WREG,xB+0
+	clrf	xB+1
+	call	mult16x16	;xA*xB=xC -> (100-char_I_O2_ratio)*10*CF61*CF62
+
+	movlw	.10
+	movwf	xB+0
+	clrf	xB+1
+	call	div32x16	  ; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
+	; store xC:2 in lo:hi
+	movff	xC+0,lo
+	movff	xC+1,hi
+
+	SAFE_2BYTE_COPY amb_pressure, xA
+	movff	char_I_O2_ratio,xB+0
+	clrf	xB+1
+	call	mult16x16	;xA*xB=xC -> xC:4 = Pressure[mbar]*char_I_O2_ratio
+
+	movlw	.10
+	movwf	xB+0
+	clrf	xB+1
+	call	div32x16	  ; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
+
+	; store xC:2 in sub_a
+	movff	xC+0,sub_a+0
+	movff	xC+1,sub_a+1
+	; reload result from lo:hi
+	movff	lo,sub_b+0
+	movff	hi,sub_b+1
+
+	call	subU16		;sub_c = sub_a - sub_b (with UNSIGNED values)
+
+	WIN_FONT	FT_SMALL
+	WIN_LEFT	.95
+	WIN_TOP		.192
+	lfsr	FSR2,letter
+	STRCPY_PRINT TXT_PPO2_5             ; ppO2:
+
+	movff	sub_c+0,xC+0
+	movff	sub_c+1,xC+1
+	clrf	xC+2
+	clrf	xC+3			; For color coding
+	PLED_color_code		warn_ppo2		; Color-code output (ppO2 stored in xC)	
+	WIN_LEFT	.130
+	WIN_TOP		.192
+	lfsr        FSR2,letter
+	movff		xC+0,lo
+	movff		xC+1,hi
+	bsf		ignore_digit4
+	output_16dp	d'1'
+	bcf		ignore_digit4
+    STRCAT_PRINT " "
+	call        PLED_standard_color     ; Back to white.
+; Show O2 drop and counter lung ration in second row
+	WIN_LEFT	.98
+	WIN_TOP		.216
+	lfsr        FSR2,letter
+	GETCUSTOM8  d'62'		; O2 Drop in percent
+	movwf		lo
+	bsf			leftbind
+	output_8
+	STRCAT		 "% 1/"
+	GETCUSTOM8  d'63'		; Counter lung ratio in 1/X
+	movwf		lo
+	output_8
+	bcf			leftbind
+    STRCAT_PRINT " "		; Trailing space needed when changing the O2 drop
+	return
+
+;=============================================================================
 ; Display cave consomation prediction (and warning).
 ;
 PLED_show_cave_bailout:

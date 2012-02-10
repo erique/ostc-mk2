@@ -2298,11 +2298,11 @@ void deco_calc_percentage(void)
     RESET_C_STACK
 
     assert( 60 <= char_I_temp && char_I_temp <= 100 );
-    assert(  0 <= int_I_temp  && int_I_temp  < 2880 );      // Less than 48h...
+    assert(  0 <= int_I_temp  && int_I_temp  < 5760 );      // Less than 4 days = 96h...
 
     int_I_temp = (unsigned short)(((float)int_I_temp * (float)char_I_temp) * 0.01 );
 
-    assert( int_I_temp < 2880 );                            // Less than 48h...
+    assert( int_I_temp < 5760 );                            // Less than 96h too...
 }
 
 

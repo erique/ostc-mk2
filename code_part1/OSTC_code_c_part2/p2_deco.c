@@ -859,6 +859,8 @@ static unsigned char gas_switch_deepest(void)
     // If there is a better gas available
     if( switch_deco )
     {
+        unsigned char delay = read_custom_function(55);
+
         assert( !sim_gas_last_depth || sim_gas_last_depth > switch_deco );
 
         // Should restart gas-switch delay only when gas do changes...
@@ -866,11 +868,16 @@ static unsigned char gas_switch_deepest(void)
 
         sim_gas_last_depth = switch_deco;
         sim_gas_last_used  = switch_last;
-        sim_gas_delay      = read_custom_function(55)
+        sim_gas_delay      = delay
                            + sim_dive_mins;
-        temp_depth_limit = switch_deco;
 
-        return 1;
+        if( delay )
+        {
+            temp_depth_limit = switch_deco;
+            return 1;
+        }
+        else
+            return 0;
     }
 
     sim_gas_delay = 0;

@@ -1146,6 +1146,12 @@ PLED_temp_divemode:
 	return
 
 PLED_show_ppO2:					; Show ppO2 (ppO2 stored in xC)
+ 	GETCUSTOM8	d'61'					; Show pSCR ppO2?
+	decfsz		WREG,F					; WREG=1?	
+	bra			PLED_show_ppO2a			; No
+	return								; Do not display ppO2 in pSCR Mode
+
+PLED_show_ppO2a:
 	ostc_debug	't'		; Sends debug-information to screen if debugmode active
 	WIN_TOP		.117
 	WIN_LEFT	.0
@@ -3474,7 +3480,7 @@ PLED_show_pSCR_ppO2:
 	call		PLED_divemask_color     ; Set Color for Divemode mask
     lfsr        FSR2,letter
     OUTPUTTEXTH .266                    ; "pSCR Info"
-    call        word_processor;			   pCCR
+    call        word_processor			; pCCR
 
 	movff	char_I_O2_ratio,WREG
 	sublw	.100			; 100-char_I_O2_ratio -> WREG

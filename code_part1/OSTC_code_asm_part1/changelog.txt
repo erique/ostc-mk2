@@ -1,10 +1,10 @@
-New in 2.21 beta:
-BETA Version - Do NOT use for diving!
+New in 2.21:
 BUGFIX: GF warning in logbook memory
 NEW: Compute ppO2 for pSCR diving
 NEW: CF61: Show pSCR ppO2 in customview
 NEW: CF62: pSCR O2 Drop in percent
 NEW: CF63: pSCR counterlung ratio 1/x
+BUGFIX: CF55 behaviour
 
 New in 2.20:
 Stable Release

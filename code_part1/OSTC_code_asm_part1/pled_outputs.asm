@@ -2598,11 +2598,18 @@ PLED_decoplan_show_stop:
         WIN_LEFT .100
         
         btfss   lo,7                    ; Bit set ?
-        bra     PLED_decoplan_std_stop  ; No : Just an usual stop.
+        bra     PLED_decoplan_std_stop  ; No : Just an usual stop
 
-        movlw   b'11111101'             ; Yellow.
-        call    PLED_set_color
-        bcf     lo,7                    ; and cleanup depth.
+        bcf     lo,7                    ; cleanup depth
+		
+		GETCUSTOM8	d'55'				; Load gas switch [min] in wreg
+		tstfsz	WREG					; =0?
+		bra		PLED_decoplan_show_stop1; No: Show gas switch stop
+		bra     PLED_decoplan_std_stop  ; Yes: Just an usual stop
+		
+PLED_decoplan_show_stop1:		
+        movlw   color_yellow
+        call    PLED_set_color			; Show in yellow for gas switch
         bra     PLED_decoplan_nstd_stop
 
 PLED_decoplan_std_stop:

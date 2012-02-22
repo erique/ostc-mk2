@@ -310,11 +310,11 @@
     TCODE    .40,   .35,     "BottomGas[/min]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
     TCODE    .40,   .35,     "Sonst.Gas[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
     TCODE    .40,   .35,     "TTS @ Zeit[min]"           ;180 Future TTS[min]   (Compute TTS for extra time at current depth)
-    TCODE    .40,   .35,     "Cave Warning[l]"           ;181 Cave Warning[l]   (Consomation warning for cave divers)
-    TCODE    .40,   .35,     "Graph. Velocity"           ;182 Graph. Velocity	(Show a graphical representation of the ascend speed)
-    TCODE    .40,   .35,     "Show pSCR ppO2 "           ;183 Show pSCR ppO2	(Show the ppO2 for pSCR divers)
+    TCODE    .40,   .35,     "Cave Warnung[l]"           ;181 Cave Warning[l]   (Consomation warning for cave divers)
+    TCODE    .40,   .35,     "Graph. Geschwi."           ;182 Graph. Velocity	(Show a graphical representation of the ascend speed)
+    TCODE    .40,   .35,     "Zeige pSCR ppO2"           ;183 Show pSCR ppO2	(Show the ppO2 for pSCR divers)
     TCODE    .40,   .35,     "pSCR O2 Drop[%]"           ;184 pSCR O2 Drop[%]	(pSCR O2 drop in percent)
-    TCODE    .40,   .35,     "pSCR lung ratio"           ;185 pSCR lung ratio	(pSCR counterlung ratio)
+    TCODE    .40,   .35,     "pSCR Gegenlunge"           ;185 pSCR lung ratio	(pSCR counterlung ratio)
 ; End of function descriptor II
 ;
     TCODE    .13,   .2,      "Custom Funktionen II"      ;186 Custom Functions II

@@ -81,6 +81,7 @@
 // 2011/08/08: [jDG] Computes CNS during deco planning ascent.
 // 2011/11/24: [jDG] Slightly faster and better NDL computation.
 // 2011/12/17: [mH] Remove of the useless debug stuff
+// 2012/02/24: [jDG] Remove missed stop bug.
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -534,10 +535,8 @@ static unsigned char calc_nextdecodepth(void)
             overlay float depth_tol = (sim_lead_tissue_limit - pres_surface) * BAR_TO_METER;
             overlay unsigned char first_stop;
 
-            // If ascent is VERY fast, this can be lower than the actual depth... Because
-            // this happends only in simulation, just forget about it:
-            if( depth_tol > depth )
-                depth_tol = depth;
+            // 2012-02-24 NOTE: Do not discard a stop just because we get shallower !
+            //     ---> Better to keep it red until the situation is cleared.
 
             // Deepest stop, in multiples of 3 metres.
             first_stop = 3 * (short)(0.99999 + depth_tol * 0.33333 );
@@ -551,26 +550,6 @@ static unsigned char calc_nextdecodepth(void)
                 low_depth = depth_tol;
                 locked_GF_step = GF_delta / low_depth;
             }
-
-#if defined(__DEBUG) || defined(CROSS_COMPILE)
-            {
-                // Extra testing code to make sure the first_stop formula
-                // and rounding provides correct depth:
-                overlay float pres_stop =  first_stop * METER_TO_BAR
-        	                  + pres_surface;
-
-                // Keep GF_low until a first stop depth is found:
-                if( first_stop >= low_depth )
-                    sim_limit( GF_low );
-                else
-                    // current GF is GF_high - alpha (GF_high - GF_low)
-                    // With alpha = currentDepth / maxDepth, hence in [0..1]
-                    sim_limit( GF_high - first_stop * locked_GF_step );
-
-                // upper limit (lowest pressure tolerated), + 1mbar for rounding...:
-                assert( sim_lead_tissue_limit < (pres_stop + 0.001) );
-            }
-#endif
 
             // Apply correction for the shallowest stop.
             if( first_stop == 3 )                           // new in v104

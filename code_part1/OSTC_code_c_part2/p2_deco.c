@@ -2201,6 +2201,7 @@ void deco_calc_CNS_planning(void)
         overlay unsigned char i = 0;    // Decostop loop counter
         overlay float actual_ppO2;
         overlay unsigned char time, t;
+        overlay unsigned char deepest_first = (read_custom_function(54) == 0);
 
         //---- Ascent to surface delay
         // NOTE: count as if time is spent with bottom pressure,
@@ -2220,20 +2221,35 @@ void deco_calc_CNS_planning(void)
             sim_dive_mins++;
         }
 
-        //---- Do all further stops
+        //---- Do all further stops ------------------------------------------
         for(i=0; i<NUM_STOPS; ++i)
         {
-            //---- Get next stop
-            time             = char_O_deco_time[i];
-            temp_depth_limit = char_O_deco_depth[i] & 0x7F;
-            if( time == 0 ) break;      // End of table: done.
+            overlay unsigned char switch_gas;
+
+            //---- Get next stop, possibly in reverse order ------------------
+            if( deepest_first )
+            {
+                time             = char_O_deco_time[i];
+                temp_depth_limit = char_O_deco_depth[i];
+            }
+            else
+            {
+                time             = char_O_deco_time[(NUM_STOPS-1)-i];
+                temp_depth_limit = char_O_deco_depth[(NUM_STOPS-1)-i];
+            }
+            if( time == 0 ) continue;
     
-            //---- Gas Switch ?
-            if( char_O_deco_depth[i] & 0x80 )
-                if( gas_switch_deepest() )
-                    gas_switch_set();
-        
-            //---- Convert Depth and N2_ratio to ppO2
+            //---- Gas Switch ? ----------------------------------------------
+            switch_gas = temp_depth_limit & 0x80;   // Switch flag.
+            temp_depth_limit &= 0x7F;               // True stop depth.
+
+            if( switch_gas )
+            {
+                gas_switch_deepest();
+                gas_switch_set();
+            }
+
+            //---- Convert Depth and N2_ratio to ppO2 ------------------------
             actual_ppO2 = (pres_surface + temp_depth_limit * METER_TO_BAR)
                         * (1.0 - calc_N2_ratio - calc_He_ratio);
             if( actual_ppO2 < 0.0  ) actual_ppO2 = 0.0;
@@ -2249,7 +2265,7 @@ void deco_calc_CNS_planning(void)
         }
     }
 
-    // Back to normal mode...
+    //---- Back to normal mode... --------------------------------------------
     char_I_step_is_1min = 0;
     sim_gas_last_depth  = backup_gas_last_depth;
     sim_gas_last_used   = backup_gas_last_used;

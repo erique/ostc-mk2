@@ -80,8 +80,9 @@
 // 2011/05/17: [jDG] Various cleanups.
 // 2011/08/08: [jDG] Computes CNS during deco planning ascent.
 // 2011/11/24: [jDG] Slightly faster and better NDL computation.
-// 2011/12/17: [mH] Remove of the useless debug stuff
+// 2011/12/17: [mH]  Remove of the useless debug stuff
 // 2012/02/24: [jDG] Remove missed stop bug.
+// 2012/02/25: [jDG] Looking for a more stable LOW grad factor reference.
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -158,10 +159,10 @@ static float			temp_limit;
 static float			GF_low;
 static float			GF_high;
 static float			GF_delta;
-static float            low_depth;                  // Depth of deepest stop
 static float			locked_GF_step;             // GF_delta / low_depth
 
 static unsigned char    temp_depth_limit;
+static unsigned char    low_depth;                  // Depth of deepest stop
 
 // Simulation context: used to predict ascent.
 static unsigned char	sim_lead_tissue_no;         // Leading compatiment number.
@@ -523,84 +524,88 @@ static unsigned char calc_nextdecodepth(void)
     //---- ZH-L16 + GRADIENT FACTOR model ------------------------------------
 	if( char_I_deco_model != 0 )
 	{
+        overlay unsigned char first_stop = 0;
+        overlay float p;
+
         if( depth >= low_depth )
             sim_limit( GF_low );
         else
             sim_limit( GF_high - depth * locked_GF_step );
 
-        // Stops are needed ?
-        if( sim_lead_tissue_limit > pres_surface )
+        p = sim_lead_tissue_limit - pres_surface;
+        if( p <= 0.0f )
+            goto no_deco_stop;          // We can surface directly...
+
+        p *= BAR_TO_METER;
+        if( p < min_depth )
+            goto no_deco_stop;          // First stop is higher than 1' ascent.
+
+        first_stop = 3 * (short)(0.99999 + p*0.333333);
+        assert( first_stop < 128 );
+
+        // Apply correction for the shallowest stop.
+        if( first_stop == 3 )                           // new in v104
+            first_stop = char_I_depth_last_deco;        // Use last 3m..6m instead.
+
+        // Store the deepest point needing a deco stop as the LOW reference for GF.
+        // NOTE: following stops will be validated using this LOW-HIGH gf scale,
+        //       so if we want to keep coherency, we should not validate this stop
+        //       yet, but apply the search as all the following stops afterward.
+        if( first_stop > low_depth )
         {
-            // Compute tolerated depth, for the leading tissue [metre]:
-            overlay float depth_tol = (sim_lead_tissue_limit - pres_surface) * BAR_TO_METER;
-            overlay unsigned char first_stop;
-
-            // 2012-02-24 NOTE: Do not discard a stop just because we get shallower !
-            //     ---> Better to keep it red until the situation is cleared.
-
-            // Deepest stop, in multiples of 3 metres.
-            first_stop = 3 * (short)(0.99999 + depth_tol * 0.33333 );
-            assert( first_stop < 128 );
-
-            // Is it a new deepest needed stop ? If yes this is the reference for
-            // the varying gradient factor. So reset that:
-            if( depth_tol > min_depth && depth_tol > low_depth )
-            {
-                // Store the deepest stop depth, as reference for GF_low.
-                low_depth = depth_tol;
-                locked_GF_step = GF_delta / low_depth;
-            }
-
-            // Apply correction for the shallowest stop.
-            if( first_stop == 3 )                           // new in v104
-                first_stop = char_I_depth_last_deco;        // Use last 3m..6m instead.
-
-            // Because gradient factor at first_stop might be bigger than at 
-            // current depth, we might ascent a bit more.
-            // Hence, check all stops until one is indeed higher than tolerated presure:
-            while(first_stop > 0)
-            {
-                overlay unsigned char next_stop;            // Next index (0..30)
-                overlay float pres_stop;                    // Next depth (0m..90m)
-
-                // Check max speed, or reaching surface.
-                if( first_stop <= min_depth )
-                    break;
-
-                // So, there is indeed a stop needed:
-                need_stop = 1;
-
-                if( first_stop <= char_I_depth_last_deco )  // new in v104
-                    next_stop = 0;
-                else if( first_stop == 6 )
-                    next_stop = char_I_depth_last_deco;
-                else
-                    next_stop = first_stop - 3;             // Index of next (upper) stop.
-
-        	    pres_stop =  next_stop * METER_TO_BAR
-        	              + pres_surface;
-
-                // Keep GF_low until a first stop depth is found:
-                if( next_stop >= low_depth )
-                    sim_limit( GF_low );
-                else
-                    // current GF is GF_high - alpha (GF_high - GF_low)
-                    // With alpha = currentDepth / maxDepth, hence in [0..1]
-                    sim_limit( GF_high - next_stop * locked_GF_step );
-
-                // upper limit (lowest pressure tolerated):
-                if( sim_lead_tissue_limit >= pres_stop )    // check if ascent to next deco stop is ok
-                    break;
-                
-                // Else, validate that stop and loop...
-                first_stop = next_stop;
-            }
-
-            // next stop is the last validated depth found, aka first_stop
-            temp_depth_limit = first_stop;                  // Stop depth, in metre.
+            low_depth = first_stop;
+            locked_GF_step = GF_delta / low_depth;
         }
-        else
- 			temp_depth_limit = 0;                           // stop depth, in metre.
+
+        // We have a stop candidate.
+        // But maybe ascending to the next stop will diminish the constraint,
+        // because the GF might decrease more than the preassure gradient...
+        while(first_stop > 0)
+        {
+            overlay unsigned char next_stop;            // Next depth (0..90m)
+            overlay float pres_stop;                    // Next pressure (bar)
+
+            // Check max speed, or reaching surface.
+            if( first_stop <= min_depth )
+                goto no_deco_stop;
+
+            if( first_stop <= char_I_depth_last_deco )  // new in v104
+                next_stop = 0;
+            else if( first_stop == 6 )
+                next_stop = char_I_depth_last_deco;
+            else
+                next_stop = first_stop - 3;             // Index of next (upper) stop.
+            
+            // Just a check we are indeed above LOW ref.
+            assert( next_stop < low_depth );
+
+            // Total preassure at the new stop candidate:
+            pres_stop =  next_stop * METER_TO_BAR
+    	              + pres_surface;
+
+            // Keep GF_low until a first stop depth is found:
+            sim_limit( GF_high - next_stop * locked_GF_step );
+
+            // Check upper limit (lowest pressure tolerated):
+            if( sim_lead_tissue_limit >= pres_stop )    // check if ascent to next deco stop is ok
+                goto deco_stop_found;
+
+            // Else, validate that stop and loop...
+            first_stop = next_stop;
+        }
+        assert( first_stop == 0 );
+
+no_deco_stop:
+		temp_depth_limit = 0;
+        goto done;
+
+        // next stop is the last validated depth found, aka first_stop
+deco_stop_found:
+        need_stop = 1;                  // Hit.
+        temp_depth_limit = first_stop;  // Stop depth, in meter.
+
+done:
+        ;
 	}
 	else //---- ZH-L16 model -------------------------------------------------
 	{
@@ -1023,7 +1028,11 @@ static void calc_hauptroutine(void)
         // Values that should be reset just once for the full real dive.
         // This is used to record the lowest stop for the whole dive,
         // Including ACCROSS all simulated ascent.
-        low_depth = 0.0;
+        // NOTE: Use a default of 6m (like the 10m in the DR5 code).
+        //       Because this produces less babling stops at the
+        //       beginning of the decompression. But putting a value too high
+        //       have the immediat effect of using lower GF for shallow dives...
+        low_depth = 6;
 
         // Reset gas switch history.
         backup_gas_used  = sim_gas_last_used  = 0;
@@ -1763,7 +1772,7 @@ static void calc_gradient_factor(void)
 	{
         overlay float rgf;
 
-		if( low_depth < 1.5 )
+		if( low_depth < 3 )
 			rgf = GF_high;
         else
         {

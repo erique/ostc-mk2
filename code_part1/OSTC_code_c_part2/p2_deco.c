@@ -155,7 +155,6 @@ static unsigned char calc_nextdecodepth(void);
 //---- Bank 4 parameters -----------------------------------------------------
 #pragma udata bank4=0x400
 
-static float			temp_limit;
 static float			GF_low;
 static float			GF_high;
 static float			GF_delta;
@@ -345,8 +344,8 @@ void assert_failed(PARAMETER short int line)
 static short read_custom_function(PARAMETER unsigned char cf)
 {
 #ifdef CROSS_COMPILE
-    return (cf & 32) ? eeprom.bank1_CF[cf-32].value
-                     : eeprom.bank0_CF[cf   ].value;
+    return (cf & 32) ? eeprom.bank1_CF[cf-32].value.lo
+                     : eeprom.bank0_CF[cf   ].value.lo;
 #else
     extern unsigned char hi, lo;
     extern void getcustom15();
@@ -390,7 +389,7 @@ static void read_buhlmann_coefficients(void)
     _endasm
 #endif
 
-    assert( 0 <= ci && ci < NUM_COMP );
+    assert( ci < NUM_COMP );
 
     // Use an interleaved array (AoS) to access coefficients with a
     // single addressing.
@@ -421,7 +420,7 @@ static void read_buhlmann_times(PARAMETER char period)
     _endasm
 #endif
 
-    assert( 0 <= ci && ci < NUM_COMP );
+    assert( ci < NUM_COMP );
 
     // Integration intervals.
     switch(period)
@@ -472,7 +471,7 @@ static void read_buhlmann_ht(void)
     _endasm
 #endif
 
-    assert( 0 <= ci && ci < NUM_COMP );
+    assert( ci < NUM_COMP );
     {
         overlay rom const float* ptr = &buhlmann_ht[2*ci];
         var_N2_ht = *ptr++;
@@ -879,7 +878,7 @@ static unsigned char gas_switch_deepest(void)
 //
 static void gas_switch_set(void)
 {
-    assert( 0 <= sim_gas_last_used && sim_gas_last_used <= NUM_GAS );
+    assert( sim_gas_last_used <= NUM_GAS );
 
     if( sim_gas_last_used == 0 )    // Gas6 = manualy set gas.
     {
@@ -2309,7 +2308,7 @@ void deco_calc_percentage(void)
     RESET_C_STACK
 
     assert( 60 <= char_I_temp && char_I_temp <= 100 );
-    assert(  0 <= int_I_temp  && int_I_temp  < 5760 );      // Less than 4 days = 96h...
+    assert( int_I_temp  < 5760 );      // Less than 4 days = 96h...
 
     int_I_temp = (unsigned short)(((float)int_I_temp * (float)char_I_temp) * 0.01 );
 

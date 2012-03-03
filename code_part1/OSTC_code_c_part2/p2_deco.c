@@ -526,11 +526,7 @@ static unsigned char calc_nextdecodepth(void)
         overlay unsigned char first_stop = 0;
         overlay float p;
 
-        if( depth >= low_depth )
-            sim_limit( GF_low );
-        else
-            sim_limit( GF_high - depth * locked_GF_step );
-
+        sim_limit( GF_low );
         p = sim_lead_tissue_limit - pres_surface;
         if( p <= 0.0f )
             goto no_deco_stop;          // We can surface directly...
@@ -1027,11 +1023,8 @@ static void calc_hauptroutine(void)
         // Values that should be reset just once for the full real dive.
         // This is used to record the lowest stop for the whole dive,
         // Including ACCROSS all simulated ascent.
-        // NOTE: Use a default of 6m (like the 10m in the DR5 code).
-        //       Because this produces less babling stops at the
-        //       beginning of the decompression. But putting a value too high
-        //       have the immediat effect of using lower GF for shallow dives...
-        low_depth = 6;
+        low_depth = 0;
+        locked_GF_step = 0.0;
 
         // Reset gas switch history.
         backup_gas_used  = sim_gas_last_used  = 0;

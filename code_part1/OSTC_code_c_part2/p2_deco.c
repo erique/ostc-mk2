@@ -545,11 +545,11 @@ static unsigned char calc_nextdecodepth(void)
         // Store the deepest point needing a deco stop as the LOW reference for GF.
         // NOTE: following stops will be validated using this LOW-HIGH gf scale,
         //       so if we want to keep coherency, we should not validate this stop
-        //       yet, but apply the search as all the following stops afterward.
+        //       yet, but apply the search to it, as for all the following stops afterward.
         if( first_stop > low_depth )
         {
             low_depth = first_stop;
-            locked_GF_step = GF_delta / low_depth;
+            locked_GF_step = GF_delta / first_stop;
         }
 
         // We have a stop candidate.
@@ -765,7 +765,6 @@ void deco_calc_dive_interval(void)
     RESET_C_STACK
     calc_dive_interval();
 }
-
 
 //////////////////////////////////////////////////////////////////////////////
 // Find current gas in the list (if any).
@@ -1957,7 +1956,7 @@ static void calc_dive_interval(void)
     float_desaturation_multiplier = char_I_desaturation_multiplier * (0.01 * SURFACE_DESAT_FACTOR);
     float_saturation_multiplier   = char_I_saturation_multiplier   * 0.01;
 
-    // Make sure SURFACE_DESAT_FACTOR is applyed:
+    // Make sure SURFACE_DESAT_FACTOR is applied:
     backup_model = char_I_deco_model;
     char_I_deco_model = 0;
 

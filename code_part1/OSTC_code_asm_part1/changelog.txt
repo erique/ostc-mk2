@@ -1,3 +1,6 @@
+New in 2.22:
+BUGFIX: Missed deco stops issue
+
 New in 2.21:
 BUGFIX: GF warning in logbook memory
 NEW: Compute ppO2 for pSCR diving

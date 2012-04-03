@@ -80,7 +80,9 @@
 // 2011/05/17: [jDG] Various cleanups.
 // 2011/08/08: [jDG] Computes CNS during deco planning ascent.
 // 2011/11/24: [jDG] Slightly faster and better NDL computation.
-// 2011/12/17: [mH] Remove of the useless debug stuff
+// 2011/12/17: [mH]  Remove of the useless debug stuff
+// 2012/02/24: [jDG] Remove missed stop bug.
+// 2012/02/25: [jDG] Looking for a more stable LOW grad factor reference.
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -153,14 +155,13 @@ static unsigned char calc_nextdecodepth(void);
 //---- Bank 4 parameters -----------------------------------------------------
 #pragma udata bank4=0x400
 
-static float			temp_limit;
 static float			GF_low;
 static float			GF_high;
 static float			GF_delta;
-static float            low_depth;                  // Depth of deepest stop
 static float			locked_GF_step;             // GF_delta / low_depth
 
 static unsigned char    temp_depth_limit;
+static unsigned char    low_depth;                  // Depth of deepest stop
 
 // Simulation context: used to predict ascent.
 static unsigned char	sim_lead_tissue_no;         // Leading compatiment number.
@@ -343,8 +344,8 @@ void assert_failed(PARAMETER short int line)
 static short read_custom_function(PARAMETER unsigned char cf)
 {
 #ifdef CROSS_COMPILE
-    return (cf & 32) ? eeprom.bank1_CF[cf-32].value
-                     : eeprom.bank0_CF[cf   ].value;
+    return (cf & 32) ? eeprom.bank1_CF[cf-32].value.lo
+                     : eeprom.bank0_CF[cf   ].value.lo;
 #else
     extern unsigned char hi, lo;
     extern void getcustom15();
@@ -388,7 +389,7 @@ static void read_buhlmann_coefficients(void)
     _endasm
 #endif
 
-    assert( 0 <= ci && ci < NUM_COMP );
+    assert( ci < NUM_COMP );
 
     // Use an interleaved array (AoS) to access coefficients with a
     // single addressing.
@@ -419,7 +420,7 @@ static void read_buhlmann_times(PARAMETER char period)
     _endasm
 #endif
 
-    assert( 0 <= ci && ci < NUM_COMP );
+    assert( ci < NUM_COMP );
 
     // Integration intervals.
     switch(period)
@@ -470,7 +471,7 @@ static void read_buhlmann_ht(void)
     _endasm
 #endif
 
-    assert( 0 <= ci && ci < NUM_COMP );
+    assert( ci < NUM_COMP );
     {
         overlay rom const float* ptr = &buhlmann_ht[2*ci];
         var_N2_ht = *ptr++;
@@ -522,106 +523,84 @@ static unsigned char calc_nextdecodepth(void)
     //---- ZH-L16 + GRADIENT FACTOR model ------------------------------------
 	if( char_I_deco_model != 0 )
 	{
-        if( depth >= low_depth )
-            sim_limit( GF_low );
-        else
-            sim_limit( GF_high - depth * locked_GF_step );
+        overlay unsigned char first_stop = 0;
+        overlay float p;
 
-        // Stops are needed ?
-        if( sim_lead_tissue_limit > pres_surface )
+        sim_limit( GF_low );
+        p = sim_lead_tissue_limit - pres_surface;
+        if( p <= 0.0f )
+            goto no_deco_stop;          // We can surface directly...
+
+        p *= BAR_TO_METER;
+        if( p < min_depth )
+            goto no_deco_stop;          // First stop is higher than 1' ascent.
+
+        first_stop = 3 * (short)(0.99999 + p*0.333333);
+        assert( first_stop < 128 );
+
+        // Apply correction for the shallowest stop.
+        if( first_stop == 3 )                           // new in v104
+            first_stop = char_I_depth_last_deco;        // Use last 3m..6m instead.
+
+        // Store the deepest point needing a deco stop as the LOW reference for GF.
+        // NOTE: following stops will be validated using this LOW-HIGH gf scale,
+        //       so if we want to keep coherency, we should not validate this stop
+        //       yet, but apply the search to it, as for all the following stops afterward.
+        if( first_stop > low_depth )
         {
-            // Compute tolerated depth, for the leading tissue [metre]:
-            overlay float depth_tol = (sim_lead_tissue_limit - pres_surface) * BAR_TO_METER;
-            overlay unsigned char first_stop;
-
-            // If ascent is VERY fast, this can be lower than the actual depth... Because
-            // this happends only in simulation, just forget about it:
-            if( depth_tol > depth )
-                depth_tol = depth;
-
-            // Deepest stop, in multiples of 3 metres.
-            first_stop = 3 * (short)(0.99999 + depth_tol * 0.33333 );
-            assert( first_stop < 128 );
-
-            // Is it a new deepest needed stop ? If yes this is the reference for
-            // the varying gradient factor. So reset that:
-            if( depth_tol > min_depth && depth_tol > low_depth )
-            {
-                // Store the deepest stop depth, as reference for GF_low.
-                low_depth = depth_tol;
-                locked_GF_step = GF_delta / low_depth;
-            }
-
-#if defined(__DEBUG) || defined(CROSS_COMPILE)
-            {
-                // Extra testing code to make sure the first_stop formula
-                // and rounding provides correct depth:
-                overlay float pres_stop =  first_stop * METER_TO_BAR
-        	                  + pres_surface;
-
-                // Keep GF_low until a first stop depth is found:
-                if( first_stop >= low_depth )
-                    sim_limit( GF_low );
-                else
-                    // current GF is GF_high - alpha (GF_high - GF_low)
-                    // With alpha = currentDepth / maxDepth, hence in [0..1]
-                    sim_limit( GF_high - first_stop * locked_GF_step );
-
-                // upper limit (lowest pressure tolerated), + 1mbar for rounding...:
-                assert( sim_lead_tissue_limit < (pres_stop + 0.001) );
-            }
-#endif
-
-            // Apply correction for the shallowest stop.
-            if( first_stop == 3 )                           // new in v104
-                first_stop = char_I_depth_last_deco;        // Use last 3m..6m instead.
-
-            // Because gradient factor at first_stop might be bigger than at 
-            // current depth, we might ascent a bit more.
-            // Hence, check all stops until one is indeed higher than tolerated presure:
-            while(first_stop > 0)
-            {
-                overlay unsigned char next_stop;            // Next index (0..30)
-                overlay float pres_stop;                    // Next depth (0m..90m)
-
-                // Check max speed, or reaching surface.
-                if( first_stop <= min_depth )
-                    break;
-
-                // So, there is indeed a stop needed:
-                need_stop = 1;
-
-                if( first_stop <= char_I_depth_last_deco )  // new in v104
-                    next_stop = 0;
-                else if( first_stop == 6 )
-                    next_stop = char_I_depth_last_deco;
-                else
-                    next_stop = first_stop - 3;             // Index of next (upper) stop.
-
-        	    pres_stop =  next_stop * METER_TO_BAR
-        	              + pres_surface;
-
-                // Keep GF_low until a first stop depth is found:
-                if( next_stop >= low_depth )
-                    sim_limit( GF_low );
-                else
-                    // current GF is GF_high - alpha (GF_high - GF_low)
-                    // With alpha = currentDepth / maxDepth, hence in [0..1]
-                    sim_limit( GF_high - next_stop * locked_GF_step );
-
-                // upper limit (lowest pressure tolerated):
-                if( sim_lead_tissue_limit >= pres_stop )    // check if ascent to next deco stop is ok
-                    break;
-                
-                // Else, validate that stop and loop...
-                first_stop = next_stop;
-            }
-
-            // next stop is the last validated depth found, aka first_stop
-            temp_depth_limit = first_stop;                  // Stop depth, in metre.
+            low_depth = first_stop;
+            locked_GF_step = GF_delta / first_stop;
         }
-        else
- 			temp_depth_limit = 0;                           // stop depth, in metre.
+
+        // We have a stop candidate.
+        // But maybe ascending to the next stop will diminish the constraint,
+        // because the GF might decrease more than the preassure gradient...
+        while(first_stop > 0)
+        {
+            overlay unsigned char next_stop;            // Next depth (0..90m)
+            overlay float pres_stop;                    // Next pressure (bar)
+
+            // Check max speed, or reaching surface.
+            if( first_stop <= min_depth )
+                goto no_deco_stop;
+
+            if( first_stop <= char_I_depth_last_deco )  // new in v104
+                next_stop = 0;
+            else if( first_stop == 6 )
+                next_stop = char_I_depth_last_deco;
+            else
+                next_stop = first_stop - 3;             // Index of next (upper) stop.
+            
+            // Just a check we are indeed above LOW ref.
+            assert( next_stop < low_depth );
+
+            // Total preassure at the new stop candidate:
+            pres_stop =  next_stop * METER_TO_BAR
+    	              + pres_surface;
+
+            // Keep GF_low until a first stop depth is found:
+            sim_limit( GF_high - next_stop * locked_GF_step );
+
+            // Check upper limit (lowest pressure tolerated):
+            if( sim_lead_tissue_limit >= pres_stop )    // check if ascent to next deco stop is ok
+                goto deco_stop_found;
+
+            // Else, validate that stop and loop...
+            first_stop = next_stop;
+        }
+        assert( first_stop == 0 );
+
+no_deco_stop:
+		temp_depth_limit = 0;
+        goto done;
+
+        // next stop is the last validated depth found, aka first_stop
+deco_stop_found:
+        need_stop = 1;                  // Hit.
+        temp_depth_limit = first_stop;  // Stop depth, in meter.
+
+done:
+        ;
 	}
 	else //---- ZH-L16 model -------------------------------------------------
 	{
@@ -787,7 +766,6 @@ void deco_calc_dive_interval(void)
     calc_dive_interval();
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
 // Find current gas in the list (if any).
 // 
@@ -895,7 +873,7 @@ static unsigned char gas_switch_deepest(void)
 //
 static void gas_switch_set(void)
 {
-    assert( 0 <= sim_gas_last_used && sim_gas_last_used <= NUM_GAS );
+    assert( sim_gas_last_used <= NUM_GAS );
 
     if( sim_gas_last_used == 0 )    // Gas6 = manualy set gas.
     {
@@ -1044,7 +1022,8 @@ static void calc_hauptroutine(void)
         // Values that should be reset just once for the full real dive.
         // This is used to record the lowest stop for the whole dive,
         // Including ACCROSS all simulated ascent.
-        low_depth = 0.0;
+        low_depth = 0;
+        locked_GF_step = 0.0;
 
         // Reset gas switch history.
         backup_gas_used  = sim_gas_last_used  = 0;
@@ -1784,7 +1763,7 @@ static void calc_gradient_factor(void)
 	{
         overlay float rgf;
 
-		if( low_depth < 1.5 )
+		if( low_depth < 3 )
 			rgf = GF_high;
         else
         {
@@ -1977,7 +1956,7 @@ static void calc_dive_interval(void)
     float_desaturation_multiplier = char_I_desaturation_multiplier * (0.01 * SURFACE_DESAT_FACTOR);
     float_saturation_multiplier   = char_I_saturation_multiplier   * 0.01;
 
-    // Make sure SURFACE_DESAT_FACTOR is applyed:
+    // Make sure SURFACE_DESAT_FACTOR is applied:
     backup_model = char_I_deco_model;
     char_I_deco_model = 0;
 
@@ -2213,6 +2192,7 @@ void deco_calc_CNS_planning(void)
         overlay unsigned char i = 0;    // Decostop loop counter
         overlay float actual_ppO2;
         overlay unsigned char time, t;
+        overlay unsigned char deepest_first = (read_custom_function(54) == 0);
 
         //---- Ascent to surface delay
         // NOTE: count as if time is spent with bottom pressure,
@@ -2232,20 +2212,35 @@ void deco_calc_CNS_planning(void)
             sim_dive_mins++;
         }
 
-        //---- Do all further stops
+        //---- Do all further stops ------------------------------------------
         for(i=0; i<NUM_STOPS; ++i)
         {
-            //---- Get next stop
-            time             = char_O_deco_time[i];
-            temp_depth_limit = char_O_deco_depth[i] & 0x7F;
-            if( time == 0 ) break;      // End of table: done.
+            overlay unsigned char switch_gas;
+
+            //---- Get next stop, possibly in reverse order ------------------
+            if( deepest_first )
+            {
+                time             = char_O_deco_time[i];
+                temp_depth_limit = char_O_deco_depth[i];
+            }
+            else
+            {
+                time             = char_O_deco_time[(NUM_STOPS-1)-i];
+                temp_depth_limit = char_O_deco_depth[(NUM_STOPS-1)-i];
+            }
+            if( time == 0 ) continue;
     
-            //---- Gas Switch ?
-            if( char_O_deco_depth[i] & 0x80 )
-                if( gas_switch_deepest() )
-                    gas_switch_set();
-        
-            //---- Convert Depth and N2_ratio to ppO2
+            //---- Gas Switch ? ----------------------------------------------
+            switch_gas = temp_depth_limit & 0x80;   // Switch flag.
+            temp_depth_limit &= 0x7F;               // True stop depth.
+
+            if( switch_gas )
+            {
+                gas_switch_deepest();
+                gas_switch_set();
+            }
+
+            //---- Convert Depth and N2_ratio to ppO2 ------------------------
             actual_ppO2 = (pres_surface + temp_depth_limit * METER_TO_BAR)
                         * (1.0 - calc_N2_ratio - calc_He_ratio);
             if( actual_ppO2 < 0.0  ) actual_ppO2 = 0.0;
@@ -2261,7 +2256,7 @@ void deco_calc_CNS_planning(void)
         }
     }
 
-    // Back to normal mode...
+    //---- Back to normal mode... --------------------------------------------
     char_I_step_is_1min = 0;
     sim_gas_last_depth  = backup_gas_last_depth;
     sim_gas_last_used   = backup_gas_last_used;
@@ -2305,7 +2300,7 @@ void deco_calc_percentage(void)
     RESET_C_STACK
 
     assert( 60 <= char_I_temp && char_I_temp <= 100 );
-    assert(  0 <= int_I_temp  && int_I_temp  < 5760 );      // Less than 4 days = 96h...
+    assert( int_I_temp  < 5760 );      // Less than 4 days = 96h...
 
     int_I_temp = (unsigned short)(((float)int_I_temp * (float)char_I_temp) * 0.01 );
 

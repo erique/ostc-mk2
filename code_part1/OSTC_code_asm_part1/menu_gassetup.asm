@@ -781,6 +781,9 @@ next_gas_page_loop:
 
 	bcf		onesecupdate	; 1 sec. functions done
 
+	btfsc	sleepmode
+	bra		exit_gassetup
+
 	bra		next_gas_page_loop
 
 next_gas_page2:

@@ -1,5 +1,6 @@
 New in 2.22:
 BUGFIX: Missed deco stops issue
+BUGFIX: Timeout for 2nd page of Gas Setup
 
 New in 2.21:
 BUGFIX: GF warning in logbook memory

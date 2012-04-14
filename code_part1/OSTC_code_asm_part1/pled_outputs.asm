@@ -466,6 +466,7 @@ PLED_display_deko:
 	WIN_LEFT	.94
 	WIN_FONT 	FT_MEDIUM
 	WIN_INVERT	.0                      ; Init new Wordprocessor
+	bcf     leftbind
 	PLED_color_code		warn_ceiling    ; Color-code Output
 	lfsr	FSR2,letter
 	movff	char_O_first_deco_depth,lo  ; Ceiling in m
@@ -488,7 +489,6 @@ PLED_display_deko:
 	lfsr	FSR2,letter
 	movff	int_O_ascenttime+0,lo       ; TTS
 	movff	int_O_ascenttime+1,hi       ; on 16bits
-	bcf     leftbind
 	output_16
 	STRCAT_PRINT    "'"
 

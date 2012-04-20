@@ -569,14 +569,30 @@ PLED_simulator_data_2:
 
 ;=============================================================================
 
-PLED_divemode_timeout:
-	btfsc	menubit						; Divemode menu active?
-	return								; Yes, return
-	btfsc	FLAG_apnoe_mode				; In Apnoe mode?
-	return								; Yes, return
-	btfsc	gauge_mode					; In Gauge mode?
-	return								; Yes, return
+PLED_divemode_timeout2:
+	WIN_TOP		.54
+	WIN_LEFT	.112
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.1
+	call    PLED_warnings_color
+	STRCPY  0x94					; "End of dive" icon
+	movff	timeout_counter, lo
+	movff	timeout_counter2, hi
+	call	convert_time				; converts hi:lo in minutes to hours (hi) and minutes (lo)
+	movf	hi,W
+	movff	lo,hi
+	movwf	lo							; exchange lo and hi
+	output_99x
+	PUTC    ':'
+	movff	hi,lo
+	output_99x
+	STRCAT_PRINT " "
+	bsf		timeout_display				; Set Flag
+	call	PLED_standard_color
+	WIN_INVERT	.0
+	return
 
+PLED_divemode_timeout:
 	WIN_TOP		.54
 	WIN_LEFT	.112
 	WIN_FONT 	FT_SMALL
@@ -586,7 +602,7 @@ PLED_divemode_timeout:
 	movff	lo,sub_a+0
 	movff	hi,sub_a+1
 	movff	timeout_counter, sub_b+0
-	movff	timeout_counter2, sub_b+1
+	movff	timeout_counter2, sub_b+1	; Divemode timeout
 	call	sub16						;  sub_c = sub_a - sub_b
 	movff	sub_c+0,lo
 	movff	sub_c+1,hi
@@ -603,6 +619,9 @@ PLED_divemode_timeout:
 	return
 
 PLED_divemode_timeout_clear:
+	btfsc		dekostop_active				; Is a deco stop displayed?
+	call		PLED_display_deko_mask		; Yes, redraw mask
+
 	WIN_TOP		.54
 	WIN_LEFT	.112
 	movlw		d'6'

@@ -1400,7 +1400,19 @@ timeout_divemode:
 	incf	timeout_counter,F
 	movlw	d'0'
 	addwfc	timeout_counter2,F			; timeout is 15bits
-	GETCUSTOM15	d'2'					; diveloop_timeout
+
+	GETCUSTOM15	d'2'					; diveloop_timeout -> lo:hi	
+
+	btfss	dekostop_active			; Is a deco stop displayed?
+	bra		timeout_divemode1		; No, use normal CF02 timeout
+
+	; Yes, use 10minutes counter	
+	movlw	LOW		.600
+	movwf	lo
+	movlw	HIGH	.600
+	movwf	hi
+
+timeout_divemode1:
 	movff	lo,sub_a+0
 	movff	hi,sub_a+1
 	movff	timeout_counter, sub_b+0
@@ -1523,7 +1535,9 @@ set_dive_modes1:
 	bra		set_dive_modes2			; too shallow (rel_pressure<dive_threshold)
 
 	btfsc	realdive				; Dive longer than one minute?
-	clrf 	timeout_counter			; Yes, reset timout counter
+	clrf 	timeout_counter			; Yes, reset timout counter (Low Byte)
+	btfsc	realdive				; Dive longer than one minute?
+	clrf 	timeout_counter2		; Yes, reset timout counter (High Byte)
 
 set_dive_modes_common:
 	bsf		divemode				; (Re-)Set divemode flag
@@ -1539,10 +1553,20 @@ set_dive_modes2:
 
 	btfss	divemode				; Are we still diving?
 	return							; No, return
-
 ; Yes, show divemode timeout
+
+	btfsc	menubit						; Divemode menu active?
+	return								; Yes, return
+	btfsc	FLAG_apnoe_mode				; In Apnoe mode?
+	return								; Yes, return
+	btfsc	gauge_mode					; In Gauge mode?
+	return								; Yes, return
+
+
 	btfss	dekostop_active			; Is a deco stop displayed?
 	call	PLED_divemode_timeout	; No, show the divemode timeout here...
+	btfsc	dekostop_active			; Is a deco stop displayed?
+	call	PLED_divemode_timeout2	; Yes, show red warning divemode counter
 	return
 
 set_dive_modes3:					; High-altitude mode

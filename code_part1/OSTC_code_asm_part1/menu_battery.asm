@@ -144,14 +144,8 @@ menu_battery_state_loop:
 	btfsc	menubit2
 	bra		menu_battery_state_exit		; Exit
 
-	btfsc	divemode
-	goto	restart			; dive started!
-
 	btfsc	onesecupdate
-	call	timeout_surfmode
-
-	btfsc	onesecupdate
-	call	set_dive_modes
+	call	menu_check_dive_and_timeout	; "Goto restart" or sets sleepmode flag
 
 	bcf		onesecupdate	; 1 sec. functions done
 

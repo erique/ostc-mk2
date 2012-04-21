@@ -63,17 +63,10 @@ menu_simulator2:
 menu_simulator_loop:
 	call	check_switches_menu
 menu_simulator_loop2:
-	btfss	onesecupdate
-	bra		menu_simulator_loop3
-
-	call	timeout_surfmode
-	call	set_dive_modes
-	call	test_charger				; check if charger IC is active
-	call	get_battery_voltage			; get battery voltage
-	
+	btfsc	onesecupdate
+	call	menu_check_dive_and_timeout	; "Goto restart" or sets sleepmode flag
 	bcf		onesecupdate				; End of one second tasks
 
-menu_simulator_loop3:
 	btfsc	menubit2
 	goto	menu_simulator_do			; call submenu
 
@@ -82,9 +75,6 @@ menu_simulator_loop3:
 
 	btfsc	sleepmode
 	goto	menu_simulator_exit
-
-	btfsc	divemode
-	goto	restart						; exit menu, restart and enter divemode
 
 	bra		menu_simulator_loop
 
@@ -248,18 +238,13 @@ simulator_show_decoplan1:
         bcf		switch_left
         bcf		switch_right
 simulator_show_decoplan2:
-        btfsc	uart_dump_screen        ; Asked to dump screen contains ?
-        call	dump_screen             ; Yes!
+	btfsc	uart_dump_screen        ; Asked to dump screen contains ?
+	call	dump_screen             ; Yes!
         
-        btfss	onesecupdate
-        bra		simulator_show_decoplan3
-        
-        call	timeout_surfmode
-        call	set_dive_modes
-        call	test_charger            ; check if charger IC is active
-        call	get_battery_voltage     ; get battery voltage
-        
-        bcf		onesecupdate            ; End of one second tasks
+	btfsc	onesecupdate
+	call	menu_check_dive_and_timeout	; "Goto restart" or sets sleepmode flag
+      
+    bcf		onesecupdate            ; End of one second tasks
 
 simulator_show_decoplan3:
 	btfsc	switch_right
@@ -270,9 +255,6 @@ simulator_show_decoplan3:
 
 	btfsc	sleepmode
 	goto	more_menu
-
-	btfsc	divemode
-	goto	restart						; exit menu, restart and enter divemode
 
 	bra		simulator_show_decoplan2
 

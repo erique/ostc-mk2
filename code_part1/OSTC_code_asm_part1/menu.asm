@@ -57,24 +57,12 @@ menu_loop:
 	goto	restart						; exit menu, restart
 
 	btfsc	onesecupdate
-	call	timeout_surfmode
-
-	btfsc	onesecupdate
-	call	set_dive_modes
-
-	btfsc	onesecupdate
-	call	test_charger				; check if charger IC is active
-
-	btfsc	onesecupdate
-	call	get_battery_voltage			; get battery voltage
+	call	menu_check_dive_and_timeout	; "Goto restart" or sets sleepmode flag
 
 	bcf		onesecupdate				; End of one second tasks
 
 	btfsc	sleepmode
 	goto	restart
-
-	btfsc	divemode
-	goto	restart						; exit menu, restart and enter divemode
 
 	bra		menu_loop	
 		
@@ -155,24 +143,12 @@ more_menu_loop:
 	bra		menu							; exit setup menu and return to main menu
 
 	btfsc	onesecupdate
-	call	timeout_surfmode
-
-	btfsc	onesecupdate
-	call	set_dive_modes
-
-	btfsc	onesecupdate
-	call	test_charger				; check if charger IC is active
-
-	btfsc	onesecupdate
-	call	get_battery_voltage			; get battery voltage
+	call	menu_check_dive_and_timeout	; "Goto restart" or sets sleepmode flag
 
 	bcf		onesecupdate				; End of one second tasks
 
 	btfsc	sleepmode
 	bra		menu
-
-	btfsc	divemode
-	goto	restart						; exit menu, restart and enter divemode
 
 	bra		more_menu_loop	
 
@@ -219,22 +195,14 @@ setup_menu_loop:
 
 	btfss	menubit
 	goto	restart						; exit menu, restart and enter surfmode
+
 	btfsc	onesecupdate
-	call	timeout_surfmode
-	btfsc	onesecupdate
-	call	set_dive_modes
-	btfsc	onesecupdate
-	call	test_charger				; check if charger IC is active
-	btfsc	onesecupdate
-	call	get_battery_voltage			; get battery voltage
+	call	menu_check_dive_and_timeout	; "Goto restart" or sets sleepmode flag
 
 	bcf		onesecupdate				; End of one second tasks
 
 	btfsc	sleepmode
 	goto	restart						; exit menu, restart and enter surfmode
-
-	btfsc	divemode
-	goto	restart						; exit menu, restart and enter divemode
 
 	bra		setup_menu_loop	
 
@@ -378,21 +346,12 @@ more_setup_menu_loop:
 	goto	restart						; exit menu, restart and enter surfmode
 
 	btfsc	onesecupdate
-	call	timeout_surfmode
-	btfsc	onesecupdate
-	call	set_dive_modes
-	btfsc	onesecupdate
-	call	test_charger				; check if charger IC is active
-	btfsc	onesecupdate
-	call	get_battery_voltage			; get battery voltage
+	call	menu_check_dive_and_timeout	; "Goto restart" or sets sleepmode flag
 
 	bcf		onesecupdate				; End of one second tasks
 
 	btfsc	sleepmode
 	goto	setup_menu					; exit menu
-
-	btfsc	divemode
-	goto	restart						; exit menu, restart and enter divemode
 
 	bra		more_setup_menu_loop	
 
@@ -575,4 +534,11 @@ show_debugstate2:
 	tstfsz	EEDATA
 	bra		show_decotype3
 	DISPLAYTEXT	.130			; ON
+	return
+
+menu_check_dive_and_timeout:
+	call	set_dive_modes	; Check thresholds
+	call	timeout_surfmode	; Sets sleepmode flag if timeout
+	btfsc	divemode
+	goto	restart			; dive started!
 	return

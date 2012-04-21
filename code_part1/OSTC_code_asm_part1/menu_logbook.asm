@@ -233,18 +233,12 @@ menu_logbook_loop:
 	bra			display_profile_or_exit		; view details/profile or exit logbook
 
 	btfsc		onesecupdate
-	call		timeout_surfmode			; Timeout
-
-	btfsc		onesecupdate
-	call		set_dive_modes				; Check, if divemode must be entered
+	call		menu_check_dive_and_timeout	; "Goto restart" or sets sleepmode flag
 
 	bcf			onesecupdate				; one second update 
 
 	btfsc		sleepmode					; Timeout?
 	goto		menu						; Yes
-
-	btfsc		divemode
-	goto		restart						; Enter Divemode if required
 
 	goto		menu_logbook_loop			; Wait for something to do
 
@@ -844,15 +838,13 @@ display_profile_loop:
 	bra			exit_profileview			; back to list
 	btfsc		menubit3					; ENTER?
 	bra			profileview_page2			; Switch to Page2 of profile view
+
 	btfsc		onesecupdate
-	call		timeout_surfmode			; timeout
-	btfsc		onesecupdate
-	call		set_dive_modes				; check, if divemode must be entered
+	call		menu_check_dive_and_timeout	; "Goto restart" or sets sleepmode flag
 	bcf			onesecupdate				; one second update
+
 	btfsc		sleepmode					; Timeout?
 	bra			exit_profileview			; back to list
-	btfsc		divemode
-	goto		restart						; Enter Divemode if required
 	bra			display_profile_loop		; wait for something to do
 
 ;=============================================================================
@@ -1020,14 +1012,10 @@ display_profile2_loop:
 	btfsc		menubit3					; ENTER?
 	bra			profileview_page3			; Switch to Page3 of profile view
 	btfsc		onesecupdate
-	call		timeout_surfmode			; timeout
-	btfsc		onesecupdate
-	call		set_dive_modes				; check, if divemode must be entered
+	call		menu_check_dive_and_timeout	; "Goto restart" or sets sleepmode flag
 	bcf			onesecupdate				; one second update
 	btfsc		sleepmode					; Timeout?
 	bra			exit_profileview			; back to list
-	btfsc		divemode
-	goto		restart						; Enter Divemode if required
 	bra			display_profile2_loop		; wait for something to do
 
 profileview_page3:
@@ -1148,14 +1136,10 @@ display_profile3_loop:
 	btfsc		menubit3					; ENTER?
 	bra			exit_profileview			; back to list
 	btfsc		onesecupdate
-	call		timeout_surfmode			; timeout
-	btfsc		onesecupdate
-	call		set_dive_modes				; check, if divemode must be entered
+	call		menu_check_dive_and_timeout	; "Goto restart" or sets sleepmode flag
 	bcf			onesecupdate				; one second update
 	btfsc		sleepmode					; Timeout?
 	bra			exit_profileview			; back to list
-	btfsc		divemode
-	goto		restart						; Enter Divemode if required
 	bra			display_profile3_loop		; wait for something to do
 	
 ;=============================================================================

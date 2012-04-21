@@ -192,14 +192,8 @@ gassetup_list_loop:
 	btfsc	menubit2
 	bra		do_gassetup_list            ; call gas-specific submenu
 
-	btfsc	divemode
-	goto	restart                     ; dive started!
-
 	btfsc	onesecupdate
-	call	timeout_surfmode
-
-	btfsc	onesecupdate
-	call	set_dive_modes
+	call	menu_check_dive_and_timeout	; "Goto restart" or sets sleepmode flag
 
 	bcf		onesecupdate                ; 1 sec. functions done
 
@@ -425,14 +419,8 @@ gassetup_loop:
 	btfsc	menubit2
 	bra		do_gassetup		; call submenu
 
-	btfsc	divemode
-	goto	restart			; dive started!
-
 	btfsc	onesecupdate
-	call	timeout_surfmode
-
-	btfsc	onesecupdate
-	call	set_dive_modes
+	call	menu_check_dive_and_timeout	; "Goto restart" or sets sleepmode flag
 
 	bcf		onesecupdate	; 1 sec. functions done
 
@@ -770,14 +758,8 @@ next_gas_page_loop:
 	btfsc	menubit2
 	bra		do_next_gas_page		; call submenu
 
-	btfsc	divemode
-	goto	restart			; dive started!
-
 	btfsc	onesecupdate
-	call	timeout_surfmode
-
-	btfsc	onesecupdate
-	call	set_dive_modes
+	call	menu_check_dive_and_timeout	; "Goto restart" or sets sleepmode flag
 
 	bcf		onesecupdate	; 1 sec. functions done
 

@@ -136,26 +136,20 @@ menu_const_ppO2_loop:
 	call	check_switches_logbook
 
 	btfsc	menubit3
-	bra	menu_const_ppO22	; move cursor
+	bra		menu_const_ppO22	; move cursor
 
 	btfsc	menubit2
-	bra	do_menu_const_ppO2		; call submenu
-
-	btfsc	divemode
-	goto	restart			; dive started!
+	bra		do_menu_const_ppO2		; call submenu
 
 	btfsc	onesecupdate
-	call	timeout_surfmode
-
-	btfsc	onesecupdate
-	call	set_dive_modes
+	call	menu_check_dive_and_timeout	; "Goto restart" or sets sleepmode flag
 
 	bcf		onesecupdate	; 1 sec. functions done
 
 	btfsc	sleepmode
-	bra	exit_menu_const_ppO2
+	bra		exit_menu_const_ppO2
 
-	bra	menu_const_ppO2_loop
+	bra		menu_const_ppO2_loop
 
 menu_const_ppO22:
 	incf	menupos,F

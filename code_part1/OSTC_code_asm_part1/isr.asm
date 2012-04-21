@@ -309,7 +309,6 @@ comp_air_pressure:
 		return
 
 sensor_int_state1_plus_restart:
-;;;		bcf			pressure_refresh    ; clear flags
 		clrf		amb_pressure_avg+0  ; pressure average registers
 		clrf		amb_pressure_avg+1
 		clrf		temperature_avg+0

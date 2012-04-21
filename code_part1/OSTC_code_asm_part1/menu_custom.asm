@@ -17,8 +17,8 @@
 
 ; Menu "Custom Functions", Custom Functions checker (Displays permanent warning if critical custom functions are altered)
 ; written by: Matthias Heinrichs, info@heinrichsweikamp.com
-; written: 05/10/30
-; last updated: 2010/12/11
+; written: 051030
+; last updated: 120421
 ; known bugs:
 ; ToDo: 
 
@@ -34,6 +34,16 @@
 
 ;Second Bank of Custom Functions:
 ; The custom functions are stored in the internal EEPROM after 0x180
+; any custom function occupies 4 byte:
+; 2 byte (low:high) store the default value, reset from menu "reset"
+; if bit16=1 then the custrom function is 15bit value, if not it's a 8bit value
+; 2 byte (low:high) store the actual value
+; defaults for custom functions are in menu "reset"
+; get values with GETCUSTOM8	.x with x=0...32 for 8 Bit values (stored in WREG)
+; or with GETCUSTOM15	.x with x=0...32 for 15 Bit values (stored in lo and hi)
+
+;Third Bank of Custom Functions:
+; The custom functions are stored in the internal EEPROM after 0x280
 ; any custom function occupies 4 byte:
 ; 2 byte (low:high) store the default value, reset from menu "reset"
 ; if bit16=1 then the custrom function is 15bit value, if not it's a 8bit value
@@ -68,7 +78,7 @@ CF_INT15	EQU	0x80; Default display. Flag for 15bit, typeless values.
 
 ;=============================================================================
 ; Overlay our tmp data in ACCESS0 bank
-    CBLOCK  0x010           ; Keep space for aa_wordprocessor module.
+    CBLOCK tmp                  ; Into safe (from C library) area.
         cf32_x4             ; CF# modulus 32, time 4.
         cf_type             ; Type of the edited CF
         cf_default:2
@@ -76,6 +86,9 @@ CF_INT15	EQU	0x80; Default display. Flag for 15bit, typeless values.
         cf_min     
         cf_max     
         cf_step             ; Value ad add/substract: 1, 10, 100
+		cf_page_number		; CF page number (0: 0-31, 1: 32-63)
+		cf_title_text		; # of text for title
+		cf_descriptor_text	; # of descriptor text offset
     ENDC
 
 ;=============================================================================
@@ -87,22 +100,27 @@ GETCUSTOM8	macro	custom8
 
 getcustom8_1:
 	; # number of requested custom function in wreg
-	movwf	customfunction_temp2
-	
-	movlw	d'31'
-	cpfsgt	customfunction_temp2
-	bra		getcustom8_2			; Lower bank
-	
-	movlw	d'1'					; Upper Bank
-	movwf	EEADRH
-	movlw	d'32'
-	subwf	customfunction_temp2,F
-	bra		getcustom8_3
+	movwf	customfunction_temp1
 
-getcustom8_2:
-	clrf	EEADRH
+	clrf	EEADRH	
+	movlw	d'31'
+	cpfsgt	customfunction_temp1
+	bra		getcustom8_3			; bank 0
+
+	movlw	d'1'
+	movwf	EEADRH					; bank 1
+	movlw	d'32'
+	subwf	customfunction_temp1,F
+	movlw	d'63'
+	cpfsgt	customfunction_temp1
+	bra		getcustom8_3			; bank 1
+
+	movlw	d'2'
+	movwf	EEADRH					; bank 2
+	movlw	d'64'
+	subwf	customfunction_temp1,F
 getcustom8_3:
-	movf	customfunction_temp2,W
+	movf	customfunction_temp1,W
 	mullw	d'4'
 	movf	PRODL,W			; x4 for adress
 	addlw	d'130'
@@ -120,21 +138,27 @@ GETCUSTOM15	macro	number
     global  getcustom15
 getcustom15:
 	; # number of requested custom function in wreg
-	movwf	customfunction_temp2
+	movwf	customfunction_temp1
 	
+	clrf	EEADRH	
 	movlw	d'31'
-	cpfsgt	customfunction_temp2
-	bra		getcustom15_2			; Lower bank
-	
-	movlw	d'1'					; Upper Bank
-	movwf	EEADRH
+	cpfsgt	customfunction_temp1
+	bra		getcustom15_3			; bank 0
+
+	movlw	d'1'
+	movwf	EEADRH					; bank 1
 	movlw	d'32'
-	subwf	customfunction_temp2,F
-	bra		getcustom15_3
-getcustom15_2:
-	clrf	EEADRH
+	subwf	customfunction_temp1,F
+	movlw	d'63'
+	cpfsgt	customfunction_temp1
+	bra		getcustom15_3			; bank 1
+
+	movlw	d'2'
+	movwf	EEADRH					; bank 2
+	movlw	d'64'
+	subwf	customfunction_temp1,F
 getcustom15_3:
-	movf	customfunction_temp2,W
+	movf	customfunction_temp1,W
 	mullw	d'4'
 	movf	PRODL,W			; x4 for adress
 	addlw	d'130'
@@ -148,15 +172,22 @@ getcustom15_3:
 	return					; return
 
 menu_custom_functions_page2:
-	movlw	d'154'			; start of custom function descriptors		
-	movwf	customfunction_temp1
-	bsf		customfunction_page	; Use Page II...
+	movlw	.1
+	movff	WREG,cf_page_number		; CF page number (0: 0-31, 1: 32-63)
+	movlw	.186
+	movff	WREG,cf_title_text		; # of text for title
+	movlw	.154
+	movff	WREG,cf_descriptor_text	; # of descriptor text offset
 	bra		menu_custom_functions0
 
 menu_custom_functions:
-	movlw	d'36'			; start of custom function descriptors		
-	movwf	customfunction_temp1
-	bcf		customfunction_page	; Use Page I...
+	movlw	.36
+	movff	WREG,cf_descriptor_text	; # of descriptor text offset
+	movlw	.27
+	movff	WREG,cf_title_text		; # of text for title
+	movlw	.0
+	movff	WREG,cf_page_number		; CF page number (0: 0-31, 1: 32-63)
+
 	
 menu_custom_functions0:
 	bsf		leftbind
@@ -175,25 +206,14 @@ menu_custom_functions0:
 
 	call	PLED_topline_box
 	WIN_INVERT	.1	; Init new Wordprocessor	
-
-	btfss	customfunction_page		;
-	bra		menu_custom_functions10
-	DISPLAYTEXT	.186				; Custom FunctionsII
-	bra		menu_custom_functions11
-	
-menu_custom_functions10:
-	DISPLAYTEXT	.27					; Custom FunctionsI
-	
-menu_custom_functions11:
+	movff	cf_title_text,WREG		; Title text in low bank
+	call	displaytext_1_low
 	WIN_INVERT	.0	; Init new Wordprocessor	
 
 menu_custom_functions1:
 	call	PLED_standard_color         ; Trash EEADRH...
 
-	movlw	d'1'                        ; So restore it !
-	btfss	customfunction_page	        ; Use Page II ?
-	movlw	d'0'                        ; NO: this is page 1.
-	movwf	EEADRH
+	movff	cf_page_number,EEADRH		; CF page number (0: 0-31, 1: 32-63)
 
 	clrf	timeout_counter2
 	bcf		menubit2
@@ -203,15 +223,14 @@ menu_custom_functions1:
 	lfsr	FSR2,letter
 	movff	decodata+0,lo               ; decodata == CF number % 32
 
-	movlw	d'0'
-	btfsc	customfunction_page			; Add offset for display in CF menu II
-	movlw	d'32'
-	addwf	lo,F
+	movff	cf_page_number,WREG			; CF page number (0: 0-31, 1: 32-63)
+	mullw	.32							; CF page number * 32 -> PRODL:PRODH
+	movf	PRODL,W
+	addwf	lo,F						; Add offset for display in CF menu
 
 	output_99x
 	STRCAT_PRINT ": "
-
-	movf	customfunction_temp1,W		; start of custom function descriptors		
+	movff	cf_descriptor_text,WREG		; start of custom function descriptors		
 	addwf	decodata+0,W				; add # of current custom function, place result in wreg
 	call	displaytext_1_low           ; shows descriptor
 
@@ -345,7 +364,7 @@ customfunctions3:
 ;-----------------------------------------------------------------------------
 ; Read default value, type, and constraints
 ;
-; Input: customfunction_page, cf32_x4
+; Input: cf32_x4
 ; Output: cf_default, cf_type, cf_min, cf_max.
 ; Trashes: TBLPTR
 
@@ -357,12 +376,13 @@ cf_read_default:
     movlw   UPPER(cf_default_table0)
     movwf   TBLPTRU
 
-    movlw   0
-	btfsc	customfunction_page	        ; Page II CF# ?
-	movlw   0x80                        ; YES: add 128 to ptr.
+	movff	cf_page_number,WREG			; CF page number (0: 0-31, 1: 32-63)
+	mullw	0x80						; CF page number * 0x80 -> PRODL:PRODH
+
+	movf	PRODL,W
 	addwf   cf32_x4,W                   ; Add 4 x (CF index modulus 32)
     addwf   TBLPTRL,F                   ; And to a 8+16 add into TBLPTR
-    movlw   0                           ; (keep carry)
+	movf	PRODH,W
     addwfc  TBLPTRH,F                   ; Propagate to 16bit (but not 24bits).
 
     tblrd*+
@@ -649,10 +669,7 @@ cf_fill_line:                   ; Mattias: No flicker if u clear just what you n
 ;-----------------------------------------------------------------------------
 
 do_customfunction:
-	CLRF	EEADRH					
-	movlw	d'1'
-	btfsc	customfunction_page
-	movwf	EEADRH					; Reset EEADRH correct (Was adjusted in check_timeout...)
+	movff	cf_page_number,EEADRH		; CF page number (0: 0-31, 1: 32-63)
 
 	dcfsnz	menupos,F
 	bra		next_customfunction
@@ -668,10 +685,8 @@ do_customfunction:
 ;-----------------------------------------------------------------------------
 
 exit_customfunctions:
-	movlw	d'2'					; Return to correct list entry
-	btfss	customfunction_page
-	movlw	d'1'
-	movwf	menupos					; 
+	movff	cf_page_number,menupos	; CF page number (0: 0-31, 1: 32-63)
+	incf	menupos,F
 	clrf	EEADRH					; Clear EEADRH !
 	goto	setup_menu2				; exit...
 
@@ -822,17 +837,34 @@ adjust_cfn_value3:
 ;       they are all ok.
 
 check_customfunctions:
-    ; Did we finished the two sweeps ?
-    btfsc   cf_checker_counter,7        ; Already at position 128 ?
-    return                              ; YES: just do nothing.
+	movlw	max_custom_number+1			; Defined in definitions.asm
+	cpfseq	cf_checker_counter			; All tested?
+	bra		check_customfunctions1		; No, continue
+	clrf	cf_checker_counter			; clear counter
+	return								; YES: just do nothing.
 
-    ; Setup cf32_x4 and cf page bit:
+check_customfunctions1:
+	; Setup cf_page_number
+	movlw	.0
+	movff	WREG,cf_page_number
+	movlw	d'31'
+	cpfsgt	cf_checker_counter
+	bra		check_customfunctions2	; CF I
+
+	movlw	.1
+	movff	WREG,cf_page_number
+	movlw	d'63'
+	cpfsgt	cf_checker_counter
+	bra		check_customfunctions2	; CF II
+
+	movlw	.2
+	movff	WREG,cf_page_number		; CF III
+	
+check_customfunctions2:
+    ; Setup cf32_x4
     movf    cf_checker_counter,W
     rlcf    WREG                        ; x4
     rlcf    WREG
-    bcf     customfunction_page
-    btfsc   WREG,7   
-    bsf     customfunction_page         ; Setup CF page bit.
     andlw   4*.31
     movwf   cf32_x4
     
@@ -842,7 +874,7 @@ check_customfunctions:
     bz      check_failed                ; 0 == FAILED.
     
     ; Passed: Simple loop until 128 is reached:
-    incf    cf_checker_counter          ; Next CF to check.
+    incf    cf_checker_counter,F        ; Next CF to check.
     bra     check_customfunctions       ; And loop until 128 reached (ie twice)
     
 check_failed:

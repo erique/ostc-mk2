@@ -346,8 +346,7 @@ apnoe_max_pressure      res 2   ; Max. Pressure in Apnoe mode
 apnoe_timeout_counter   res 1   ; counts minutes for apnoe timeout
 apnoe_surface_mins      res 1   ; Surface interval mins for Apnoe mode
 apnoe_surface_secs      res 1   ; Surface interval secs for Apnoe mode
-customfunction_temp1    res 1   ; start of custom function descriptors 
-customfunction_temp2    res 1   ; used in GETCUSTOM8 and GETCUSTOM15
+customfunction_temp1    res 1   ; used in GETCUSTOM8 and GETCUSTOM15
 
 decoplan_page           res 1   ; used in PLED_MultiGF,...
 temp10                  res 2   ; used in customview
@@ -537,7 +536,7 @@ ASSERT_BANK1    MACRO   tag
 #DEFINE	neg_flag_isr			flag12,3	;=1: ISR Negative flag (Math)
 #DEFINE	select_bailoutgas		flag12,4	;=1: Select Bailout instead of Setpoint in Gaslist
 #DEFINE	FLAG_apnoe_mode			flag12,5	;=1: Apnoe mode selected
-#DEFINE	customfunction_page		flag12,6	;=1: Use 2nd Page of Custom Functions
+;#DEFINE	unused		flag12,6	;=1: 
 #DEFINE	uart_send_int_eeprom2	flag12,7	;=1: Send internal EEPROM BANK 1
 
 #DEFINE	internal_eeprom_write2	flag13,0	;=1: start routine to access internal EEPROM BANK 1 via the UART

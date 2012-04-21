@@ -13,10 +13,10 @@
 ;    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ; provides routines for external EEPROM via I2C
 ; written by: Matthias Heinrichs, info@heinrichsweikamp.com
-; written: 10/30/05
-; last updated: 08/21/06
+; written: 051030
+; last updated: 120421
 ; known bugs:
-; ToDo: use 2nd 32KB from external EEPROM for something
+; ToDo: 
 
 incf_eeprom_address	macro	ext_ee_temp1	; Will increase eeprom_address:2 with the 8Bit value "ext_ee_temp1"
     	movlw	ext_ee_temp1                
@@ -60,13 +60,7 @@ write_external_eeprom:				; data in WREG
 	movlw		d'0'
 	addwfc		eeprom_address+1,F
 	return
-;	btfss		eeprom_address+1,7		; at address 8000?
-;	return								; no, return
-;
-;	clrf		eeprom_address+0		; Clear eeprom address
-;	clrf		eeprom_address+1
-;	return
-;
+
 write_external_eeprom_block:			; Writes a block of 64Byte (one page in external EEPROM without stop condition
 #ifdef TESTING
 	; When Simulating with MPLabSIM, there is no way to emulate external EEPROM...
@@ -84,12 +78,6 @@ write_external_eeprom_block:			; Writes a block of 64Byte (one page in external 
 	addwfc		eeprom_address+1,F
 	return
 
-;	btfss		eeprom_address+1,7	; at address 8000
-;	return						; no, return
-;	
-;	clrf		eeprom_address+0		; Clear eeprom address
-;	clrf		eeprom_address+1
-;	return
 I2CWRITE_BLOCK:
 	movwf		ext_ee_temp1				; Data byte in WREG
 	bsf			SSPCON2,SEN			; Start condition
@@ -240,13 +228,6 @@ I2CREAD2_2:
 	movlw		d'0'
 	addwfc		eeprom_address+1,F
 	return
-;	btfss		eeprom_address+1,7	; at 0x8000?
-;	return		; no, return
-;	
-;	clrf		eeprom_address+0	; Yes, clear address
-;	clrf		eeprom_address+1
-;	return
-;
 I2CREAD3:						; block read start with automatic address increase 
 	rcall		I2CREAD_COMMON
 	; no Stop condition here

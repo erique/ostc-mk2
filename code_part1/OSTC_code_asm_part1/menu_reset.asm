@@ -108,65 +108,65 @@ CFn set     -1
 cf_default_table0:
     ;---- BANK0 custom function defaults -------------------------------------
     ;                          DEFAULT   MIN     MAX
-	CF_DEFAULT    CF_CENTI,	    d'100', d'50',  d'250'  ; dive_threshold	        100cm
-	CF_DEFAULT    CF_CENTI,	    d'30',  d'10',  d'100'  ; surf_threshold        	30cm
-	CF_DEFAULT    CF_INT15,	    d'240', d'0',   d'600'  ; diveloop_timeout      	240s
-	CF_DEFAULT    CF_SEC,	    d'120', d'30',  d'240'  ; surfloop_timeout	        120s
-	CF_DEFAULT    CF_SEC,	    d'5',   d'1',   d'30'   ; premenu_timeout	        5s
+	CF_DEFAULT    CF_CENTI,	    d'100', d'50',  d'250'  ; CF00 dive_threshold	        100cm
+	CF_DEFAULT    CF_CENTI,	    d'30',  d'10',  d'100'  ; CF01 surf_threshold        	30cm
+	CF_DEFAULT    CF_INT15,	    d'240', d'0',   d'600'  ; CF02 diveloop_timeout      	240s
+	CF_DEFAULT    CF_SEC,	    d'120', d'30',  d'240'  ; CF03 surfloop_timeout	        120s
+	CF_DEFAULT    CF_SEC,	    d'5',   d'1',   d'30'   ; CF04 premenu_timeout	        5s
 
-	CF_DEFAULT    CF_INT8, 	    d'7',   d'3',   d'18'   ; minimum_velocity		    7min/min
+	CF_DEFAULT    CF_INT8, 	    d'7',   d'3',   d'18'   ; CF05 minimum_velocity		    7min/min
 	CF_DEFAULT    CF_INT15,	    d'1160',d'950', 0    	; pressure_offset_divemode	1160mbar
 	CF_DEFAULT    CF_INT15,	    d'1080',d'1080', 0   	; max_surfpressure		    1080mbar
 	CF_DEFAULT    CF_PERCENT,	d'20',  d'1',  d'99'   	; min_gradient_factor		20%
 	CF_DEFAULT    CF_PERCENT,	d'20',  d'1',  d'22'	; oxygen_threshold			22%
 
-	CF_DEFAULT    CF_SEC,	    d'45',  d'5',   d'60'   ; dive_menu_timeout		    45s
+	CF_DEFAULT    CF_SEC,	    d'45',  d'5',   d'60'   ; CF10 dive_menu_timeout		    45s
 	CF_DEFAULT    CF_PERCENT,   d'110', d'110', d'200' 	; saturation_multiplier		x1.10
 	CF_DEFAULT    CF_PERCENT,   d'90',  d'50',  d'90'   ; desaturation_multiplier	x0.90
 	CF_DEFAULT    CF_PERCENT,	d'60',  d'60',  d'100'	; nofly_time_ratio			60%
 	CF_DEFAULT    CF_PERCENT,	d'100', d'50',  d'100'  ; gradient_factor_alarm1	100%
 
-	CF_DEFAULT    CF_PERCENT,	d'10',  d'0',  	d'100'  ; cns_display_surface		10%
+	CF_DEFAULT    CF_PERCENT,	d'10',  d'0',  	d'100'  ; CF15 cns_display_surface		10%
 	CF_DEFAULT    CF_DECI,	    d'10',  d'0',  	d'10'	; deco_distance_for_sim		1m
 	CF_DEFAULT    CF_CENTI,     d'019', d'19', 	d'021'	; ppo2_warning_low			0.19 bar
 	CF_DEFAULT    CF_CENTI,     d'160', d'0', 	d'160'  ; ppo2_warning_high			1.60 bar
 	CF_DEFAULT    CF_CENTI,     d'140', d'0', 	d'150'	; ppo2_display_high			1.40 bar
     
-	CF_DEFAULT    CF_INT8,	    d'10',  d'1',   d'120'  ; sampling_rate				10s
+	CF_DEFAULT    CF_INT8,	    d'10',  d'1',   d'120'  ; CF20 sampling_rate				10s
 	CF_DEFAULT    CF_INT8,	    d'6',   d'0',   d'15'   ; sampling_divisor_temp		/6
 	CF_DEFAULT    CF_INT8,	    d'6',   d'0',   d'15'   ; sampling_divisor_deco		/6
 	CF_DEFAULT    CF_INT8,	    d'6',   d'0',   d'15'   ; sampling_divisor_gf		/6
 	CF_DEFAULT    CF_INT8,	    d'0',   d'0',   d'15'   ; sampling_divisor_ppo2		never
 
-	CF_DEFAULT    CF_INT8,	    d'0',   d'0',   d'15'   ; sampling_divisor_deco2	never
+	CF_DEFAULT    CF_INT8,	    d'0',   d'0',   d'15'   ; CF25 sampling_divisor_deco2	never
 	CF_DEFAULT    CF_INT8,	    d'12',  d'0',   d'15'   ; sampling_divisor_cns		/12
 	CF_DEFAULT    CF_PERCENT,	d'20',  d'5',   d'75'   ; cns_display_high			20%
 	CF_DEFAULT    CF_INT15,	    d'0',   d'0',   0 		; logbook_offset			No Offset, but 15Bit value
 	CF_DEFAULT    CF_INT8,	    d'3',   d'2',   d'6'	; last_deco_depth			3m
 
-	CF_DEFAULT    CF_SEC,	    d'10',  d'1',   d'15'   ; timeout_apnoe_mode		10min
-	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; show_voltage_value		=1 Show value instead of symbol, =0 Show Symbol
+	CF_DEFAULT    CF_SEC,	    d'10',  d'1',   d'15'   ; CF30 timeout_apnoe_mode		10min
+	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; CF31 show_voltage_value		=1 Show value instead of symbol, =0 Show Symbol
 
     ;---- BANK1 custom function defaults -------------------------------------
 cf_default_table1:
     ;                          DEFAULT   MIN     MAX
-	CF_DEFAULT    CF_PERCENT,   d'30',  d'5',  	d'90'   ; GF_low_default			30%
-	CF_DEFAULT    CF_PERCENT,   d'90', 	d'30',  d'95'   ; GF_high_default			90%
-	CF_DEFAULT    CF_COLOR,     d'199', 0,      0 		; color_battery_surface		Color Battery sign: Deep blue
-	CF_DEFAULT    CF_COLOR,     d'255', 0,      0 		; color_standard1			Color Standard: White
-	CF_DEFAULT    CF_COLOR,     d'62',  0,      0 		; color_divemask			Color Divemask: Light green
+	CF_DEFAULT    CF_PERCENT,   d'30',  d'5',  	d'90'   ; CF32 GF_low_default			30%
+	CF_DEFAULT    CF_PERCENT,   d'90', 	d'30',  d'95'   ; CF33 GF_high_default			90%
+	CF_DEFAULT    CF_COLOR,     d'199', 0,      0 		; CF34 color_battery_surface	Color Battery sign: Deep blue
+	CF_DEFAULT    CF_COLOR,     d'255', 0,      0 		; CF35 color_standard1			Color Standard: White
+	CF_DEFAULT    CF_COLOR,     d'62',  0,      0 		; CF36 color_divemask			Color Divemask: Light green
     
 	CF_DEFAULT    CF_COLOR,     d'224', 0,      0 		; CF37 color_warnings			Color Warnings: Red
-	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; show_seconds_divemode		=1 Show the seconds in Divemode
-	CF_DEFAULT    CF_BOOL,     	0,      0,      0 		; Adjust SetPoint if Diluent ppO2 > SetPoint
-	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0       ; warn_ceiling_divemode		=1 Warn ceiling violation in divemode
-	CF_DEFAULT    CF_BOOL,      d'1',   0,      0 		; Show mix type is surfmode
+	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; CF38 show_seconds_divemode		=1 Show the seconds in Divemode
+	CF_DEFAULT    CF_BOOL,     	0,      0,      0 		; CF39 Adjust SetPoint if Diluent ppO2 > SetPoint
+	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0       ; CF40 warn_ceiling_divemode		=1 Warn ceiling violation in divemode
+	CF_DEFAULT    CF_BOOL,      d'1',   0,      0 		; CF41 Show mix type is surfmode
 
-	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0       ; blink_gas_divemode 		=1 blink better gas
-	CF_DEFAULT    CF_INT15,     d'13000', 0,   d'13000' ; color_warn_depth_mbar		Warn depths
-	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'	; color_warn_cns_percent    Warn-%
-	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'  ; color_warn_gf_percent		Warn-%
-	CF_DEFAULT    CF_CENTI,     d'161', d'100', d'161'  ; color_warn_ppo2_cbar		ppO2 warn
+	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0       ; CF42 blink_gas_divemode 		=1 blink better gas
+	CF_DEFAULT    CF_INT15,     d'13000', 0,   d'13000' ; CF43 color_warn_depth_mbar		Warn depths
+	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'	; CF44 color_warn_cns_percent    Warn-%
+	CF_DEFAULT    CF_PERCENT,	d'101', d'50',  d'101'  ; CF45 color_warn_gf_percent		Warn-%
+	CF_DEFAULT    CF_CENTI,     d'161', d'100', d'161'  ; CF46 color_warn_ppo2_cbar		ppO2 warn
 
 	CF_DEFAULT    CF_INT8,	    d'15',  d'7',   d'20'	; CF47 color_warn_celocity_mmin	warn at xx m/min
 	CF_DEFAULT    CF_SEC+CF_NEG,d'0',  -d'120' ,d'120'  ; CF48 time_correction_value_default	Adds to Seconds on Midnight
@@ -188,9 +188,45 @@ cf_default_table1:
 	                
 	CF_DEFAULT    CF_PERCENT,   .4,     .0,     .100	; CF62 pSCR O2 Drop
 	CF_DEFAULT    CF_INT8,      .10,    .0,     .100 	; CF63 pSCR counterlung ratio
-;	CF_DEFAULT    CF_INT15,     0,      0,      0 		; UNUSED
 cf_default_table2:
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF64 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF65 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF66 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF67 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF68 unused
 
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF69 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF70 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF71 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF72 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF73 unused
+
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF74 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF75 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF76 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF77 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF78 unused
+
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF79 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF80 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF81 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF82 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF83 unused
+
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF84 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF85 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF87 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF88 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF89 unused
+
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF90 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF91 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF92 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF93 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF94 unused
+	
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF95 unused	
+cf_default_table3:
 ;=============================================================================
 
 menu_reset:
@@ -395,13 +431,12 @@ cf_bank0_loop:
 	movf    TBLPTRL,W
 	sublw   LOW (cf_default_table1)
 	bz      reset_all_cf_bank1
-
 	rcall	reset_customfunction	; saves default and current value
 	bra     cf_bank0_loop
 	
 reset_all_cf_bank1:
 	movlw	d'1'
-	movwf	EEADRH					; EEPROM BANK 1 !!
+	movwf	EEADRH					; EEPROM BANK 1
 	movlw	d'127'					; address of low byte of first custom function
 	movwf	EEADR
 	
@@ -409,19 +444,32 @@ cf_bank1_loop:
 	; Did we already read another 32 (decimal) words or double-words ?
 	movf    TBLPTRL,W
 	sublw   LOW (cf_default_table2)
-	bz      cf_bank1_end
-
+	bz      reset_all_cf_bank2
 	rcall	reset_customfunction	; saves default and current value
 	bra     cf_bank1_loop
 
-cf_bank1_end:
-	clrf	EEADRH					; EEPROM BANK 0 !
+reset_all_cf_bank2:
+	movlw	d'2'
+	movwf	EEADRH					; EEPROM BANK 2
+	movlw	d'127'					; address of low byte of first custom function
+	movwf	EEADR
+	
+cf_bank2_loop:
+	; Did we already read another 32 (decimal) words or double-words ?
+	movf    TBLPTRL,W
+	sublw   LOW (cf_default_table3)
+	bz      cf_bank2_end
+	rcall	reset_customfunction	; saves default and current value
+	bra     cf_bank2_loop
+
+cf_bank2_end:
+	clrf	EEADRH					; EEPROM BANK 0
 
 ;call	reset_external_eeprom	; delete profile memory
     return
 
 reset_gases:
-	clrf	EEADRH					; EEPROM BANK 0 !
+	clrf	EEADRH					; EEPROM BANK 0
 
 	movlw	d'3'					; address of first gas-1
 	movwf	EEADR

@@ -1,4 +1,6 @@
 New in 2.22:
+BETA Version - Do NOT use for diving!
+NEW: Custom Functions III menu (CF64-CF95)
 BUGFIX: Missed deco stops issue
 BUGFIX: Timeout for 2nd page of Gas Setup
 

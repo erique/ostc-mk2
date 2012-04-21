@@ -207,7 +207,6 @@ setup_menu3a:
 	bsf		menubit
 	bsf		cursor
 	call	show_decotype
-	call	show_salinity_value
 	call	PLED_menu_cursor
 	bcf		switch_left
 	bcf		switch_right
@@ -246,7 +245,7 @@ do_setup_menu:								; calls submenu
 	dcfsnz	menupos,F
 	goto	menu_custom_functions_page2
 	dcfsnz	menupos,F
-	bra		toggle_salinity
+	bra		menu_custom_functions_page3
 	dcfsnz	menupos,F
 	bra		toggle_decotype
 	dcfsnz	menupos,F
@@ -321,7 +320,7 @@ deco_info_screen1:
 	mulwf	EEDATA						; Multiply with Decomode 0-5 (5=Spare)	
 	
 	movf	PRODL,W
-	addlw	d'193'						; Description text offset
+	addlw	.314-.256					; Description text offset
 	movwf	menupos						; Used as loop counter temp
 	
 	movlw	d'7'
@@ -329,7 +328,7 @@ deco_info_screen1:
 
 menu0:
 	movf	menupos,W	
-	call	displaytext_1_low           ; Display text!
+	call	displaytext_1_high          ; Display text!
 	incf	menupos,F
 	
 	decfsz	temp1,F
@@ -355,6 +354,7 @@ more_setup_menu3a:
 	bsf		cursor
 	call	show_debugstate
 	call	show_dateformat
+	call	show_salinity_value
 	call	PLED_menu_cursor
 	call	toggle_brightness_show
 	bcf		switch_left
@@ -404,113 +404,12 @@ do_more_setup_menu:								; calls submenu
 	dcfsnz	menupos,F
 	bra		show_license
 	dcfsnz	menupos,F
-	bra		show_rawdata
+	bra		toggle_salinity
 	dcfsnz	menupos,F
 	bra		toggle_brightness		; toggle between ECO and HIGH
 	movlw	d'5'					; set cursor to "More again"
 	movwf	menupos
 	bra		setup_menu2						; exit...
-
-show_rawdata:						; Displays Sensor raw data
-	call	PLED_ClearScreen
-	call	PLED_topline_box
-	WIN_INVERT	.1	; Init new Wordprocessor
-	DISPLAYTEXTH	.296		; Raw Data:
-	WIN_INVERT	.0	; Init new Wordprocessor
-
-	call	PLED_static_raw_data
-
-    
-	clrf	timeout_counter2
-	bcf		sleepmode
-	bcf		menubit3
-	bsf		menubit
-	
-show_rawdata_loop:
-    rcall   show_rawdata_wait
-
-	btfsc	menubit2
-	bra     show_rawdata_next
-
-	btfsc	onesecupdate
-	call	PLED_update_raw_data
-
-	bcf		onesecupdate				; End of one second tasks, if any.
-
-    goto    show_rawdata_loop
-
-show_rawdata_wait:
-	bcf		menubit2
-	bcf		switch_left
-	bcf		switch_right
-
-show_rawdata_wait_1:
-	btfsc	uart_dump_screen                ; Asked to dump screen contains ?
-	call	dump_screen     			    ; Yes!
-
-	btfsc	switch_left					; Ack?
-	bsf		menubit2
-	btfsc	switch_right				; Ack?
-	bsf		menubit2
-
-	btfsc	menubit2
-	return
-
-	btfss	menubit
-	goto	restart						; exit menu, restart and enter surfmode
-
-	btfsc	onesecupdate
-	call	timeout_surfmode
-
-	btfsc	onesecupdate
-	call	set_dive_modes
-
-	btfsc	sleepmode
-	bra		show_rawdata_exit			; Exit
-
-	btfsc	divemode
-	goto	restart						; exit menu, restart and enter divemode
-
-	btfsc	onesecupdate
-	return
-
-	bra		show_rawdata_wait_1
-
-; Display blank/red/green/blue screens until click, to test OLED ageing.
-show_rawdata_next:
-	; display test draws more power then allowed -> potential hardware risk!
-#ifndef DISPLAY_TEST
-	bra     show_rawdata_exit
-#endif
-
-    setf    WREG
-    WIN_BOX_COLOR   .0,.240,.0,.160
-    rcall   show_rawdata_screen_wait
-    movlw   color_red
-    WIN_BOX_COLOR   .0,.240,.0,.160
-    rcall   show_rawdata_screen_wait
-    movlw   color_green
-    WIN_BOX_COLOR   .0,.240,.0,.160
-    rcall   show_rawdata_screen_wait
-    movlw   color_blue
-    WIN_BOX_COLOR   .0,.240,.0,.160
-    rcall   show_rawdata_screen_wait
-    bra     show_rawdata_exit
-
-show_rawdata_screen_wait:
-    rcall   show_rawdata_wait
-	bcf		onesecupdate				; No dynamic update here...
-
-	btfsc	menubit2
-    return
-
-    bra     show_rawdata_screen_wait
-
-show_rawdata_exit:	
-	movlw	d'4'
-	movwf	menupos
-	bcf		switch_right
-	bra		more_setup_menu2			; return to "more menu" loop
 
 show_license:
 	call	startup_screen1				;1/2
@@ -534,10 +433,10 @@ toggle_salinity:
 
 toggle_salinity2:
 	write_int_eeprom	d'26'			; Store salinity
-	movlw	d'3'
+	movlw	d'4'
 	movwf	menupos
 	bcf		switch_right
-	bra		setup_menu3a			; return to manu loop
+	bra		more_setup_menu3a		; return to manu loop
 
 toggle_salinity_reset:
 	movlw	d'100'
@@ -552,7 +451,7 @@ show_salinity_value:
 	movlw	d'105'					; 105% ?
 	cpfslt	EEDATA					; Salinity higher limit
 	rcall	toggle_salinity_reset2	; Reset before display!
-	WIN_TOP		.95
+	WIN_TOP		.125
 	WIN_LEFT	.90                 ; +7 for spanish
 	WIN_FONT 	FT_SMALL
 	lfsr	FSR2,letter

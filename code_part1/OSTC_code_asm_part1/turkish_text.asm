@@ -213,7 +213,6 @@
     TCODE    .0,    .0,      "m/dk "                     ;083 m/min
     TCODE    .100,  .113,    "Dekosuz "                  ;084 No Stop
     TCODE    .135,  .113,    "Yüzey Varis"               ;085 TTS
-;   TCODE    .71,  .113,     "Yüzey Varis"               ;085 TTS
     TCODE    .85,  .0,       "Dalis Süre"                ;086 Divetime
     TCODE    .0,    .0,      "Derinlik"                  ;087 Depth
     TCODE    .0,    .0,      "Ilk Gaz ?  "               ;088 First Gas?
@@ -327,55 +326,52 @@
     TCODE    .0,    .0,      "ppO2 +"                    ;190 ppO2 +
     TCODE    .0,    .0,      "ppO2 -"                    ;191 ppO2 -
     TCODE    .0,    .0,      "Dil."                      ;192 Dil.			       (Rebreather diluent)
-; ZH-L16 mode description
-    TCODE    .0,    .35,     "Deko Modeli: ZH-L16 OC "   ;193 Decotype: ZH-L16 OC
-    TCODE    .0,    .65,     "Standart dalis modeli. "   ;194 For Open Circuit
-    TCODE    .0,    .95,     "Cihaz,5 adet Trimix ga-"   ;195 Divers. Supports 5
-    TCODE    .0,    .125,    "zini desteklemektedir. "   ;196 Trimix Gases.
-    TCODE    .0,    .155,    "Lütfen ozel fonksiyon- "   ;197 Configure your gas
-    TCODE    .0,    .185,    "lardan CF11 & CF12 yi  "   ;198 in Gassetup menu.
-    TCODE    .0,    .215,    "kontrol ediniz!        "   ;199 Check CF11 & CF12 !
-; Gaugemode description
-    TCODE    .0,    .35,     "Deko Modeli: Geyc Modu "   ;200 Decotype: Gauge
-    TCODE    .0,    .65,     "Dalis zamani dakika ve "   ;201 Divetime will be in
-    TCODE    .0,    .95,     "saniye cinsinden göste-"   ;202 Minutes:Seconds.
-    TCODE    .0,    .125,    "rilecektir. Bilgisayar "   ;203 OSTC2 will not
-    TCODE    .0,    .155,    "hicbir sekilde Deko bil"   ;204 compute Deco, NoFly
-    TCODE    .0,    .185,    "gisi hesaplamayacaktir "   ;205 time and Desat.
-    TCODE    .0,    .215,    "                       "   ;206 time at all!
-; Const.ppO2 description
-    TCODE    .0,    .35,     "Deko Modeli: ZH-L16 CC "   ;207 Decotype: ZH-L16 CC
-    TCODE    .0,    .65,     "Tam/Yari Kapali Devre  "   ;208 For (Semi-)Closed
-    TCODE    .0,    .95,     "Geri Solutucu modeli.  "   ;209 Circuit rebreathers
-    TCODE    .0,    .125,    "Kapali Devre icin 3    "   ;210 Configure the 3
-    TCODE    .0,    .155,    "farkli SetPoint ve 5   "   ;211 SetPoints in CCR -
-    TCODE    .0,    .185,    "adet Bailout(kurtarma) "   ;212 Setup menu. 5 bail-
-    TCODE    .0,    .215,    "sistemde bulunmaktadir."   ;213 outs are available.
-; Apnoemode description
-    TCODE    .0,    .35,     "Deko Modeli: Apnea Modu"   ;214 Decotype: Apnoe
-    TCODE    .0,    .65,     "OSTC2 sadece inis bilgi"   ;215 OSTC2 will display
-    TCODE    .0,    .95,     "sini dakika ve saniye  "   ;216 each descent separ-
-    TCODE    .0,    .125,    "cinsinden gosterecektir"   ;217 ately in Min:Sec.
-    TCODE    .0,    .155,    "Deko hesaplamasi bu    "   ;218 Will temporally set
-    TCODE    .0,    .185,    "modda yapilmayacaktir! "   ;219 samplerate to 1 sec
-    TCODE    .0,    .215,    "                       "   ;220 No Deco calculation
-; Multi GF OC mode description
-    TCODE    .0,    .35,     "Deko Modeli: L16-GF OC "   ;221 Decotype: L16-GF OC
-    TCODE    .0,    .65,     "Deko hesaplamalari GF- "   ;222 Decompression cal-
-    TCODE    .0,    .95,     "Gradient Factor'e göre "   ;223 culations with the
-    TCODE    .0,    .125,    "yapilmaktadir. Lütfen  "   ;224 GF-Method (GF_lo/GF
-    TCODE    .0,    .155,    "CF32 & CF33 nolu fonksi"   ;225 _hi). Check CF32 &
-    TCODE    .0,    .185,    "yonlari kontrol ediniz."   ;226 CF33! Open Circuit
-    TCODE    .0,    .215,    "                       "   ;227 with Deep Stops.
-; Multi GF CC mode description
-    TCODE    .0,    .35,     "Deko Modeli: L16-GF CC "   ;228 Decotype: L16-GF CC
-    TCODE    .0,    .65,     "Deko hesaplamalari     "   ;229 Decompression cal-
-    TCODE    .0,    .95,     "Gradient Factor'e göre "   ;230 culations with the
-    TCODE    .0,    .125,    "yapilmaktadir. Lütfen  "   ;231 GF-Method (GF_lo/GF
-    TCODE    .0,    .155,    "CF32 & CF33 nolu fonksi"   ;232 _hi). Check CF32 &
-    TCODE    .0,    .185,    "yonlari kontrol ediniz."   ;233 CF33!Closed Circuit
-    TCODE    .0,    .215,    "                       "   ;234 with Deep Stops.
+
+; 32 custom function descriptors III (FIXED LENGTH = 15 chars).
+    TCODE    .40,   .35,     "unused         "           ;193 unused
+    TCODE    .40,   .35,     "unused         "           ;194 unused
+    TCODE    .40,   .35,     "unused         "           ;195 unused
+    TCODE    .40,   .35,     "unused         "           ;196 unused
+    TCODE    .40,   .35,     "unused         "           ;197 unused
+    TCODE    .40,   .35,     "unused         "           ;198 unused
+    TCODE    .40,   .35,     "unused         "           ;199 unused
+    TCODE    .40,   .35,     "unused         "           ;200 unused
+    TCODE    .40,   .35,     "unused         "           ;201 unused
+    TCODE    .40,   .35,     "unused         "           ;202 unused
+    TCODE    .40,   .35,     "unused         "           ;203 unused
+    TCODE    .40,   .35,     "unused         "           ;204 unused
+    TCODE    .40,   .35,     "unused         "           ;205 unused
+    TCODE    .40,   .35,     "unused         "           ;206 unused
+    TCODE    .40,   .35,     "unused         "           ;207 unused
+    TCODE    .40,   .35,     "unused         "           ;208 unused
+    TCODE    .40,   .35,     "unused         "           ;209 unused
+    TCODE    .40,   .35,     "unused         "           ;210 unused
+    TCODE    .40,   .35,     "unused         "           ;211 unused
+    TCODE    .40,   .35,     "unused         "           ;212 unused
+    TCODE    .40,   .35,     "unused         "           ;213 unused
+    TCODE    .40,   .35,     "unused         "           ;214 unused
+    TCODE    .40,   .35,     "unused         "           ;215 unused
+    TCODE    .40,   .35,     "unused         "           ;216 unused
+    TCODE    .40,   .35,     "unused         "           ;217 unused
+    TCODE    .40,   .35,     "unused         "           ;218 unused
+    TCODE    .40,   .35,     "unused         "           ;219 unused
+    TCODE    .40,   .35,     "unused         "           ;220 unused
+    TCODE    .40,   .35,     "unused         "           ;221 unused
+    TCODE    .40,   .35,     "unused         "           ;222 unused
+    TCODE    .40,   .35,     "unused         "           ;223 unused
+    TCODE    .40,   .35,     "unused         "           ;224 unused
 ;
+    TCODE    .7,    .2,      "Ozel Fonksiyonlar III"     ;225 Custom Functions III
+    TCODE    .0,    .0,      ""		                   	 ;226 unused
+    TCODE    .0,    .0,      ""		                     ;227 unused
+    TCODE    .0,    .0,      ""     	                 ;228 unused
+    TCODE    .0,    .0,      ""		                   	 ;229 unused
+    TCODE    .0,    .0,      ""		                     ;230 unused
+    TCODE    .0,    .0,      ""     	                 ;231 unused
+    TCODE    .0,    .0,      ""		                   	 ;232 unused
+    TCODE    .0,    .0,      ""		                     ;233 unused
+    TCODE    .0,    .0,      ""     	                 ;234 unused
+
     TCODE    .10,   .2,      "Deko Modeli Degisti!"      ;235 Decomode changed!
     TCODE    .85,   .125,    "L16-GF CC"                 ;236 L16-GF CC
     TCODE    .2,    .12,     "Bulunamadi!   "            ;237 Not found
@@ -423,7 +419,7 @@
     TCODE    .0,    .65,     "Eklendi,Lütfen     "       ;273 were added! Check
     TCODE    .0,    .95,     "Ozel Fonksiyonlari "       ;274 CF I and CF II Menu
     TCODE    .0,    .125,    "Kontrol Ediniz!  "         ;275 for Details!
-    TCODE    .20,   .95,     "Tuzluluk: "                ;276 Salinity:
+    TCODE    .20,   .125,    "Tuzluluk: "                ;276 Salinity:
 ;
     TCODE    .20,   .95,     "Dip Zaman:"                ;277 Bottom Time:
     TCODE    .20,   .125,    "Derinlik :"                ;278 Max. Depth:
@@ -446,7 +442,7 @@
     TCODE    .20,   .155,    "-1 mbar"                   ;293 -1 mbar
     TCODE    .85,   .185,    "Alt: "                     ;294 Alt:
 ;
-    TCODE    .20,   .125,    "Degiskenler...   "         ;295 Show raw data
+    TCODE    .20,   .95,     "Ozel FonksiyonlarIII"      ;295 Custom FunctionsIII
     TCODE    .50,    .2,     "Degiskenler"               ;296 Raw Data:
 ; Gas-setup addons:
     TCODE    .0,    .0,      "MOD:"                      ;297 MOD:                  (max operating depth of a gas).
@@ -472,5 +468,65 @@
 ; OLED Brightness settings
     TCODE    .103,  .155,    "Dusuk "                    ;312 Eco 					(Same length as #313!)
     TCODE    .103,  .155,    "Parlak" 	                 ;313 High					(Same length as #312!)
+
+; ZH-L16 mode description
+    TCODE    .0,    .35,     "Deko Modeli: ZH-L16 OC "   ;314 Decotype: ZH-L16 OC
+    TCODE    .0,    .65,     "Standart dalis modeli. "   ;315 For Open Circuit
+    TCODE    .0,    .95,     "Cihaz,5 adet Trimix ga-"   ;316 Divers. Supports 5
+    TCODE    .0,    .125,    "zini desteklemektedir. "   ;317 Trimix Gases.
+    TCODE    .0,    .155,    "Lütfen ozel fonksiyon- "   ;318 Configure your gas
+    TCODE    .0,    .185,    "lardan CF11 & CF12 yi  "   ;319 in Gassetup menu.
+    TCODE    .0,    .215,    "kontrol ediniz!        "   ;320 Check CF11 & CF12 !
+; Gaugemode description
+    TCODE    .0,    .35,     "Deko Modeli: Geyc Modu "   ;321 Decotype: Gauge
+    TCODE    .0,    .65,     "Dalis zamani dakika ve "   ;322 Divetime will be in
+    TCODE    .0,    .95,     "saniye cinsinden göste-"   ;323 Minutes:Seconds.
+    TCODE    .0,    .125,    "rilecektir. Bilgisayar "   ;324 OSTC2 will not
+    TCODE    .0,    .155,    "hicbir sekilde Deko bil"   ;325 compute Deco, NoFly
+    TCODE    .0,    .185,    "gisi hesaplamayacaktir "   ;326 time and Desat.
+    TCODE    .0,    .215,    "                       "   ;327 time at all!
+; Const.ppO2 description
+    TCODE    .0,    .35,     "Deko Modeli: ZH-L16 CC "   ;328 Decotype: ZH-L16 CC
+    TCODE    .0,    .65,     "Tam Kapali Devre" 	  	 ;329 For Closed
+    TCODE    .0,    .95,     "Geri Solutucu modeli.  "   ;330 Circuit rebreathers
+    TCODE    .0,    .125,    "Kapali Devre icin 3    "   ;331 Configure the 3
+    TCODE    .0,    .155,    "farkli SetPoint ve 5   "   ;332 SetPoints in CCR -
+    TCODE    .0,    .185,    "adet Bailout(kurtarma) "   ;333 Setup menu. 5 bail-
+    TCODE    .0,    .215,    "sistemde bulunmaktadir."   ;334 outs are available.
+; Apnoemode description
+    TCODE    .0,    .35,     "Deko Modeli: Apnea Modu"   ;335 Decotype: Apnoe
+    TCODE    .0,    .65,     "OSTC2 sadece inis bilgi"   ;336 OSTC2 will display
+    TCODE    .0,    .95,     "sini dakika ve saniye  "   ;337 each descent separ-
+    TCODE    .0,    .125,    "cinsinden gosterecektir"   ;338 ately in Min:Sec.
+    TCODE    .0,    .155,    "Deko hesaplamasi bu    "   ;339 Will temporally set
+    TCODE    .0,    .185,    "modda yapilmayacaktir! "   ;340 samplerate to 1 sec
+    TCODE    .0,    .215,    "                       "   ;341 No Deco calculation
+; Multi GF OC mode description
+    TCODE    .0,    .35,     "Deko Modeli: L16-GF OC "   ;342 Decotype: L16-GF OC
+    TCODE    .0,    .65,     "Deko hesaplamalari GF- "   ;343 Decompression cal-
+    TCODE    .0,    .95,     "Gradient Factor'e göre "   ;344 culations with the
+    TCODE    .0,    .125,    "yapilmaktadir. Lütfen  "   ;345 GF-Method (GF_lo/GF
+    TCODE    .0,    .155,    "CF32 & CF33 nolu fonksi"   ;346 _hi). Check CF32 &
+    TCODE    .0,    .185,    "yonlari kontrol ediniz."   ;347 CF33! Open Circuit
+    TCODE    .0,    .215,    "                       "   ;348 with Deep Stops.
+; Multi GF CC mode description
+    TCODE    .0,    .35,     "Deko Modeli: L16-GF CC "   ;349 Decotype: L16-GF CC
+    TCODE    .0,    .65,     "Deko hesaplamalari     "   ;350 Decompression cal-
+    TCODE    .0,    .95,     "Gradient Factor'e göre "   ;351 culations with the
+    TCODE    .0,    .125,    "yapilmaktadir. Lütfen  "   ;352 GF-Method (GF_lo/GF
+    TCODE    .0,    .155,    "CF32 & CF33 nolu fonksi"   ;353 _hi). Check CF32 &
+    TCODE    .0,    .185,    "yonlari kontrol ediniz."   ;354 CF33!Closed Circuit
+    TCODE    .0,    .215,    "                       "   ;355 with Deep Stops.
+; Spare (PSCR?)
+    TCODE    .0,    .35,     ""     ;356
+    TCODE    .0,    .65,     ""     ;357
+    TCODE    .0,    .95,     ""    	;358
+    TCODE    .0,    .125,    ""     ;359
+    TCODE    .0,    .155,    ""    	;360
+    TCODE    .0,    .185,    ""     ;361
+    TCODE    .0,    .215,    ""    	;362
+
+;
+
 
 ;=============================================================================

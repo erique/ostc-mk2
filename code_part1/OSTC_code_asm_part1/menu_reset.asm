@@ -177,7 +177,7 @@ cf_default_table1:
 	CF_DEFAULT    CF_BOOL,     	d'0',   0,      0 		; CF52 Show Tissue Graph in Divemode
 	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0 		; CF53 Show Laeding Tissue in Divemode
 	CF_DEFAULT    CF_BOOL,      d'0',   0,      0 		; CF54 Display shallowest stop first
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'10'   ; GF55 Gas switch additional delay
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'10'   ; CF55 Gas switch additional delay
 	CF_DEFAULT    CF_INT8,      d'20',  d'5',   d'50'   ; CF56 Bottom gas usage (SAC l/min)
 
 	CF_DEFAULT    CF_INT8,      d'20',  d'5',   d'50'   ; CF57 Ascent/deco gas usage (SAC l/min)
@@ -189,43 +189,44 @@ cf_default_table1:
 	CF_DEFAULT    CF_PERCENT,   .4,     .0,     .100	; CF62 pSCR O2 Drop
 	CF_DEFAULT    CF_INT8,      .10,    .0,     .100 	; CF63 pSCR counterlung ratio
 cf_default_table2:
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF64 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF65 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF66 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF67 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF68 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF64 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF65 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF66 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF67 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF68 unused
 
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF69 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF70 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF71 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF72 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF73 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF69 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF70 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF71 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF72 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF73 unused
 
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF74 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF75 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF76 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF77 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF78 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF74 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF75 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF76 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF77 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF78 unused
 
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF79 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF80 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF81 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF82 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF83 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF79 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF80 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF81 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF82 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF83 unused
 
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF84 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF85 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF87 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF88 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF89 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF84 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF85 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF86 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF87 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF88 unused
 
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF90 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF91 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF92 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF93 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF94 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF89 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF90 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF91 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF92 unused
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF93 unused
 	
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; GF95 unused	
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF94 unused	
+	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF95 unused	
 cf_default_table3:
 ;=============================================================================
 

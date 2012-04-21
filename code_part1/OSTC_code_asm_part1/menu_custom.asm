@@ -171,6 +171,15 @@ getcustom15_3:
 	clrf	EEADRH
 	return					; return
 
+menu_custom_functions_page3:
+	movlw	.2
+	movff	WREG,cf_page_number		; CF page number (0: 0-31, 1: 32-63)
+	movlw	.225
+	movff	WREG,cf_title_text		; # of text for title
+	movlw	.193
+	movff	WREG,cf_descriptor_text	; # of descriptor text offset
+	bra		menu_custom_functions0
+
 menu_custom_functions_page2:
 	movlw	.1
 	movff	WREG,cf_page_number		; CF page number (0: 0-31, 1: 32-63)
@@ -181,13 +190,12 @@ menu_custom_functions_page2:
 	bra		menu_custom_functions0
 
 menu_custom_functions:
-	movlw	.36
-	movff	WREG,cf_descriptor_text	; # of descriptor text offset
-	movlw	.27
-	movff	WREG,cf_title_text		; # of text for title
 	movlw	.0
 	movff	WREG,cf_page_number		; CF page number (0: 0-31, 1: 32-63)
-
+	movlw	.27
+	movff	WREG,cf_title_text		; # of text for title
+	movlw	.36
+	movff	WREG,cf_descriptor_text	; # of descriptor text offset
 	
 menu_custom_functions0:
 	bsf		leftbind

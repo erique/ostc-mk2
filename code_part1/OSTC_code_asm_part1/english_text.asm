@@ -324,55 +324,52 @@
     TCODE    .0,    .0,      "ppO2 +"                    ;190 ppO2 +
     TCODE    .0,    .0,      "ppO2 -"                    ;191 ppO2 -
     TCODE    .0,    .0,      "Dil."                      ;192 Dil.			       (Rebreather diluent)
-; ZH-L16 mode description
-    TCODE    .0,    .35,     "Decotype: ZH-L16 OC"       ;193 Decotype: ZH-L16 OC
-    TCODE    .0,    .65,     "For Open Circuit   "       ;194 For Open Circuit
-    TCODE    .0,    .95,     "Divers. Supports 5 "       ;195 Divers. Supports 5
-    TCODE    .0,    .125,    "Trimix Gases.      "       ;196 Trimix Gases.
-    TCODE    .0,    .155,    "Configure your gas "       ;197 Configure your gas
-    TCODE    .0,    .185,    "in Gassetup menu.  "       ;198 in Gassetup menu.
-    TCODE    .0,    .215,    "Check CF11 & CF12 !"       ;199 Check CF11 & CF12 !
-; Gaugemode description
-    TCODE    .0,    .35,     "Decotype: Gauge    "       ;200 Decotype: Gauge    
-    TCODE    .0,    .65,     "Divetime will be in"       ;201 Divetime will be in
-    TCODE    .0,    .95,     "Minutes:Seconds.   "       ;202 Minutes:Seconds.   
-    TCODE    .0,    .125,    "OSTC2 will not     "       ;203 OSTC2 will not     
-    TCODE    .0,    .155,    "compute Deco, NoFly"       ;204 compute Deco, NoFly
-    TCODE    .0,    .185,    "time and Desat.    "       ;205 time and Desat.
-    TCODE    .0,    .215,    "time at all!       "       ;206 time at all!
-; Const.ppO2 description
-    TCODE    .0,    .35,     "Decotype: ZH-L16 CC"       ;207 Decotype: ZH-L16 CC
-    TCODE    .0,    .65,     "For (Semi-)Closed  "       ;208 For (Semi-)Closed
-    TCODE    .0,    .95,     "Circuit rebreathers"       ;209 Circuit rebreathers
-    TCODE    .0,    .125,    "Configure the 3    "       ;210 Configure the 3
-    TCODE    .0,    .155,    "SetPoints in CCR - "       ;211 SetPoints in CCR -
-    TCODE    .0,    .185,    "Setup menu. 5 bail-"       ;212 Setup menu. 5 bail-
-    TCODE    .0,    .215,    "outs are available."       ;213 outs are available.
-; Apnoemode description
-    TCODE    .0,    .35,     "Decotype: Apnoe    "       ;214 Decotype: Apnoe
-    TCODE    .0,    .65,     "OSTC2 will display "       ;215 OSTC2 will display
-    TCODE    .0,    .95,     "each descent separ-"       ;216 each descent separ-
-    TCODE    .0,    .125,    "ately in Min:Sec.  "       ;217 ately in Min:Sec.
-    TCODE    .0,    .155,    "Will temporally set"       ;218 Will temporally set
-    TCODE    .0,    .185,    "samplerate to 1 sec"       ;219 samplerate to 1 sec
-    TCODE    .0,    .215,    "No Deco calculation"       ;220 No Deco calculation
-; Multi GF OC mode description
-    TCODE    .0,    .35,     "Decotype: L16-GF OC"       ;221 Decotype: L16-GF OC
-    TCODE    .0,    .65,     "Decompression cal- "       ;222 Decompression cal-
-    TCODE    .0,    .95,     "culations with the "       ;223 culations with the
-    TCODE    .0,    .125,    "GF-Method (GF_lo/GF"       ;224 GF-Method (GF_lo/GF
-    TCODE    .0,    .155,    "_hi). Check CF32 & "       ;225 _hi). Check CF32 &
-    TCODE    .0,    .185,    "CF33! Open Circuit "       ;226 CF33! Open Circuit
-    TCODE    .0,    .215,    "with Deep Stops.   "       ;227 with Deep Stops.
-; Multi GF CC mode description
-    TCODE    .0,    .35,     "Decotype: L16-GF CC"       ;228 Decotype: L16-GF CC
-    TCODE    .0,    .65,     "Decompression cal- "       ;229 Decompression cal-
-    TCODE    .0,    .95,     "culations with the "       ;230 culations with the
-    TCODE    .0,    .125,    "GF-Method (GF_lo/GF"       ;231 GF-Method (GF_lo/GF
-    TCODE    .0,    .155,    "_hi). Check CF32 & "       ;232 _hi). Check CF32 &
-    TCODE    .0,    .185,    "CF33!Closed Circuit"       ;233 CF33!Closed Circuit
-    TCODE    .0,    .215,    "with Deep Stops.   "       ;234 with Deep Stops.
+
+; 32 custom function descriptors III (FIXED LENGTH = 15 chars).
+    TCODE    .40,   .35,     "unused         "           ;193 unused
+    TCODE    .40,   .35,     "unused         "           ;194 unused
+    TCODE    .40,   .35,     "unused         "           ;195 unused
+    TCODE    .40,   .35,     "unused         "           ;196 unused
+    TCODE    .40,   .35,     "unused         "           ;197 unused
+    TCODE    .40,   .35,     "unused         "           ;198 unused
+    TCODE    .40,   .35,     "unused         "           ;199 unused
+    TCODE    .40,   .35,     "unused         "           ;200 unused
+    TCODE    .40,   .35,     "unused         "           ;201 unused
+    TCODE    .40,   .35,     "unused         "           ;202 unused
+    TCODE    .40,   .35,     "unused         "           ;203 unused
+    TCODE    .40,   .35,     "unused         "           ;204 unused
+    TCODE    .40,   .35,     "unused         "           ;205 unused
+    TCODE    .40,   .35,     "unused         "           ;206 unused
+    TCODE    .40,   .35,     "unused         "           ;207 unused
+    TCODE    .40,   .35,     "unused         "           ;208 unused
+    TCODE    .40,   .35,     "unused         "           ;209 unused
+    TCODE    .40,   .35,     "unused         "           ;210 unused
+    TCODE    .40,   .35,     "unused         "           ;211 unused
+    TCODE    .40,   .35,     "unused         "           ;212 unused
+    TCODE    .40,   .35,     "unused         "           ;213 unused
+    TCODE    .40,   .35,     "unused         "           ;214 unused
+    TCODE    .40,   .35,     "unused         "           ;215 unused
+    TCODE    .40,   .35,     "unused         "           ;216 unused
+    TCODE    .40,   .35,     "unused         "           ;217 unused
+    TCODE    .40,   .35,     "unused         "           ;218 unused
+    TCODE    .40,   .35,     "unused         "           ;219 unused
+    TCODE    .40,   .35,     "unused         "           ;220 unused
+    TCODE    .40,   .35,     "unused         "           ;221 unused
+    TCODE    .40,   .35,     "unused         "           ;222 unused
+    TCODE    .40,   .35,     "unused         "           ;223 unused
+    TCODE    .40,   .35,     "unused         "           ;224 unused
 ;
+    TCODE    .7,    .2,      "Custom Functions III"      ;225 Custom Functions III
+    TCODE    .0,    .0,      ""		                   	 ;226 unused
+    TCODE    .0,    .0,      ""		                     ;227 unused
+    TCODE    .0,    .0,      ""     	                 ;228 unused
+    TCODE    .0,    .0,      ""		                   	 ;229 unused
+    TCODE    .0,    .0,      ""		                     ;230 unused
+    TCODE    .0,    .0,      ""     	                 ;231 unused
+    TCODE    .0,    .0,      ""		                   	 ;232 unused
+    TCODE    .0,    .0,      ""		                     ;233 unused
+    TCODE    .0,    .0,      ""     	                 ;234 unused
+
     TCODE    .10,   .2,      "Decomode changed!  "       ;235 Decomode changed!
     TCODE    .85,   .125,    "L16-GF CC"                 ;236 L16-GF CC
     TCODE    .2,    .12,     "Not found"                 ;237 Not found
@@ -420,7 +417,7 @@
     TCODE    .0,    .65,     "were added! Check"         ;273 were added! Check
     TCODE    .0,    .95,     "CF I and CF II Menu"       ;274 CF I and CF II Menu
     TCODE    .0,    .125,    "for Details!"              ;275 for Details!
-    TCODE    .20,   .95,     "Salinity: "                ;276 Salinity:
+    TCODE    .20,   .125,    "Salinity: "                ;276 Salinity:
 ;
     TCODE    .20,   .95,     "Bottom Time:"              ;277 Bottom Time:
     TCODE    .20,   .125,    "Max. Depth:"               ;278 Max. Depth:
@@ -443,7 +440,7 @@
     TCODE    .20,   .155,    "-1 mbar"                   ;293 -1 mbar
     TCODE    .85,   .185,    "Alt: "                     ;294 Alt: 
 ;
-	TCODE    .20,   .125,    "Show raw data"             ;295 Show raw data
+	TCODE    .20,   .95,     "Custom FunctionsIII"       ;295 Custom FunctionsIII
 	TCODE    .50,    .2,     "Raw Data:"                 ;296 Raw Data:
 ; Gas-setup addons:
     TCODE    .0,    .0,      "MOD:"                      ;297 MOD:                  (max operating depth of a gas).
@@ -470,4 +467,63 @@
 ; OLED Brightness settings
     TCODE    .103,  .155,    "Eco "	    	             ;312 Eco 					(Same length as #313!)
     TCODE    .103,  .155,    "High" 	                 ;313 High					(Same length as #312!)
+
+; ZH-L16 mode description
+    TCODE    .0,    .35,     "Decotype: ZH-L16 OC"       ;314 Decotype: ZH-L16 OC
+    TCODE    .0,    .65,     "For Open Circuit   "       ;315 For Open Circuit
+    TCODE    .0,    .95,     "Divers. Supports 5 "       ;316 Divers. Supports 5
+    TCODE    .0,    .125,    "Trimix Gases.      "       ;317 Trimix Gases.
+    TCODE    .0,    .155,    "Configure your gas "       ;318 Configure your gas
+    TCODE    .0,    .185,    "in Gassetup menu.  "       ;319 in Gassetup menu.
+    TCODE    .0,    .215,    "Check CF11 & CF12 !"       ;320 Check CF11 & CF12 !
+; Gaugemode description
+    TCODE    .0,    .35,     "Decotype: Gauge    "       ;321 Decotype: Gauge    
+    TCODE    .0,    .65,     "Divetime will be in"       ;322 Divetime will be in
+    TCODE    .0,    .95,     "Minutes:Seconds.   "       ;323 Minutes:Seconds.   
+    TCODE    .0,    .125,    "OSTC2 will not     "       ;324 OSTC2 will not     
+    TCODE    .0,    .155,    "compute Deco, NoFly"       ;325 compute Deco, NoFly
+    TCODE    .0,    .185,    "time and Desat.    "       ;326 time and Desat.
+    TCODE    .0,    .215,    "time at all!       "       ;327 time at all!
+; Const.ppO2 description
+    TCODE    .0,    .35,     "Decotype: ZH-L16 CC"       ;328 Decotype: ZH-L16 CC
+    TCODE    .0,    .65,     "For closed"       		 ;329 For closed
+    TCODE    .0,    .95,     "circuit rebreathers"       ;330 circuit rebreathers
+    TCODE    .0,    .125,    "Configure the 3    "       ;331 Configure the 3
+    TCODE    .0,    .155,    "SetPoints in CCR - "       ;332 SetPoints in CCR -
+    TCODE    .0,    .185,    "Setup menu. 5 bail-"       ;333 Setup menu. 5 bail-
+    TCODE    .0,    .215,    "outs are available."       ;334 outs are available.
+; Apnoemode description
+    TCODE    .0,    .35,     "Decotype: Apnoe    "       ;335 Decotype: Apnoe
+    TCODE    .0,    .65,     "OSTC2 will display "       ;336 OSTC2 will display
+    TCODE    .0,    .95,     "each descent separ-"       ;337 each descent separ-
+    TCODE    .0,    .125,    "ately in Min:Sec.  "       ;338 ately in Min:Sec.
+    TCODE    .0,    .155,    "Will temporally set"       ;339 Will temporally set
+    TCODE    .0,    .185,    "samplerate to 1 sec"       ;340 samplerate to 1 sec
+    TCODE    .0,    .215,    "No Deco calculation"       ;341 No Deco calculation
+; Multi GF OC mode description
+    TCODE    .0,    .35,     "Decotype: L16-GF OC"       ;342 Decotype: L16-GF OC
+    TCODE    .0,    .65,     "Decompression cal- "       ;343 Decompression cal-
+    TCODE    .0,    .95,     "culations with the "       ;344 culations with the
+    TCODE    .0,    .125,    "GF-Method (GF_lo/GF"       ;345 GF-Method (GF_lo/GF
+    TCODE    .0,    .155,    "_hi). Check CF32 & "       ;346 _hi). Check CF32 &
+    TCODE    .0,    .185,    "CF33! Open Circuit "       ;347 CF33! Open Circuit
+    TCODE    .0,    .215,    "with Deep Stops.   "       ;348 with Deep Stops.
+; Multi GF CC mode description
+    TCODE    .0,    .35,     "Decotype: L16-GF CC"       ;349 Decotype: L16-GF CC
+    TCODE    .0,    .65,     "Decompression cal- "       ;350 Decompression cal-
+    TCODE    .0,    .95,     "culations with the "       ;351 culations with the
+    TCODE    .0,    .125,    "GF-Method (GF_lo/GF"       ;352 GF-Method (GF_lo/GF
+    TCODE    .0,    .155,    "_hi). Check CF32 & "       ;353 _hi). Check CF32 &
+    TCODE    .0,    .185,    "CF33!Closed Circuit"       ;354 CF33!Closed Circuit
+    TCODE    .0,    .215,    "with Deep Stops.   "       ;355 with Deep Stops.
+; Spare (PSCR?)
+    TCODE    .0,    .35,     ""     ;356
+    TCODE    .0,    .65,     ""     ;357
+    TCODE    .0,    .95,     ""    	;358
+    TCODE    .0,    .125,    ""     ;359
+    TCODE    .0,    .155,    ""    	;360
+    TCODE    .0,    .185,    ""     ;361
+    TCODE    .0,    .215,    ""    	;362
+;
+
 ;=============================================================================

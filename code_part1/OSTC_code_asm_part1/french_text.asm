@@ -446,7 +446,7 @@
     TCODE    .0,    .0,      "PMU:"                      ;297 MOD:                  (max operating depth of a gas).
     TCODE    .0,    .0,      "PEN:"                      ;298 END:                  (equivalent nitrogen depth of a gas).
     TCODE    .0,    .0,      "PEA:"                      ;299 EAD:                  (equivalent air depth of a gas).
-	TCODE	 .100,	.125,	 "Active?"					 ;300 Active?               (Enable/Disable Gas underwater)
+	TCODE    .100,  .125,	 "Suite"					 ;300 More               	(Enable/Disable Gas underwater)
 	TCODE    .0,    .2,      "OCR Gas Usage:"            ;301 OCR Gas Usage:        (Planned gas consumtion by tank).
 ; 115k Bootloader support:
 	TCODE	 .45,	.100,	 "Bootloader"				 ;302 Bootloader

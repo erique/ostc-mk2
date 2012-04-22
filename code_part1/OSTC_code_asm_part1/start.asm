@@ -362,8 +362,7 @@ startup_screen1_2:
 	movlw	d'10'					; timeout for startup screen
 	movwf	temp1			
 	WAITMS	d'200'
-	bcf		switch_left
-	bcf		switch_right
+	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 screen1_loop:
 	btfsc	uart_dump_screen                ; Asked to dump screen contains ?
 	call	dump_screen     			    ; Yes!
@@ -395,8 +394,7 @@ startup_screen2:
 startup_screen3a:; WARNING: Also used for decodescriptions and CF Warning screen!
 	movwf	temp1			
 	WAITMS	d'200'
-	bcf		switch_left
-	bcf		switch_right
+	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 screen3_loop:
 	btfsc	uart_dump_screen                ; Asked to dump screen contains ?
 	call	dump_screen     			    ; Yes!

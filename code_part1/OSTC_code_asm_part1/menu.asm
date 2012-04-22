@@ -34,18 +34,10 @@ menu:
 	movlw	d'1'
 	movwf	menupos
 menu2:
-
-	bcf		leftbind
 	call	PLED_ClearScreen
-	clrf	timeout_counter2
-	bcf		sleepmode
-	bcf		menubit2
-	bcf		menubit3
-	bsf		menubit
-	bsf		cursor
+	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
 	call	PLED_menu_mask
 	call	PLED_menu_cursor
-	rcall	wait_switches
 
 menu_loop:
 	call	check_switches_menu
@@ -76,10 +68,10 @@ check_switches_menu:                    ; checks switches
 	incf	menupos,F
 	movlw	d'6'
 	cpfsgt	menupos
-	bra		refresh_cursor
+	bra		refresh_cursor				; Returns
 	movlw	d'1'
 	movwf	menupos
-	bra		refresh_cursor
+	bra		refresh_cursor				; Returns
 check_switches_menu2:
 	btfsc	switch_left
 	bsf		menubit2					; Enter!
@@ -102,10 +94,8 @@ do_menu:								; calls submenu
 
 refresh_cursor:
 	clrf	timeout_counter2
-	btfsc	cursor
 	call	PLED_menu_cursor
-	bcf		switch_right
-	bcf		switch_left
+	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 	return
 
 more_menu:
@@ -115,16 +105,9 @@ more_menu2:
 	bcf		leftbind
 	call	PLED_ClearScreen
 more_menu3:
-	clrf	timeout_counter2
-	bcf		sleepmode
-	bcf		menubit2
-	bcf		menubit3
-	bsf		menubit
-	bsf		cursor
+	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
 	call	PLED_more_menu_mask
 	call	PLED_menu_cursor
-	bcf		switch_left
-	bcf		switch_right
 more_menu_loop:
 	call	check_switches_menu
 
@@ -176,16 +159,9 @@ setup_menu2:
 	call	PLED_ClearScreen
 	call	PLED_setup_menu_mask
 setup_menu3a:
-	clrf	timeout_counter2
-	bcf		sleepmode
-	bcf		menubit2
-	bcf		menubit3
-	bsf		menubit
-	bsf		cursor
+	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
 	call	show_decotype
 	call	PLED_menu_cursor
-	bcf		switch_left
-	bcf		switch_right
 
 setup_menu_loop:
 	call	check_switches_menu
@@ -314,19 +290,12 @@ more_setup_menu2:
 	call	PLED_ClearScreen
 	call	PLED_more_setup_menu_mask
 more_setup_menu3a:
-	clrf	timeout_counter2
-	bcf		sleepmode
-	bcf		menubit2
-	bcf		menubit3
-	bsf		menubit
-	bsf		cursor
+	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
 	call	show_debugstate
 	call	show_dateformat
 	call	show_salinity_value
 	call	PLED_menu_cursor
 	call	toggle_brightness_show
-	bcf		switch_left
-	bcf		switch_right
 
 more_setup_menu_loop:
 	call	check_switches_menu
@@ -541,4 +510,15 @@ menu_check_dive_and_timeout:
 	call	timeout_surfmode	; Sets sleepmode flag if timeout
 	btfsc	divemode
 	goto	restart			; dive started!
+	return
+
+menu_pre_loop_common:		; Clear some menu flags and the timeout
+	clrf	timeout_counter2
+	bcf		leftbind
+	bcf		sleepmode
+	bcf		menubit2
+	bcf		menubit3
+	bsf		menubit
+	bcf		switch_left
+	bcf		switch_right
 	return

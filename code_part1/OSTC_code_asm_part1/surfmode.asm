@@ -444,7 +444,7 @@ test_switches_surfmode3:
 	return
 
 test_switches_surfmode2:
-	bcf		switch_left
+	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 	btfss	premenu
 	bra		test_switches_surfmode4
 	bsf		menubit					; Enter Menu!

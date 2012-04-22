@@ -32,9 +32,8 @@ test_switches_divemode:				; checks switches in divemode
 
 	btfss	switch_right
 	return
-	
-	bcf		switch_left				; Left button pressed!
-	bcf		switch_right
+
+	call	wait_switches			; Waits until switches are released, resets flag if button stays pressed!
 	
 	bcf		select_bailoutgas		; Clear Flag for Bailout list
 
@@ -68,8 +67,7 @@ test_switches_divemode1:
 	return
 
 test_switches_divemode2:
-	bcf		switch_left			; Also reactivate left button if there was a right press without prior left press
-	bcf		switch_right		; enable right button again
+	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 
 	btfsc	premenu
 	bra		test_switches_divemode2_2
@@ -101,8 +99,7 @@ test_switches_divemode2b:
 	call	PLED_divemode_menu_mask_first	; Write Divemode menu1 mask
 	bcf		display_set_simulator			; Clear Simulator-Menu flag
 	call	PLED_divemenu_cursor	; show cursor
-	bcf		switch_right
-	bcf		switch_left				; Left button pressed!
+	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 	return
 
 test_switches_divemode_menu:
@@ -161,8 +158,7 @@ test_switches_divemode_menu1a:
 	return
 
 test_switches_divemode_menu3:
-	bcf		switch_left
-	bcf		switch_right
+	call	wait_switches			; Waits until switches are released, resets flag if button stays pressed!
 	bsf		menubit					; Enter Divemode-Menu!
 	bcf		premenu					; clear premenu flag
 	clrf	timeout_counter3
@@ -339,8 +335,7 @@ divemode_set_xgas:						; Set the extra gas...
 divemode_menu_simulator:
 	bsf		menubit					; Enter Divemode-Menu!
 	bcf		premenu					; clear premenu flag
-	bcf		switch_right
-	bcf		switch_left				; Left button pressed!
+	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 	bsf		display_set_simulator	; Set Flag
 	bsf		menu3_active			; So "+1" is accessible at all times
 	call	PLED_clear_divemode_menu	; Clear Menu
@@ -742,8 +737,7 @@ timeout_divemenu2a:
 	bcf		display_set_simulator
 	bcf		display_set_active
 	bcf		menu3_active
-	bcf		switch_left				; and debounce switches
-	bcf		switch_right
+	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 	return
 
 ; Re-Draw current page of decoplan (may have more stops)

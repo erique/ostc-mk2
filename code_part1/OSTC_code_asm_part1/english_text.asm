@@ -233,7 +233,7 @@
     TCODE    .85,   .125,    "Gauge"                     ;103 Gauge
     TCODE    .85,   .125,    "ZH-L16 CC"                 ;104 ZH-L16 CC
     TCODE    .0,    .0,      "Active Gas? "              ;105 Active Gas?
-    TCODE    .10,   .2,      "Gas Setup - Gaslist"	 ;106 Gas Setup - Gaslist
+    TCODE    .10,   .2,      "Gas Setup - Gaslist"	 	 ;106 Gas Setup - Gaslist
     TCODE    .20,   .95,     "Depth +/-:"                ;107 Depth +/-:
     TCODE    .20,   .125,    "Change:" 		             ;108 Change:
 	TCODE	 .20,	.155,	 "Default:"				  	 ;109 Default:
@@ -370,7 +370,7 @@
     TCODE    .0,    .0,      ""		                     ;233 unused
     TCODE    .0,    .0,      ""     	                 ;234 unused
 
-    TCODE    .10,   .2,      "Decomode changed!  "       ;235 Decomode changed!
+    TCODE    .10,   .2,      "Decomode changed!"       	 ;235 Decomode changed!
     TCODE    .85,   .125,    "L16-GF CC"                 ;236 L16-GF CC
     TCODE    .2,    .12,     "Not found"                 ;237 Not found
     TCODE    .100,  .0,      "SetPoint"                  ;238 SetPoint
@@ -446,7 +446,7 @@
     TCODE    .0,    .0,      "MOD:"                      ;297 MOD:                  (max operating depth of a gas).
     TCODE    .0,    .0,      "END:"                      ;298 END:                  (equivalent nitrogen depth of a gas).
     TCODE    .0,    .0,      "EAD:"                      ;299 EAD:                  (equivalent air depth of a gas).
-	TCODE    .100,  .125,	 "Active?"					 ;300 Active?               (Enable/Disable Gas underwater)
+	TCODE    .100,  .125,	 "More"						 ;300 More               	(Enable/Disable Gas underwater)
 	TCODE    .0,    .2,      "OCR Gas Usage:"            ;301 OCR Gas Usage:        (Planned gas consumtion by tank).
 ; 115k Bootloader support:
 	TCODE	 .45,	.100,	 "Bootloader"				 ;302 Bootloader
@@ -469,53 +469,53 @@
     TCODE    .103,  .155,    "High" 	                 ;313 High					(Same length as #312!)
 
 ; ZH-L16 mode description
-    TCODE    .0,    .35,     "Decotype: ZH-L16 OC"       ;314 Decotype: ZH-L16 OC
-    TCODE    .0,    .65,     "For Open Circuit   "       ;315 For Open Circuit
-    TCODE    .0,    .95,     "Divers. Supports 5 "       ;316 Divers. Supports 5
-    TCODE    .0,    .125,    "Trimix Gases.      "       ;317 Trimix Gases.
-    TCODE    .0,    .155,    "Configure your gas "       ;318 Configure your gas
-    TCODE    .0,    .185,    "in Gassetup menu.  "       ;319 in Gassetup menu.
-    TCODE    .0,    .215,    "Check CF11 & CF12 !"       ;320 Check CF11 & CF12 !
+    TCODE    .0,    .35,     "Decotype: ZH-L16 OC"      ;314 Decotype: ZH-L16 OC
+    TCODE    .0,    .65,     "For Open Circuit" 	    ;315 For Open Circuit
+    TCODE    .0,    .95,     "Divers. Supports 5"    	;316 Divers. Supports 5
+    TCODE    .0,    .125,    "Trimix Gases."       		;317 Trimix Gases.
+    TCODE    .0,    .155,    "Configure your gas"      	;318 Configure your gas
+    TCODE    .0,    .185,    "in Gassetup menu."      	;319 in Gassetup menu.
+    TCODE    .0,    .215,    "Check CF11 & CF12 !"      ;320 Check CF11 & CF12 !
 ; Gaugemode description
-    TCODE    .0,    .35,     "Decotype: Gauge    "       ;321 Decotype: Gauge    
-    TCODE    .0,    .65,     "Divetime will be in"       ;322 Divetime will be in
-    TCODE    .0,    .95,     "Minutes:Seconds.   "       ;323 Minutes:Seconds.   
-    TCODE    .0,    .125,    "OSTC2 will not     "       ;324 OSTC2 will not     
-    TCODE    .0,    .155,    "compute Deco, NoFly"       ;325 compute Deco, NoFly
-    TCODE    .0,    .185,    "time and Desat.    "       ;326 time and Desat.
-    TCODE    .0,    .215,    "time at all!       "       ;327 time at all!
+    TCODE    .0,    .35,     "Decotype: Gauge"      	;321 Decotype: Gauge    
+    TCODE    .0,    .65,     "Divetime will be in"      ;322 Divetime will be in
+    TCODE    .0,    .95,     "Minutes:Seconds."      	;323 Minutes:Seconds.   
+    TCODE    .0,    .125,    "OSTC2 will not"      		;324 OSTC2 will not     
+    TCODE    .0,    .155,    "compute Deco, NoFly"      ;325 compute Deco, NoFly
+    TCODE    .0,    .185,    "time and Desat."      	;326 time and Desat.
+    TCODE    .0,    .215,    "time at all!"      		;327 time at all!
 ; Const.ppO2 description
-    TCODE    .0,    .35,     "Decotype: ZH-L16 CC"       ;328 Decotype: ZH-L16 CC
-    TCODE    .0,    .65,     "For closed"       		 ;329 For closed
-    TCODE    .0,    .95,     "circuit rebreathers"       ;330 circuit rebreathers
-    TCODE    .0,    .125,    "Configure the 3    "       ;331 Configure the 3
-    TCODE    .0,    .155,    "SetPoints in CCR - "       ;332 SetPoints in CCR -
-    TCODE    .0,    .185,    "Setup menu. 5 bail-"       ;333 Setup menu. 5 bail-
-    TCODE    .0,    .215,    "outs are available."       ;334 outs are available.
+    TCODE    .0,    .35,     "Decotype: ZH-L16 CC"      ;328 Decotype: ZH-L16 CC
+    TCODE    .0,    .65,     "For closed"       		;329 For closed
+    TCODE    .0,    .95,     "circuit rebreathers"      ;330 circuit rebreathers
+    TCODE    .0,    .125,    "Configure the 3"      	;331 Configure the 3
+    TCODE    .0,    .155,    "SetPoints in CCR -"      	;332 SetPoints in CCR -
+    TCODE    .0,    .185,    "Setup menu. 5 bail-"      ;333 Setup menu. 5 bail-
+    TCODE    .0,    .215,    "outs are available."      ;334 outs are available.
 ; Apnoemode description
-    TCODE    .0,    .35,     "Decotype: Apnoe    "       ;335 Decotype: Apnoe
-    TCODE    .0,    .65,     "OSTC2 will display "       ;336 OSTC2 will display
-    TCODE    .0,    .95,     "each descent separ-"       ;337 each descent separ-
-    TCODE    .0,    .125,    "ately in Min:Sec.  "       ;338 ately in Min:Sec.
-    TCODE    .0,    .155,    "Will temporally set"       ;339 Will temporally set
-    TCODE    .0,    .185,    "samplerate to 1 sec"       ;340 samplerate to 1 sec
-    TCODE    .0,    .215,    "No Deco calculation"       ;341 No Deco calculation
+    TCODE    .0,    .35,     "Decotype: Apnoe"      	;335 Decotype: Apnoe
+    TCODE    .0,    .65,     "OSTC2 will display"	    ;336 OSTC2 will display
+    TCODE    .0,    .95,     "each descent separ-"      ;337 each descent separ-
+    TCODE    .0,    .125,    "ately in Min:Sec."      	;338 ately in Min:Sec.
+    TCODE    .0,    .155,    "Will temporally set"      ;339 Will temporally set
+    TCODE    .0,    .185,    "samplerate to 1 sec"      ;340 samplerate to 1 sec
+    TCODE    .0,    .215,    "No Deco calculation"      ;341 No Deco calculation
 ; Multi GF OC mode description
-    TCODE    .0,    .35,     "Decotype: L16-GF OC"       ;342 Decotype: L16-GF OC
-    TCODE    .0,    .65,     "Decompression cal- "       ;343 Decompression cal-
-    TCODE    .0,    .95,     "culations with the "       ;344 culations with the
-    TCODE    .0,    .125,    "GF-Method (GF_lo/GF"       ;345 GF-Method (GF_lo/GF
-    TCODE    .0,    .155,    "_hi). Check CF32 & "       ;346 _hi). Check CF32 &
-    TCODE    .0,    .185,    "CF33! Open Circuit "       ;347 CF33! Open Circuit
-    TCODE    .0,    .215,    "with Deep Stops.   "       ;348 with Deep Stops.
+    TCODE    .0,    .35,     "Decotype: L16-GF OC"      ;342 Decotype: L16-GF OC
+    TCODE    .0,    .65,     "Decompression cal-"       ;343 Decompression cal-
+    TCODE    .0,    .95,     "culations with the"       ;344 culations with the
+    TCODE    .0,    .125,    "GF-Method (GF_lo/GF"      ;345 GF-Method (GF_lo/GF
+    TCODE    .0,    .155,    "_hi). Check CF32 &"       ;346 _hi). Check CF32 &
+    TCODE    .0,    .185,    "CF33! Open Circuit"       ;347 CF33! Open Circuit
+    TCODE    .0,    .215,    "with Deep Stops."	  	    ;348 with Deep Stops.
 ; Multi GF CC mode description
-    TCODE    .0,    .35,     "Decotype: L16-GF CC"       ;349 Decotype: L16-GF CC
-    TCODE    .0,    .65,     "Decompression cal- "       ;350 Decompression cal-
-    TCODE    .0,    .95,     "culations with the "       ;351 culations with the
-    TCODE    .0,    .125,    "GF-Method (GF_lo/GF"       ;352 GF-Method (GF_lo/GF
-    TCODE    .0,    .155,    "_hi). Check CF32 & "       ;353 _hi). Check CF32 &
-    TCODE    .0,    .185,    "CF33!Closed Circuit"       ;354 CF33!Closed Circuit
-    TCODE    .0,    .215,    "with Deep Stops.   "       ;355 with Deep Stops.
+    TCODE    .0,    .35,     "Decotype: L16-GF CC"      ;349 Decotype: L16-GF CC
+    TCODE    .0,    .65,     "Decompression cal-"      	;350 Decompression cal-
+    TCODE    .0,    .95,     "culations with the"      	;351 culations with the
+    TCODE    .0,    .125,    "GF-Method (GF_lo/GF"      ;352 GF-Method (GF_lo/GF
+    TCODE    .0,    .155,    "_hi). Check CF32 &"       ;353 _hi). Check CF32 &
+    TCODE    .0,    .185,    "CF33!Closed Circuit"      ;354 CF33!Closed Circuit
+    TCODE    .0,    .215,    "with Deep Stops."       	;355 with Deep Stops.
 ; Spare (PSCR?)
     TCODE    .0,    .35,     ""     ;356
     TCODE    .0,    .65,     ""     ;357

@@ -28,8 +28,6 @@ menu_const_ppO2:
 	movwf	menupos
 
 	bcf		menubit4
-	bcf		cursor
-	bcf		sleepmode
 	clrf	decodata+0				; Here: # of SP
 	bcf		first_FA				; Here: =1: -, =0: +
 	bcf		second_FA				; Here: =1: 1, =0: 10 steps
@@ -44,10 +42,6 @@ menu_const_ppO20:
 
 
 menu_const_ppO21:
-	clrf	timeout_counter2
-	bcf		menubit2
-	bcf		menubit3
-
 	WIN_LEFT 	.20
 	WIN_TOP		.35
 	lfsr	FSR2,letter
@@ -130,6 +124,7 @@ menu_const_ppO21:
 
 	DISPLAYTEXT	.11			; Exit
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
+	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
 	call	PLED_menu_cursor
 
 menu_const_ppO2_loop:
@@ -167,12 +162,8 @@ menu_const_ppO22a:
 	movwf	menupos
 
 menu_const_ppO23:
-	clrf	timeout_counter2
+	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
 	call	PLED_menu_cursor
-	
-	; debounce switches
-	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!	
-	bcf		menubit3		; clear flag
 	bra		menu_const_ppO2_loop
 
 do_menu_const_ppO2:
@@ -231,7 +222,7 @@ change_ppo2_minus2:
 
 	movlw	d'4'
 	movwf	menupos
-	bra	menu_const_ppO21
+	bra		menu_const_ppO21
 
 change_ppo2_reset:				; reset to 1.00Bar
 	movf	decodata+0,W		; read current value 
@@ -253,4 +244,4 @@ next_ppO2:
 next_ppO22:	
 	movlw	d'1'
 	movwf	menupos
-	bra	menu_const_ppO21	
+	bra		menu_const_ppO21	

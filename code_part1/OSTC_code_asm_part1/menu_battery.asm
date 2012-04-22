@@ -134,9 +134,8 @@ menu_battery_state:
 	movff	EEDATA,convert_value_temp+2
 	call	PLED_convert_date		; coverts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 	STRCAT_PRINT ") "
-	
-	bcf		switch_left
-	bcf		switch_right
+
+	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!	
 	bcf		menubit2
 menu_battery_state_loop:
 	call	check_switches_logbook

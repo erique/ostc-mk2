@@ -373,7 +373,7 @@ PLED_resetdebugger:
 	output_8		
 	call	word_processor
 
-	bcf		switch_left	
+	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 PLED_resetdebugger_loop:
     bcf     LED_blue            ; Blink blue led every seconds..
     btfss   secs,0
@@ -383,7 +383,7 @@ PLED_resetdebugger_loop:
 	bra		PLED_resetdebugger_loop		; Loop
 
     bcf     LED_blue
-	bcf		switch_left	
+	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 	return
 
 PLED_divemode_mask:					; Displays mask in Dive-Mode

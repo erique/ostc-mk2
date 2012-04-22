@@ -204,11 +204,13 @@ PLED_DisplayOff:
 ;
 AA_CMD_WRITE macro cmd
 		movlw	cmd
-		rcall   PLED_CmdWrite
-;		bcf		oled_rs				    ; Cmd mode
-;		movwf	PORTD,A
-;		bcf		oled_rw				    ; Tick the clock
-;		bsf		oled_rw
+;		rcall   PLED_CmdWrite			; slow but saves a lot of bytes in flash
+	; /* Fast writing
+		bcf		oled_rs				    ; Cmd mode
+		movwf	PORTD,A
+		bcf		oled_rw				    ; Tick the clock
+		bsf		oled_rw
+	; Fast writing */
 		endm
 ;
 ; Input	 : data as macro parameter.
@@ -225,14 +227,16 @@ AA_DATA_WRITE macro data
 ; Trash  : NONE
 ;
 AA_DATA_WRITE_PROD	macro
-        rcall   PLED_DataWrite_PROD
-;		bsf		oled_rs				    ; Data mode
-;		movff	PRODH,PORTD			    ; NOTE: OLED is BIGENDIAN!
-;		bcf		oled_rw				    ; Tick the clock
-;		bsf		oled_rw
-;		movff	PRODL,PORTD
-;		bcf		oled_rw				    ; Tick the clock
-;		bsf		oled_rw
+;       rcall   PLED_DataWrite_PROD	; slow but saves a lot of bytes in flash
+	; /* Fast writing
+		bsf		oled_rs				    ; Data mode
+		movff	PRODH,PORTD			    ; NOTE: OLED is BIGENDIAN!
+		bcf		oled_rw				    ; Tick the clock
+		bsf		oled_rw
+		movff	PRODL,PORTD
+		bcf		oled_rw				    ; Tick the clock
+		bsf		oled_rw
+	; Fast writing */
 		endm
 
 ;=============================================================================

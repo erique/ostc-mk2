@@ -204,7 +204,6 @@ menu_custom_functions0:
 	movwf	menupos
 
 	bcf		menubit4
-	bcf		cursor
 	bcf		sleepmode
 	clrf	decodata+0				; here: # of CustomFunction
 	clrf	cf32_x4                 ; here: # of CustomFunction*4

@@ -450,7 +450,7 @@ ASSERT_BANK1    MACRO   tag
 #DEFINE	menubit2			flag3,0	; menu
 #DEFINE	menubit3			flag3,1	; menu
 #DEFINE	set_minutes			flag3,2	; set minutes (not hours)
-#DEFINE cursor				flag3,3	; display cursor
+;#DEFINE unused				flag3,3	;
 #DEFINE	menubit4			flag3,4	; quit set time 
 #DEFINE	display_velocity	flag3,5	; velocity is displayed
 #DEFINE	temp_changed		flag3,6	; temperature changed

@@ -300,8 +300,7 @@ altimeter_menu_3:
 
 alt_menu_loop:
         call        PLED_menu_cursor    ; Display cursor
-    	bcf		    switch_left         ; reset buttons state
-    	bcf		    switch_right
+		call		wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 
 alt_menu_loop1:                         ; Wait for button.
     	btfsc	uart_dump_screen        ; Asked to dump screen contains ?

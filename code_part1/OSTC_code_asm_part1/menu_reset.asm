@@ -238,16 +238,9 @@ menu_reset:
 	call	PLED_reset_menu_mask
 
 menu_reset2:
-	clrf	timeout_counter2
-	bcf		sleepmode
-	bcf		menubit2
-	bcf		menubit3
-	bsf		menubit
-	bsf		cursor
+	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
 	call	PLED_reset_menu_mask
 	call	PLED_menu_cursor
-	bcf		switch_left
-	bcf		switch_right
 menu_reset_loop:
 	call	check_switches_menu
 	btfsc	menubit2

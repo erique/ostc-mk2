@@ -30,10 +30,7 @@ menu_gassetup:
 menu_gassetup_prelist:
 	call	PLED_ClearScreen
 	call	gassetup_sort_gaslist			; Sorts Gaslist according to change depth
-	clrf	timeout_counter2
-	bcf		sleepmode
-	bcf		menubit2
-	bcf		menubit3
+	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
 	call	PLED_topline_box
 	WIN_INVERT	.1	; Init new Wordprocessor
 	DISPLAYTEXT	.106			; Gas List
@@ -277,7 +274,6 @@ menu_gassetup_page1:
 	movwf	menupos
 	bcf		gas_setup_page2			; Page 1 of gassetup
 	bcf		menubit4
-	bcf		cursor
 	bcf		sleepmode
 	bcf		first_FA				; Here: =1: -, =0: +
 
@@ -287,9 +283,7 @@ menu_gassetup0:
 	DISPLAYTEXT	.11			; Exit
 
 menu_gassetup1:
-	clrf	timeout_counter2
-	bcf		menubit2
-	bcf		menubit3
+	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
 
 	rcall	gassetup_title_bar2			; Displays the title bar with the current Gas info
 
@@ -621,9 +615,7 @@ next_gas_page:
 	DISPLAYTEXT	.11			; Exit
 
 next_gas_page1:
-	clrf	timeout_counter2
-	bcf		menubit2
-	bcf		menubit3
+	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
 
 	WIN_TOP		.65
 	WIN_LEFT	.20

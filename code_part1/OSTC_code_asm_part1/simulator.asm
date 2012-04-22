@@ -45,18 +45,12 @@ menu_simulator:
     movff   WREG,char_I_dive_interval
 
 menu_simulator1:
-	clrf	timeout_counter2
-	bsf		menubit
-	bsf		cursor
 	call	PLED_brightness_full			;max. brightness
 	call	PLED_ClearScreen
 	call	PLED_simulator_mask
 
 menu_simulator2:
-	bcf		switch_left
-	bcf		switch_right
-	bcf		menubit2
-	bcf		menubit3
+	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
 	call	PLED_simulator_data
 	call	PLED_menu_cursor
 
@@ -160,8 +154,7 @@ simulator_startdive:
 	bcf		menubit2
 	bcf		menubit3
 	bcf		menubit
-	bcf		switch_left
-	bcf		switch_right
+	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 
 	call	simulator_save_tissue_data  ; Stores 32 floats "pre_tissue" into bank3
 
@@ -235,8 +228,7 @@ simulator_decoplan_cns_2:
         WIN_INVERT	.0                  ; Init new Wordprocessor	
 	
 simulator_show_decoplan1:
-        bcf		switch_left
-        bcf		switch_right
+	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 simulator_show_decoplan2:
 	btfsc	uart_dump_screen        ; Asked to dump screen contains ?
 	call	dump_screen             ; Yes!

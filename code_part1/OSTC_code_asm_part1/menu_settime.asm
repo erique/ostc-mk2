@@ -26,14 +26,10 @@
 
 menu_settime:
 	call	PLED_ClearScreen
+	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
 
 	bcf		set_minutes
 	bcf		menubit4
-	bcf		cursor
-	clrf	timeout_counter2
-	bcf		menubit2
-	bcf		menubit3
-	bcf		sleepmode
 	bcf		set_year
 	bcf		set_day
 	bcf		set_month
@@ -50,9 +46,6 @@ menu_settime:
 
 	DISPLAYTEXT	.24			; Set Hours
 	
-	bcf		switch_right
-	bcf		switch_left
-
 settime_loop:
 	btfsc	switch_right
 	call	add_hours_or_minutes_or_date
@@ -223,7 +216,7 @@ set_time_next_or_exit5:
 	return
 	
 add_hours_or_minutes_or_date:
-	bcf		switch_left
+	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 	clrf	secs
 
 	btfsc	set_year

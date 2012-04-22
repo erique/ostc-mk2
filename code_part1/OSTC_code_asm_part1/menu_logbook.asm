@@ -206,13 +206,7 @@ menu_logbook_display_loop2:
 	
 	DISPLAYTEXT .11							; Displays "Exit" in the last row on the current page
 
-	bcf			sleepmode					; clear some flags for user input
-	bcf			menubit2
-	bcf			menubit3
-	bcf			cursor
-	bcf			switch_right
-	bcf			switch_left
-	clrf		timeout_counter2
+	call		menu_pre_loop_common		; Clear some menu flags, timeout and switches
 
 	movlw		d'1'						; Set cursor to position 1...
 	btfsc		return_from_profileview		; .. unless we are returning from a detail/profile view
@@ -824,13 +818,7 @@ profile_display_loop3:
 ; Done.
 profile_display_loop_done:
 	call		PLED_standard_color			; Restore color
-
-	bcf			sleepmode					; clear some flags
-	bcf			menubit2
-	bcf			menubit3
-	bcf			switch_right
-	bcf			switch_left
-	clrf		timeout_counter2
+	call		menu_pre_loop_common		; Clear some menu flags, timeout and switches
 
 display_profile_loop:
 	call		check_switches_logbook
@@ -996,15 +984,10 @@ profileview_page2:
 	bcf		leftbind
 	STRCAT_PRINT  TXT_VOLT1
 
-	bcf			leftbind					; Clear flag
 
 ;	call		I2CREAD2					; Skip Sampling rate
 
-	bcf			menubit2
-	bcf			menubit3
-	bcf			switch_right
-	bcf			switch_left
-	clrf		timeout_counter2
+	call		menu_pre_loop_common		; Clear some menu flags, timeout and switches
 display_profile2_loop:
 	call		check_switches_logbook
 	btfsc		menubit2					; SET/MENU?

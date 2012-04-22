@@ -37,6 +37,7 @@
         logbook_min_tp:2        ; Min temperature, for drawing profile.
         logbook_max_tp:2        ; Maximum temperature, for drawing profile.
         logbook_ceiling         ; Current ceiling, for drawing profile.
+		divenumber              ; Dive number
     ENDC
 
 ;=============================================================================

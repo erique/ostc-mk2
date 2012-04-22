@@ -85,12 +85,12 @@
 #DEFINE color_orange        b'11111000'     ; (7,6,0)
 #DEFINE color_pink          b'11111010'     ; (7,6,2)
 
-#DEFINE	warn_depth		d'1'
-#DEFINE	warn_cns		d'2'
-#DEFINE	warn_gf			d'3'
-#DEFINE	warn_ppo2		d'4'
-#DEFINE warn_velocity	d'5'
-#DEFINE warn_ceiling	d'6'
+#DEFINE	warn_depth			d'1'
+#DEFINE	warn_cns			d'2'
+#DEFINE	warn_gf				d'3'
+#DEFINE	warn_ppo2			d'4'
+#DEFINE warn_velocity		d'5'
+#DEFINE warn_ceiling		d'6'
 #DEFINE	warn_gas_in_gaslist	d'7'
 
 ;Configuration bits
@@ -157,9 +157,6 @@ altitude        res 2           ; Last computed altitude [m]
 ;
 bank1 udata 0x100               ;Bank 1
 
-;wreg_temp       res 1           ;variables used for context saving during ISR 
-;status_temp     res 1
-;bsr_temp        res 1
 prod_temp       res 2           ;Trashed by isr_mult16x16, for sensor compensations
 
 secs            res 1           ;realtime clock
@@ -276,7 +273,6 @@ last_pressure   res 2
 temperature_avg res 2           ; Temperature summing buffer.
 temperature     res 2           ; Final temperature. SIGNED.
 last_temperature res 2          ; Last displayed temperature (used to detect changes).
-Dx              res 2
 
 last_surfpressure       res 2   ; Divemode
 last_surfpressure_15min res 2
@@ -315,8 +311,6 @@ menupos3                res 1   ; used in Logbook, Set Time and divemode
 eeprom_address          res 2   ; external EEPROM
 eeprom_header_address   res 2
 
-divenumber              res 1   ; Logbook
-
 batt_voltage            res 2   ; Battery voltage in mV
 
 i2c_temp                res 1   ; I²C timeout counter
@@ -335,7 +329,7 @@ char_I_O2_ratio         res 1   ; 02 ratio
 
 active_gas              res 1   ; Holds number of active gas
 
-last_diluent            res 1   ; backup of diluent percentage in const ppO2 mode
+;last_diluent            res 1   ; backup of diluent percentage in const ppO2 mode
 ;last_ppO2_value         res 1   ; last calculated ppO2 value
 
 debug_char              res 6    ; For debugmode

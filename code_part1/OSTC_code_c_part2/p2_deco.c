@@ -591,7 +591,7 @@ static unsigned char calc_nextdecodepth(void)
         assert( first_stop == 0 );
 
 no_deco_stop:
-		temp_depth_limit = 0;
+		temp_depth_limit = min_depth;
         goto done;
 
         // next stop is the last validated depth found, aka first_stop

@@ -196,6 +196,8 @@ surfloop_loop2a:
 	goto	internal_eeprom_access_b0	; Yes!
 	btfsc	internal_eeprom_write2		; Access internal EEPROM BANK 1 via UART module
 	goto	internal_eeprom_access_b1	; Yes!
+	btfsc	internal_eeprom_write3		; Access internal EEPROM BANK 2 via UART module
+	goto	internal_eeprom_access_b2	; Yes!
 	btfsc	uart_send_hash				; Send MD2 hash values
 	goto	send_md2_hash				; Yes!
 	btfsc	uart_send_int_eeprom		; Send internal EEPROM BANK 0
@@ -204,6 +206,8 @@ surfloop_loop2a:
 	goto	reset_decodata				; Yes!
 	btfsc	uart_send_int_eeprom2		; Send internal EEPROM BANK 1
 	goto	send_int_eeprom_b1			; Yes!
+	btfsc	uart_send_int_eeprom3		; Send internal EEPROM BANK 2
+	goto	send_int_eeprom_b2			; Yes!
 	btfsc	uart_store_tissue_data		; Store tissue data?
 	goto	uart_store_tissues			; Yes!
 	btfsc	uart_115200_bootloader		; Look for 115200Baud bootloader?

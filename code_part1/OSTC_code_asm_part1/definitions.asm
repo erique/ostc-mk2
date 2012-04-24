@@ -444,7 +444,7 @@ ASSERT_BANK1    MACRO   tag
 #DEFINE	menubit2			flag3,0	; menu
 #DEFINE	menubit3			flag3,1	; menu
 #DEFINE	set_minutes			flag3,2	; set minutes (not hours)
-;#DEFINE unused				flag3,3	;
+#DEFINE internal_eeprom_write3 flag3,3 ;=1: start routine to access internal EEPROM BANK 2 via the UART
 #DEFINE	menubit4			flag3,4	; quit set time 
 #DEFINE	display_velocity	flag3,5	; velocity is displayed
 #DEFINE	temp_changed		flag3,6	; temperature changed
@@ -530,7 +530,7 @@ ASSERT_BANK1    MACRO   tag
 #DEFINE	neg_flag_isr			flag12,3	;=1: ISR Negative flag (Math)
 #DEFINE	select_bailoutgas		flag12,4	;=1: Select Bailout instead of Setpoint in Gaslist
 #DEFINE	FLAG_apnoe_mode			flag12,5	;=1: Apnoe mode selected
-;#DEFINE	unused		flag12,6	;=1: 
+#DEFINE	uart_send_int_eeprom3	flag12,6	;=1: Send internal EEPROM BANK 2
 #DEFINE	uart_send_int_eeprom2	flag12,7	;=1: Send internal EEPROM BANK 1
 
 #DEFINE	internal_eeprom_write2	flag13,0	;=1: start routine to access internal EEPROM BANK 1 via the UART

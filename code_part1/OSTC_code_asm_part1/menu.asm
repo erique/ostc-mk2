@@ -431,9 +431,9 @@ show_dateformat3:
 	return
 
 toggle_brightness:
-	movlw	LOW		0x104
+	movlw	LOW		0x103
 	movwf	EEADR
-	movlw	HIGH 	0x104
+	movlw	HIGH 	0x103
 	movwf	EEADRH					; OLED brightness (=0: Eco, =1: High)
 	call	read_eeprom				; read byte
 	bcf		oled_brightness_high	; Eco mode
@@ -449,9 +449,9 @@ toggle_brightness:
 	call	PLED_brightness_full	; Set OLED
 
 	; ...and write it again to EEPROM
-	movlw	LOW		0x104
+	movlw	LOW		0x103
 	movwf	EEADR
-	movlw	HIGH 	0x104
+	movlw	HIGH 	0x103
 	movwf	EEADRH					; OLED brightness (=0: Eco, =1: High)
 	movlw	.0
 	btfsc	oled_brightness_high

@@ -63,30 +63,24 @@ reset_decodata:
 ; send internal EEPROM BANK 0 via the UART
 send_int_eeprom_b0:
 	bcf			uart_send_int_eeprom	; clear flag
-	bcf			PIE1,RCIE				; No Interrupt for UART
-	bsf			LED_blue
-	
-	clrf		EEADRH						; Point to Bank0
-	rcall		send_internal_eeprom1		; sends complete 1st. page of internal EEPROM
-
-	bcf			LED_blue
-	bsf			PIE1,RCIE				; Interrupt for RS232
+	movlw		.0						; Point to Bank0
+	rcall		send_internal_eeprom1	; sends complete 1st. page of internal EEPROM
 	goto		surfloop_loop			; return to surface loop
 
 ; send internal EEPROM BANK 1 via the UART
 send_int_eeprom_b1:
 	bcf			uart_send_int_eeprom2	; clear flag
-	bcf			PIE1,RCIE				; No Interrupt for UART
-	bsf			LED_blue
-
-
 	movlw		d'1'
-	movwf		EEADRH						; Point to Bank1
-	rcall		send_internal_eeprom1		; sends complete 2nd page of internal EEPROM
-	clrf		EEADRH						; Point to Bank0
+	movwf		EEADRH					; Point to Bank1
+	rcall		send_internal_eeprom1	; sends complete 2nd page of internal EEPROM
+	goto		surfloop_loop			; return to surface loop
 
-	bcf			LED_blue
-	bsf			PIE1,RCIE				; Interrupt for RS232
+; send internal EEPROM BANK 2 via the UART
+send_int_eeprom_b2:
+	bcf			uart_send_int_eeprom3	; clear flag
+	movlw		d'2'
+	movwf		EEADRH					; Point to Bank1
+	rcall		send_internal_eeprom1	; sends complete 2nd page of internal EEPROM
 	goto		surfloop_loop			; return to surface loop
 
 
@@ -154,7 +148,9 @@ menu_interface1:
 
 	DISPLAYTEXT	.17						; "Data"
 
+	movlw		.0							; Point to Bank0
 	rcall		send_internal_eeprom1		; sends complete 1st. page of internal EEPROM
+	bsf			LED_blue
 
 	call		rs232_wait_tx				; wait for UART
 	movff		batt_voltage+0,TXREG			; Battery
@@ -232,6 +228,9 @@ menu_interface2:
 	goto		surfloop					; back to surfacemode
 
 send_internal_eeprom1:
+	movwf		EEADRH						; Point to Bank "WREG"
+	bcf			PIE1,RCIE					; No Interrupt for UART
+	bsf			LED_blue
 	clrf		uart1_temp					; Send the total of 256bytes
 	clrf		EEADR						; Send bytes 0-255 from internal EEPROM
 send_internal_eeprom2:
@@ -241,4 +240,7 @@ send_internal_eeprom2:
 	call		rs232_wait_tx				; wait for UART
 	decfsz		uart1_temp,F				; until limit reached
 	bra			send_internal_eeprom2
+	clrf		EEADRH						; Point to Bank0
+	bcf			LED_blue
+	bsf			PIE1,RCIE				; Interrupt for RS232
 	return

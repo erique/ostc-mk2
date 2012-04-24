@@ -152,9 +152,9 @@ check_firmware_new:
 
 ; After update resets
 	; Reset brightness to ECO
-	movlw	LOW		0x104
+	movlw	LOW		0x103
 	movwf	EEADR
-	movlw	HIGH 	0x104
+	movlw	HIGH 	0x103
 	movwf	EEADRH					; OLED brightness (=0: Eco, =1: High)
 	movlw	.0
 	movwf	EEDATA
@@ -271,9 +271,9 @@ restart_1:
 	call	logbook_convert_64k		; No, convert now (And write 0xAA to internal EEPROM 0x100)
 
 ; Set OLED brightness flag
-	movlw	LOW		0x104
+	movlw	LOW		0x103
 	movwf	EEADR
-	movlw	HIGH 	0x104
+	movlw	HIGH 	0x103
 	movwf	EEADRH					; OLED brightness (=0: Eco, =1: High)
 	call	read_eeprom				; read byte
 	bcf		oled_brightness_high	; Eco mode

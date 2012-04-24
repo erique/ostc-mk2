@@ -40,21 +40,27 @@ read_int_eeprom_1:
 	movwf	EEADR
 	bra		read_eeprom					; reads and "returns" after write
 
+internal_eeprom_access_b2:				; accesses internal EEPROM BANK 2 via the UART
+	bcf		internal_eeprom_write3		; clear flag!
+	movlw	d'2'
+	movwf	EEADRH						;BANK1
+	movlw	"n"
+	bra		internal_eeprom_access1		; Continue with common routines
+
 internal_eeprom_access_b1:				; accesses internal EEPROM BANK 1 via the UART
 	bcf		internal_eeprom_write2		; clear flag!
 	movlw	d'1'
 	movwf	EEADRH						;BANK1
 	movlw	"i"
-	bra		internal_eeprom_access1		; Continue with bank1 and bank0 common routines
+	bra		internal_eeprom_access1		; Continue with common routines
 
 internal_eeprom_access_b0:				; accesses internal EEPROM BANK 0 via the UART
 	bcf		internal_eeprom_write		; clear flag!
 	clrf	EEADRH						; Bank0
 	movlw	"d"
-;	bra		internal_eeprom_access1		; Continue with bank1 and bank0 common routines
-
+;	bra		internal_eeprom_access1		; Continue with common routines
 internal_eeprom_access1:
-	movwf	TXREG						; Send command echo ("i" or "d")
+	movwf	TXREG						; Send command echo ("i", "d" or "n")
 	bsf		no_sensor_int				; No Sensor Interrupt
 	movlw	d'4'
 	movwf	EEADR

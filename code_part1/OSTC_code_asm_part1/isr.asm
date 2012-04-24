@@ -79,7 +79,10 @@ uartint:
 		bsf		uart_store_tissue_data		; set flag
 		dcfsnz	uart1_temp,F				; "l"
 		bsf		uart_dump_screen            ; set flag
-	
+		dcfsnz	uart1_temp,F				; "m"	
+		bsf		uart_send_int_eeprom3		; set flag
+		dcfsnz	uart1_temp,F				; "n"	
+		bsf		internal_eeprom_write3		; set flag
 		movlw	0xC1
 		cpfseq	RCREG						; 115200Baud Bootloader request?
 		bra		uartint1					; No

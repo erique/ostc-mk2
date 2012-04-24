@@ -2345,11 +2345,23 @@ void deco_gas_volumes(void)
             = (char_I_bottom_depth*0.1 + 1.0)           // Use Psurface = 1.0 bar.
             * char_I_bottom_time                        // in minutes.
             * bottom_usage;                             // In liter/minutes.
-    else
-        volumes[gas] = 65535.0;
+
+    //---- Starts by a gas switch ? ------------------------------------------
+    // If there is no special gas-switch stops inserted, then
+    // we should pay attention to the gas when starting to ascent, before
+    // the first stop...
+    if( read_custom_function(55) == 0 )
+    {
+        overlay unsigned char j;
+        for(j=0; j<NUM_GAS; ++j)
+        {
+            if( char_O_first_deco_depth < char_I_deco_gas_change[j] )
+                if( !char_I_deco_gas_change[gas] || (char_I_deco_gas_change[gas] > char_I_deco_gas_change[j]) )
+                    gas = j;
+        }
+    }
 
     //---- Ascent usage ------------------------------------------------------
-
     deepest_first = read_custom_function(54) == 0;
     deco_usage    = (float) read_custom_function(57); // In liter/minutes.
 
@@ -2363,8 +2375,6 @@ void deco_gas_volumes(void)
             += (char_I_bottom_depth*0.1 + 1.0)          // Depth -> bar
              * (char_I_bottom_depth - char_O_first_deco_depth) * 0.1  // ascent time (min)
              * deco_usage;                              // Consumption ( xxx / min @ 1 bar)
-    else
-        volumes[gas] = 65535.0;
 
     for(i=0; i<NUM_STOPS; ++i)
     {

@@ -2340,7 +2340,7 @@ void deco_gas_volumes(void)
     gas = char_I_first_gas - 1;
 
     bottom_usage = (float) read_custom_function(56);
-    if( bottom_usage > 0.0 )
+    if( char_I_const_ppO2 == 0 && bottom_usage > 0.0 )
         volumes[gas]
             = (char_I_bottom_depth*0.1 + 1.0)           // Use Psurface = 1.0 bar.
             * char_I_bottom_time                        // in minutes.

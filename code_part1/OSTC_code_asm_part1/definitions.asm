@@ -329,9 +329,6 @@ char_I_O2_ratio         res 1   ; 02 ratio
 
 active_gas              res 1   ; Holds number of active gas
 
-;last_diluent            res 1   ; backup of diluent percentage in const ppO2 mode
-;last_ppO2_value         res 1   ; last calculated ppO2 value
-
 debug_char              res 6    ; For debugmode
 
 apnoe_mins              res 1   ; single descent minutes for Apnoe mode

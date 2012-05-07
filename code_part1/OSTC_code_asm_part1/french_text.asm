@@ -21,6 +21,7 @@
 ; 2008/05/24 : MW.
 ; 2011/02/02 : Jean-Do Gascuel: split into different files for multi-lingual support
 ; 2011/02/09 : Pierre Vidalot: French translation.
+; 2011/08/12 : Sergei V. Rozinov: Complete translation patch
 ;
 ; known bugs:
 ; ToDo: 
@@ -86,7 +87,7 @@
 #DEFINE	TXT_HE4			     "He: "                      ; "He: "                 
 #DEFINE	TXT_NX3			     "NX "                       ; "NX "                  
 #DEFINE	TXT_TX3			     "TX "                       ; "TX "                  
-#DEFINE	TXT_AT4			     " à  "                      ; " at "
+#DEFINE	TXT_AT4			     " a  "                      ; " at "
 #DEFINE	TXT_G1_3		     "G1:"                       ; "G1:"                  
 #DEFINE	TXT_G2_3		     "G2:"                       ; "G2:"                  
 #DEFINE	TXT_G3_3		     "G3:"                       ; "G3:"                  
@@ -132,7 +133,7 @@
     TCODE    .20,  .95,      "Remises a zéro"            ;009 Reset Menu
     TCODE    .20,  .125,     "Menu Réglages"             ;010 Setup
     TCODE    .20,  .185,     "Sortir"                    ;011 Exit
-    TCODE    .87,  .2,       "Attendez.."                ;012 Wait..
+    TCODE    .84,  .2,       "Attendez..."               ;012 Wait...
     TCODE    .0,   .24,      "Hash MD2:"                 ;013 MD2 Hash:
     TCODE    .0,   .0,       "Désat"                     ;014 Desat         (Desaturation count-down)
     TCODE    .50,  .2,       "Interface"                 ;015 Interface		(Connected to USB)
@@ -311,10 +312,10 @@
     TCODE    .40,   .35,     "ConsoDeco[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
     TCODE    .40,   .35,     "DTR Réchap[min]"           ;180 Future TTS[min]   (Compute TTS for extra time at current depth)
     TCODE    .40,   .35,     "Alarme Sout.[l]"           ;181 Cave Warning[l]   (Consomation warning for cave divers)
-    TCODE    .40,   .35,     "Graph. Velocity"           ;182 Graph. Velocity	(Show a graphical representation of the ascend speed)
-    TCODE    .40,   .35,     "Show pSCR ppO2 "           ;183 Show pSCR ppO2	(Show the ppO2 for pSCR divers)
-    TCODE    .40,   .35,     "pSCR O2 Drop[%]"           ;184 pSCR O2 Drop[%]	(pSCR O2 drop in percent)
-    TCODE    .40,   .35,     "pSCR lung ratio"           ;185 pSCR lung ratio	(pSCR counterlung ratio)
+    TCODE    .40,   .35,     "Indic. Vitesse "           ;182 Graph. Velocity	(Show a graphical representation of the ascend speed)
+    TCODE    .40,   .35,     "Aff. ppO2 pSCR "           ;183 Show pSCR ppO2	(Show the ppO2 for pSCR divers)
+    TCODE    .40,   .35,     "BaisseO2pSCR[%]"           ;184 pSCR O2 Drop[%]	(pSCR O2 drop in percent)
+    TCODE    .40,   .35,     "Rapp.Poum. pSCR"           ;185 pSCR lung ratio	(pSCR counterlung ratio)
 ; End of function descriptor II
 ;
     TCODE    .13,   .2,      "Config Fonctions II"       ;186 Custom Functions II
@@ -374,10 +375,10 @@
     TCODE    .85,   .125,    "L16-GF CC"                 ;236 L16-GF CC
     TCODE    .2,    .12,     "Non trouvé"                ;237 Not found
     TCODE    .100,  .0,      "SetPoint"                  ;238 SetPoint
-    TCODE    .100,  .0,      "PasDéco"                   ;239 No Deco
+    TCODE    .100,  .0,      "SansDéco"                  ;239 No Deco
     TCODE    .90,   .50,     "Interval:"                 ;240 Interval:
     TCODE    .100,  .75,     "Contrast"                  ;241 Display
-    TCODE    .100,  .0,      "PasDéco"                   ;242 No deco
+    TCODE    .100,  .0,      "SansDéco"                  ;242 No deco
     TCODE    .132,  .0,      "béta"                      ;243 beta
     TCODE    .100,  .100,    "unuse"                     ;244 unuse
     TCODE    .20,   .65,     "RaZ CF,Gaz & Déco"         ;245 Reset CF,Gas & Deco
@@ -415,7 +416,7 @@
     TCODE    .3,    .2,      "Nouvelles CF ajoutées!"    ;271 New CF added!
     TCODE    .0,    .35,     "Nouv. Config Fonctions"    ;272 New CustomFunctions
     TCODE    .0,    .65,     "ajoutées! Regardez les"    ;273 were added! Check
-    TCODE    .0,    .95,     "Menus  CF I  et  CF II"    ;274 CF I and CF II Menu
+    TCODE    .0,    .95,     "Menus  CF I, II et III"    ;274 CF I and CF II Menu
     TCODE    .0,    .125,    "pour plus de détails!"     ;275 for Details!
     TCODE    .20,   .125,    "Salinité: "                ;276 Salinity:
 ;

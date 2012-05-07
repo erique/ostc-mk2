@@ -415,8 +415,8 @@
     TCODE    .24,   .2,      "New CF added!"             ;271 New CF added!
     TCODE    .0,    .35,     "New CustomFunctions"       ;272 New CustomFunctions
     TCODE    .0,    .65,     "were added! Check"         ;273 were added! Check
-    TCODE    .0,    .95,     "CF I and CF II Menu"       ;274 CF I and CF II Menu
-    TCODE    .0,    .125,    "for Details!"              ;275 for Details!
+    TCODE    .0,    .95,     "CF I, II and III "         ;274 CF I and CF II Menu
+    TCODE    .0,    .125,    "Menu for Details!"         ;275 for Details!
     TCODE    .20,   .125,    "Salinity: "                ;276 Salinity:
 ;
     TCODE    .20,   .95,     "Bottom Time:"              ;277 Bottom Time:

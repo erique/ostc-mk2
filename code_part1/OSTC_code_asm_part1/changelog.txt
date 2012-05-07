@@ -4,6 +4,7 @@ NEW: Custom Functions III menu (CF64-CF95)
 BUGFIX: Missed deco stops issue
 BUGFIX: Timeout for 2nd page of Gas Setup
 BUGFIX: GasVolume checks for a gas-switch before the first stop
+NEW: Battery statistics reset when battery is fully charged
 
 New in 2.21:
 BUGFIX: GF warning in logbook memory

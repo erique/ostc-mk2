@@ -237,11 +237,11 @@ RTCinit2:
 	movwf	mins
 	movlw	.12
 	movwf	hours
-	movlw	.5
+	movlw	.7
 	movwf	day
 	movlw	.5
 	movwf	month
-	movlw	.11
+	movlw	.12
 	movwf	year
 	bsf		PIE1, TMR1IE
 	return

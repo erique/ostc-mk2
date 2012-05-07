@@ -316,7 +316,7 @@ test_charger:
 	; Yes, store all data for complete cycle
 	bcf		charge_started				; Clear flag
 	bcf		charge_done					; Clear flag
-	; Store incomplete/total cycles
+	; Store incomplete cycles
 	read_int_eeprom 	d'50'		; Read byte (stored in EEDATA)
 	movff	EEDATA,temp1				; Low byte
 	read_int_eeprom 	d'51'		; Read byte (stored in EEDATA)
@@ -353,6 +353,47 @@ test_charger:
 	movff	year,EEDATA
 	write_int_eeprom	d'49'
 
+	; Reset lowest battery seen
+	movlw	LOW			d'4200'		; reset to 4.2V
+	movwf	EEDATA
+	write_int_eeprom	d'40'
+	movlw	HIGH		d'4200'		; reset to 4.2V
+	movwf	EEDATA
+	write_int_eeprom	d'41'
+	movff	month,EEDATA
+	write_int_eeprom	d'42'
+	movff	day,EEDATA
+	write_int_eeprom	d'43'
+	movff	year,EEDATA
+	write_int_eeprom	d'44'
+	; Reset temperature
+    SAFE_2BYTE_COPY temperature,lo
+	movff	lo,EEDATA
+	write_int_eeprom	d'45'
+	movff	hi,EEDATA
+	write_int_eeprom	d'46'
+	; Reset temperature extremas
+    SAFE_2BYTE_COPY temperature,lo
+	movff	lo,EEDATA	; Reset mimimum extrema
+	write_int_eeprom	d'54'
+	movff	hi,EEDATA
+	write_int_eeprom	d'55'
+	movff	month,EEDATA
+	write_int_eeprom	d'56'
+	movff	day,EEDATA
+	write_int_eeprom	d'57'
+	movff	year,EEDATA
+	write_int_eeprom	d'58'
+	movff	lo,EEDATA	; Reset maximum extrema
+	write_int_eeprom	d'59'
+	movff   hi,EEDATA
+	write_int_eeprom	d'60'
+	movff	month,EEDATA
+	write_int_eeprom	d'61'
+	movff	day,EEDATA
+	write_int_eeprom	d'62'
+	movff	year,EEDATA
+	write_int_eeprom	d'63'
 	return
 
 test_charger2:
@@ -360,7 +401,7 @@ test_charger2:
 	return								; No, quit!
 
 	bcf		charge_started				; Clear flag
-	; Store incomplete/total cycles
+	; Store incomplete cycles
 	read_int_eeprom 	d'50'			; Read byte (stored in EEDATA)
 	movff	EEDATA,temp1				; Low byte
 	read_int_eeprom 	d'51'			; Read byte (stored in EEDATA)

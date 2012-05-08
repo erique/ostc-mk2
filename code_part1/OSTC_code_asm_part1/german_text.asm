@@ -415,7 +415,7 @@
     TCODE    .10,   .2,      "Neue CF hinzugefügt!"      ;271 New CF added!
     TCODE    .0,    .35,     "Neue Custom Funktionen"    ;272 New CustomFunctions
     TCODE    .0,    .65,     "wurden hinzugefügt!"       ;273 were added! Check
-    TCODE    .0,    .95,     "Prüfe CFI und CF II"       ;274 CF I and CF II Menu
+    TCODE    .0,    .95,     "Prüfe CF I - CF III"       ;274 CF I - CF III Menu
     TCODE    .0,    .125,    "Menü für Details!"         ;275 for Details!
     TCODE    .20,   .125,    "Salzgeh.: "                ;276 Salinity:
 ;

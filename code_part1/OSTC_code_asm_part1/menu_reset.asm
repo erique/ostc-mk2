@@ -126,8 +126,8 @@ cf_default_table0:
 	CF_DEFAULT    CF_PERCENT,	d'60',  d'60',  d'100'	; nofly_time_ratio			60%
 	CF_DEFAULT    CF_PERCENT,	d'100', d'50',  d'100'  ; gradient_factor_alarm1	100%
 
-	CF_DEFAULT    CF_PERCENT,	d'10',  d'0',  	d'100'  ; CF15 cns_display_surface		10%
-	CF_DEFAULT    CF_DECI,	    d'10',  d'0',  	d'10'	; deco_distance_for_sim		1m
+	CF_DEFAULT    CF_PERCENT,	d'10',  d'0',  	d'100'  ; CF15 cns_display_surface			10%
+	CF_DEFAULT    CF_DECI,	    d'10',  d'0',  	d'20'	; CF16 deco_distance_for_sim		1m
 	CF_DEFAULT    CF_CENTI,     d'019', d'19', 	d'021'	; ppo2_warning_low			0.19 bar
 	CF_DEFAULT    CF_CENTI,     d'160', d'0', 	d'160'  ; ppo2_warning_high			1.60 bar
 	CF_DEFAULT    CF_CENTI,     d'140', d'0', 	d'150'	; ppo2_display_high			1.40 bar

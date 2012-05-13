@@ -1286,7 +1286,7 @@ PLED_white_gas:
 	goto	PLED_set_color	            ; grey out inactive gases!
 
 PLED_grey_gas:
-	movlw	color_grey
+	GETCUSTOM8	d'64'					;movlw	color_grey
 	goto	PLED_set_color	            ; grey out inactive gases!
 
 ;-----------------------------------------------------------------------------
@@ -2372,7 +2372,7 @@ PLED_serial:
 	WIN_INVERT	.0                      ; Init new Wordprocessor
 	
   ifdef __DEBUG
-    movlw   color_grey                  ; Write header in blue when
+	GETCUSTOM8	d'64'					; Write header in blue when
     call    PLED_set_color              ; compiled in DEBUG mode...
   else
 	call	PLED_standard_color
@@ -2739,7 +2739,7 @@ PLED_de_activelist_loop1:
     bc      PLED_de_activelist_white
 
 PLED_de_activelist_grey:    ; grey out inactive gases!
-	movlw	color_grey
+	GETCUSTOM8	d'64'					;movlw	color_grey
 	call	PLED_set_color
 
 PLED_de_activelist_white:
@@ -2834,10 +2834,9 @@ PLED_gas_list_loop1:
 	decfsz	lo,F			; max. 5 times...
 	bra		PLED_gas_list_loop1
 
-	movlw	color_grey
 	btfss	STATUS,C		; test carry
-	call	PLED_set_color	; grey out inactive gases!
-	
+	rcall	PLED_gas_list_grey
+		
 	call	word_processor	
 	call	PLED_standard_color	
 
@@ -2847,6 +2846,11 @@ PLED_gas_list_loop1:
 
 	DISPLAYTEXT		d'122'		; More
 	return					;  return (OC mode)
+
+PLED_gas_list_grey:
+	GETCUSTOM8	d'64'					;movlw	color_grey
+	call	PLED_set_color	; grey out inactive gases!
+	return
 
 PLED_splist_start:	
 	WIN_LEFT	.100
@@ -2943,7 +2947,7 @@ PLED_tsg_2:
     btfss   divemode
     bra     PLED_no_graph_grid
     
-	movlw   color_grey
+	GETCUSTOM8	d'64'					;movlw	color_grey
     call	PLED_set_color
 
     movlw   .169+.1                     ; divemode
@@ -3791,7 +3795,7 @@ PLED_simdata_screen2_loop1:
 	bra		PLED_simdata_white      	; Is not zero
 
 PLED_simdata_grey:
-	movlw	color_grey
+	GETCUSTOM8	d'64'					;movlw	color_grey
 	call	PLED_set_color	            ; grey out inactive gases!
 	bra		PLED_simdata_color_done
 

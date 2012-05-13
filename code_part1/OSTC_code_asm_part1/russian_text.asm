@@ -329,7 +329,7 @@
     TCODE    .0,    .0,      "Дил."                      ;192 Dil.			       (Rebreather diluent)
 
 ; 32 custom function descriptors III (FIXED LENGTH = 15 chars).
-    TCODE    .40,   .35,     "unused         "           ;193 unused
+    TCODE    .40,   .35,     "Color# inactive"           ;193 Color# inactive
     TCODE    .40,   .35,     "unused         "           ;194 unused
     TCODE    .40,   .35,     "unused         "           ;195 unused
     TCODE    .40,   .35,     "unused         "           ;196 unused

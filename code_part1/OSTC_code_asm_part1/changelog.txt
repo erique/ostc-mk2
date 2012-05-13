@@ -1,3 +1,7 @@
+New in 2.23:
+BETA Version - Do NOT use for diving!
+NEW: CF64: Configures color for inactive gases
+
 New in 2.22:
 BETA Version - Do NOT use for diving!
 NEW: Custom Functions III menu (CF64-CF95)

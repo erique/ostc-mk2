@@ -111,13 +111,13 @@ getcustom8_1:
 	movwf	EEADRH					; bank 1
 	movlw	d'32'
 	subwf	customfunction_temp1,F
-	movlw	d'63'
+	movlw	d'31'
 	cpfsgt	customfunction_temp1
-	bra		getcustom8_3			; bank 1
+	bra		getcustom8_3
 
 	movlw	d'2'
 	movwf	EEADRH					; bank 2
-	movlw	d'64'
+	movlw	d'32'
 	subwf	customfunction_temp1,F
 getcustom8_3:
 	movf	customfunction_temp1,W

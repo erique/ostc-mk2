@@ -285,7 +285,7 @@ calc_deko_divemode:
 	bra			calc_deko_divemode1a
 	; in PSCR mode
 	call		compute_pscr_ppo2		; pSCR ppO2 into sub_c:2
-;    tstfsz      sub_c+1                 ; Is ppO2 > 2.55bar ?
+;    tstfsz      sub_c+1                 ; Is ppO2 > 2.55bar ? mH
 ;    setf        sub_c+0                 ; yes: bound to 2.55... better than wrap around.
     movff		sub_c+0,char_I_actual_ppO2	; copy last ppO2 to buffer register
 

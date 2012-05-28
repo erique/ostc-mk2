@@ -1,6 +1,7 @@
 New in 2.23:
 BETA Version - Do NOT use for diving!
 NEW: CF64: Configures color for inactive gases
+NEW: Deco mode "pSCR-GF": Computes deco and CNS based on pSCR parameters (CF62/63)
 
 New in 2.22:
 BETA Version - Do NOT use for diving!

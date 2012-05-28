@@ -342,8 +342,22 @@ restart_4_test_gf_mode:
 restart_5_test_gfO2_mode:
 	movlw	d'5'					    ; GF CC mode
 	cpfseq	EEDATA
-	return							    ; Start in Surfacemode
+	bra		restart_5_test_pSCR_mode    ; check for pSCR-GF
 	bsf		FLAG_const_ppO2_mode	    ; Set flag for ppO2 mode
+	movlw	d'1'
+	movff	WREG,char_I_deco_model	    ; Set Flagbyte for GF method
+	; Load GF values into RAM
+	GETCUSTOM8	d'32'                   ; GF low
+	movff		EEDATA,char_I_GF_Low_percentage
+	GETCUSTOM8	d'33'                   ; GF high
+	movff		EEDATA,char_I_GF_High_percentage
+	return							    ; start in Surfacemode
+
+restart_5_test_pSCR_mode:
+	movlw	d'6'					    ; pSCR-GF
+	cpfseq	EEDATA
+	return							    ; start in Surfacemode
+	bcf		FLAG_const_ppO2_mode	    ; Clear flag for ppO2 mode
 	movlw	d'1'
 	movff	WREG,char_I_deco_model	    ; Set Flagbyte for GF method
 	; Load GF values into RAM

@@ -1104,6 +1104,8 @@ logbook_deco_model:
 	movlw		d'152'						; Textnumber
 	dcfsnz		lo,F						; L16-GF CC?
 	movlw		d'236'						; Textnumber
+	dcfsnz		lo,F						; pSCR-GF?
+	movlw		d'226'						; Textnumber
 	call		displaytext0_low			; Outputs to POSTINC2
 	call		word_processor
 

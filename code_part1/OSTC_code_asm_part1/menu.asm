@@ -202,7 +202,7 @@ toggle_decotype:
 	incf	EEDATA,F
 	
 toggle_decotype0:	
-	movlw	d'6'						; number of different modes
+	movlw	d'7'						; number of different modes
 	cpfseq	EEDATA
 	bra		toggle_decotype1
 	clrf	EEDATA
@@ -242,8 +242,13 @@ show_decotype5:
 	return
 show_decotype6:
 	decfsz	EEDATA,F
-	return
+	bra		show_decotype7
 	DISPLAYTEXT	.236			; L16-GF CC	=5
+	return
+show_decotype7:
+	decfsz	EEDATA,F
+	return
+	DISPLAYTEXT	.226			; pSCR-GF =6
 	return
 
 exit_setup_menu:
@@ -261,7 +266,7 @@ deco_info_screen1:
 	read_int_eeprom d'34'		; Read deco data
 
 	movlw	d'7'						; length of description text
-	mulwf	EEDATA						; Multiply with Decomode 0-5 (5=Spare)	
+	mulwf	EEDATA						; Multiply with Decomode 0-6
 	
 	movf	PRODL,W
 	addlw	.314-.256					; Description text offset

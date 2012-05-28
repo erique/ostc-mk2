@@ -385,6 +385,30 @@ simulator_calc_deco:
 	call    set_first_gas               ; Set current N2/He/O2 ratios.
     call    set_actual_ppo2             ; Then configure char_I_actual_ppO2
 
+	read_int_eeprom d'34'				; Read deco data
+	movlw		.6	
+	cpfseq		EEDATA
+	bra			simulator_calc_deco1
+	; in PSCR mode, compute fO2 into char_I_O2_ratio
+	call		compute_pscr_ppo2		; pSCR ppO2 into sub_c:2
+	movff		sub_c+0,xA+0
+	movff		sub_c+1,xA+1
+	movlw		LOW		.10
+	movwf		xB+0
+	movlw		HIGH	.10
+	movwf		xB+1
+	call		mult16x16		;xA*xB=xC	-> xC:4 = ppO2*1000
+
+    tstfsz      xA+1                    	; Is ppO2 > 2.55bar ?
+    setf        xA+0                    	; yes: bound to 2.55... better than wrap around.
+    movff		xA+0, char_I_actual_ppO2	; copy last ppO2 to buffer register
+
+	SAFE_2BYTE_COPY amb_pressure, xB
+	call		div32x16	 	; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
+	; xC+0 has O2 in percent
+	movff	xC+0,char_I_O2_ratio
+
+simulator_calc_deco1:
     ; First minute is special: init everything.
 	movlw	d'3'                        ; Begin of deco cycle (reset table).
 	movff	WREG,char_O_deco_status     ; Reset Deco module.

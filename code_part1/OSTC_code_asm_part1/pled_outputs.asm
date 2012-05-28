@@ -859,6 +859,44 @@ PLED_show_cf11_cf12_cf29_2:
 	bcf		leftbind
 	return
 
+PLED_show_cf32_cf33_cf62_cf63:	; Display GF_LOW, GF_HIGH, pSCR ratio and drop in the customview field
+	WIN_TOP		.25
+	WIN_LEFT	.90
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0					; Init new Wordprocessor
+	call	PLED_standard_color
+	GETCUSTOM8	d'32'				; GF_lo
+	movwf	lo
+    STRCPY  TXT_GFLO6
+	bsf		leftbind
+	output_8
+	STRCAT_PRINT  "%"
+
+	WIN_TOP		.50
+	GETCUSTOM8	d'33'				; GF_hi
+	movwf	lo
+    STRCPY  TXT_GFHI6
+	bsf		leftbind
+	output_8
+	STRCAT_PRINT  "%"
+
+	WIN_TOP		.75
+	lfsr        FSR2,letter
+	GETCUSTOM8  d'62'		; O2 Drop in percent
+	movwf		lo
+	bsf			leftbind
+	output_8
+
+	STRCAT		 "% 1/"
+	GETCUSTOM8  d'63'		; Counter lung ratio in 1/X
+	movwf		lo
+	output_8
+	bcf			leftbind
+    STRCAT_PRINT ""
+	return
+
+
+
 PLED_show_cf32_cf33_cf29:; Display GF_LOW, GF_HIGH and last deco in the customview field
 	WIN_TOP		.25
 	WIN_LEFT	.90
@@ -1040,12 +1078,6 @@ PLED_temp_divemode:
 	return
 
 PLED_show_ppO2:					; Show ppO2 (ppO2 stored in xC)
- 	GETCUSTOM8	d'61'					; Show pSCR ppO2?
-	decfsz		WREG,F					; WREG=1?	
-	bra			PLED_show_ppO2a			; No
-	return								; Do not display ppO2 in pSCR Mode
-
-PLED_show_ppO2a:
 	ostc_debug	't'		; Sends debug-information to screen if debugmode active
 	WIN_TOP		.117
 	WIN_LEFT	.0
@@ -1197,7 +1229,8 @@ PLED_display_decotype_surface:
 	tstfsz	EEDATA
 	bra		show_decotype_surface2
 
-;ZH-L16
+	;EEDATA=0
+	;ZH-L16-OC
 	WIN_TOP		.125
     STRCPY_PRINT TXT_OC_O1
 
@@ -1209,14 +1242,16 @@ show_decotype_surface2:
 	decf	EEDATA,F
 	tstfsz	EEDATA
 	bra		show_decotype_surface3
-; Gauge
+	;EEDATA=1
+	;Gauge
 	return
 	
 show_decotype_surface3:
     decf	EEDATA,F
     tstfsz	EEDATA
     bra	show_decotype_surface4
-    ; const. ppO2
+	;EEDATA=2
+	;ZH-L16-CC
     WIN_TOP		.125
     call	PLED_standard_color
     
@@ -1234,21 +1269,40 @@ show_decotype_surface4:
 	decf	EEDATA,F
 	tstfsz	EEDATA
 	bra		show_decotype_surface5
-; Apnoe
+	;EEDATA=3
+	;Apnoe
 	return
 
 show_decotype_surface5:
-show_decotype_surface6:
     decf	EEDATA,F
     tstfsz	EEDATA
     bra		show_decotype_surface6
-    ; Multi-GF OC
+	;EEDATA=4
+show_decotype_surface5_2:
+	;EEDATA=5
+    ;ZH16-GF OC or ZH16-GF CC
     WIN_TOP		.125
     STRCPY_PRINT TXT_GF_G1
     
     WIN_TOP		.150
     STRCPY_PRINT TXT_GF_F1
     return
+
+show_decotype_surface6:
+    decf	EEDATA,F
+    tstfsz	EEDATA
+    bra		show_decotype_surface7
+	bra		show_decotype_surface5_2
+show_decotype_surface7:
+	;EEDATA=6:
+   	;pSCR-GF  
+    WIN_TOP		.125
+    STRCPY_PRINT TXT_PSCR_P1
+    
+    WIN_TOP		.150
+    STRCPY_PRINT TXT_PSCR_S1
+    return
+
 
 ;-----------------------------------------------------------------------------
 ; Set color to grey when gas is inactive
@@ -3376,17 +3430,9 @@ PLED_show_@5_wait:
     return
 
 ;=============================================================================
-; Display pSCR ppO2
-; (Pressure[mbar]*char_I_O2_ratio)-(100-char_I_O2_ratio)*CF61*CF62*10
-PLED_show_pSCR_ppO2:
-	WIN_FONT    FT_SMALL
-    WIN_LEFT    .160-.63                ; 9 chars aligned right.
-    WIN_TOP     .170
-	call		PLED_divemask_color     ; Set Color for Divemode mask
-    lfsr        FSR2,letter
-    OUTPUTTEXTH .266                    ; "pSCR Info"
-    call        word_processor			; pCCR
 
+compute_pscr_ppo2:
+; (Pressure[mbar]*char_I_O2_ratio)-(100-char_I_O2_ratio)*CF61*CF62*10	
 	movff	char_I_O2_ratio,WREG
 	sublw	.100			; 100-char_I_O2_ratio -> WREG
 	mullw	.10				; (100-char_I_O2_ratio)*10 -> PROD:2
@@ -3429,6 +3475,19 @@ PLED_show_pSCR_ppO2:
 	movff	hi,sub_b+1
 
 	call	subU16		;sub_c = sub_a - sub_b (with UNSIGNED values)
+	return
+
+; Display pSCR ppO2
+PLED_show_pSCR_ppO2:
+	WIN_FONT    FT_SMALL
+    WIN_LEFT    .160-.63                ; 9 chars aligned right.
+    WIN_TOP     .170
+	call		PLED_divemask_color     ; Set Color for Divemode mask
+    lfsr        FSR2,letter
+    OUTPUTTEXTH .266                    ; "pSCR Info"
+    call        word_processor			; pCCR
+
+	rcall		compute_pscr_ppo2		; pSCR ppO2 into sub_c:2
 
 	WIN_FONT	FT_SMALL
 	WIN_LEFT	.95

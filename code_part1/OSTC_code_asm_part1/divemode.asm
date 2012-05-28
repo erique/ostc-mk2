@@ -279,6 +279,17 @@ calc_deko_divemode:
     clrf    WREG
     movff   WREG,char_I_step_is_1min    ; Make sure to be in 2sec mode.
 
+	read_int_eeprom d'34'				; Read deco data
+	movlw		.6	
+	cpfseq		EEDATA
+	bra			calc_deko_divemode1a
+	; in PSCR mode
+	call		compute_pscr_ppo2		; pSCR ppO2 into sub_c:2
+;    tstfsz      sub_c+1                 ; Is ppO2 > 2.55bar ?
+;    setf        sub_c+0                 ; yes: bound to 2.55... better than wrap around.
+    movff		sub_c+0,char_I_actual_ppO2	; copy last ppO2 to buffer register
+
+calc_deko_divemode1a:
 	call	deco_calc_CNS_fraction		; calculate CNS
 	movlb	b'00000001'					; rambank 1 selected
 
@@ -372,7 +383,7 @@ divemode_check_decogases:               ; CALLed from Simulator, too
 ;-----------------------------------------------------------------------------
 ; calculate ppO2 in 0.01bar (e.g. 150 = 1.50 bar ppO2)
 set_actual_ppo2:
-    SAFE_2BYTE_COPY amb_pressure, xA    ; P_amb in milibar (1000 = 1.000 bar).
+    SAFE_2BYTE_COPY amb_pressure, xA    ; P_amb in millibar (1000 = 1.00 bar).
 	movlw		d'10'
 	movwf		xB+0
 	clrf		xB+1
@@ -426,13 +437,47 @@ calc_deko_divemode2:
 	clrf	WREG
 	movff	WREG,char_I_step_is_1min    ; Force 2 second deco mode
 
+	movff	char_I_O2_ratio,lo_temp		; Backup original value for everything
+	movff	char_I_N2_ratio,hi_temp		; Backup original value for everything
+
+	read_int_eeprom d'34'				; Read deco data
+	movlw		.6	
+	cpfseq		EEDATA
+	bra			calc_deko_divemode2a
+	; in PSCR mode, compute fO2 into char_I_O2_ratio
+	call		compute_pscr_ppo2		; pSCR ppO2 into sub_c:2
+	movff		sub_c+0,xA+0
+	movff		sub_c+1,xA+1
+	movlw		LOW		.10
+	movwf		xB+0
+	movlw		HIGH	.10
+	movwf		xB+1
+	call		mult16x16		;xA*xB=xC	-> xC:4 = ppO2*10
+	SAFE_2BYTE_COPY amb_pressure, xB
+	call		div32x16	 	; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
+	; xC+0 has O2 in percent
+	movff	xC+0,char_I_O2_ratio
+
+	movff	char_I_He_ratio, wait_temp	; copy into bank1 register
+	bsf		STATUS,C					; Borrow bit
+	movlw	d'100'						; 100%
+	subfwb	wait_temp,W					; minus He
+	bsf		STATUS,C					; Borrow bit
+	subfwb	xC+0,W						; minus O2
+	movff	WREG, char_I_N2_ratio		; = N2!
+	
+calc_deko_divemode2a:
+
 	clrf	TMR3L
 	nop									; See errata DS80284E-page 2
 	clrf	TMR3H						; Reset Timer3
 
 	call	deco_calc_hauptroutine		; calc_tissue
-	movlb	b'00000001'						; rambank 1 selected
+	movlb	b'00000001'					; rambank 1 selected
 	ostc_debug	'C'		; Sends debug-information to screen if debugmode active
+
+	movff	lo_temp,char_I_O2_ratio		; Restore original value for everything
+	movff	hi_temp,char_I_N2_ratio		; Restore original value for everything
 
 	btfss	debug_mode				; Are we in debugmode?
 	bra		calc_deko_divemode4		; No...
@@ -826,6 +871,19 @@ check_ppO2:							    ; check current ppO2 and display warning if required
 	return
 
 check_ppO2_bail:						; In CC mode but bailout active!
+	read_int_eeprom d'34'				; Read deco data
+	movlw		.6	
+	cpfseq		EEDATA
+	bra			check_ppO2_non_pscr
+	; in PSCR mode
+	call		compute_pscr_ppo2		; pSCR ppO2 into sub_c:2
+	movff		sub_c+0,xC+0
+	movff		sub_c+1,xC+1			; copy for comptibility
+	clrf		xC+2
+	clrf		xC+3
+	bra			check_ppO2_check
+
+check_ppO2_non_pscr:
     SAFE_2BYTE_COPY amb_pressure, xA
 	movlw		d'10'
 	movwf		xB+0
@@ -835,8 +893,9 @@ check_ppO2_bail:						; In CC mode but bailout active!
 	movff		xC+1,xA+1
 	movff		char_I_O2_ratio,xB+0
 	clrf		xB+1
-	call		mult16x16				; char_I_O2_ratio * p_amb/10
-
+	call		mult16x16				; char_I_O2_ratio * p_amb/10 -> xC:4
+;	bra			check_ppO2_check
+check_ppO2_check:
 ; Check very high ppO2 manually
 	tstfsz		xC+2					; char_I_O2_ratio * p_amb/10 > 65536, ppO2>6,55bar?
 	bra			check_ppO2_bail2		; Yes, display Value!

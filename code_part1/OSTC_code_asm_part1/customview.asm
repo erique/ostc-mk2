@@ -405,6 +405,9 @@ surfcustomview_init_cfview:
 	call	PLED_show_cf32_cf33_cf29			; =4 (L16-GF OC)
 	dcfsnz	temp10,F
 	call	PLED_show_cf32_cf33_cf29			; =5 (L16-GF CC)
+	dcfsnz	temp10,F
+	call	PLED_show_cf32_cf33_cf62_cf63		; =6 (pSCR-GF)
+
 	bra		surfcustomview_toggle_exit	
 
 surfcustomview_toggle_exit:

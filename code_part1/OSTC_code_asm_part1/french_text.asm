@@ -118,6 +118,8 @@
 #DEFINE	TXT_DIL4			 "Dil:"                      ; "Dil:"  
 #DEFINE	TXT_N2_2			 "N2"                        ; "N2"    
 #DEFINE	TXT_HE2				 "He"                        ; "He"    
+#DEFINE	TXT_PSCR_P1			 "p"                         ; "P"
+#DEFINE	TXT_PSCR_S1			 "S"                         ; "S"
                                                                          
 #ENDIF                                                                   
 ;=============================================================================
@@ -361,7 +363,7 @@
     TCODE    .40,   .35,     "unused         "           ;224 unused
 ;
 	TCODE    .7,    .2,      "Config Fonctions III"      ;225 Custom Functions III
-    TCODE    .0,    .0,      ""		                   	 ;226 unused
+    TCODE    .85,   .125,    "pSCR-GF  "                 ;226 pSCR-GF
     TCODE    .0,    .0,      ""		                     ;227 unused
     TCODE    .0,    .0,      ""     	                 ;228 unused
     TCODE    .0,    .0,      ""		                   	 ;229 unused
@@ -517,14 +519,14 @@
     TCODE    .0,    .155,    "Vérifiez CF32 & CF33 !"    ;353 _hi). Check CF32 &
     TCODE    .0,    .185,    "Pour   Circuit   Fermé"    ;354 CF33!Closed Circuit
     TCODE    .0,    .215,    "avec paliers profonds."    ;355 with Deep Stops.
-; Spare (PSCR?)
-    TCODE    .0,    .35,     ""     ;356
-    TCODE    .0,    .65,     ""     ;357
-    TCODE    .0,    .95,     ""    	;358
-    TCODE    .0,    .125,    ""     ;359
-    TCODE    .0,    .155,    ""    	;360
-    TCODE    .0,    .185,    ""     ;361
-    TCODE    .0,    .215,    ""    	;362
+; pSCR-GF mode description
+    TCODE    .0,    .35,     "Decotype: pSCR-GF"     	;356 Decotype: pSCR-GF
+    TCODE    .0,    .65,     "For passive semi-"     	;357 For passive semi-
+    TCODE    .0,    .95,     "closed rebreather."    	;358 closed rebreather.
+    TCODE    .0,    .125,    "Check CF32 & CF33"     	;359 Check CF32 & CF33
+    TCODE    .0,    .155,    "for gradient factors"    	;360 for gradient factors
+    TCODE    .0,    .185,    "and CF61-CF63 for"     	;361 and CF61-CF63 for
+    TCODE    .0,    .215,    "pSCR features."    		;362 pSCR features.
 ;
 
 ;=============================================================================

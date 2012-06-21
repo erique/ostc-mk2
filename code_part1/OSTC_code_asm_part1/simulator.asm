@@ -391,10 +391,15 @@ simulator_calc_deco:
 	bra			simulator_calc_deco1
 	; in PSCR mode, compute fO2 into char_I_O2_ratio
 	call		compute_pscr_ppo2		; pSCR ppO2 into sub_c:2
-;    tstfsz      sub_c+1                 ; Is ppO2 > 2.55bar ? mH
-;    setf        sub_c+0                 ; yes: bound to 2.55... better than wrap around.
-    movff		sub_c+0,char_I_actual_ppO2	; copy last ppO2 to buffer register
-
+    movff		sub_c+0,xA+0
+    movff		sub_c+1,xA+1
+	movlw		d'100'
+	movwf		xB+0
+	clrf		xB+1
+	call		div16x16				; /100
+    tstfsz      xC+1                    ; Is ppO2 > 2.55bar ?
+    setf        xC+0                    ; yes: bound to 2.55... better than wrap around.
+    movff		xC+0,char_I_actual_ppO2	; copy last ppO2 to buffer register (for pSCR CNS)
 	movff		sub_c+0,xA+0
 	movff		sub_c+1,xA+1
 	movlw		LOW		.10

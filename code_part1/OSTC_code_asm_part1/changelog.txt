@@ -1,3 +1,7 @@
+New in 2.24:
+BETA Version - Do NOT use for diving!
+BUGFIX: CNS for pSCR-GF
+
 New in 2.23:
 BETA Version - Do NOT use for diving!
 NEW: CF64: Configures color for inactive gases

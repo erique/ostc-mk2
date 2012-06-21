@@ -275,19 +275,13 @@ calc_deko_divemode:
 	call	calc_velocity		; calculate vertical velocity and display if > threshold (every two seconds)
 	
 ; Calculate CNS	
-    rcall   set_actual_ppo2             ; Set char_I_actual_ppO2
     clrf    WREG
     movff   WREG,char_I_step_is_1min    ; Make sure to be in 2sec mode.
 
 	read_int_eeprom d'34'				; Read deco data
-	movlw		.6	
-	cpfseq		EEDATA
-	bra			calc_deko_divemode1a
-	; in PSCR mode
-	call		compute_pscr_ppo2		; pSCR ppO2 into sub_c:2
-;    tstfsz      sub_c+1                 ; Is ppO2 > 2.55bar ? mH
-;    setf        sub_c+0                 ; yes: bound to 2.55... better than wrap around.
-    movff		sub_c+0,char_I_actual_ppO2	; copy last ppO2 to buffer register
+	movlw	.6	
+	cpfseq	EEDATA						; in pscr-mode?
+    rcall   set_actual_ppo2             ; No, set char_I_actual_ppO2
 
 calc_deko_divemode1a:
 	call	deco_calc_CNS_fraction		; calculate CNS
@@ -877,10 +871,19 @@ check_ppO2_bail:						; In CC mode but bailout active!
 	bra			check_ppO2_non_pscr
 	; in PSCR mode
 	call		compute_pscr_ppo2		; pSCR ppO2 into sub_c:2
-	movff		sub_c+0,xC+0
-	movff		sub_c+1,xC+1			; copy for comptibility
+    movff		sub_c+0,xA+0
+    movff		sub_c+1,xA+1
+	movlw		d'100'
+	movwf		xB+0
+	clrf		xB+1
+	call		div16x16				; /100
+    tstfsz      xC+1                    ; Is ppO2 > 2.55bar ?
+    setf        xC+0                    ; yes: bound to 2.55... better than wrap around.
+    movff		xC+0,char_I_actual_ppO2	; copy last ppO2 to buffer register (for pSCR CNS)
 	clrf		xC+2
 	clrf		xC+3
+	movff		sub_c+0,xC+0
+	movff		sub_c+1,xC+1			; copy for comptibility
 	bra			check_ppO2_check
 
 check_ppO2_non_pscr:

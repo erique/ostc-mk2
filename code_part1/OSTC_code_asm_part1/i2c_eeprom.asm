@@ -322,9 +322,10 @@ WaitMSSP:
 	bra			I2CFail			; timeout occured
 WaitMSSP2:
 	btfss		PIR1,SSPIF
-	bra		WaitMSSP
+	bra			WaitMSSP
 	clrf		i2c_temp
 	bcf			PIR1,SSPIF
+	nop
 	return
 
 I2CReset:						; Something went wrong (Slave holds SDA low?)

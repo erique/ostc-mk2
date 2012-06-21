@@ -352,7 +352,6 @@ restart_5_test_gfO2_mode:
 	GETCUSTOM8	d'33'                   ; GF high
 	movff		EEDATA,char_I_GF_High_percentage
 	return							    ; start in Surfacemode
-
 restart_5_test_pSCR_mode:
 	movlw	d'6'					    ; pSCR-GF
 	cpfseq	EEDATA

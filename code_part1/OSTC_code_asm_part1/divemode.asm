@@ -65,10 +65,10 @@ diveloop_loop:		; The diveloop starts here
 	bra		diveloop_loop1c					; One Second Tasks in const_ppO2 mode
 
 ; Tasks only for OC modes
-	call	check_ppO2						; check ppO2 and displays warning if required
-	call	calc_deko_divemode				; calculate decompression and display result (any two seconds)
 	btfsc	show_safety_stop				; Show the safety stop?
 	call	PLED_show_safety_stop			; Yes, show/delete if done.
+	call	check_ppO2						; check ppO2 and displays warning if required
+	call	calc_deko_divemode				; calculate decompression and display result (any two seconds)
 	bra		diveloop_loop1x					; Common Tasks
 
 ; Tasks only for Gauge mode
@@ -97,10 +97,10 @@ diveloop_loop1b:
 
 ; Tasks only for ppO2 mode
 diveloop_loop1c:
-	call	PLED_const_ppO2_value			; display const ppO2 setting in [bar]
-	call	calc_deko_divemode				; calculate decompression and display result (any two seconds)
 	btfsc	show_safety_stop				; Show the safety stop?
 	call	PLED_show_safety_stop			; Yes, show/delete if done.
+	call	PLED_const_ppO2_value			; display const ppO2 setting in [bar]
+	call	calc_deko_divemode				; calculate decompression and display result (any two seconds)
 	btfsc	is_bailout						; Are we in Bailout mode?
 	call	check_ppO2_bail					; Yes, display ppO2 (If required)
 

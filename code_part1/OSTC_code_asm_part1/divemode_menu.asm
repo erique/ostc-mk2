@@ -722,6 +722,9 @@ timeout_divemenu2:					; quit divemode menu
 	btfss	dekostop_active
 	call	PLED_display_ndl		; Update NDL display at once
 
+	btfsc	safety_stop_active
+	bcf		safety_stop_active		; Clear flag to rebuild the safety stop
+
 timeout_divemenu2a:
 	bcf		menubit
 	bcf		premenu					; Yes, clear flags and menu, display dive time and mask again

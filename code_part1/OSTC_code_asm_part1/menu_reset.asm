@@ -190,7 +190,7 @@ cf_default_table1:
 	CF_DEFAULT    CF_INT8,      .10,    .0,     .100 	; CF63 pSCR counterlung ratio
 cf_default_table2:
 	CF_DEFAULT    CF_COLOR,     d'74',  0,      0 		; CF64 color_inactive	Color inactive: grey
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF65 unused
+	CF_DEFAULT    CF_BOOL,     	0,   	0,      0 		; CF65 Show safety stop
 	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF66 unused
 	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF67 unused
 	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF68 unused

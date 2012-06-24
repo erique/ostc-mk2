@@ -26,7 +26,7 @@
 
 #DEFINE softwareversion_beta 	1 			; (and 0 for release) 
 
-#DEFINE	max_custom_number		d'64'		; Number of last used custom function
+#DEFINE	max_custom_number		d'65'		; Number of last used custom function
 
 ; International extension. Selecting messages source:
 #DEFINE    ENGLISH                         ; Use english_text.asm
@@ -62,6 +62,12 @@
 #DEFINE		FT_SMALL		.0
 #DEFINE		FT_MEDIUM		.1
 #DEFINE		FT_LARGE		.2
+
+; Safety stop parameters
+#DEFINE	safety_stop_length		.180		; [s]
+#DEFINE	safety_stop_start		.500		; [mbar]
+#DEFINE	safety_stop_end			.300		; [mbar]
+#DEFINE	safety_stop_reset		.1000		; [mbar]
 
 ; "Better Gas" behavior
 ; better_gas_window <= minimum_change_depth !
@@ -350,6 +356,8 @@ gaslist_active          res 1	; Holds flags for active gases
 desaturation_time_buffer res 2	; buffer for desat time
 total_divetime_seconds	res 2	; counts dive seconds regardless of CF01 (18h max.)
 
+safety_stop_countdown	res 1	; counts seconds of safety stop
+
 ASSERT_BANK1    MACRO   tag
     Ifdef   __DEBUG
         local @end
@@ -434,7 +442,7 @@ ASSERT_BANK1    MACRO   tag
 #DEFINE	oneminupdate		flag2,2	;=1 after any minute
 #DEFINE	realdive			flag2,3 	; dive was longer then one minute?
 #DEFINE	sleepmode			flag2,4	;=1 if in sleepmode
-#DEFINE	same_row			flag2,5	;=1 if pixel pair is in same row (display_profile)
+#DEFINE	safety_stop_active	flag2,5	;=1 The safety stop is currently displayed
 #DEFINE premenu				flag2,6	; Premenu/Divemenu selected
 #DEFINE	menubit				flag2,7	; menu
 
@@ -497,9 +505,9 @@ ASSERT_BANK1    MACRO   tag
 #DEFINE	nofly_active			flag9,0	;=1: Do not fly!
 #DEFINE	ppO2_display_active		flag9,1	;=1: ppO2 value is displayed
 #DEFINE	ppO2_show_value			flag9,2	;=1: show ppO2 value!
-#DEFINE	uart_reset_battery_stats flag9,3	;=1: Reset the battery statistics (UART String FFF)
+#DEFINE	uart_reset_battery_stats flag9,3;=1: Reset the battery statistics (UART String FFF)
 #DEFINE	ignore_digit3			flag9,4	;=1: ignores digits 3-5 in valconv
-#DEFINE	ppO2_warn_value			flag9,5	;=1: warn about ppO2!
+#DEFINE	show_safety_stop		flag9,5	;=1: Show the safety stop
 #DEFINE	output_to_postinc_only	flag9,6	;=1: Do not call wordprocessor in output
 #DEFINE	uart_send_hash			flag9,7	;=1: Send the MD2 hash via UART
 

@@ -1,3 +1,7 @@
+New in 2.25:
+BETA Version - Do NOT use for diving!
+NEW: CF65: Show a safety stop for no-deco dives
+
 New in 2.24:
 BETA Version - Do NOT use for diving!
 BUGFIX: CNS for pSCR-GF

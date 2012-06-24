@@ -67,6 +67,8 @@ diveloop_loop:		; The diveloop starts here
 ; Tasks only for OC modes
 	call	check_ppO2						; check ppO2 and displays warning if required
 	call	calc_deko_divemode				; calculate decompression and display result (any two seconds)
+	btfsc	show_safety_stop				; Show the safety stop?
+	call	PLED_show_safety_stop			; Yes, show/delete if done.
 	bra		diveloop_loop1x					; Common Tasks
 
 ; Tasks only for Gauge mode
@@ -97,6 +99,8 @@ diveloop_loop1b:
 diveloop_loop1c:
 	call	PLED_const_ppO2_value			; display const ppO2 setting in [bar]
 	call	calc_deko_divemode				; calculate decompression and display result (any two seconds)
+	btfsc	show_safety_stop				; Show the safety stop?
+	call	PLED_show_safety_stop			; Yes, show/delete if done.
 	btfsc	is_bailout						; Are we in Bailout mode?
 	call	check_ppO2_bail					; Yes, display ppO2 (If required)
 
@@ -218,7 +222,7 @@ divemode_apnoe_tasks1:
 divemode_apnoe_tasks2:
 	btfss	FLAG_active_descent				; Are descending?			
 	return									; No, We are at the surface
-	rcall	apnoe_calc_maxdepth				; Yes!
+	call	apnoe_calc_maxdepth				; Yes!
 	
 divemode_apnoe_tasks3:
 	call	PLED_apnoe_clear_surface		; Clear Surface timer
@@ -273,6 +277,7 @@ calc_deko_divemode:
 	; Routines used in the "other second"
 	call	calc_average_depth	; calculate average depth
 	call	calc_velocity		; calculate vertical velocity and display if > threshold (every two seconds)
+	call	set_reset_safety_stop	; Set flags for safety stop and/or reset safety stop
 	
 ; Calculate CNS	
     clrf    WREG
@@ -373,6 +378,75 @@ divemode_check_decogases:               ; CALLed from Simulator, too
 	clrf	EEDATA							; No, clear!
 	movff	EEDATA,char_I_deco_gas_change+4	; Yes!
 	return
+
+set_reset_safety_stop:						; Set flags for safety stop and/or reset safety stop
+ 	GETCUSTOM8	d'65'						; Use safety stop
+	decfsz		WREG,F						; WREG=1?	
+	bra			delete_safety_stop			; No, don't show safety stop
+
+	btfsc	dekostop_active					; Is a deco stop displayed?
+	bra		delete_safety_stop				; Yes, don't show safety stop
+	; Below "safety_stop_reset"? Set flag and reset count-down timer
+    SAFE_2BYTE_COPY rel_pressure, lo
+	call	adjust_depth_with_salinity		; computes salinity setting into lo:hi [mbar]
+	movff	lo,sub_a+0
+	movff	hi,sub_a+1
+	movlw	LOW		safety_stop_reset
+	movwf	sub_b+0
+	movlw	HIGH	safety_stop_reset
+	movwf	sub_b+1	
+	call	sub16							;  sub_c = sub_a - sub_b
+	btfss	neg_flag
+	bra		reset_safety_stop				; Below 10m, reset safety stop
+
+	; Above "safety_stop_end"? Clear flag.
+    SAFE_2BYTE_COPY rel_pressure, lo
+	call	adjust_depth_with_salinity		; computes salinity setting into lo:hi [mbar]
+	movff	lo,sub_a+0
+	movff	hi,sub_a+1
+	movlw	LOW		safety_stop_end
+	movwf	sub_b+0
+	movlw	HIGH	safety_stop_end
+	movwf	sub_b+1	
+	call	sub16							;  sub_c = sub_a - sub_b
+	btfsc	neg_flag
+	bra		delete_safety_stop				; Above 3m, remove safety stop
+
+	; Above "safety_stop_start"? Activate safety stop
+    SAFE_2BYTE_COPY rel_pressure, lo
+	call	adjust_depth_with_salinity		; computes salinity setting into lo:hi [mbar]
+	movff	lo,sub_a+0
+	movff	hi,sub_a+1
+	movlw	LOW		safety_stop_start
+	movwf	sub_b+0
+	movlw	HIGH	safety_stop_start
+	movwf	sub_b+1	
+	call	sub16							;  sub_c = sub_a - sub_b
+	btfsc	neg_flag
+	bra		acivate_safety_stop				; Above 5m, activate safety stop
+
+	bra		reset_safety_stop2				; Pause safety stop	
+
+acivate_safety_stop:
+	tstfsz	safety_stop_countdown			; Countdown at zero?
+	bsf		show_safety_stop				; No, Set flag!
+	return
+
+delete_safety_stop:
+	bcf		show_safety_stop				; Clear flag
+	clrf	safety_stop_countdown			; reset timer
+	return									; Done.
+
+reset_safety_stop:
+	movlw	safety_stop_length				;[s]
+	movwf	safety_stop_countdown			; reset timer
+reset_safety_stop2:
+	btfss	safety_stop_active				; Safety stop shown
+	return									; No, don't delete it
+	bcf		show_safety_stop				; Clear flag
+	bcf		safety_stop_active				; Clear flag
+    call	PLED_clear_decoarea				; Yes, Clear stop
+	goto	PLED_display_ndl_mask			; Show NDL again (And return)
 
 ;-----------------------------------------------------------------------------
 ; calculate ppO2 in 0.01bar (e.g. 150 = 1.50 bar ppO2)
@@ -916,7 +990,6 @@ check_ppO2_check:
 	bsf			ppO2_show_value		; set flag if required
 
 ;check if we are within our warning thresholds!
-	bcf			ppO2_warn_value		; clear flag
 	movff		xC+0,sub_b+0
 	movff		xC+1,sub_b+1
 	GETCUSTOM8	d'18'					; ppo2_warning_high
@@ -929,7 +1002,6 @@ check_ppO2_check:
 
 check_ppO2_bail2:
 	bsf			ppO2_show_value		; set flag if required
-	bsf			ppO2_warn_value		; set flag 
 	movlw		d'5'				; Type of Alarm
 	movwf		AlarmType			; Copy to Alarm Register
 	bsf			event_occured		; Set Event Flag
@@ -945,7 +1017,6 @@ check_ppO2_0:
 	btfsc		neg_flag
 	bra			check_ppO2_1		; Not too low
 
-	bsf			ppO2_warn_value		; set flag 
 	bsf			ppO2_show_value		; show ppO2 if below threshold!
 	movlw		d'4'				; Type of Alarm
 	movwf		AlarmType			; Copy to Alarm Register
@@ -1148,7 +1219,7 @@ end_dive:
 	; Dive finished (and longer then one minute or Apnoe timeout occured)
 
 	btfsc	FLAG_apnoe_mode			; Calc max. depth (again) for very short apnoe dives
-	rcall	apnoe_calc_maxdepth
+	call	apnoe_calc_maxdepth
 
 	; calculate desaturation time
 	movff	last_surfpressure_30min+0,int_I_pres_surface+0          ; Pass surface to desat routine !
@@ -1810,6 +1881,8 @@ diveloop_boot:
 	bcf		is_bailout					;=1: CC mode, but bailout active!		
 	bcf		better_gas_available        ;=1: A better gas is available and a gas change is advised in divemode
     bcf     tts_extra_time              ;=1: Compute TTS if extra time spent at current depth
+	bcf		show_safety_stop			;=1: Show the safety stop
+	clrf	safety_stop_countdown		; Clear count-down
 
 	call	get_free_EEPROM_location	; get last position in external EEPROM, may be up to 2 secs!
 

@@ -412,7 +412,6 @@ PLED_display_ndl_mask:
 
 	; Clear Dekostop and Dekosum
 	rcall	PLED_clear_decoarea	
-
 	call	PLED_divemask_color	; Set Color for Divemode mask
 	DISPLAYTEXT		d'84'			; NoStop
 	call	PLED_standard_color
@@ -451,6 +450,7 @@ PLED_display_deko_mask:
 
     rcall	PLED_clear_decoarea	
     ; total deco time word
+	bcf			show_safety_stop	; Clear safety stop flag
     call		PLED_divemask_color	; Set Color for Divemode mask
     DISPLAYTEXT	d'85'			; TTS
 	DISPLAYTEXT	d'82'			; DEKOSTOP
@@ -512,6 +512,54 @@ PLED_display_deko2:
 	movff	char_O_gradient_factor,lo		; gradient factor
 	output_8
 	STRCAT_PRINT  "% "
+	call	PLED_standard_color
+	return
+
+PLED_show_safety_stop:
+	tstfsz	safety_stop_countdown			; Countdown at zero?
+	bra		PLED_show_safety_stop2			; No, show stop
+
+	bcf		show_safety_stop				; Clear flag
+
+	btfsc	safety_stop_active				; Displayed?
+    rcall	PLED_clear_decoarea				; Yes, Clear stop
+	bcf		safety_stop_active				; Clear flag
+	bra		PLED_display_ndl_mask			; Show NDL again
+
+PLED_show_safety_stop2:
+	btfsc	safety_stop_active				; Displayed?
+	bra		PLED_show_safety_stop3			; Yes.
+
+	bsf		safety_stop_active				; Set flag
+ 
+	btfsc	menubit							; Divemode menu active?
+	bra		PLED_show_safety_stop3			; Yes, do not display now but countdown
+
+	call	PLED_divemask_color				; Set Color for Divemode mask
+	DISPLAYTEXT	d'227'						; Safety stop
+
+PLED_show_safety_stop3:
+	decf	safety_stop_countdown,F			; Reduce countdown
+	btfsc	menubit							; Divemode menu active?
+	return									; Yes, do not show
+	movff	safety_stop_countdown,lo
+	call	PLED_standard_color
+	WIN_TOP		.80
+	WIN_LEFT	.104
+	WIN_FONT 	FT_MEDIUM
+	WIN_INVERT	.0                      	; Init new Wordprocessor
+	lfsr	FSR2,letter
+	clrf	hi
+	call	convert_time					; converts hi:lo in seconds to mins (hi) and seconds (lo)
+	movf	hi,W
+	movff	lo,hi
+	movwf	lo								; exchange lo and hi
+	output_99
+	PUTC    ':'
+	movff	hi,lo
+	output_99x
+	STRCAT_PRINT ""
+	WIN_FONT 	FT_SMALL
 	call	PLED_standard_color
 	return
 

@@ -330,7 +330,7 @@
 
 ; 32 custom function descriptors III (FIXED LENGTH = 15 chars).
     TCODE    .40,   .35,     "Color# inactive"           ;193 Color# inactive
-    TCODE    .40,   .35,     "unused         "           ;194 unused
+    TCODE    .40,   .35,     "Use safety stop"           ;194 Use safety stop
     TCODE    .40,   .35,     "unused         "           ;195 unused
     TCODE    .40,   .35,     "unused         "           ;196 unused
     TCODE    .40,   .35,     "unused         "           ;197 unused
@@ -364,7 +364,7 @@
 ;
 	TCODE    .7,    .2,      "Config Fonctions III"      ;225 Custom Functions III
     TCODE    .85,   .125,    "pSCR-GF  "                 ;226 pSCR-GF
-    TCODE    .0,    .0,      ""		                     ;227 unused
+	TCODE    .90,   .54,     "SafetyStop"                ;227 SafetyStop
     TCODE    .0,    .0,      ""     	                 ;228 unused
     TCODE    .0,    .0,      ""		                   	 ;229 unused
     TCODE    .0,    .0,      ""		                     ;230 unused

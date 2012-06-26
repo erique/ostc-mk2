@@ -116,6 +116,9 @@ extern void deco_gas_volumes(void);
     // Avoid warnings about float/double mismatches:
 #   ifdef WIN32
 #       pragma warning(disable: 4244 4068 4305)
+#   elif defined(Q_OS_MAC)
+//#       pragma GCC diagnostic error "-Wunknown-pragmas"
+#       pragma GCC diagnostic error "-Wunused-variable"
 #   endif
 #else
 #   define PARAMETER static

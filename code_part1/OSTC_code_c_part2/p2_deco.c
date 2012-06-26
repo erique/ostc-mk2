@@ -153,7 +153,9 @@ static void gas_switch_set(void);
 static unsigned char calc_nextdecodepth(void);
 
 //---- Bank 4 parameters -----------------------------------------------------
-#pragma udata bank4=0x400
+#ifndef UNIX
+#   pragma udata bank4=0x400
+#endif
 
 static float			GF_low;
 static float			GF_high;
@@ -178,7 +180,9 @@ static float pres_tissue_N2_vault[NUM_COMP];
 static float pres_tissue_He_vault[NUM_COMP];
 
 //---- Bank 5 parameters -----------------------------------------------------
-#pragma udata bank5=0x500
+#ifndef UNIX
+#   pragma udata bank5=0x500
+#endif
 
 static unsigned char	ci;
 static float 			pres_respiration;
@@ -216,7 +220,9 @@ static char			    flag_in_divemode;		        // new in v.108
 static unsigned char    deco_gas_change[NUM_GAS];       // new in v.109
 
 //---- Bank 6 parameters -----------------------------------------------------
-#pragma udata bank6=0x600
+#ifndef UNIX
+#   pragma udata bank6=0x600
+#endif
 
 float  pres_tissue_N2[NUM_COMP];
 float  pres_tissue_He[NUM_COMP];
@@ -224,19 +230,28 @@ float  sim_pres_tissue_N2[NUM_COMP];             // 16 floats = 64 bytes.
 float  sim_pres_tissue_He[NUM_COMP];             // 16 floats = 64 bytes.
 
 //---- Bank 7 parameters -----------------------------------------------------
-#pragma udata bank7=0x700
+#ifndef UNIX
+#   pragma udata bank7=0x700
+#endif
+
 // EMPTY ...
 
 //---- Bank 8 parameters -----------------------------------------------------
-#pragma udata bank8=0x800
+#ifndef UNIX
+#   pragma udata bank8=0x800
 
-static char	  md_pi_subst[256];
-#define C_STACK md_pi_subst                     // Overlay C-code data stack here, too.
+    static char	  md_pi_subst[256];
+#   define C_STACK md_pi_subst      // Overlay C-code data stack here, too.
+
+#endif
 
 //---- Bank 9 parameters -----------------------------------------------------
-#pragma udata bank9=0x900
+#ifndef UNIX
+#   pragma udata bank9=0x900
 
-static char	  md_state[48];		        // DONT MOVE !! // has to be at the beginning of bank 9 for the asm code!!!
+    static char	  md_state[48];     // DONT MOVE : has to be at the beginning of bank 9 for the asm code!!!
+#endif
+
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -246,31 +261,36 @@ static char	  md_state[48];		        // DONT MOVE !! // has to be at the beginni
 //
 // End of PROM code is 17F00, So push tables on PROM top...
 //
-#pragma romdata buhlmann_tables = 0x017B00  // Needs to be in UPPER bank.
+#ifndef UNIX
+#   pragma romdata buhlmann_tables = 0x017B00  // Needs to be in UPPER bank.
+#endif
+
 #include "p2_tables.romdata" 		        // new table for deco_main_v.101 (var_N2_a modified)
 
 // Magic table to compute the MD2 HASH
 //
-#pragma romdata hash_tables = 0x017E00  // Address fixed by ASM access...
-rom const rom unsigned short md_pi[] =
-{
-    0x292E, 0x43C9, 0xA2D8, 0x7C01, 0x3D36, 0x54A1, 0xECF0, 0x0613
-  , 0x62A7, 0x05F3, 0xC0C7, 0x738C, 0x9893, 0x2BD9, 0xBC4C, 0x82CA
-  , 0x1E9B, 0x573C, 0xFDD4, 0xE016, 0x6742, 0x6F18, 0x8A17, 0xE512
-  , 0xBE4E, 0xC4D6, 0xDA9E, 0xDE49, 0xA0FB, 0xF58E, 0xBB2F, 0xEE7A
-  , 0xA968, 0x7991, 0x15B2, 0x073F, 0x94C2, 0x1089, 0x0B22, 0x5F21
-  , 0x807F, 0x5D9A, 0x5A90, 0x3227, 0x353E, 0xCCE7, 0xBFF7, 0x9703
-  , 0xFF19, 0x30B3, 0x48A5, 0xB5D1, 0xD75E, 0x922A, 0xAC56, 0xAAC6
-  , 0x4FB8, 0x38D2, 0x96A4, 0x7DB6, 0x76FC, 0x6BE2, 0x9C74, 0x04F1
-  , 0x459D, 0x7059, 0x6471, 0x8720, 0x865B, 0xCF65, 0xE62D, 0xA802
-  , 0x1B60, 0x25AD, 0xAEB0, 0xB9F6, 0x1C46, 0x6169, 0x3440, 0x7E0F
-  , 0x5547, 0xA323, 0xDD51, 0xAF3A, 0xC35C, 0xF9CE, 0xBAC5, 0xEA26
-  , 0x2C53, 0x0D6E, 0x8528, 0x8409, 0xD3DF, 0xCDF4, 0x4181, 0x4D52
-  , 0x6ADC, 0x37C8, 0x6CC1, 0xABFA, 0x24E1, 0x7B08, 0x0CBD, 0xB14A
-  , 0x7888, 0x958B, 0xE363, 0xE86D, 0xE9CB, 0xD5FE, 0x3B00, 0x1D39
-  , 0xF2EF, 0xB70E, 0x6658, 0xD0E4, 0xA677, 0x72F8, 0xEB75, 0x4B0A
-  , 0x3144, 0x50B4, 0x8FED, 0x1F1A, 0xDB99, 0x8D33, 0x9F11, 0x8314
-};
+#ifndef UNIX
+#   pragma romdata hash_tables = 0x017E00  // Address fixed by ASM access...
+    rom const rom unsigned short md_pi[] =
+    {
+        0x292E, 0x43C9, 0xA2D8, 0x7C01, 0x3D36, 0x54A1, 0xECF0, 0x0613
+      , 0x62A7, 0x05F3, 0xC0C7, 0x738C, 0x9893, 0x2BD9, 0xBC4C, 0x82CA
+      , 0x1E9B, 0x573C, 0xFDD4, 0xE016, 0x6742, 0x6F18, 0x8A17, 0xE512
+      , 0xBE4E, 0xC4D6, 0xDA9E, 0xDE49, 0xA0FB, 0xF58E, 0xBB2F, 0xEE7A
+      , 0xA968, 0x7991, 0x15B2, 0x073F, 0x94C2, 0x1089, 0x0B22, 0x5F21
+      , 0x807F, 0x5D9A, 0x5A90, 0x3227, 0x353E, 0xCCE7, 0xBFF7, 0x9703
+      , 0xFF19, 0x30B3, 0x48A5, 0xB5D1, 0xD75E, 0x922A, 0xAC56, 0xAAC6
+      , 0x4FB8, 0x38D2, 0x96A4, 0x7DB6, 0x76FC, 0x6BE2, 0x9C74, 0x04F1
+      , 0x459D, 0x7059, 0x6471, 0x8720, 0x865B, 0xCF65, 0xE62D, 0xA802
+      , 0x1B60, 0x25AD, 0xAEB0, 0xB9F6, 0x1C46, 0x6169, 0x3440, 0x7E0F
+      , 0x5547, 0xA323, 0xDD51, 0xAF3A, 0xC35C, 0xF9CE, 0xBAC5, 0xEA26
+      , 0x2C53, 0x0D6E, 0x8528, 0x8409, 0xD3DF, 0xCDF4, 0x4181, 0x4D52
+      , 0x6ADC, 0x37C8, 0x6CC1, 0xABFA, 0x24E1, 0x7B08, 0x0CBD, 0xB14A
+      , 0x7888, 0x958B, 0xE363, 0xE86D, 0xE9CB, 0xD5FE, 0x3B00, 0x1D39
+      , 0xF2EF, 0xB70E, 0x6658, 0xD0E4, 0xA677, 0x72F8, 0xEB75, 0x4B0A
+      , 0x3144, 0x50B4, 0x8FED, 0x1F1A, 0xDB99, 0x8D33, 0x9F11, 0x8314
+    };
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -280,8 +300,9 @@ rom const rom unsigned short md_pi[] =
 //
 // all new in v.102
 // moved from 0x0D000 to 0x0C000 in v.108
-
-#pragma code p2_deco = 0x0C000
+#ifndef UNIX
+#   pragma code p2_deco = 0x0C000
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -1828,12 +1849,10 @@ void deco_calc_desaturation_time(void)
         temp1 = 1.05 * ppN2 - pres_tissue_N2[ci];
         temp2 = ppN2 - pres_tissue_N2[ci];
         if (temp2 >= 0.0)
-        {
             temp1 = 0.0;
-            temp2 = 0.0;
-        }
         else
             temp1 = temp1 / temp2;
+        
         if( 0.0 < temp1 && temp1 < 1.0 )
         {
             // 0.6931 is ln(2), because the math function log() calculates with a base of e not 2 as requested.
@@ -1851,12 +1870,10 @@ void deco_calc_desaturation_time(void)
         // He
         temp3 = 0.1 - pres_tissue_He[ci];
         if (temp3 >= 0.0)
-        {
             temp3 = 0.0;
-            temp4 = 0.0;
-        }
         else
             temp3 = - temp3 / pres_tissue_He[ci];
+
         if( 0.0 < temp3 && temp3 < 1.0 )
     	{
         	temp3 = log(1.0 - temp3) / -0.6931; // temp1 is the multiples of half times necessary.

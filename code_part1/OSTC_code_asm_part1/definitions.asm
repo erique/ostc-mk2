@@ -65,9 +65,9 @@
 
 ; Safety stop parameters
 #DEFINE	safety_stop_length		.180		; [s]
-#DEFINE	safety_stop_start		.500		; [mbar]
-#DEFINE	safety_stop_end			.300		; [mbar]
-#DEFINE	safety_stop_reset		.1000		; [mbar]
+#DEFINE	safety_stop_start		.510		; [mbar]
+#DEFINE	safety_stop_end			.290		; [mbar]
+#DEFINE	safety_stop_reset		.1010		; [mbar]
 
 ; "Better Gas" behavior
 ; better_gas_window <= minimum_change_depth !

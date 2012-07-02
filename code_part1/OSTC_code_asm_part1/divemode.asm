@@ -395,7 +395,7 @@ set_reset_safety_stop:						; Set flags for safety stop and/or reset safety stop
 	movwf	sub_b+0
 	movlw	HIGH	safety_stop_reset
 	movwf	sub_b+1	
-	call	sub16							;  sub_c = sub_a - sub_b
+	call	subU16							;  sub_c = sub_a - sub_b
 	btfss	neg_flag
 	bra		reset_safety_stop				; Below 10m, reset safety stop
 
@@ -408,7 +408,7 @@ set_reset_safety_stop:						; Set flags for safety stop and/or reset safety stop
 	movwf	sub_b+0
 	movlw	HIGH	safety_stop_end
 	movwf	sub_b+1	
-	call	sub16							;  sub_c = sub_a - sub_b
+	call	subU16							;  sub_c = sub_a - sub_b
 	btfsc	neg_flag
 	bra		delete_safety_stop				; Above 3m, remove safety stop
 
@@ -421,7 +421,7 @@ set_reset_safety_stop:						; Set flags for safety stop and/or reset safety stop
 	movwf	sub_b+0
 	movlw	HIGH	safety_stop_start
 	movwf	sub_b+1	
-	call	sub16							;  sub_c = sub_a - sub_b
+	call	subU16							;  sub_c = sub_a - sub_b
 	btfsc	neg_flag
 	bra		acivate_safety_stop				; Above 5m, activate safety stop
 
@@ -433,9 +433,8 @@ acivate_safety_stop:
 	return
 
 delete_safety_stop:
-	bcf		show_safety_stop				; Clear flag
 	clrf	safety_stop_countdown			; reset timer
-	return									; Done.
+	bra		reset_safety_stop2				; Remove saftestop from display
 
 reset_safety_stop:
 	movlw	safety_stop_length				;[s]

@@ -49,6 +49,9 @@ tcode_idx set tcode_idx+1
 ;---- Manage language -------------------------------------------------------
 ; Compile with ASM macro definition GERMAN=1 to use another
 ; file...
+#ifdef ITALIAN
+#define LANGUAGE_FILE "italian_text.asm"
+#endif
 #ifdef SPANISH
 #define LANGUAGE_FILE "spanish_text.asm"
 #endif

@@ -408,8 +408,8 @@ reset_all_cf:
 	clrf	nofly_time+0			; Clear nofly time
 	clrf	nofly_time+1			; Clear nofly time
 
-reset_all_cf_bank0:
-    clrf    EEADRH
+reset_all_cf_bank0:	
+    clrf    EEADRH					; EEPROM BANK 0
 	movlw	d'127'					; address of low byte of first custom function
 	movwf	EEADR
 
@@ -458,8 +458,6 @@ cf_bank2_loop:
 
 cf_bank2_end:
 	clrf	EEADRH					; EEPROM BANK 0
-
-;call	reset_external_eeprom	; delete profile memory
     return
 
 reset_gases:

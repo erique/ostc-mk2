@@ -241,18 +241,23 @@ restart_loop:
 	read_int_eeprom	d'92'			; Read number of CF used in this firmware	
 	movlw	max_custom_number		; Defined in definitions.asm
 	cpfseq	EEDATA					; Compare with last version
-	bra		restart_01				; New CF, show warning and store new number
-	bra		restart_1				; No new CF, continue with boot
-restart_01:
-; Save new number of current CF count
+	bra		restart1				; New CF, show warning and store new number
+	bra		restart2				; No new CF, continue with boot
+
+restart1:
+; Reset Bank2 if required
+	movlw	max_custom_number
+	btfsc	WREG,6					; >63?
+	call	reset_all_cf_bank2
+; Show info screen
 	call	PLED_boot               ; PLED boot (Incl. Clear Screen!)
-	rcall	display_new_cf_installed; Show warning
+	rcall	display_new_cf_installed; Show info screen
+; Save new number of current CF count
 	movlw	max_custom_number		; Defined in definitions.asm
 	movwf	EEDATA
 	write_int_eeprom	d'92'		; Store number of CF used in this firmware
 
-restart_1:
-
+restart2:
 ; Set Debug mode?
 	read_int_eeprom	d'39'
 	bsf		debug_mode			

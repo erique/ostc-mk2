@@ -1,3 +1,8 @@
+New in 2.26:
+BETA Version - Do NOT use for diving!
+CHANGE: Safety stop behaviour
+BUGFIX: Reset CFIII Menu
+
 New in 2.25:
 BETA Version - Do NOT use for diving!
 NEW: CF65: Show a safety stop for no-deco dives

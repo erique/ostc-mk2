@@ -188,6 +188,8 @@ cf_default_table1:
 	                
 	CF_DEFAULT    CF_PERCENT,   .4,     .0,     .100	; CF62 pSCR O2 Drop
 	CF_DEFAULT    CF_INT8,      .10,    .0,     .100 	; CF63 pSCR counterlung ratio
+    
+	;---- BANK2 custom function defaults -------------------------------------
 cf_default_table2:
 	CF_DEFAULT    CF_COLOR,     d'74',  0,      0 		; CF64 color_inactive	Color inactive: grey
 	CF_DEFAULT    CF_BOOL,     	0,   	0,      0 		; CF65 Show safety stop
@@ -433,6 +435,14 @@ reset_all_cf_bank1:
 	movwf	EEADRH					; EEPROM BANK 1
 	movlw	d'127'					; address of low byte of first custom function
 	movwf	EEADR
+
+    movlw   LOW cf_default_table1    ; Load PROM pointer.
+    movwf   TBLPTRL,A
+    movlw   HIGH cf_default_table1
+    movwf   TBLPTRH,A
+    movlw   UPPER cf_default_table1
+    movwf   TBLPTRU,A
+
 	
 cf_bank1_loop:
 	; Did we already read another 32 (decimal) words or double-words ?
@@ -447,6 +457,13 @@ reset_all_cf_bank2:
 	movwf	EEADRH					; EEPROM BANK 2
 	movlw	d'127'					; address of low byte of first custom function
 	movwf	EEADR
+
+    movlw   LOW cf_default_table2    ; Load PROM pointer.
+    movwf   TBLPTRL,A
+    movlw   HIGH cf_default_table2
+    movwf   TBLPTRH,A
+    movlw   UPPER cf_default_table2
+    movwf   TBLPTRU,A
 	
 cf_bank2_loop:
 	; Did we already read another 32 (decimal) words or double-words ?

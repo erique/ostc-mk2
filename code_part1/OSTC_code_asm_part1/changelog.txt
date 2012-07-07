@@ -1,3 +1,10 @@
+New in 2.28:
+BETA Version - Do NOT use for diving!
+
+New in 2.27:
+BETA Version - Do NOT use for diving!
+BUGFIX: Reset CFIII on update
+
 New in 2.26:
 BETA Version - Do NOT use for diving!
 CHANGE: Safety stop behaviour

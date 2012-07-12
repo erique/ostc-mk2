@@ -107,18 +107,15 @@
 #DEFINE	TXT_GFLO6			 "GF_lo:"                    ; "GF_lo:"
 #DEFINE	TXT_GFHI6			 "GF_hi:"                    ; "GF_hi:"
 #DEFINE	TXT_PPO2_5			 "ppO2:"                     ; "ppO2:" 
-#DEFINE	TXT_OC_O1			 "O"                         ; "O"     
-#DEFINE	TXT_OC_C1			 "C"                         ; "C"     
-#DEFINE	TXT_CC_C1_1			 "C"                         ; "C"     
-#DEFINE	TXT_CC_C2_1			 "C"                         ; "C"     
-#DEFINE	TXT_GF_G1			 "G"                         ; "G"     
-#DEFINE	TXT_GF_F1			 "F"                         ; "F"     
 #DEFINE	TXT_SP2				 "SP"                        ; "SP"    
 #DEFINE	TXT_DIL4			 "Dil:"                      ; "Dil:"  
 #DEFINE	TXT_N2_2			 "N2"                        ; "N2"    
-#DEFINE	TXT_HE2				 "He"                        ; "He"    
-#DEFINE	TXT_PSCR_P1			 "p"                         ; "P"
-#DEFINE	TXT_PSCR_S1			 "S"                         ; "S"
+#DEFINE	TXT_HE2				 "He"                        ; "He"   
+#DEFINE	TXT_TX1				 "T"						 ; "T"
+#DEFINE	TXT_TX2				 "x"						 ; "x"
+#DEFINE	TXT_NX1				 "N"						 ; "N"
+#DEFINE	TXT_NX2				 "x"						 ; "x"
+ 
 #ENDIF                                                                   
 ;=============================================================================
 ;   macro     X     Y        "translation"               ; English original

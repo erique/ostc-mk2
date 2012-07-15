@@ -1266,92 +1266,6 @@ PLED_active_gas_divemode4:
     call    PLED_standard_color ; Back to normal (if O2<21 and He=0)
 	return
 
-PLED_display_decotype_surface:
-	WIN_LEFT	.85
-	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
-
-	clrf	EEADRH
-	read_int_eeprom d'34'		; Read deco data	
-	tstfsz	EEDATA
-	bra		show_decotype_surface2
-
-	;EEDATA=0
-	;ZH-L16-OC
-	WIN_TOP		.125
-    STRCPY_PRINT TXT_OC_O1
-
-	WIN_TOP		.150
-    STRCPY_PRINT TXT_OC_C1
-	return		
-
-show_decotype_surface2:
-	decf	EEDATA,F
-	tstfsz	EEDATA
-	bra		show_decotype_surface3
-	;EEDATA=1
-	;Gauge
-	return
-	
-show_decotype_surface3:
-    decf	EEDATA,F
-    tstfsz	EEDATA
-    bra	show_decotype_surface4
-	;EEDATA=2
-	;ZH-L16-CC
-    WIN_TOP		.125
-    call	PLED_standard_color
-    
-    STRCPY_PRINT TXT_CC_C1_1
-    
-    WIN_TOP		.150
-#IF TXT_CC_C1_1 == TXT_CC_C2_1
-    call	word_processor              ; Twice the same string.
-#ELSE
-    STRCPY_PRINT TXT_CC_C2_1
-#ENDIF
-    return
-
-show_decotype_surface4:
-	decf	EEDATA,F
-	tstfsz	EEDATA
-	bra		show_decotype_surface5
-	;EEDATA=3
-	;Apnoe
-	return
-
-show_decotype_surface5:
-    decf	EEDATA,F
-    tstfsz	EEDATA
-    bra		show_decotype_surface6
-	;EEDATA=4
-show_decotype_surface5_2:
-	;EEDATA=5
-    ;ZH16-GF OC or ZH16-GF CC
-    WIN_TOP		.125
-    STRCPY_PRINT TXT_GF_G1
-    
-    WIN_TOP		.150
-    STRCPY_PRINT TXT_GF_F1
-    return
-
-show_decotype_surface6:
-    decf	EEDATA,F
-    tstfsz	EEDATA
-    bra		show_decotype_surface7
-	bra		show_decotype_surface5_2
-show_decotype_surface7:
-	;EEDATA=6:
-   	;pSCR-GF  
-    WIN_TOP		.125
-    STRCPY_PRINT TXT_PSCR_P1
-    
-    WIN_TOP		.150
-    STRCPY_PRINT TXT_PSCR_S1
-    return
-
-
 ;-----------------------------------------------------------------------------
 ; Set color to grey when gas is inactive
 ; Inputs: WREG : gas# (0..4)
@@ -1544,7 +1458,7 @@ PLED_active_gas_surfmode:				; Displays start gas/SP 1
 	bcf		leftbind
 
 	STRCAT_PRINT  TXT_BAR3
-	bra		PLED_active_gas_surfmode_exit
+	return								; Done.
 
 PLED_active_gas_surfmode2:
 	WIN_TOP		.130
@@ -1552,7 +1466,6 @@ PLED_active_gas_surfmode2:
 	WIN_FONT 	FT_MEDIUM
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	PLED_standard_color
-
 
 	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)
 	movff	EEDATA,active_gas			; Read start gas (1-5)
@@ -1591,28 +1504,56 @@ PLED_active_gas_surfmode2:
 	movff	char_I_He_ratio,hi			; Copy into Bank1 register
 
 	movlw	d'21'
-	cpfseq	lo				; Air? (O2=21%)
-	bra		PLED_active_gas_surfmode4 ; No!
+	cpfseq	lo							; Air? (O2=21%)
+	bra		PLED_active_gas_surfmode4 	; No!
 	tstfsz	hi							; Air? (He=0%)
-	bra		PLED_active_gas_surfmode4 ; No!
+	bra		PLED_active_gas_surfmode4 	; No!
 	
 							; Yes, display "Air" instead of 21/0
 	DISPLAYTEXTH		d'265'		;"Air  ", y-scale=2
-	bra		PLED_active_gas_surfmode_exit
+	return								; Done.
 
 PLED_active_gas_surfmode4:
 	lfsr	FSR2,letter
 	bsf		leftbind			; left orientated output
 	output_99					; O2 ratio is still in "lo"
+	movff	char_I_He_ratio,lo	; copy He ratio into lo
+	tstfsz	lo					; He>0?
+	bra		PLED_active_gas_surfmode5	; Yes.
+	bra		PLED_active_gas_surfmode6	; No, skip He
+PLED_active_gas_surfmode5:	
 	PUTC    '/'
-	movff	char_I_He_ratio,lo		; copy He ratio into lo
 	output_99
+PLED_active_gas_surfmode6:
 	bcf		leftbind
 	call	word_processor
-;	bra		PLED_active_gas_surfmode_exit
-PLED_active_gas_surfmode_exit:
-;   WIN_FRAME_BLACK   .122, .175, .82, .159
+
+	rcall	PLED_mainscreen_show_nx
+	tstfsz	lo					; He>0?
+	rcall	PLED_mainscreen_show_tx	; Yes
+	return								; Done.
+
+PLED_mainscreen_show_tx:
+	WIN_LEFT	.85
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0					; Init new Wordprocessor
+   	WIN_TOP		.127
+
+   	STRCPY_PRINT TXT_TX1
+  	WIN_TOP		.148
+	STRCPY_PRINT TXT_TX2
 	return
+PLED_mainscreen_show_nx:
+	WIN_LEFT	.85
+   	WIN_TOP		.127
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0					; Init new Wordprocessor
+
+   	STRCPY_PRINT TXT_NX1
+  	WIN_TOP		.148
+	STRCPY_PRINT TXT_NX2
+	return
+
 
 PLED_confirmbox:
     WIN_BOX_BLACK   .68, .146, .34, .101		;top, bottom, left, right
@@ -2481,17 +2422,41 @@ PLED_serial:
   endif
 
 	lfsr	FSR2,letter
-	OUTPUTTEXTH		d'262'              ; "OSTC "
-	clrf	EEADRH
-	clrf	EEADR                       ; Get Serial number LOW
-	call	read_eeprom                 ; read byte
-	movff	EEDATA,lo
-	incf	EEADR,F                     ; Get Serial number HIGH
-	call	read_eeprom                 ; read byte
-	movff	EEDATA,hi
-
-	bsf		leftbind
-	output_16
+	read_int_eeprom d'34'		; Read deco data
+	tstfsz	EEDATA
+	bra		show_decotype_mainscreen2
+	OUTPUTTEXT	.101			; ZH-L16 OC =0
+	bra		show_decotype_mainscreen8	; Done.
+show_decotype_mainscreen2:
+	decfsz	EEDATA,F
+	bra		show_decotype_mainscreen3
+	OUTPUTTEXT	.102			; Gauge	=1
+	bra		show_decotype_mainscreen8	; Done.
+show_decotype_mainscreen3:
+	decfsz	EEDATA,F
+	bra		show_decotype_mainscreen4
+	OUTPUTTEXT	.104			; ZH-L16 CC =2
+	bra		show_decotype_mainscreen8	; Done.
+show_decotype_mainscreen4:
+	decfsz	EEDATA,F
+	bra		show_decotype_mainscreen5
+	OUTPUTTEXT	.138			; Apnoe	=3
+	bra		show_decotype_mainscreen8	; Done.
+show_decotype_mainscreen5:
+	decfsz	EEDATA,F
+	bra		show_decotype_mainscreen6
+	OUTPUTTEXT	.152			; L16-GF OC	=4
+	bra		show_decotype_mainscreen8	; Done.
+show_decotype_mainscreen6:
+	decfsz	EEDATA,F
+	bra		show_decotype_mainscreen7
+	OUTPUTTEXT	.236			; L16-GF CC	=5
+	bra		show_decotype_mainscreen8	; Done.
+show_decotype_mainscreen7:
+	decfsz	EEDATA,F
+	bra		show_decotype_mainscreen8	; Done.
+	OUTPUTTEXT	.226			; pSCR-GF =6
+show_decotype_mainscreen8:
 	STRCAT  " \x90\x91 V"               ; Scribble logo...
 	movlw	softwareversion_x
 	movwf	lo
@@ -3789,7 +3754,7 @@ PLED_custom_text:
 	read_int_eeprom	d'64'
 	movlw	d'1'
 	cpfseq	EEDATA						; Custom text active?
-	bra		PLED_clear_custom_text		; No, Delete row
+	bra		PLED_custom_text_serial		; No, show serial instead
 	WIN_TOP		.200
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
@@ -3825,12 +3790,26 @@ PLED_get_custom_letter:
 	call	read_eeprom					; Read letter
 	return
 
-PLED_clear_custom_text:
-	movlw		d'24'
-	movwf		temp1
+PLED_custom_text_serial:
 	WIN_TOP		.200
-	WIN_LEFT	.0
-	call		PLED_display_clear_common_y1
+	WIN_LEFT	.50
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0					; Init new Wordprocessor
+	call		PLED_divemask_color	; Set Color for Divemode mask
+
+	lfsr	FSR2,letter
+	OUTPUTTEXTH		d'262'              ; "OSTC "
+	clrf	EEADRH
+	clrf	EEADR                       ; Get Serial number LOW
+	call	read_eeprom                 ; read byte
+	movff	EEDATA,lo
+	incf	EEADR,F                     ; Get Serial number HIGH
+	call	read_eeprom                 ; read byte
+	movff	EEDATA,hi
+	bsf		leftbind
+	output_16
+	call	word_processor
+	call	PLED_standard_color
 	return
 
 PLED_simdata_screen:			;Display Pre-Dive Screen

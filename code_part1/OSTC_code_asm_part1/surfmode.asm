@@ -55,7 +55,6 @@ surfloop:
 	call	PLED_nofly_time					; display nofly time
 
 	call	PLED_active_gas_surfmode		; Show start gas
-	call	PLED_display_decotype_surface	; Show deco mode (ZH-L16, const. ppO2 or Multi-GF)
 
 surfloop1:
 	btfss	gauge_mode					; Display only in gauge mode	
@@ -132,7 +131,6 @@ surfloop_loop1:
 	call	timeout_premenu				; timeout premenu
 	call	set_leds_surfmode			; Sets Warning and No-Fly LEDs
 	call    check_customfunctions       ; Checks CF functions and displays warning symbol if something critical is wrong
-	call	PLED_display_decotype_surface	; Show deco mode
 	call	surfcustomview_second		; Do every-second tasks for the custom view area
 	call    dive_type_icons             ; Draw Air/Nitrox/Trimix color icon.
 

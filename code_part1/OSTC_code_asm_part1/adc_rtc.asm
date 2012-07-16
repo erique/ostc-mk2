@@ -206,7 +206,6 @@ RTCinit:						; resets RTC
 	movwf	TMR1H
 	nop							; See errata DS80284E-page 2
 	clrf	TMR1L
-
 ; Reset RTC if any part of the time/date is out of range
 	movlw	d'60'				; Limit
 	cpfslt	secs				; Check part
@@ -226,8 +225,13 @@ RTCinit:						; resets RTC
 	movlw	d'100'				; Limit
 	cpfslt	year				; Check part
 	bra		RTCinit2			; Reset time...
-
-	bsf		PIE1, TMR1IE
+; Make sure day and month <> zero
+	movlw	.0
+	cpfseq	day					; =0?
+	incf	day,F				; Yes, +1
+	cpfseq	month				; =0?
+	incf	month,F				; Yes, +1
+	bsf		PIE1, TMR1IE		; Enable clock int
 	return
 
 RTCinit2:
@@ -243,7 +247,7 @@ RTCinit2:
 	movwf	month
 	movlw	.12
 	movwf	year
-	bsf		PIE1, TMR1IE
+	bsf		PIE1, TMR1IE		; Enable clock int
 	return
 
 reset_battery_stats:

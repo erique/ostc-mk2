@@ -2,6 +2,7 @@ New in 2.28:
 BETA Version - Do NOT use for diving!
 BUGFIX: Blink better gas in bailout case (if CF42=1)
 CHANGE: Surface screen layout change
+BUGFIX: Use CF01 for end-of-dive detection
 
 New in 2.27:
 BETA Version - Do NOT use for diving!

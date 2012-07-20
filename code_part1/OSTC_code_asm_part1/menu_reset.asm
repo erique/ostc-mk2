@@ -109,7 +109,7 @@ cf_default_table0:
     ;---- BANK0 custom function defaults -------------------------------------
     ;                          DEFAULT   MIN     MAX
 	CF_DEFAULT    CF_CENTI,	    d'100', d'50',  d'250'  ; CF00 dive_threshold	        100cm
-	CF_DEFAULT    CF_CENTI,	    d'30',  d'10',  d'100'  ; CF01 surf_threshold        	30cm
+	CF_DEFAULT    CF_CENTI,	    d'40',  d'20',  d'100'  ; CF01 surf_threshold        	40cm
 	CF_DEFAULT    CF_INT15,	    d'240', d'0',   d'600'  ; CF02 diveloop_timeout      	240s
 	CF_DEFAULT    CF_SEC,	    d'120', d'30',  d'240'  ; CF03 surfloop_timeout	        120s
 	CF_DEFAULT    CF_SEC,	    d'5',   d'1',   d'30'   ; CF04 premenu_timeout	        5s

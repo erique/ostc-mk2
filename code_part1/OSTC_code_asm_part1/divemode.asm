@@ -1658,10 +1658,20 @@ set_dive_modes:
 	btfsc	high_altitude_mode		; In high altitude (Fly) mode?
 	bra		set_dive_modes3			; Yes!
 
+	btfss	divemode				; In divemode?
+	bra		set_dive_modes0			; No.
+
+	; in Divemode, check threshold from CF01
+	GETCUSTOM8	.1					; loads dive_threshold in WREG
+	movwf	sub_a+0					; dive_treshold is in cm
+	clrf	sub_a+1
+	bra		set_dive_modes1			; Done.
+
 set_dive_modes0:
 	GETCUSTOM8	.0					; loads dive_threshold in WREG
 	movwf	sub_a+0					; dive_treshold is in cm
 	clrf	sub_a+1
+	bra		set_dive_modes1			; Done.
 
 set_dive_modes1:
     SAFE_2BYTE_COPY rel_pressure, sub_b

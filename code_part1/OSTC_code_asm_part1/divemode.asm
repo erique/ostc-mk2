@@ -61,6 +61,24 @@ diveloop_loop:		; The diveloop starts here
 	bra		diveloop_loop1a					; One Second Tasks in Gauge mode
 	btfsc	FLAG_apnoe_mode					; Only in apnoe mode
 	bra		diveloop_loop1b					; One Second Tasks in Apnoe mode
+
+; Update divetime 
+	call	customview_second				; Do every-second tasks for the custom view area
+	GETCUSTOM8	d'38'		; Show seconds (=1?)
+	movwf	lo
+	movlw	d'1'
+	cpfseq	lo					; =1?
+	bra		diveloop_loop1y		; No, minutes only
+	bsf		update_divetime		; Set Update flag
+diveloop_loop1y:
+	btfss	update_divetime				; display new divetime?
+	bra		diveloop_loop1z				; No
+	btfsc	premenu						; Is the divemode menu active?
+	bra		diveloop_loop1z				; Yes
+	call	PLED_divemins				; Display (new) divetime!
+diveloop_loop1z:
+	bcf		update_divetime				; clear flag
+
 	btfsc	FLAG_const_ppO2_mode			; only in const_ppO2_mode
 	bra		diveloop_loop1c					; One Second Tasks in const_ppO2 mode
 
@@ -108,29 +126,26 @@ diveloop_loop1c:
 	
 ; Common Tasks for all modes
 diveloop_loop1x:
-	call	customview_second				; Do every-second tasks for the custom view area
+;	call	customview_second				; Do every-second tasks for the custom view area
+;
+;	GETCUSTOM8	d'38'		; Show seconds (=1?)
+;	movwf	lo
+;	movlw	d'1'
+;	cpfseq	lo					; =1?
+;	bra		diveloop_loop1y		; No, minutes only
+;	bsf		update_divetime		; Set Update flag
+;diveloop_loop1y:
+;	btfss	update_divetime				; display new divetime?
+;	bra		diveloop_loop1z				; No
+;	btfsc	premenu						; Is the divemode menu active?
+;	bra		diveloop_loop1z				; Yes
+;	call	PLED_divemins				; Display (new) divetime!
+;
+;diveloop_loop1z:
+;	bcf		update_divetime				; clear flag
 
-	GETCUSTOM8	d'38'		; Show seconds (=1?)
-	movwf	lo
-	movlw	d'1'
-	cpfseq	lo					; =1?
-	bra		diveloop_loop1y		; No, minutes only
-	bsf		update_divetime		; Set Update flag
-diveloop_loop1y:
-	btfss	update_divetime				; display new divetime?
-	bra		diveloop_loop1z				; No
-	btfsc	premenu						; Is the divemode menu active?
-	bra		diveloop_loop1z				; Yes
-	call	PLED_divemins				; Display (new) divetime!
-
-diveloop_loop1z
-	bcf		update_divetime				; clear flag
-
-;	btfsc	FLAG_const_ppO2_mode		; only in const_ppO2_mode
-;	call	PLED_const_ppO2_value		; display const ppO2 setting in [bar]
-	btfsc	ppO2_show_value				; show ppO2?
-	call	check_ppO2					; check ppO2 and displays warning if required
-
+	btfsc	ppO2_show_value					; show ppO2?
+	call	check_ppO2						; check ppO2 and displays warning if required
 	call	timeout_divemode				; dive finished? This routine sets the required flags
 	btfsc	low_battery_state				; If battery is low, then...
 	call	update_batt_voltage_divemode	; Display Battery Warning Text
@@ -140,8 +155,7 @@ diveloop_loop1z
 	call	timeout_divemenu				; Yes, so check for timeout divemenu
 	call	set_leds_divemode				; Sets warnings, if required. Also Sets buzzer
 	btfsc	enter_error_sleep				; Enter Fatal Error Routine?
-	call	fatal_error_sleep				; Yes (In Sleepmode_vxx.asm!)
-
+	call	fatal_error_sleep				; Yes (In Sleepmode.asm!)
 
 	bcf		onesecupdate					; one seconds update done
 

@@ -3,6 +3,7 @@ BETA Version - Do NOT use for diving!
 BUGFIX: Blink better gas in bailout case (if CF42=1)
 CHANGE: Surface screen layout change
 BUGFIX: Use CF01 for end-of-dive detection
+CHANGE: CF01 default to 50cm
 
 New in 2.27:
 BETA Version - Do NOT use for diving!

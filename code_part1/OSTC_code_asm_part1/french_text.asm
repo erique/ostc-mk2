@@ -327,7 +327,7 @@
 ; 32 custom function descriptors III (FIXED LENGTH = 15 chars).
     TCODE    .40,   .35,     "CouleurInactive"           ;193 Color# inactive
     TCODE    .40,   .35,     "Palier sécurité"           ;194 Use safety stop
-    TCODE    .40,   .35,     "unused         "           ;195 unused
+    TCODE    .40,   .35,     "Show GF in NDL "           ;195 Show GF in NDL	(If GF > CF08)
     TCODE    .40,   .35,     "unused         "           ;196 unused
     TCODE    .40,   .35,     "unused         "           ;197 unused
     TCODE    .40,   .35,     "unused         "           ;198 unused

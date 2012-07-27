@@ -407,6 +407,13 @@ PLED_clear_decoarea:
 	return
 
 PLED_display_ndl_mask:
+	; Clears Gradient Factor
+	movlw	d'8'
+	movwf	temp1
+	WIN_TOP		.145
+	WIN_LEFT	.0
+	call	PLED_display_clear_common_y1	
+
 	btfsc	menubit					; Divemode menu active?
 	return							; Yes, return
 
@@ -415,17 +422,15 @@ PLED_display_ndl_mask:
 	call	PLED_divemask_color	; Set Color for Divemode mask
 	DISPLAYTEXT		d'84'			; NoStop
 	call	PLED_standard_color
-
-PLED_display_ndl_mask2:
-	; Clears Gradient Factor
-	movlw	d'8'
-	movwf	temp1
-	WIN_TOP		.145
-	WIN_LEFT	.0
-	call	PLED_display_clear_common_y1	
 	return
 
 PLED_display_ndl:
+	GETCUSTOM8	d'66'				; Always show GF?
+	decfsz		WREG,F				; WREG=1?	
+	bra		PLED_display_ndl2		; No
+	rcall	PLED_display_gf			; Show GF (If GF > CF08)
+
+PLED_display_ndl2:
 	btfsc	menubit					; Divemode menu active?
 	return							; Yes, return
 
@@ -477,7 +482,6 @@ PLED_display_deko:
 	STRCAT_PRINT "'"
 	WIN_FONT 	FT_SMALL
 	
-;PLED_display_deko1:
 	ostc_debug	'x'		; Sends debug-information to screen if debugmode active
 	
 	WIN_TOP		.136
@@ -493,12 +497,22 @@ PLED_display_deko:
 	STRCAT_PRINT    "'"
 
 PLED_display_deko1:
-	movff	char_O_gradient_factor,lo		; gradient factor
-	GETCUSTOM8	d'8'		; threshold for display
-	cpfslt	lo				; show value?
-	bra		PLED_display_deko2	; Yes
+	rcall	PLED_display_gf				; Show GF (If GF > CF08)
+	return								; Done.
+
+PLED_display_gf:
+	movff	char_O_gradient_factor,lo	; gradient factor
+	GETCUSTOM8	d'8'					; threshold for display
+	cpfslt	lo							; show value?
+	bra		PLED_display_deko2			; Yes
 	; No
-	bra		PLED_display_ndl_mask2	; Clear gradient factor
+	; Clears Gradient Factor
+	movlw	d'8'
+	movwf	temp1
+	WIN_TOP		.145
+	WIN_LEFT	.0
+	call	PLED_display_clear_common_y1	
+	return
 
 PLED_display_deko2:
 	ostc_debug	'w'		; Sends debug-information to screen if debugmode active

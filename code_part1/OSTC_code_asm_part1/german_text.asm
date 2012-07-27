@@ -326,7 +326,7 @@
 ; 32 custom function descriptors III (FIXED LENGTH = 15 chars).
 	TCODE    .40,   .35,     "Farbe# inaktiv "           ;193 Color# inactive
     TCODE    .40,   .35,     "Sicherheitsstop"           ;194 Use safety stop
-    TCODE    .40,   .35,     "unbenutzt      "           ;195 unused
+    TCODE    .40,   .35,     "Zeige GF in NZ "           ;195 Show GF in NDL	(If GF > CF08)
     TCODE    .40,   .35,     "unbenutzt      "           ;196 unused
     TCODE    .40,   .35,     "unbenutzt      "           ;197 unused
     TCODE    .40,   .35,     "unbenutzt      "           ;198 unused

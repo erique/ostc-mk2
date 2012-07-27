@@ -1,3 +1,8 @@
+New in 2.29:
+INFO: This update will reset CFIII menu to defaults
+BETA Version - Do NOT use for diving!
+New CF66: Show GF in NDL (If GF > CF08)
+
 New in 2.28:
 BETA Version - Do NOT use for diving!
 BUGFIX: Blink better gas in bailout case (if CF42=1)

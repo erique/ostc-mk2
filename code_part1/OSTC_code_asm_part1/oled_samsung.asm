@@ -854,7 +854,7 @@ PLED_brightness_low:
 
 PLED_set_color:;Converts 8Bit RGB b'RRRGGGBB' into 16Bit RGB b'RRRRRGGG GGGBBBBB'
 	movwf	oled1_temp				; Get 8Bit RGB b'RRRGGGBB'
-	movff	oled1_temp,	oled2_temp	; Copy
+	movwf	oled2_temp				; Copy
 
 	; Mask Bit 7,6,5,4,3,2
 	movlw	b'00000011'
@@ -960,3 +960,4 @@ PLED_set_color:;Converts 8Bit RGB b'RRRGGGBB' into 16Bit RGB b'RRRRRGGG GGGBBBBB
 	movff	oled3_temp,win_color2	; Set Bank0 Color registers...
 	return
 
+	

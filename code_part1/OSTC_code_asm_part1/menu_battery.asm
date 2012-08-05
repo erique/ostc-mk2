@@ -51,7 +51,7 @@ menu_battery_state:
 	output_16
 	STRCAT_PRINT  ")"
 
-	WIN_TOP		.65
+	WIN_TOP		.63
 	lfsr	FSR2,letter
 	OUTPUTTEXT	.117		; Last Complete at:
 	read_int_eeprom	d'47'	; Month
@@ -63,7 +63,7 @@ menu_battery_state:
 	call	PLED_convert_date		; coverts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 	call	word_processor
 
-	WIN_TOP		.95
+	WIN_TOP		.91
 	lfsr	FSR2,letter
 	OUTPUTTEXT	.118		; Lowest Battery:
 	read_int_eeprom	d'40'	; Batt LOW
@@ -77,7 +77,7 @@ menu_battery_state:
 	bcf		leftbind
 	STRCAT_PRINT TXT_VOLT1
 
-	WIN_TOP		.125
+	WIN_TOP		.119
 	lfsr	FSR2,letter
 	OUTPUTTEXT .119		; Lowest Battery at:
 	read_int_eeprom	d'42'	; Month
@@ -89,7 +89,7 @@ menu_battery_state:
 	call	PLED_convert_date		; coverts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 	call	word_processor
 
-	WIN_TOP		.155
+	WIN_TOP		.147
 	lfsr	FSR2,letter
 	OUTPUTTEXT .120		; Temp min:
 	read_int_eeprom	d'54'	; TEMP_min LOW
@@ -112,7 +112,7 @@ menu_battery_state:
 	call		PLED_convert_date		; coverts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 	STRCAT_PRINT ") "
 
-	WIN_TOP		.185
+	WIN_TOP		.175
 	lfsr	FSR2,letter
 	OUTPUTTEXT .121		; Temp max:
 	read_int_eeprom	d'59'	; TEMP_max LOW
@@ -134,6 +134,17 @@ menu_battery_state:
 	movff	EEDATA,convert_value_temp+2
 	call	PLED_convert_date		; coverts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 	STRCAT_PRINT ") "
+
+	WIN_TOP		.203
+	lfsr	FSR2,letter
+	OUTPUTTEXT .228			; Total Dives: 
+	read_int_eeprom	d'2'	; Total dives low
+	movff	EEDATA,lo
+	read_int_eeprom	d'3'	; Total dives high
+	movff	EEDATA,hi
+	bsf		leftbind			; left orientated output
+	output_16
+	STRCAT_PRINT ""
 
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!	
 	bcf		menubit2

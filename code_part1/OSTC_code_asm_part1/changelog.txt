@@ -1,7 +1,9 @@
 New in 2.29:
 INFO: This update will reset CFIII menu to defaults
 BETA Version - Do NOT use for diving!
-New CF66: Show GF in NDL (If GF > CF08)
+NEW CF66: Show GF in NDL (If GF > CF08)
+NEW: Show total dives in Battery Information menu
+CHANGE: CF01 default to 75cm
 
 New in 2.28:
 BETA Version - Do NOT use for diving!

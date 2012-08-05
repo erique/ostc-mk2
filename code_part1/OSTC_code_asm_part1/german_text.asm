@@ -360,7 +360,7 @@
     TCODE    .7,    .2,      "Custom Funktionen III"     ;225 Custom Functions III
     TCODE    .85,   .125,    "pSCR-GF  "                 ;226 pSCR-GF
 	TCODE    .90,   .54,     "Sicherheit"                ;227 SafetyStop
-    TCODE    .0,    .0,      ""     	                 ;228 unused
+    TCODE    .0,    .0,      "Anzahl TG: "			     ;228 Total Dives: 
     TCODE    .0,    .0,      ""		                   	 ;229 unused
     TCODE    .0,    .0,      ""		                     ;230 unused
     TCODE    .0,    .0,      ""     	                 ;231 unused

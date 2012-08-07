@@ -209,6 +209,7 @@ timeout_premenu_divemode:
 	bcf		premenu                         ; Yes, so clear "Menu?" and clear pre_menu bit
 	call	PLED_menu_clear                 ; Remove "Menu?"
 	call	PLED_divemode_mask				; And redraw mask (Redraw missing "T" from "Tauchzeit" in german text version)
+	call	PLED_divemins					; Redraw divetime
 	return
 
 divemode_apnoe_tasks:                       ; 1 sec. Apnoe tasks

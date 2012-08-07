@@ -22,9 +22,9 @@
 ; ToDo:
 
 #DEFINE	softwareversion_x		d'2'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'30'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'50'		; Software version  XX.YY
 
-#DEFINE softwareversion_beta 	1 			; (and 0 for release) 
+#DEFINE softwareversion_beta 	0 			; (and 0 for release) 
 
 #DEFINE	max_custom_number		d'66'		; Number of last used custom function
 

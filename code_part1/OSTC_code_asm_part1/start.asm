@@ -245,10 +245,9 @@ restart_loop:
 	bra		restart2				; No new CF, continue with boot
 
 restart1:
-; Reset Bank2 if required
-	movlw	max_custom_number
-	btfsc	WREG,6					; >63?
-	call	reset_all_cf_bank2
+; Reset all CF and Gases
+	call	reset_gases
+	call	reset_all_cf
 ; Show info screen
 	call	PLED_boot               ; PLED boot (Incl. Clear Screen!)
 	rcall	display_new_cf_installed; Show info screen

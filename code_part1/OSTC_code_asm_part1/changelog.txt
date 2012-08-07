@@ -1,3 +1,6 @@
+New in 2.50 Stable:
+INFO: This update will reset all Custom Functions and gases to defaults
+
 New in 2.29:
 INFO: This update will reset CFIII menu to defaults
 BETA Version - Do NOT use for diving!

@@ -93,6 +93,7 @@ diveloop_loop1z:
 diveloop_loop1a:
 	btfss	premenu							; Is the divemode menu active?
 	call	PLED_divemins					; display (new) divetime!
+	call	customview_second				; Do every-second tasks for the custom view area
 	call	timeout_divemode				; dive finished? This routine sets the required flags
 
 	btfsc	twosecupdate					; two seconds after the last call
@@ -213,6 +214,7 @@ timeout_premenu_divemode:
 	return
 
 divemode_apnoe_tasks:                       ; 1 sec. Apnoe tasks
+	call	PLED_divemins					; display (new) divetime!
 	call	PLED_display_apnoe_descent		; Show descent timer
 
 	btfsc	divemode2						; Time running?

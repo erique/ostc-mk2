@@ -1023,6 +1023,25 @@ PLED_menu_mask:
 	DISPLAYTEXT .10			; Setup...
 	DISPLAYTEXT	.142		; More...
 	DISPLAYTEXT .11			; Exit
+
+; Write OSTC serial in Main Menu
+	WIN_TOP		.215
+	WIN_LEFT	.47
+	GETCUSTOM8	d'64'					; Write header in blue when
+    call    PLED_set_color              ; compiled in DEBUG mode...
+	lfsr	FSR2,letter
+	OUTPUTTEXTH		d'262'              ; "OSTC "
+	clrf	EEADRH
+	clrf	EEADR                       ; Get Serial number LOW
+	call	read_eeprom                 ; read byte
+	movff	EEDATA,lo
+	incf	EEADR,F                     ; Get Serial number HIGH
+	call	read_eeprom                 ; read byte
+	movff	EEDATA,hi
+	bsf		leftbind
+	output_16
+	call	word_processor
+	call	PLED_standard_color
 	return	
 
 PLED_setup_menu_mask:

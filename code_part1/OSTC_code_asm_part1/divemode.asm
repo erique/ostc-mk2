@@ -1064,7 +1064,7 @@ check_ppO2_3:
 ;=============================================================================
 ; Compare all enabled gas in list, to see if a better one is available.
 ;
-; Output: better_gas_available
+; Output: better_gas_available, better_gas_number
 ;
 check_gas_change:					; Checks if a better gas should be selected (by user)
 	bcf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
@@ -1090,6 +1090,8 @@ check_gas_change1x:
 	movf	xC+0,W					; load depth in m into WREG
 	cpfsgt	EEDATA					; gas_change_depth < current depth?
 	bra		check_gas_change2		; No, check next gas
+	movlw	.1
+	movwf	better_gas_number		; number (1-5) of the "better gas" in divemode, =0: no better gas available
 	movlw	better_gas_window
 	subwf	EEDATA,W				; Change depth-better_gas_window
 	cpfslt	xC+0					; current depth<Change depth-better_gas_window?
@@ -1110,6 +1112,8 @@ check_gas_change2x:
 	movf	xC+0,W					; load depth in m into WREG
 	cpfsgt	EEDATA					; gas_change_depth < current depth?
 	bra		check_gas_change3		; No, check next gas
+	movlw	.2
+	movwf	better_gas_number		; number (1-5) of the "better gas" in divemode, =0: no better gas available
 	movlw	better_gas_window
 	subwf	EEDATA,W				; Change depth-better_gas_window
 	cpfslt	xC+0					; current depth<Change depth-better_gas_window?
@@ -1130,6 +1134,8 @@ check_gas_change3x:
 	movf	xC+0,W					; load depth in m into WREG
 	cpfsgt	EEDATA					; gas_change_depth < current depth?
 	bra		check_gas_change4		; No, check next gas
+	movlw	.3
+	movwf	better_gas_number		; number (1-5) of the "better gas" in divemode, =0: no better gas available
 	movlw	better_gas_window
 	subwf	EEDATA,W				; Change depth-better_gas_window
 	cpfslt	xC+0					; current depth<Change depth-better_gas_window?
@@ -1150,6 +1156,8 @@ check_gas_change4x:
 	movf	xC+0,W					; load depth in m into WREG
 	cpfsgt	EEDATA					; gas_change_depth < current depth?
 	bra		check_gas_change5		; No, check next gas
+	movlw	.4
+	movwf	better_gas_number		; number (1-5) of the "better gas" in divemode, =0: no better gas available
 	movlw	better_gas_window
 	subwf	EEDATA,W				; Change depth-better_gas_window
 	cpfslt	xC+0					; current depth<Change depth-better_gas_window?
@@ -1170,12 +1178,17 @@ check_gas_change5x:
 	movf	xC+0,W					; load depth in m into WREG
 	cpfsgt	EEDATA					; gas_change_depth < current depth?
 	bra		check_gas_change6		; No, check next gas
+	movlw	.5
+	movwf	better_gas_number		; number (1-5) of the "better gas" in divemode, =0: no better gas available
 	movlw	better_gas_window
 	subwf	EEDATA,W				; Change depth-better_gas_window
 	cpfslt	xC+0					; current depth<Change depth-better_gas_window?
 	bsf		better_gas_available	;=1: A better gas is available and a gas change is advised in divemode
 
 check_gas_change6:
+	btfss	better_gas_available	; Is a better gas available
+	clrf	better_gas_number		; No, clear better gas register
+
 	btfsc	is_bailout				;=1: CC mode, but bailout active!
 	bra		check_gas_change7		; In bailout, blink better gas (if required)
 
@@ -1902,6 +1915,7 @@ diveloop_boot:
 	bcf		menu3_active
 	clrf	divesecs
 	clrf	samplesecs
+	clrf	better_gas_number			; number (1-5) of the "better gas" in divemode, =0: no better gas available
 	clrf	apnoe_timeout_counter		; timeout in minutes
 	clrf 	timeout_counter				; takes care of the timeout (Low byte)
 	clrf 	timeout_counter2			; takes care of the timeout (High byte)

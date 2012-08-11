@@ -2907,7 +2907,6 @@ PLED_gas_list_loop:
 	addwf	waitms_temp,F		; Increase row
 	WIN_LEFT	.100
 	movff	waitms_temp,win_top ; Set Row
-	
 	STRCPY  TXT_GAS1
 	movff	hi,lo			; copy gas number
 	output_8				; display gas number
@@ -2925,9 +2924,21 @@ PLED_gas_list_loop:
 	decf	EEADR,F			; Gas #hi: %O2 - Set address in internal EEPROM
 	call	read_eeprom		; get byte (stored in EEDATA)
 	PLED_color_code		warn_gas_in_gaslist		; Color-code output	(%O2 in "EEDATA")
+
+; Check if the "better gas" should be highlighted
+
+	WIN_INVERT	.0					; Init new Wordprocessor	
+	movf	better_gas_number,W	; better gas 1-5?
+	cpfseq	hi					; compare with gas#
+	bra		PLED_gas_list_loop2	; No equal, skip
+	
+	movlw	color_yellow			; Blink in yellow
+    call	PLED_set_color
+	WIN_INVERT	.1					; Init new Wordprocessor	
+	
+PLED_gas_list_loop2:
 ; Check if gas needs to be greyed-out (inactive)
 	movff	gaslist_active, EEDATA		; Work with sorted list
-;	read_int_eeprom		d'27'	; read flag register
 	movff	hi,lo			; copy gas number
 PLED_gas_list_loop1:
 	rrcf	EEDATA			; roll flags into carry

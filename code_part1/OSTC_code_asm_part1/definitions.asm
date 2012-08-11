@@ -358,6 +358,7 @@ desaturation_time_buffer res 2	; buffer for desat time
 total_divetime_seconds	res 2	; counts dive seconds regardless of CF01 (18h max.)
 
 safety_stop_countdown	res 1	; counts seconds of safety stop
+better_gas_number		res 1	; number (1-5) of the "better gas" in divemode, =0: no better gas available
 
 ASSERT_BANK1    MACRO   tag
     Ifdef   __DEBUG

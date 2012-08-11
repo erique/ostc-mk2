@@ -190,10 +190,11 @@ customview_toggle:
 	bcf		menu3_active	            ;=1: menu entry three in divemode menu is active		
 	ostc_debug	'X'		; Sends debug-information to screen if debugmode active
 	
+	incf	menupos3,F			            ; Number of customview to show
+customview_toggle2:
 	btfsc	FLAG_apnoe_mode					; In Apnoe mode?
 	bra		customview_toggle_exit			; Yes, ignore custom view in divemode completely
 
-	incf	menupos3,F			            ; Number of customview to show
 	movlw	d'10'							; Max number
 	cpfsgt	menupos3			            ; Max reached?
 	bra		customview_mask		            ; No, show
@@ -349,6 +350,7 @@ customview_toggle_exit:
 
 surfcustomview_toggle:
 	incf	menupos3,F			; Number of customview to show
+surfcustomview_toggle2:
 	movlw	d'4'				; Max number
 	cpfsgt	menupos3			; Max reached?
 	bra		surfcustomview_mask	; No, show

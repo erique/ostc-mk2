@@ -42,7 +42,10 @@ surfloop:
 	movff	last_surfpressure_30min+0,int_I_pres_surface+0			; copy surface air pressure to deco routine
 	movff	last_surfpressure_30min+1,int_I_pres_surface+1			; 30min old values 
 
-	clrf	menupos3					; Reset Custom views (Default: No custom view)
+; Reload last customview
+	read_int_eeprom	d'93'				; Read last selected customview surface mode into EEDATA
+	movff	EEDATA,menupos3				; Copy to menupos3
+	call	surfcustomview_toggle2		; Show customview 
 
 	btfsc	gauge_mode					; Ignore in gauge mode
 	bra		surfloop1

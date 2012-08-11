@@ -35,6 +35,11 @@ sleeploop1:
 sleeploop2:
 	call	PLED_DisplayOff			; display off
 	call	disable_rs232			; disable UART module
+
+; Save surface mode custom view
+	movff	menupos3,EEDATA			; Copy to EEDATA
+	write_int_eeprom	d'93'		; Write last selected customview surface mode into EEPROM
+
 	clrf	divemins+0
 	clrf	divemins+1
 	bcf		TRISB,6

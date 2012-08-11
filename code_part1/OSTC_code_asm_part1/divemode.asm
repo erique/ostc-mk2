@@ -37,6 +37,11 @@ diveloop:
 	call	PLED_active_gas_divemode	; Display gas, if required
 	call	PLED_temp_divemode			; Displays temperature
 
+; Reload last customview
+	read_int_eeprom	d'94'				; Read last selected customview dive mode into EEDATA
+	movff	EEDATA,menupos3				; Copy to menupos3
+	call	customview_toggle2			; Show customview 
+
 	btfsc	FLAG_apnoe_mode
 	bsf		realdive					; Set Realdive flag in Apnoe mode
 
@@ -1499,6 +1504,10 @@ end_dive2:
 	movff	temp2,EEDATA
 	write_int_eeprom	d'3'			; write byte stored in EEDATA
 
+; Save dive mode custom view
+	movff	menupos3,EEDATA				; Copy to EEDATA
+	write_int_eeprom	d'94'			; Write last selected customview dive mode into EEPROM
+
 	GETCUSTOM15	.28							; Logbook Offset -> lo, hi
 	tstfsz		lo							; lo=0?
 	bra		change_logbook_offset1		; No, adjust offset	
@@ -1890,7 +1899,6 @@ diveloop_boot:
 	call	PLED_brightness_full
 
 	bcf		timeout_display
-	clrf	menupos3
 	bcf		menu3_active
 	clrf	divesecs
 	clrf	samplesecs

@@ -313,9 +313,9 @@
     TCODE    .40,   .35,     "Будущ. TTS[мин]"           ;180 Future TTS[min]   (@5 variant: compute TTS for extra time at current depth)
     TCODE    .40,   .35,     "Пещер. Пред.[л]"           ;181 Cave Warning[l]   (Consomation warning for cave divers)
     TCODE    .40,   .35,     "График скорости"           ;182 (Show a graphical representation of the ascend speed)
-    TCODE    .40,   .35,     "Show pSCR ppO2 "           ;183 Show pSCR ppO2	(Show the ppO2 for pSCR divers)
-    TCODE    .40,   .35,     "pSCR O2 Drop[%]"           ;184 pSCR O2 Drop[%]	(pSCR O2 drop in percent)
-    TCODE    .40,   .35,     "pSCR lung ratio"           ;185 pSCR lung ratio	(pSCR counterlung ratio)
+    TCODE    .40,   .35,     "Показ pSCR ppO2"           ;183 Show pSCR ppO2	(Show the ppO2 for pSCR divers)
+    TCODE    .40,   .35,     "pSCR O2 Сниж[%]"           ;184 pSCR O2 Drop[%]	(pSCR O2 drop in percent)
+    TCODE    .40,   .35,     "pSCR отн. мешка"           ;185 pSCR lung ratio	(pSCR counterlung ratio)
 ; End of function descriptor II
 ;
     TCODE    .20,   .2,      "Доп. Параметры II"         ;186 Custom Functions II
@@ -327,9 +327,9 @@
     TCODE    .0,    .0,      "Дил."                      ;192 Dil.			       (Rebreather diluent)
 
 ; 32 custom function descriptors III (FIXED LENGTH = 15 chars).
-    TCODE    .40,   .35,     "Color# inactive"           ;193 Color# inactive
-    TCODE    .40,   .35,     "Use safety stop"           ;194 Use safety stop
-    TCODE    .40,   .35,     "Show GF in NDL "           ;195 Show GF in NDL	(If GF > CF08)
+    TCODE    .40,   .35,     "Цвет#  неактивн"           ;193 Color# inactive
+    TCODE    .40,   .35,     "Остан. безопасн"           ;194 Use safety stop
+    TCODE    .40,   .35,     "Показ GF в NDL "           ;195 Show GF in NDL	(If GF > CF08)
     TCODE    .40,   .35,     "unused         "           ;196 unused
     TCODE    .40,   .35,     "unused         "           ;197 unused
     TCODE    .40,   .35,     "unused         "           ;198 unused
@@ -362,8 +362,8 @@
 ;
 	TCODE    .12,   .2,      "Доп. Параметры III"        ;225 Custom Functions III
     TCODE    .85,   .125,    "pSCR-GF  "                 ;226 pSCR-GF
-	TCODE    .90,   .54,     "SafetyStop"                ;227 SafetyStop
-    TCODE    .0,    .0,      "Total Dives: "             ;228 Total Dives: 
+	TCODE    .90,   .54,     "Ост.Безоп."                ;227 SafetyStop
+    TCODE    .0,    .0,      "Всего погружений: "        ;228 Total Dives: 
     TCODE    .0,    .0,      ""		                   	 ;229 unused
     TCODE    .0,    .0,      ""		                     ;230 unused
     TCODE    .0,    .0,      ""     	                 ;231 unused
@@ -406,7 +406,7 @@
     TCODE    .7,    .48,     "Возд."                     ;264 Air
     TCODE    .120,  .135,    "Возд."                     ;265 Air
 
-    TCODE    .0,    .0,      "pSCR Info"             	 ;266 pSCR Info (Must be 9Chars!)
+    TCODE    .0,    .0,      "pSCR Инфо"             	 ;266 pSCR Info (Must be 9Chars!)
     TCODE    .0,    .216,    "Макс."                     ;267 Max.
     TCODE    .0,    .0,      ""     	                 ;268 unused
     TCODE    .0,    .0,      ""		                   	 ;269 unused
@@ -418,7 +418,7 @@
     TCODE    .0,    .65,     "добавлены! Проверьте"      ;273 were added! Check
     TCODE    .0,    .95,     "Меню ДП I and ДП II"       ;274 CF I and CF II Menu
     TCODE    .0,    .125,    "для информации!"           ;275 for Details!
-    TCODE    .20,   .125,     "Соленость: "               ;276 Salinity:
+    TCODE    .20,   .125,    "Соленость: "               ;276 Salinity:
 ;
     TCODE    .20,   .95,     "Время на дне :"            ;277 Bottom Time:
     TCODE    .20,   .125,    "Макс. глубина:"            ;278 Max. Depth:
@@ -485,7 +485,7 @@
     TCODE    .0,    .215,    "время рассыщения!  "       ;327 time at all!
 ; Const.ppO2 description
     TCODE    .0,    .35,     "Алгоритм: ZH-L16 CC"       ;328 Decotype: ZH-L16 CC
-    TCODE    .0,    .65,     "Для закрытой"       		 ;329 For Closed
+    TCODE    .0,    .65,     "Для закрытой       " 		 ;329 For Closed
     TCODE    .0,    .95,     "схемы дыхания.     "       ;330 Circuit rebreathers
     TCODE    .0,    .125,    "Задайте 3 Сетпоинта"       ;331 Configure the 3
     TCODE    .0,    .155,    "в меню настройки   "       ;332 SetPoints in CCR -
@@ -516,13 +516,13 @@
     TCODE    .0,    .185,    "ДП33!Закрытый цикл,"       ;354 CF33!Closed Circuit
     TCODE    .0,    .215,    "глубокие остановки."       ;355 with Deep Stops.
 ; pSCR-GF mode description
-    TCODE    .0,    .35,     "Decotype: pSCR-GF"     	;356 Decotype: pSCR-GF
-    TCODE    .0,    .65,     "For passive semi-"     	;357 For passive semi-
-    TCODE    .0,    .95,     "closed rebreather."    	;358 closed rebreather.
-    TCODE    .0,    .125,    "Check CF32 & CF33"     	;359 Check CF32 & CF33
-    TCODE    .0,    .155,    "for gradient factors"    	;360 for gradient factors
-    TCODE    .0,    .185,    "and CF61-CF63 for"     	;361 and CF61-CF63 for
-    TCODE    .0,    .215,    "pSCR features."    		;362 pSCR features.
+    TCODE    .0,    .35,     "Алгоритм: pSCR-GF  "     	;356 Decotype: pSCR-GF
+    TCODE    .0,    .65,     "Для пассивного полу-"    	;357 For passive semi-
+    TCODE    .0,    .95,     "закрытого ребризера."    	;358 closed rebreather.
+    TCODE    .0,    .125,    "Уточн. ДП32 & ДП33 "     	;359 Check CF32 & CF33
+    TCODE    .0,    .155,    "для град.-факторов "    	;360 for gradient factors
+    TCODE    .0,    .185,    "и ДП61-ДП63 для    "     	;361 and CF61-CF63 for
+    TCODE    .0,    .215,    "параметров pSCR.   " 		;362 pSCR features.
 
 ;
 

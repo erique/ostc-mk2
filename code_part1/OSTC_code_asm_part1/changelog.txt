@@ -2,6 +2,7 @@ New in 2.51:
 BETA Version - Do NOT use for diving!
 NEW: Saves last selected custom view for surface mode and dive mode
 NEW: Gaslist highlights "better gas" in divemode
+NEW: Cursor is in front of the "better gas" automatically
 
 New in 2.50 Stable:
 INFO: This update will reset all Custom Functions and gases to defaults

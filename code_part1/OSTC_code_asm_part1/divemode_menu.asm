@@ -589,7 +589,10 @@ divemenu_set_gas_2:
 	bsf		display_set_gas				; set flag	
 	call	PLED_clear_divemode_menu	; Clear Menu
 	call	PLED_gas_list				; Display all 5 gases
-	movlw	d'1'
+
+	movlw	d'1'						; Reset cursor
+	btfsc	better_gas_available		;=1: A better gas is available and a gas change is advised in divemode
+	movf	better_gas_number,W			; better gas 1-5
 	movwf	menupos						; reset cursor
 	call	PLED_divemenu_cursor		; update cursor
 	call	PLED_show_change_depth		; And show the first change depth

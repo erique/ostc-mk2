@@ -715,7 +715,7 @@ check_extended3:
 check_extended4:
 	decfsz	divisor_deco_debug,W; Check divisor
 	bra		check_extended5		
-	movlw	d'9'				; Information length	
+	movlw	d'15'				; Information length
 	addwf	ProfileFlagByte,F	; add to ProfileFlagByte
 check_extended5:
 	decfsz	divisor_cns,W		; Check divisor
@@ -849,7 +849,36 @@ store_dive_cns:
 	return
 
 store_dive_decodebug:
-	; do something here
+    movff   char_O_deco_time_for_log+.0,WREG     ; 3m
+    call	write_external_eeprom
+    movff   char_O_deco_time_for_log+.1,WREG
+    call	write_external_eeprom
+    movff   char_O_deco_time_for_log+.2,WREG
+    call	write_external_eeprom
+    movff   char_O_deco_time_for_log+.3,WREG
+    call	write_external_eeprom
+    movff   char_O_deco_time_for_log+.4,WREG
+    call	write_external_eeprom
+    movff   char_O_deco_time_for_log+.5,WREG
+    call	write_external_eeprom
+    movff   char_O_deco_time_for_log+.6,WREG
+    call	write_external_eeprom
+    movff   char_O_deco_time_for_log+.7,WREG
+    call	write_external_eeprom
+    movff   char_O_deco_time_for_log+.8,WREG
+    call	write_external_eeprom
+    movff   char_O_deco_time_for_log+.9,WREG
+    call	write_external_eeprom
+    movff   char_O_deco_time_for_log+.10,WREG
+    call	write_external_eeprom
+    movff   char_O_deco_time_for_log+.11,WREG
+    call	write_external_eeprom
+    movff   char_O_deco_time_for_log+.12,WREG
+    call	write_external_eeprom
+    movff   char_O_deco_time_for_log+.13,WREG
+    call	write_external_eeprom
+    movff   char_O_deco_time_for_log+.14,WREG   ; 45m
+    call	write_external_eeprom
 	GETCUSTOM8	d'25'
 	movwf	divisor_deco_debug			; Reload divisor from CF
 	return
@@ -1441,7 +1470,7 @@ end_dive2:
 	addwf	temp1,W		; copy to bits 0-3, result in WREG
 	call	write_external_eeprom
 
-	movlw	d'0'		; information size Decodebug
+	movlw	d'15'		; information size Decodebug
 	movwf	temp1		; copy to bits 0-3
 	swapf	temp1,F		; swap nibbels 0-3 with 4-7
 	GETCUSTOM8	d'25'	; Divisor Decodebug

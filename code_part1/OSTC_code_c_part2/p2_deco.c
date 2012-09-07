@@ -680,6 +680,7 @@ static void copy_deco_table(void)
         for(y=0; y<NUM_STOPS; y++, --x)
         {
             char_O_deco_depth[y] = internal_deco_depth[x];
+            char_O_deco_time_for_log[y] = internal_deco_depth[x];
             char_O_deco_time [y] = internal_deco_time [x];
 
             // Stop only once the last transfer is done.
@@ -691,17 +692,39 @@ static void copy_deco_table(void)
         {
             char_O_deco_time [y] = 0;
             char_O_deco_depth[y] = 0;
+            char_O_deco_time_for_log[y] = 0;
         }
     }
     else //---- Straight copy ------------------------------------------------
     {
-        overlay unsigned char x;
+        overlay unsigned char x, y;
 
         for(x=0; x<NUM_STOPS; x++)
         {
             char_O_deco_depth[x] = internal_deco_depth[x];
             char_O_deco_time [x] = internal_deco_time [x];
         }
+
+        //Now fill the char_O_deco_time_for_log array
+        //---- First: search the first non-null depth
+        for(x=(NUM_STOPS-1); x != 0; --x)
+            if( internal_deco_depth[x] != 0 ) break;
+
+        //---- Second: copy to output table (in reverse order)
+        for(y=0; y<NUM_STOPS; y++, --x)
+        {
+            char_O_deco_time_for_log[y] = internal_deco_depth[x];
+
+            // Stop only once the last transfer is done.
+            if( x == 0 ) break;
+        }
+
+        //---- Third: fill table end with null
+        for(y++; y<NUM_STOPS; y++)
+        {
+            char_O_deco_time_for_log [y] = 0;
+        }
+
     }
 }
 

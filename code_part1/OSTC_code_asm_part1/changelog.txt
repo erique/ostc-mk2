@@ -1,3 +1,8 @@
+New in 2.52:
+BETA Version - Do NOT use for diving!
+TODO: Text 61 update
+NEW: Divisor Decoplan (CF25) stores entire decoplan in logbook
+
 New in 2.51:
 BETA Version - Do NOT use for diving!
 NEW: Saves last selected custom view for surface mode and dive mode

@@ -181,7 +181,7 @@
     TCODE    .40,  .35,      "Divisor Decodat"           ;058 Divisor Decodat
     TCODE    .40,  .35,      "Divisor GF     "           ;059 Divisor GF
     TCODE    .40,  .35,      "Divisor ppO2   "           ;060 Divisor ppO2 
-    TCODE    .40,  .35,      "Divisor Debug  "           ;061 Divisor Debug  
+    TCODE    .40,  .35,      "Divisor Decopln"           ;061 Divisor Decopln
     TCODE    .40,  .35,      "Divisor CNS    "           ;062 Divisor CNS
     TCODE    .40,  .35,      "CNSshow dive[%]"           ;063 CNSshow dive[%]
     TCODE    .40,  .35,      "Logbook offset "           ;064 Logbook offset 

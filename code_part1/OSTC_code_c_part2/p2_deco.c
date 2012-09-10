@@ -680,7 +680,7 @@ static void copy_deco_table(void)
         for(y=0; y<NUM_STOPS; y++, --x)
         {
             char_O_deco_depth[y] = internal_deco_depth[x];
-            char_O_deco_time_for_log[y] = internal_deco_depth[x];
+            char_O_deco_time_for_log[y] = internal_deco_time [x];
             char_O_deco_time [y] = internal_deco_time [x];
 
             // Stop only once the last transfer is done.
@@ -713,7 +713,7 @@ static void copy_deco_table(void)
         //---- Second: copy to output table (in reverse order)
         for(y=0; y<NUM_STOPS; y++, --x)
         {
-            char_O_deco_time_for_log[y] = internal_deco_depth[x];
+            char_O_deco_time_for_log[y] = internal_deco_time [x];
 
             // Stop only once the last transfer is done.
             if( x == 0 ) break;

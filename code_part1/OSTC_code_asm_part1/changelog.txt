@@ -2,6 +2,7 @@ New in 2.52:
 BETA Version - Do NOT use for diving!
 TODO: Text 61 update
 NEW: Divisor Decoplan (CF25) stores entire decoplan in logbook
+NEW: CF29 stored in divelog header (Byte 52)
 
 New in 2.51:
 BETA Version - Do NOT use for diving!

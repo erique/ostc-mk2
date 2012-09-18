@@ -2145,7 +2145,7 @@ update_date:
 	return
 
 PLED_menu_clear:
-    WIN_BOX_BLACK   .0, .26, .65, .100			;top, bottom, left, right
+    WIN_BOX_BLACK   .0, .26, .50, .100			;top, bottom, left, right
 	return
 
 PLED_max_pressure:

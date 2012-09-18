@@ -121,7 +121,7 @@
     TCODE    .0,   .0,       "Creando Resumen MD2"       ;001 Building MD2 Hash
     TCODE    .0,   .25,      "Espere por favor..."       ;002 Please Wait...
     TCODE    .0,   .2,       "HeinrichsWeikamp OSTC2"    ;003 HeinrichsWeikamp OSTC2
-    TCODE    .58,  .2,       "¿Menú?"                    ;004 Menu?
+    TCODE    .58,  .2,       "Menú?"                     ;004 Menu?
     TCODE    .65,  .2,       "Menú:"                     ;005 Menu:
     TCODE    .20,  .35,      "Diario"                    ;006 Logbook
     TCODE    .20,  .65,      "Config. Gas"               ;007 Gas Setup
@@ -259,7 +259,7 @@
     TCODE    .100,  .50,     "Borrtodo"                  ;132 Del. all
     TCODE    .0,    .0,      "¡Reinicio inesperado"      ;133 Unexpected reset from
     TCODE    .0,    .25,     "del Modo Buceo. Ayudar"    ;134 Divemode! Please help
-    TCODE    .0,    .50,     "reportando Información"    ;135 and report the Debug 
+    TCODE    .0,    .50,     "aportando Información "    ;135 and report the Debug 
     TCODE    .0,    .75,     "de Depuración debajo!"     ;136 Information below!
     TCODE    .100,  .0,      "Bailout"                   ;137 Bailout
     TCODE    .85,   .125,    "Apnea    "                 ;138 Apnoe    
@@ -288,7 +288,7 @@
     TCODE    .40,   .35,     "#Color Avisos  "           ;159 Color# Warnings
     TCODE    .40,   .35,     "SegundosModoBuc"           ;160 Divemode secs. 
     TCODE    .40,   .35,     "Ajusta SP fijo "           ;161 Adjust fixed SP
-    TCODE    .40,   .35,     "Tope Aviso     "           ;162 Warn Ceiling
+    TCODE    .40,   .35,     "Aviso Techo    "           ;162 Warn Ceiling
     TCODE    .40,   .35,     "Iconos TipoMezl"           ;163 Mix type icons
     TCODE    .40,   .35,     "Parp. Mejor Gas"           ;164 Blink BetterGas	(Remainder in divemode to switch to a better decompression gas).
     TCODE    .40,   .35,     "AvisoProf[mbar]"           ;165 DepthWarn[mbar]
@@ -307,11 +307,11 @@
     TCODE    .40,   .35,     "Gas Fondo[/min]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
     TCODE    .40,   .35,     "GasAscens[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
     TCODE    .40,   .35,     "Futuro TTS[min]"           ;180 Future TTS[min]   (Compute TTS for extra time at current depth)
-    TCODE    .40,   .35,     "Cave Warning[l]"           ;181 Cave Warning[l]   (Consomation warning for cave divers)
-    TCODE    .40,   .35,     "Graph. Velocity"           ;182 Graph. Velocity	(Show a graphical representation of the ascend speed)
-    TCODE    .40,   .35,     "Show pSCR ppO2 "           ;183 Show pSCR ppO2	(Show the ppO2 for pSCR divers)
-    TCODE    .40,   .35,     "pSCR O2 Drop[%]"           ;184 pSCR O2 Drop[%]	(pSCR O2 drop in percent)
-    TCODE    .40,   .35,     "pSCR lung ratio"           ;185 pSCR lung ratio	(pSCR counterlung ratio)
+    TCODE    .40,   .35,     "Aviso Cuevas[l]"           ;181 Cave Warning[l]   (Consomation warning for cave divers)
+    TCODE    .40,   .35,     "Gráfica Vel Asc"           ;182 Graph. Velocity	(Show a graphical representation of the ascend speed)
+    TCODE    .40,   .35,     "Mostr pSCR ppO2"           ;183 Show pSCR ppO2	(Show the ppO2 for pSCR divers)
+    TCODE    .40,   .35,     "Caída pSCRO2[%]"           ;184 pSCR O2 Drop[%]	(pSCR O2 drop in percent)
+    TCODE    .40,   .35,     "Ratio Pulm pSCR"           ;185 pSCR lung ratio	(pSCR counterlung ratio)
 ; End of function descriptor II
 ;
     TCODE    .13,   .2,      "Func.Personaliz. II"       ;186 Custom Functions II
@@ -323,9 +323,9 @@
     TCODE    .0,    .0,      "Dil."                      ;192 Dil.			       (Rebreather diluent)
 
 ; 32 custom function descriptors III (FIXED LENGTH = 15 chars).
-    TCODE    .40,   .35,     "Color# inactive"           ;193 Color# inactive
-    TCODE    .40,   .35,     "Use safety stop"           ;194 Use safety stop
-    TCODE    .40,   .35,     "Show GF in NDL "           ;195 Show GF in NDL	(If GF > CF08)
+    TCODE    .40,   .35,     "Color# inactivo"           ;193 Color# inactive
+    TCODE    .40,   .35,     "Usar para. segu"           ;194 Use safety stop
+    TCODE    .40,   .35,     "Mostr.GF en NDL"           ;195 Show GF in NDL	(If GF > CF08)
     TCODE    .40,   .35,     "unused         "           ;196 unused
     TCODE    .40,   .35,     "unused         "           ;197 unused
     TCODE    .40,   .35,     "unused         "           ;198 unused
@@ -356,12 +356,12 @@
     TCODE    .40,   .35,     "unused         "           ;223 unused
     TCODE    .40,   .35,     "unused         "           ;224 unused
 ;
-	TCODE    .7,    .2,      "Func.Personaliz. III"      ;225 Custom Functions III
+    TCODE    .7,    .2,      "Func.Personaliz. III"      ;225 Custom Functions III
     TCODE    .85,   .125,    "pSCR-GF  "                 ;226 pSCR-GF
-   	TCODE    .90,   .54,     "SafetyStop"                ;227 SafetyStop
-    TCODE    .0,    .0,      "Total Dives: "             ;228 Total Dives: 
-    TCODE    .0,    .0,      ""		                   	 ;229 unused
-    TCODE    .0,    .0,      ""		                     ;230 unused
+    TCODE    .90,   .54,     "Parada Segur."             ;227 SafetyStop
+    TCODE    .0,    .0,      "Inmer. Totales"            ;228 Total Dives: 
+    TCODE    .0,    .0,      ""		                 ;229 unused
+    TCODE    .0,    .0,      ""		                 ;230 unused
     TCODE    .0,    .0,      ""     	                 ;231 unused
     TCODE    .0,    .0,      ""		                   	 ;232 unused
     TCODE    .0,    .0,      ""		                     ;233 unused
@@ -455,14 +455,14 @@
     TCODE    .100,  .125,    "SalirSim"                  ;306 Quit Sim              (=8char max. Quit Simulator mode)
 ;Dive interval
     TCODE    .20,   .35,     "Interval:"                 ;307 Interval:
-    TCODE    .0,    .0,      "Now    "                   ;308 Now                   (7 chars min)
+    TCODE    .0,    .0,      "Ahora  "                   ;308 Now                   (7 chars min)
 	TCODE	 .100,	.113,	 "Promedio"			 		 ;309 Average
 	TCODE	 .116,	.54,	 "Crono."		 		 	 ;310 Stopwatch             (BIG Stopwatch in Gauge mode)
 ; Cave consomation
-    TCODE    .0,    .0,      "Cave Bail."                ;311 Cave Bail.           (=10 chars.)
+    TCODE    .0,    .0,      "Bail Cueva"                ;311 Cave Bail.           (=10 chars.)
 ; OLED Brightness settings
     TCODE    .103,  .155,    "Eco "	    	             ;312 Eco 					(Same length as #313!)
-    TCODE    .103,  .155,    "High" 	                 ;313 High					(Same length as #312!)
+    TCODE    .103,  .155,    "Alto" 	                 ;313 High					(Same length as #312!)
 
 ; ZH-L16 mode description
     TCODE    .0,    .35,     "Tipodeco: ZH-L16 OC"       ;314 Decotype: ZH-L16 OC
@@ -513,13 +513,13 @@
     TCODE    .0,    .185,    "CircuitoCerrado con"       ;354 CF33!Closed Circuit
     TCODE    .0,    .215,    "Paradas Profundas. "       ;355 with Deep Stops.
 ; pSCR-GF mode description
-    TCODE    .0,    .35,     "Decotype: pSCR-GF"     	;356 Decotype: pSCR-GF
-    TCODE    .0,    .65,     "For passive semi-"     	;357 For passive semi-
-    TCODE    .0,    .95,     "closed rebreather."    	;358 closed rebreather.
-    TCODE    .0,    .125,    "Check CF32 & CF33"     	;359 Check CF32 & CF33
-    TCODE    .0,    .155,    "for gradient factors"    	;360 for gradient factors
-    TCODE    .0,    .185,    "and CF61-CF63 for"     	;361 and CF61-CF63 for
-    TCODE    .0,    .215,    "pSCR features."    		;362 pSCR features.
+    TCODE    .0,    .35,     "Tipodeco: pSCR-GF   "    	 ;356 Decotype: pSCR-GF
+    TCODE    .0,    .65,     "Para Rebreathers    "    	 ;357 For passive semi-
+    TCODE    .0,    .95,     "Pasivos Semicerrados"    	 ;358 closed rebreather.
+    TCODE    .0,    .125,    "Mirar CF32 & CF33   "    	 ;359 Check CF32 & CF33
+    TCODE    .0,    .155,    "Para Factores Grad. "    	 ;360 for gradient factors
+    TCODE    .0,    .185,    "y CF61-CF63 para    "    	 ;361 and CF61-CF63 for
+    TCODE    .0,    .215,    "Características pSCR"    	 ;362 pSCR features.
 
 ;
 

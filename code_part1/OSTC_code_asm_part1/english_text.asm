@@ -235,8 +235,8 @@
     TCODE    .20,   .95,     "Depth +/-:"                ;107 Depth +/-:
     TCODE    .20,   .125,    "Change:" 		             ;108 Change:
 	TCODE	 .20,	.155,	 "Default:"				  	 ;109 Default:
-    TCODE    .20,   .65,     "CCR SetPoint Menu"         ;110 CCR SetPoint Menu
-    TCODE    .20,   .2,      "CCR SetPoint Menu"         ;111 CCR SetPoint Menu
+    TCODE    .20,   .65,     "CCR Setup Menu"            ;110 CCR Setup Menu
+    TCODE    .28,   .2,      "CCR Setup Menu"            ;111 CCR Setup Menu
     TCODE    .0,    .0,      "SP#"                       ;112 SP#
     TCODE    .20,   .95,     "Battery Info"              ;113 Battery Info
     TCODE    .10,   .2,      "Battery Information"       ;114 Battery Information
@@ -361,8 +361,8 @@
     TCODE    .85,   .125,    "pSCR-GF  "                 ;226 pSCR-GF
 	TCODE    .90,   .54,     "SafetyStop"                ;227 SafetyStop
     TCODE    .0,    .0,      "Total Dives: "             ;228 Total Dives: 
-    TCODE    .0,    .0,      ""		                   	 ;229 unused
-    TCODE    .0,    .0,      ""		                     ;230 unused
+    TCODE    .20,   .35,     "Diluent Setup"             ;229 Diluent Setup
+    TCODE    .20,   .65,     "Setpoint Setup"            ;230 Setpoint Setup
     TCODE    .0,    .0,      ""     	                 ;231 unused
     TCODE    .0,    .0,      ""		                   	 ;232 unused
     TCODE    .0,    .0,      ""		                     ;233 unused

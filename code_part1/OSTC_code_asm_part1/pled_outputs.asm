@@ -1046,9 +1046,9 @@ PLED_menu_mask:
 
 PLED_setup_menu_mask:
 	call	PLED_topline_box
-	WIN_INVERT	.1	; Init new Wordprocessor	
+	WIN_INVERT	.1          ; Init new Wordprocessor
 	DISPLAYTEXT	.98			; Setup Menu:
-	WIN_INVERT	.0	; Init new Wordprocessor	
+	WIN_INVERT	.0          ; Init new Wordprocessor
 	DISPLAYTEXT .99			; Custom FunctionsI
 	DISPLAYTEXT	.153		; Custom FunctionsII
 	DISPLAYTEXTH .295		; Custom FunctionsIII
@@ -1056,6 +1056,17 @@ PLED_setup_menu_mask:
 	DISPLAYTEXT	.142		; More...
 	DISPLAYTEXT .11			; Exit
 	return	
+
+PLED_ccr_setup_menu_mask:
+	call	PLED_topline_box
+	WIN_INVERT	.1          ; Init new Wordprocessor
+    DISPLAYTEXT	.111		; CCR Setup Menu
+	WIN_INVERT	.0          ; Init new Wordprocessor
+	DISPLAYTEXT .229        ; Diluent Setup
+	DISPLAYTEXT	.230		; Setpoint Setup
+	DISPLAYTEXT .11			; Exit
+	return
+
 
 PLED_more_setup_menu_mask:
 	call	PLED_topline_box

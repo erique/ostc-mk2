@@ -115,6 +115,7 @@
 #DEFINE	TXT_TX2				 "x"						 ; "x"
 #DEFINE	TXT_NX1				 "N"						 ; "N"
 #DEFINE	TXT_NX2				 "x"						 ; "x"
+#DEFINE TXT_DIL_C            "D"                         ; "D"
  
 #ENDIF                                                                   
 ;=============================================================================

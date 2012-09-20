@@ -111,7 +111,7 @@ menu_diluentsetup_list:
 	movf	waitms_temp,W		; Load row into WREG
 	movff	WREG,win_top
 	lfsr	FSR2,letter
-	PUTC	TXT_GAS_C
+	PUTC	TXT_DIL_C
 	movff	decodata+0,lo
 	incf	lo,F
 	bsf		leftbind
@@ -194,6 +194,7 @@ menu_diluentsetup_list0:
 	DISPLAYTEXT	.11                     ; Exit
 	call	wait_switches               ; Waits until switches are released, resets flag if button stays pressed!
 	call	PLED_menu_cursor
+    clrf    EEADRH
 
 menu_diluentsetup_loop:
 	call	check_switches_logbook
@@ -292,31 +293,20 @@ menu_const_ppO21:
 	OUTPUTTEXT	d'192'				; Dil.
 	PUTC	' '
 
-	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)
-	movff	EEDATA,active_gas			; Read start gas (1-5)
-
-	decf	active_gas,W				; Gas 0-4
-	mullw	d'4'
-	movf	PRODL,W			
-	addlw	d'6'						; = address for O2 ratio
+    movlw   .1
+    movwf   EEADRH
+	addlw	d'96'						; = address for O2 ratio
 	movwf	EEADR
 	call	read_eeprom					; Read O2 ratio
-	movff	EEDATA, lo		; O2 ratio
-
-
+	movff	EEDATA, lo                  ; O2 ratio
 	bsf		leftbind
 	output_99
-
 	PUTC	'/'
-
-	decf	active_gas,W				; Gas 0-4
-	mullw	d'4'
-	movf	PRODL,W			
-	addlw	d'7'						; = address for He ratio
+	addlw	d'97'						; = address for He ratio
 	movwf	EEADR
 	call	read_eeprom					; Read He ratio
-	movff	EEDATA,lo		; And copy into hold register
-
+	movff	EEDATA,lo                   ; And copy into hold register
+    clrf    EEADRH
 	bsf		leftbind
 	output_99
 	STRCAT_PRINT ")"

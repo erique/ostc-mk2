@@ -419,7 +419,7 @@
     TCODE    .20,   .95,     "Tiempo Fondo:"             ;277 Bottom Time:
     TCODE    .20,   .125,    "Prof. Max.:"               ;278 Max. Depth:
     TCODE    .20,   .155,    "Calcular Deco"             ;279 Calculate Deco
-    TCODE    .20,   .155,    "Brightness:"          	 ;280 Brightness:
+    TCODE    .20,   .155,    "Brillo:    "          	 ;280 Brightness:
 ;
     TCODE    .93,   .170,    "ProfMedia"                 ;281 Avr.Depth
     TCODE    .90,   .170,    "TejControl"                ;282 Lead Tiss.
@@ -443,7 +443,7 @@
     TCODE    .0,    .0,      "MOD:"                      ;297 MOD:                  (max operating depth of a gas).
     TCODE    .0,    .0,      "END:"                      ;298 END:                  (equivalent nitrogen depth of a gas).
     TCODE    .0,    .0,      "EAD:"                      ;299 EAD:                  (equivalent air depth of a gas).
-	TCODE    .100,  .125,	 "Más"						 ;300 More               	(Enable/Disable Gas underwater)
+	TCODE    .100,  .125,	 "Activar"						 ;300 Activate               	(Enable/Disable Gas underwater)
 	TCODE    .0,    .2,      "Uso Gas OCR:"              ;301 OCR Gas Usage:        (Planned gas consumtion by tank).
 ; 115k Bootloader support:
 	TCODE	 .45,	.100,	 "CargadorArr"				 ;302 Bootloader

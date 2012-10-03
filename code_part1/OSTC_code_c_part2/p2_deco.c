@@ -83,6 +83,7 @@
 // 2011/12/17: [mH]  Remove of the useless debug stuff
 // 2012/02/24: [jDG] Remove missed stop bug.
 // 2012/02/25: [jDG] Looking for a more stable LOW grad factor reference.
+// 2012/09/10: [mH] Fill char_O_deco_time_for_log for logbook write
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).

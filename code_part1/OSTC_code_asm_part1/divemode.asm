@@ -33,9 +33,9 @@ diveloop:
 ; Startup Tasks for all modes
 	ostc_debug	'R'		; Sends debug-information to screen if debugmode active
 	call	PLED_ClearScreen			; clean up OLED
-	call	PLED_divemode_mask					; Display mask
-	call	PLED_active_gas_divemode	; Display gas, if required
+	call	PLED_divemode_mask			; Display mask
 	call	PLED_temp_divemode			; Displays temperature
+   	call	PLED_active_gas_divemode	; Display gas
 
 ; Reload last customview
 	read_int_eeprom	d'94'				; Read last selected customview dive mode into EEDATA

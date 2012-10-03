@@ -746,17 +746,19 @@ menu_const_ppO21:
 	OUTPUTTEXT	d'192'				; Dil.
 	PUTC	' '
 
+ 	movlw	d'96'						; = address for O2 ratio
+	movwf	EEADR
     movlw   .1
     movwf   EEADRH
-	addlw	d'96'						; = address for O2 ratio
-	movwf	EEADR
 	call	read_eeprom					; Read O2 ratio
 	movff	EEDATA, lo                  ; O2 ratio
 	bsf		leftbind
 	output_99
 	PUTC	'/'
-	addlw	d'97'						; = address for He ratio
+	movlw	d'97'						; = address for He ratio
 	movwf	EEADR
+    movlw   .1
+    movwf   EEADRH
 	call	read_eeprom					; Read He ratio
 	movff	EEDATA,lo                   ; And copy into hold register
     clrf    EEADRH

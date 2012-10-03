@@ -520,10 +520,13 @@ divemenu_set_xgas2_o2minus:
 	read_int_eeprom		d'24'			; O2 value
 	movff	EEDATA,lo
 	decf	lo,F						; decrease O2
-	movlw	d'3'						; Limit-1
+	movlw	d'0'
 	cpfseq	lo
 	bra		divemenu_set_xgas2_o2minus2
-	incf	lo,F						; limit to min=9
+    read_int_eeprom		d'25'			; Read He ratio
+    movf    EEDATA,W                    ; into WREG
+    sublw   .100                        ; 100% total...
+    movwf   lo                          ; Set to Max. value
 divemenu_set_xgas2_o2minus2:
 	movff	lo, EEDATA
 	write_int_eeprom	d'24'			; O2 Value
@@ -547,8 +550,8 @@ divemenu_set_xgas2_o2plus2:				; test if O2+He>100...
 	movf	EEDATA,W
 	addwf	lo,W						; add O2 value
 	movwf	hi							; store in temp
-	movlw	d'101'
-	cpfseq	hi							; O2 and He > 100?
+	movlw	d'100'
+	cpfsgt	hi							; O2 and He > 100?
 	bra		divemenu_set_xgas2_o2plus3	; No!
 	decf	lo,F						; reduce O2 again = unchanged after operation
 divemenu_set_xgas2_o2plus3:				; save current value

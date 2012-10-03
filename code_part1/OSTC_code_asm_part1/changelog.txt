@@ -5,6 +5,7 @@ NEW: Divisor Decoplan (CF25) stores entire decoplan in logbook
 NEW: CF29 stored in divelog header (Byte 52)
 BUGFIX: Gas Setup when using "ERR" Gases (e.g. NX17)
 
+
 New in 2.51:
 BETA Version - Do NOT use for diving!
 NEW: Saves last selected custom view for surface mode and dive mode

@@ -91,7 +91,7 @@ menu_diluentsetup_prelist:
 	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
 	call	PLED_topline_box
 	WIN_INVERT	.1	; Init new Wordprocessor
-	DISPLAYTEXT	.106			; Gas List
+	DISPLAYTEXT	.231			; Dil. Setup - Gaslist
 	WIN_INVERT	.0	; Init new Wordprocessor
 	clrf	decodata+0				; Here: # of gas 0-4
 	clrf	divemins+0				; Here: # of Gas * 4
@@ -126,8 +126,10 @@ menu_diluentsetup_Tx:
 	movff	WREG,win_top
 	lfsr	FSR2,letter
 
-	movff	wait_temp, EEADR	; Gas %He - Set address in internal EEPROM
-	incf	EEADR,F				; Gas %He - Set address in internal EEPROM
+	incf	wait_temp, W        ; Gas %O2
+	movwf	EEADR				; Gas %He - Set address in internal EEPROM
+    movlw   .1
+    movwf   EEADRH
 	call	read_eeprom			; Read He value from EEPROM
 	movff	EEDATA,lo			; Move EEDATA -> lo
 	movf	lo,f				; Move lo -> f
@@ -136,13 +138,17 @@ menu_diluentsetup_Tx:
 	bra 	menu_diluentsetup_Nx	; NO check o2
 
 	; YES Write TX 15/55
-	call 	gassetup_write_Tx
+   STRCAT  TXT_TX3
 	movff	wait_temp, EEADR	; Gas %O2 - Set address in internal EEPROM
+    movlw   .1
+    movwf   EEADRH
 	call	read_eeprom			; O2 value
 	movff	EEDATA,lo
 	output_8
 	PUTC	'/'
 	incf	EEADR,F				; Gas #hi: %He - Set address in internal EEPROM
+    movlw   .1
+    movwf   EEADRH
 	call	read_eeprom			; He value
 	movff	EEDATA,lo
 	output_8
@@ -151,6 +157,8 @@ menu_diluentsetup_Tx:
 ; New v1.44se
 menu_diluentsetup_Nx:
 	movff	wait_temp, EEADR	; Gas %O2 - Set address in internal EEPROM
+    movlw   .1
+    movwf   EEADRH
 	call	read_eeprom			; Read O2 value from EEPROM
 	movff	EEDATA,lo			; Move EEDATA -> lo
 	movf	lo,f				; Move lo -> f
@@ -162,7 +170,7 @@ menu_diluentsetup_Nx:
 	bra		menu_diluentsetup_O2	; NO write O2
 
 	; YES Write NX 32
-	call	gassetup_write_Nx
+    STRCAT  TXT_NX3
 	output_8
 	bra 	menu_diluentsetup_list0
 
@@ -173,7 +181,7 @@ menu_diluentsetup_O2:
 
 menu_diluentsetup_Air:
 	cpfseq	lo					; o2 = 21%
-	call    menu_gassetup_Err
+	bra     menu_diluentsetup_Err
 
     STRCAT  TXT_AIR4
 	output_8
@@ -237,21 +245,466 @@ do_diluentsetup_list:
 	dcfsnz	menupos,F
 	bra		diluent_list_edit_gas1
 	dcfsnz	menupos,F
-	bra		diluent_list_edit_gas1
+	bra		diluent_list_edit_gas2
 	dcfsnz	menupos,F
-	bra		diluent_list_edit_gas1
+	bra		diluent_list_edit_gas3
 	dcfsnz	menupos,F
-	bra		diluent_list_edit_gas1
+	bra		diluent_list_edit_gas4
 	dcfsnz	menupos,F
-	bra		diluent_list_edit_gas1
+	bra		diluent_list_edit_gas5
 	bra		menu_const_ppO2             ; Exit List
 
 diluent_list_edit_gas1:
+	movlw	d'0'                        ; Diluent Number 0-4
+	movwf	decodata+0
+	movlw	d'96'                       ; EEPROM address of %O2
+	movwf	divemins+0
+	bra		menu_diluentgas
 diluent_list_edit_gas2:
+	movlw	d'1'                        ; Diluent Number 0-4
+	movwf	decodata+0
+	movlw	d'98'                       ; EEPROM address of %O2
+	movwf	divemins+0
+	bra		menu_diluentgas
 diluent_list_edit_gas3:
+	movlw	d'2'                        ; Diluent Number 0-4
+	movwf	decodata+0
+	movlw	d'100'                       ; EEPROM address of %O2
+	movwf	divemins+0
+	bra		menu_diluentgas
 diluent_list_edit_gas4:
+	movlw	d'3'                        ; Diluent Number 0-4
+	movwf	decodata+0
+	movlw	d'102'                       ; EEPROM address of %O2
+	movwf	divemins+0
+	bra		menu_diluentgas
 diluent_list_edit_gas5:
-    bra		menu_const_ppO2             ; Exit List
+	movlw	d'4'                        ; Diluent Number 0-4
+	movwf	decodata+0
+	movlw	d'104'                       ; EEPROM address of %O2
+	movwf	divemins+0
+;	bra		menu_diluentgas
+menu_diluentgas:
+	movlw	d'1'
+	movwf	menupos
+	bcf		menubit4
+	bcf		first_FA				; Here: =1: -, =0: +
+
+menu_diluentgas0:
+	call	PLED_ClearScreen
+    WIN_LEFT    .20
+	WIN_TOP		.155
+    lfsr    FSR2, letter
+	OUTPUTTEXT  .11			; Exit
+    STRCAT_PRINT  ""
+
+menu_diluentgas1:
+	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
+
+	call	diluent_title_bar2			; Displays the title bar with the current Gas info
+
+	WIN_LEFT	.20
+	WIN_TOP		.35
+	STRCPY  TXT_O2_4
+	movff	divemins+0,EEADR
+    movlw   .1
+    movwf   EEADRH
+	call	read_eeprom                 ; O2 value
+	movff	EEDATA,lo
+	output_8
+	STRCAT_PRINT "% "
+
+; Show MOD in m
+	WIN_LEFT	.90
+    lfsr    FSR2, letter
+	OUTPUTTEXTH .297                    ; MOD:
+
+    GETCUSTOM8 .18                      ; ppO2 warnvalue in WREG
+	mullw	d'10'
+	movff	PRODL,xA+0
+	movff	PRODH,xA+1                  ; ppO2 in [0.01bar] * 10
+	movff	divemins+0,EEADR
+	movlw   .1
+	movwf	EEADRH
+	call	read_eeprom                 ; O2 value
+	movff	EEDATA,xB+0
+	clrf	xB+1
+	call	div16x16                    ; xA/xB=xC with xA as remainder
+	movlw	d'10'
+	subwf	xC+0,F                      ; Subtract 10m...
+	movff	xC+0,lo
+	movlw	d'0'
+	subwfb	xC+1,F
+	movff	xC+1,hi
+
+	output_16
+	STRCAT_PRINT  TXT_METER3
+
+	WIN_LEFT	.20
+	WIN_TOP		.65
+	STRCPY  TXT_HE4
+	incf	divemins+0,W
+    movwf   EEADR
+    movlw   .1
+    movwf   EEADRH
+	call	read_eeprom                 ; He value
+	movff	EEDATA,lo
+	output_8
+	STRCAT_PRINT "% "
+
+; Show END in m
+    lfsr    FSR2, letter
+	WIN_LEFT	.90
+	OUTPUTTEXTH .298                    ; END:
+	GETCUSTOM8 .18				        ; ppO2 warnvalue in WREG
+	mullw	d'10'
+	movff	PRODL,xA+0
+	movff	PRODH,xA+1		            ; ppO2 in [0.01bar] * 10
+    movff	divemins+0,EEADR
+    movlw   .1
+    movwf   EEADRH
+	call	read_eeprom                 ; O2 value
+	movff	EEDATA,xB+0
+	clrf	xB+1
+	call	div16x16                    ; xA/xB=xC with xA as remainder
+	movlw	d'10'
+	subwf	xC+0,F                      ; Subtract 10m...
+	movff	xC+0,lo
+	movlw	d'0'
+	subwfb	xC+1,F
+	movff	xC+1,hi                     ; lo:hi holding MOD in meters
+	movlw	d'10'
+	addwf	lo,F
+	movlw	d'0'
+	addwfc	hi,F                        ; lo:hi holding MOD+10m
+
+	incf	divemins+0,W
+    movwf   EEADR
+    movlw   .1
+    movwf   EEADRH
+	call	read_eeprom                 ; He value in % -> EEDATA
+	movlw	d'100'
+	movwf	xA+0
+	movf	EEDATA,W                    ; He value in % -> EEDATA
+	subwf	xA+0,F                      ; xA+0 = 100 - He Value in %
+	clrf	xA+1
+	movff	lo,xB+0
+	movff	hi,xB+1                     ; Copy MOD+10
+	call	mult16x16                   ; xA*xB=xC
+	movff	xC+0,xA+0
+	movff	xC+1,xA+1
+	movlw	d'100'
+	movwf	xB+0
+	clrf	xB+1
+	call	div16x16                    ; xA/xB=xC with xA as remainder
+	;	xC:2 = ((MOD+10) * 100 - HE Value in %) / 100
+	movlw	d'10'
+	subwf	xC+0,F				        ; Subtract 10m...
+	movff	xC+0,lo
+	movlw	d'0'
+	subwfb	xC+1,F
+	movff	xC+1,hi
+	output_16
+	STRCAT_PRINT  TXT_METER3
+
+    WIN_LEFT    .20
+	WIN_TOP		.95
+	STRCPY  "+/-: "
+	movlw	'+'
+	btfsc	first_FA
+	movlw	'-'
+	movwf	POSTINC2
+	call	word_processor
+
+	WIN_TOP		.125
+	lfsr	FSR2,letter
+	OUTPUTTEXT	.89			            ; Default:
+    movlw   .21
+    movwf   lo                          ; Default always Air
+	output_8
+	PUTC	'/'
+    clrf    lo                          ; Default He value
+	output_8
+	STRCAT_PRINT  "  "
+
+	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
+	call	PLED_menu_cursor
+
+diluentgassetup_loop:
+	call	check_switches_logbook
+
+	btfsc	menubit3
+	bra		diluentgassetup2           ; move cursor
+
+	btfsc	menubit2
+	bra		do_diluentgassetup		; call submenu
+
+	btfsc	onesecupdate
+	call	menu_check_dive_and_timeout	; "Goto restart" or sets sleepmode flag
+
+	bcf		onesecupdate	; 1 sec. functions done
+
+	btfsc	sleepmode
+	bra		exit_menu_const_ppO2
+
+	bra     diluentgassetup_loop
+
+diluentgassetup2:
+	incf	menupos,F
+	movlw	d'6'
+	cpfseq	menupos             ; =6?
+	bra		diluentgassetup3	; No
+	movlw	d'1'
+	movwf	menupos
+
+diluentgassetup3:
+	clrf	timeout_counter2
+	call	PLED_menu_cursor
+
+	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
+
+	bcf		menubit3		; clear flag
+	bra		diluentgassetup_loop
+
+do_diluentgassetup:
+	dcfsnz	menupos,F
+	bra		adjust_o2_diluent
+	dcfsnz	menupos,F
+	bra		adjust_he_diluent
+	dcfsnz	menupos,F
+	bra		toggle_plus_minus_diluentsetup
+	dcfsnz	menupos,F
+	bra		restore_gas_diluent
+exit_diluentgassetup:			; exit...
+	movff	decodata+0,menupos
+	incf	menupos,F
+	bra		menu_diluentsetup_prelist
+
+toggle_plus_minus_diluentsetup:
+	btg		first_FA
+	movlw	d'3'
+	movwf	menupos
+	bra		menu_diluentgas1	; return
+
+adjust_o2_diluent:
+	movff	divemins+0,EEADR			; read current value
+	movlw   .1
+	movwf	EEADRH
+	call	read_eeprom		; Low-value
+	movff	EEDATA,lo
+
+	btfsc	first_FA			; Minus?
+	bra		adjust_o2_1_diluent			; yes, minus!
+
+	incf	lo,F			; increase O2
+	movlw	d'101'
+	cpfseq	lo
+	bra		adjust_o2_2_diluent
+	movlw	d'4'			; LOWER O2 Limit
+	movwf	lo
+	bra		adjust_o2_2_diluent
+
+adjust_o2_1_diluent:
+	decf	lo,F			; decrease O2
+	movlw	d'3'
+	cpfseq	lo
+	bra		adjust_o2_2_diluent
+
+	incf	divemins+0,W
+	movwf	EEADR
+    movlw   .1
+    movwf   EEADRH
+	call	read_eeprom		; read He value
+
+	movlw	d'100'
+	movwf	lo
+	movf	EEDATA,W		; He value
+	subwf	lo,F			; lo=100% - He%
+
+adjust_o2_2_diluent:				; test if O2+He>100...
+	incf	divemins+0,W
+	movwf	EEADR
+    movlw   .1
+    movwf   EEADRH
+	call	read_eeprom		; read He value
+	movf	EEDATA,W		; He value
+	addwf	lo,W			; add O2 value
+	movwf	hi				; store in temp
+	movlw	d'101'
+	cpfseq	hi				; O2 and He > 100?
+	bra		adjust_o2_3_diluent		; No!
+
+	movlw	d'4'			; LOWER O2 Limit
+	movwf	lo
+
+adjust_o2_3_diluent:
+	movff	divemins+0,EEADR		; save current value
+	movff	lo,EEDATA
+    movlw   .1
+    movwf   EEADRH
+	call	write_eeprom		; Low-value
+
+	movlw	d'1'
+	movwf	menupos
+	bra		menu_diluentgas1	; return
+
+adjust_he_diluent:
+	incf	divemins+0,W
+    movwf   EEADR			; read current value
+	movlw   .1
+	movwf	EEADRH
+	call	read_eeprom		; Low-value
+	movff	EEDATA,lo
+
+	btfsc	first_FA			; Minus?
+	bra		adjust_he_1_diluent			; yes, minus!
+
+	incf	lo,F
+	movlw	d'92'			; He limited to (useless) 90%
+	cpfseq	lo
+	bra		adjust_he_2_diluent
+	clrf	lo
+	bra		adjust_he_2_diluent
+
+adjust_he_1_diluent:
+	decf	lo,F			; decrease He
+	movlw	d'255'
+	cpfseq	lo
+	bra		adjust_he_2_diluent
+	clrf	lo
+
+adjust_he_2_diluent:				; test if O2+He>100...
+	incf	divemins+0,W
+	movwf	EEADR
+    movlw   .1
+    movwf   EEADRH
+	call	read_eeprom		; read He value
+	movf	EEDATA,W		; He value
+	addwf	lo,W			; add O2 value
+	movwf	hi				; store in temp
+	movlw	d'101'
+	cpfseq	hi				; O2 and He > 100?
+	bra		adjust_he_3_diluent		; No!
+;	clrf	lo				; Yes, clear He to zero
+	decf	lo,F			; reduce He again = unchanged after operation
+
+adjust_he_3_diluent:
+	incf	divemins+0,W			; save current value
+	movwf	EEADR
+	movff	lo,EEDATA
+    movlw   .1
+    movwf   EEADRH
+	call	write_eeprom		; Low-value
+
+	movlw	d'2'
+	movwf	menupos
+	bra		menu_diluentgas1	;
+
+restore_gas_diluent:
+	movff	divemins+0,EEADR			; save Default value (O2)
+    movlw   .1
+    movwf   EEADRH
+    movlw   .21                         ; Always Air
+	movwf	EEDATA
+	call	write_eeprom
+	incf   	EEADR,F                     ; Point to He
+	clrf    EEDATA
+	call	write_eeprom
+	movlw	d'4'
+	movwf	menupos
+	bra		menu_diluentgas1
+
+
+diluent_title_bar2:
+	call	PLED_topline_box
+	WIN_INVERT	.1	; Init new Wordprocessor
+	WIN_TOP		.2
+	WIN_LEFT	.30
+	lfsr	FSR2,letter
+    STRCAT  TXT_DIL5            ; Dil.#
+	movff	decodata+0,lo
+	incf	lo,F
+	bsf		leftbind
+	output_99
+	STRCAT_PRINT ": "
+
+	WIN_TOP		.2
+	WIN_LEFT	.80
+	lfsr	FSR2,letter
+
+	;He check
+	incf	divemins+0,W
+	movwf	EEADR
+    movlw   .1
+    movwf   EEADRH
+	call	read_eeprom			; He value
+	movff	EEDATA,lo			; Move EEData -> lo
+	movf	lo,f				; Move lo -> f
+	movlw	d'0'				; Move 0 -> WREG
+	cpfsgt	lo					; He > 0?
+	bra 	diluent_title_bar3	; NO check o2
+
+	; YES Write TX 15/55
+    STRCAT  TXT_TX3
+	movff	divemins+0,EEADR
+	movlw   .1
+	movwf	EEADRH
+	call	read_eeprom			; O2 value
+	movff	EEDATA,lo
+	output_8					; Write O2
+	PUTC	'/'
+	incf	divemins+0,W
+	movwf	EEADR
+	call	read_eeprom			; He value
+	movff	EEDATA,lo
+	output_8					; Write He
+	bra		diluent_title_bar7
+
+; New v1.44se
+diluent_title_bar3:			; O2 Check
+	movff	divemins+0,EEADR
+	call	read_eeprom			; O2 value
+	movff	EEDATA,lo
+	movf	lo,f				; Move lo -> f
+	movlw	d'21'				; Move 21 -> WREG
+	cpfseq	lo					; o2 = 21
+	cpfsgt	lo					; o2 > 21%
+	bra 	diluent_title_bar5	; NO AIR
+	movlw	d'100'				; Move 100 -> WREG
+	cpfslt	lo					; o2 < 100%
+	bra		diluent_title_bar4	; NO write O2
+
+	; YES Write NX 32
+    STRCAT  TXT_NX3
+	output_8
+	bra 	diluent_title_bar7
+
+; New v1.44se
+diluent_title_bar4:
+    STRCAT  TXT_O2_3
+	output_8
+	bra 	diluent_title_bar7
+
+; New v1.44se
+diluent_title_bar5:
+	cpfseq	lo					; o2 = 21%
+	bra 	diluent_title_bar6
+
+    STRCAT  TXT_AIR4
+	output_8
+	bra 	diluent_title_bar7
+
+; New v1.44se
+diluent_title_bar6:		; ERROR
+    STRCAT  TXT_ERR4
+	output_8
+	;bra 	diluent_title_bar7
+
+diluent_title_bar7:
+    STRCAT_PRINT  ""
+	WIN_INVERT	.0	; Init new Wordprocessor
+	return
+
 
 ; ***
 

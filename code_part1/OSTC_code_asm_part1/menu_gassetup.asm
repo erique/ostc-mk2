@@ -96,7 +96,7 @@ menu_gassetup_Tx:
 	bra 	menu_gassetup_Nx	; NO check o2
 
 	; YES Write TX 15/55
-	call 	gassetup_write_Tx
+    STRCAT  TXT_TX3
 	movff	wait_temp, EEADR	; Gas %O2 - Set address in internal EEPROM
 	call	read_eeprom			; O2 value
 	movff	EEDATA,lo
@@ -122,7 +122,7 @@ menu_gassetup_Nx:
 	bra		menu_gassetup_O2	; NO write O2
 	
 	; YES Write NX 32
-	call	gassetup_write_Nx
+    STRCAT  TXT_NX3
 	output_8
 	bra 	menu_gassetup_list0
 
@@ -135,7 +135,7 @@ menu_gassetup_O2:
 ; New v1.44se
 menu_gassetup_Air:
 	cpfseq	lo					; o2 = 21%
-	call menu_gassetup_Err
+	bra     menu_gassetup_Err
 
     STRCAT  TXT_AIR4
 	output_8
@@ -274,7 +274,6 @@ menu_gassetup_page1:
 	movwf	menupos
 	bcf		gas_setup_page2			; Page 1 of gassetup
 	bcf		menubit4
-	bcf		sleepmode
 	bcf		first_FA				; Here: =1: -, =0: +
 
 menu_gassetup0:
@@ -925,7 +924,7 @@ gassetup_title_bar2:
 	bra 	gassetup_title_bar3	; NO check o2
 	
 	; YES Write TX 15/55
-	call 	gassetup_write_Tx	; Write TX
+    STRCAT  TXT_TX3
 	movf	divemins+0,W
 	addlw	0x06
 	movwf	EEADR
@@ -958,7 +957,7 @@ gassetup_title_bar3:			; O2 Check
 	bra		gassetup_title_bar4	; NO write O2
 
 	; YES Write NX 32
-	call	gassetup_write_Nx 	
+    STRCAT  TXT_NX3
 	output_8
 	bra 	gassetup_title_bar7
 
@@ -981,7 +980,7 @@ gassetup_title_bar5:
 gassetup_title_bar6:		; ERROR
     STRCAT  TXT_ERR4
 	output_8
-	bra 	gassetup_title_bar7
+	;bra 	gassetup_title_bar7
 
 gassetup_title_bar7:
     STRCAT  TXT_AT4
@@ -994,16 +993,6 @@ gassetup_title_bar7:
     STRCAT_PRINT  TXT_METER2
 
 	WIN_INVERT	.0	; Init new Wordprocessor	
-	return
-
-; New v1.44se
-gassetup_write_Nx:
-    STRCAT  TXT_NX3
-	return
-
-; New v1.44se
-gassetup_write_Tx:
-    STRCAT  TXT_TX3
 	return
 
 gassetup_show_ppO2:

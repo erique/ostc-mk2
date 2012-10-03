@@ -116,6 +116,7 @@
 #DEFINE	TXT_NX1				 "N"						 ; "N"
 #DEFINE	TXT_NX2				 "x"						 ; "x"
 #DEFINE TXT_DIL_C            "D"                         ; "D"
+#DEFINE	TXT_DIL5			 "Dil.#"                     ; "Dil.#"
  
 #ENDIF                                                                   
 ;=============================================================================
@@ -364,7 +365,7 @@
     TCODE    .0,    .0,      "Total Dives: "             ;228 Total Dives: 
     TCODE    .20,   .35,     "Diluent Setup"             ;229 Diluent Setup
     TCODE    .20,   .65,     "Setpoint Setup"            ;230 Setpoint Setup
-    TCODE    .0,    .0,      ""     	                 ;231 unused
+    TCODE    .5,   .2,       "Dil. Setup - Gaslist"	 	 ;231 Dil. Setup - Gaslist
     TCODE    .0,    .0,      ""		                   	 ;232 unused
     TCODE    .0,    .0,      ""		                     ;233 unused
     TCODE    .0,    .0,      ""     	                 ;234 unused

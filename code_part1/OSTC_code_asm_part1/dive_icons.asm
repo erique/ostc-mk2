@@ -41,6 +41,8 @@ dive_type_icons:
             return                      ; YES: just return.
             btfsc   gauge_mode          ; gauge mode ?
             return                      ; YES: also return.
+            btfsc   FLAG_const_ppO2_mode; Not in CC modes
+            return
             
             ;---- Don't display CF#41 is false -------------------------------
             GETCUSTOM8  d'41'           ; Read CF#41

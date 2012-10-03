@@ -163,6 +163,7 @@ menu_gassetup_list0:
 	movwf	EEADR
 	call	read_eeprom			; Low-value
 	movff	EEDATA,lo
+ 
 	output_8
     PUTC	TXT_METER_C
 	movf    decodata+0,W

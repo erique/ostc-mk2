@@ -135,7 +135,7 @@ surfloop_loop1:
 	call	set_leds_surfmode			; Sets Warning and No-Fly LEDs
 	call    check_customfunctions       ; Checks CF functions and displays warning symbol if something critical is wrong
 	call	surfcustomview_second		; Do every-second tasks for the custom view area
-	call    dive_type_icons             ; Draw Air/Nitrox/Trimix color icon.
+  	call    dive_type_icons             ; Draw Air/Nitrox/Trimix color icon.
 
 ; Every 2 seconds, overwrite with GF value (if needed to display)
     btfsc   secs,1                      ; Alternating every 2sec (if needed)

@@ -899,6 +899,7 @@ check_failed:
     movff   cf_checker_counter,lo
     output_99x
 	STRCAT_PRINT "!"
+    WIN_INVERT	.0					    ; Init new Wordprocessor
     
     ; When failed, increment counter modulo 64, to restart checks.
     incf    cf_checker_counter,W

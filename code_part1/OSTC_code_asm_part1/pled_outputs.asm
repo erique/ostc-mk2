@@ -1450,18 +1450,12 @@ PLED_pre_dive_screen3_loop:
 	cpfseq	apnoe_mins          ; All gases shown?
 	bra		PLED_pre_dive_screen3_loop	;no
 
-	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)
-	movff	EEDATA,active_gas			; Read start gas (1-5)
-	decf	active_gas,W				; Gas 0-4
-	mullw	d'4'
-	movf	PRODL,W			
-	addlw	d'6'						; = address for O2 ratio
-	movwf	EEADR
-	call	read_eeprom                 ; Read O2 ratio
-	movff	EEDATA, lo                  ; O2 ratio
-	incf	EEADR,F                     ; = address for He
-	call	read_eeprom					; Read He ratio
-	movff	EEDATA,hi                   ; And copy into hold register
+    movlw   .1
+    movwf   EEADRH
+	read_int_eeprom 	d'96'			; Read O2
+	movff	EEDATA,lo
+	read_int_eeprom 	d'97'			; Read He
+    clrf    EEADRH
 
 	WIN_LEFT	.90
 	WIN_TOP		.100

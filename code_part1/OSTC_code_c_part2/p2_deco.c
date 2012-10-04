@@ -83,7 +83,8 @@
 // 2011/12/17: [mH]  Remove of the useless debug stuff
 // 2012/02/24: [jDG] Remove missed stop bug.
 // 2012/02/25: [jDG] Looking for a more stable LOW grad factor reference.
-// 2012/09/10: [mH] Fill char_O_deco_time_for_log for logbook write
+// 2012/09/10: [mH]  Fill char_O_deco_time_for_log for logbook write
+// 2012/10/05: [jDG] Better deco_gas_volumes accuracy (average depth, switch between stop).
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -882,7 +883,8 @@ static unsigned char gas_switch_deepest(void)
     // If there is a better gas available
     if( switch_deco )
     {
-        unsigned char delay = read_custom_function(55);
+        unsigned char delay;
+        delay = read_custom_function(55);
 
         assert( !sim_gas_last_depth || sim_gas_last_depth > switch_deco );
 
@@ -2370,7 +2372,7 @@ void deco_gas_volumes(void)
     overlay float volumes[NUM_GAS];
     overlay float bottom_usage, deco_usage;
     overlay unsigned char i, deepest_first;
-    overlay unsigned char gas;
+    overlay unsigned char gas, depth;
     RESET_C_STACK
 
     //---- initialize with bottom consumption --------------------------------
@@ -2387,40 +2389,16 @@ void deco_gas_volumes(void)
             * char_I_bottom_time                        // in minutes.
             * bottom_usage;                             // In liter/minutes.
 
-    //---- Starts by a gas switch ? ------------------------------------------
-    // If there is no special gas-switch stops inserted, then
-    // we should pay attention to the gas when starting to ascent, before
-    // the first stop...
-    if( read_custom_function(55) == 0 )
-    {
-        overlay unsigned char j;
-        for(j=0; j<NUM_GAS; ++j)
-        {
-            if( char_O_first_deco_depth < char_I_deco_gas_change[j] )
-                if( !char_I_deco_gas_change[gas] || (char_I_deco_gas_change[gas] > char_I_deco_gas_change[j]) )
-                    gas = j;
-        }
-    }
-
     //---- Ascent usage ------------------------------------------------------
     deepest_first = read_custom_function(54) == 0;
     deco_usage    = (float) read_custom_function(57); // In liter/minutes.
 
-    // Usage up to the first stop:
-    //  - computed at MAX depth (easier, safer),
-    //  - with an ascent speed of 10m/min.
-    //  - with ascent litter / minutes.
-    //  - still using bottom gas:
-    if( deco_usage > 0.0 )
-        volumes[gas]
-            += (char_I_bottom_depth*0.1 + 1.0)          // Depth -> bar
-             * (char_I_bottom_depth - char_O_first_deco_depth) * 0.1  // ascent time (min)
-             * deco_usage;                              // Consumption ( xxx / min @ 1 bar)
+    depth = char_I_bottom_depth;
 
     for(i=0; i<NUM_STOPS; ++i)
     {
         overlay unsigned char j;
-        overlay unsigned char depth, time, ascent;
+        overlay unsigned char newDepth, newStop, newGas, time;
 
         // Manage stops in reverse order (CF#54)
         if( deepest_first )
@@ -2428,41 +2406,64 @@ void deco_gas_volumes(void)
             time = char_O_deco_time[i];
             if( time == 0 ) break;          // End of table: done.
 
-            ascent = depth  = char_O_deco_depth[i] & 0x7F;
-            if( i < 31 )
-                ascent -= char_O_deco_depth[i+1] & 0x7F;
+             newStop = newDepth  = char_O_deco_depth[i] & 0x7F;
         }
         else
         {
             time = char_O_deco_time[31-i];
             if( time == 0 ) continue;       // not yet: still searh table.
 
-            ascent = depth = char_O_deco_depth[31-i] & 0x7F;
-            if( i < 31 )
-                ascent -= char_O_deco_depth[30-i] & 0x7F;
+            newStop = newDepth = char_O_deco_depth[31-i] & 0x7F;
         }
 
         // Gas switch depth ?
+        newGas = gas;
         for(j=0; j<NUM_GAS; ++j)
         {
-            if( depth <= char_I_deco_gas_change[j] )
-                if( !char_I_deco_gas_change[gas] || (char_I_deco_gas_change[gas] > char_I_deco_gas_change[j]) )
-                    gas = j;
+            if( j == newGas ) continue;
+            if( char_I_deco_gas_change[j] == 0 ) continue;
+            if( newStop <= char_I_deco_gas_change[j] )
+                if( gas == newGas || (char_I_deco_gas_change[newGas] > char_I_deco_gas_change[j]) )
+                {
+                    newGas  = j;
+                    newStop = char_I_deco_gas_change[j];
+                }
         }
 
-        // usage during stop:
-        // Note: because first gas is not in there, increment gas+1
+        // usage BEFORE gas switch (if any), at 10m/min :
+        if( deco_usage > 0.0 && depth > newStop )
+            // Plus usage during ascent to the next stop, at 10m/min.
+            volumes[gas] += ((depth+newStop)*0.05 + 1.0)    // average depth --> bar.
+                          * (depth-newStop)*0.1             // metre --> min
+                          * deco_usage;
+
+        // Do gas switch:
+        gas = newGas;
+        depth = newStop;
+
+        // usage AFTER gas switch (if any), at 10m/min :
+        if( depth > newDepth )
+            volumes[gas] += ((depth+newDepth)*0.05 + 1.0)    // average depth --> bar.
+                          * (depth-newDepth)*0.1             // metre --> min
+                          * deco_usage;
+
+        // Do stop:
+        depth = newDepth;
+
+        // Usage at stop:
         if( deco_usage > 0.0 )
             volumes[gas] += (depth*0.1 + 1.0)   // depth --> bar.
                           * time                // in minutes.
-                          * deco_usage          // in xxx / min @ 1bar.
-            // Plus usage during ascent to the next stop, at 10m/min.
-                          + (depth*0.1  + 1.0)
-                          * ascent*0.1          // metre --> min
-                          * deco_usage;
+                          * deco_usage;         // in xxx / min @ 1bar.
         else
             volumes[gas] = 65535.0;
     }
+
+    // From last stop to surface
+    if( deco_usage > 0.0 )
+        volumes[gas] += (depth*0.05 + 1.0)      // avg depth --> bar.
+                      * depth * 0.1             // time to surface, in minutes.
+                      * deco_usage;             // in xxx / min @ 1bar.
 
     //---- convert results for the ASM interface -----------------------------
     for(i=0; i<NUM_GAS; ++i)

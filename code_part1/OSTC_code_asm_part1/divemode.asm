@@ -2026,6 +2026,8 @@ divemode1:
 
 ; Read Start Gas and configure char_I_He_ratio, char_I_O2_ratio and char_I_N2_ratio
 set_first_gas:
+	btfsc	FLAG_const_ppO2_mode
+    bra     set_first_gas_ccr           ; In CCR mode
 	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)
 	movff	EEDATA,active_gas			; Read start gas (1-5)
     movff   EEDATA,char_I_current_gas
@@ -2054,3 +2056,19 @@ set_first_gas:
 	read_int_eeprom	d'27'
 	movff	EEDATA, gaslist_active
 	return
+
+set_first_gas_ccr:                      ; Set Diluent
+    movlw   .1
+    movwf   active_diluent              ; Always start with Diluent 1 (EEPROM 96/97)
+	read_int_eeprom 	d'97'			; Read He
+	movff	EEDATA,char_I_He_ratio		; And copy into hold register
+	read_int_eeprom 	d'96'			; Read O2
+	movff	EEDATA, char_I_O2_ratio		; O2 ratio
+	movff	char_I_He_ratio, wait_temp	; copy into bank1 register
+	bsf		STATUS,C					; Borrow bit
+	movlw	d'100'						; 100%
+	subfwb	wait_temp,W					; minus He
+	bsf		STATUS,C					; Borrow bit
+	subfwb	EEDATA,W					; minus O2
+	movff	WREG, char_I_N2_ratio		; = N2!
+    return

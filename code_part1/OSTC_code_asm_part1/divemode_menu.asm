@@ -123,13 +123,15 @@ test_switches_divemode_menu:
 	btfsc	display_set_gas				; Are we in the "Gaslist" menu?
 	movlw	d'7'						; Yes, Number of entries for this menu+1 = 7
 	btfsc	display_set_setpoint		; In SetPoint Menu?
-	movlw	d'5'						; Number of entries for this menu+1 = 5
+	movlw	d'6'						; Number of entries for this menu+1 = 6
 	btfsc	display_set_active			; De/Activate gases underwater menu is visible?
 	movlw	d'7'						; Number of entries for this menu+1 = 7
 	btfsc	display_set_xgas			; Are we in the Gas6 menu?
 	movlw	d'7'						; Number of entries for this menu+1 = 7
 	btfsc	display_set_simulator		; Are we in the simulator menu?
 	movlw	d'7'						; Number of entries for this menu+1 = 7
+    btfsc   display_set_diluent         ; Are we in the "Diluent" list?
+    movlw	d'6'						; Number of entries for this menu+1 = 6
 	cpfseq	menupos						; =limit?
 	bra		test_switches_divemode_menu1; No!
 	movlw	d'1'						; Yes, reset to position 1!
@@ -144,6 +146,8 @@ test_switches_divemode_menu1:
 	bra		test_switches_divemode_menu1a	; Skip test for sub menus
 	btfsc	display_set_active				; Are we in the "Gaslist", "SetPoint" or De/Activate gases menu?
 	bra		test_switches_divemode_menu1a	; Skip test for sub menus
+    btfsc	display_set_diluent				; Are we in the "Gaslist", "SetPoint" or De/Activate gases menu?
+    bra		test_switches_divemode_menu1a	; Skip test for sub menus
 
 	movlw	d'3'
 	cpfseq	menupos							; At position 3?
@@ -177,6 +181,9 @@ test_switches_divemode_menu3:
 
 	btfsc	display_set_simulator		; Are we in the Divemode Simulator menu?
 	goto	divemode_menu_simulator2	; Yes, so adjust depth or set and exit
+
+    btfsc	display_set_diluent         ; Are we in the "Diluent" List?
+    goto	divemode_set_diluent2       ; Yes, so choose diluent and exit
 
 ; Options for Menu 1
 	dcfsnz	menupos,F
@@ -607,7 +614,8 @@ divemenu_set_setpoint:
 
 	call	PLED_clear_divemode_menu	; Clear Menu
 	call	PLED_splist_start			; Display SetPoints
-	DISPLAYTEXT		d'137'				; Bailout (as a sub-menu)
+	DISPLAYTEXT d'137'  				; Bailout (as a sub-menu)
+    DISPLAYTEXT d'232'                  ; Diluent (as a sub-menu)
 	movlw	d'1'
 	movwf	menupos						; reset cursor
 	call	PLED_divemenu_cursor		; update cursor
@@ -627,12 +635,31 @@ divemenu_set_gas2:
 divemenu_set_gas1:
 	movlw	d'1'				
 	cpfseq	menupos						; At the "Bailout" position?		
-	bra		divemenu_set_gas1b			; No, select SetPoint 1-3
+	bra		divemenu_set_gas1b			; No, select SetPoint 1-3 or Diluent
 	bsf		select_bailoutgas			; Set Flag
 	bcf		display_set_setpoint		; Clear Flag
 	bra		divemenu_set_gas_2			; Configure the extra gas / Select Bailout
 
 divemenu_set_gas1b:
+	movlw	d'5'
+	cpfseq	menupos						; At the "Diluent" position?
+	bra		divemenu_set_gas1c			; No, select SetPoint 1-3
+    ; Choose Diluent from list
+    bcf		display_set_setpoint		; Clear Flag
+    bcf     display_set_gas             ; Clear Flag
+    bsf     display_set_diluent         ; Set Flag
+	call	PLED_clear_divemode_menu	; Clear Menu
+	call	PLED_diluent_list			; Display all 5 diluents
+	movlw	d'1'						; Reset cursor
+	movwf	menupos						; reset cursor
+	call	PLED_divemenu_cursor		; update cursor
+	return
+
+divemode_set_diluent2:                  ; Choose diluent #menupos
+    movff  menupos,active_diluent       ; 1-5
+    bra    divemenu_set_gas1d           ; Continue here...
+
+divemenu_set_gas1c:
 	decf	menupos,F					; Adjust 1-3 to 0-2...
 	movlw	d'35'						; offset in memory
 	addwf	menupos,W					; add SP number 0-2
@@ -642,6 +669,29 @@ divemenu_set_gas1b:
 	movff	EEDATA, ppO2_setpoint_store	; Store also in this byte...
 	bsf		setpoint_changed
 	bsf		event_occured				; set global event flag
+
+divemenu_set_gas1d:                     ; (Re-)Set Diluent
+    decf   active_diluent,W             ; 0-4 -> WREG mH
+    mullw   .2
+    movf    PRODL,W
+    addlw   d'97'
+    movwf   EEADR
+    call	read_eeprom					; Read He
+	movff	EEDATA,char_I_He_ratio		; And copy into hold register
+    decf   active_diluent,W             ; 0-4 -> WREG
+    mullw   .2
+    movf    PRODL,W
+    addlw   d'96'
+    movwf   EEADR
+    call	read_eeprom					; Read O2
+	movff	EEDATA, char_I_O2_ratio		; O2 ratio
+	movff	char_I_He_ratio, wait_temp	; copy into bank1 register
+	bsf		STATUS,C					; Borrow bit
+	movlw	d'100'						; 100%
+	subfwb	wait_temp,W					; minus He
+	bsf		STATUS,C					; Borrow bit
+	subfwb	EEDATA,W					; minus O2
+	movff	WREG, char_I_N2_ratio		; = N2!
 	bra		timeout_divemenu2			; quit menu!
 
 divemenu_set_gas1a:
@@ -745,6 +795,7 @@ timeout_divemenu2a:
 	bcf		display_set_setpoint
 	bcf		display_set_simulator
 	bcf		display_set_active
+    bcf     display_set_diluent
 	bcf		menu3_active
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 	return

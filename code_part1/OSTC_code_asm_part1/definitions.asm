@@ -334,7 +334,8 @@ cf_checker_counter      res 1   ; counts custom functions to check for warning s
 
 char_I_O2_ratio         res 1   ; 02 ratio
 
-active_gas              res 1   ; Holds number of active gas
+active_gas              res 1   ; Holds number of active gas (1-5)
+active_diluent          res 1   ; Holds number of active diluent (1-5)
 
 debug_char              res 6    ; For debugmode
 
@@ -359,6 +360,7 @@ total_divetime_seconds	res 2	; counts dive seconds regardless of CF01 (18h max.)
 
 safety_stop_countdown	res 1	; counts seconds of safety stop
 better_gas_number		res 1	; number (1-5) of the "better gas" in divemode, =0: no better gas available
+
 
 ASSERT_BANK1    MACRO   tag
     Ifdef   __DEBUG
@@ -550,7 +552,7 @@ ASSERT_BANK1    MACRO   tag
 #DEFINE	toggle_customview		flag13,7	;=1: Next customview
 
 #DEFINE	enter_error_sleep		flag14,0	;=1: Sleep immediately displaying the error using LED codes
-#DEFINE nsm						flag14,1	;=1: Do not sleep
+#DEFINE display_set_diluent 	flag14,1	;=1: Diluent list active
 #DEFINE	is_bailout				flag14,2	;=1: CC mode, but bailout active!
 #DEFINE	standalone_simulator	flag14,3	;=1: Standalone Simulator active
 #DEFINE	display_set_simulator	flag14,4	;=1: Show Divemode simulator menu

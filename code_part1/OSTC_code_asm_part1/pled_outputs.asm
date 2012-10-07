@@ -1450,12 +1450,10 @@ PLED_pre_dive_screen3_loop:
 	cpfseq	apnoe_mins          ; All gases shown?
 	bra		PLED_pre_dive_screen3_loop	;no
 
-    movlw   .1
-    movwf   EEADRH
 	read_int_eeprom 	d'96'			; Read O2
 	movff	EEDATA,lo
 	read_int_eeprom 	d'97'			; Read He
-    clrf    EEADRH
+    movff	EEDATA,hi
 
 	WIN_LEFT	.90
 	WIN_TOP		.100
@@ -2889,6 +2887,51 @@ PLED_show_change_depth:		; Yes, show change depth for gas #menupos
 PLED_show_change_depth_clear:
 	STRCPY_PRINT  "         "
 	return
+
+PLED_diluent_list:
+	ostc_debug	'm'		; Sends debug-information to screen if debugmode active
+	WIN_LEFT	.100
+	WIN_FONT	FT_SMALL
+	bsf		leftbind
+    movlw	d'94'
+	movwf	wait_temp			; here: stores eeprom address for diluent list (96-2)
+	movlw	d'231'
+	movwf	waitms_temp			; here: stores row for gas list
+	clrf	hi					; here: Diluent counter
+
+PLED_diluent_list_loop:
+   	incf	hi,F				; Increase Diluent
+    movlw   .2
+	addwf   wait_temp,F			; Increase eeprom address for gas list
+	movlw	d'25'
+	addwf	waitms_temp,F		; Increase row
+	WIN_LEFT	.100
+	movff	waitms_temp,win_top ; Set Row
+	STRCPY  TXT_DIL_C
+	movff	hi,lo			; copy dil number
+	output_8				; display dil number
+    PUTC    ':'
+	movff	wait_temp, EEADR; Dil #hi: %O2 - Set address in internal EEPROM
+	call	read_eeprom		; get byte (stored in EEDATA)
+	movff	EEDATA,lo		; copy to lo
+	output_8				; outputs into Postinc2!
+    PUTC    '/'
+	incf	EEADR,F			; Dil #hi: %He - Set address in internal EEPROM
+	call	read_eeprom		; get byte (stored in EEDATA)
+	movff	EEDATA,lo		; copy to lo
+	output_8				; outputs into Postinc2!
+
+	decf	EEADR,F			; Dil #hi: %O2 - Set address in internal EEPROM
+	call	read_eeprom		; get byte (stored in EEDATA)
+	PLED_color_code		warn_gas_in_gaslist		; Color-code output	(%O2 in "EEDATA")
+    
+	call	word_processor
+	call	PLED_standard_color
+
+	movlw	d'5'			; list all five Diluents
+	cpfseq	hi				; All diluents shown?
+	bra		PLED_diluent_list_loop	; No
+	return					;  return
 
 
 PLED_gas_list:

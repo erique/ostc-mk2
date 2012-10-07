@@ -212,18 +212,6 @@ restart:
 	btfss	neg_flag				; Result negative (Ambient>880mBar)?
 	bsf		high_altitude_mode		; No, Set Flag!
 	
-	; Should we disable sleep (hardware emulator)
-  Ifndef TESTING
-restart_loop:
-	btfss	0xF81,0,A
-	bra		restart_loop
-	btfss	0xF81,1,A
-	bra		restart_loop
-	movlw	0x80
-	cpfslt	0xFB3,A
-	bsf		nsm						; NO-SLEEP-MODE : for hardware debugging
-  Endif
-
 	call	gassetup_sort_gaslist       ; Sorts Gaslist according to change depth
 	WIN_TOP		.0
 	WIN_LEFT	.0

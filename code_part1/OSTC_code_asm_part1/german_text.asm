@@ -115,6 +115,9 @@
 #DEFINE	TXT_TX2				 "x"						 ; "x"
 #DEFINE	TXT_NX1				 "N"						 ; "N"
 #DEFINE	TXT_NX2				 "x"						 ; "x"
+#DEFINE TXT_DIL_C            "D"                         ; "D"
+#DEFINE	TXT_DIL5			 "Dil.#"                     ; "Dil.#"
+
                                                                          
 #ENDIF                                                                   
 ;=============================================================================
@@ -235,8 +238,8 @@
     TCODE    .20,   .95,     "Tiefe +/-:"		         ;107 Depth +/-:
     TCODE    .20,   .125,    "Wechsel:"			  		 ;108 Change:
     TCODE    .20,   .155,    "Standard:"                 ;109 Default:
-    TCODE    .20,   .65,     "CCR SetPoint Menü"         ;110 CCR SetPoint Menu
-    TCODE    .20,   .2,      "CCR SetPoint Menü"         ;111 CCR SetPoint Menu
+    TCODE    .20,   .65,     "CCR Setup Menü"            ;110 CCR Setup Menu
+    TCODE    .28,   .2,      "CCR Setup Menü"            ;111 CCR Setup Menu
     TCODE    .0,    .0,      "SP#"                       ;112 SP#
     TCODE    .20,   .95,     "Batterie Info"             ;113 Battery Info
     TCODE    .10,   .2,      "Batterie Information"      ;114 Battery Information
@@ -361,10 +364,10 @@
     TCODE    .85,   .125,    "pSCR-GF  "                 ;226 pSCR-GF
 	TCODE    .90,   .54,     "Sicherheit"                ;227 SafetyStop
     TCODE    .0,    .0,      "Anzahl TG: "			     ;228 Total Dives: 
-    TCODE    .0,    .0,      ""		                   	 ;229 unused
-    TCODE    .0,    .0,      ""		                     ;230 unused
-    TCODE    .0,    .0,      ""     	                 ;231 unused
-    TCODE    .0,    .0,      ""		                   	 ;232 unused
+    TCODE    .20,   .35,     "Diluent Setup"             ;229 Diluent Setup
+    TCODE    .20,   .65,     "Setpoint Setup"            ;230 Setpoint Setup
+    TCODE    .5,    .2,      "Dil. Setup - Gasliste" 	 ;231 Dil. Setup - Gaslist
+    TCODE    .100,  .100,	 "Diluent"                   ;232 Diluent
     TCODE    .0,    .0,      ""		                     ;233 unused
     TCODE    .0,    .0,      ""     	                 ;234 unused
 

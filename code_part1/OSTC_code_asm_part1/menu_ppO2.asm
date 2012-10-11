@@ -521,7 +521,7 @@ adjust_o2_3_diluent:
 
 adjust_he_diluent:
 	incf	divemins+0,W
-    movwf   EEADR			; read current value
+    movwf   EEADR			; read current value (He)
 	call	read_eeprom		; Low-value
 	movff	EEDATA,lo
 
@@ -529,7 +529,7 @@ adjust_he_diluent:
 	bra		adjust_he_1_diluent			; yes, minus!
 
 	incf	lo,F
-	movlw	d'92'			; He limited to (useless) 90%
+	movlw	d'99'			; He limited to (useless) 99%
 	cpfseq	lo
 	bra		adjust_he_2_diluent
 	clrf	lo
@@ -540,30 +540,29 @@ adjust_he_1_diluent:
 	movlw	d'255'
 	cpfseq	lo
 	bra		adjust_he_2_diluent
-	clrf	lo
+	clrf	lo              ; limit to zero
 
-adjust_he_2_diluent:				; test if O2+He>100...
-	incf	divemins+0,W
-	movwf	EEADR
-	call	read_eeprom		; read He value
-	movf	EEDATA,W		; He value
-	addwf	lo,W			; add O2 value
+adjust_he_2_diluent:		; test if O2+He>100...
+	movff	divemins+0,EEADR; read current O2 value
+	call	read_eeprom		; Low-value
+	movf	EEDATA,W
+	addwf	lo,W			; add He value
 	movwf	hi				; store in temp
 	movlw	d'101'
-	cpfseq	hi				; O2 and He > 100?
-	bra		adjust_he_3_diluent		; No!
+	cpfseq	hi                  ; O2 and He > 100?
+	bra		adjust_he_3_diluent	; No!
 ;	clrf	lo				; Yes, clear He to zero
 	decf	lo,F			; reduce He again = unchanged after operation
 
 adjust_he_3_diluent:
-	incf	divemins+0,W			; save current value
+	incf	divemins+0,W	; save current value
 	movwf	EEADR
 	movff	lo,EEDATA
-	call	write_eeprom		; Low-value
+	call	write_eeprom	; Low-value
 
 	movlw	d'2'
 	movwf	menupos
-	bra		menu_diluentgas1	;
+	bra		menu_diluentgas1;
 
 restore_gas_diluent:
 	movff	divemins+0,EEADR			; save Default value (O2)

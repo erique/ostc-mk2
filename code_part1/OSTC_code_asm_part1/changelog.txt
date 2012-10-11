@@ -1,10 +1,10 @@
-New in 2.52:
+New in 2.53:
 BETA Version - Do NOT use for diving!
+NEW: 5 Gases extra for CC
 TODO: Text 61,229,110,111,230,231,232 TXT_DIL_C, TXT_DIL5 update
 NEW: Divisor Decoplan (CF25) stores entire decoplan in logbook
 NEW: CF29 stored in divelog header (Byte 52)
 BUGFIX: Gas Setup when using "ERR" Gases (e.g. NX17)
-
 
 New in 2.51:
 BETA Version - Do NOT use for diving!

@@ -407,7 +407,7 @@
     TCODE    .120,  .135,    "Возд."                     ;265 Air
 
     TCODE    .0,    .0,      "pSCR Инфо"             	 ;266 pSCR Info (Must be 9Chars!)
-    TCODE    .0,    .216,    "Макс."                     ;267 Max.
+    TCODE    .0,    .184,    "Макс."                     ;267 Max.
     TCODE    .0,    .0,      ""     	                 ;268 unused
     TCODE    .0,    .0,      ""		                   	 ;269 unused
     TCODE    .0,    .0,      ""		                     ;270 unused

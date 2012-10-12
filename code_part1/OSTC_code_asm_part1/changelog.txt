@@ -1,6 +1,11 @@
+New in 2.55:
+BETA Version - Do NOT use for diving!
+
+
 New in 2.54:
 BETA Version - Do NOT use for diving!
 BUGFIX: Allow Diluents with more then 50% He
+CHANGE: "Max." Depth text position
 
 New in 2.53:
 BETA Version - Do NOT use for diving!

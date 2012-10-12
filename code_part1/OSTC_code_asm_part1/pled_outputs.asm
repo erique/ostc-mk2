@@ -2164,7 +2164,7 @@ PLED_max_pressure:
 ; Display normal "xx.y"
 	lfsr	FSR2,letter
 	call	PLED_standard_color
-	WIN_TOP		.184
+	WIN_TOP		.208
 	WIN_LEFT	.0
 	WIN_FONT 	FT_MEDIUM
 	WIN_INVERT	.0					; Init new Wordprocessor
@@ -2185,7 +2185,7 @@ maxdepth_greater_99_84mtr:			; Display only in full meters
 	; That means ignore figure 4 and 5
 	lfsr	FSR2,letter
 	call	PLED_standard_color
-	WIN_TOP		.184
+	WIN_TOP		.208
 	WIN_LEFT	.0
 	WIN_FONT 	FT_MEDIUM
 	WIN_INVERT	.0					; Init new Wordprocessor
@@ -2200,7 +2200,7 @@ maxdepth_greater_99_84mtr:			; Display only in full meters
 	return
 
 PLED_clear_maxdepth:
-    WIN_BOX_BLACK   .184, .215, .0, .41		;top, bottom, left, right
+    WIN_BOX_BLACK   .208, .239, .0, .41		;top, bottom, left, right
 	bsf		maxdepth_greater_100m	; Set Flag
 	return
 

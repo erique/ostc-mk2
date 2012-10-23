@@ -2058,17 +2058,16 @@ set_first_gas:
 	return
 
 set_first_gas_ccr:                      ; Set Diluent
-    movlw   .1
-    movwf   active_diluent              ; Always start with Diluent 1 (EEPROM 96/97)
-	read_int_eeprom 	d'97'			; Read He
-	movff	EEDATA,char_I_He_ratio		; And copy into hold register
-	read_int_eeprom 	d'96'			; Read O2
-	movff	EEDATA, char_I_O2_ratio		; O2 ratio
+    call    get_first_diluent           ; Read first diluent into lo(O2) and hi(He)
+	movff	hi,char_I_He_ratio          ; And copy into hold register
+	movff	lo, char_I_O2_ratio         ; O2 ratio
 	movff	char_I_He_ratio, wait_temp	; copy into bank1 register
 	bsf		STATUS,C					; Borrow bit
 	movlw	d'100'						; 100%
 	subfwb	wait_temp,W					; minus He
 	bsf		STATUS,C					; Borrow bit
-	subfwb	EEDATA,W					; minus O2
+	subfwb	lo,W        				; minus O2
 	movff	WREG, char_I_N2_ratio		; = N2!
+    read_int_eeprom d'106'              ; Read First Diluent (1-5)
+    movff   EEDATA,active_diluent
     return

@@ -34,6 +34,8 @@
 ; Diluent 4 (%O2,%He)
 ; EEPROM BANK0 Byte104-105:
 ; Diluent 5 (%O2,%He)
+; EEPROM BANK0 Byte106:
+; First Diluent (1-5)
 
 
 menu_const_ppO2:
@@ -115,10 +117,23 @@ menu_diluentsetup_list:
 	bsf		leftbind
 	output_99
 	PUTC	':'
-
-menu_diluentsetup_Tx:
 	call	word_processor
 
+	WIN_LEFT	.40
+	movf	waitms_temp,W		; Load row into WREG
+	movff	WREG,win_top
+	lfsr	FSR2,letter
+
+	movlw	d'106'
+	movwf	EEADR
+	call	read_eeprom			; Get current startgas 1-5 # into EEDATA
+	decf	EEDATA,W			; 0-4
+	cpfseq	decodata+0			; =current displayed gas #?
+	bra		menu_diluentsetup_Tx; no, do not display *
+	PUTC	'*'					; display *
+    call	word_processor
+
+menu_diluentsetup_Tx:
 	WIN_LEFT	.48
 	movf	waitms_temp,W		; Load row into WREG
 	movff	WREG,win_top
@@ -282,18 +297,42 @@ menu_diluentgas:
 menu_diluentgas0:
 	call	PLED_ClearScreen
     WIN_LEFT    .20
-	WIN_TOP		.155
+	WIN_TOP		.185
     lfsr    FSR2, letter
 	OUTPUTTEXT  .11			; Exit
     STRCAT_PRINT  ""
 
 menu_diluentgas1:
 	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
-
 	call	diluent_title_bar2			; Displays the title bar with the current Gas info
 
-	WIN_LEFT	.20
 	WIN_TOP		.35
+	WIN_LEFT	.20
+	lfsr	FSR2,letter
+	OUTPUTTEXT	.88			; First Gas?
+	PUTC	' '
+
+	movlw	d'106'
+	movwf	EEADR
+	call	read_eeprom		; Get current startgas 1-5 # into EEDATA
+	decf	EEDATA,W		; 0-4
+	cpfseq	decodata+0		; =current displayed gas #?
+	bra		menu_firstdil0	; no, display three spaces
+
+	OUTPUTTEXT	.96			; Yes
+	bsf		second_FA		; Is first gas
+
+	bra		menu_firstdil1
+
+menu_firstdil0:
+	bcf		second_FA		; Is not first gas
+	STRCAT  "   "           ; 3 spaces.
+
+menu_firstdil1:
+	call	word_processor
+
+	WIN_LEFT	.20
+	WIN_TOP		.65
 	STRCPY  TXT_O2_4
 	movff	divemins+0,EEADR
 	call	read_eeprom                 ; O2 value
@@ -326,7 +365,7 @@ menu_diluentgas1:
 	STRCAT_PRINT  TXT_METER3
 
 	WIN_LEFT	.20
-	WIN_TOP		.65
+	WIN_TOP		.95
 	STRCPY  TXT_HE4
 	incf	divemins+0,W
     movwf   EEADR
@@ -387,7 +426,7 @@ menu_diluentgas1:
 	STRCAT_PRINT  TXT_METER3
 
     WIN_LEFT    .20
-	WIN_TOP		.95
+	WIN_TOP		.125
 	STRCPY  "+/-: "
 	movlw	'+'
 	btfsc	first_FA
@@ -395,7 +434,7 @@ menu_diluentgas1:
 	movwf	POSTINC2
 	call	word_processor
 
-	WIN_TOP		.125
+	WIN_TOP		.155
 	lfsr	FSR2,letter
 	OUTPUTTEXT	.89			            ; Default:
     movlw   .21
@@ -430,8 +469,8 @@ diluentgassetup_loop:
 
 diluentgassetup2:
 	incf	menupos,F
-	movlw	d'6'
-	cpfseq	menupos             ; =6?
+	movlw	d'7'
+	cpfseq	menupos             ; =7?
 	bra		diluentgassetup3	; No
 	movlw	d'1'
 	movwf	menupos
@@ -447,6 +486,8 @@ diluentgassetup3:
 
 do_diluentgassetup:
 	dcfsnz	menupos,F
+    bra     make_first_diluent
+	dcfsnz	menupos,F
 	bra		adjust_o2_diluent
 	dcfsnz	menupos,F
 	bra		adjust_he_diluent
@@ -459,9 +500,19 @@ exit_diluentgassetup:			; exit...
 	incf	menupos,F
 	bra		menu_diluentsetup_prelist
 
+make_first_diluent:
+	movff	decodata+0,EEDATA		; current gas (0-4) into EEDATA
+	incf	EEDATA,F				; current gas (1-5) into EEDATA
+	movlw	d'106'
+	movwf	EEADR
+	call	write_eeprom			; store in internal EEPROM
+	movlw	d'1'
+	movwf	menupos
+	bra		menu_diluentgas1	; return
+
 toggle_plus_minus_diluentsetup:
 	btg		first_FA
-	movlw	d'3'
+	movlw	d'4'
 	movwf	menupos
 	bra		menu_diluentgas1	; return
 
@@ -515,7 +566,7 @@ adjust_o2_3_diluent:
 	movff	lo,EEDATA
 	call	write_eeprom		; Low-value
 
-	movlw	d'1'
+	movlw	d'2'
 	movwf	menupos
 	bra		menu_diluentgas1	; return
 
@@ -560,7 +611,7 @@ adjust_he_3_diluent:
 	movff	lo,EEDATA
 	call	write_eeprom	; Low-value
 
-	movlw	d'2'
+	movlw	d'3'
 	movwf	menupos
 	bra		menu_diluentgas1;
 
@@ -572,7 +623,7 @@ restore_gas_diluent:
 	incf   	EEADR,F                     ; Point to He
 	clrf    EEDATA
 	call	write_eeprom
-	movlw	d'4'
+	movlw	d'5'
 	movwf	menupos
 	bra		menu_diluentgas1
 
@@ -704,21 +755,13 @@ menu_const_ppO21:
 	OUTPUTTEXT	d'192'				; Dil.
 	PUTC	' '
 
- 	movlw	d'96'						; = address for O2 ratio
-	movwf	EEADR
-	call	read_eeprom					; Read O2 ratio
-	movff	EEDATA, lo                  ; O2 ratio
+    rcall   get_first_diluent           ; Read first diluent into lo(O2) and hi(He)
 	bsf		leftbind
-	output_99
+	output_99                           ; O2
 	PUTC	'/'
-	movlw	d'97'						; = address for He ratio
-	movwf	EEADR
-	call	read_eeprom					; Read He ratio
-	movff	EEDATA,lo                   ; And copy into hold register
-	bsf		leftbind
-	output_99
+    movff   hi,lo
+	output_99                           ; He
 	STRCAT_PRINT ")"
-
 
 	WIN_LEFT 	.20
 	WIN_TOP		.65
@@ -878,4 +921,19 @@ next_ppO2:
 next_ppO22:	
 	movlw	d'1'
 	movwf	menupos
-	bra		menu_const_ppO21	
+	bra		menu_const_ppO21
+
+get_first_diluent:              ; Read first diluent into lo(O2) and hi(He)
+    read_int_eeprom d'106'      ; Read First Diluent (1-5)
+    decf    EEDATA,W            ; WREG: 0-4
+    mullw   .2                  ; PRODL: 0-8
+    movlw   .96                 ; Base address for O2
+    addwf   PRODL,W
+    movwf   EEADR
+    call    read_eeprom         ; Read O2
+    movff   EEDATA,lo
+    incf    EEADR,F
+    call    read_eeprom         ; Read He
+    movff   EEDATA,hi
+    return
+

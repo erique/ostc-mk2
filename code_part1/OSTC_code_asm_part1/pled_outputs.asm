@@ -1450,11 +1450,8 @@ PLED_pre_dive_screen3_loop:
 	cpfseq	apnoe_mins          ; All gases shown?
 	bra		PLED_pre_dive_screen3_loop	;no
 
-	read_int_eeprom 	d'96'			; Read O2
-	movff	EEDATA,lo
-	read_int_eeprom 	d'97'			; Read He
-    movff	EEDATA,hi
 
+    call    get_first_diluent           ; Read first diluent into lo(O2) and hi(He)
 	WIN_LEFT	.90
 	WIN_TOP		.100
 	STRCPY  TXT_DIL4

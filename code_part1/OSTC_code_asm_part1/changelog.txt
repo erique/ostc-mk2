@@ -1,6 +1,9 @@
-New in 2.55:
+New in 2.56:
 BETA Version - Do NOT use for diving!
 
+New in 2.55:
+BETA Version - Do NOT use for diving!
+NEW: Allow any Diluent to be "First Gas" in CCR mode
 
 New in 2.54:
 BETA Version - Do NOT use for diving!

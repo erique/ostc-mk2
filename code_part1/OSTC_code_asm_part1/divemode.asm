@@ -1381,48 +1381,86 @@ end_dive2:
 	call	write_external_eeprom
 
 	; Gases....
+    btfsc   FLAG_const_ppO2_mode
+    bra     end_dive3               ; Store diluents instead of gases
+
 	read_int_eeprom 	d'6'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
 	read_int_eeprom 	d'7'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
-
 	read_int_eeprom 	d'10'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
 	read_int_eeprom 	d'11'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
-
 	read_int_eeprom 	d'14'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
 	read_int_eeprom 	d'15'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
-
 	read_int_eeprom 	d'18'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
 	read_int_eeprom 	d'19'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
-
 	read_int_eeprom 	d'22'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
 	read_int_eeprom 	d'23'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
+    bra     end_dive4
 
+end_dive3:
+	read_int_eeprom 	d'96'		; Read byte (stored in EEDATA)
+	movf	EEDATA,W
+	call	write_external_eeprom
+	read_int_eeprom 	d'97'		; Read byte (stored in EEDATA)
+	movf	EEDATA,W
+	call	write_external_eeprom
+	read_int_eeprom 	d'98'		; Read byte (stored in EEDATA)
+	movf	EEDATA,W
+	call	write_external_eeprom
+	read_int_eeprom 	d'99'		; Read byte (stored in EEDATA)
+	movf	EEDATA,W
+	call	write_external_eeprom
+	read_int_eeprom 	d'100'		; Read byte (stored in EEDATA)
+	movf	EEDATA,W
+	call	write_external_eeprom
+	read_int_eeprom 	d'101'		; Read byte (stored in EEDATA)
+	movf	EEDATA,W
+	call	write_external_eeprom
+	read_int_eeprom 	d'102'		; Read byte (stored in EEDATA)
+	movf	EEDATA,W
+	call	write_external_eeprom
+	read_int_eeprom 	d'103'		; Read byte (stored in EEDATA)
+	movf	EEDATA,W
+	call	write_external_eeprom
+	read_int_eeprom 	d'104'		; Read byte (stored in EEDATA)
+	movf	EEDATA,W
+	call	write_external_eeprom
+	read_int_eeprom 	d'105'		; Read byte (stored in EEDATA)
+	movf	EEDATA,W
+	call	write_external_eeprom
+
+end_dive4:
 	read_int_eeprom	d'24'			; % O2 Gas6
 	movf	EEDATA,W
 	call	write_external_eeprom
 	read_int_eeprom	d'25'			; % He Gas6
 	movf	EEDATA,W
 	call	write_external_eeprom
-	read_int_eeprom	d'33'			; start gas
+
+    movlw   .33                     ; Start gas
+    btfsc   FLAG_const_ppO2_mode    ; In CCR mode?
+    movlw   .106                    ; Yes, use start Diluent instead
+    movwf   EEADR
+    call    read_eeprom
 	movf	EEDATA,W
 	call	write_external_eeprom
 

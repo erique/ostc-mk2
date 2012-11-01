@@ -2397,8 +2397,7 @@ void deco_gas_volumes(void)
 
     for(i=0; i<NUM_STOPS; ++i)
     {
-        overlay unsigned char j;
-        overlay unsigned char newDepth, newStop, newGas, time;
+        overlay unsigned char newDepth, time;
 
         // Manage stops in reverse order (CF#54)
         if( deepest_first )
@@ -2406,40 +2405,55 @@ void deco_gas_volumes(void)
             time = char_O_deco_time[i];
             if( time == 0 ) break;          // End of table: done.
 
-             newStop = newDepth  = char_O_deco_depth[i] & 0x7F;
+             newDepth  = char_O_deco_depth[i] & 0x7F;
         }
         else
         {
             time = char_O_deco_time[31-i];
-            if( time == 0 ) continue;       // not yet: still searh table.
+            if( time == 0 ) continue;       // not yet: still search table.
 
-            newStop = newDepth = char_O_deco_depth[31-i] & 0x7F;
+            newDepth = char_O_deco_depth[31-i] & 0x7F;
         }
 
-        // Gas switch depth ?
-        newGas = gas;
-        for(j=0; j<NUM_GAS; ++j)
+        //---- Gas switch during this step -----------------------------------
         {
-            if( j == newGas ) continue;
-            if( char_I_deco_gas_change[j] == 0 ) continue;
-            if( newStop <= char_I_deco_gas_change[j] )
-                if( gas == newGas || (char_I_deco_gas_change[newGas] > char_I_deco_gas_change[j]) )
+            overlay unsigned char newGas = 0;
+            overlay unsigned char newStop = 0;  // NO CHANGE yet
+            overlay unsigned char j;
+
+            for(j=0; j<NUM_GAS; ++j)
+            {
+                // Skip gas without changing depth:
+                if( ! char_I_deco_gas_change[j] )
+                    continue;
+                // Select gas changed between [newDepth .. depth]
+                if( newDepth <= char_I_deco_gas_change[j]
+                 && char_I_deco_gas_change[j] <= depth )
                 {
-                    newGas  = j;
-                    newStop = char_I_deco_gas_change[j];
+                    // Keep the DEEPEST gas in that range:
+                    // Note: that = means changing gas at BEGINNING of this stop.
+                    if( char_I_deco_gas_change[j] >= newStop )
+                    {
+                        newGas  = j;
+                        newStop = char_I_deco_gas_change[j];
+                    }
                 }
+            }
+
+            if( newStop ) // Did we find something ?
+            {
+                // usage BEFORE gas switch (if any), at 10m/min :
+                if( deco_usage > 0.0 && depth > newStop )
+                    // Plus usage during ascent to the next stop, at 10m/min.
+                    volumes[gas] += ((depth+newStop)*0.05 + 1.0)    // average depth --> bar.
+                                  * (depth-newStop)*0.1             // metre --> min
+                                  * deco_usage;
+
+                // Do gas switch:
+                gas = newGas;
+                depth = newStop;
+            }
         }
-
-        // usage BEFORE gas switch (if any), at 10m/min :
-        if( deco_usage > 0.0 && depth > newStop )
-            // Plus usage during ascent to the next stop, at 10m/min.
-            volumes[gas] += ((depth+newStop)*0.05 + 1.0)    // average depth --> bar.
-                          * (depth-newStop)*0.1             // metre --> min
-                          * deco_usage;
-
-        // Do gas switch:
-        gas = newGas;
-        depth = newStop;
 
         // usage AFTER gas switch (if any), at 10m/min :
         if( depth > newDepth )

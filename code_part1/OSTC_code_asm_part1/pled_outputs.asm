@@ -4029,26 +4029,10 @@ PLED_simdata_screen3_loop:
 	cpfseq	decoplan_index		; All gases shown?
 	bra		PLED_simdata_screen3_loop	;no
 
-	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)
-	movff	EEDATA,active_gas			; Read start gas (1-5)
-	decf	active_gas,W				; Gas 0-4
-	mullw	d'4'
-	movf	PRODL,W			
-	addlw	d'7'						; = address for He ratio
-	movwf	EEADR
-	call	read_eeprom					; Read He ratio
-	movff	EEDATA,hi		; And copy into hold register
-	decf	active_gas,W				; Gas 0-4
-	mullw	d'4'
-	movf	PRODL,W			
-	addlw	d'6'						; = address for O2 ratio
-	movwf	EEADR
-	call	read_eeprom					; Read O2 ratio
-	movff	EEDATA, lo		; O2 ratio
-
+    ; Show Diluent
+    call    get_first_diluent           ; Read first diluent into lo(O2) and hi(He)
 	WIN_LEFT	.0
 	WIN_TOP		.110
-
 	STRCPY  TXT_DIL4
 	output_8				; O2 Ratio
 	STRCAT  "/"
@@ -4058,8 +4042,6 @@ PLED_simdata_screen3_loop:
 
 	bcf		leftbind
 	return				; Return (CC Mode)
-
-
 
 adjust_depth_with_salinity:			; computes salinity setting into lo:hi [mbar]
 

@@ -1,5 +1,10 @@
+New in 2.57:
+BETA Version - Do NOT use for diving!
+
 New in 2.56:
 BETA Version - Do NOT use for diving!
+BUGFIX: Gas volumes when many tanks and stops
+BUGFIX: show first diluent in simulator result screen (Instead of first gas)
 
 New in 2.55:
 BETA Version - Do NOT use for diving!

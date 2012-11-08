@@ -286,8 +286,8 @@ set_leds_divemode:
 	return					; Yes, return
 
 warn_gf1:
-	movlw		d'2'			; Type of Alarm
-	movwf		AlarmType		; Copy to Alarm Register
+	movlw		d'2'			; Type of alarm (Deco Stop missed/GF violated)
+	movwf		AlarmType		; Copy to alarm Register
 	bsf			event_occured	; Set Event Flag
 	return
 
@@ -732,7 +732,7 @@ check_extended6:
 
 	clrf	EventByte			; reset EventByte
 
-	movf	AlarmType,W			; Type of Alarm Bit 0-3
+	movf	AlarmType,W			; Type of alarm Bit 0-3
 	addwf	EventByte,F			; Copy to EventByte Bit 0-3
 	clrf	AlarmType			; Reset AlarmType
 	
@@ -1052,8 +1052,8 @@ check_ppO2_check:
 
 check_ppO2_bail2:
 	bsf			ppO2_show_value		; set flag if required
-	movlw		d'5'				; Type of Alarm
-	movwf		AlarmType			; Copy to Alarm Register
+	movlw		d'5'				; Type of alarm (ppO High Warning)
+	movwf		AlarmType			; Copy to alarm Register
 	bsf			event_occured		; Set Event Flag
 
 check_ppO2_0:
@@ -1068,8 +1068,8 @@ check_ppO2_0:
 	bra			check_ppO2_1		; Not too low
 
 	bsf			ppO2_show_value		; show ppO2 if below threshold!
-	movlw		d'4'				; Type of Alarm
-	movwf		AlarmType			; Copy to Alarm Register
+	movlw		d'4'				; Type of alarm (ppO Low Warning)
+	movwf		AlarmType			; Copy to alarm Register
 	bsf			event_occured		; Set Event Flag
 
 check_ppO2_1:
@@ -1842,8 +1842,8 @@ set_powersafe:
 	return
 
 set_powersafe1:
-	movlw	d'7'					; Type of Alarm (Battery Low)
-	movwf	AlarmType				; Copy to Alarm Register
+	movlw	d'7'					; Type of alarm (Battery Low)
+	movwf	AlarmType				; Copy to alarm Register
 	bsf		event_occured			; Set Event Flag
 	bsf		low_battery_state		; set flag for battery warning
 	return							; return

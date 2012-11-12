@@ -584,6 +584,8 @@ divemenu_set_xgas2_exit:
 	movff	EEDATA, char_I_N2_ratio		; = N2!
 	bsf		manual_gas_changed			; set event flag
 	bsf		event_occured				; set global event flag
+    clrf    WREG
+    movff   WREG,char_O_deco_status     ; Restart decoplan computation mH
     bsf		is_bailout					;=1: CC mode, but bailout active!		
 	clrf	lo							; clear Setpoint, PLED_const_ppO2_value now displayes "Bail"
 	movff	lo,char_I_const_ppO2
@@ -698,6 +700,8 @@ divemenu_set_gas1a:
 	bcf		display_set_setpoint		; Clear Display Flag
 	bsf		stored_gas_changed			; set event flag
 	bsf		event_occured				; set global event flag
+    clrf    WREG
+    movff   WREG,char_O_deco_status     ; Restart decoplan computation mH
 	bra		timeout_divemenu2			; quit menu!
 
 divemenu_set_gas2a:
@@ -736,6 +740,8 @@ divemenu_set_gas2b:
 	movff	EEDATA, char_I_N2_ratio		; = N2!
 	bsf		stored_gas_changed			; set event flag
 	bsf		event_occured				; set global event flag
+    clrf    WREG
+    movff   WREG,char_O_deco_status     ; Restart decoplan computation mH
 
     movff   menupos,char_I_current_gas  ; Inform deco code too.
 	bra		timeout_divemenu2			; quit menu!

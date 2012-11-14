@@ -604,6 +604,7 @@ calc_deko_divemode4:
     return                              ; Return is status <> 0
 
     ; Check if deco stops are necessary ?
+    bcf     decoplan_invalid            ; The decoplan is valid
 	movff	char_O_first_deco_depth,wait_temp	; copy ceiling to temp register
 	tstfsz	wait_temp							; Ceiling<0m?
 	bra		calc_deko_divemode3					; Yes!
@@ -1997,7 +1998,8 @@ diveloop_boot:
 	clrf	average_depth_hold_total+3	; Clear Non-Resettable Average
 	bcf		depth_greater_100m			; clear flag
 ;	setf	last_diluent				; to be displayed after first calculation (range: 0 to 100 [%])
-	bcf		dekostop_active	
+	bcf		dekostop_active
+    bcf     decoplan_invalid
 	bcf		is_bailout					;=1: CC mode, but bailout active!		
 	bcf		better_gas_available        ;=1: A better gas is available and a gas change is advised in divemode
     bcf     tts_extra_time              ;=1: Compute TTS if extra time spent at current depth

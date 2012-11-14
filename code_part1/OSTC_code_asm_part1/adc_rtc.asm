@@ -91,9 +91,8 @@ get_battery_voltage3:
 
 get_battery_voltage4:
 	; check if the battery control memory needs to be initialised!
-	bcf		initialize_battery1		; clear check-flags
-	bcf		initialize_battery2
-
+	bcf		initialize_battery1		; clear check-flag
+	
 	read_int_eeprom d'40'			; get lowest battery voltage seen in mV
 	movff	EEDATA,sub_b+0
 	read_int_eeprom d'41'
@@ -113,12 +112,9 @@ get_battery_voltage4:
 	movwf	sub_a+1
 	call	sub16					;  sub_c = sub_a - sub_b
 	btfss	neg_flag				; neg_flag=1 if eeprom40:41 < 4500
-	bsf		initialize_battery2		; battery need to be initialised
+	bsf		initialize_battery1		; battery need to be initialised
 	
 	btfss	initialize_battery1		; battery need to be initialised?
-	bra		get_battery_no_init		; No, we have already valid values, just check for new extremas
-
-	btfss	initialize_battery2		; battery need to be initialised?
 	bra		get_battery_no_init		; No, we have already valid values, just check for new extremas
 
 get_battery_voltage_reset:	

@@ -530,7 +530,7 @@ ASSERT_BANK1    MACRO   tag
 #DEFINE	ignore_digit4			flag11,3	;=1: Ignores digits 4-5 in valconv
 #DEFINE	charge_done				flag11,4	;=1: Complete charge cycle done
 #DEFINE	initialize_battery1		flag11,5	;=1: Battery memory need to be initialised
-#DEFINE	initialize_battery2		flag11,6	;=1: Battery memory need to be initialised
+#DEFINE	decoplan_invalid    	flag11,6	;=1: Decoplan still invalid (After a gas change)
 #DEFINE	charge_started			flag11,7	;=1: Charger started in CC mode
 
 #DEFINE	setpoint_changed		flag12,0	;=1: Setpoint was changed in divemode, store in profile

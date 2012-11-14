@@ -473,6 +473,8 @@ PLED_display_deko:
 	WIN_INVERT	.0                      ; Init new Wordprocessor
 	bcf     leftbind
 	PLED_color_code		warn_ceiling    ; Color-code Output
+    btfsc   decoplan_invalid            ; The decoplan needs to updated...
+    call    PLED_grey                   ; .. so set the color to grey
 	lfsr	FSR2,letter
 	movff	char_O_first_deco_depth,lo  ; Ceiling in m
 	output_99
@@ -490,11 +492,14 @@ PLED_display_deko:
 	WIN_INVERT	.0					    ; Init new Wordprocessor
 
 	call	PLED_standard_color
+    btfsc   decoplan_invalid            ; The decoplan needs to updated...
+    call    PLED_grey                   ; .. so set the color to grey
 	lfsr	FSR2,letter
 	movff	int_O_ascenttime+0,lo       ; TTS
 	movff	int_O_ascenttime+1,hi       ; on 16bits
 	output_16
 	STRCAT_PRINT    "'"
+	call	PLED_standard_color
 
 PLED_display_deko1:
 	rcall	PLED_display_gf				; Show GF (If GF > CF08)
@@ -1344,10 +1349,13 @@ PLED_grey_inactive_gas1:
 PLED_white_gas:
 	GETCUSTOM8	d'35'		            ;movlw	color_white	
 	goto	PLED_set_color	            ; grey out inactive gases!
+    ; return
 
 PLED_grey_gas:
+PLED_grey:
 	GETCUSTOM8	d'64'					;movlw	color_grey
 	goto	PLED_set_color	            ; grey out inactive gases!
+    ; return
 
 ;-----------------------------------------------------------------------------
 ; Display Pre-Dive Screen

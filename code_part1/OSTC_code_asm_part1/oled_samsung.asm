@@ -227,7 +227,7 @@ AA_DATA_WRITE macro data
 ; Trash  : NONE
 ;
 AA_DATA_WRITE_PROD	macro
-;       rcall   PLED_DataWrite_PROD	; slow but saves a lot of bytes in flash
+;      rcall   PLED_DataWrite_PROD	; slow but saves a lot of bytes in flash
 	; /* Fast writing
 		bsf		oled_rs				    ; Data mode
 		movff	PRODH,PORTD			    ; NOTE: OLED is BIGENDIAN!

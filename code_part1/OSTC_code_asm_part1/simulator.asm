@@ -334,6 +334,11 @@ simulator_show_decoplan5_1:
 ; OSTC Simulator: compute a new runtime
 ;
 simulator_calc_deco:
+    btfsc	gauge_mode                  ; In Gauge mode?
+    bra     menu_simulator              ; Yes, igonore decoplaner
+	btfsc   FLAG_apnoe_mode             ; In Apnoe mode?
+    bra     menu_simulator              ; Yes, igonore decoplaner
+
 	call	simulator_save_tissue_data  ; Stores 32 floats "pre_tissue" into bank3
 
     movff   char_I_dive_interval,WREG   ; Any interval ?

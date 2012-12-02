@@ -376,7 +376,7 @@ restart_5_test_pSCR_mode:
 	return							    ; start in Surfacemode
 
 restart_load_gf:
-    btfss   use_aGF
+    btfsc   use_aGF
     bra     restart_load_gf2            ; Use aGf
     ; Use normal GF
 	; Load GF values into RAM

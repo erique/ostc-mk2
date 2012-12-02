@@ -352,10 +352,7 @@ restart_4_test_gf_mode:
 	movlw	d'1'
 	movff	WREG,char_I_deco_model      ; Set Flagbyte for GF method
 ; Load GF values into RAM
-	GETCUSTOM8	d'32'			        ; GF low
-	movff   EEDATA,char_I_GF_Low_percentage
-	GETCUSTOM8	d'33'			        ; GF high
-	movff   EEDATA,char_I_GF_High_percentage
+    rcall   restart_load_gf
 	return							    ; start in Surfacemode
 restart_5_test_gfO2_mode:
 	movlw	d'5'					    ; GF CC mode
@@ -365,10 +362,7 @@ restart_5_test_gfO2_mode:
 	movlw	d'1'
 	movff	WREG,char_I_deco_model	    ; Set Flagbyte for GF method
 	; Load GF values into RAM
-	GETCUSTOM8	d'32'                   ; GF low
-	movff		EEDATA,char_I_GF_Low_percentage
-	GETCUSTOM8	d'33'                   ; GF high
-	movff		EEDATA,char_I_GF_High_percentage
+    rcall   restart_load_gf
 	return							    ; start in Surfacemode
 restart_5_test_pSCR_mode:
 	movlw	d'6'					    ; pSCR-GF
@@ -378,11 +372,27 @@ restart_5_test_pSCR_mode:
 	movlw	d'1'
 	movff	WREG,char_I_deco_model	    ; Set Flagbyte for GF method
 	; Load GF values into RAM
-	GETCUSTOM8	d'32'                   ; GF low
-	movff		EEDATA,char_I_GF_Low_percentage
-	GETCUSTOM8	d'33'                   ; GF high
-	movff		EEDATA,char_I_GF_High_percentage
+    rcall   restart_load_gf
 	return							    ; start in Surfacemode
+
+restart_load_gf:
+    btfss   use_aGF
+    bra     restart_load_gf2            ; Use aGf
+    ; Use normal GF
+	; Load GF values into RAM
+	GETCUSTOM8	d'32'                   ; GF low
+	movff	EEDATA,char_I_GF_Low_percentage
+	GETCUSTOM8	d'33'                   ; GF high
+	movff	EEDATA,char_I_GF_High_percentage
+	return                              ; Done.
+restart_load_gf2:                       ; Use aGf
+	; Load GF values into RAM
+	GETCUSTOM8	d'67'                   ; aGF low
+	movff	EEDATA,char_I_GF_Low_percentage
+	GETCUSTOM8	d'68'                   ; aGF high
+	movff	EEDATA,char_I_GF_High_percentage
+	return                              ; Done.
+
 
 ;=============================================================================
 

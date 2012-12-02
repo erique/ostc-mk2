@@ -151,7 +151,7 @@ cf_default_table0:
 cf_default_table1:
     ;                          DEFAULT   MIN     MAX
 	CF_DEFAULT    CF_PERCENT,   d'30',  d'5',  	d'90'   ; CF32 GF_low_default			30%
-	CF_DEFAULT    CF_PERCENT,   d'90', 	d'30',  d'95'   ; CF33 GF_high_default			90%
+	CF_DEFAULT    CF_PERCENT,   d'85', 	d'30',  d'95'   ; CF33 GF_high_default			85%
 	CF_DEFAULT    CF_COLOR,     d'199', 0,      0 		; CF34 color_battery_surface	Color Battery sign: Deep blue
 	CF_DEFAULT    CF_COLOR,     d'255', 0,      0 		; CF35 color_standard1			Color Standard: White
 	CF_DEFAULT    CF_COLOR,     d'62',  0,      0 		; CF36 color_divemask			Color Divemask: Light green
@@ -194,10 +194,10 @@ cf_default_table2:
 	CF_DEFAULT    CF_COLOR,     d'74',  0,      0 		; CF64 color_inactive	Color inactive: grey
 	CF_DEFAULT    CF_BOOL,     	0,   	0,      0 		; CF65 Show safety stop
 	CF_DEFAULT    CF_BOOL,      0,   	0,      0 		; CF66 Show GF in NDL (If GF > CF08)
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF67 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF68 unused
+	CF_DEFAULT    CF_PERCENT,   d'30',  d'5',  	d'90'   ; CF67 aGF_low_default			30%
+	CF_DEFAULT    CF_PERCENT,   d'90', 	d'30',  d'95'   ; CF68 aGF_high_default			90%
 
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF69 unused
+	CF_DEFAULT    CF_BOOL,     	0,   	0,      0 		; CF69 Allow GF change (Between GF and aGF)
 	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF70 unused
 	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF71 unused
 	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF72 unused

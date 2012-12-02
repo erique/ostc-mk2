@@ -460,6 +460,7 @@ ASSERT_BANK1    MACRO   tag
 #DEFINE	pres_changed		flag3,7	; pressure changed
 
 #DEFINE	set_year			flag4,0	; Menu Settime
+#DEFINE	use_aGF 			flag4,0	; =1: Use alternative GF in divemode
 #DEFINE	set_day				flag4,1	; Menu Settime
 #DEFINE	set_month			flag4,2	; Menu Settime
 #DEFINE	store_sample		flag4,3	;=1 after any CF20 seconds in divemode

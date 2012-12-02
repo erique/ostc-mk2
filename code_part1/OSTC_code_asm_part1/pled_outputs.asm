@@ -890,6 +890,50 @@ PLED_interval:
 	STRCAT_PRINT " "
 	return
 
+PLED_show_gf_customview:
+	WIN_LEFT	.93
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0					; Init new Wordprocessor
+    call    PLED_divemask_color     ; Set Color for Divemode mask
+    DISPLAYTEXTH .268               ;"Gradient Factors"
+
+   	GETCUSTOM8	d'64'               ; Set to grey
+	call	PLED_set_color
+    btfss   use_aGF
+    call    PLED_standard_color
+
+	WIN_TOP		.192
+    STRCPY  TXT_GF3             ; "GF:"
+    GETCUSTOM8  d'32'            ; GF_lo
+    movwf   lo
+	bsf		leftbind
+	output_8
+	STRCAT  "/"
+    GETCUSTOM8  d'33'            ; GF_hi
+    movwf   lo
+    output_8
+    STRCAT_PRINT  ""
+
+   	GETCUSTOM8	d'64'               ; Set to grey
+	call	PLED_set_color
+    btfsc   use_aGF
+    call    PLED_standard_color
+
+	WIN_TOP		.216
+    STRCPY  TXT_aGF4             ; "aGF:"
+    GETCUSTOM8  d'67'            ; aGF_lo
+    movwf   lo
+    bsf		leftbind
+	output_8
+	STRCAT  "/"
+    GETCUSTOM8  d'68'            ; aGF_hi
+    movwf   lo
+	output_8
+    STRCAT_PRINT  ""
+    bcf		leftbind
+
+    call    PLED_standard_color
+    return
 
 PLED_show_cf11_cf12_cf29:; Display saturations/desaturation multiplier and last deco in the customview field
 	WIN_TOP		.25

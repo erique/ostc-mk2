@@ -1,5 +1,10 @@
 New in 2.57:
 BETA Version - Do NOT use for diving!
+CHANGE: GF_hi default now 85% (CF33)
+NEW: aGF: Alternative GF (CF67 and CF68). Can be switched underwater if CF69=1
+NEW: CF67: aGF_lo [%]
+NEW: CF68: aGF_hi [%]
+NEW: CF69: Allow GF change (underwater)
 
 New in 2.56:
 BETA Version - Do NOT use for diving!

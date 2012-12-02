@@ -47,12 +47,21 @@ customview_menu_entry3:
 	bra		customview_menu3_@5         ; Show nothing
 	dcfsnz	WREG,F
 	bra		customview_menu3_cave_bailout; Show reset option
+	dcfsnz	WREG,F
+	bra		customview_menu3_pSCR_ppO2    ; Show nothing
+	dcfsnz	WREG,F
+	bra		customview_menu3_show_change_gf; Show toggle option
+
 	return
 
 customview_menu3_cave_bailout:
 customview_menu3_stopwatch:
 	DISPLAYTEXT	.33                     ; ResetAvr
 	return
+
+customview_menu3_show_change_gf:
+    DISPLAYTEXTH    .269                ; ToggleGF
+    return
 
 customview_menu3_marker:
 	DISPLAYTEXT	.30                     ; Set Marker
@@ -64,6 +73,7 @@ customview_menu3_average:
 customview_menu3_graphs:
 customview_menu3_ead_end:
 customview_menu3_@5:
+customview_menu3_pSCR_ppO2:
 	return
 
 ;=============================================================================
@@ -91,6 +101,8 @@ customview_second:
 	bra		customview_1sec_cave_bailout; Show Cave conso prediction.
 	dcfsnz	WREG,F
 	bra		customview_1sec_pSCR_ppO2	; Show/Update pSCR ppO2
+	dcfsnz	WREG,F
+	bra		customview_1sec_show_change_gf; Show and/or change GF values
 	; Menupos3=0, do nothing
 	return
 
@@ -109,6 +121,7 @@ customview_1sec_stopwatch_gauge:
 	goto	PLED_stopwatch_show_gauge  	; Update figures + Description
 
 customview_1sec_marker:                 ; Do nothing extra
+customview_1sec_show_change_gf:         ; Do nothing extra
 	bsf		menu3_active                ; Set Flag
 customview_1sec_clock:                  ; Do nothing extra
 customview_1sec_lead_tiss:              ; Do nothing extra
@@ -163,6 +176,8 @@ customview_minute:
 	bra		customview_minute_cave_bailout; Show Cave consomation prediction.
 	dcfsnz	WREG,F
 	bra		customview_minute_pSCR_ppO2; Show pSCR ppO2 level
+	dcfsnz	WREG,F
+	bra		customview_minute_show_change_gf; Show and/or change GF values
 
 	; Menupos3=0, do nothing
 	return
@@ -173,6 +188,7 @@ customview_minute_clock:
 customview_minute_lead_tiss:
 	goto	PLED_show_leading_tissue_2  ; Update the leading tissue
 
+customview_minute_show_change_gf:       ; Do nothing extra
 customview_minute_cave_bailout:         ; Do nothing extra
 customview_minute_@5:                   ; Do nothing extra
 customview_minute_ead_end:              ; Do nothing extra
@@ -195,7 +211,7 @@ customview_toggle2:
 	btfsc	FLAG_apnoe_mode					; In Apnoe mode?
 	bra		customview_toggle_exit			; Yes, ignore custom view in divemode completely
 
-	movlw	d'10'							; Max number
+	movlw	d'11'							; Max number
 	cpfsgt	menupos3			            ; Max reached?
 	bra		customview_mask		            ; No, show
 	clrf	menupos3			            ; Reset to zero (Zero=no custom view)
@@ -225,6 +241,8 @@ customview_mask:
 	bra		customview_init_cave_bailout    ; 9: Show Cave consomation prediction.
 	dcfsnz	WREG,F
 	bra		customview_init_pSCR_ppo2	    ; 10: Show ppO2 for pSCR users
+    dcfsnz	WREG,F
+	bra		customview_init_show_change_gf  ; 11: Show and/or change GF values
 
 customview_init_nocustomview:
 	bra		customview_toggle_exit	
@@ -336,9 +354,28 @@ customview_init_pSCR_ppo2:
 	decfsz		WREG,F					; WREG=1?	
 	bra			customview_toggle		; No, use next Customview
 
+	btfsc		no_deco_customviews		; no-deco-mode-flag = 1
+	bra			customview_toggle		; Yes, use next Customview!
+
     call        PLED_show_pSCR_ppO2		; Yes, compute and show value
 	
 	bra         customview_toggle_exit
+
+customview_init_show_change_gf:
+ 	GETCUSTOM8	d'69'					; Allow GF change?
+	decfsz		WREG,F					; WREG=1?
+	bra			customview_toggle		; No, use next Customview
+
+	btfsc		no_deco_customviews		; no-deco-mode-flag = 1
+	bra			customview_toggle		; Yes, use next Customview!
+
+	movff       char_I_deco_model,lo
+	decfsz      lo,F                    ; jump over next line if char_I_deco_model == 1
+    bra         customview_toggle_exit
+
+	bsf			menu3_active            ; Set Flag
+    call        PLED_show_gf_customview ; Show info
+    bra         customview_toggle_exit
 
 customview_toggle_exit:
 	bcf		toggle_customview			; Clear flag

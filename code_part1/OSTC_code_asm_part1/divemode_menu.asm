@@ -217,9 +217,35 @@ divemode_menu3:
 	bra		divemode_menu3_nothing      ; Future TTS...
 	dcfsnz	WREG,F
 	bra		toggle_stopwatch            ; Cave bailout prediction.
+	dcfsnz	WREG,F
+	bra		divemode_menu3_nothing      ; pSCR info
+	dcfsnz	WREG,F
+	bra		toggle_gradient_factors     ; Toggle gradient factors
 
 divemode_menu3_nothing:
 	bra		timeout_divemenu2			; Quit divemode menu
+
+toggle_gradient_factors:
+    btg     use_aGF                     ; Toggle GF selector bit
+    bsf     decoplan_invalid            ; The decoplan needs to updated
+    clrf    WREG
+    movff   WREG,char_O_deco_status     ; Restart decoplan computation mH
+    btfss   use_aGF
+    bra     toggle_gradient_factors2    ; Use aGf
+    ; Use normal GF
+	; Load GF values into RAM
+	GETCUSTOM8	d'32'                   ; GF low
+	movff	EEDATA,char_I_GF_Low_percentage
+	GETCUSTOM8	d'33'                   ; GF high
+	movff	EEDATA,char_I_GF_High_percentage
+	bra		timeout_divemenu2			; quit menu!
+toggle_gradient_factors2:               ; Use aGf
+	; Load GF values into RAM
+	GETCUSTOM8	d'67'                   ; aGF low
+	movff	EEDATA,char_I_GF_Low_percentage
+	GETCUSTOM8	d'68'                   ; aGF high
+	movff	EEDATA,char_I_GF_High_percentage
+	bra     timeout_divemenu2			; quit menu!
 
 set_marker:
 	movlw	d'6'                        ; Type of Alarm  (Manual Marker)

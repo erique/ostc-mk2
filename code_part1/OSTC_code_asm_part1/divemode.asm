@@ -1980,6 +1980,7 @@ diveloop_boot:
 	cpfsgt	EEDATA
 	call	PLED_brightness_full
 
+    bcf     use_aGF
 	bcf		timeout_display
 	bcf		menu3_active
 	clrf	divesecs

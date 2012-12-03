@@ -115,6 +115,8 @@
 #DEFINE	TXT_TX2				 "x"						 ; "x"
 #DEFINE	TXT_NX1				 "N"						 ; "N"
 #DEFINE	TXT_NX2				 "x"						 ; "x"
+#DEFINE TXT_aGF4             "aGF:"                      ; "aGF:"
+
 #ENDIF                                                                   
 ;=============================================================================
 ;   macro     X     Y        "Italiano   "               ; English original
@@ -326,9 +328,9 @@
     TCODE    .40,   .35,     "Color# inattivo"           ;193 Color# inactive
     TCODE    .40,   .35,     "Usa tappa sicur"           ;194 Use safety stop
     TCODE    .40,   .35,     "Show GF in NDL "           ;195 Show GF in NDL	(If GF > CF08)
-    TCODE    .40,   .35,     "inutilizzato   "           ;196 unused
-    TCODE    .40,   .35,     "inutilizzato   "           ;197 unused
-    TCODE    .40,   .35,     "inutilizzato   "           ;198 unused
+    TCODE    .40,   .35,     "Alt. GF Low [%]"           ;196 Alt. GF Low [%]
+    TCODE    .40,   .35,     "Alt. GF High[%]"           ;197 Alt. GF High[%]
+    TCODE    .40,   .35,     "Allow GF change"           ;198 Allow GF change
     TCODE    .40,   .35,     "inutilizzato   "           ;199 unused
     TCODE    .40,   .35,     "inutilizzato   "           ;200 unused
     TCODE    .40,   .35,     "inutilizzato   "           ;201 unused
@@ -404,8 +406,8 @@
 
     TCODE    .0,    .0,      "Info pSCR"             	 ;266 pSCR Info (Must be 9Chars!)
     TCODE    .1,    .216,    "Max."                      ;267 Max.
-    TCODE    .0,    .0,      ""     	                 ;268 unused
-    TCODE    .0,    .0,      ""		                 ;269 unused
+    TCODE    .93,   .170,    "GF Values"                 ;268 GF Values
+    TCODE    .100,  .50,     "ToggleGF"               	 ;269 ToggleGF (In Divemode Menu)
     TCODE    .0,    .0,      ""		                 ;270 unused
 
 ; New CFs Warning

@@ -364,8 +364,9 @@ reset_all_cf:
 	movlw	d'1'
 	movwf	EEDATA
 	write_int_eeprom	d'33'		; reset start gas
-	clrf	EEDATA
-	write_int_eeprom	d'34'		; reset deco model to ZH-L16
+	movlw	d'4'                    ; Default is L16-GF OC
+	movwf	EEDATA
+	write_int_eeprom	d'34'		; reset deco model
 	clrf	EEDATA
 	write_int_eeprom	d'35'		; unused in Mk.2
 

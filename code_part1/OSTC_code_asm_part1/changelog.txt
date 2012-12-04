@@ -5,6 +5,7 @@ NEW: aGF: Alternative GF (CF67 and CF68). Can be switched underwater if CF69=1
 NEW: CF67: aGF_lo [%]
 NEW: CF68: aGF_hi [%]
 NEW: CF69: Allow GF change (underwater)
+CHANGE: Deco model default now is L16-GF OC (OC, GF-Deco)
 
 New in 2.56:
 BETA Version - Do NOT use for diving!

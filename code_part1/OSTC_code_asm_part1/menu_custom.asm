@@ -844,7 +844,8 @@ adjust_cfn_value3:
 ;       they are all ok.
 
 check_customfunctions:
-	movlw	max_custom_number+1			; Defined in definitions.asm
+;	movlw	max_custom_number+1			; Defined in definitions.asm
+    movlw   .63                         ; mH: CF checker does currently not work for Bank2
 	cpfseq	cf_checker_counter			; All tested?
 	bra		check_customfunctions1		; No, continue
 	clrf	cf_checker_counter			; clear counter

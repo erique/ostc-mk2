@@ -279,6 +279,15 @@ customview_init_marker:					; Init Marker
     call        PLED_standard_color
 	DISPLAYTEXT d'151'				    ; Set Marker?
 	bsf			menu3_active            ; Set Flag
+
+    btfss       event_occured           ; Is an event active?
+    bra         customview_toggle_exit  ; No
+
+    movlw       d'6'                    ; Type of Alarm  (Manual Marker)
+	cpfseq      AlarmType               ; Marker recently set?
+    bra         customview_toggle_exit  ; No
+
+    call        PLED_marker_set         ; Show some feedback
 	bra		    customview_toggle_exit	
 
 customview_init_clock:					; Init Clock

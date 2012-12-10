@@ -251,7 +251,13 @@ set_marker:
 	movlw	d'6'                        ; Type of Alarm  (Manual Marker)
 	movwf	AlarmType                   ; Copy to Alarm Register
 	bsf		event_occured               ; Set Event Flag
-	bra		timeout_divemenu2			; quit menu!
+
+    ; save snapshot of depth and time
+    SAFE_2BYTE_COPY rel_pressure,marker_depth
+    SAFE_2BYTE_COPY divemins,marker_time
+    movff   divesecs,marker_time+2
+
+    bra		timeout_divemenu2			; quit menu!
 
 toggle_stopwatch:
 	bsf		reset_average_depth			; Average Depth will be resetted in divemode.asm
@@ -808,7 +814,7 @@ timeout_divemenu2:					; quit divemode menu
 	btfss	dekostop_active
 	call	PLED_display_ndl_mask	;  Clear deco data, display nostop time
 
-    btfss   decoplan_invalid        ; The decoplan needs to updated
+    btfsc   decoplan_invalid        ; The decoplan needs to updated
     bra     timeout_divemenu2a      ; Yes, skip update
 
 	btfsc	dekostop_active

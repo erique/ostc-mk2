@@ -3805,6 +3805,38 @@ PLED_show_leading_tissue2:
 	bcf		leftbind
 	return
 
+PLED_marker_set:
+	WIN_LEFT	.105
+    WIN_TOP		.170
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0					; Init new Wordprocessor
+    call    PLED_divemask_color     ; Set Color for Divemode mask
+    SAFE_2BYTE_COPY marker_depth, lo
+	call	adjust_depth_with_salinity			; computes salinity setting into lo:hi [mbar]
+    lfsr	FSR2,letter
+   	bsf		leftbind
+	bsf		ignore_digit5		; do not display 1cm depth
+	output_16dp	d'3'
+    PUTC    TXT_METER_C
+    bcf		show_last3
+	call	word_processor
+
+	WIN_LEFT	.105
+    WIN_TOP		.192
+	WIN_INVERT	.0					; Init new Wordprocessor
+	movff	marker_time+0,lo
+	movff	marker_time+1,hi
+	bsf		leftbind
+	lfsr	FSR2,letter
+	output_16_3	; displays only last three figures from a 16Bit value (0-999)
+    PUTC    ':'
+	movff	marker_time+2,lo
+	output_99x
+	call	word_processor
+	bcf		leftbind
+	call	PLED_standard_color
+    return
+
 PLED_topline_box_clear:			; Writes an empty box
 	movlw	.0
 	bra		PLED_topline_box2

@@ -1561,8 +1561,9 @@ end_dive4:
 	GETCUSTOM8	d'29'                       ; Last decostop [m]
 	call	write_external_eeprom			; write WREG into external memory
 
-	clrf	WREG
-	call	write_external_eeprom			; Spare2
+	movff   gaslist_active,WREG             ; "Gas active" flag register
+	call	write_external_eeprom			; write WREG into external memory
+
 	clrf	WREG
 	call	write_external_eeprom			; Spare1
 

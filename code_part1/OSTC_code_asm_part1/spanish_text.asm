@@ -330,10 +330,10 @@
     TCODE    .40,   .35,     "Alt. GF Low [%]"           ;196 Alt. GF Low [%]
     TCODE    .40,   .35,     "Alt. GF High[%]"           ;197 Alt. GF High[%]
     TCODE    .40,   .35,     "Allow GF change"           ;198 Allow GF change
-    TCODE    .40,   .35,     "unused         "           ;199 unused
-    TCODE    .40,   .35,     "unused         "           ;200 unused
-    TCODE    .40,   .35,     "unused         "           ;201 unused
-    TCODE    .40,   .35,     "unused         "           ;202 unused
+    TCODE    .40,   .35,     "S.StopLength[s]"           ;199 S.StopLength[s] (CF70: Safety Stop Duration [s])
+    TCODE    .40,   .35,     "S.StopStart [m]"           ;200 S.StopStart [m] (CF71: Safety Stop Start Depth [m])
+    TCODE    .40,   .35,     "S.StopEnd   [m]"           ;201 S.StopEnd   [m] (CF72: Safety Stop End Depth [m])
+    TCODE    .40,   .35,     "S.StopReset [m]"           ;202 S.StopReset [m] (CF73: Safety Stop Reset Depth [m])
     TCODE    .40,   .35,     "unused         "           ;203 unused
     TCODE    .40,   .35,     "unused         "           ;204 unused
     TCODE    .40,   .35,     "unused         "           ;205 unused

@@ -1,3 +1,12 @@
+New in 2.58:
+BETA Version - Do NOT use for diving!
+NEW: Confirmation when marker is set
+BUGFIX: Decoplan update after GF change
+NEW: CF70: Safety Stop Duration [s]
+NEW: CF71: Safety Stop Start Depth [m]
+NEW: CF72: Safety Stop End Depth [m]
+NEW: CF73: Safety Stop Reset Depth [m]
+
 New in 2.57:
 BETA Version - Do NOT use for diving!
 CHANGE: GF_hi default now 85% (CF33)
@@ -24,7 +33,7 @@ CHANGE: "Max." Depth text position
 New in 2.53:
 BETA Version - Do NOT use for diving!
 NEW: 5 Gases extra for CC
-TODO: Text 61,229,110,111,230,231,232 TXT_DIL_C, TXT_DIL5 update
+TODO: Text 61,229,110,111,229,230,231,232 TXT_DIL_C, TXT_DIL5 update
 NEW: Divisor Decoplan (CF25) stores entire decoplan in logbook
 NEW: CF29 stored in divelog header (Byte 52)
 BUGFIX: Gas Setup when using "ERR" Gases (e.g. NX17)

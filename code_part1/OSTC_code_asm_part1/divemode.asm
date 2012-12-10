@@ -413,10 +413,10 @@ set_reset_safety_stop:						; Set flags for safety stop and/or reset safety stop
 	call	adjust_depth_with_salinity		; computes salinity setting into lo:hi [mbar]
 	movff	lo,sub_a+0
 	movff	hi,sub_a+1
-	movlw	LOW		safety_stop_reset
-	movwf	sub_b+0
-	movlw	HIGH	safety_stop_reset
-	movwf	sub_b+1	
+    GETCUSTOM8  .73                         ; Safety Stop Reset Depth [dm]
+    mullw   .10
+    movff   PRODL,sub_b+0
+    movff   PRODH,sub_b+1
 	call	subU16							;  sub_c = sub_a - sub_b
 	btfss	neg_flag
 	bra		reset_safety_stop				; Below 10m, reset safety stop
@@ -426,10 +426,10 @@ set_reset_safety_stop:						; Set flags for safety stop and/or reset safety stop
 	call	adjust_depth_with_salinity		; computes salinity setting into lo:hi [mbar]
 	movff	lo,sub_a+0
 	movff	hi,sub_a+1
-	movlw	LOW		safety_stop_end
-	movwf	sub_b+0
-	movlw	HIGH	safety_stop_end
-	movwf	sub_b+1	
+    GETCUSTOM8  .72                         ; Safety Stop End Depth [dm]
+    mullw   .10
+    movff   PRODL,sub_b+0
+    movff   PRODH,sub_b+1
 	call	subU16							;  sub_c = sub_a - sub_b
 	btfsc	neg_flag
 	bra		delete_safety_stop				; Above 3m, remove safety stop
@@ -439,10 +439,10 @@ set_reset_safety_stop:						; Set flags for safety stop and/or reset safety stop
 	call	adjust_depth_with_salinity		; computes salinity setting into lo:hi [mbar]
 	movff	lo,sub_a+0
 	movff	hi,sub_a+1
-	movlw	LOW		safety_stop_start
-	movwf	sub_b+0
-	movlw	HIGH	safety_stop_start
-	movwf	sub_b+1	
+    GETCUSTOM8  .71                         ; Safety Stop Start Depth [dm]
+    mullw   .10
+    movff   PRODL,sub_b+0
+    movff   PRODH,sub_b+1
 	call	subU16							;  sub_c = sub_a - sub_b
 	btfsc	neg_flag
 	bra		acivate_safety_stop				; Above 5m, activate safety stop
@@ -459,7 +459,7 @@ delete_safety_stop:
 	bra		reset_safety_stop2				; Remove saftestop from display
 
 reset_safety_stop:
-	movlw	safety_stop_length				;[s]
+    GETCUSTOM8  .70                         ; Safety Stop Duration [s]
 	movwf	safety_stop_countdown			; reset timer
 reset_safety_stop2:
 	btfss	safety_stop_active				; Safety stop shown

@@ -64,12 +64,6 @@
 #DEFINE		FT_MEDIUM		.1
 #DEFINE		FT_LARGE		.2
 
-; Safety stop parameters
-#DEFINE	safety_stop_length		.180		; [s]
-#DEFINE	safety_stop_start		.510		; [mbar]
-#DEFINE	safety_stop_end			.290		; [mbar]
-#DEFINE	safety_stop_reset		.1010		; [mbar]
-
 ; "Better Gas" behavior
 ; better_gas_window <= minimum_change_depth !
 ; minimum_change_depth >=5 !

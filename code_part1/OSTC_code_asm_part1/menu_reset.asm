@@ -198,10 +198,10 @@ cf_default_table2:
 	CF_DEFAULT    CF_PERCENT,   d'90', 	d'30',  d'95'   ; CF68 aGF_high_default			90%
 
 	CF_DEFAULT    CF_BOOL,     	0,   	0,      0 		; CF69 Allow GF change (Between GF and aGF)
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF70 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF71 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF72 unused
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF73 unused
+	CF_DEFAULT    CF_SEC,       d'180', d'10',  d'250'  ; CF70 Safety Stop Duration [s]
+	CF_DEFAULT    CF_DECI,      d'51',  d'30',  d'65'   ; CF71 Safety Stop Start Depth [dm]
+	CF_DEFAULT    CF_DECI,      d'29',  d'25',  d'50'   ; CF72 Safety Stop End Depth [dm]
+	CF_DEFAULT    CF_DECI,      d'101', d'75',  d'201'  ; CF73 Safety Stop Reset Depth [dm]
 
 	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF74 unused
 	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF75 unused

@@ -798,9 +798,9 @@ timeout_divemenu2:					; quit divemode menu
 	call	PLED_clear_divemode_menu; Clear dive mode menu
 
 	btfsc	FLAG_apnoe_mode				; Ignore in Apnoe mode
-	bra		timeout_divemenu2a			; skip!
+	bra		timeout_divemenu2b			; skip!
 	btfsc	gauge_mode					; Ignore in Gauge mode
-	bra		timeout_divemenu2a			; skip!
+	bra		timeout_divemenu2b			; skip!
 
 	bcf		menubit
 	btfsc	dekostop_active
@@ -808,15 +808,19 @@ timeout_divemenu2:					; quit divemode menu
 	btfss	dekostop_active
 	call	PLED_display_ndl_mask	;  Clear deco data, display nostop time
 
+    btfss   decoplan_invalid        ; The decoplan needs to updated
+    bra     timeout_divemenu2a      ; Yes, skip update
+
 	btfsc	dekostop_active
 	call	PLED_display_deko		; Update deco display at once
 	btfss	dekostop_active
 	call	PLED_display_ndl		; Update NDL display at once
 
+timeout_divemenu2a:
 	btfsc	safety_stop_active
 	bcf		safety_stop_active		; Clear flag to rebuild the safety stop
 
-timeout_divemenu2a:
+timeout_divemenu2b:
 	bcf		menubit
 	bcf		premenu					; Yes, clear flags and menu, display dive time and mask again
 	call	PLED_active_gas_divemode; Display gas, if required

@@ -22,6 +22,7 @@
 ; 2011/02/02 : Jean-Do Gascuel: split into different files for multi-lingual support
 ; 2011/02/09 : Pierre Vidalot: French translation.
 ; 2011/08/12 : Sergei V. Rozinov: Complete translation patch
+; 2012/12/12 : Matthieu Foll: Added missing french translation (106,229,230,231)
 ;
 ; known bugs:
 ; ToDo: 
@@ -235,7 +236,7 @@
     TCODE    .85,   .125,    "Profondi."                 ;103 Gauge
     TCODE    .85,   .125,    "ZH-L16 CC"                 ;104 ZH-L16 CC
     TCODE    .0,    .0,      "Gaz Actif ? "              ;105 Active Gas?
-    TCODE    .31,   .2,      "Liste des Gaz:"            ;106 Gas Setup - Gaslist
+    TCODE    .31,   .2,      "Liste des Gaz"            ;106 Gas Setup - Gaslist
     TCODE    .20,   .95,     "Prof. +/-:"  		         ;107 Depth +/-:
     TCODE    .20,   .125,    "Changer:"	                 ;108 Change:
     TCODE    .20,   .155,    "Défaut:"                   ;109 Default:
@@ -334,10 +335,10 @@
     TCODE    .40,   .35,     "Alt. GF Low [%]"           ;196 Alt. GF Low [%]
     TCODE    .40,   .35,     "Alt. GF High[%]"           ;197 Alt. GF High[%]
     TCODE    .40,   .35,     "Allow GF change"           ;198 Allow GF change
-    TCODE    .40,   .35,     "S.StopLength[s]"           ;199 S.StopLength[s] (CF70: Safety Stop Duration [s])
-    TCODE    .40,   .35,     "S.StopStart [m]"           ;200 S.StopStart [m] (CF71: Safety Stop Start Depth [m])
-    TCODE    .40,   .35,     "S.StopEnd   [m]"           ;201 S.StopEnd   [m] (CF72: Safety Stop End Depth [m])
-    TCODE    .40,   .35,     "S.StopReset [m]"           ;202 S.StopReset [m] (CF73: Safety Stop Reset Depth [m])
+    TCODE    .40,   .35,     "Durée P.Sécu[s]"  		 ;199 S.StopLength[s] (CF70: Safety Stop Duration [ s])
+    TCODE    .40,   .35,     "Début P.Sécu[m]"  		 ;200 S.StopStart [m] (CF71: Safety Stop Start Depth [m])
+    TCODE    .40,   .35,     "Fin P.Sécu  [m]"  		 ;201 S.StopEnd   [m] (CF72: Safety Stop End Depth [m])
+    TCODE    .40,   .35,     "RaZ P.Sécu  [m]"  		 ;202 S.StopReset [m] (CF73: Safety Stop Reset Depth [m])
     TCODE    .40,   .35,     "unused         "           ;203 unused
     TCODE    .40,   .35,     "unused         "           ;204 unused
     TCODE    .40,   .35,     "unused         "           ;205 unused
@@ -365,10 +366,10 @@
     TCODE    .85,   .125,    "pSCR-GF  "                 ;226 pSCR-GF
 	TCODE    .90,   .54,     "PalierSécu"                ;227 SafetyStop
     TCODE    .0,    .0,      "Plongées totales: "        ;228 Total Dives: 
-    TCODE    .20,   .35,     "Diluent Setup"             ;229 Diluent Setup
-    TCODE    .20,   .65,     "Setpoint Setup"            ;230 Setpoint Setup
-    TCODE    .5,    .2,      "Dil. Setup - Gaslist"	 	 ;231 Dil. Setup - Gaslist
-    TCODE    .100,  .100,	 "Diluent"                   ;232 Diluent
+    TCODE    .20,   .35,     "Réglage Diluant"           ;229 Diluent Setup
+    TCODE    .20,   .65,     "Réglage SetPoint"          ;230 Setpoint Setup
+    TCODE    .5,    .2,      "Liste des Diluants"	 	 ;231 Dil. Setup - Gaslist
+    TCODE    .100,  .100,	 "Diluant"                   ;232 Diluent
     TCODE    .0,    .0,      ""		                     ;233 unused
     TCODE    .0,    .0,      ""     	                 ;234 unused
 

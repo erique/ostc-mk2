@@ -1,3 +1,7 @@
+New in 2.59:
+BETA Version - Do NOT use for diving!
+CHANGE: Set CF17 (ppo2_warning_low) low level to 0.16bar
+
 New in 2.58:
 BETA Version - Do NOT use for diving!
 NEW: Confirmation when marker is set

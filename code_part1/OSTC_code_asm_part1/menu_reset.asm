@@ -128,7 +128,7 @@ cf_default_table0:
 
 	CF_DEFAULT    CF_PERCENT,	d'10',  d'0',  	d'100'  ; CF15 cns_display_surface			10%
 	CF_DEFAULT    CF_DECI,	    d'10',  d'0',  	d'20'	; CF16 deco_distance_for_sim		1m
-	CF_DEFAULT    CF_CENTI,     d'019', d'19', 	d'021'	; ppo2_warning_low			0.19 bar
+	CF_DEFAULT    CF_CENTI,     d'019', d'16', 	d'021'	; ppo2_warning_low			0.19 bar
 	CF_DEFAULT    CF_CENTI,     d'160', d'0', 	d'160'  ; ppo2_warning_high			1.60 bar
 	CF_DEFAULT    CF_CENTI,     d'140', d'0', 	d'150'	; ppo2_display_high			1.40 bar
     
@@ -483,39 +483,42 @@ reset_gases:
 
 	movlw	d'3'					; address of first gas-1
 	movwf	EEADR
-	clrf	hi						; He part (default for all gases: 0%)
-	movlw	d'21'					; O2 part (21%)
+	clrf	hi						; He part (default for all gases and diluents: 0%)
+    movlw   .21
+    movwf   lo                      ; O2 part (default for all gases and diluents: 21%)
 	rcall	reset_gas               ; saves current value for gas #1
-	movlw	d'21'					; O2 part (21%)
 	rcall	reset_gas               ; saves default value for gas #1
-	movlw	d'21'					; O2 part (21%)
 	rcall	reset_gas               ; saves current value for gas #2
-	movlw	d'21'					; O2 part (21%)
 	rcall	reset_gas               ; saves default value for gas #2
-	movlw	d'21'					; O2 part (21%)
 	rcall	reset_gas               ; saves current value for gas #3
-	movlw	d'21'					; O2 part (21%)
 	rcall	reset_gas               ; saves default value for gas #3
-	movlw	d'21'					; O2 part (21%)
 	rcall	reset_gas               ; saves current value for gas #4
-	movlw	d'21'					; O2 part (21%)
 	rcall	reset_gas               ; saves default value for gas #4
-	movlw	d'21'					; O2 part (21%)
 	rcall	reset_gas               ; saves current value for gas #5
-	movlw	d'21'					; O2 part (21%)
 	rcall	reset_gas               ; saves default value for gas #5
-	movlw	d'21'					; O2 part (21%)
 	rcall	reset_gas               ; saves current value for gas #6
+
+	movlw	d'95'					; address of first diluent-1
+	movwf	EEADR
+	rcall	reset_gas               ; saves current value for diluent #1
+	rcall	reset_gas               ; saves current value for diluent #2
+	rcall	reset_gas               ; saves current value for diluent #3
+	rcall	reset_gas               ; saves current value for diluent #4
+	rcall	reset_gas               ; saves current value for diluent #5
+
+    movlw   .1
+    movwf   EEDATA
+    write_int_eeprom    .33         ; First Gas (1-5)
+    write_int_eeprom    .106        ; First Diluent (1-5)
 	return
 
 ; Write WREG:lo twice, w/o any type clearing, pre-incrementing EEADR
 reset_gas:
-    movwf   lo
 	incf	EEADR,F
-	movff	lo, EEDATA				; O2 Default value
+	movff	lo, EEDATA				; O2 value
 	call	write_eeprom
 	incf	EEADR,F
-	movff	hi, EEDATA				; He default value
+	movff	hi, EEDATA				; He value
 	call    write_eeprom
 	return
 

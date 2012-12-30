@@ -261,7 +261,7 @@ restart:
 restart1:
 ; Reset all CF and Gases
 	call	reset_gases
-	call	reset_all_cf
+;	call	reset_all_cf
 ; Show info screen
 	call	PLED_boot               ; PLED boot (Incl. Clear Screen!)
 	rcall	display_new_cf_installed; Show info screen

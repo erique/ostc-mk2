@@ -1,6 +1,10 @@
+New in 2.60:
+BETA Version - Do NOT use for diving!
+
 New in 2.59:
 BETA Version - Do NOT use for diving!
 CHANGE: Set CF17 (ppo2_warning_low) low level to 0.16bar
+Known Issue: CFIII Menu not checked from cf_checker routine
 
 New in 2.58:
 BETA Version - Do NOT use for diving!

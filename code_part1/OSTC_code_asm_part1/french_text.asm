@@ -331,10 +331,10 @@
 ; 32 custom function descriptors III (FIXED LENGTH = 15 chars).
     TCODE    .40,   .35,     "CouleurInactive"           ;193 Color# inactive
     TCODE    .40,   .35,     "Palier sécurité"           ;194 Use safety stop
-    TCODE    .40,   .35,     "Show GF in NDL "           ;195 Show GF in NDL	(If GF > CF08)
-    TCODE    .40,   .35,     "Alt. GF Low [%]"           ;196 Alt. GF Low [%]
-    TCODE    .40,   .35,     "Alt. GF High[%]"           ;197 Alt. GF High[%]
-    TCODE    .40,   .35,     "Allow GF change"           ;198 Allow GF change
+    TCODE    .40,   .35,     "Aff. GF Nodeco "           ;195 Show GF in NDL	(If GF > CF08)
+    TCODE    .40,   .35,     "Alt. GF Bas [%]"           ;196 Alt. GF Low [%]
+    TCODE    .40,   .35,     "Alt. GF Haut[%]"           ;197 Alt. GF High[%]
+    TCODE    .40,   .35,     "Changement GF  "           ;198 Allow GF change
     TCODE    .40,   .35,     "Durée P.Sécu[s]"  		 ;199 S.StopLength[s] (CF70: Safety Stop Duration [ s])
     TCODE    .40,   .35,     "Début P.Sécu[m]"  		 ;200 S.StopStart [m] (CF71: Safety Stop Start Depth [m])
     TCODE    .40,   .35,     "Fin P.Sécu  [m]"  		 ;201 S.StopEnd   [m] (CF72: Safety Stop End Depth [m])

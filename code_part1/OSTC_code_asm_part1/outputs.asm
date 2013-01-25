@@ -437,7 +437,7 @@ DISP_display_ndl2:
 	ostc_debug	'z'		; Sends debug-information to screen if debugmode active
 	
 	WIN_TOP		.136
-	WIN_LEFT	.119
+	WIN_LEFT	.118
 	WIN_FONT 	FT_MEDIUM
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	DISP_standard_color
@@ -2720,7 +2720,7 @@ DISP_decoplan_clear_bottom:
         movff   WREG,win_height
 
         WIN_LEFT .85                    ; Full divemenu width
-        movlw   .160-.85+1
+        movlw   .159-.85+1
         movff   WREG,win_width
 
         clrf    WREG                    ; Fill with black
@@ -3101,7 +3101,7 @@ DISP_splist_loop:
 	return						; no, return
 
 DISP_clear_divemode_menu:
-    WIN_BOX_BLACK   .0, .168, .85, .160		;top, bottom, left, right
+    WIN_BOX_BLACK   .0, .168, .85, .159		;top, bottom, left, right
 	return
 
 DISP_divemenu_cursor:
@@ -3540,7 +3540,7 @@ DISP_show_end_ead_divemode_1:
 ;
 DISP_show_@5:
 	WIN_FONT    FT_SMALL
-    WIN_LEFT    .160-.70                ; 10 chars aligned right.
+    WIN_LEFT    .159-.70                ; 10 chars aligned right.
     WIN_TOP     .170
 	call		DISP_divemask_color     ; Set Color for Divemode mask
     lfsr        FSR2,letter
@@ -3634,7 +3634,7 @@ compute_pscr_ppo2:
 ; Display pSCR ppO2
 DISP_show_pSCR_ppO2:
 	WIN_FONT    FT_SMALL
-    WIN_LEFT    .160-.63                ; 9 chars aligned right.
+    WIN_LEFT    .159-.63                ; 9 chars aligned right.
     WIN_TOP     .170
 	call		DISP_divemask_color     ; Set Color for Divemode mask
     lfsr        FSR2,letter
@@ -3685,7 +3685,7 @@ DISP_show_pSCR_ppO2:
 ;
 DISP_show_cave_bailout:
 	WIN_FONT    FT_SMALL
-    WIN_LEFT    .160-.70                ; 10 chars aligned right.
+    WIN_LEFT    .159-.70                ; 10 chars aligned right.
     WIN_TOP     .170
 	call		DISP_divemask_color     ; Set Color for Divemode mask
     lfsr        FSR2,letter

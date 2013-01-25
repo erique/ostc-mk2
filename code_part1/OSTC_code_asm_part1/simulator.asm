@@ -278,7 +278,7 @@ simulator_show_decoplan5_0:
     movlb   1
 
     ; Clear the complete stop result column:
-    WIN_BOX_BLACK   .0, .239, .85, .160		;top, bottom, left, right
+    WIN_BOX_BLACK   .0, .239, .85, .159		;top, bottom, left, right
 
 	movlw	d'10'
 	movwf	waitms_temp                 ; Row for gas list is .10+.25

@@ -293,7 +293,7 @@
     TCODE    .40,   .35,     "Divemode secs. "           ;160 Divemode secs. 
     TCODE    .40,   .35,     "Adjust fixed SP"           ;161 Adjust fixed SP
     TCODE    .40,   .35,     "Warn Ceiling   "           ;162 Warn Ceiling
-    TCODE    .40,   .35,     "Mix type icons "           ;163 Mix type icons
+    TCODE    .40,   .35,     "unused         "           ;163 unused
     TCODE    .40,   .35,     "Blink BetterGas"           ;164 Blink BetterGas	(Remainder in divemode to switch to a better decompression gas).
 	TCODE    .40,   .35,     "DepthWarn[mbar]"           ;165 DepthWarn[mbar]
     TCODE    .40,   .35,     "CNS warning [%]"           ;166 CNS warning [%]

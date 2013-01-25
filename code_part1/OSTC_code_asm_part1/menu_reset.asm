@@ -160,7 +160,7 @@ cf_default_table1:
 	CF_DEFAULT    CF_BOOL,	    d'0',   0,      0       ; CF38 show_seconds_divemode		=1 Show the seconds in Divemode
 	CF_DEFAULT    CF_BOOL,     	0,      0,      0 		; CF39 Adjust SetPoint if Diluent ppO2 > SetPoint
 	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0       ; CF40 warn_ceiling_divemode		=1 Warn ceiling violation in divemode
-	CF_DEFAULT    CF_BOOL,      d'1',   0,      0 		; CF41 Show mix type is surfmode
+	CF_DEFAULT    CF_BOOL,      d'1',   0,      0 		; CF41 unused
 
 	CF_DEFAULT    CF_BOOL,	    d'1',   0,      0       ; CF42 blink_gas_divemode 		=1 blink better gas
 	CF_DEFAULT    CF_INT15,     d'13000', 0,   d'13000' ; CF43 color_warn_depth_mbar		Warn depths

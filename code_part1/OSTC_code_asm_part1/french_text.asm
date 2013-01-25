@@ -295,7 +295,7 @@
     TCODE    .40,   .35,     "Secs.TempsPlong"           ;160 Divemode secs. 
     TCODE    .40,   .35,     "Ajuster SP fixe"           ;161 Adjust fixed SP
     TCODE    .40,   .35,     "Alarme Plafond "           ;162 Warn Ceiling
-    TCODE    .40,   .35,     "Icone Type Mél."           ;163 Mix type icons
+    TCODE    .40,   .35,     "unused         "           ;163 unused
     TCODE    .40,   .35,     "Aff.MeilleurGaz"           ;164 Blink BetterGas	(Remainder in divemode to switch to a better decompression gas).
     TCODE    .40,   .35,     "AlarmProf[mbar]"           ;165 DepthWarn[mbar]
     TCODE    .40,   .35,     "Alarme CNS  [%]"           ;166 CNS warning [%]

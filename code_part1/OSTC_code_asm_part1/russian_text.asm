@@ -294,7 +294,7 @@
     TCODE    .40,   .35,     "Время погр.сек."           ;160 Divemode secs.
     TCODE    .40,   .35,     "Поправ. фикс.SP"           ;161 Adjust fixed SP
     TCODE    .40,   .35,     "Предупреж. стоп"           ;162 Warn Ceiling
-    TCODE    .40,   .35,     "Картинки газов "           ;163 Mix type icons
+    TCODE    .40,   .35,     "unused         "           ;163 unused
     TCODE    .40,   .35,     "Напом. лучш.газ"           ;164 Blink BetterGas	(Remainder in divemode to switch to a better decompression gas).
 	TCODE    .40,   .35,     "Трев.глуб[мбар]"           ;165 DepthWarn[mbar]
     TCODE    .40,   .35,     "ЦНС предупр.[%]"           ;166 CNS warning [%]

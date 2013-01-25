@@ -1,5 +1,6 @@
 New in 2.60:
 BETA Version - Do NOT use for diving!
+CHANGE: Removed "Mix type" Icons and CF43
 
 New in 2.59:
 BETA Version - Do NOT use for diving!

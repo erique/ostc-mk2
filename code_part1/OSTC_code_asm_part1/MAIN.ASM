@@ -108,8 +108,6 @@ osct_asm	code
 #include    strings.asm         ; Basic string operations
 
 #include    altimeter.asm
-;=============================================================================
-#include    dive_icons.asm      ; Draw dive type icons in surface mode.
 
 ;=============================================================================
 ; Extracted from p3_wordprocessor includes:

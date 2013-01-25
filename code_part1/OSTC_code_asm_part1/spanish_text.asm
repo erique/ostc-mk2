@@ -290,7 +290,7 @@
     TCODE    .40,   .35,     "SegundosModoBuc"           ;160 Divemode secs. 
     TCODE    .40,   .35,     "Ajusta SP fijo "           ;161 Adjust fixed SP
     TCODE    .40,   .35,     "Aviso Techo    "           ;162 Warn Ceiling
-    TCODE    .40,   .35,     "Iconos TipoMezl"           ;163 Mix type icons
+    TCODE    .40,   .35,     "unused         "           ;163 unused
     TCODE    .40,   .35,     "Parp. Mejor Gas"           ;164 Blink BetterGas	(Remainder in divemode to switch to a better decompression gas).
     TCODE    .40,   .35,     "AvisoProf[mbar]"           ;165 DepthWarn[mbar]
     TCODE    .40,   .35,     "Aviso CNS   [%]"           ;166 CNS warning [%]

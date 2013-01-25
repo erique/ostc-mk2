@@ -865,7 +865,7 @@ DISP_clock:
 	PUTC    ':'
 	movff	secs,lo
 	output_99x
-	STRCAT_PRINT " "
+	STRCAT_PRINT ""
 	return
 
 DISP_interval:
@@ -2720,12 +2720,13 @@ DISP_decoplan_clear_bottom:
         movff   WREG,win_height
 
         WIN_LEFT .85                    ; Full divemenu width
-        movlw   .159-.85+1
+        movlw   .159-.85
         movff   WREG,win_width
 
         clrf    WREG                    ; Fill with black
         movff   WREG,win_color1
         movff   WREG,win_color2
+        movff   WREG,win_color3
         
         goto	DISP_box
 

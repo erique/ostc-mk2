@@ -236,13 +236,13 @@ menu_reset:
 	movlw	d'1'
 	movwf	menupos
 
-	call	PLED_ClearScreen
-	call	PLED_reset_menu_mask
+	call	DISP_ClearScreen
+	call	DISP_reset_menu_mask
 
 menu_reset2:
 	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
-	call	PLED_reset_menu_mask
-	call	PLED_menu_cursor
+	call	DISP_reset_menu_mask
+	call	DISP_menu_cursor
 menu_reset_loop:
 	call	check_switches_menu
 	btfsc	menubit2
@@ -281,14 +281,14 @@ do_menu_reset_exit:
 
 
 do_menu_reset_reboot:
-	call	PLED_confirmbox				; Returns WREG=0 for Cancel (Or Timeout) and WREG=1 for OK!
+	call	DISP_confirmbox				; Returns WREG=0 for Cancel (Or Timeout) and WREG=1 for OK!
 	movwf	menupos						; Used as temp
 	tstfsz	menupos
 	bra		do_menu_reset_reboot2		; Delete now!
 	bra		do_menu_reset_exit			; Cancel!
 
 do_menu_reset_reboot2:
-	call	PLED_DisplayOff					; Power-down OLED 
+	call	DISP_DisplayOff					; Power-down DISPLAY 
 	movlw	b'00000000'						; Bit6: PPL Disable
 	movwf	OSCTUNE
 	movlw	b'01111110'						; 8MHz
@@ -297,14 +297,14 @@ do_menu_reset_reboot2:
 	goto	0x00000							; restart to 0x00000
 
 do_menu_reset_logbook:
-	call	PLED_confirmbox				; Returns WREG=0 for Cancel (Or Timeout) and WREG=1 for OK!
+	call	DISP_confirmbox				; Returns WREG=0 for Cancel (Or Timeout) and WREG=1 for OK!
 	movwf	menupos						; Used as temp
 	tstfsz	menupos
 	bra		do_menu_reset_logbook2		; Delete Logbook now!
 	bra		do_menu_reset_exit			; Cancel!
 
 do_menu_reset_logbook2:
-	call	PLED_ClearScreen
+	call	DISP_ClearScreen
     setf    win_color1                  ; Make sure to display in white color.
     setf    win_color2
 	DISPLAYTEXT	.25					    ; "Reset..."
@@ -312,7 +312,7 @@ do_menu_reset_logbook2:
 	bra		do_menu_reset_exit
 
 do_menu_reset_decodata:
-	call	PLED_confirmbox				; Returns WREG=0 for Cancel (Or Timeout) and WREG=1 for OK!
+	call	DISP_confirmbox				; Returns WREG=0 for Cancel (Or Timeout) and WREG=1 for OK!
 	movwf	menupos						; Used as temp
 	tstfsz	menupos
 	bra		do_menu_reset_decodata2		; Reset Deco Data now!
@@ -320,7 +320,7 @@ do_menu_reset_decodata:
 
 do_menu_reset_decodata2:
 ; reset deco data
-	call	PLED_ClearScreen
+	call	DISP_ClearScreen
 	DISPLAYTEXT	.25					    ; "Reset..."
 
     SAFE_2BYTE_COPY amb_pressure,int_I_pres_respiration	; copy surface air pressure to deco routine
@@ -334,14 +334,14 @@ do_menu_reset_decodata2:
 	goto		restart							; done. quit to surfmode
 
 do_menu_reset_all:
-	call	PLED_confirmbox				; Returns WREG=0 for Cancel (Or Timeout) and WREG=1 for OK!
+	call	DISP_confirmbox				; Returns WREG=0 for Cancel (Or Timeout) and WREG=1 for OK!
 	movwf	menupos						; Used as temp
 	tstfsz	menupos
 	bra		do_menu_reset_all2			; Reset all now!
 	bra		do_menu_reset_exit			; Cancel!
 
 do_menu_reset_all2:
-	call	PLED_ClearScreen
+	call	DISP_ClearScreen
 	DISPLAYTEXT	.25					    ; "Reset..."
 
 reset_start:

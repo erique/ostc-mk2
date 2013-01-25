@@ -107,18 +107,18 @@ customview_second:
 	return
 
 customview_1sec_average:
-	goto	PLED_total_average_show2	; Update the figures only
+	goto	DISP_total_average_show2	; Update the figures only
 	
 customview_1sec_stopwatch:
 	btfsc	gauge_mode					; In Gauge mode?
 	bra		customview_1sec_stopwatch_gauge; Yes
 
 	bsf		menu3_active                ; Set Flag
-	goto	PLED_stopwatch_show2        ; Update figures only
+	goto	DISP_stopwatch_show2        ; Update figures only
 
 customview_1sec_stopwatch_gauge:
 	bsf		menu3_active                ; Set Flag
-	goto	PLED_stopwatch_show_gauge  	; Update figures + Description
+	goto	DISP_stopwatch_show_gauge  	; Update figures + Description
 
 customview_1sec_marker:                 ; Do nothing extra
 customview_1sec_show_change_gf:         ; Do nothing extra
@@ -135,20 +135,20 @@ customview_1sec_graphs:                 ; Do nothing extra
 
 	call	deco_calc_desaturation_time	; calculate desaturation time
 	movlb	b'00000001'						; select ram bank 1
-	goto	PLED_tissue_saturation_graph
+	goto	DISP_tissue_saturation_graph
 
 customview_1sec_ead_end:
-	goto	PLED_show_end_ead_divemode
+	goto	DISP_show_end_ead_divemode
 
 customview_1sec_@5:
-    goto    PLED_show_@5
+    goto    DISP_show_@5
 
 customview_1sec_cave_bailout:
 	bsf		menu3_active                ; Set Flag
-    goto    PLED_show_cave_bailout
+    goto    DISP_show_cave_bailout
 
 customview_1sec_pSCR_ppO2:
-	goto	PLED_show_pSCR_ppO2			; Yes, compute and show value
+	goto	DISP_show_pSCR_ppO2			; Yes, compute and show value
 	
 
 ;=============================================================================
@@ -183,10 +183,10 @@ customview_minute:
 	return
 
 customview_minute_clock:
-	goto	PLED_diveclock2             ; Update the clock
+	goto	DISP_diveclock2             ; Update the clock
 
 customview_minute_lead_tiss:
-	goto	PLED_show_leading_tissue_2  ; Update the leading tissue
+	goto	DISP_show_leading_tissue_2  ; Update the leading tissue
 
 customview_minute_show_change_gf:       ; Do nothing extra
 customview_minute_cave_bailout:         ; Do nothing extra
@@ -217,7 +217,7 @@ customview_toggle2:
 	clrf	menupos3			            ; Reset to zero (Zero=no custom view)
 
 customview_mask:	
-	call	PLED_clear_customview_divemode
+	call	DISP_clear_customview_divemode
     bcf     tts_extra_time                  ; By default, CLEAR computation of @5 request.
 
 	movff	menupos3,WREG                   ; Menupos3 holds number of customview function
@@ -248,7 +248,7 @@ customview_init_nocustomview:
 	bra		customview_toggle_exit	
 
 customview_init_average:
-	call	PLED_total_average_show		; Show Average with mask
+	call	DISP_total_average_show		; Show Average with mask
 	bra		customview_toggle_exit	
 
 customview_init_stopwatch:
@@ -259,24 +259,24 @@ customview_init_stopwatch:
 	btfsc		gauge_mode				; In Gauge mode?
 	bra			customview_init_stopwatch_gauge	; Yes
 
-	call	PLED_stopwatch_show			; Init Stopwatch display
+	call	DISP_stopwatch_show			; Init Stopwatch display
 	bsf		menu3_active                ; Set Flag
 	bra		customview_toggle_exit	
 
 customview_init_stopwatch_gauge:
-	call	PLED_stopwatch_show_gauge	; Init Stopwatch display
+	call	DISP_stopwatch_show_gauge	; Init Stopwatch display
 	bsf		menu3_active                ; Set Flag
 	bra		customview_toggle_exit	
 
 customview_init_marker:					; Init Marker
 	btfsc		gauge_mode				; In Gauge mode?
-	call		PLED_clear_divemode_menu; Yes, clear BIG stopwatch
+	call		DISP_clear_divemode_menu; Yes, clear BIG stopwatch
 
 	GETCUSTOM8	d'50'					; Show Marker? (=1 in WREG)
 	decfsz		WREG,F					; WREG=1?	
 	bra			customview_toggle		; No, use next Customview
 
-    call        PLED_standard_color
+    call        DISP_standard_color
 	DISPLAYTEXT d'151'				    ; Set Marker?
 	bsf			menu3_active            ; Set Flag
 
@@ -287,11 +287,11 @@ customview_init_marker:					; Init Marker
 	cpfseq      AlarmType               ; Marker recently set?
     bra         customview_toggle_exit  ; No
 
-    call        PLED_marker_set         ; Show some feedback
+    call        DISP_marker_set         ; Show some feedback
 	bra		    customview_toggle_exit	
 
 customview_init_clock:					; Init Clock
-	call	    PLED_diveclock
+	call	    DISP_diveclock
 	bra		    customview_toggle_exit	
 
 customview_init_lead_tissue:			; Show leading tissue
@@ -302,14 +302,14 @@ customview_init_lead_tissue:			; Show leading tissue
 	btfsc		no_deco_customviews		; no-deco-mode-flag = 1
 	bra			customview_toggle		; Yes, use next Customview!
 
-	call	    PLED_show_leading_tissue
+	call	    DISP_show_leading_tissue
 	bra		    customview_toggle_exit	
 
 customview_init_ead_end:
 	btfsc		no_deco_customviews		; no-deco-mode-flag = 1
 	bra			customview_toggle		; Yes, use next Customview!
 
-	call		PLED_show_end_ead_divemode
+	call		DISP_show_end_ead_divemode
 	bra		    customview_toggle_exit	
 
 customview_init_@5:
@@ -327,7 +327,7 @@ customview_init_@5:
     movlw       1
     movwf       apnoe_mins              ; Start compute after next cycle.
     bsf         tts_extra_time
-    call        PLED_show_@5            ; Show (wait)
+    call        DISP_show_@5            ; Show (wait)
 
 	bra		    customview_toggle_exit	
 
@@ -338,7 +338,7 @@ customview_init_cave_bailout:
  	bz          customview_toggle       ; No: jump to next Customview !
 
 	bsf			menu3_active            ; Set Flag
-    call        PLED_show_cave_bailout
+    call        DISP_show_cave_bailout
 	bra		    customview_toggle_exit	
     
 customview_init_graphs:					; Show tissue graph
@@ -354,7 +354,7 @@ customview_init_graphs:					; Show tissue graph
 
 	call	    deco_calc_desaturation_time	; calculate desaturation time
 	movlb	    b'00000001'             ; select ram bank 1
-	call	    PLED_tissue_saturation_graph
+	call	    DISP_tissue_saturation_graph
 
 	bra         customview_toggle_exit
 
@@ -366,7 +366,7 @@ customview_init_pSCR_ppo2:
 	btfsc		no_deco_customviews		; no-deco-mode-flag = 1
 	bra			customview_toggle		; Yes, use next Customview!
 
-    call        PLED_show_pSCR_ppO2		; Yes, compute and show value
+    call        DISP_show_pSCR_ppO2		; Yes, compute and show value
 	
 	bra         customview_toggle_exit
 
@@ -383,7 +383,7 @@ customview_init_show_change_gf:
     bra         customview_toggle_exit
 
 	bsf			menu3_active            ; Set Flag
-    call        PLED_show_gf_customview ; Show info
+    call        DISP_show_gf_customview ; Show info
     bra         customview_toggle_exit
 
 customview_toggle_exit:
@@ -402,7 +402,7 @@ surfcustomview_toggle2:
 	bra		surfcustomview_mask	; No, show
 	clrf	menupos3			; Reset to zero (Zero=no custom view)
 surfcustomview_mask:	
-	call	PLED_clear_customview_surfmode
+	call	DISP_clear_customview_surfmode
 	movff	menupos3,WREG       ; Menupos3 holds number of customview function
 	dcfsnz	WREG,F
 	bra		surfcustomview_init_graphs			; Show the tissue graphs
@@ -420,21 +420,21 @@ surfcustomview_init_graphs:
 	btfsc	no_deco_customviews				; no-deco-mode-flag = 1
 	bra		surfcustomview_toggle			; Yes, use next Customview!
 
-	call	PLED_tissue_saturation_graph; Draw the graphs
+	call	DISP_tissue_saturation_graph; Draw the graphs
 	bra		surfcustomview_toggle_exit	
 
 surfcustomview_init_gaslist:
 	btfsc	no_deco_customviews				; no-deco-mode-flag = 1
 	bra		surfcustomview_toggle			; Yes, use next Customview!
 
-	call	PLED_pre_dive_screen				; Show the Gaslist/Setpoint list
+	call	DISP_pre_dive_screen				; Show the Gaslist/Setpoint list
 	bra		surfcustomview_toggle_exit	
 
 surfcustomview_init_interval:
-	call    PLED_standard_color
+	call    DISP_standard_color
 	DISPLAYTEXT	d'189'							; Surface
 	DISPLAYTEXT	d'240'							; Interval:
-	call	PLED_interval						; Display the interval
+	call	DISP_interval						; Display the interval
 	bra		surfcustomview_toggle_exit	
 
 surfcustomview_init_cfview:
@@ -442,19 +442,19 @@ surfcustomview_init_cfview:
 	incf	EEDATA,W							; +1 -> WREG
 	movwf	temp10
 	dcfsnz	temp10,F
-	call	PLED_show_cf11_cf12_cf29			; =0 (ZH-L16 OC)
+	call	DISP_show_cf11_cf12_cf29			; =0 (ZH-L16 OC)
 	dcfsnz	temp10,F
 	bra		surfcustomview_toggle_exit			; =1 (Gauge)
 	dcfsnz	temp10,F
-	call	PLED_show_cf11_cf12_cf29			; =2 (ZH-L16 CC)
+	call	DISP_show_cf11_cf12_cf29			; =2 (ZH-L16 CC)
 	dcfsnz	temp10,F
 	bra		surfcustomview_toggle_exit			; =3 (Apnoe)
 	dcfsnz	temp10,F
-	call	PLED_show_cf32_cf33_cf29			; =4 (L16-GF OC)
+	call	DISP_show_cf32_cf33_cf29			; =4 (L16-GF OC)
 	dcfsnz	temp10,F
-	call	PLED_show_cf32_cf33_cf29			; =5 (L16-GF CC)
+	call	DISP_show_cf32_cf33_cf29			; =5 (L16-GF CC)
 	dcfsnz	temp10,F
-	call	PLED_show_cf32_cf33_cf62_cf63		; =6 (pSCR-GF)
+	call	DISP_show_cf32_cf33_cf62_cf63		; =6 (pSCR-GF)
 
 	bra		surfcustomview_toggle_exit	
 
@@ -502,13 +502,13 @@ surfcustomview_minute:		; Do every-minute tasks for the custom view area
 surfcustomview_minute_graphs:
 	call	deco_calc_desaturation_time         ; calculate desaturation time
 	movlb	b'00000001'                         ; select ram bank 1
-	call	PLED_tissue_saturation_graph        ; Draw/Update the graphs
+	call	DISP_tissue_saturation_graph        ; Draw/Update the graphs
 	return
 
 surfcustomview_minute_interval:
 	DISPLAYTEXT	d'189'							; Surface
 	DISPLAYTEXT	d'240'							; Interval:
-	call	PLED_interval						; Display the interval	
+	call	DISP_interval						; Display the interval	
 	return
 
 surfcustomview_minute_gaslist:					; Do nothing extra

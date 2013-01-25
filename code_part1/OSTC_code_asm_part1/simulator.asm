@@ -45,14 +45,14 @@ menu_simulator:
     movff   WREG,char_I_dive_interval
 
 menu_simulator1:
-	call	PLED_brightness_full			;max. brightness
-	call	PLED_ClearScreen
-	call	PLED_simulator_mask
+	call	DISP_brightness_full			;max. brightness
+	call	DISP_ClearScreen
+	call	DISP_simulator_mask
 
 menu_simulator2:
 	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
-	call	PLED_simulator_data
-	call	PLED_menu_cursor
+	call	DISP_simulator_data
+	call	DISP_menu_cursor
 
 menu_simulator_loop:
 	call	check_switches_menu
@@ -175,12 +175,12 @@ simulator_startdive:
 ; Show decoplanning result.
 ;
 simulator_show_decoplan:
-        call	PLED_ClearScreen
-        call	PLED_simdata_screen
+        call	DISP_ClearScreen
+        call	DISP_simdata_screen
         call	divemenu_see_decoplan
         
         WIN_LEFT .0
-        call    PLED_standard_color
+        call    DISP_standard_color
 
         ; Display TTS, if any...
         movff   int_O_ascenttime+0,lo
@@ -205,7 +205,7 @@ simulator_decoplan_notts:
 
         movlw   .100                    ; Detect if CNS > 100%
         cpfslt  sim_CNS
-        call    PLED_warnings_color     ; Yes: draw in red !
+        call    DISP_warnings_color     ; Yes: draw in red !
 
         STRCPY  TXT_CNS4
         movff   char_O_CNS_fraction,lo  ; Current CNS, before dive.
@@ -218,11 +218,11 @@ simulator_decoplan_notts:
         bra     simulator_decoplan_cns_2
 
 simulator_decoplan_cns_1:
-        call    PLED_warnings_color     ; Yes: draw in red !
+        call    DISP_warnings_color     ; Yes: draw in red !
         STRCPY_PRINT    TXT_CNSGR10
 
 simulator_decoplan_cns_2:
-        call    PLED_standard_color     ; Back to normal.
+        call    DISP_standard_color     ; Back to normal.
         WIN_INVERT	.1	                ; Init new Wordprocessor	
         DISPLAYTEXT	.188		        ; Sim. Results:
         WIN_INVERT	.0                  ; Init new Wordprocessor	
@@ -255,7 +255,7 @@ simulator_show_decoplan5:
 	btfsc	last_ceiling_gf_shown		; last ceiling shown?
 	bra		simulator_show_decoplan5_0	; All done, clear and return
 
-	call	PLED_decoplan               ; Re-Draw Current page of GF Decoplan
+	call	DISP_decoplan               ; Re-Draw Current page of GF Decoplan
 	bra		simulator_show_decoplan1	
 
 ;---- In OCR mode, show the gas Usage special page ---------------------------
@@ -286,7 +286,7 @@ simulator_show_decoplan5_0:
     lfsr	FSR0,int_O_gas_volumes      ; Initialize indexed addressing.
 
 	WIN_LEFT	.90                     ; Set column
-    call    PLED_standard_color   
+    call    DISP_standard_color   
 
 simulator_show_decoplan5_loop:
     incf    wait_temp,F                 ; Increment gas #
@@ -305,9 +305,9 @@ simulator_show_decoplan5_loop:
     andwf   hi,W
     incf    WREG
     bnz     simulator_show_decoplan5_2
-    call    PLED_warnings_color
+    call    DISP_warnings_color
     STRCPY_PRINT  "= xxxx.x"
-    call    PLED_standard_color   
+    call    DISP_standard_color   
     bra     simulator_show_decoplan5_1
     
 simulator_show_decoplan5_2: 
@@ -376,7 +376,7 @@ simulator_calc_deco:
 	movff	xC+0,sim_pressure+0
 	movff	xC+1,sim_pressure+1
 
-	call	PLED_topline_box
+	call	DISP_topline_box
 	WIN_INVERT	.1
 	DISPLAYTEXT	.12                     ; "Wait..."
 	WIN_INVERT	.0
@@ -436,7 +436,7 @@ simulator_calc_deco1:
 
     ; Loop for bottom time duration
 simulator_calc_deco_loop2:
-    call	PLED_simulator_data         ; Update display of bottom time.
+    call	DISP_simulator_data         ; Update display of bottom time.
 
     call	deco_calc_tissue		    ; JUST calc tissue (faster).
     call	deco_calc_CNS_fraction      ; Also calculate CNS (in 1min loop)
@@ -459,7 +459,7 @@ simulator_calc_deco2:
 	movlb	b'00000001'                 ; rambank 1 selected
 
     movff   char_O_deco_last_stop,sim_btm_depth
-    call    PLED_simulator_data         ; Animate ascent simu.
+    call    DISP_simulator_data         ; Animate ascent simu.
 
 	dcfsnz	timeout_counter2,F			; Abort loop (max. 256 tries)?
 	bra		simulator_calc_deco3		; Yes...

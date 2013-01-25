@@ -332,7 +332,7 @@ aa_decode_10:
 		bra		aa_decode_12
 
 		movff	aa_temp+0,PRODH         ; Add color/2 if bit set.
-		movff	aa_temp+1,PRODL         ; OLED is big endian, so swap here.
+		movff	aa_temp+1,PRODL         ; DISPLAY is big endian, so swap here.
 aa_decode_12:
 		btfss	aa_color_quart,ACCESS
 		bra		aa_decode_3
@@ -360,12 +360,14 @@ aa_decode_13:							; Got a 1xx or a 000 code...
 
 		; WHITE pixel (ie. full color)
 		movff	win_color1,PRODH	    ; current draw color
-		movff	win_color2,PRODL	    ; (rem: OLED is big endian)
+		movff	win_color2,PRODL	    ; (rem: DISPLAY is big endian)
+        setf    win_color3
 		bra		aa_decode_3
 
 aa_decode_2:
 		clrf	PRODH,A				    ; BLACK pixel
 		clrf	PRODL,A
+        clrf    win_color3
 
 aa_decode_3:
 		;---- PIXEL WRITE LOOP -----------------------------------------------
@@ -387,7 +389,7 @@ aa_decode_3:
 ;------------------------------------------------------------------------------
 ; Setup pointers for a char:
 ; Inputs : letter : string to print (SHOULD BE NULL TERMINATED)
-; Output : OLED commands on port D + clocks.
+; Output : DISPLAY commands on port D + clocks.
 ; 
         global  aa_wordprocessor        ; Callable from C-code.
 aa_wordprocessor:
@@ -395,7 +397,7 @@ aa_wordprocessor:
 		movlb	HIGH win_top            ; Switch to bank 0...
 
 		rcall	aa_string_width		    ; Set win_height, compute win_width
-		rcall	PLED_box_write		    ; Use that for the box.
+		call	DISP_box_write		    ; Use that for the box.
 
 		; Restart the loop for each char to print
 		lfsr	FSR2, letter		    ; FSR2 pointer to start of string.

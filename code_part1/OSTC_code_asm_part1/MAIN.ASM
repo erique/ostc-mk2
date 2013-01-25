@@ -77,7 +77,7 @@ osct_asm	code
 #include	displaytext.asm		; sends texts to wordprocessor
 #include	math.asm			; mathematical functions
 #include 	wait.asm			; waitroutines
-#include	oled_samsung.asm	; Attached in 80-System 8-Bit Mode
+#include	display_lowlevel.asm; Low level display routines
 #include	aa_wordprocessor.asm; New antialiased word processor and fonts
 #include    color_processor.asm ; Color image drawing.
 #include    dump_screen.asm     ; Copy screen contains to serial interface
@@ -88,7 +88,7 @@ osct_asm	code
 #include	menu_reset.asm		; Submenu "Reset"
 #include	menu_settime.asm	; Submenu "Set Time"
 #include	ms5535.asm			; Interface to MS5535A,B or C pressure sensor
-#include	pled_outputs.asm	; div. PLED outputs and background debugger
+#include	outputs.asm         ; div. outputs and background debugger
 #include	i2c_eeprom.asm		; for external I2C EEPROM and general I2C Routines
 #include	menu_logbook.asm	; Submenu "Logbook"
 #include	interface.asm		; Interface routines 

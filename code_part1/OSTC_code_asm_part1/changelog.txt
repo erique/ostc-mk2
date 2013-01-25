@@ -1,6 +1,7 @@
 New in 2.60:
 BETA Version - Do NOT use for diving!
 CHANGE: Removed "Mix type" Icons and CF43
+CHANGE: Hardware4 support
 
 New in 2.59:
 BETA Version - Do NOT use for diving!
@@ -145,7 +146,7 @@ New in 2.05 beta:
 BETA Version - Do NOT use for diving!
 BUGFIX: German text layout in Divemode
 NEW: Always show numeric velocity...
-NEW: OLED Brightness setting
+NEW: DISPLAY Brightness setting
 
 New in 2.04 beta:
 BETA Version - Do NOT use for diving!

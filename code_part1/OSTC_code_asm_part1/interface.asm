@@ -116,8 +116,8 @@ menu_interface:
 	bcf		dump_external_eeprom			; clear flag
 	bcf		PIE1,RCIE					; No Interrupt for UART
 	bsf		LED_blue
-	call	PLED_ClearScreen
-	call	PLED_topline_box
+	call	DISP_ClearScreen
+	call	DISP_topline_box
 	WIN_INVERT	.1					; Init new Wordprocessor	
 	DISPLAYTEXT	.15						; "Interface"
 	WIN_INVERT	.0					; Init new Wordprocessor

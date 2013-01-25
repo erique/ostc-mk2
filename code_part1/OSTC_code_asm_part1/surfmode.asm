@@ -29,12 +29,12 @@ surfloop:
 	clrf	lo
 	movff	lo,char_I_const_ppO2			; reset to standard mode, OSTC assumes Air breathing at the surface!
 
-	call	PLED_brightness_full			; max. brightness
+	call	DISP_brightness_full			; max. brightness
 	
 	call 	I2CReset
-	call	PLED_boot
-	call	PLED_serial						; Show OSTC serial and firmware version
-	call	PLED_clock						; display time
+	call	DISPLAY_boot
+	call	DISP_serial						; Show OSTC serial and firmware version
+	call	DISP_clock						; display time
 	call	update_date						; display date
 	call	get_battery_voltage				; get battery voltage
 	movff	last_surfpressure_30min+0,int_I_pres_respiration+0		; copy surface air pressure to deco routine
@@ -53,11 +53,11 @@ surfloop:
 	bra		surfloop1
 
 ; Startup tasks for decompression modes
-	call	PLED_display_cns_surface		; Update surface CNS display (If allowed by CF15)
-	call	PLED_desaturation_time			; display desaturation time
-	call	PLED_nofly_time					; display nofly time
+	call	DISP_display_cns_surface		; Update surface CNS display (If allowed by CF15)
+	call	DISP_desaturation_time			; display desaturation time
+	call	DISP_nofly_time					; display nofly time
 
-	call	PLED_active_gas_surfmode		; Show start gas
+	call	DISP_active_gas_surfmode		; Show start gas
 
 surfloop1:
 	btfss	gauge_mode					; Display only in gauge mode	
@@ -92,12 +92,12 @@ surfloop3:
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	call	PLED_standard_color
+	call	DISP_standard_color
 
 	bcf		switch_left
 	bcf		switch_right
-	call	PLED_active_gas_surfmode	; Show start gas / SetPoint
-	call	PLED_custom_text			; Displays custom text
+	call	DISP_active_gas_surfmode	; Show start gas / SetPoint
+	call	DISP_custom_text			; Displays custom text
 	clrf	cf_checker_counter			; next cf to check
 	ostc_debug	'G'						; Sends debug-information to screen if debugmode active
 
@@ -127,7 +127,7 @@ surfloop_loop:
 
 surfloop_loop1:
 ; One Second tasks for all modes
-	call	PLED_clock					; update clock
+	call	DISP_clock					; update clock
 	call	test_charger				; check if charger IC is active
 	call	timeout_surfmode			; check timeout 
     call    update_batt_voltage			; display battery voltage
@@ -138,9 +138,9 @@ surfloop_loop1:
 
 ; Every 2 seconds, overwrite with GF value (if needed to display)
     btfsc   secs,1                      ; Alternating every 2sec (if needed)
-    call    PLED_display_cns_surface    ; Display CNS (if > CF15).
+    call    DISP_display_cns_surface    ; Display CNS (if > CF15).
     btfss   secs,1
-    call    PLED_display_gf_surface     ; Display GF (if > CF8).
+    call    DISP_display_gf_surface     ; Display GF (if > CF8).
 
     btfsc	enter_error_sleep			; Enter Fatal Error Routine?
     call	fatal_error_sleep			; Yes (In Sleepmode.asm!)
@@ -159,7 +159,7 @@ surfloop_loop2:
 
 ; New sensor value available
 	call	update_surf_press			; display surface pressure
-	call	PLED_temp_surfmode			; Displays temperature
+	call	DISP_temp_surfmode			; Displays temperature
 	call	set_dive_modes				; tests if depth>threshold
 	call    altimeter_calc
     movf    menupos3,W                  ; Get customview status.
@@ -223,11 +223,11 @@ surfloop_loop2a:
 
 update_surfloop60:
 ; One minute tasks for all modes
-;	call	PLED_active_gas_surfmode	; Show start gas / SetPoint
+;	call	DISP_active_gas_surfmode	; Show start gas / SetPoint
 	call	update_date					; and date in divemode
 	call	calc_deko_surfmode			; calculate desaturation every minute
 	call	check_temp_extrema			; check for new temperature extremas
-	call	PLED_custom_text			; Displays custom text
+	call	DISP_custom_text			; Displays custom text
 	call	surfcustomview_minute		; Do every-minute tasks for the custom view area
 
 	btfsc	gauge_mode					; Ignore in gauge mode
@@ -236,8 +236,8 @@ update_surfloop60:
 	bra		update_surfloop60_2
 
 ; One Minute tasks for deco modes
-	call	PLED_nofly_time				; display nofly time
-	call	PLED_desaturation_time		; display desaturation time
+	call	DISP_nofly_time				; display nofly time
+	call	DISP_desaturation_time		; display desaturation time
 	btfsc	premenu						; Not when "Menu?" is displayed!
 	bra		update_surfloop60_2
 
@@ -448,7 +448,7 @@ timeout_premenu:
 	return							; No!
 	bcf		premenu					; Yes, so clear "Menu?" and clear pre_menu bit
 
-	call	PLED_topline_box_clear	; Clears Bar at the top
+	call	DISP_topline_box_clear	; Clears Bar at the top
 
 	btfsc	gauge_mode
 	bra		timeout_premenu2		; Skip in Gauge mode
@@ -457,7 +457,7 @@ timeout_premenu:
 
 timeout_premenu2:
 	call	update_surf_press		; rewrite serial number
-	call	PLED_serial				; rewrite serial number
+	call	DISP_serial				; rewrite serial number
 	clrf	timeout_counter3		; Also clear timeout
 	bcf		switch_left				; and debounce switches
 	bcf		switch_right
@@ -480,7 +480,7 @@ test_switches_surfmode:		; checks switches in surfacemode
 
 test_switches_surfmode3:
 	bcf		switch_right
-	call	PLED_topline_box		; Write a filled bar at the top
+	call	DISP_topline_box		; Write a filled bar at the top
 	WIN_INVERT	.1					; Init new Wordprocessor
 	DISPLAYTEXT	.4			;Menu?
 	WIN_INVERT	.0					; Init new Wordprocessor

@@ -24,8 +24,8 @@
 ; ToDo: 
 
 menu_battery_state:
-	call	PLED_ClearScreen
-	call	PLED_topline_box
+	call	DISP_ClearScreen
+	call	DISP_topline_box
 	WIN_INVERT	.1	; Init new Wordprocessor	
 	DISPLAYTEXT	.114		; Battery Information
 	WIN_INVERT	.0	; Init new Wordprocessor	
@@ -60,7 +60,7 @@ menu_battery_state:
 	movff	EEDATA,convert_value_temp+1
 	read_int_eeprom	d'49'	; Year
 	movff	EEDATA,convert_value_temp+2
-	call	PLED_convert_date		; coverts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
+	call	DISP_convert_date		; coverts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 	call	word_processor
 
 	WIN_TOP		.91
@@ -86,7 +86,7 @@ menu_battery_state:
 	movff	EEDATA,convert_value_temp+1
 	read_int_eeprom	d'44'	; Year
 	movff	EEDATA,convert_value_temp+2
-	call	PLED_convert_date		; coverts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
+	call	DISP_convert_date		; coverts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 	call	word_processor
 
 	WIN_TOP		.147
@@ -96,7 +96,7 @@ menu_battery_state:
 	movff	EEDATA,lo
 	read_int_eeprom	d'55'	; TEMP_min HIGH
 	movff	EEDATA,hi
-	call	PLED_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
+	call	DISP_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
 	movlw	d'3'
 	movwf	ignore_digits
 	bsf		leftbind			; left orientated output
@@ -109,7 +109,7 @@ menu_battery_state:
 	movff	EEDATA,convert_value_temp+1
 	read_int_eeprom	d'58'	; Year
 	movff	EEDATA,convert_value_temp+2
-	call		PLED_convert_date		; coverts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
+	call		DISP_convert_date		; coverts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 	STRCAT_PRINT ") "
 
 	WIN_TOP		.175
@@ -119,7 +119,7 @@ menu_battery_state:
 	movff	EEDATA,lo
 	read_int_eeprom	d'60'	; TEMP_max HIGH
 	movff	EEDATA,hi
-	call	PLED_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
+	call	DISP_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
 	movlw	d'3'
 	movwf	ignore_digits
 	bsf		leftbind			; left orientated output
@@ -132,7 +132,7 @@ menu_battery_state:
 	movff	EEDATA,convert_value_temp+1
 	read_int_eeprom	d'63'	; Year
 	movff	EEDATA,convert_value_temp+2
-	call	PLED_convert_date		; coverts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
+	call	DISP_convert_date		; coverts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 	STRCAT_PRINT ") "
 
 	WIN_TOP		.203

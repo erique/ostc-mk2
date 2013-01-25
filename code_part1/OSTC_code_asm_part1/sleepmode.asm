@@ -27,13 +27,13 @@ sleeploop1:
 	decfsz	temp1,F
 	bra		sleeploop1
  	; build hash  (about 90sek @ 16MHz)
-	call	PLED_ClearScreen		; clear
+	call	DISP_ClearScreen		; clear
 	DISPLAYTEXT	.1					; "Building MD2 hash"
 	DISPLAYTEXT	.2					; "Please wait..."
 	call	deco_hash			    ; calculate MD2 hash
 	movlb	b'00000001'				; Back to Bank1
 sleeploop2:
-	call	PLED_DisplayOff			; display off
+	call	DISP_DisplayOff			; display off
 	call	disable_rs232			; disable UART module
 
 ; Save surface mode custom view

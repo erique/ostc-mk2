@@ -138,13 +138,14 @@ bank0           udata 0x060     ;Bank 0
 letter          res .26         ;letter buffer
 win_color1      res 1
 win_color2      res 1
+win_color3      res 1
 win_top         res 1           ; Box/text position (0..239).
 win_height      res 1           ; Box/text height (1..240)
 win_leftx2      res 1           ; Box/text position (0..159)
 win_width       res 1           ; box width (1..160)
 win_font        res 1
 win_invert      res 1
-win_bargraph    res 1           ; PLED_box swicth to black after this position (0..159).
+win_bargraph    res 1           ; DISP_box swicth to black after this position (0..159).
 win_flags       res 1           ; flip_screen flag, transparent fonts, etc...
 
 pressureSum     res 2           ; Stabilize surface presure by a long averaging window [mbar]
@@ -196,11 +197,12 @@ flag12          res 1
 flag13          res 1
 flag14          res 1
 flag15          res 1
+flag16          res 1
 
-oled1_temp      res 1           ; Temp variables for display output
-oled2_temp  	res 1
-oled3_temp      res 1
-oled4_temp      res 1           ; Used in "Displaytext"
+DISPLAY1_temp      res 1           ; Temp variables for display output
+DISPLAY2_temp  	res 1
+DISPLAY3_temp      res 1
+DISPLAY4_temp      res 1           ; Used in "Displaytext"
 
                 global hi,lo    ; Make them visible from C-code
 lo              res 1           ; bin to dec conversion routine
@@ -341,7 +343,7 @@ apnoe_surface_mins      res 1   ; Surface interval mins for Apnoe mode
 apnoe_surface_secs      res 1   ; Surface interval secs for Apnoe mode
 customfunction_temp1    res 1   ; used in GETCUSTOM8 and GETCUSTOM15
 
-decoplan_page           res 1   ; used in PLED_MultiGF,...
+decoplan_page           res 1   ; used in DISP_MultiGF,...
 temp10                  res 2   ; used in customview
 
 fatal_error_code        res 1   ; holds error code value 
@@ -370,7 +372,7 @@ ASSERT_BANK1    MACRO   tag
         movff   WREG,temp10+0
         movlw   high(tag)
         movff   WREG,temp10+1
-        call    PLED_resetdebugger
+        call    DISP_resetdebugger
 @end:
     Endif
     ENDM
@@ -397,36 +399,37 @@ ASSERT_BANK1    MACRO   tag
 ;I/O Ports (I=Input, O=Output)
 ;
 #DEFINE	sensor_SDO			PORTA,1 ;O
-#DEFINE	oled_rw				PORTA,2 ;0
-#DEFINE	oled_hv				PORTA,3 ;O
+#DEFINE	DISPLAY_rw				PORTA,2 ;0
+#DEFINE	DISPLAY_hv				PORTA,3 ;O
 #DEFINE	sensor_SDI			PORTA,4 ;I
-#DEFINE	oled_cs				PORTA,5 ;O
+#DEFINE	DISPLAY_cs				PORTA,5 ;O
 #DEFINE	sensor_CLK			PORTA,7 ;O
 
 #DEFINE	SWITCH2				PORTB,0 ;I  (Right)
 #DEFINE	SWITCH1				PORTB,1 ;I  (Left)
-#DEFINE	oled_vdd			PORTB,2 ;O
+#DEFINE	DISPLAY_vdd			PORTB,2 ;O
 #DEFINE	LED_blue			PORTB,3 ;0
 #DEFINE	LED_red				PORTB,4 ;O
 
 #DEFINE	CHRG_OUT			PORTC,1 ;O
 #DEFINE	CHRG_IN				PORTC,2 ;I
 
-#DEFINE	oled_d1				PORTD,0 ;O
-#DEFINE	oled_d2				PORTD,1 ;O
-#DEFINE	oled_d3				PORTD,2 ;O
-#DEFINE	oled_d4				PORTD,3 ;O
-#DEFINE	oled_d5				PORTD,4 ;O
-#DEFINE	oled_d6				PORTD,5 ;O
-#DEFINE	oled_d7				PORTD,6 ;O
-#DEFINE	oled_d8				PORTD,7 ;O
+#DEFINE	DISPLAY_d1				PORTD,0 ;O
+#DEFINE	DISPLAY_d2				PORTD,1 ;O
+#DEFINE	DISPLAY_d3				PORTD,2 ;O
+#DEFINE	DISPLAY_d4				PORTD,3 ;O
+#DEFINE	DISPLAY_d5				PORTD,4 ;O
+#DEFINE	DISPLAY_d6				PORTD,5 ;O
+#DEFINE	DISPLAY_d7				PORTD,6 ;O
+#DEFINE	DISPLAY_d8				PORTD,7 ;O
 
-#DEFINE	oled_rs				PORTE,0 ;0
-#DEFINE	oled_nreset			PORTE,1 ;0
-#DEFINE	oled_e_nwr			PORTE,2 ;0
+#DEFINE	DISPLAY_rs				PORTE,0 ;0
+#DEFINE	DISPLAY_nreset			PORTE,1 ;0
+#DEFINE	DISPLAY_e_nwr			PORTE,2 ;0
 
 ; Bank0 flags
-#DEFINE win_flip_screen     win_flags,0 ; 180° rotation of the OLED screen.
+#DEFINE win_flip_screen     win_flags,0 ; 180° rotation of the DISPLAY screen.
+#DEFINE win_display_type    win_flags,1 ; =1: Display1, =0: Display0
 
 ; Flags
 #DEFINE	tts_extra_time		flag1,0	; Showing "Future TTS" customview
@@ -470,7 +473,7 @@ ASSERT_BANK1    MACRO   tag
 
 #DEfINE	timeout_display		flag5,0	; =1: The divemode timeout is displayed
 #DEFINE	eeprom_blockwrite	flag5,1	; EEPROM blockwrite active
-#DEFINE oled_brightness_high flag5,2	; =1: High brightness, =0: Eco mode
+#DEFINE DISPLAY_brightness_high flag5,2	; =1: High brightness, =0: Eco mode
 #DEFINE	low_battery_state	flag5,3	;=1 if battery low
 #DEFINE	DP_done				flag5,4	; valconv
 #DEFINE	DP_done2			flag5,5	; valconv
@@ -544,7 +547,7 @@ ASSERT_BANK1    MACRO   tag
 #DEFINE	button_delay_done		flag13,1	;=1: Button was pressed for more then 500ms, start counting
 #DEFINE	display_set_active		flag13,2	;=1: De/Activate gases underwater menu is visible
 #DEFINE	deco_mode_changed		flag13,3	;=1: The Decomode was changes, show decomode description!
-#DEFINE	pled_velocity_display	flag13,4	;=1: Velocity is displayed 
+#DEFINE	DISP_velocity_display	flag13,4	;=1: Velocity is displayed 
 #DEFINE depth_greater_100m		flag13,5	;=1: Depth is greater then 100m
 #DEFINE	display_set_setpoint	flag13,6	;=1: SetPoint list active
 #DEFINE	toggle_customview		flag13,7	;=1: Next customview

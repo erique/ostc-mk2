@@ -112,7 +112,7 @@ altimeter_display:
         WIN_LEFT    .90
         WIN_INVERT  .0
         WIN_FONT    .0
-        call    PLED_standard_color
+        call    DISP_standard_color
 
         STRCPY  TXT_ALT5
 
@@ -229,9 +229,9 @@ altimeter_menu:
         rcall   altimeter_reset
 
 altimeter_menu_1:
-        call    PLED_ClearScreen        ; Menu header.
-        call    PLED_standard_color
-    	call	PLED_topline_box
+        call    DISP_ClearScreen        ; Menu header.
+        call    DISP_standard_color
+    	call	DISP_topline_box
     	WIN_INVERT	.1	; Init new Wordprocessor	
         DISPLAYTEXTH .288               ; Title bar
 
@@ -299,7 +299,7 @@ altimeter_menu_3:
         STRCAT_PRINT    TXT_METER5
 
 alt_menu_loop:
-        call        PLED_menu_cursor    ; Display cursor
+        call        DISP_menu_cursor    ; Display cursor
 		call		wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 
 alt_menu_loop1:                         ; Wait for button.

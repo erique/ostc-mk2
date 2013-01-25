@@ -42,8 +42,8 @@ menu_const_ppO2:
 	movlw	d'1'
 	movwf	menupos
 menu_const_ppO2_return:
-    call	PLED_ClearScreen
-    call    PLED_ccr_setup_menu_mask
+    call	DISP_ClearScreen
+    call    DISP_ccr_setup_menu_mask
 	call	refresh_cursor
     call    menu_pre_loop_common
 
@@ -54,7 +54,7 @@ menu_const_ppO2_preloop:
 	bra		menu_const_ppO2_preloop2	; Returns
 	movlw	d'6'
     movwf   menupos
-    call    PLED_menu_cursor
+    call    DISP_menu_cursor
 
 menu_const_ppO2_preloop2:
 	btfsc	menubit2
@@ -89,9 +89,9 @@ menu_diluentsetup:
 	movwf	menupos
 
 menu_diluentsetup_prelist:
-	call	PLED_ClearScreen
+	call	DISP_ClearScreen
 	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
-	call	PLED_topline_box
+	call	DISP_topline_box
 	WIN_INVERT	.1	; Init new Wordprocessor
 	DISPLAYTEXT	.231			; Dil. Setup - Gaslist
 	WIN_INVERT	.0	; Init new Wordprocessor
@@ -206,7 +206,7 @@ menu_diluentsetup_list0:
 
 	DISPLAYTEXT	.11                     ; Exit
 	call	wait_switches               ; Waits until switches are released, resets flag if button stays pressed!
-	call	PLED_menu_cursor
+	call	DISP_menu_cursor
 
 menu_diluentsetup_loop:
 	call	check_switches_logbook
@@ -237,7 +237,7 @@ menu_diluentsetup_list2:
 
 menu_diluentsetup_list3:
 	clrf	timeout_counter2
-	call	PLED_menu_cursor
+	call	DISP_menu_cursor
 
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 
@@ -295,7 +295,7 @@ menu_diluentgas:
 	bcf		first_FA				; Here: =1: -, =0: +
 
 menu_diluentgas0:
-	call	PLED_ClearScreen
+	call	DISP_ClearScreen
     WIN_LEFT    .20
 	WIN_TOP		.185
     lfsr    FSR2, letter
@@ -446,7 +446,7 @@ menu_firstdil1:
 	STRCAT_PRINT  "  "
 
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
-	call	PLED_menu_cursor
+	call	DISP_menu_cursor
 
 diluentgassetup_loop:
 	call	check_switches_logbook
@@ -477,7 +477,7 @@ diluentgassetup2:
 
 diluentgassetup3:
 	clrf	timeout_counter2
-	call	PLED_menu_cursor
+	call	DISP_menu_cursor
 
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 
@@ -629,7 +629,7 @@ restore_gas_diluent:
 
 
 diluent_title_bar2:
-	call	PLED_topline_box
+	call	DISP_topline_box
 	WIN_INVERT	.1	; Init new Wordprocessor
 	WIN_TOP		.2
 	WIN_LEFT	.30
@@ -733,8 +733,8 @@ menu_const_ppO2_setpoints:          ; Setpoint menu
 	bcf		second_FA				; Here: =1: 1, =0: 10 steps
 
 menu_const_ppO20:
-	call	PLED_ClearScreen
-	call	PLED_topline_box
+	call	DISP_ClearScreen
+	call	DISP_topline_box
 
 	WIN_INVERT	.1			; Init new Wordprocessor	
 	DISPLAYTEXT	.111		; Constant ppO2 Setup
@@ -803,7 +803,7 @@ menu_const_ppO21:
 	DISPLAYTEXT	.11			; Exit
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
-	call	PLED_menu_cursor
+	call	DISP_menu_cursor
 
 menu_const_ppO2_loop:
 	call	check_switches_logbook
@@ -841,7 +841,7 @@ menu_const_ppO22a:
 
 menu_const_ppO23:
 	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
-	call	PLED_menu_cursor
+	call	DISP_menu_cursor
 	bra		menu_const_ppO2_loop
 
 do_menu_const_ppO2:

@@ -221,9 +221,9 @@ rs232_get_byte3:
 
 uart_115k_bootloader:
 	bcf		PIE1,RCIE				; disable interrupt for RS232
-	call	PLED_ClearScreen		; Clear screen
+	call	DISP_ClearScreen		; Clear screen
 	movlw	color_red
-    call	PLED_set_color			; Set to Red
+    call	DISP_set_color			; Set to Red
 	DISPLAYTEXTH	d'302'			; Bootloader
 	bcf		RCSTA,CREN				; Clear receiver status
 	bsf		RCSTA,CREN

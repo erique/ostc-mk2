@@ -34,10 +34,10 @@ menu:
 	movlw	d'1'
 	movwf	menupos
 menu2:
-	call	PLED_ClearScreen
+	call	DISP_ClearScreen
 	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
-	call	PLED_menu_mask
-	call	PLED_menu_cursor
+	call	DISP_menu_mask
+	call	DISP_menu_cursor
 
 menu_loop:
 	call	check_switches_menu
@@ -94,7 +94,7 @@ do_menu:								; calls submenu
 
 refresh_cursor:
 	clrf	timeout_counter2
-	call	PLED_menu_cursor
+	call	DISP_menu_cursor
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 	return
 
@@ -103,11 +103,11 @@ more_menu:
 	movwf	menupos
 more_menu2:
 	bcf		leftbind
-	call	PLED_ClearScreen
+	call	DISP_ClearScreen
 more_menu3:
 	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
-	call	PLED_more_menu_mask
-	call	PLED_menu_cursor
+	call	DISP_more_menu_mask
+	call	DISP_menu_cursor
 more_menu_loop:
 	call	check_switches_menu
 
@@ -116,7 +116,7 @@ more_menu_loop:
 ;	bra		more_menu_loop2
 ;	movlw	d'6'
 ;	movwf	menupos
-;	call	PLED_menu_cursor
+;	call	DISP_menu_cursor
 	
 ;more_menu_loop2:
 	btfsc	menubit2
@@ -156,12 +156,12 @@ setup_menu:
 	movwf	menupos
 setup_menu2:
 	bcf		leftbind
-	call	PLED_ClearScreen
-	call	PLED_setup_menu_mask
+	call	DISP_ClearScreen
+	call	DISP_setup_menu_mask
 setup_menu3a:
 	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
 	call	show_decotype
-	call	PLED_menu_cursor
+	call	DISP_menu_cursor
 
 setup_menu_loop:
 	call	check_switches_menu
@@ -255,10 +255,10 @@ exit_setup_menu:
 	btfss	deco_mode_changed			; Was the decomode changed in Setup menu?
 	goto	restart						; No, restart to surfacemode
 
-	call	PLED_ClearScreen
+	call	DISP_ClearScreen
 	
 deco_info_screen1:
-	call	PLED_topline_box
+	call	DISP_topline_box
 	WIN_INVERT	.1	; Init new Wordprocessor	
 	DISPLAYTEXT	.235			;Decomode changed!
 	WIN_INVERT	.0	; Init new Wordprocessor	
@@ -292,14 +292,14 @@ more_setup_menu:
 	movwf	menupos
 more_setup_menu2:
 	bcf		leftbind
-	call	PLED_ClearScreen
-	call	PLED_more_setup_menu_mask
+	call	DISP_ClearScreen
+	call	DISP_more_setup_menu_mask
 more_setup_menu3a:
 	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
 	call	show_debugstate
 	call	show_dateformat
 	call	show_salinity_value
-	call	PLED_menu_cursor
+	call	DISP_menu_cursor
 	call	toggle_brightness_show
 
 more_setup_menu_loop:
@@ -310,7 +310,7 @@ more_setup_menu_loop:
 ;	bra		more_setup_menu_loop2
 ;	movlw	d'6'
 ;	movwf	menupos
-;	call	PLED_menu_cursor
+;	call	DISP_menu_cursor
 ;more_setup_menu_loop2:
 ;
 	btfsc	menubit2
@@ -439,27 +439,27 @@ toggle_brightness:
 	movlw	LOW		0x103
 	movwf	EEADR
 	movlw	HIGH 	0x103
-	movwf	EEADRH					; OLED brightness (=0: Eco, =1: High)
+	movwf	EEADRH					; DISPLAY brightness (=0: Eco, =1: High)
 	call	read_eeprom				; read byte
-	bcf		oled_brightness_high	; Eco mode
+	bcf		DISPLAY_brightness_high	; Eco mode
 	movlw	.0
 	cpfseq	EEDATA					; High?
-	bsf		oled_brightness_high	; Yes!
+	bsf		DISPLAY_brightness_high	; Yes!
 
 	; Value loaded, now toggle it...
-	btg		oled_brightness_high
+	btg		DISPLAY_brightness_high
 
 	; ...Display it...
 	rcall	toggle_brightness_show
-	call	PLED_brightness_full	; Set OLED
+	call	DISP_brightness_full	; Set DISPLAY
 
 	; ...and write it again to EEPROM
 	movlw	LOW		0x103
 	movwf	EEADR
 	movlw	HIGH 	0x103
-	movwf	EEADRH					; OLED brightness (=0: Eco, =1: High)
+	movwf	EEADRH					; DISPLAY brightness (=0: Eco, =1: High)
 	movlw	.0
-	btfsc	oled_brightness_high
+	btfsc	DISPLAY_brightness_high
 	movlw	.1
 	movwf	EEDATA
 	call	write_eeprom			; write byte
@@ -471,7 +471,7 @@ toggle_brightness:
 	bra		more_setup_menu3a			; return to menu loop
 
 toggle_brightness_show:
-	btfsc	oled_brightness_high
+	btfsc	DISPLAY_brightness_high
 	bra		toggle_brightness_show2
 	DISPLAYTEXTH	.312			; Eco
 	return

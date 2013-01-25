@@ -49,7 +49,7 @@ menu_logbook:
 	bcf			return_from_profileview				; clear some flags
 menu_logbook1:
 	bcf			logbook_header_drawn
-	call		PLED_ClearScreen				; Clear screen
+	call		DISP_ClearScreen				; Clear screen
 	bcf			all_dives_shown					; clear some flags
 	bcf			logbook_profile_view
 	bcf			logbook_page_not_empty
@@ -200,7 +200,7 @@ menu_logbook_display_loop2:
 	btfss		logbook_page_not_empty		; Was there one dive at all?
 	bra			menu_logbook				; Yes, so reload the first page
 
-	call		PLED_topline_box			; Draw box
+	call		DISP_topline_box			; Draw box
 	WIN_INVERT	.1	
 	DISPLAYTEXT	.26							; "Logbook"
 	WIN_INVERT	.0
@@ -216,7 +216,7 @@ menu_logbook_display_loop2:
 	bcf			return_from_profileview		; Do this only once while the page is loaded again!
 
 	bcf			logbook_page_not_empty			; Obviously the current page is NOT empty
-	call		PLED_logbook_cursor
+	call		DISP_logbook_cursor
 
 menu_logbook_loop:
 	call		check_switches_logbook
@@ -254,7 +254,7 @@ display_profile:
 	addwf		menupos,W						; page*5+menupos=
 	movwf		divesecs						; # of dive to search
 
-	call		PLED_ClearScreen				; search for dive
+	call		DISP_ClearScreen				; search for dive
 	bsf			logbook_profile_view			; set flag for search routine
 
 	clrf		divenumber						; search from scratch
@@ -270,8 +270,8 @@ display_profile2:
 	clrf		average_divesecs+0
 	clrf		average_divesecs+1				; holds amount of read samples
 
-	call		PLED_display_wait_clear
-	call		PLED_standard_color
+	call		DISP_display_wait_clear
+	call		DISP_standard_color
 	WIN_TOP		.0
 	WIN_LEFT	.0
 	STRCPY      "#"
@@ -327,7 +327,7 @@ display_profile_offset3:
 	movff		SSPBUF,convert_value_temp+1
 	call		I2CREAD2					; Year
 	movff		SSPBUF,convert_value_temp+2
-	call		PLED_convert_date			; converts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
+	call		DISP_convert_date			; converts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 
 	PUTC		' '
 
@@ -516,15 +516,15 @@ display_profile_xscale:
     movff       lo,logbook_min_tp+0     ; Backup min Tp° too.
 	movff       hi,logbook_min_tp+1
 	movlw       color_orange            ; Use same color as tp° curve
-	call        PLED_set_color
+	call        DISP_set_color
 
-	call		PLED_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
+	call		DISP_convert_signed_temperature	; converts lo:hi into signed-short and adds '-' to POSTINC2 if required
 	movlw		d'3'
 	movwf		ignore_digits
 	bsf			leftbind
 	output_16dp	d'2'					; temperature
 	STRCAT_PRINT "°C"                   ; Display 2nd row of details
-    call        PLED_standard_color     ; Back to normal
+    call        DISP_standard_color     ; Back to normal
     
 	WIN_TOP		.50
 	WIN_LEFT	.05
@@ -597,7 +597,7 @@ display_profile2d:
 	; Start Profile display
 ; Write 0m X-Line..
 	movlw		color_grey	
-	call		PLED_set_color				; Make this configurable?
+	call		DISP_set_color				; Make this configurable?
 
 	movlw		d'75'
 	movff		WREG,win_top
@@ -608,7 +608,7 @@ display_profile2d:
 	movlw		d'155'
 	movff		WREG,win_width				; Right border (0-159)
 display_profile2e:
-	call		PLED_box					; Inputs:  win_top, win_leftx2, win_height, win_width, win_color1, win_color2
+	call		DISP_box					; Inputs:  win_top, win_leftx2, win_height, win_width, win_color1, win_color2
 	movff		win_top,WREG				; Get row
 	addwf		last_temperature+0,W		; Add line interval distance to win_top
 	tstfsz		last_temperature+1			; >255?
@@ -623,7 +623,7 @@ display_profile2e:
 
 ; Write 0min Y-Line..
 	movlw		color_grey	
-	call		PLED_set_color				; Make this configurable?
+	call		DISP_set_color				; Make this configurable?
 
 	movlw		d'75'
 	movff		WREG,win_top
@@ -633,7 +633,7 @@ display_profile2e:
 	movff		WREG,win_height				
 	movlw		d'1'
 	movff		WREG,win_width				; "Window" Width
-	call		PLED_box					; Inputs:  win_top, win_leftx2, win_height, win_width, win_color1, win_color2
+	call		DISP_box					; Inputs:  win_top, win_leftx2, win_height, win_width, win_color1, win_color2
 
 ; Draw frame around profile
 	movlw		color_blue	
@@ -695,7 +695,7 @@ profile_display_loop2:
     movlw       color_dark_green            ; Dark green if Ok,
     btfss       neg_flag
     movlw       color_dark_red              ; Or dark red if ceiling overflown.
-    call        PLED_set_color
+    call        DISP_set_color
     
 	movff       PRODL,xA+0
 	movff       PRODH,xA+1
@@ -751,7 +751,7 @@ profile_display_skip_deco:
 	movff		xC+1,xC+0
 
     movlw       color_orange
-    call        PLED_set_color
+    call        DISP_set_color
 
     movf        logbook_last_tp,W           ; do we have a valid previous value ?
     bz          profile_display_temp_1      ; No: skip the vertical line.
@@ -818,7 +818,7 @@ profile_display_loop3:
 	bra			profile_display_loop		; Not ready yet
 ; Done.
 profile_display_loop_done:
-	call		PLED_standard_color			; Restore color
+	call		DISP_standard_color			; Restore color
 	call		menu_pre_loop_common		; Clear some menu flags, timeout and switches
 
 display_profile_loop:
@@ -851,7 +851,7 @@ profile_display_color:
 	movlw		color_violet				; Color for Gas 5
 	dcfsnz		active_gas,F
 	movlw		color_cyan					; Color for Gas 6
-	goto		PLED_set_color				; Set Color...
+	goto		DISP_set_color				; Set Color...
 
 ;=============================================================================
 profileview_page2:
@@ -861,7 +861,7 @@ profileview_page2:
 	movff		average_depth_hold+1,eeprom_address+1			; Pointer to Gaslist
 
 	movlw		color_white					; Color for Gas 1
-	call		PLED_set_color				; Set Color...
+	call		DISP_set_color				; Set Color...
 	bsf			leftbind
 	WIN_TOP		.0
 	WIN_LEFT	.0
@@ -876,7 +876,7 @@ profileview_page2:
 	call		word_processor				; Display Gas information
 
 	movlw		color_green					; Color for Gas 2
-	call		PLED_set_color				; Set Color...
+	call		DISP_set_color				; Set Color...
 	WIN_TOP		.25
 	STRCPY      TXT_G2_3
 	call		I2CREAD2					; Gas2 current O2
@@ -889,7 +889,7 @@ profileview_page2:
 	call		word_processor				; Display Gas information
 
 	movlw		color_red					; Color for Gas 3
-	call		PLED_set_color				; Set Color...
+	call		DISP_set_color				; Set Color...
 	WIN_TOP		.50
 	STRCPY      TXT_G3_3
 	call		I2CREAD2					; Gas3 current O2
@@ -902,7 +902,7 @@ profileview_page2:
 	call		word_processor				; Display Gas information
 
 	movlw		color_yellow				; Color for Gas 4
-	call		PLED_set_color				; Set Color...
+	call		DISP_set_color				; Set Color...
 	WIN_TOP		.0
 	WIN_LEFT	.60
 	STRCPY      TXT_G4_3
@@ -916,7 +916,7 @@ profileview_page2:
 	call		word_processor				; Display Gas information
 
 	movlw		color_violet				; Color for Gas 5
-	call		PLED_set_color				; Set Color...
+	call		DISP_set_color				; Set Color...
 	WIN_TOP		.25
 	STRCPY      TXT_G5_3
 	call		I2CREAD2					; Gas5 current O2
@@ -929,7 +929,7 @@ profileview_page2:
 	call		word_processor				; Display Gas information
 
 	movlw		color_cyan					; Color for Gas 6
-	call		PLED_set_color				; Set Color...
+	call		DISP_set_color				; Set Color...
 	WIN_TOP		.50
 	STRCPY      TXT_G6_3
 	call		I2CREAD2					; Gas6 current O2
@@ -941,7 +941,7 @@ profileview_page2:
 	output_8
 	call		word_processor				; Display Gas information
 
-	call		PLED_standard_color
+	call		DISP_standard_color
 	WIN_TOP		.0
 	WIN_LEFT	.120
 	STRCPY      TXT_1ST4
@@ -1005,7 +1005,7 @@ display_profile2_loop:
 profileview_page3:
     WIN_BOX_BLACK   .0, .74, .0, .159		;top, bottom, left, right
 
-	call		PLED_standard_color
+	call		DISP_standard_color
 
 	movff		average_depth_hold+0,eeprom_address+0
 	movff		average_depth_hold+1,eeprom_address+1			; Pointer to Gaslist
@@ -1192,7 +1192,7 @@ profile_view_get_depth:
 	clrf		average_divesecs+1					; clear counting registers for next line
 
 	movlw		color_grey	
-	call		PLED_set_color						; Make this configurable?
+	call		DISP_set_color						; Make this configurable?
 	movlw		d'76'
 	movff		WREG,win_top
 	incf		timeout_counter3,W	; draw one line to right to make sure it's the background of the profile
@@ -1201,7 +1201,7 @@ profile_view_get_depth:
 	movff		WREG,win_height				
 	movlw		d'1'
 	movff		WREG,win_width				; "Window" Width
-	call		PLED_box					; Inputs:  win_top, win_leftx2, win_height, win_width, win_color1, win_color2
+	call		DISP_box					; Inputs:  win_top, win_leftx2, win_height, win_width, win_color1, win_color2
 
 profile_view_get_depth_no_line:
 	call		I2CREAD2					; read first depth
@@ -1315,7 +1315,7 @@ exit_profileview:
 	clrf		menupos3					; here: used row on current page
 	movlw		d'5'
 	movwf		menupos						; here: active row on current page
-	call		PLED_ClearScreen			; clear details/profile
+	call		DISP_ClearScreen			; clear details/profile
 	goto		menu_logbook1b					; start search
 
 next_logbook2:
@@ -1326,7 +1326,7 @@ next_logbook2:
 	movlw		d'5'
 	movwf		menupos					; 
 	incf		menupos2,F					; start new screen
-	call		PLED_ClearScreen
+	call		DISP_ClearScreen
 	
 next_logbook:
 	movff		eeprom_header_address+0,eeprom_address+0
@@ -1360,7 +1360,7 @@ next_logbook3a:
 
 next_logbook3b:
 	clrf		timeout_counter2
-	call		PLED_logbook_cursor
+	call		DISP_logbook_cursor
 
 	bcf			switch_right
 	bcf			menubit3					; clear flag
@@ -1372,7 +1372,7 @@ display_listdive:
 
 	btfsc		logbook_header_drawn		; "Logbook already displayed?
 	bra			display_listdive1a
-	call		PLED_topline_box			; Draw box
+	call		DISP_topline_box			; Draw box
 	WIN_INVERT	.1
 	DISPLAYTEXT	.26							; "Logbook"
 	WIN_INVERT	.0
@@ -1415,7 +1415,7 @@ display_listdive2:
 	movff		SSPBUF,convert_value_temp+1
 	call		I2CREAD4					; Year (Block read)
 	movff		SSPBUF,convert_value_temp+2
-	call		PLED_convert_date_short		; converts into "DD/MM" or "MM/DD" or "MM/DD" in s
+	call		DISP_convert_date_short		; converts into "DD/MM" or "MM/DD" or "MM/DD" in s
 
 
 	incf_eeprom_address	d'2'				; Skip Bytes in EEPROM (faster)
@@ -1446,10 +1446,10 @@ display_listdive2:
 	return
 
 logbook_convert_64k:						; Converts <1.91 logbook (32kB) to 64kB variant
-	call	PLED_boot
-	call	PLED_ClearScreen		; Clear screen
+	call	DISPLAY_boot
+	call	DISP_ClearScreen		; Clear screen
 	movlw	color_red
-    call	PLED_set_color			; Set to Red
+    call	DISP_set_color			; Set to Red
 	DISPLAYTEXTH	d'303'			; Please wait!
 	clrf	EEADR
 	movlw	d'1'

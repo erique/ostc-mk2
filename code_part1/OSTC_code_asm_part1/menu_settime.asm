@@ -25,7 +25,7 @@
 
 
 menu_settime:
-	call	PLED_ClearScreen
+	call	DISP_ClearScreen
 	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
 
 	bcf		set_minutes
@@ -35,7 +35,7 @@ menu_settime:
 	bcf		set_month
 	clrf	menupos2
 
-	call	PLED_topline_box
+	call	DISP_topline_box
 	WIN_INVERT	.1	; Init new Wordprocessor	
 	DISPLAYTEXT	.29			; Set Time
 	WIN_INVERT	.0	; Init new Wordprocessor	
@@ -94,7 +94,7 @@ set_date_refresh:
 	movff	month,convert_value_temp+0
 	movff	day,convert_value_temp+1
 	movff	year,convert_value_temp+2
-	call	PLED_convert_date		; converts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
+	call	DISP_convert_date		; converts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
 	STRCAT_PRINT "  "
     return
 
@@ -134,7 +134,7 @@ set_time_done2:
 	WIN_TOP		.215
 	movlw	(.160-.0)/7                ; full line length, for various translations.
 	movwf	temp1
-	call	PLED_display_clear_common_y1
+	call	DISP_display_clear_common_y1
 	
 	movlw	d'5'
 	movwf	wait_temp
@@ -188,7 +188,7 @@ set_time_next_or_exit:
 	
 	WIN_LEFT	.0
 	WIN_TOP		.215
-    call    PLED_standard_color    
+    call    DISP_standard_color    
 	lfsr	FSR2,letter
 	OUTPUTTEXT	.94			    ; Set
 

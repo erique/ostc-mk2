@@ -28,10 +28,10 @@ menu_gassetup:
 	movwf	menupos
 
 menu_gassetup_prelist:
-	call	PLED_ClearScreen
+	call	DISP_ClearScreen
 	call	gassetup_sort_gaslist			; Sorts Gaslist according to change depth
 	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
-	call	PLED_topline_box
+	call	DISP_topline_box
 	WIN_INVERT	.1	; Init new Wordprocessor
 	DISPLAYTEXT	.106			; Gas List
 	WIN_INVERT	.0	; Init new Wordprocessor
@@ -60,7 +60,7 @@ menu_gassetup_list:
 	PUTC	':'
 	
 	movf    decodata+0,W
-	call	PLED_grey_inactive_gas			; Sets Greyvalue for inactive gases
+	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases
 	call	word_processor
 	WIN_LEFT	.40
 	movf	waitms_temp,W		; Load row into WREG
@@ -78,7 +78,7 @@ menu_gassetup_list:
 ; New v1.44se
 menu_gassetup_Tx:
 	movf    decodata+0,W
-	call	PLED_grey_inactive_gas			; Sets Greyvalue for inactive gases	
+	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases	
 	call	word_processor
 
 	WIN_LEFT	.48
@@ -149,7 +149,7 @@ menu_gassetup_Err:
 ; Changed v1.44se
 menu_gassetup_list0:
 	movf    decodata+0,W
-	call	PLED_grey_inactive_gas			; Sets Greyvalue for inactive gases
+	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases
 	call	word_processor
 
 	WIN_LEFT	.105
@@ -167,10 +167,10 @@ menu_gassetup_list0:
 	output_8
     PUTC	TXT_METER_C
 	movf    decodata+0,W
-	call	PLED_grey_inactive_gas			; Sets Greyvalue for inactive gases
+	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases
 	call	word_processor	
 
-	call	PLED_standard_color
+	call	DISP_standard_color
 	
 	incf	decodata+0,F
 	movlw	d'5'	
@@ -179,7 +179,7 @@ menu_gassetup_list0:
 
 	DISPLAYTEXT	.11                     ; Exit
 	call	wait_switches               ; Waits until switches are released, resets flag if button stays pressed!
-	call	PLED_menu_cursor
+	call	DISP_menu_cursor
 
 gassetup_list_loop:
 	call	check_switches_logbook
@@ -210,7 +210,7 @@ gassetup_list2:
 
 gassetup_list3:
 	clrf	timeout_counter2
-	call	PLED_menu_cursor
+	call	DISP_menu_cursor
 
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 
@@ -278,7 +278,7 @@ menu_gassetup_page1:
 	bcf		first_FA				; Here: =1: -, =0: +
 
 menu_gassetup0:
-	call	PLED_ClearScreen
+	call	DISP_ClearScreen
 	DISPLAYTEXT	.147		; More...
 	DISPLAYTEXT	.11			; Exit
 
@@ -402,7 +402,7 @@ menu_gassetup1:
 	STRCAT_PRINT  "  "
 
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
-	call	PLED_menu_cursor
+	call	DISP_menu_cursor
 
 gassetup_loop:
 	call	check_switches_logbook
@@ -434,7 +434,7 @@ gassetup2:
 gassetup3:
 
 	clrf	timeout_counter2
-	call	PLED_menu_cursor
+	call	DISP_menu_cursor
 
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 
@@ -606,7 +606,7 @@ restore_gas:
 
 
 next_gas_page:
-	call	PLED_ClearScreen		
+	call	DISP_ClearScreen		
 	movlw	d'1'
 	movwf	menupos
 	bcf		first_FA				; Here: =1: -, =0: +
@@ -677,13 +677,13 @@ menu_firstgas1:
 	call		sub16					;  sub_c = sub_a - sub_b	
 	btfss		neg_flag
 	bra			gassetup_color_code_ppo2_1; too high -> Warning Color!
-	call		PLED_standard_color
+	call		DISP_standard_color
 	bra			gassetup_color_code_ppo2_2
 gassetup_color_code_ppo2_1:
-	call	PLED_warnings_color
+	call	DISP_warnings_color
 gassetup_color_code_ppo2_2:
 	call	word_processor	
-	call	PLED_standard_color
+	call	DISP_standard_color
 
 	WIN_TOP		.95
 	WIN_LEFT	.95
@@ -739,7 +739,7 @@ active_gas_display_end:
 	call	word_processor	
 
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
-	call	PLED_menu_cursor
+	call	DISP_menu_cursor
 
 next_gas_page_loop:
 	call	check_switches_logbook
@@ -771,7 +771,7 @@ next_gas_page2:
 
 next_gas_page3:
 	clrf	timeout_counter2
-	call	PLED_menu_cursor
+	call	DISP_menu_cursor
 	
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 
@@ -897,7 +897,7 @@ change_gas_depth_default:
 
 ; Changed v1.44se
 gassetup_title_bar2:
-	call	PLED_topline_box
+	call	DISP_topline_box
 	WIN_INVERT	.1	; Init new Wordprocessor	
 	WIN_TOP		.2
 	WIN_LEFT	.0

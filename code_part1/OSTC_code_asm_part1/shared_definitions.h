@@ -169,15 +169,15 @@ TAB_UCHAR (char_I_deco_He_ratio, NUM_GAS); // new in v.101
 extern unsigned char win_top, win_leftx2, win_font, win_invert;
 extern ram unsigned char letter[26];
 
-extern void PLED_ClearScreen(void);
-extern void PLED_standard_color(void);
-extern void PLED_warnings_color(void);
-extern void PLED_divemask_color(void);
+extern void DISP_ClearScreen(void);
+extern void DISP_standard_color(void);
+extern void DISP_warnings_color(void);
+extern void DISP_divemask_color(void);
 
-extern void PLED_box(void);
-extern void PLED_frame(void);
+extern void DISP_box(void);
+extern void DISP_frame(void);
 extern void aa_wordprocessor(void);
 
 /// Set WREG color.
-extern void PLED_set_color(void);
+extern void DISP_set_color(void);
 #endif

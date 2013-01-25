@@ -465,7 +465,7 @@
     TCODE    .94,    .54,    "Cronometro" 		 ;310 Stopwatch             (BIG Stopwatch in Gauge mode)
 ; Cave consomation
     TCODE    .0,    .0,      "Cave Bail."                ;311 Cave Bail.            (=10 chars.)
-; OLED Brightness settings
+; DISPLAY Brightness settings
     TCODE    .103,  .155,    "Eco "	    	         ;312 Eco 					(Same length as #313!)
     TCODE    .103,  .155,    "High" 	                 ;313 High					(Same length as #312!)
 

@@ -32,10 +32,10 @@ diveloop:
 
 ; Startup Tasks for all modes
 	ostc_debug	'R'		; Sends debug-information to screen if debugmode active
-	call	PLED_ClearScreen			; clean up OLED
-	call	PLED_divemode_mask			; Display mask
-	call	PLED_temp_divemode			; Displays temperature
-   	call	PLED_active_gas_divemode	; Display gas
+	call	DISP_ClearScreen			; clean up DISPLAY
+	call	DISP_divemode_mask			; Display mask
+	call	DISP_temp_divemode			; Displays temperature
+   	call	DISP_active_gas_divemode	; Display gas
 
 ; Reload last customview
 	read_int_eeprom	d'94'				; Read last selected customview dive mode into EEDATA
@@ -51,7 +51,7 @@ diveloop:
 	bra		diveloop_loop				; Skip in apnoe mode
 
 ; Startup Tasks for deco modes
-	call	PLED_display_ndl_mask		; display "no stop" if not in gauge or apnoe mode
+	call	DISP_display_ndl_mask		; display "no stop" if not in gauge or apnoe mode
 
 	btfss	FLAG_const_ppO2_mode		; only in const_ppO2_mode
 	bra		diveloop_loop				; OC modes, skip
@@ -80,7 +80,7 @@ diveloop_loop1y:
 	bra		diveloop_loop1z				; No
 	btfsc	premenu						; Is the divemode menu active?
 	bra		diveloop_loop1z				; Yes
-	call	PLED_divemins				; Display (new) divetime!
+	call	DISP_divemins				; Display (new) divetime!
 diveloop_loop1z:
 	bcf		update_divetime				; clear flag
 
@@ -89,7 +89,7 @@ diveloop_loop1z:
 
 ; Tasks only for OC modes
 	btfsc	show_safety_stop				; Show the safety stop?
-	call	PLED_show_safety_stop			; Yes, show/delete if done.
+	call	DISP_show_safety_stop			; Yes, show/delete if done.
 	call	check_ppO2						; check ppO2 and displays warning if required
 	call	calc_deko_divemode				; calculate decompression and display result (any two seconds)
 	bra		diveloop_loop1x					; Common Tasks
@@ -97,7 +97,7 @@ diveloop_loop1z:
 ; Tasks only for Gauge mode
 diveloop_loop1a:
 	btfss	premenu							; Is the divemode menu active?
-	call	PLED_divemins					; display (new) divetime!
+	call	DISP_divemins					; display (new) divetime!
 	call	customview_second				; Do every-second tasks for the custom view area
 	call	timeout_divemode				; dive finished? This routine sets the required flags
 
@@ -122,8 +122,8 @@ diveloop_loop1b:
 ; Tasks only for ppO2 mode
 diveloop_loop1c:
 	btfsc	show_safety_stop				; Show the safety stop?
-	call	PLED_show_safety_stop			; Yes, show/delete if done.
-	call	PLED_const_ppO2_value			; display const ppO2 setting in [bar]
+	call	DISP_show_safety_stop			; Yes, show/delete if done.
+	call	DISP_const_ppO2_value			; display const ppO2 setting in [bar]
 	call	calc_deko_divemode				; calculate decompression and display result (any two seconds)
 	btfsc	is_bailout						; Are we in Bailout mode?
 	call	check_ppO2_bail					; Yes, display ppO2 (If required)
@@ -145,7 +145,7 @@ diveloop_loop1x:
 ;	bra		diveloop_loop1z				; No
 ;	btfsc	premenu						; Is the divemode menu active?
 ;	bra		diveloop_loop1z				; Yes
-;	call	PLED_divemins				; Display (new) divetime!
+;	call	DISP_divemins				; Display (new) divetime!
 ;
 ;diveloop_loop1z:
 ;	bcf		update_divetime				; clear flag
@@ -213,19 +213,19 @@ timeout_premenu_divemode:
 	return                                  ; No!
 
 	bcf		premenu                         ; Yes, so clear "Menu?" and clear pre_menu bit
-	call	PLED_menu_clear                 ; Remove "Menu?"
-	call	PLED_divemode_mask				; And redraw mask (Redraw missing "T" from "Tauchzeit" in german text version)
-	call	PLED_divemins					; Redraw divetime
+	call	DISP_menu_clear                 ; Remove "Menu?"
+	call	DISP_divemode_mask				; And redraw mask (Redraw missing "T" from "Tauchzeit" in german text version)
+	call	DISP_divemins					; Redraw divetime
 	return
 
 divemode_apnoe_tasks:                       ; 1 sec. Apnoe tasks
-	call	PLED_divemins					; display (new) divetime!
-	call	PLED_display_apnoe_descent		; Show descent timer
+	call	DISP_divemins					; display (new) divetime!
+	call	DISP_display_apnoe_descent		; Show descent timer
 
 	btfsc	divemode2						; Time running?
 	bra		divemode_apnoe_tasks2			; New descent, reset data if flag is set
 
-	call	PLED_display_apnoe_surface
+	call	DISP_display_apnoe_surface
 	incf	apnoe_surface_secs,F
 	movlw	d'60'
 	cpfseq	apnoe_surface_secs
@@ -247,7 +247,7 @@ divemode_apnoe_tasks2:
 	call	apnoe_calc_maxdepth				; Yes!
 	
 divemode_apnoe_tasks3:
-	call	PLED_apnoe_clear_surface		; Clear Surface timer
+	call	DISP_apnoe_clear_surface		; Clear Surface timer
 	
 	clrf	apnoe_timeout_counter			; Delete timeout
 	clrf	apnoe_surface_secs
@@ -319,7 +319,7 @@ calc_deko_divemode1a:
 	GETCUSTOM8	d'27'					; cns_display_high
 	subwf	lo,W
 	btfsc	STATUS,C
-	call	PLED_display_cns			; Show CNS
+	call	DISP_display_cns			; Show CNS
 	call	check_gas_change			; Checks if a better gas should be selected (by user)
 
 ;NOTE: always set full gas list, because the user can switch gas,
@@ -466,8 +466,8 @@ reset_safety_stop2:
 	return									; No, don't delete it
 	bcf		show_safety_stop				; Clear flag
 	bcf		safety_stop_active				; Clear flag
-    call	PLED_clear_decoarea				; Yes, Clear stop
-	goto	PLED_display_ndl_mask			; Show NDL again (And return)
+    call	DISP_clear_decoarea				; Yes, Clear stop
+	goto	DISP_display_ndl_mask			; Show NDL again (And return)
 
 ;-----------------------------------------------------------------------------
 ; calculate ppO2 in 0.01bar (e.g. 150 = 1.50 bar ppO2)
@@ -610,13 +610,13 @@ calc_deko_divemode4:
 	bra		calc_deko_divemode3					; Yes!
 
 	btfsc	dekostop_active             ; Already in nodeco mode ?
-	call	PLED_display_ndl_mask       ; Clear deco data, display nostop time
+	call	DISP_display_ndl_mask       ; Clear deco data, display nostop time
 	bcf		dekostop_active             ; clear flag
 
 	clrf	decodata+0                  ; for profile memory
 	movff	char_O_nullzeit,decodata+1  ; nostop time
 	
-	call	PLED_display_ndl            ; display no deco limit
+	call	DISP_display_ndl            ; display no deco limit
 
 calc_deko_divemode5:
     ; Check if extra cycles are needed to compute @5 variant:
@@ -635,13 +635,13 @@ calc_deko_divemode5:
 
 calc_deko_divemode3:
 	btfss	dekostop_active             ; Already in deco mode ?
-	call	PLED_display_deko_mask      ; clear nostop time, display decodata
+	call	DISP_display_deko_mask      ; clear nostop time, display decodata
 	bsf		dekostop_active             ; Set flag
 
 	movff	char_O_first_deco_depth,decodata+0	; ceiling
 	movff	char_O_first_deco_time,decodata+1	; length of first stop in minues
 
-	call	PLED_display_deko           ; display decodata
+	call	DISP_display_deko           ; display decodata
     bra     calc_deko_divemode5
     
 ;-----------------------------------------------------------------------------
@@ -970,11 +970,11 @@ update_velocity:
 	cpfseq	lo					; =1?
 	bra		update_velocity1	; No
 
-	call	PLED_display_velocity_graphical
+	call	DISP_display_velocity_graphical
 	return
 
 update_velocity1:
-	call	PLED_display_velocity
+	call	DISP_display_velocity
 	return
 
 do_not_display_velocity:
@@ -982,7 +982,7 @@ do_not_display_velocity:
 	return
 		
 	bcf		display_velocity			; Velocity was displayed, delete velocity now
-	call	PLED_display_velocity_clear
+	call	DISP_display_velocity_clear
 	return
 
 check_ppO2:							    ; check current ppO2 and display warning if required
@@ -1080,12 +1080,12 @@ check_ppO2_1:
 	btfss		ppO2_display_active	; is the value displayed?
 	bra			check_ppO2_3		; No, so clear not required
 	
-	call		PLED_show_ppO2_clear; Clear ppO2 value
+	call		DISP_show_ppO2_clear; Clear ppO2 value
 	bcf			ppO2_display_active	; clear flag
 	bra			check_ppO2_3		; done
 
 check_ppO2_2:
-	call		PLED_show_ppO2		; Display ppO2 (stored in xC)
+	call		DISP_show_ppO2		; Display ppO2 (stored in xC)
 	bsf			ppO2_display_active	; Set flag		
 
 check_ppO2_3:
@@ -1226,7 +1226,7 @@ check_gas_change6:
 	bcf		better_gas_available	; Yes, do not blink better gas
 
 check_gas_change7:
-	call	PLED_active_gas_divemode; Display gas, if required (and with "*" if required...)
+	call	DISP_active_gas_divemode; Display gas, if required (and with "*" if required...)
 	return
 
 ;=============================================================================
@@ -1707,7 +1707,7 @@ update_divemode1:						; update any second
 	cpfseq	last_temperature+1
 	bsf		temp_changed			    ; Yes
 	btfsc	temp_changed	
-	call	PLED_temp_divemode		    ; Displays temperature
+	call	DISP_temp_divemode		    ; Displays temperature
 
 	bcf		pres_changed			; Display new depth?
     SAFE_2BYTE_COPY amb_pressure, lo
@@ -1722,13 +1722,13 @@ update_divemode1:						; update any second
 	bsf		pres_changed				
 
 	btfsc	pres_changed	
-	call	PLED_depth					; Displays new depth
+	call	DISP_depth					; Displays new depth
 	return
 
 update_divemode60:					; update any minute
 	call	get_battery_voltage			; gets battery voltage
 	call	set_powersafe				; red LED blinking if battery is low
-	call	PLED_max_pressure			; No, use normal max. depth
+	call	DISP_max_pressure			; No, use normal max. depth
 	call	check_temp_extrema			; check for new temperature extremas
 	call	customview_minute			; Do every-minute tasks for the custom view area
 	bcf		oneminupdate
@@ -1746,7 +1746,7 @@ set_max_depth:
 								;max_pressure<rel_pressure
 	movff	sub_b+0,max_pressure+0
 	movff	sub_b+1,max_pressure+1
-	call	PLED_max_pressure			; No, use normal max. depth
+	call	DISP_max_pressure			; No, use normal max. depth
 	return
 
 set_min_temp:
@@ -1798,7 +1798,7 @@ set_dive_modes_common:
 	bsf		divemode				; (Re-)Set divemode flag
 	bsf		divemode2				; displayed divetime is running
 	btfsc	timeout_display			; Was the timeout displayed?
-	call	PLED_divemode_timeout_clear	; Yes, Clear (once)
+	call	DISP_divemode_timeout_clear	; Yes, Clear (once)
 	return
 
 set_dive_modes2:
@@ -1819,9 +1819,9 @@ set_dive_modes2:
 
 
 	btfss	dekostop_active			; Is a deco stop displayed?
-	call	PLED_divemode_timeout	; No, show the divemode timeout here...
+	call	DISP_divemode_timeout	; No, show the divemode timeout here...
 	btfsc	dekostop_active			; Is a deco stop displayed?
-	call	PLED_divemode_timeout2	; Yes, show red warning divemode counter
+	call	DISP_divemode_timeout2	; Yes, show red warning divemode counter
 	return
 
 set_dive_modes3:					; High-altitude mode
@@ -1975,11 +1975,11 @@ diveloop_boot:
 	bsf		divemode2					; displayed divetime is running (Divetime starts HERE)
 
 	clrf    EEADRH                      ; Make sure to select eeprom bank 0
-	call	PLED_brightness_low
+	call	DISP_brightness_low
 	read_int_eeprom	d'90'				; Brightness offset? (Dim>0, Normal = 0)
 	movlw	d'0'
 	cpfsgt	EEDATA
-	call	PLED_brightness_full
+	call	DISP_brightness_full
 
     bcf     use_aGF
 	bcf		timeout_display

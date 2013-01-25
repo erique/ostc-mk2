@@ -95,10 +95,10 @@ test_switches_divemode2a:
 test_switches_divemode2b:
 	bsf		menubit					; Enter Divemode-Menu!
 	bcf		premenu					; clear premenu flag
-	call	PLED_clear_divemode_menu		; Clear dive mode menu area
-	call	PLED_divemode_menu_mask_first	; Write Divemode menu1 mask
+	call	DISP_clear_divemode_menu		; Clear dive mode menu area
+	call	DISP_divemode_menu_mask_first	; Write Divemode menu1 mask
 	bcf		display_set_simulator			; Clear Simulator-Menu flag
-	call	PLED_divemenu_cursor	; show cursor
+	call	DISP_divemenu_cursor	; show cursor
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 	return
 
@@ -156,9 +156,9 @@ test_switches_divemode_menu1:
 	incf	menupos,F						; No, +1, skip to menuos=4
 
 test_switches_divemode_menu1a:
-	call	PLED_divemenu_cursor		; update cursor
+	call	DISP_divemenu_cursor		; update cursor
 	btfsc	display_set_gas				; In Gaslist or Setpoint list menu?
-	call	PLED_show_change_depth		; Yes, show change depth for gas #menupos
+	call	DISP_show_change_depth		; Yes, show change depth for gas #menupos
 	return
 
 test_switches_divemode_menu3:
@@ -193,7 +193,7 @@ test_switches_divemode_menu3:
 	dcfsnz	menupos,F
 	bra		divemode_menu3				; Customview-function
 	dcfsnz	menupos,F
-	bra		divemode_toggle_brightness	; Toggle OLED-Brightness
+	bra		divemode_toggle_brightness	; Toggle DISPLAY-Brightness
 	dcfsnz	menupos,F
 	bra		timeout_divemenu2           ; Quit divemode menu
 	bra		timeout_divemenu2			; Quit divemode menu
@@ -268,37 +268,37 @@ divemode_toggle_brightness:
 	tstfsz	EEDATA						; Was dimmed?
 	bra		divemode_toggle_brightness1	; Yes...
 
-	call	PLED_brightness_low
+	call	DISP_brightness_low
 	movlw	d'1'
 	movwf	EEDATA						; Copy to EEDATA
 	write_int_eeprom	d'90'			; Brightness offset? (Dim=1, Normal = 0)
 	bra		divemode_toggle_brightness3
 
 divemode_toggle_brightness1:
-	call	PLED_brightness_full
+	call	DISP_brightness_full
 	movlw	d'0'
 	movwf	EEDATA						; Copy to EEDATA
 	write_int_eeprom	d'90'			; Brightness offset? (Dim=1, Normal = 0)
 
 divemode_toggle_brightness3:
 ; Now, redraw all outputs (All modes)
-	call	PLED_active_gas_divemode	; Display gas, if required
-	call	PLED_temp_divemode			; Displays temperature
-	call	PLED_depth					; Displays new depth...
-	call	PLED_max_pressure			; ...and max. depth
+	call	DISP_active_gas_divemode	; Display gas, if required
+	call	DISP_temp_divemode			; Displays temperature
+	call	DISP_depth					; Displays new depth...
+	call	DISP_max_pressure			; ...and max. depth
 
 	bra		timeout_divemenu2			; quit menu!
 
 divemenu_de_activate:
 	bsf		display_set_active			; Set display flag
 	bcf		display_set_xgas			; Clear Flag
-	call	PLED_clear_divemode_menu	; Clear Menu
+	call	DISP_clear_divemode_menu	; Clear Menu
 
-	call	PLED_de_activelist			; show (de)active gaslist
+	call	DISP_de_activelist			; show (de)active gaslist
 
 	movlw	d'1'
 	movwf	menupos						; reset cursor
-	call	PLED_divemenu_cursor		; update cursor
+	call	DISP_divemenu_cursor		; update cursor
 	return
 
 divemenu_de_activate2:					; Toggle active flag
@@ -323,52 +323,52 @@ divemenu_de_activate2_g1:
 	btg		gaslist_active,0    		; Toggle flag
 	movlw	d'2'
 	movwf	menupos						; reset cursor
-	call	PLED_de_activelist			; show (de)active gaslist
+	call	DISP_de_activelist			; show (de)active gaslist
 	return
 
 divemenu_de_activate2_g2:
 	btg		gaslist_active,1    		; Toggle flag
 	movlw	d'3'
 	movwf	menupos						; reset cursor
-	call	PLED_de_activelist			; show (de)active gaslist
+	call	DISP_de_activelist			; show (de)active gaslist
 	return
 
 divemenu_de_activate2_g3:
 	btg		gaslist_active,2    		; Toggle flag
 	movlw	d'4'
 	movwf	menupos						; reset cursor
-	call	PLED_de_activelist			; show (de)active gaslist
+	call	DISP_de_activelist			; show (de)active gaslist
 	return
 
 divemenu_de_activate2_g4:
 	btg		gaslist_active,3    		; Toggle flag
 	movlw	d'5'
 	movwf	menupos						; reset cursor
-	call	PLED_de_activelist			; show (de)active gaslist
+	call	DISP_de_activelist			; show (de)active gaslist
 	return
 
 divemenu_de_activate2_g5:
 	btg		gaslist_active,4    		; Toggle flag
 	movlw	d'6'
 	movwf	menupos						; reset cursor
-	call	PLED_de_activelist			; show (de)active gaslist
+	call	DISP_de_activelist			; show (de)active gaslist
 	return
 
 divemode_set_xgas:						; Set the extra gas...
 	bsf		display_set_xgas			; Set Flag
 	bcf		display_set_gas				; Clear Flag
-	call	PLED_clear_divemode_menu	; Clear Menu
+	call	DISP_clear_divemode_menu	; Clear Menu
 
 	movff	char_I_O2_ratio, EEDATA		; Reset Gas6 to current gas
 	write_int_eeprom	d'24'
 	movff	char_I_He_ratio, EEDATA
 	write_int_eeprom	d'25'
 
-	call	PLED_divemode_set_xgas		; Show mask
+	call	DISP_divemode_set_xgas		; Show mask
 
 	movlw	d'1'
 	movwf	menupos						; reset cursor
-	call	PLED_divemenu_cursor		; update cursor
+	call	DISP_divemenu_cursor		; update cursor
 	return
 
 divemode_menu_simulator:
@@ -377,11 +377,11 @@ divemode_menu_simulator:
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 	bsf		display_set_simulator	; Set Flag
 	bsf		menu3_active			; So "+1" is accessible at all times
-	call	PLED_clear_divemode_menu	; Clear Menu
-	call	PLED_divemode_simulator_mask; Show mask
+	call	DISP_clear_divemode_menu	; Clear Menu
+	call	DISP_divemode_simulator_mask; Show mask
 	movlw	d'1'
 	movwf	menupos						; reset cursor
-	call	PLED_divemenu_cursor		; update cursor
+	call	DISP_divemenu_cursor		; update cursor
 	return
 
 divemode_menu_simulator2:
@@ -400,7 +400,7 @@ divemode_menu_simulator2:
 	bra		timeout_divemenu2			; quit underwater menu!
 
 divemode_menu_simulator_common:
-	call	PLED_divemode_simulator_mask		; Redraw Simualtor mask
+	call	DISP_divemode_simulator_mask		; Redraw Simualtor mask
 
 	; Check limits (130m and 0m)
 	movlw	LOW		d'14000'            ; Compare to 14bar=14000mbar (130m).
@@ -476,7 +476,7 @@ divemode_menu_simulator_m1:
 
 divemenu_see_decoplan:
 	bsf		display_see_deco			; set flag
-	call	PLED_clear_divemode_menu	; Clear Menu
+	call	DISP_clear_divemode_menu	; Clear Menu
 	
 	bcf		last_ceiling_gf_shown		; Clear flag
     clrf    decoplan_page               ; Starts on page 0
@@ -489,7 +489,7 @@ divemenu_see_decoplan2:
 
 divemenu_see_decoplan2_1:
 	clrf	timeout_counter3			; Clear timeout Divemode menu
-	call	PLED_decoplan   			; Display the new screen
+	call	DISP_decoplan   			; Display the new screen
 	return
 
 divemenu_see_decoplan2_0:
@@ -523,7 +523,7 @@ divemenu_set_xgas2_heminus2:
 	movff	lo, EEDATA
 	write_int_eeprom	d'25'			; He Value
 
-	call	PLED_divemode_set_xgas		; Redraw menu
+	call	DISP_divemode_set_xgas		; Redraw menu
 	movlw	d'5'
 	movwf	menupos						; reset cursor
 	return
@@ -550,7 +550,7 @@ divemenu_set_xgas2_heplus3:				; save current value
 	movff	lo, EEDATA
 	write_int_eeprom	d'25'			; He Value
 
-	call	PLED_divemode_set_xgas		; Redraw menu
+	call	DISP_divemode_set_xgas		; Redraw menu
 	movlw	d'4'
 	movwf	menupos						; reset cursor
 	return
@@ -570,7 +570,7 @@ divemenu_set_xgas2_o2minus2:
 	movff	lo, EEDATA
 	write_int_eeprom	d'24'			; O2 Value
 
-	call	PLED_divemode_set_xgas		; Redraw menu
+	call	DISP_divemode_set_xgas		; Redraw menu
 	movlw	d'3'
 	movwf	menupos						; reset cursor
 	return
@@ -597,7 +597,7 @@ divemenu_set_xgas2_o2plus3:				; save current value
 	movff	lo, EEDATA
 	write_int_eeprom	d'24'			; O2 Value
 
-	call	PLED_divemode_set_xgas		; Redraw menu
+	call	DISP_divemode_set_xgas		; Redraw menu
 	movlw	d'2'
 	movwf	menupos						; reset cursor
 	return
@@ -620,7 +620,7 @@ divemenu_set_xgas2_exit:
     clrf    WREG
     movff   WREG,char_O_deco_status     ; Restart decoplan computation mH
     bsf		is_bailout					;=1: CC mode, but bailout active!		
-	clrf	lo							; clear Setpoint, PLED_const_ppO2_value now displayes "Bail"
+	clrf	lo							; clear Setpoint, DISP_const_ppO2_value now displayes "Bail"
 	movff	lo,char_I_const_ppO2
     movlw   6
     movff   WREG,char_I_current_gas     ; Current gas is Gas6 (manual setting).
@@ -632,28 +632,28 @@ divemenu_set_gas:
 
 divemenu_set_gas_2:
 	bsf		display_set_gas				; set flag	
-	call	PLED_clear_divemode_menu	; Clear Menu
-	call	PLED_gas_list				; Display all 5 gases
+	call	DISP_clear_divemode_menu	; Clear Menu
+	call	DISP_gas_list				; Display all 5 gases
 
 	movlw	d'1'						; Reset cursor
 	btfsc	better_gas_available		;=1: A better gas is available and a gas change is advised in divemode
 	movf	better_gas_number,W			; better gas 1-5
 	movwf	menupos						; reset cursor
-	call	PLED_divemenu_cursor		; update cursor
-	call	PLED_show_change_depth		; And show the first change depth
+	call	DISP_divemenu_cursor		; update cursor
+	call	DISP_show_change_depth		; And show the first change depth
 	return
 
 divemenu_set_setpoint:
 	bsf		display_set_setpoint		; set flag	
 	bsf		display_set_gas				; set flag	
 
-	call	PLED_clear_divemode_menu	; Clear Menu
-	call	PLED_splist_start			; Display SetPoints
+	call	DISP_clear_divemode_menu	; Clear Menu
+	call	DISP_splist_start			; Display SetPoints
 	DISPLAYTEXT d'137'  				; Bailout (as a sub-menu)
     DISPLAYTEXT d'232'                  ; Diluent (as a sub-menu)
 	movlw	d'1'
 	movwf	menupos						; reset cursor
-	call	PLED_divemenu_cursor		; update cursor
+	call	DISP_divemenu_cursor		; update cursor
 	return
 
 
@@ -665,7 +665,7 @@ divemenu_set_gas2:
 	bra		divemenu_set_gas2a			; no, choose gas
 	; Yes, so select SP 1-3
 	bcf		is_bailout					;=1: CC mode, but bailout active!		
-	call	PLED_show_ppO2_clear		; Clear ppO2 value
+	call	DISP_show_ppO2_clear		; Clear ppO2 value
 	
 divemenu_set_gas1:
 	movlw	d'1'				
@@ -683,11 +683,11 @@ divemenu_set_gas1b:
     bcf		display_set_setpoint		; Clear Flag
     bcf     display_set_gas             ; Clear Flag
     bsf     display_set_diluent         ; Set Flag
-	call	PLED_clear_divemode_menu	; Clear Menu
-	call	PLED_diluent_list			; Display all 5 diluents
+	call	DISP_clear_divemode_menu	; Clear Menu
+	call	DISP_diluent_list			; Display all 5 diluents
 	movlw	d'1'						; Reset cursor
 	movwf	menupos						; reset cursor
-	call	PLED_divemenu_cursor		; update cursor
+	call	DISP_divemenu_cursor		; update cursor
 	return
 
 divemode_set_diluent2:                  ; Choose diluent #menupos
@@ -746,7 +746,7 @@ divemenu_set_gas2a:
 
 divemenu_set_gas2b:
 	bsf		is_bailout					;=1: CC mode, but bailout active!		
-	clrf	lo							; clear Setpoint, PLED_const_ppO2_value now displayes "Bail"
+	clrf	lo							; clear Setpoint, DISP_const_ppO2_value now displayes "Bail"
 	movff	lo,char_I_const_ppO2		
 
 	bcf		display_set_gas				; clear flag
@@ -801,7 +801,7 @@ timeout_divemenu1:
 timeout_divemenu2:					; quit divemode menu
 ; Restore some outputs
 	clrf	decoplan_page           ; Page 0-1 of deco list
-	call	PLED_clear_divemode_menu; Clear dive mode menu
+	call	DISP_clear_divemode_menu; Clear dive mode menu
 
 	btfsc	FLAG_apnoe_mode				; Ignore in Apnoe mode
 	bra		timeout_divemenu2b			; skip!
@@ -810,17 +810,17 @@ timeout_divemenu2:					; quit divemode menu
 
 	bcf		menubit
 	btfsc	dekostop_active
-	call	PLED_display_deko_mask	; clear nostop time, display decodata
+	call	DISP_display_deko_mask	; clear nostop time, display decodata
 	btfss	dekostop_active
-	call	PLED_display_ndl_mask	;  Clear deco data, display nostop time
+	call	DISP_display_ndl_mask	;  Clear deco data, display nostop time
 
     btfsc   decoplan_invalid        ; The decoplan needs to updated
     bra     timeout_divemenu2a      ; Yes, skip update
 
 	btfsc	dekostop_active
-	call	PLED_display_deko		; Update deco display at once
+	call	DISP_display_deko		; Update deco display at once
 	btfss	dekostop_active
-	call	PLED_display_ndl		; Update NDL display at once
+	call	DISP_display_ndl		; Update NDL display at once
 
 timeout_divemenu2a:
 	btfsc	safety_stop_active
@@ -829,9 +829,9 @@ timeout_divemenu2a:
 timeout_divemenu2b:
 	bcf		menubit
 	bcf		premenu					; Yes, clear flags and menu, display dive time and mask again
-	call	PLED_active_gas_divemode; Display gas, if required
-	call	PLED_divemode_mask		; Display mask
-	call	PLED_divemins			; Display (new) divetime!
+	call	DISP_active_gas_divemode; Display gas, if required
+	call	DISP_divemode_mask		; Display mask
+	call	DISP_divemins			; Display (new) divetime!
 	call	customview_mask			; Redraw current customview mask
 	clrf	timeout_counter3		; Also clear timeout
 	bcf		display_see_deco		; clear all display flags
@@ -850,12 +850,12 @@ timeout_divemenu3:
     movff   char_O_deco_status,WREG     ; Get last computation state (BANK safe)
     iorwf   WREG                        ; Is it zero ?
     btfsc   STATUS,Z
-	call	PLED_decoplan               ; Yes: new data available.
+	call	DISP_decoplan               ; Yes: new data available.
 	bra		timeout_divemenu1			; Check timeout
 
 timeout_divemenu6:
 	; Update Simulator Mask
 	bsf		menu3_active				; So "+1" is accessible at all times
-	call	PLED_divemode_simulator_mask; Show mask
-	call	PLED_divemenu_cursor		; update cursor
+	call	DISP_divemode_simulator_mask; Show mask
+	call	DISP_divemenu_cursor		; update cursor
 	bra		timeout_divemenu1			; Check timeout

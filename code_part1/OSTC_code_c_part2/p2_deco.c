@@ -317,11 +317,11 @@ float  sim_pres_tissue_He[NUM_COMP];             // 16 floats = 64 bytes.
 #ifdef __DEBUG
 void assert_failed(PARAMETER short int line)
 {
-    extern void PLED_resetdebugger(void);
+    extern void DISP_resetdebugger(void);
     extern unsigned short temp10;
 
     temp10 = line;          // Show source line number as stack depth.
-    PLED_resetdebugger();
+    DISP_resetdebugger();
 }
 #endif
 

@@ -58,7 +58,7 @@ dump_screen:
 
 dump_screen_0:
 
-    ;---- Send OLED box command for the full screen window -------------------
+    ;---- Send DISPLAY box command for the full screen window -------------------
     mullw       0                       ; PRODH:L <- 0
 
     AA_CMD_WRITE    0x35                ; VerticalStartAddress HIGH:LOW
@@ -88,8 +88,8 @@ dump_screen_mk2:
     AA_DATA_WRITE_PROD                  ; 00:00
 
     AA_CMD_WRITE    0x22                ; Start reading.
-    rcall       PLED_DataRead           ; Dummy pixel to skip.
-    rcall       PLED_DataRead           ; Dummy pixel to skip.
+    rcall       DISP_DataRead           ; Dummy pixel to skip.
+    rcall       DISP_DataRead           ; Dummy pixel to skip.
 
    	movlw	    .160                    ; 160x2 columns
 	movwf	    ds_column
@@ -106,9 +106,9 @@ dump_screen_1:
 	movlw	    .240                    ; 240 lines, once.
 	movwf	    ds_line
 dump_screen_2:
-    rcall       PLED_DataRead           ; read pixel-high byte
+    rcall       DISP_DataRead           ; read pixel-high byte
     movwf       PRODH
-    rcall       PLED_DataRead           ; read pixel-low byte
+    rcall       DISP_DataRead           ; read pixel-low byte
     movwf       PRODL
     rcall       dump_screen_pixel
 
@@ -120,9 +120,9 @@ dump_screen_2:
 	movlw	    .240                    ; 240 lines, twice.
 	movwf	    ds_line
 dump_screen_3:
-    rcall       PLED_DataRead           ; read pixel-high byte
+    rcall       DISP_DataRead           ; read pixel-high byte
     movwf       PRODH
-    rcall       PLED_DataRead           ; read pixel-low byte
+    rcall       DISP_DataRead           ; read pixel-low byte
     movwf       PRODL
     rcall       dump_screen_pixel
 

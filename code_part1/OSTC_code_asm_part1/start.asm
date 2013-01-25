@@ -28,7 +28,7 @@ start:
 	clrf    temp10+1
 	call	init
 	btfsc	divemode				; Reset from Divemode?
-	call	PLED_resetdebugger		; Yes! Something went wrong, show reset informations
+	call	DISP_resetdebugger		; Yes! Something went wrong, show reset informations
 start3:
 	clrf	STKPTR					; Clear Stackpointer
 	lfsr	FSR0,year+1				; Clear rambank 1-9, do not delete RTC registers
@@ -155,7 +155,7 @@ check_firmware_new:
 	movlw	LOW		0x103
 	movwf	EEADR
 	movlw	HIGH 	0x103
-	movwf	EEADRH					; OLED brightness (=0: Eco, =1: High)
+	movwf	EEADRH					; DISPLAY brightness (=0: Eco, =1: High)
 	movlw	.0
 	movwf	EEDATA
 	call	write_eeprom			; write byte
@@ -263,7 +263,7 @@ restart1:
 	call	reset_gases
 ;	call	reset_all_cf
 ; Show info screen
-	call	PLED_boot               ; PLED boot (Incl. Clear Screen!)
+	call	DISPLAY_boot               ; DISP boot (Incl. Clear Screen!)
 	rcall	display_new_cf_installed; Show info screen
 ; Save new number of current CF count
 	movlw	max_custom_number		; Defined in definitions.asm
@@ -288,23 +288,23 @@ restart2:
 	cpfseq	EEDATA					; is 0xAA already?
 	call	logbook_convert_64k		; No, convert now (And write 0xAA to internal EEPROM 0x100)
 
-; Set OLED brightness flag
+; Set DISPLAY brightness flag
 	movlw	LOW		0x103
 	movwf	EEADR
 	movlw	HIGH 	0x103
-	movwf	EEADRH					; OLED brightness (=0: Eco, =1: High)
+	movwf	EEADRH					; DISPLAY brightness (=0: Eco, =1: High)
 	call	read_eeprom				; read byte
-	bcf		oled_brightness_high	; Eco mode
+	bcf		DISPLAY_brightness_high	; Eco mode
 	movlw	.0
 	cpfseq	EEDATA					; High?
-	bsf		oled_brightness_high	; Yes!
+	bsf		DISPLAY_brightness_high	; Yes!
 
 	clrf	EEADRH					; Reset EEADRH
 	goto	surfloop				; Jump to Surfaceloop!
 	
 
 display_new_cf_installed:
-	call	PLED_new_cf_warning		; Display new CF warning screen
+	call	DISP_new_cf_warning		; Display new CF warning screen
 	movlw	d'20'					; timeout for warning screen
 	bra		startup_screen3a		; Will RETURN after timeout or button press
 
@@ -397,8 +397,8 @@ restart_load_gf2:                       ; Use aGf
 ;=============================================================================
 
 startup_screen1:
-	call	PLED_ClearScreen		
-	call	PLED_startupscreen1		; show startup sreen
+	call	DISP_ClearScreen		
+	call	DISP_startupscreen1		; show startup sreen
 startup_screen1_2:
 	movlw	d'10'					; timeout for startup screen
 	movwf	temp1			
@@ -428,8 +428,8 @@ screen1_loop2:
 	bra		screen1_loop				; loop screen
 
 startup_screen2:
-	call	PLED_ClearScreen		; Page 1
-	call	PLED_startupscreen2		; show startup sreen
+	call	DISP_ClearScreen		; Page 1
+	call	DISP_startupscreen2		; show startup sreen
 	bra		startup_screen1_2
 
 startup_screen3a:; WARNING: Also used for decodescriptions and CF Warning screen!

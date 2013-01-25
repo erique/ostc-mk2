@@ -199,7 +199,7 @@ menu_custom_functions:
 	
 menu_custom_functions0:
 	bsf		leftbind
-	call	PLED_ClearScreen
+	call	DISP_ClearScreen
 	movlw	d'1'
 	movwf	menupos
 
@@ -211,14 +211,14 @@ menu_custom_functions0:
     movlw   1                       ; Stepsize: 1, 10, or 100.
     movwf   cf_step
 
-	call	PLED_topline_box
+	call	DISP_topline_box
 	WIN_INVERT	.1	; Init new Wordprocessor	
 	movff	cf_title_text,WREG		; Title text in low bank
 	call	displaytext_1_low
 	WIN_INVERT	.0	; Init new Wordprocessor	
 
 menu_custom_functions1:
-	call	PLED_standard_color         ; Trash EEADRH...
+	call	DISP_standard_color         ; Trash EEADRH...
 
 	movff	cf_page_number,EEADRH		; CF page number (0: 0-31, 1: 32-63)
 
@@ -305,7 +305,7 @@ menu_custom_functions10b:
 	call	read_eeprom				; Highbyte
 	movff	EEDATA,cf_value+1
 
-	call    PLED_standard_color     ; Changed by color swatches, but trash EEADRH...
+	call    DISP_standard_color     ; Changed by color swatches, but trash EEADRH...
     movff   cf_value+0,lo
     movff   cf_value+1,hi
 	call	display_customfunction
@@ -315,7 +315,7 @@ menu_custom_functions10b:
 	DISPLAYTEXT	.11					; Exit
 
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
-	call	PLED_menu_cursor
+	call	DISP_menu_cursor
 
 customfunctions_loop:
 	call    check_switches_logbook
@@ -361,7 +361,7 @@ customfunctions2a:
 
 customfunctions3:
 	clrf	timeout_counter2
-	call	PLED_menu_cursor
+	call	DISP_menu_cursor
 	
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 
@@ -473,7 +473,7 @@ cf_min_unsigned:
     bc      cf_min_passed       ; Ok if CARRY, ie. min >= lo
 
 cf_min_failed:
-    call    PLED_warnings_color
+    call    DISP_warnings_color
     WIN_INVERT  1
 
 cf_min_passed:    
@@ -488,7 +488,7 @@ cf_no_min:
 
 ; Display max line
     WIN_TOP  .95
-    call    PLED_standard_color
+    call    DISP_standard_color
     WIN_INVERT 0
     lfsr    FSR2, letter
 
@@ -521,7 +521,7 @@ cf_max_unsigned:
     bc      cf_max_passed       ; Ok if no carry, ie. max <= lo
 
 cf_max_failed:
-    call    PLED_warnings_color
+    call    DISP_warnings_color
     WIN_INVERT  1
 
 cf_max_passed:    
@@ -535,7 +535,7 @@ cf_no_max:
 	call	word_processor
 
 cf_minmax_done:
-    call    PLED_standard_color
+    call    DISP_standard_color
     WIN_INVERT  0
 	movff	FSR1H, EEADRH
 	return
@@ -643,7 +643,7 @@ cf_type_07:						; Type == 7 is CF_COLOR swatch.
 
 	STRCAT_PRINT " "
 	movf	lo,W				; Get color.
-	call    PLED_set_color
+	call    DISP_set_color
 	movlw	.23
 	movff	WREG,win_height		; row bottom (0-239)
 	movlw	.110
@@ -651,7 +651,7 @@ cf_type_07:						; Type == 7 is CF_COLOR swatch.
 	movlw	.148-.110+1	
 	movff	WREG,win_width		; column right (0-159)
 
-	call	PLED_box
+	call	DISP_box
     retlw   -1  				; wp already done. Skip it...
 
 cf_type_00:						; 8bit mode. Or unrecognized type...
@@ -894,7 +894,7 @@ check_failed:
 	WIN_LEFT	.125
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.1					    ; Init new Wordprocessor
-	call    PLED_warnings_color
+	call    DISP_warnings_color
 	
 	STRCPY  TXT_CF2
     movff   cf_checker_counter,lo

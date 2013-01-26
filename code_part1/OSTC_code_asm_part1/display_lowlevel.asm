@@ -764,6 +764,9 @@ DISP_DataWrite_PROD:
 ; NOTE: you should "setf TRISD" before calling this function,
 ;       to make PortD an input port...
 DISP_DataRead:
+    movff   win_flags,WREG          ; Display1? win_flags is in bank0...
+    btfsc   WREG,1                  ; Display1?
+    return                          ; Yes, done.
 	bsf		DISPLAY_rs					; Data register.
 	bcf		DISPLAY_e_nwr              ; Read enable.
 	nop

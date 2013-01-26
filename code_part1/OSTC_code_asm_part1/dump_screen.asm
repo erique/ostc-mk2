@@ -45,7 +45,9 @@ dump_screen:
 	bsf		    LED_blue                ; LEDusb ON
 	call		rs232_wait_tx           ; wait for UART
 
-    call        dump_screen_0
+    movff       win_flags,WREG          ; BEWARE: bank0 bit-test
+    btfss       WREG,1                  ; Display1?
+    call        dump_screen_0           ; No, dump screen
 
 	bcf		    no_sensor_int           ; Restore Sensor Interrupt
 	bcf			LED_blue                ; Clear led

@@ -464,7 +464,7 @@ toggle_plus_minus_gassetup:
 	bra		menu_gassetup1	; return
 
 next_gas:
-	movlw	d'1'
+	movlw	d'6'
 	movwf	menupos
 	bra		menu_gassetup0		; incl. clear screen
 

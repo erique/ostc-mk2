@@ -161,32 +161,6 @@ check_firmware_new:
 	call	write_eeprom			; write byte
 	clrf	EEADRH					; Reset EEADRH
 
-; New in 2.52 Diluents stored seperately in EEPROM Bank0
-; EEPROM BANK0 Byte96-97:
-; Diluent 1 (%O2,%He)
-; EEPROM BANK0 Byte98-99:
-; Diluent 2 (%O2,%He)
-; EEPROM BANK0 Byte100-101:
-; Diluent 3 (%O2,%He)
-; EEPROM BANK0 Byte102-103:
-; Diluent 4 (%O2,%He)
-; EEPROM BANK0 Byte104-105:
-; Diluent 5 (%O2,%He)
-    clrf    EEADRH
-    movlw   .21
-    movwf   EEDATA
-    write_int_eeprom	d'96'
-    write_int_eeprom	d'98'
-    write_int_eeprom	d'100'
-    write_int_eeprom	d'102'
-    write_int_eeprom	d'104'
-    clrf    EEDATA
-    write_int_eeprom	d'97'
-    write_int_eeprom	d'99'
-    write_int_eeprom	d'101'
-    write_int_eeprom	d'103'
-    write_int_eeprom	d'105'
-			
 restart:
 	movlw	b'00000011'
 	movwf	T3CON					; Timer3 with 32768Hz clock running

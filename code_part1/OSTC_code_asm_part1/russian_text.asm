@@ -405,7 +405,7 @@
     TCODE    .1,    .1,      "OSTC "                     ;262 OSTC
     TCODE    .65,   .168,    "Запас"                     ;263 Bail
     TCODE    .7,    .48,     "Возд."                     ;264 Air
-    TCODE    .120,  .135,    "Возд."                     ;265 Air
+    TCODE    .115,  .135,    "Возд."                     ;265 Air
 
     TCODE    .0,    .0,      "pSCR Инфо"             	 ;266 pSCR Info (Must be 9Chars!)
     TCODE    .0,    .184,    "Макс."                     ;267 Max.

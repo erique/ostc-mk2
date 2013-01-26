@@ -405,7 +405,7 @@
     TCODE    .1,    .1,      "OSTC "                     ;262 OSTC 
     TCODE    .65,   .168,    "Bail "                     ;263 Bail 
     TCODE    .7,    .48,     "Luft  "                    ;264 Air
-    TCODE    .120,  .135,    "Luft  "                    ;265 Air
+    TCODE    .115,  .135,    "Luft  "                    ;265 Air
 
     TCODE    .0,    .0,      "pSCR Info"             	 ;266 pSCR Info (Must be 9Chars!)
 	TCODE    .0,    .184,    "Max."                      ;267 Max.

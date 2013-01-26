@@ -498,18 +498,23 @@ reset_gases:
 	rcall	reset_gas               ; saves default value for gas #5
 	rcall	reset_gas               ; saves current value for gas #6
 
-	movlw	d'95'					; address of first diluent-1
+	movlw	d'94'					; address of first diluent-1
 	movwf	EEADR
 	rcall	reset_gas               ; saves current value for diluent #1
+	rcall	reset_gas               ; saves default value for diluent #1
 	rcall	reset_gas               ; saves current value for diluent #2
+	rcall	reset_gas               ; saves default value for diluent #2
 	rcall	reset_gas               ; saves current value for diluent #3
+	rcall	reset_gas               ; saves default value for diluent #3
 	rcall	reset_gas               ; saves current value for diluent #4
+	rcall	reset_gas               ; saves default value for diluent #4
 	rcall	reset_gas               ; saves current value for diluent #5
+	rcall	reset_gas               ; saves default value for diluent #5
 
     movlw   .1
     movwf   EEDATA
     write_int_eeprom    .33         ; First Gas (1-5)
-    write_int_eeprom    .106        ; First Diluent (1-5)
+    write_int_eeprom    .116        ; First Diluent (1-5)
 	return
 
 ; Write WREG:lo twice, w/o any type clearing, pre-incrementing EEADR

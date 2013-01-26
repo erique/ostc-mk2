@@ -707,16 +707,16 @@ divemenu_set_gas1c:
 
 divemenu_set_gas1d:                     ; (Re-)Set Diluent
     decf   active_diluent,W             ; 0-4 -> WREG mH
-    mullw   .2
+    mullw   .4
     movf    PRODL,W
-    addlw   d'97'
+    addlw   d'98'
     movwf   EEADR
     call	read_eeprom					; Read He
 	movff	EEDATA,char_I_He_ratio		; And copy into hold register
     decf   active_diluent,W             ; 0-4 -> WREG
-    mullw   .2
+    mullw   .4
     movf    PRODL,W
-    addlw   d'96'
+    addlw   d'97'
     movwf   EEADR
     call	read_eeprom					; Read O2
 	movff	EEDATA, char_I_O2_ratio		; O2 ratio

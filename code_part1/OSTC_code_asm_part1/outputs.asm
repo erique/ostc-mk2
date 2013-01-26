@@ -1387,7 +1387,6 @@ DISP_grey_inactive_gas1:
 	rrcf	EEDATA			            ; roll flags into carry
 	decfsz	lo,F			            ; max. 5 times...
 	bra		DISP_grey_inactive_gas1
-	
 	bnc		DISP_grey_gas               ; test carry
 
 DISP_white_gas:
@@ -1546,10 +1545,33 @@ DISP_active_gas_surfmode:				; Displays start gas/SP 1
 	return								; Done.
 
 DISP_active_gas_surfmode2:
+	WIN_TOP		.175
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0					; Init new Wordprocessor
+    movlw   .0
+	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases
+	WIN_LEFT	.90
+    STRCPY_PRINT    "1"
+    movlw   .1
+	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases
+	WIN_LEFT	.103
+    STRCPY_PRINT    "2"
+    movlw   .2
+	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases
+	WIN_LEFT	.117
+    STRCPY_PRINT    "3"
+    movlw   .3
+	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases
+	WIN_LEFT	.130
+    STRCPY_PRINT    "4"
+    movlw   .4
+	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases
+	WIN_LEFT	.143
+    STRCPY_PRINT    "5"
+
 	WIN_TOP		.130
 	WIN_LEFT	.100
 	WIN_FONT 	FT_MEDIUM
-	WIN_INVERT	.0					; Init new Wordprocessor
 	call	DISP_standard_color
 
 	read_int_eeprom 	d'33'			; Read byte (stored in EEDATA)
@@ -2943,7 +2965,7 @@ DISP_diluent_list:
 	WIN_LEFT	.100
 	WIN_FONT	FT_SMALL
 	bsf		leftbind
-    movlw	d'94'
+    movlw	d'93'
 	movwf	wait_temp			; here: stores eeprom address for diluent list (96-2)
 	movlw	d'231'
 	movwf	waitms_temp			; here: stores row for gas list
@@ -2951,7 +2973,7 @@ DISP_diluent_list:
 
 DISP_diluent_list_loop:
    	incf	hi,F				; Increase Diluent
-    movlw   .2
+    movlw   d'4'
 	addwf   wait_temp,F			; Increase eeprom address for gas list
 	movlw	d'25'
 	addwf	waitms_temp,F		; Increase row

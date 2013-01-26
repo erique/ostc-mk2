@@ -2,6 +2,9 @@ New in 2.60:
 BETA Version - Do NOT use for diving!
 CHANGE: Removed "Mix type" Icons and CF43
 CHANGE: Hardware4 support
+CHANGE: Use 4Bytes in EEPROM for diluents (Same as OC gases)
+NEW: Show active gas indicator below first gas in surfacemode
+UPDATE: OSTC interface description file
 
 New in 2.59:
 BETA Version - Do NOT use for diving!

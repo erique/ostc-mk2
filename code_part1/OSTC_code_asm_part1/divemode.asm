@@ -1459,7 +1459,7 @@ end_dive4:
 
     movlw   .33                     ; Start gas
     btfsc   FLAG_const_ppO2_mode    ; In CCR mode?
-    movlw   .106                    ; Yes, use start Diluent instead
+    movlw   .116                    ; Yes, use start Diluent instead
     movwf   EEADR
     call    read_eeprom
 	movf	EEDATA,W
@@ -2110,6 +2110,6 @@ set_first_gas_ccr:                      ; Set Diluent
 	bsf		STATUS,C					; Borrow bit
 	subfwb	lo,W        				; minus O2
 	movff	WREG, char_I_N2_ratio		; = N2!
-    read_int_eeprom d'106'              ; Read First Diluent (1-5)
+    read_int_eeprom d'116'              ; Read First Diluent (1-5)
     movff   EEDATA,active_diluent
     return

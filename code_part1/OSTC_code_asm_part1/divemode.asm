@@ -1773,12 +1773,22 @@ set_dive_modes:
 	; in Divemode, check threshold from CF01
 	GETCUSTOM8	.1					; loads dive_threshold in WREG
 	movwf	sub_a+0					; dive_treshold is in cm
+
+    movlw   .20
+    cpfsgt  sub_a+0
+    movwf   sub_a+0                 ; Make sure to have at least 20cm threshold
+
 	clrf	sub_a+1
 	bra		set_dive_modes1			; Done.
 
 set_dive_modes0:
 	GETCUSTOM8	.0					; loads dive_threshold in WREG
 	movwf	sub_a+0					; dive_treshold is in cm
+
+    movlw   .20
+    cpfsgt  sub_a+0
+    movwf   sub_a+0                 ; Make sure to have at least 20cm threshold
+
 	clrf	sub_a+1
 	bra		set_dive_modes1			; Done.
 

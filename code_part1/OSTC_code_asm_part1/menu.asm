@@ -146,7 +146,7 @@ do_more_menu:								; calls submenu
 	goto	menu_simulator
 	dcfsnz	menupos,F
 	goto	altimeter_menu
-	movlw	d'5'
+	movlw	d'6'
 	movwf	menupos
 	bra		menu2						; exit...
 
@@ -340,7 +340,7 @@ do_more_setup_menu:								; calls submenu
 	bra		toggle_salinity
 	dcfsnz	menupos,F
 	bra		toggle_brightness		; toggle between ECO and HIGH
-	movlw	d'5'					; set cursor to "More again"
+	movlw	d'6'					; set cursor to "More again"
 	movwf	menupos
 	bra		setup_menu2						; exit...
 

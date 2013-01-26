@@ -108,6 +108,8 @@ pixel_write:
         ;---- Do the 16bit 319-X-->X, if needed, and send to DISPLAY ------------
 pixel_write_col320:
         movff   win_flags,WREG          ; BEWARE: bank0 bit-test
+        btfsc   WREG,1                  ; Display1
+        bra     pixel_write_noflip_H_display1 ; Yes.
         btfss   WREG,0                  ; 180° rotation ?
         bra     pixel_write_noflip_H
 
@@ -123,8 +125,32 @@ pixel_write_col320:
 pixel_write_noflip_H:
     	movlw	0x21				    ; Start Address Vertical (.0 - .319)
     	rcall	DISP_CmdWrite
-    	bra     DISP_DataWrite_PROD   
+    	bra     DISP_DataWrite_PROD     ; And return...
 
+pixel_write_noflip_H_display1:
+        movlw	0x06
+        rcall	DISP_CmdWrite
+        movf    PRODH,W
+        rcall	DISP_DataWrite
+        movlw	0x07
+        rcall	DISP_CmdWrite
+        movf    PRODL,W
+        rcall	DISP_DataWrite
+
+        incf    PRODL,F
+        movlw   .0
+        addwfc  PRODH,F             ;+1
+
+        movlw	0x08
+        rcall	DISP_CmdWrite
+        movf    PRODH,W
+        rcall	DISP_DataWrite
+        movlw	0x09
+        rcall	DISP_CmdWrite
+        movf    PRODL,W
+        bra 	DISP_DataWrite      ; And return...
+        
+    
 ;-----------------------------------------------------------------------------
 ; Writes a vertical line of half-pixel at position (win_top,win_leftx2,win_height).
 ; Inputs: win_leftx2, win_top, win_height, win_color:2
@@ -156,34 +182,68 @@ half_vertical_line_loop:
 ; Trashed: WREG, PROD
 half_pixel_write:
     	movff  	win_top,WREG            ; d'0' ... d'239'
-
 ; Variant with Y position in WREG.
 half_pixel_write_1:
-        movff   win_flags,PRODL         ; BEWARE: bank0 bit-test
+        movff   win_flags,PRODL          ; Display1? win_flags is in bank0...
+        btfsc   PRODL,1
+        bra     half_pixel_write_1_display1 ; Yes.
+
     	btfsc   PRODL,0                 ; 180° rotation ?
     	sublw   .239                    ; 239-Y --> Y
+    	mullw   1                       ; Copy row to PRODL (PRODH=0)
 
-    	mullw   1                       ; Copy row to PRODH:L
     	movlw	0x20			        ; Horizontal Address START:END
     	rcall	DISP_CmdWrite
     	rcall   DISP_DataWrite_PROD
     
     	movlw	0x22					; Start Writing Data to GRAM
     	rcall	DISP_CmdWrite
-    	bsf		DISPLAY_rs					; Data!
+    	bsf		DISPLAY_rs				; Data!
     	movff	win_color1, PORTD
     	bcf		DISPLAY_rw
-    	bsf		DISPLAY_rw					; Upper
+    	bsf		DISPLAY_rw				; Upper
     	movff	win_color2, PORTD
     	bcf		DISPLAY_rw
-    	bsf		DISPLAY_rw					; Lower
-        movff   win_flags,WREG          ; Display1? win_flags is in bank0...
-        btfss   WREG,1
-        return                          ; No, Done.
+    	bsf		DISPLAY_rw				; Lower
+        return                          ; Done.
+
+half_pixel_write_1_display1:
+    	mullw   1                       ; Copy row to PRODL (PRODH=0)
+    ; Row address start
+        movlw	0x02
+        rcall	DISP_CmdWrite
+        movlw   .0
+        rcall	DISP_DataWrite
+        movlw	0x03
+        rcall	DISP_CmdWrite
+        movf    PRODL,W
+        rcall 	DISP_DataWrite
+
+        incf    PRODL,F
+
+        movlw	0x04
+        rcall	DISP_CmdWrite
+        movlw   .0
+        rcall	DISP_DataWrite
+        movlw	0x05
+        rcall	DISP_CmdWrite
+        movf    PRODL,W
+        rcall 	DISP_DataWrite
+
+    	movlw	0x22					; Start Writing Data to GRAM
+    	rcall	DISP_CmdWrite
+    	bsf		DISPLAY_rs				; Data!
+    	movff	win_color1, PORTD
+    	bcf		DISPLAY_rw
+    	bsf		DISPLAY_rw				; Upper
+    	movff	win_color2, PORTD
+    	bcf		DISPLAY_rw
+    	bsf		DISPLAY_rw				; High
     	movff	win_color3, PORTD
     	bcf		DISPLAY_rw
-    	bsf		DISPLAY_rw					; Lower
+    	bsf		DISPLAY_rw				; Lower
     	return
+
 
 ; -----------------------------
 ; DISP Display Off
@@ -371,7 +431,7 @@ DISP_box_write_display1:
         rcall	DISP_DataWrite
 
         ;---- Normal vertical window -----------------------------------------
-        ; Output 0x37 (top) (bottom)
+        ; Output  (top) (bottom)
 		movff	win_top,PRODH           ; top --> PRODH (first byte)
 		movff   win_height,WREG
 		addwf   PRODH,W
@@ -386,7 +446,6 @@ DISP_box_write_display1:
         rcall	DISP_CmdWrite
         movf    PRODH,W
         rcall	DISP_DataWrite
-
 
         movlw	0x04
         rcall	DISP_CmdWrite
@@ -469,30 +528,30 @@ DISP_box2:                              ; Loop height times
 DISP_box3:                              ; loop width times
 	movff	win_color1,PORTD
 	bcf		DISPLAY_rw
-	bsf		DISPLAY_rw                     ; Upper
+	bsf		DISPLAY_rw                  ; Upper
 	movff	win_color2,PORTD
 	bcf		DISPLAY_rw
-	bsf		DISPLAY_rw                     ; Lower
+	bsf		DISPLAY_rw                  ; Lower/High
     movff   win_flags,WREG          ; Display1? win_flags is in bank0...
     btfss   WREG,1                  ; Display1?
     bra     DISP_box3a                  ; No
     movff	win_color3,PORTD
 	bcf		DISPLAY_rw
-	bsf		DISPLAY_rw                     ; Lower
+	bsf		DISPLAY_rw                  ; Lower
 
 DISP_box3a:
 	movff	win_color1,PORTD
 	bcf		DISPLAY_rw
-	bsf		DISPLAY_rw                     ; Upper
+	bsf		DISPLAY_rw                  ; Upper
 	movff	win_color2,PORTD
 	bcf		DISPLAY_rw
-	bsf		DISPLAY_rw                     ; Lower
+	bsf		DISPLAY_rw                  ; Lower/High
     movff   win_flags,WREG          ; Display1? win_flags is in bank0...
     btfss   WREG,1                  ; Display1?
     bra     DISP_box3b                  ; No
     movff	win_color3,PORTD
 	bcf		DISPLAY_rw
-	bsf		DISPLAY_rw                     ; Lower
+	bsf		DISPLAY_rw                  ; Lower
 
 DISP_box3b:
 	decfsz	PRODL,F                     ; row loop finished ?
@@ -565,37 +624,27 @@ DISP_ClearScreen:
 
 	; See Page 101 of DISPLAY Driver IC Datasheet how to handle rs/rw clocks
 	bsf		DISPLAY_rs             ; Data!
-
+	clrf	PORTD
 	movlw	.160
 	movwf	PRODH
 DISP_ClearScreen2:
 	movlw	.240
 	movwf	PRODL
 DISP_ClearScreen3:
-
-	clrf	PORTD               ; Need to generate trace here too.
 	bcf		DISPLAY_rw
 	bsf		DISPLAY_rw             ; Upper
-
-    clrf	PORTD               ; Need to generate trace here too.
 	bcf		DISPLAY_rw
 	bsf		DISPLAY_rw             ; Lower
-
-	clrf	PORTD               ; Need to generate trace here too.
 	bcf		DISPLAY_rw
 	bsf		DISPLAY_rw             ; Upper
-
-    clrf	PORTD               ; Need to generate trace here too.
 	bcf		DISPLAY_rw
 	bsf		DISPLAY_rw             ; Lower
-
 	decfsz	PRODL,F
 	bra		DISP_ClearScreen3
 	decfsz	PRODH,F
 	bra		DISP_ClearScreen2
-
 	movlw	0x00					; NOP, to stop Address Update Counter
-	bra     DISP_CmdWrite
+	bra     DISP_CmdWrite           ; And return...
 
 DISP_ClearScreen_display1:
     ; Column Address start
@@ -648,7 +697,7 @@ DISP_ClearScreen_display1:
 DISP_ClearScreen2_display1:
 	movlw	.240
 	movwf	PRODL
-	clrf	PORTD               ; Need to generate trace here too.
+	clrf	PORTD
 DISP_ClearScreen3_display1:
 	bcf		DISPLAY_rw
 	bsf		DISPLAY_rw             ; Upper
@@ -904,7 +953,6 @@ display0_init:          ; Display0
 	bcf		DISPLAY_cs
 	nop
 	bsf		DISPLAY_nreset
-;	WAITMS	d'10'			; Quick wake-up
 	WAITMS	d'250'			; Standard wake-up
 	bsf		DISPLAY_e_nwr	
 	nop
@@ -930,10 +978,9 @@ display0_init:          ; Display0
 
 	; Change direction for block-writes of pixels
     lfsr    FSR0,win_flags
+    movlw   b'00000000'         ; [flipped] X  	X 	 I/D1 	I/D0 	X  	X  	X 	AM
 	btfss   INDF0,0             ; BANK-SAFE bit test.
 	movlw	b'00110000'			; [normal]  X  	X 	 I/D1 	I/D0 	X  	X  	X 	AM
-	btfsc   INDF0,0
-    movlw   b'00000000'         ; [flipped] X  	X 	 I/D1 	I/D0 	X  	X  	X 	AM
 	rcall	DISP_DataWrite
 
 	movlw	0x18
@@ -1306,7 +1353,7 @@ DISP_set_color:;Converts 8Bit RGB b'RRRGGGBB' into 16Bit RGB b'RRRRRGGG GGGBBBBB
 	movff	DISPLAY3_temp,win_color2	; Set Bank0 Color registers...
 	return
 
-DISP_set_color_display1:
+DISP_set_color_display1:;Converts 8Bit RGB b'RRRGGGBB' into 24Bit RGB b'00RRRRRR 00GGGGGG 00BBBBBB'
 	; Mask Bit 7,6,5,4,3,2
 	movlw	b'00000011'
 	andwf	DISPLAY2_temp,F
@@ -1318,7 +1365,6 @@ DISP_set_color_display1:
 	movlw	b'10100000'
 	dcfsnz	DISPLAY2_temp,F
 	movlw	b'11111000'
-;	movwf	DISPLAY3_temp				; Blue done.
     movff   WREG,win_color3              ; B
 
 	movff	DISPLAY1_temp,	DISPLAY2_temp	; Copy
@@ -1343,35 +1389,32 @@ DISP_set_color_display1:
 	movlw	b'10000000'
 	dcfsnz	DISPLAY2_temp,F
 	movlw	b'11111100'
-;	movwf	DISPLAY4_temp
     movff   WREG,win_color2              ; G
 
-	movff	DISPLAY1_temp,	DISPLAY2_temp	; Copy
 	; Mask Bit 4,3,2,1,0
 	movlw	b'11100000'
-	andwf	DISPLAY2_temp,F
+	andwf	DISPLAY1_temp,F
 
-	rrncf	DISPLAY2_temp,F
-	rrncf	DISPLAY2_temp,F
-	rrncf	DISPLAY2_temp,F
-	rrncf	DISPLAY2_temp,F
-	rrncf	DISPLAY2_temp,F
+	rrncf	DISPLAY1_temp,F
+	rrncf	DISPLAY1_temp,F
+	rrncf	DISPLAY1_temp,F
+	rrncf	DISPLAY1_temp,F
+	rrncf	DISPLAY1_temp,F
 
 	movlw	b'00000000'
-	dcfsnz	DISPLAY2_temp,F
+	dcfsnz	DISPLAY1_temp,F
 	movlw	b'00010000'
-	dcfsnz	DISPLAY2_temp,F
+	dcfsnz	DISPLAY1_temp,F
 	movlw	b'00100000'
-	dcfsnz	DISPLAY2_temp,F
+	dcfsnz	DISPLAY1_temp,F
 	movlw	b'00110000'
-	dcfsnz	DISPLAY2_temp,F
+	dcfsnz	DISPLAY1_temp,F
 	movlw	b'01000000'
-	dcfsnz	DISPLAY2_temp,F
+	dcfsnz	DISPLAY1_temp,F
 	movlw	b'01010000'
-	dcfsnz	DISPLAY2_temp,F
+	dcfsnz	DISPLAY1_temp,F
 	movlw	b'10000000'
-	dcfsnz	DISPLAY2_temp,F
+	dcfsnz	DISPLAY1_temp,F
 	movlw	b'11111100'
-;	movwf	DISPLAY4_temp
     movff   WREG,win_color1              ; R
 	return

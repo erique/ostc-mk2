@@ -826,11 +826,11 @@ display1_init:
     movwf   TBLPTRH
     movlw   UPPER   display1_config_table
     movwf   TBLPTRU
-display_init_loop:
+display1_init_loop:
     TBLRD*+
     movlw   0xFF
     cpfseq  TABLAT
-    bra     display_config_write    ; Write Config pair to Display
+    bra     display1_config_write    ; Write Config pair to Display
     ; Delay ms or quit (return)
     TBLRD*+
     tstfsz  TABLAT                  ; End of config?
@@ -838,15 +838,15 @@ display_init_loop:
     return                          ; Done.
     movf    TABLAT,W
     call    WAITMSX                 ; Wait WREG milliseconds
-    bra     display_init_loop       ; Loop
+    bra     display1_init_loop       ; Loop
 
-display_config_write:               ; With command in WREG
+display1_config_write:               ; With command in WREG
     movf    TABLAT,W
     rcall	DISP_CmdWrite           ; Write command
     TBLRD*+                         ; Get config
     movf    TABLAT,W
 	rcall	DISP_DataWrite          ; Write config
-    bra     display_init_loop       ; Loop
+    bra     display1_init_loop       ; Loop
 
 
 display1_config_table:
@@ -986,54 +986,24 @@ display0_init:          ; Display0
 	movlw	b'00110000'			; [normal]  X  	X 	 I/D1 	I/D0 	X  	X  	X 	AM
 	rcall	DISP_DataWrite
 
-	movlw	0x18
-	rcall	DISP_CmdWrite
-	movlw	0x00
-	rcall	DISP_DataWrite
-	movlw	0x28
-	rcall	DISP_DataWrite
-
-	movlw	0xF8
-	rcall	DISP_CmdWrite
-	movlw	0x00
-	rcall	DISP_DataWrite
-	movlw	0x0F
-	rcall	DISP_DataWrite
-
-	movlw	0xF9
-	rcall	DISP_CmdWrite
-	movlw	0x00
-	rcall	DISP_DataWrite
-	movlw	0x0F
-	rcall	DISP_DataWrite
-
-	movlw	0x10
-	rcall	DISP_CmdWrite
-	movlw	0x00
-	rcall	DISP_DataWrite
-	movlw	0x00
-	rcall	DISP_DataWrite
-
-; Now Gamma settings...
-	rcall	DISP_brightness_full
-	;rcall	DISP_brightness_low
-; End Gamma Settings
-
+    movlw   LOW     display0_config_table
+    movwf   TBLPTRL
+    movlw   HIGH    display0_config_table
+    movwf   TBLPTRH
+    movlw   UPPER   display0_config_table
+    movwf   TBLPTRU
+    rcall   display0_init_loop
+    rcall	DISP_brightness_full        ; Gamma settings...
 	rcall	DISP_ClearScreen
-
-	bsf		DISPLAY_hv
-	WAITMS	d'32'
-	bsf		DISPLAY_hv
-	WAITMS	d'32'
-	bsf		DISPLAY_hv
-
-	movlw	0x05
-	rcall	DISP_CmdWrite
-	movlw	0x00
-	rcall	DISP_DataWrite
-	movlw	0x01
-	rcall	DISP_DataWrite			; Display ON
+	bsf		DISPLAY_hv                  ; OLED volatages on
 	return
+
+
+display0_config_table:
+    ; Reg, Dat0, Dat1 or 0xFF,0x00,0x00 for end
+    db  0x18,0x00,0x28,0xF8,0x00,0x0F
+    db  0xF9,0x00,0x0F,0x10,0x00,0x00
+    db  0x05,0x00,0x01,0xFF,0x00,0x00
 
 
 DISP_brightness_full: ; Choose between Eco and High...
@@ -1047,64 +1017,14 @@ DISP_brightness_full: ; Choose between Eco and High...
     btfsc   WREG,1                  ; Display1?
     return                          ; Yes, done.
 
-	movlw	0x70
-	rcall	DISP_CmdWrite
-	movlw	0x1B
-	rcall	DISP_DataWrite
-	movlw	0x80
-	rcall	DISP_DataWrite
-	movlw	0x71
-	rcall	DISP_CmdWrite
-	movlw	0x1F
-	rcall	DISP_DataWrite
-	movlw	0x00
-	rcall	DISP_DataWrite
-	movlw	0x72
-	rcall	DISP_CmdWrite
-	movlw	0x22
-	rcall	DISP_DataWrite
-	movlw	0x00
-	rcall	DISP_DataWrite
+    movlw   LOW     display0_gamma_high_table
+    movwf   TBLPTRL
+    movlw   HIGH    display0_gamma_high_table
+    movwf   TBLPTRH
+    movlw   UPPER   display0_gamma_high_table
+    movwf   TBLPTRU
+    bra     display0_init_loop          ; And return...
 
-	movlw	0x73
-	rcall	DISP_CmdWrite
-	movlw	0x17
-	rcall	DISP_DataWrite
-	movlw	0x11
-	rcall	DISP_DataWrite
-	movlw	0x74
-	rcall	DISP_CmdWrite
-	movlw	0x1A
-	rcall	DISP_DataWrite
-	movlw	0x0E
-	rcall	DISP_DataWrite
-
-	movlw	0x75
-	rcall	DISP_CmdWrite
-	movlw	0x1D
-	rcall	DISP_DataWrite
-	movlw	0x15
-	rcall	DISP_DataWrite
-	movlw	0x76
-	rcall	DISP_CmdWrite
-	movlw	0x18
-	rcall	DISP_DataWrite
-	movlw	0x11
-	rcall	DISP_DataWrite
-
-	movlw	0x77
-	rcall	DISP_CmdWrite
-	movlw	0x1E
-	rcall	DISP_DataWrite
-	movlw	0x18
-	rcall	DISP_DataWrite
-	movlw	0x78
-	rcall	DISP_CmdWrite
-	movlw	0x1D
-	rcall	DISP_DataWrite
-	movlw	0x11
-	rcall	DISP_DataWrite
-	return
 
 DISP_brightness_full_high:
 ; Full
@@ -1115,64 +1035,13 @@ DISP_brightness_full_high:
     btfsc   WREG,1                  ; Display1?
     return                          ; Yes, done.
 
-	movlw	0x70
-	rcall	DISP_CmdWrite
-	movlw	0x1F
-	rcall	DISP_DataWrite
-	movlw	0x00
-	rcall	DISP_DataWrite
-	movlw	0x71
-	rcall	DISP_CmdWrite
-	movlw	0x23
-	rcall	DISP_DataWrite
-	movlw	0x80
-	rcall	DISP_DataWrite
-	movlw	0x72
-	rcall	DISP_CmdWrite
-	movlw	0x2A
-	rcall	DISP_DataWrite
-	movlw	0x80
-	rcall	DISP_DataWrite
-
-	movlw	0x73
-	rcall	DISP_CmdWrite
-	movlw	0x15
-	rcall	DISP_DataWrite
-	movlw	0x11
-	rcall	DISP_DataWrite
-	movlw	0x74
-	rcall	DISP_CmdWrite
-	movlw	0x1C
-	rcall	DISP_DataWrite
-	movlw	0x11
-	rcall	DISP_DataWrite
-
-	movlw	0x75
-	rcall	DISP_CmdWrite
-	movlw	0x1B
-	rcall	DISP_DataWrite
-	movlw	0x15
-	rcall	DISP_DataWrite
-	movlw	0x76
-	rcall	DISP_CmdWrite
-	movlw	0x1A
-	rcall	DISP_DataWrite
-	movlw	0x15
-	rcall	DISP_DataWrite
-
-	movlw	0x77
-	rcall	DISP_CmdWrite
-	movlw	0x1C
-	rcall	DISP_DataWrite
-	movlw	0x18
-	rcall	DISP_DataWrite
-	movlw	0x78
-	rcall	DISP_CmdWrite
-	movlw	0x21
-	rcall	DISP_DataWrite
-	movlw	0x15
-	rcall	DISP_DataWrite
-	return
+    movlw   LOW     display0_gamma_full_table
+    movwf   TBLPTRL
+    movlw   HIGH    display0_gamma_full_table
+    movwf   TBLPTRH
+    movlw   UPPER   display0_gamma_full_table
+    movwf   TBLPTRU
+    bra     display0_init_loop          ; And return...
 
 
 DISP_brightness_low:
@@ -1182,66 +1051,64 @@ DISP_brightness_low:
     movff   win_flags,WREG          ; Display1? win_flags is in bank0...
     btfsc   WREG,1                  ; Display1?
     return                          ; Yes, done.
+    movlw   LOW     display0_gamma_low_table
+    movwf   TBLPTRL
+    movlw   HIGH    display0_gamma_low_table
+    movwf   TBLPTRH
+    movlw   UPPER   display0_gamma_low_table
+    movwf   TBLPTRU
+    bra     display0_init_loop          ; And return...
 
-	movlw	0x70
-	rcall	DISP_CmdWrite
-	movlw	0x14
-	rcall	DISP_DataWrite
-	movlw	0x00
-	rcall	DISP_DataWrite
-	movlw	0x71
-	rcall	DISP_CmdWrite
-	movlw	0x17
-	rcall	DISP_DataWrite
-	movlw	0x00
-	rcall	DISP_DataWrite
-	movlw	0x72
-	rcall	DISP_CmdWrite
-	movlw	0x15
-	rcall	DISP_DataWrite
-	movlw	0x80
-	rcall	DISP_DataWrite
+display0_init_loop:
+    TBLRD*+
+    movlw   0xFF
+    cpfseq  TABLAT
+    bra     display0_config_write    ; Write Config pair to Display
+    ; Delay ms or quit (return)
+    TBLRD*+
+    tstfsz  TABLAT                  ; End of config?
+    bra     $+4                     ; No
+    return                          ; Done.
+    movf    TABLAT,W
+    call    WAITMSX                 ; Wait WREG milliseconds
+    bra     display0_init_loop       ; Loop
 
-	movlw	0x73
-	rcall	DISP_CmdWrite
-	movlw	0x15
-	rcall	DISP_DataWrite
-	movlw	0x11
-	rcall	DISP_DataWrite
-	movlw	0x74
-	rcall	DISP_CmdWrite
-	movlw	0x14
-	rcall	DISP_DataWrite
-	movlw	0x0B
-	rcall	DISP_DataWrite
+display0_config_write:               ; With command in WREG
+    movf    TABLAT,W
+    rcall	DISP_CmdWrite           ; Write command
+    TBLRD*+                         ; Get config
+    movf    TABLAT,W
+	rcall	DISP_DataWrite          ; Write config
+    TBLRD*+                         ; Get config
+    movf    TABLAT,W
+	rcall	DISP_DataWrite          ; Write config
+    bra     display0_init_loop       ; Loop
 
-	movlw	0x75
-	rcall	DISP_CmdWrite
-	movlw	0x1B
-	rcall	DISP_DataWrite
-	movlw	0x15
-	rcall	DISP_DataWrite
-	movlw	0x76
-	rcall	DISP_CmdWrite
-	movlw	0x13
-	rcall	DISP_DataWrite
-	movlw	0x0E
-	rcall	DISP_DataWrite
 
-	movlw	0x77
-	rcall	DISP_CmdWrite
-	movlw	0x1C
-	rcall	DISP_DataWrite
-	movlw	0x18
-	rcall	DISP_DataWrite
-	movlw	0x78
-	rcall	DISP_CmdWrite
-	movlw	0x15
-	rcall	DISP_DataWrite
-	movlw	0x0E
-	rcall	DISP_DataWrite
-	
-	return
+display0_gamma_high_table:
+    ; Reg, Dat0, Dat1 or 0xFF,0x00,0x00 for end
+    db  0x70,0x1B,0x80,0x71,0x1F,0x00
+    db  0x72,0x22,0x00,0x73,0x17,0x11
+    db  0x74,0x1A,0x0E,0x75,0x1D,0x15
+    db  0x76,0x18,0x11,0x77,0x1E,0x18
+    db  0x78,0x1D,0x11,0xFF,0x00,0x00
+
+display0_gamma_full_table:
+    ; Reg, Dat0, Dat1 or 0xFF,0x00,0x00 for end
+    db  0x70,0x1F,0x00,0x71,0x23,0x80
+    db  0x72,0x2A,0x80,0x73,0x15,0x11
+    db  0x74,0x1C,0x11,0x75,0x1B,0x15
+    db  0x76,0x1A,0x15,0x77,0x1C,0x18
+    db  0x78,0x21,0x15,0xFF,0x00,0x00
+
+display0_gamma_low_table:
+    ; Reg, Dat0, Dat1 or 0xFF,0x00,0x00 for end
+    db  0x70,0x14,0x00,0x71,0x17,0x00
+    db  0x72,0x15,0x80,0x73,0x15,0x11
+    db  0x74,0x14,0x0B,0x75,0x1B,0x15
+    db  0x76,0x13,0x0E,0x77,0x1C,0x18
+    db  0x78,0x15,0x0E,0xFF,0x00,0x00
+
 
 DISP_set_color:;Converts 8Bit RGB b'RRRGGGBB' into 16Bit RGB b'RRRRRGGG GGGBBBBB'
 	movwf	DISPLAY1_temp				; Get 8Bit RGB b'RRRGGGBB'

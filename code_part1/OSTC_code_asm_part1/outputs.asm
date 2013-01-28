@@ -638,7 +638,7 @@ DISP_simulator_data_2:
 
 DISP_divemode_timeout2:
 	WIN_TOP		.54
-	WIN_LEFT	.112
+	WIN_LEFT	.110
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.1
 	call    DISP_warnings_color
@@ -661,7 +661,7 @@ DISP_divemode_timeout2:
 
 DISP_divemode_timeout:
 	WIN_TOP		.54
-	WIN_LEFT	.112
+	WIN_LEFT	.110
 	WIN_FONT 	FT_SMALL
 	call	DISP_standard_color
 	STRCPY  0x94						; "End of dive" icon

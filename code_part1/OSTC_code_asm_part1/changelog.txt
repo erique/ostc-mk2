@@ -6,7 +6,7 @@ CHANGE: Use 4Bytes in EEPROM for diluents (Same as OC gases)
 NEW: Show active gas indicator below first gas in surfacemode
 UPDATE: OSTC interface description file
 NEW: Hard-coded min. Values for CF00 and CF01
-CHANGE: Set cursor to "Exit" when leaving sub-menus
+CHANGE: Set cursor to "Exit" when leaving some sub-menus
 
 New in 2.59:
 BETA Version - Do NOT use for diving!

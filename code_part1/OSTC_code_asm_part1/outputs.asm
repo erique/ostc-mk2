@@ -1550,23 +1550,23 @@ DISP_active_gas_surfmode2:
 	WIN_INVERT	.0					; Init new Wordprocessor
     movlw   .0
 	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases
-	WIN_LEFT	.90
+	WIN_LEFT	.115
     STRCPY_PRINT    "1"
     movlw   .1
 	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases
-	WIN_LEFT	.103
+	WIN_LEFT	.124
     STRCPY_PRINT    "2"
     movlw   .2
 	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases
-	WIN_LEFT	.117
+	WIN_LEFT	.133
     STRCPY_PRINT    "3"
     movlw   .3
 	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases
-	WIN_LEFT	.130
+	WIN_LEFT	.142
     STRCPY_PRINT    "4"
     movlw   .4
 	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases
-	WIN_LEFT	.143
+	WIN_LEFT	.151
     STRCPY_PRINT    "5"
 
 	WIN_TOP		.130

@@ -407,7 +407,7 @@
     TCODE    .115,  .135,    "Aria "                     ;265 Air
 
     TCODE    .0,    .0,      "Info pSCR"             	 ;266 pSCR Info (Must be 9Chars!)
-    TCODE    .1,    .216,    "Max."                      ;267 Max.
+    TCODE    .0,    .184,    "Max."                      ;267 Max.
     TCODE    .93,   .170,    "GF Values"                 ;268 GF Values
     TCODE    .100,  .50,     "ToggleGF"               	 ;269 ToggleGF (In Divemode Menu)
     TCODE    .0,    .0,      ""		                 ;270 unused

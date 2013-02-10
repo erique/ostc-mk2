@@ -191,7 +191,7 @@ cf_default_table1:
     
 	;---- BANK2 custom function defaults -------------------------------------
 cf_default_table2:
-	CF_DEFAULT    CF_COLOR,     d'74',  0,      0 		; CF64 color_inactive	Color inactive: grey
+	CF_DEFAULT    CF_COLOR,     d'103',  0,      0 		; CF64 color_inactive	Color inactive: grey
 	CF_DEFAULT    CF_BOOL,     	0,   	0,      0 		; CF65 Show safety stop
 	CF_DEFAULT    CF_BOOL,      0,   	0,      0 		; CF66 Show GF in NDL (If GF > CF08)
 	CF_DEFAULT    CF_PERCENT,   d'30',  d'5',  	d'90'   ; CF67 aGF_low_default			30%

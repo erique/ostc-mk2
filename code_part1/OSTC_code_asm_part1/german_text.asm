@@ -77,7 +77,7 @@
 #DEFINE	TXT_KGL4		     "kg/l"                      ; "kg/l"                 
 #DEFINE	TXT_VOLT2			 "V "                        ; "V "
 #DEFINE	TXT_VOLT1		     "V"                         ; "V"                    
-#DEFINE	TXT_STEP5		     "Step:"                     ; "Step:"                
+#DEFINE	TXT_STEP5		     "Stufe:"                    ; "Step:"
 #DEFINE	TXT_CF2			     "CF"                        ; "CF"                   
 #DEFINE	TXT_O2_4		     "O2: "                      ; "O2: "                 
 #DEFINE	TXT_O2_3		     "O2 "                       ; "O2 "                  
@@ -262,7 +262,7 @@
     TCODE    .65,   .65,     "AN "                       ;130 ON 
     TCODE    .65,   .65,     "AUS"                       ;131 OFF
     TCODE    .100,  .50,     "alle löschen"              ;132 Del. all
-    TCODE    .10,   .0,      "Unerwarteter Reset des"    ;133 Unexpected reset from
+    TCODE    .10,   .0,      "Unerwarteter Reset im"     ;133 Unexpected reset from
     TCODE    .10,   .25,     "TG-Modus! Bitte melden"    ;134 Divemode! Please help
     TCODE    .10,   .50,     "Sie die u.a. Debug "       ;135 and report the Debug 
     TCODE    .10,   .75,     "Informationen!"            ;136 Information below!

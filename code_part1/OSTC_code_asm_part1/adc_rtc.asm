@@ -237,11 +237,11 @@ RTCinit2:
 	movwf	mins
 	movlw	.12
 	movwf	hours
-	movlw	.8
+	movlw	.11
 	movwf	day
-	movlw	.8
+	movlw	.2
 	movwf	month
-	movlw	.12
+	movlw	.13
 	movwf	year
 	bsf		PIE1, TMR1IE		; Enable clock int
 	return

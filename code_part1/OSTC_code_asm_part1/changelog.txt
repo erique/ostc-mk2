@@ -1,3 +1,7 @@
+New in 2.61:
+BETA Version - Do NOT use for diving!
+CHANGE: Set default for CF64 (Color inactive) to 103 (light blue)
+
 New in 2.60:
 BETA Version - Do NOT use for diving!
 CHANGE: Removed "Mix type" Icons and CF43

@@ -1545,29 +1545,58 @@ DISP_active_gas_surfmode:				; Displays start gas/SP 1
 	return								; Done.
 
 DISP_active_gas_surfmode2:
+	clrf	EEADRH                  ; Select EEPROM lower page.
+	read_int_eeprom		d'33'       ; Get First gas (1-5)
+    movff   EEDATA,hi               ; into register hi
+
 	WIN_TOP		.175
 	WIN_FONT 	FT_SMALL
-	WIN_INVERT	.0					; Init new Wordprocessor
+	WIN_INVERT	.0                      ; Init new Wordprocessor
     movlw   .0
 	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases
 	WIN_LEFT	.115
     STRCPY_PRINT    "1"
     movlw   .1
+    cpfseq  hi                              ; Is "first gas"?
+    bra     DISP_active_gas_surfmode3       ; No, skip box
+	WIN_FRAME_STD   .174, .196, .114, .122    ;top, bottom, left, right
+DISP_active_gas_surfmode3:
+    movlw   .1
 	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases
 	WIN_LEFT	.124
     STRCPY_PRINT    "2"
+    movlw   .2
+    cpfseq  hi                              ; Is "first gas"?
+    bra     DISP_active_gas_surfmode4       ; No, skip box
+	WIN_FRAME_STD   .174, .196, .123, .131    ;top, bottom, left, right
+DISP_active_gas_surfmode4:
     movlw   .2
 	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases
 	WIN_LEFT	.133
     STRCPY_PRINT    "3"
     movlw   .3
+    cpfseq  hi                              ; Is "first gas"?
+    bra     DISP_active_gas_surfmode5       ; No, skip box
+	WIN_FRAME_STD   .174, .196, .132, .140    ;top, bottom, left, right
+DISP_active_gas_surfmode5:
+    movlw   .3
 	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases
 	WIN_LEFT	.142
     STRCPY_PRINT    "4"
     movlw   .4
+    cpfseq  hi                              ; Is "first gas"?
+    bra     DISP_active_gas_surfmode6       ; No, skip box
+	WIN_FRAME_STD   .174, .196, .141, .149    ;top, bottom, left, right
+DISP_active_gas_surfmode6:
+    movlw   .4
 	call	DISP_grey_inactive_gas			; Sets Greyvalue for inactive gases
 	WIN_LEFT	.151
     STRCPY_PRINT    "5"
+    movlw   .5
+    cpfseq  hi                              ; Is "first gas"?
+    bra     DISP_active_gas_surfmode7       ; No, skip box
+	WIN_FRAME_STD   .174, .196, .150, .158    ;top, bottom, left, right
+DISP_active_gas_surfmode7:
 
 	WIN_TOP		.130
 	WIN_LEFT	.100
@@ -1612,26 +1641,26 @@ DISP_active_gas_surfmode2:
 
 	movlw	d'21'
 	cpfseq	lo							; Air? (O2=21%)
-	bra		DISP_active_gas_surfmode4 	; No!
+	bra		DISP_active_gas_surfmode8 	; No!
 	tstfsz	hi							; Air? (He=0%)
-	bra		DISP_active_gas_surfmode4 	; No!
+	bra		DISP_active_gas_surfmode8 	; No!
 	
 							; Yes, display "Air" instead of 21/0
 	DISPLAYTEXTH		d'265'		;"Air  ", y-scale=2
 	return								; Done.
 
-DISP_active_gas_surfmode4:
+DISP_active_gas_surfmode8:
 	lfsr	FSR2,letter
 	bsf		leftbind			; left orientated output
 	output_99					; O2 ratio is still in "lo"
 	movff	char_I_He_ratio,lo	; copy He ratio into lo
 	tstfsz	lo					; He>0?
-	bra		DISP_active_gas_surfmode5	; Yes.
-	bra		DISP_active_gas_surfmode6	; No, skip He
-DISP_active_gas_surfmode5:	
+	bra		DISP_active_gas_surfmode9	; Yes.
+	bra		DISP_active_gas_surfmode10	; No, skip He
+DISP_active_gas_surfmode9:
 	PUTC    '/'
 	output_99
-DISP_active_gas_surfmode6:
+DISP_active_gas_surfmode10:
 	bcf		leftbind
 	call	word_processor
 

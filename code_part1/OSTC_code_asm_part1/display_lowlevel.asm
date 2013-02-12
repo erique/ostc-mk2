@@ -255,6 +255,7 @@ DISP_DisplayOff:
 	bcf		DISPLAY_cs
 	bcf		DISPLAY_e_nwr	
 	bcf		DISPLAY_rw
+    bcf		DISPLAY_rs
 	bcf		DISPLAY_nreset
 	return
 

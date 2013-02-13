@@ -531,6 +531,7 @@ static void read_buhlmann_ht(void)
 //
 static unsigned char calc_nextdecodepth(void)
 {
+    signed short gf_step;
     //--- Max ascent speed ---------------------------------------------------
     // Recompute leading gas limit, at current depth:
     overlay float depth = (temp_deco - pres_surface) * BAR_TO_METER;
@@ -549,7 +550,12 @@ static unsigned char calc_nextdecodepth(void)
         overlay unsigned char first_stop = 0;
         overlay float p;
 
-        sim_limit( GF_low );
+        gf_step = (signed short)(low_depth - depth);
+        if (gf_step < 0)
+            gf_step = 0;
+        assert(GF_low + (gf_step + char_I_depth_last_deco) * locked_GF_step <= GF_high);
+
+        sim_limit( GF_low + gf_step * locked_GF_step);
         p = sim_lead_tissue_limit - pres_surface;
         if( p <= 0.0f )
             goto no_deco_stop;          // We can surface directly...
@@ -574,44 +580,7 @@ static unsigned char calc_nextdecodepth(void)
             low_depth = first_stop;
             locked_GF_step = GF_delta / first_stop;
         }
-
-        // We have a stop candidate.
-        // But maybe ascending to the next stop will diminish the constraint,
-        // because the GF might decrease more than the preassure gradient...
-        while(first_stop > 0)
-        {
-            overlay unsigned char next_stop;            // Next depth (0..90m)
-            overlay float pres_stop;                    // Next pressure (bar)
-
-            // Check max speed, or reaching surface.
-            if( first_stop <= min_depth )
-                goto no_deco_stop;
-
-            if( first_stop <= char_I_depth_last_deco )  // new in v104
-                next_stop = 0;
-            else if( first_stop == 6 )
-                next_stop = char_I_depth_last_deco;
-            else
-                next_stop = first_stop - 3;             // Index of next (upper) stop.
-            
-            // Just a check we are indeed above LOW ref.
-            assert( next_stop < low_depth );
-
-            // Total preassure at the new stop candidate:
-            pres_stop =  next_stop * METER_TO_BAR
-    	              + pres_surface;
-
-            // Keep GF_low until a first stop depth is found:
-            sim_limit( GF_high - next_stop * locked_GF_step );
-
-            // Check upper limit (lowest pressure tolerated):
-            if( sim_lead_tissue_limit >= pres_stop )    // check if ascent to next deco stop is ok
-                goto deco_stop_found;
-
-            // Else, validate that stop and loop...
-            first_stop = next_stop;
-        }
-        assert( first_stop == 0 );
+        goto deco_stop_found;
 
 no_deco_stop:
 		temp_depth_limit = min_depth;

@@ -86,6 +86,7 @@
 // 2012/09/10: [mH]  Fill char_O_deco_time_for_log for logbook write
 // 2012/10/05: [jDG] Better deco_gas_volumes accuracy (average depth, switch between stop).
 // 2013/03/05: [jDG] Should vault low_depth too.
+// 2013/03/05: [jDG] Wrobell remark: ascent_to_first_stop works better with finer steps (2sec).
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -1337,6 +1338,8 @@ Surface:
 // before ascent.
 void sim_ascent_to_first_stop(void)
 {
+    overlay unsigned char fast = 1; // 1min or 2sec steps.
+
     update_startvalues();
     clear_deco_table();
 
@@ -1355,8 +1358,12 @@ void sim_ascent_to_first_stop(void)
   	{
         overlay float old_deco = temp_deco;     // Pamb backup (bars)
 
-        // Try ascending 1 full minute.
-        temp_deco -= 10*METER_TO_BAR;   // 1 min, at 10m/min. ~ 1bar.
+        // Try ascending 1 full minute (fast) or 2sec (!fast):
+        if( fast )
+            temp_deco -= 10*METER_TO_BAR;   // 1 min, at 10m/min. ~ 1bar.
+        else
+            temp_deco -= (10.0/30.0)*METER_TO_BAR;  // 2sec at 10m/min.
+
         if( temp_deco < pres_surface )  // But don't go over surface.
             temp_deco = pres_surface;
 
@@ -1368,7 +1375,14 @@ void sim_ascent_to_first_stop(void)
         if( temp_deco < sim_lead_tissue_limit )
         {
             temp_deco = old_deco;           // Restore last correct depth,
-            break;                          // Do no spend a minute more.
+
+            if( fast )
+            {
+                fast = 0;                   // Retry with 2sec steps.
+                continue;
+            }
+            else
+                break;                      // Done...
         }
 
         // Did we reach surface ?
@@ -1389,9 +1403,10 @@ void sim_ascent_to_first_stop(void)
             break;
         }
 
-        sim_dive_mins++;                // Advance simulated time by 1 minute.
+        if( fast )
+            sim_dive_mins++;            // Advance simulated time by 1 minute.
         sim_alveolar_presures();        // temp_deco --> ppN2/ppHe
-		sim_tissue(1);                  // and update tissues for 1 min.
+        sim_tissue(fast);               // and update tissues for 1 min.
 	}
 }
 

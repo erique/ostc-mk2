@@ -85,6 +85,7 @@
 // 2012/02/25: [jDG] Looking for a more stable LOW grad factor reference.
 // 2012/09/10: [mH]  Fill char_O_deco_time_for_log for logbook write
 // 2012/10/05: [jDG] Better deco_gas_volumes accuracy (average depth, switch between stop).
+// 2013/03/05: [jDG] Should vault low_depth too.
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -178,6 +179,7 @@ static unsigned char	internal_deco_time[NUM_STOPS];
 static unsigned char	internal_deco_depth[NUM_STOPS];
 
 static float cns_vault;
+static float low_depth_vault;
 static float pres_tissue_N2_vault[NUM_COMP];
 static float pres_tissue_He_vault[NUM_COMP];
 
@@ -1055,7 +1057,7 @@ static void calc_hauptroutine(void)
     // toggle between calculation for nullzeit (bottom time), 
     //                deco stops 
     //                and more deco stops (continue)
-	switch( char_O_deco_status )
+    switch( char_O_deco_status )
 	{
     case 3: //---- At surface: start a new dive ------------------------------
     	clear_deco_table();
@@ -2493,6 +2495,8 @@ void deco_push_tissues_to_vault(void)
     RESET_C_STACK
 
 	cns_vault = CNS_fraction;
+    low_depth_vault = low_depth;
+
 	for (x=0;x<NUM_COMP;x++)
     {
 		pres_tissue_N2_vault[x] = pres_tissue_N2[x];
@@ -2514,6 +2518,10 @@ void deco_pull_tissues_from_vault(void)
     // Restore both CNS variable, too.
     CNS_fraction = cns_vault;
     char_O_CNS_fraction = (unsigned char)(CNS_fraction * 100.0 + 0.5);
+
+    // GF history too:
+    low_depth = low_depth_vault;
+    locked_GF_step = GF_delta / low_depth;
 }
 
 //////////////////////////////////////////////////////////////////////////////

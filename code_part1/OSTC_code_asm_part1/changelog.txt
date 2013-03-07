@@ -1,6 +1,8 @@
 New in 2.61:
 BETA Version - Do NOT use for diving!
 CHANGE: Set default for CF64 (Color inactive) to 103 (light blue)
+BUGFIX: Vault low_depth too
+BUGFIX: Ascent to first stop in finer steps (Deko spikes)
 
 New in 2.60:
 BETA Version - Do NOT use for diving!

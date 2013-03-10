@@ -3592,7 +3592,7 @@ DISP_show_end_ead_divemode_1:
 ;
 DISP_show_@5:
 	WIN_FONT    FT_SMALL
-    WIN_LEFT    .159-.70                ; 10 chars aligned right.
+    WIN_LEFT    .159-.69                ; 10 chars aligned right.
     WIN_TOP     .170
 	call		DISP_divemask_color     ; Set Color for Divemode mask
     lfsr        FSR2,letter

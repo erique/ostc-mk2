@@ -63,7 +63,7 @@ get_battery_voltage2:
 	movwf	sub_a+0
 	movlw	HIGH	d'2600'
 	movwf	sub_a+1
-	call	sub16					;  sub_c = sub_a - sub_b
+	call	subU16					;  sub_c = sub_a - sub_b
 	bcf		enter_error_sleep		; Clear flag
 	btfsc	neg_flag				; neg_flag=1 if eeprom40:41 < 2000
 	bra		get_battery_voltage3	; Battery in OK range
@@ -79,7 +79,7 @@ get_battery_voltage3:
 	movwf	sub_a+0
 	movlw	HIGH	d'15001'
 	movwf	sub_a+1
-	call	sub16					;  sub_c = sub_a - sub_b
+	call	subU16					;  sub_c = sub_a - sub_b
 	bcf		enter_error_sleep		; Clear flag
 	btfss	neg_flag				; 
 	bra		get_battery_voltage4	; Pressure in OK range
@@ -102,7 +102,7 @@ get_battery_voltage4:
 	movwf	sub_a+0
 	movlw	HIGH	d'2000'
 	movwf	sub_a+1
-	call	sub16					;  sub_c = sub_a - sub_b
+	call	subU16					;  sub_c = sub_a - sub_b
 	btfss	neg_flag				; neg_flag=1 if eeprom40:41 < 2000
 	bsf		initialize_battery1		; battery need to be initialised
 
@@ -110,14 +110,14 @@ get_battery_voltage4:
 	movwf	sub_a+0
 	movlw	HIGH	d'4500'
 	movwf	sub_a+1
-	call	sub16					;  sub_c = sub_a - sub_b
-	btfss	neg_flag				; neg_flag=1 if eeprom40:41 < 4500
+	call	subU16					;  sub_c = sub_a - sub_b
+	btfsc	neg_flag				; neg_flag=1 if eeprom40:41 < 4500
 	bsf		initialize_battery1		; battery need to be initialised
 	
 	btfss	initialize_battery1		; battery need to be initialised?
 	bra		get_battery_no_init		; No, we have already valid values, just check for new extremas
 
-get_battery_voltage_reset:	
+get_battery_voltage_reset:
 	; Init EEPROM for battery control
 	; Reset lowest battery seen
 	movlw	LOW			d'4200'		; reset to 4.2V
@@ -168,7 +168,6 @@ get_battery_voltage_reset:
 	write_int_eeprom	d'62'
 	movff	year,EEDATA
 	write_int_eeprom	d'63'
-	
 get_battery_no_init:	
 	read_int_eeprom d'40'			; get lowest battery voltage seen in mV
 	movff	EEDATA,sub_b+0
@@ -176,7 +175,7 @@ get_battery_no_init:
 	movff	EEDATA,sub_b+1
 	movff	batt_voltage+0,sub_a+0
 	movff	batt_voltage+1,sub_a+1
-	call	sub16					; sub_c = sub_a - sub_b
+	call	subU16					; sub_c = sub_a - sub_b
 	btfss	neg_flag				; new lowest battery voltage?
 	return							; no, quit routine
 	; Yes, store new value together with the date and temperature values

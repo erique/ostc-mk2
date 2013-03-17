@@ -79,7 +79,7 @@ send_int_eeprom_b1:
 send_int_eeprom_b2:
 	bcf			uart_send_int_eeprom3	; clear flag
 	movlw		d'2'
-	movwf		EEADRH					; Point to Bank1
+	movwf		EEADRH					; Point to Bank2
 	rcall		send_internal_eeprom1	; sends complete 2nd page of internal EEPROM
 	goto		surfloop_loop			; return to surface loop
 

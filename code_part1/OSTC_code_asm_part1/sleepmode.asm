@@ -186,6 +186,8 @@ pressuretest_sleep_fast:				; Get pressure without averaging (Faster to save som
 	nop
 	sleep								; Wait at least 35ms (every 16.5ms Timer1 wakeup)
 	call		get_pressure_value		; State2: Get pressure (51us)
+	clrf		temperature_avg+0
+	clrf		temperature_avg+1
 	clrf		amb_pressure_avg+0
 	clrf		amb_pressure_avg+1			; clear for sleep routine
 	call		calculate_compensation		; calculate temperature compensated pressure (233us)

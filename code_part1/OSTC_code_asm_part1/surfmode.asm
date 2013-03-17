@@ -310,6 +310,7 @@ test_charger:
 	btfsc	RCSTA,7						; RS232 already disabled
 	call	disable_rs232				; No, disable UART module
 
+    clrf    EEADRH
 	btfss	charge_done					; charge done?
 	bra		test_charger2				; No, add incomplete cycle!
 	
@@ -408,9 +409,9 @@ test_charger2:
 	movff	EEDATA,temp2				; high byte
 	bcf		STATUS,C
 	movlw	d'1'
-	addwf	temp1
+	addwf	temp1,F
 	movlw	d'0'
-	addwfc	temp2				
+	addwfc	temp2,F
 	movff	temp1,EEDATA
 	write_int_eeprom	d'50'			; write byte stored in EEDATA
 	movff	temp2,EEDATA
@@ -427,6 +428,7 @@ show_cv_active:							; CV mode
 	WAITMS	d'100'
 	bsf		LED_red
 	bsf		charge_done					; Charge cycle finished
+    bsf		charge_started				; Charger started in CV mode
 	return
 
 show_cc_active:							; CC mode

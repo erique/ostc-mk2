@@ -24,6 +24,7 @@
 ; ToDo:
 
 check_temp_extrema:			; called once every minute from Sleeploop, Surfloop and Diveloop
+    clrf    EEADRH
 	read_int_eeprom d'54'			; get lowest temperature so far
 	movff	EEDATA,sub_b+0
 	read_int_eeprom d'55'

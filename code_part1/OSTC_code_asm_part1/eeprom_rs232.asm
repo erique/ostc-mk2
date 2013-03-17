@@ -43,7 +43,7 @@ read_int_eeprom_1:
 internal_eeprom_access_b2:				; accesses internal EEPROM BANK 2 via the UART
 	bcf		internal_eeprom_write3		; clear flag!
 	movlw	d'2'
-	movwf	EEADRH						;BANK1
+	movwf	EEADRH						;BANK2
 	movlw	"n"
 	bra		internal_eeprom_access1		; Continue with common routines
 

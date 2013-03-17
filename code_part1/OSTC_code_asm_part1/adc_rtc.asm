@@ -92,7 +92,7 @@ get_battery_voltage3:
 get_battery_voltage4:
 	; check if the battery control memory needs to be initialised!
 	bcf		initialize_battery1		; clear check-flag
-	
+	clrf    EEADRH
 	read_int_eeprom d'40'			; get lowest battery voltage seen in mV
 	movff	EEDATA,sub_b+0
 	read_int_eeprom d'41'
@@ -103,7 +103,7 @@ get_battery_voltage4:
 	movlw	HIGH	d'2000'
 	movwf	sub_a+1
 	call	subU16					;  sub_c = sub_a - sub_b
-	btfss	neg_flag				; neg_flag=1 if eeprom40:41 < 2000
+	btfsc	neg_flag				; neg_flag=1 if eeprom40:41 < 2000
 	bsf		initialize_battery1		; battery need to be initialised
 
 	movlw	LOW		d'4500'			; must be lower then 4500mV...
@@ -111,7 +111,7 @@ get_battery_voltage4:
 	movlw	HIGH	d'4500'
 	movwf	sub_a+1
 	call	subU16					;  sub_c = sub_a - sub_b
-	btfsc	neg_flag				; neg_flag=1 if eeprom40:41 < 4500
+	btfss	neg_flag				; neg_flag=1 if eeprom40:41 < 4500
 	bsf		initialize_battery1		; battery need to be initialised
 	
 	btfss	initialize_battery1		; battery need to be initialised?
@@ -247,6 +247,7 @@ RTCinit2:
 
 reset_battery_stats:
 	bcf		uart_reset_battery_stats	; Clear flag
+    clrf    EEADRH
 	bcf		PIE1,RCIE					; no interrupt for UART
 	call	rs232_get_byte				; Get Byte
 	bcf		PIR1,RCIF					; clear flag

@@ -34,23 +34,11 @@
 
 ;=============================================================================
 calculate_compensation:
-    ; calculate UT1 = 8*C5 + 10000 (u16 range 10.000 .. +42.760)
-	clrf	isr_xA+1
-	movlw	d'8'
-	movwf	isr_xA+0
-	movff	C5+0,isr_xB+0
-	movff	C5+1,isr_xB+1
-	call	isr_unsigned_mult16x16      ;isr_xA*isr_xB=isr_xC
-	movlw   LOW		d'10000'
-	addwf   isr_xC+0, f
-	movlw   HIGH 	d'10000'
-	addwfc  isr_xC+1, f			        ;isr_xC= 8*C5 + 10000
-	
-	; xdT = D2 - UT1    (s16 range -11.400 .. +12.350)
-	movf   isr_xC+0,W                   ;  Get Value to be subtracted
+	; xdT = D2 - C5    (s16 range -11.400 .. +12.350)
+	movf   C5+0,W                       ;  Get Value to be subtracted
 	subwf  D2+0,W             	        ;  Do the Low Byte
 	movwf  xdT+0
-	movf   isr_xC+1,W                   ;  Then the high byte.
+	movf   C5+1,W                       ;  Then the high byte.
 	subwfb D2+1,W
 	movwf  xdT+1
 
@@ -87,12 +75,8 @@ calc_loop_1:
 
     ; Calculate OFF = C2 + ((C4-250)*dT2)/2^12 + 10000
     ; (range +9.246 .. +18.887)
-	movlw   LOW(-.250)                  ; C4 - 250 --> A
-	addwf	C4+0,W
-	movwf   isr_xA+0
-	movlw   -1                          ; HIGH(- .250) is not hunderstood...
-	addwfc  C4+1,W
-	movwf   isr_xA+1
+    movff   C4+0,isr_xA+0
+    movff   C4+1,isr_xA+1
 	
 	movff   xdT2+0,isr_xB+0             ; dT2 --> B
 	movff   xdT2+1,isr_xB+1
@@ -394,6 +378,14 @@ get_calibration_data:
 	clrf	C4+1
 	btfsc	W4+1,7
 	bsf		C4+1,0
+
+; C4=C4-250
+	movlw   LOW(-.250)                  ; C4 - 250 --> C4
+	addwf	C4+0,W
+	movwf   C4+0
+	movlw   -1                          ; HIGH(- .250) is not understood...
+	addwfc  C4+1,W
+	movwf   C4+1
 	
 ; calculate C5 (16Bit)		
 	movff	W3+0,C5+0
@@ -412,6 +404,21 @@ get_calibration_data:
 	bsf		C5+1,2
 	btfsc	W2+0,5
 	bsf		C5+1,3
+
+    ; calculate C5 = UT1
+    ; C5 = 8*C5 + 10000 (u16 range 10.000 .. +42.760)
+	clrf	isr_xA+1
+	movlw	d'8'
+	movwf	isr_xA+0
+	movff	C5+0,isr_xB+0
+	movff	C5+1,isr_xB+1
+	call	isr_unsigned_mult16x16      ;isr_xA*isr_xB=isr_xC
+    movff   isr_xC+0,C5+0
+    movff   isr_xC+1,C5+1
+	movlw   LOW		d'10000'
+	addwf   C5+0,F
+	movlw   HIGH 	d'10000'
+	addwfc  C5+1,F    ; = 8*C5 + 10000
 
 ; calculate C6 (16Bit)		
 	clrf	C6+1

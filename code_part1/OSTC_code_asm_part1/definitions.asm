@@ -249,7 +249,7 @@ W4              res 2	        ; 100
 C1              res 2           ; Decoded calibration data
 C2              res 2
 C3              res 2
-C4              res 2
+C4              res 2           ; Here: C4-250
 C5              res 2
 C6              res 2
 D1              res 2           ; raw pressure

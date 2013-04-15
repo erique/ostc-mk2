@@ -753,7 +753,7 @@ DISP_DataWrite_PROD:
     movff   win_flags,WREG          ; Display1? win_flags is in bank0...
     btfss   WREG,1                  ; Display1?
     return                          ; No, done.
-    movff   win_color3,PORTD        ; Move low byte to PORTD
+    movff   win_color3,PORTD        ; Move low(est) byte to PORTD
 	bcf		DISPLAY_rw
 	bsf		DISPLAY_rw
 	return

@@ -350,6 +350,32 @@ aa_decode_12:
 		movf	aa_temp+0,W,ACCESS      ; hence composants won't overlap.
 		addwfc	PRODH,F				    ; In right order, to propagate carry.
 
+        movff   win_flags,WREG          ; BEWARE: bank0 bit-test
+        btfss   WREG,1                  ; Display1?
+        bra		aa_decode_3			    ; No, Done.
+
+        ; Convert 16Bit RGB b'RRRRRGGG GGGBBBBB' into 24Bit RGB b'00RRRRRR 00GGGGGG 00BBBBBB'
+        ; Blue
+        movff   PRODH,win_color3
+        bcf     STATUS,C
+        rlcf    win_color3,F            ; = U0BBBBB0
+        bcf     win_color3,7            ; = 00BBBBB0
+        ; Green
+        rrcf    PRODL,F
+        rrcf    PRODH,F
+        rrcf    PRODL,F
+        rrcf    PRODH,F
+        rrcf    PRODL,F                 ; = UUURRRRR
+        rrcf    PRODH,F                 ; = GGGGGGUU
+        bcf     STATUS,C
+        rrcf    PRODH,F                 ; = 0GGGGGGU
+        bcf     STATUS,C
+        rrcf    PRODH,F                 ; = 00GGGGGG
+        ; Red
+        bcf     STATUS,C
+        rlcf    PRODL,F                 ; = UURRRRR0
+        bcf     PRODL,6                 ; = U0RRRRR0
+        bcf     PRODL,7                 ; = 00RRRRR0
 		bra		aa_decode_3			    ; Done.
 
 		; ---- Simple BLACK and WHITE cases ------------------------------

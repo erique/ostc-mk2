@@ -114,7 +114,7 @@ osct_asm	code
 #include	aa_fonts.asm
 
 ;=============================================================================
-    MESSG "OSTC - diving computer code,  Copyright (C) 2012 HeinrichsWeikamp"
+    MESSG "OSTC - diving computer code,  Copyright (C) 2013 HeinrichsWeikamp"
     MESSG "This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the"
     MESSG "Free Software Foundation, either version 3 of the License, or (at your option) any later version."
     MESSG "This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY"
@@ -122,9 +122,9 @@ osct_asm	code
     MESSG "You should have received a copy of the GNU General Public License along with this program.If not, see http://www.gnu.org/licenses/."
 
   ifdef __DEBUG
-   	MESSG "OSTC Mk.2 code compiled in DEBUG configuration!"
+   	MESSG "OSTC2 code compiled in DEBUG configuration!"
   else
-	MESSG "OSTC Mk.2 code compiled in RELEASE configuration!"
+	MESSG "OSTC2 code compiled in RELEASE configuration!"
   endif
 
 

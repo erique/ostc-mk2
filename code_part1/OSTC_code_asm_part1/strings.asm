@@ -158,6 +158,9 @@ box_black_block:                        ; Use black color
         movff   WREG,win_color1         ; Bank-safe addressing.
         movff   WREG,win_color2
         movff   WREG,win_color3
+        movff   WREG,win_color4
+        movff   WREG,win_color5
+        movff   WREG,win_color6
 box_common:
         VARARGS_BEGIN
             VARARGS_GET8    win_top

@@ -335,7 +335,7 @@ aa_decode_10:
 		movff	aa_temp+1,PRODL         ; DISPLAY is big endian, so swap here.
 aa_decode_12:
 		btfss	aa_color_quart,ACCESS
-		bra		aa_decode_3
+		bra		aa_decode_12b
 
 		; Divide it once again by 2. Max red = 7/31.
 		rrcf	aa_temp+0,W,ACCESS      ; xxRRRxxG
@@ -350,32 +350,45 @@ aa_decode_12:
 		movf	aa_temp+0,W,ACCESS      ; hence composants won't overlap.
 		addwfc	PRODH,F				    ; In right order, to propagate carry.
 
+aa_decode_12b:
         movff   win_flags,WREG          ; BEWARE: bank0 bit-test
         btfss   WREG,1                  ; Display1?
         bra		aa_decode_3			    ; No, Done.
 
-        ; Convert 16Bit RGB b'RRRRRGGG GGGBBBBB' into 24Bit RGB b'00RRRRRR 00GGGGGG 00BBBBBB'
+        ; Convert 16Bit RGB b'RRRRRGGG GGGBBBBB' into 24Bit RGB b'RRRRRR00 GGGGGG00 BBBBBB00'
+                            ; PRODH     PRODL                  win_color4 win_color5 win_color6
         ; Blue
-        movff   PRODH,win_color3
+        movff   PRODL,win_color6
         bcf     STATUS,C
-        rlcf    win_color3,F            ; = U0BBBBB0
-        bcf     win_color3,7            ; = 00BBBBB0
+        rlcf    win_color6,F            ; = UUBBBBB0
+        bcf     STATUS,C
+        rlcf    win_color6,F            ; = UBBBBB00
+        bcf     STATUS,C
+        rlcf    win_color6,F            ; = BBBBB000
+        btfsc   win_color6,7
+        bsf     win_color6,2
+
         ; Green
-        rrcf    PRODL,F
         rrcf    PRODH,F
         rrcf    PRODL,F
         rrcf    PRODH,F
-        rrcf    PRODL,F                 ; = UUURRRRR
-        rrcf    PRODH,F                 ; = GGGGGGUU
-        bcf     STATUS,C
-        rrcf    PRODH,F                 ; = 0GGGGGGU
-        bcf     STATUS,C
-        rrcf    PRODH,F                 ; = 00GGGGGG
+        rrcf    PRODL,F
+        rrcf    PRODH,F                 ; = UUURRRRR
+        rrcf    PRODL,F                 ; = GGGGGGUU
+        bcf     PRODL,1                 ; = GGGGGG0U
+        bcf     PRODL,0                 ; = GGGGGG00
+        movff   PRODL,win_color5
+
         ; Red
         bcf     STATUS,C
-        rlcf    PRODL,F                 ; = UURRRRR0
-        bcf     PRODL,6                 ; = U0RRRRR0
-        bcf     PRODL,7                 ; = 00RRRRR0
+        rlcf    PRODH,F                 ; = UURRRRR0
+        bcf     STATUS,C
+        rlcf    PRODH,F                 ; = URRRRR00
+        bcf     STATUS,C
+        rlcf    PRODH,F                 ; = RRRRR000
+        btfsc   PRODH,7
+        bsf     PRODH,2
+        movff   PRODH,win_color4
 		bra		aa_decode_3			    ; Done.
 
 		; ---- Simple BLACK and WHITE cases ------------------------------
@@ -387,17 +400,42 @@ aa_decode_13:							; Got a 1xx or a 000 code...
 		; WHITE pixel (ie. full color)
 		movff	win_color1,PRODH	    ; current draw color
 		movff	win_color2,PRODL	    ; (rem: DISPLAY is big endian)
-        setf    win_color3
-		bra		aa_decode_3
+		bra		aa_decode_12b
 
 aa_decode_2:
 		clrf	PRODH,A				    ; BLACK pixel
 		clrf	PRODL,A
-        clrf    win_color3
+        clrf    win_color4
+        clrf    win_color5
+        clrf    win_color6
 
 aa_decode_3:
 		;---- PIXEL WRITE LOOP -----------------------------------------------
-		AA_DATA_WRITE_PROD
+;		AA_DATA_WRITE_PROD
+    	bsf		DISPLAY_rs					; Data!
+
+        movff   win_flags,WREG          ; Display1? win_flags is in bank0...
+        btfsc   WREG,1                  ; Display1?
+        bra     aa_decode_3_display1    ; Yes.
+
+    	movff	PRODH,PORTD				; Move high byte to PORTD (DISPLAY is bigendian)
+        bcf		DISPLAY_rw
+        bsf		DISPLAY_rw
+        movff	PRODL,PORTD				; Move low byte to PORTD
+        bra     aa_decode_3_done
+
+aa_decode_3_display1:
+    	movff   win_color4,PORTD		; Move high byte to PORTD (DISPLAY is bigendian)
+        bcf		DISPLAY_rw
+        bsf		DISPLAY_rw
+        movff   win_color5,PORTD		; Move low byte to PORTD
+        bcf		DISPLAY_rw
+        bsf		DISPLAY_rw
+        movff   win_color6,PORTD        ; Move low(est) byte to PORTD
+aa_decode_3_done:
+        bcf		DISPLAY_rw
+        bsf		DISPLAY_rw
+
 		decf	aa_bitlen,F,ACCESS
 		bnz		aa_decode_3
 

@@ -233,13 +233,13 @@ half_pixel_write_1_display1:
     	movlw	0x22					; Start Writing Data to GRAM
     	rcall	DISP_CmdWrite
     	bsf		DISPLAY_rs				; Data!
-    	movff	win_color1, PORTD
+    	movff	win_color4, PORTD
     	bcf		DISPLAY_rw
     	bsf		DISPLAY_rw				; Upper
-    	movff	win_color2, PORTD
+    	movff	win_color5, PORTD
     	bcf		DISPLAY_rw
     	bsf		DISPLAY_rw				; High
-    	movff	win_color3, PORTD
+    	movff	win_color6, PORTD
     	bcf		DISPLAY_rw
     	bsf		DISPLAY_rw				; Lower
     	return
@@ -527,34 +527,50 @@ DISP_box2:                              ; Loop height times
 	movff	win_height,PRODL
     
 DISP_box3:                              ; loop width times
+    movff   win_flags,WREG              ; Display1? win_flags is in bank0...
+    btfsc   WREG,1                      ; Display1?
+    bra     DISP_box3aa                 ; Yes
+
 	movff	win_color1,PORTD
 	bcf		DISPLAY_rw
 	bsf		DISPLAY_rw                  ; Upper
 	movff	win_color2,PORTD
+    bra     DISP_box3a                  ; Done.
+DISP_box3aa:
+    movff	win_color4,PORTD
+	bcf		DISPLAY_rw
+	bsf		DISPLAY_rw                  ; Upper
+	movff	win_color5,PORTD
 	bcf		DISPLAY_rw
 	bsf		DISPLAY_rw                  ; Lower/High
-    movff   win_flags,WREG          ; Display1? win_flags is in bank0...
-    btfss   WREG,1                  ; Display1?
-    bra     DISP_box3a                  ; No
-    movff	win_color3,PORTD
-	bcf		DISPLAY_rw
-	bsf		DISPLAY_rw                  ; Lower
+	movff	win_color6,PORTD
 
 DISP_box3a:
+	bcf		DISPLAY_rw
+	bsf		DISPLAY_rw                  ; Lower/High
+
+    movff   win_flags,WREG              ; Display1? win_flags is in bank0...
+    btfsc   WREG,1                      ; Display1?
+    bra     DISP_box3ab                 ; Yes
+
 	movff	win_color1,PORTD
 	bcf		DISPLAY_rw
 	bsf		DISPLAY_rw                  ; Upper
 	movff	win_color2,PORTD
+    bra     DISP_box3b
+
+DISP_box3ab:
+    movff	win_color4,PORTD
 	bcf		DISPLAY_rw
-	bsf		DISPLAY_rw                  ; Lower/High
-    movff   win_flags,WREG          ; Display1? win_flags is in bank0...
-    btfss   WREG,1                  ; Display1?
-    bra     DISP_box3b                  ; No
-    movff	win_color3,PORTD
+	bsf		DISPLAY_rw                  ; Upper
+	movff	win_color5,PORTD
 	bcf		DISPLAY_rw
-	bsf		DISPLAY_rw                  ; Lower
+	bsf		DISPLAY_rw                  ; High
+	movff	win_color6,PORTD
 
 DISP_box3b:
+	bcf		DISPLAY_rw
+	bsf		DISPLAY_rw                  ; Lower
 	decfsz	PRODL,F                     ; row loop finished ?
 	bra		DISP_box3                   ; No: continue.
 
@@ -567,7 +583,10 @@ DISP_box3b:
     clrf    WREG                        ; Yes: switch to black
     movff   WREG,win_color1
     movff   WREG,win_color2
-    movff   WREG,win_color3             ; Yes.
+    movff   WREG,win_color3
+    movff   WREG,win_color4
+    movff   WREG,win_color5
+    movff   WREG,win_color6
 DISP_box4:
     movff   win_width,WREG
     cpfseq  PRODH
@@ -1114,10 +1133,7 @@ display0_gamma_low_table:
 DISP_set_color:;Converts 8Bit RGB b'RRRGGGBB' into 16Bit RGB b'RRRRRGGG GGGBBBBB'
 	movwf	DISPLAY1_temp				; Get 8Bit RGB b'RRRGGGBB'
 	movwf	DISPLAY2_temp				; Copy
-
-    movff   win_flags,WREG          ; Display1? win_flags is in bank0...
-    btfsc   WREG,1                  ; Display1?
-    bra     DISP_set_color_display1 ; Yes
+    movff   WREG,win_color6             ; Another (bank-safe) copy
 
     ; Display0
 	; Mask Bit 7,6,5,4,3,2
@@ -1222,9 +1238,15 @@ DISP_set_color:;Converts 8Bit RGB b'RRRGGGBB' into 16Bit RGB b'RRRRRGGG GGGBBBBB
 
 	movff	DISPLAY1_temp,win_color1
 	movff	DISPLAY3_temp,win_color2	; Set Bank0 Color registers...
-	return
+
+    movff   win_flags,WREG          ; Display1? win_flags is in bank0...
+    btfss   WREG,1                  ; Display1?
+	return                          ; No
 
 DISP_set_color_display1:;Converts 8Bit RGB b'RRRGGGBB' into 24Bit RGB b'00RRRRRR 00GGGGGG 00BBBBBB'
+    movff   win_color6,DISPLAY1_temp
+    movff   win_color6,DISPLAY2_temp
+
 	; Mask Bit 7,6,5,4,3,2
 	movlw	b'00000011'
 	andwf	DISPLAY2_temp,F
@@ -1236,7 +1258,7 @@ DISP_set_color_display1:;Converts 8Bit RGB b'RRRGGGBB' into 24Bit RGB b'00RRRRRR
 	movlw	b'10100000'
 	dcfsnz	DISPLAY2_temp,F
 	movlw	b'11111000'
-    movff   WREG,win_color3              ; B
+    movff   WREG,win_color6              ; B
 
 	movff	DISPLAY1_temp,	DISPLAY2_temp	; Copy
 	; Mask Bit 7,6,5,1,0
@@ -1260,7 +1282,7 @@ DISP_set_color_display1:;Converts 8Bit RGB b'RRRGGGBB' into 24Bit RGB b'00RRRRRR
 	movlw	b'10000000'
 	dcfsnz	DISPLAY2_temp,F
 	movlw	b'11111100'
-    movff   WREG,win_color2              ; G
+    movff   WREG,win_color5              ; G
 
 	; Mask Bit 4,3,2,1,0
 	movlw	b'11100000'
@@ -1287,5 +1309,5 @@ DISP_set_color_display1:;Converts 8Bit RGB b'RRRGGGBB' into 24Bit RGB b'00RRRRRR
 	movlw	b'10000000'
 	dcfsnz	DISPLAY1_temp,F
 	movlw	b'11111100'
-    movff   WREG,win_color1              ; R
+    movff   WREG,win_color4              ; R
 	return

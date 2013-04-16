@@ -2778,7 +2778,9 @@ DISP_decoplan_clear_bottom:
         movff   WREG,win_color1
         movff   WREG,win_color2
         movff   WREG,win_color3
-        
+        movff   WREG,win_color4
+        movff   WREG,win_color5
+        movff   WREG,win_color6
         goto	DISP_box
 
 ;-----------------------------------------------------------------------------

@@ -139,6 +139,9 @@ letter          res .26         ;letter buffer
 win_color1      res 1
 win_color2      res 1
 win_color3      res 1
+win_color4      res 1
+win_color5      res 1
+win_color6      res 1
 win_top         res 1           ; Box/text position (0..239).
 win_height      res 1           ; Box/text height (1..240)
 win_leftx2      res 1           ; Box/text position (0..159)

@@ -662,7 +662,7 @@ display_profile2e:
     clrf        logbook_last_tp             ; Also reset previous Y for Tp°
     clrf        logbook_ceiling             ; Ceiling = 0, correct value for no ceiling.
 
-    INIT_PIXEL_WROTE timeout_counter3       ; pixel x2			(Also sets standard Color!)
+    INIT_PIXEL_WRITE timeout_counter3       ; pixel x2			(Also sets standard Color!)
 
 profile_display_loop:
 	movff		profile_temp+0,profile_temp2+0

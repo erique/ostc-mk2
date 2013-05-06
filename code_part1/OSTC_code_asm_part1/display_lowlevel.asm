@@ -1031,6 +1031,7 @@ DISP_brightness_full: ; Choose between Eco and High...
 	bra		DISP_brightness_full_high
 ; Mid
     bsf     PORTB,7
+    nop
     bcf     PORTB,6
 
     movff   win_flags,WREG          ; Display1? win_flags is in bank0...
@@ -1049,6 +1050,7 @@ DISP_brightness_full: ; Choose between Eco and High...
 DISP_brightness_full_high:
 ; Full
     bsf     PORTB,7
+    nop
     bsf     PORTB,6
 
     movff   win_flags,WREG          ; Display1? win_flags is in bank0...
@@ -1067,6 +1069,7 @@ DISP_brightness_full_high:
 DISP_brightness_low:
 ;Low
     bcf     PORTB,7
+    nop
     bcf     PORTB,6
     movff   win_flags,WREG          ; Display1? win_flags is in bank0...
     btfsc   WREG,1                  ; Display1?

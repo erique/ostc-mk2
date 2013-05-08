@@ -48,17 +48,17 @@
 #define	DBS_ppO2	0x0002
 #define	DBS_HE_sat	0x0004
 // #define	DBS_UNUSED  0x0008
-                    
+
 #define	DBS_SAT2l	0x0010
 #define	DBS_SAT2h	0x0020
 #define	DBS_GFLOW2l	0x0040
 #define	DBS_GFLOW2h	0x0080
-                    
+
 #define	DBS_GFHGH2l	0x0100
 #define	DBS_GFHGH2h	0x0200
 #define	DBS_GASO22l	0x0400
 #define	DBS_GASO22h	0x0800
-                    
+
 #define	DBS_DIST2h 	0x1000
 #define	DBS_LAST2h 	0x2000
 #define	DBS_DECOO2l	0x4000
@@ -68,7 +68,7 @@
 #define	DBS2_PRES2l 0x0002
 #define	DBS2_SURF2l	0x0004
 #define	DBS2_SURF2h	0x0008
-                    
+
 #define DBS2_DESAT2l 0x0010
 #define DBS2_DESAT2h 0x0020
 #define	DBS2_GFDneg  0x0040
@@ -102,7 +102,7 @@ extern void deco_gas_volumes(void);
 // **         Allow compile on VisualC          **
 // ***********************************************
 
-#if defined(WIN32) || defined(UNIX) 
+#if defined(WIN32) || defined(UNIX)
     // Some keywords just dont exists on Visual C++:
 #   define CROSS_COMPILE
 #   define __18CXX
@@ -116,9 +116,6 @@ extern void deco_gas_volumes(void);
     // Avoid warnings about float/double mismatches:
 #   ifdef WIN32
 #       pragma warning(disable: 4244 4068 4305)
-#   elif defined(Q_OS_MAC)
-//#       pragma GCC diagnostic error "-Wunknown-pragmas"
-#       pragma GCC diagnostic error "-Wunused-variable"
 #   endif
 #else
 #   define PARAMETER static

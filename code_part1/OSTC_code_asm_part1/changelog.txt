@@ -1,3 +1,7 @@
+New in 2.62:
+BETA Version - Do NOT use for diving!
+BUGFIX: CNS compute. NOAA tables are in ATA, not bar
+
 New in 2.61:
 BETA Version - Do NOT use for diving!
 CHANGE: Set default for CF64 (Color inactive) to 103 (light blue)

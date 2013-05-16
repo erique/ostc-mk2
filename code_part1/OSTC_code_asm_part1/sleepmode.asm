@@ -194,8 +194,8 @@ pressuretest_sleep_fast:				; Get pressure without averaging (Faster to save som
 	return
 
 fatal_error_sleep:
-	bsf		no_sensor_int               ; Disable sensor interrupt
 	call	get_calibration_data    	; Get calibration data from pressure sensor
+    banksel	flag5
 	bcf		no_sensor_int               ; Enable sensor interrupt
 	WAITMS	d'250'
 	WAITMS	d'250'

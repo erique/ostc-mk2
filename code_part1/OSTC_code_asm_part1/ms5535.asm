@@ -218,6 +218,8 @@ get_temperature_value:
 
 ;=============================================================================
 get_calibration_data:
+	banksel	flag5
+	bsf		no_sensor_int			; disable sensor interrupts
 	rcall	reset_MS5535A
 	movlw	d'13'
 	movwf	clock_count

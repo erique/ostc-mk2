@@ -43,8 +43,8 @@ clear_rambank:
 	call	RTCinit					; reset RTC
 
 ; Air pressure compensation	after reset
-	bsf		no_sensor_int           ; Disable sensor interrupt
 	call	get_calibration_data	; Get calibration data from pressure sensor
+    banksel	flag5
 	bcf		no_sensor_int           ; Enable sensor interrupt
 	bcf		pressure_refresh
 wait_start_pressure:

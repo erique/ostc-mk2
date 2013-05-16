@@ -194,13 +194,24 @@ pressuretest_sleep_fast:				; Get pressure without averaging (Faster to save som
 	return
 
 fatal_error_sleep:
-	WAITMS	d'250'
-	WAITMS	d'250'
+	bsf		no_sensor_int               ; Disable sensor interrupt
+	call	get_calibration_data    	; Get calibration data from pressure sensor
+	bcf		no_sensor_int               ; Enable sensor interrupt
 	WAITMS	d'250'
 	WAITMS	d'250'
 	call	get_battery_voltage			; get battery voltage
 	btfss	enter_error_sleep			; REALLY enter Fatal Error Routine?
 	return								; No!
+    SAFE_2BYTE_COPY amb_pressure, sub_b
+	movlw	LOW		d'15001'			; must be lower then 15001mbar
+	movwf	sub_a+0
+	movlw	HIGH	d'15001'
+	movwf	sub_a+1
+	call	subU16					;  sub_c = sub_a - sub_b
+	bcf		enter_error_sleep		; Clear flag
+	btfss	neg_flag				;
+	return                          ; No!
+    bsf		enter_error_sleep		; Set flag
 	clrf	INTCON
 	clrf	INTCON2
 	clrf	INTCON3

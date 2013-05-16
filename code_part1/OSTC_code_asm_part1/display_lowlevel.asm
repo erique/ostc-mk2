@@ -970,6 +970,8 @@ display0_init:          ; Display0
     bcf     win_flags,1
     banksel flag1
 	bcf		DISPLAY_hv
+    btfsc   DISPLAY_hv
+    bra     $-4
 	WAITMS	d'32'
 	bsf		DISPLAY_vdd
 	nop

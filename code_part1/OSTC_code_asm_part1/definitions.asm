@@ -57,7 +57,8 @@
 ;	#DEFINE	SSPADD_VALUE	d'16'			; 400kHz I2C clock @ 32MHz Fcy
 	#DEFINE	SSPADD_VALUE	d'32'			; 200kHz I2C clock @ 32MHz Fcy
 	#DEFINE	SSPSTAT_VALUE	b'00000000'		; with slew rate control
-	#DEFINE	T0CON_VALUE 	b'00010000'		; Timer0
+;    #DEFINE	T0CON_VALUE 	b'00010000'		; Timer0    1:2     -> 32ms
+	#DEFINE	T0CON_VALUE 	b'00010011'		; Timer0    1:16    -> 256ms
  	#DEFINE	SPEED_32MHz
 
 #DEFINE		FT_SMALL		.0

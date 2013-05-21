@@ -162,7 +162,8 @@ switch_right_int:
 
 timer0_restart:
 		bcf		INTCON,TMR0IF				; Clear flag
-		clrf	T0CON						; Timer0
+        movlw   T0CON_VALUE
+		movwf   T0CON						; Timer0
 		clrf	TMR0H
 		clrf	TMR0L
 		bsf		T0CON,TMR0ON				; Start Timer 0

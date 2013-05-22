@@ -1,3 +1,8 @@
+New in 2.63:
+BETA Version - Do NOT use for diving!
+BUGFIX: no flicker when powering on
+CHANGE: 256ms switch debounce timer
+
 New in 2.62:
 BETA Version - Do NOT use for diving!
 BUGFIX: CNS compute. NOAA tables are in ATA, not bar

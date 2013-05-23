@@ -521,8 +521,7 @@ DISP_box:
 	rcall	DISP_CmdWrite
 
 	clrf	PRODH                       ; Column counter.
-	bsf		DISPLAY_rs                     ; Data!
-
+	bsf		DISPLAY_rs                  ; Data!
 DISP_box2:                              ; Loop height times
 	movff	win_height,PRODL
     

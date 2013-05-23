@@ -323,9 +323,9 @@ simulator_show_decoplan5_1:
 	cpfseq	wait_temp                   ; All gases shown?
 	bra		simulator_show_decoplan5_loop	; No
 	
-	WIN_INVERT 1
+    call	DISP_divemask_color
 	DISPLAYTEXTH .301                   ; OCR Gas Usage:
-	WIN_INVERT 0
+    call	DISP_standard_color
 
 	bra		simulator_show_decoplan1		
 

@@ -2099,7 +2099,8 @@ update_batt_voltage2a:
 update_batt_voltage3:
 	GETCUSTOM8	d'34'			; Color battery
 	btfsc	cc_active
-	movlw	color_yellow		; CC active
+;	movlw	color_yellow		; CC active
+    movlw   color_orange        ; CC active
 	btfsc	charge_done
 	movlw	color_green			; Charge done.
     call	DISP_set_color
@@ -2714,15 +2715,16 @@ DISP_decoplan_nstd_stop:
         STRCAT_PRINT TXT_METER2
 
         ;---- Print duration -------------------------------------------------
-	    WIN_LEFT	.140
+	    WIN_LEFT	.139
 	    lfsr	FSR2,letter
 	    
 	    movf    lo,W                    ; Swap hi & lo
 	    movff   hi,lo
 	    movwf   hi
 
-	    output_8					    ; Allow up to 240'
-        STRCAT_PRINT "'  "              ; 1 to 3 chars for depth.
+        bsf     leftbind
+	    output_99					    ; Allow up to 99'
+        STRCAT_PRINT "'"                ; 1 to 3 chars for depth.
 
 	    movf    lo,W                    ; Swap back hi & lo
 	    movff   hi,lo
@@ -2744,7 +2746,9 @@ DISP_decoplan_nstd_stop:
         movlw	d'16'                   ; Limit length (16min)
         cpfslt	hi
         movwf	hi
-        movff	hi,win_bargraph         ; Active width, the rest is cleared.
+        movff   hi,win_bargraph         ; Active width, the rest is cleared.
+
+        call    DISP_standard_color
         call	DISP_box
 
         ; Restore win_top
@@ -2755,7 +2759,7 @@ DISP_decoplan_nstd_stop:
         return
 
 ;-----------------------------------------------------------------------------
-; Clear unused area belw last stop
+; Clear unused area below last stop
 ; Inputs: win_top : last used area...
 DISP_decoplan_clear_bottom:
         movff   win_top,WREG            ; Get back from bank0

@@ -35,10 +35,9 @@ menu_settime:
 	bcf		set_month
 	clrf	menupos2
 
-	call	DISP_topline_box
-	WIN_INVERT	.1	; Init new Wordprocessor	
+    call	DISP_divemask_color
 	DISPLAYTEXT	.29			; Set Time
-	WIN_INVERT	.0	; Init new Wordprocessor	
+    call	DISP_standard_color
 	DISPLAYTEXT	.22			; Time:
 	DISPLAYTEXT	.23			; Date:
 

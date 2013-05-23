@@ -31,10 +31,9 @@ menu_gassetup_prelist:
 	call	DISP_ClearScreen
 	call	gassetup_sort_gaslist			; Sorts Gaslist according to change depth
 	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
-	call	DISP_topline_box
-	WIN_INVERT	.1	; Init new Wordprocessor
+    call	DISP_divemask_color
 	DISPLAYTEXT	.106			; Gas List
-	WIN_INVERT	.0	; Init new Wordprocessor
+    call	DISP_standard_color
 	clrf	decodata+0				; Here: # of gas 0-4
 	clrf	divemins+0				; Here: # of Gas * 4
 	movlw	d'5'
@@ -897,8 +896,8 @@ change_gas_depth_default:
 
 ; Changed v1.44se
 gassetup_title_bar2:
-	call	DISP_topline_box
-	WIN_INVERT	.1	; Init new Wordprocessor	
+;	call	DISP_topline_box
+    call	DISP_divemask_color
 	WIN_TOP		.2
 	WIN_LEFT	.0
 	lfsr	FSR2,letter
@@ -992,8 +991,7 @@ gassetup_title_bar7:
 	movff	EEDATA,lo
 	output_8
     STRCAT_PRINT  TXT_METER2
-
-	WIN_INVERT	.0	; Init new Wordprocessor	
+    call	DISP_standard_color
 	return
 
 gassetup_show_ppO2:

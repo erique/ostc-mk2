@@ -117,11 +117,9 @@ menu_interface:
 	bcf		PIE1,RCIE					; No Interrupt for UART
 	bsf		LED_blue
 	call	DISP_ClearScreen
-	call	DISP_topline_box
-	WIN_INVERT	.1					; Init new Wordprocessor	
+    call	DISP_divemask_color
 	DISPLAYTEXT	.15						; "Interface"
-	WIN_INVERT	.0					; Init new Wordprocessor
-
+    call    DISP_standard_color
 	movlw		d'5'
 	movwf		uart1_temp
 menu_interface1:

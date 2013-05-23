@@ -1062,10 +1062,9 @@ DISP_menu_cursor:
 	return
 
 DISP_menu_mask:
-	call	DISP_topline_box
-	WIN_INVERT	.1	; Init new Wordprocessor
+    call	DISP_divemask_color
 	DISPLAYTEXT	.5			; Menu:
-	WIN_INVERT	.0	; Init new Wordprocessor
+	call	DISP_standard_color
 	DISPLAYTEXT .6			; Logbook
 	DISPLAYTEXT .7			; Gas Setup
 	DISPLAYTEXT .9			; Reset all
@@ -1094,10 +1093,9 @@ DISP_menu_mask:
 	return	
 
 DISP_setup_menu_mask:
-	call	DISP_topline_box
-	WIN_INVERT	.1          ; Init new Wordprocessor
+    call	DISP_divemask_color
 	DISPLAYTEXT	.98			; Setup Menu:
-	WIN_INVERT	.0          ; Init new Wordprocessor
+    call    DISP_standard_color
 	DISPLAYTEXT .99			; Custom FunctionsI
 	DISPLAYTEXT	.153		; Custom FunctionsII
 	DISPLAYTEXTH .295		; Custom FunctionsIII
@@ -1107,10 +1105,9 @@ DISP_setup_menu_mask:
 	return	
 
 DISP_ccr_setup_menu_mask:
-	call	DISP_topline_box
-	WIN_INVERT	.1          ; Init new Wordprocessor
+    call	DISP_divemask_color
     DISPLAYTEXT	.111		; CCR Setup Menu
-	WIN_INVERT	.0          ; Init new Wordprocessor
+	call    DISP_standard_color
 	DISPLAYTEXT .229        ; Diluent Setup
 	DISPLAYTEXT	.230		; Setpoint Setup
 	DISPLAYTEXT .11			; Exit
@@ -1118,10 +1115,9 @@ DISP_ccr_setup_menu_mask:
 
 
 DISP_more_setup_menu_mask:
-	call	DISP_topline_box
-	WIN_INVERT	.1	; Init new Wordprocessor	
+    call	DISP_divemask_color
 	DISPLAYTEXTH	.258	; Setup Menu 2:
-	WIN_INVERT	.0	; Init new Wordprocessor	
+	call	DISP_standard_color
 	DISPLAYTEXTH	.257	; Date format:
 	DISPLAYTEXT		.129	; Debug: 
 	DISPLAYTEXT		.187	; Show License
@@ -1131,10 +1127,9 @@ DISP_more_setup_menu_mask:
 	return	
 
 DISP_more_menu_mask:
-	call	DISP_topline_box
-	WIN_INVERT	.1	; Init new Wordprocessor
+    call	DISP_divemask_color
 	DISPLAYTEXT	.144		; Menu 2:
-	WIN_INVERT	.0	; Init new Wordprocessor
+	call	DISP_standard_color
 	DISPLAYTEXT .8			; Set Time
 	DISPLAYTEXT	.110		; Const. ppO2 Setup
 	DISPLAYTEXT	.113		; Battery Info
@@ -1144,10 +1139,9 @@ DISP_more_menu_mask:
 	return
 
 DISP_reset_menu_mask:
-	call	DISP_topline_box
-	WIN_INVERT	.1	; Init new Wordprocessor	
+    call	DISP_divemask_color
 	DISPLAYTEXT	.28				; Reset Menu
-	WIN_INVERT	.0	; Init new Wordprocessor	
+	call	DISP_standard_color
 	DISPLAYTEXT	.21				; Cancel Reset
 	DISPLAYTEXT	.245			; Reset CF,Gases & Deco
 	DISPLAYTEXTH .284			; Reset Logbook
@@ -1157,10 +1151,9 @@ DISP_reset_menu_mask:
 	return
 
 DISP_simulator_mask:
-	call	DISP_topline_box
-	WIN_INVERT	.1	; Init new Wordprocessor	
+    call	DISP_divemask_color
 	DISPLAYTEXT	.248		; OSTC Simulator
-	WIN_INVERT	.0	; Init new Wordprocessor
+	call	DISP_standard_color
     DISPLAYTEXTH    .307                ; Interval:
 	DISPLAYTEXT	    .249                ; Start Dive
 	DISPLAYTEXTH	.277                ; Bottom Time:
@@ -1695,7 +1688,9 @@ DISP_confirmbox:
     WIN_BOX_BLACK   .68, .146, .34, .101		;top, bottom, left, right
 	WIN_FRAME_STD   .70, .144, .35, .100
 
+    call	DISP_divemask_color
 	DISPLAYTEXT	.143			; Confirm:
+    call	DISP_standard_color
 	DISPLAYTEXT	.145			; Cancel
 	DISPLAYTEXT	.146			; OK!
 
@@ -3366,10 +3361,9 @@ DISP_tissue_saturation_graph2:
 ;=============================================================================
 
 DISP_startupscreen1:
-	call	DISP_topline_box
-	WIN_INVERT	.1	; Init new Wordprocessor
+    call	DISP_divemask_color
 	DISPLAYTEXT d'3'			; "HeinrichsWeikamp"
-	WIN_INVERT	.0	; Init new Wordprocessor
+	call	DISP_standard_color
 	DISPLAYTEXT	.68				; Licence 1/2
 	DISPLAYTEXT	.69
 	DISPLAYTEXT	.70
@@ -3380,10 +3374,9 @@ DISP_startupscreen1:
 	return
 
 DISP_startupscreen2:
-	call	DISP_topline_box
-	WIN_INVERT	.1	; Init new Wordprocessor
+    call	DISP_divemask_color
 	DISPLAYTEXT d'3'			; "HeinrichsWeikamp"
-	WIN_INVERT	.0	; Init new Wordprocessor
+	call	DISP_standard_color
 	DISPLAYTEXT	.75				; Licence 2/2
 	DISPLAYTEXT	.76
 	DISPLAYTEXT	.77
@@ -3394,10 +3387,9 @@ DISP_startupscreen2:
 	return
 
 DISP_new_cf_warning:
-	call	DISP_topline_box
-	WIN_INVERT	.1	; Init new Wordprocessor	
+    call	DISP_divemask_color
 	DISPLAYTEXTH	.271		; New CF added!
-	WIN_INVERT	.0	; Init new Wordprocessor	
+	call	DISP_standard_color
 	DISPLAYTEXTH .272		; New CustomFunctions
 	DISPLAYTEXTH .273		; were added! Check
 	DISPLAYTEXTH .274		; CF I and CF II Menu

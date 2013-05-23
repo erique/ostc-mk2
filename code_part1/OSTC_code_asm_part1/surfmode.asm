@@ -482,10 +482,10 @@ test_switches_surfmode:		; checks switches in surfacemode
 
 test_switches_surfmode3:
 	bcf		switch_right
-	call	DISP_topline_box		; Write a filled bar at the top
-	WIN_INVERT	.1					; Init new Wordprocessor
+	call	DISP_topline_box_clear
+    call        DISP_divemask_color
 	DISPLAYTEXT	.4			;Menu?
-	WIN_INVERT	.0					; Init new Wordprocessor
+    call    DISP_standard_color
 	bsf		premenu
 	clrf	timeout_counter2
 	return

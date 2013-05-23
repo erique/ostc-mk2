@@ -211,11 +211,9 @@ menu_custom_functions0:
     movlw   1                       ; Stepsize: 1, 10, or 100.
     movwf   cf_step
 
-	call	DISP_topline_box
-	WIN_INVERT	.1	; Init new Wordprocessor	
+    call	DISP_divemask_color
 	movff	cf_title_text,WREG		; Title text in low bank
 	call	displaytext_1_low
-	WIN_INVERT	.0	; Init new Wordprocessor	
 
 menu_custom_functions1:
 	call	DISP_standard_color         ; Trash EEADRH...

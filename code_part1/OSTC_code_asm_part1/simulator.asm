@@ -222,10 +222,9 @@ simulator_decoplan_cns_1:
         STRCPY_PRINT    TXT_CNSGR10
 
 simulator_decoplan_cns_2:
-        call    DISP_standard_color     ; Back to normal.
-        WIN_INVERT	.1	                ; Init new Wordprocessor	
+        call	DISP_divemask_color
         DISPLAYTEXT	.188		        ; Sim. Results:
-        WIN_INVERT	.0                  ; Init new Wordprocessor	
+        call    DISP_standard_color
 	
 simulator_show_decoplan1:
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
@@ -376,10 +375,9 @@ simulator_calc_deco:
 	movff	xC+0,sim_pressure+0
 	movff	xC+1,sim_pressure+1
 
-	call	DISP_topline_box
-	WIN_INVERT	.1
+    call	DISP_divemask_color
 	DISPLAYTEXT	.12                     ; "Wait..."
-	WIN_INVERT	.0
+    call    DISP_standard_color
 
     ; This override is done in ISR too, but do it right now also:	
 	movff	sim_pressure+0,amb_pressure+0

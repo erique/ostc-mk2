@@ -114,10 +114,9 @@ menu_diluentsetup:
 menu_diluentsetup_prelist:
 	call	DISP_ClearScreen
 	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
-	call	DISP_topline_box
-	WIN_INVERT	.1	; Init new Wordprocessor
+    call	DISP_divemask_color
 	DISPLAYTEXT	.231			; Dil. Setup - Gaslist
-	WIN_INVERT	.0	; Init new Wordprocessor
+    call	DISP_standard_color
 	clrf	decodata+0				; Here: # of gas 0-4
 	clrf	divemins+0				; Here: # of Gas * 4
 	movlw	d'5'
@@ -692,8 +691,8 @@ restore_gas_diluent:
 
 
 diluent_title_bar2:
-	call	DISP_topline_box
-	WIN_INVERT	.1	; Init new Wordprocessor
+;	call	DISP_topline_box
+    call	DISP_divemask_color
 	WIN_TOP		.2
 	WIN_LEFT	.30
 	lfsr	FSR2,letter
@@ -780,7 +779,7 @@ diluent_title_bar6:		; ERROR
 
 diluent_title_bar7:
     STRCAT_PRINT  ""
-	WIN_INVERT	.0	; Init new Wordprocessor
+    call	DISP_standard_color
 	return
 
 
@@ -803,12 +802,10 @@ menu_const_ppO2_setpoints:          ; Setpoint menu
 
 menu_const_ppO20:
 	call	DISP_ClearScreen
-	call	DISP_topline_box
-
-	WIN_INVERT	.1			; Init new Wordprocessor	
+    call	DISP_divemask_color
 	DISPLAYTEXT	.111		; Constant ppO2 Setup
-	WIN_INVERT	.0			; Init new Wordprocessor	
-
+    call	DISP_standard_color
+	
 
 menu_const_ppO21:
 	WIN_LEFT 	.20

@@ -256,12 +256,9 @@ exit_setup_menu:
 	goto	restart						; No, restart to surfacemode
 
 	call	DISP_ClearScreen
-	
-deco_info_screen1:
-	call	DISP_topline_box
-	WIN_INVERT	.1	; Init new Wordprocessor	
-	DISPLAYTEXT	.235			;Decomode changed!
-	WIN_INVERT	.0	; Init new Wordprocessor	
+    call	DISP_divemask_color
+	DISPLAYTEXT	.235                ;Decomode changed!
+    call    DISP_standard_color
 
 	read_int_eeprom d'34'		; Read deco data
 

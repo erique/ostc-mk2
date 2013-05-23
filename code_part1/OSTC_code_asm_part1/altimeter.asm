@@ -110,7 +110,6 @@ altimeter_display:
 
         WIN_TOP     .35                 ; Custom view drawing zone...
         WIN_LEFT    .90
-        WIN_INVERT  .0
         WIN_FONT    .0
         call    DISP_standard_color
 
@@ -230,16 +229,14 @@ altimeter_menu:
 
 altimeter_menu_1:
         call    DISP_ClearScreen        ; Menu header.
-        call    DISP_standard_color
-    	call	DISP_topline_box
-    	WIN_INVERT	.1	; Init new Wordprocessor	
+        call	DISP_divemask_color
         DISPLAYTEXTH .288               ; Title bar
+        call    DISP_standard_color
 
         movlw       2                   ; Start menu on line 2.
         movwf       menupos
 
 altimeter_menu_2:
-        WIN_INVERT  0
         WIN_FONT    0
         WIN_LEFT    .20                 ; First line:
         WIN_TOP     .35

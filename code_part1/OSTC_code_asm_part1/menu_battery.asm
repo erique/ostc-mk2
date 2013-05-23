@@ -25,11 +25,9 @@
 
 menu_battery_state:
 	call	DISP_ClearScreen
-	call	DISP_topline_box
-	WIN_INVERT	.1	; Init new Wordprocessor	
+    call	DISP_divemask_color
 	DISPLAYTEXT	.114		; Battery Information
-	WIN_INVERT	.0	; Init new Wordprocessor	
-	
+    call    DISP_standard_color
 	WIN_TOP		.35
 	WIN_LEFT	.0
 	WIN_FONT 	FT_SMALL

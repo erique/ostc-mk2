@@ -59,9 +59,9 @@ menu_logbook1:
 
 
 menu_logbook1a:
-	WIN_INVERT	.1
+    call	DISP_divemask_color
 	DISPLAYTEXT	.12							;" Wait.."
-	WIN_INVERT	.0
+    call	DISP_standard_color
 	call 		I2CReset					; Reset I2C Bus
 	call		get_free_EEPROM_location	; search from "here" backwards through the external memory
 
@@ -82,9 +82,9 @@ menu_logbook1a_no_get_free:				; Without repeated search for dive
 ; recopy data to search from here
 
 menu_logbook1b:
-	WIN_INVERT	.1
+    call	DISP_divemask_color
 	DISPLAYTEXT	.12						;" Wait.."
-	WIN_INVERT	.0
+    call	DISP_standard_color
 
     ;---- fast loop: check every other byte ----------------------------------
 menu_logbook2:
@@ -200,11 +200,10 @@ menu_logbook_display_loop2:
 	btfss		logbook_page_not_empty		; Was there one dive at all?
 	bra			menu_logbook				; Yes, so reload the first page
 
-	call		DISP_topline_box			; Draw box
-	WIN_INVERT	.1	
+	call	DISP_topline_box_clear	; Clears Bar at the top
+    call	DISP_divemask_color
 	DISPLAYTEXT	.26							; "Logbook"
-	WIN_INVERT	.0
-	
+    call    DISP_standard_color
 	DISPLAYTEXT .11							; Displays "Exit" in the last row on the current page
 
 	call		menu_pre_loop_common		; Clear some menu flags, timeout and switches
@@ -1372,10 +1371,10 @@ display_listdive:
 
 	btfsc		logbook_header_drawn		; "Logbook already displayed?
 	bra			display_listdive1a
-	call		DISP_topline_box			; Draw box
-	WIN_INVERT	.1
+	call        DISP_topline_box_clear      ; Clears Bar at the top
+    call        DISP_divemask_color
 	DISPLAYTEXT	.26							; "Logbook"
-	WIN_INVERT	.0
+    call        DISP_standard_color
 	bsf			logbook_header_drawn
 	
 display_listdive1a:	

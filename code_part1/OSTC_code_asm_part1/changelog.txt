@@ -1,3 +1,7 @@
+New in 2.64:
+BETA Version - Do NOT use for diving!
+CHANGE: "ostc3-style" menu titles
+
 New in 2.63:
 BETA Version - Do NOT use for diving!
 BUGFIX: no flicker when powering on

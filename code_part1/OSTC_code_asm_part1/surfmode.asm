@@ -24,15 +24,15 @@
 
 surfloop:
 ; Boot tasks for all modes
+	call	DISPLAY_boot
+surfloop_no_display_init:
+    call	DISP_ClearScreen
 	bcf		s_unlock_after_sleep			; Lock sensor results
 	call	restart_set_modes_and_flags		; Sets decomode flags
 	clrf	lo
 	movff	lo,char_I_const_ppO2			; reset to standard mode, OSTC assumes Air breathing at the surface!
-
-	call	DISP_brightness_full			; max. brightness
-	
 	call 	I2CReset
-	call	DISPLAY_boot
+	call	DISP_brightness_full			; max. brightness
 	call	DISP_serial						; Show OSTC serial and firmware version
 	call	DISP_clock						; display time
 	call	update_date						; display date

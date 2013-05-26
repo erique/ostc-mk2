@@ -1650,7 +1650,7 @@ end_dive_common:
 		call	simulator_restore_tissue_data		; Yes!
 	endif
 
-	goto	surfloop					; and return to surfaceloop
+	goto	surfloop_no_display_init	; and return to surfaceloop
 
 timeout_divemode:
 	btfss	realdive					; Dive longer then one minute

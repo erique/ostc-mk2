@@ -1446,7 +1446,6 @@ display_listdive2:
 
 logbook_convert_64k:						; Converts <1.91 logbook (32kB) to 64kB variant
 	call	DISPLAY_boot
-	call	DISP_ClearScreen		; Clear screen
 	movlw	color_red
     call	DISP_set_color			; Set to Red
 	DISPLAYTEXTH	d'303'			; Please wait!

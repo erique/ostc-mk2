@@ -163,6 +163,32 @@ check_firmware_new:
 	clrf	EEADRH					; Reset EEADRH
 
 restart:
+    ; check for time/date vault
+    movlw   .1
+    movwf   EEADRH
+    read_int_eeprom .5
+    movlw   0xAA
+    cpfseq  EEDATA                  ; 0xAA in EEPROM Bank1, Byte 5?
+    bra     restart0                        ; No
+
+    movlw   0x00
+    movwf   EEDATA
+    write_int_eeprom	d'5'        ; clear flag
+    read_int_eeprom     .6
+    movff   EEDATA,year
+    read_int_eeprom     .7
+    movff   EEDATA,month
+    read_int_eeprom     .8
+    movff   EEDATA,day
+    read_int_eeprom     .9
+    movff   EEDATA,hours
+    read_int_eeprom     .10
+    movff   EEDATA,mins
+    read_int_eeprom     .11
+    movff   EEDATA,secs
+    call    RTCinit                 ; Check limits
+restart0:
+    clrf    EEADRH
 	movlw	b'00000011'
 	movwf	T3CON					; Timer3 with 32768Hz clock running
 	clrf	TMR3L

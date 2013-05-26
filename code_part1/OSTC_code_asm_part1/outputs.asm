@@ -297,7 +297,7 @@ DISP_resetdebugger:
     global temp10
 
     movlb   1                       ; For C-code calls
-	call	DISPLAY_boot				; DISP boot
+	call	DISPLAY_boot			; DISP boot
 	call	DISP_standard_color
 	WIN_INVERT	.0					; Init new Wordprocessor
 

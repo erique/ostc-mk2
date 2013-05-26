@@ -249,7 +249,30 @@ uart_115k_bootloader3:
 uart_115k_bootloader1:
 	movlw	0xC1
 	cpfseq	RCREG					; 115200Baud Bootloader request?
-	bra		uart_115k_bootloader2	; No, Abort	
+	bra		uart_115k_bootloader2	; No, Abort
+
+; Vault date and time during update
+; EEPROM Bank1
+; Byte 5: =0xAA -> reload time and date in "restart:"
+; Byte 6-11: YYMMDDHHMMSS
+    movlw   .1
+    movwf   EEADRH
+    movff   year,EEDATA
+    write_int_eeprom	d'6'
+    movff   month,EEDATA
+    write_int_eeprom	d'7'
+    movff   day,EEDATA
+    write_int_eeprom	d'8'
+    movff   hours,EEDATA
+    write_int_eeprom	d'9'
+    movff   mins,EEDATA
+    write_int_eeprom	d'10'
+    movff   secs,EEDATA
+    write_int_eeprom	d'11'
+    movlw   0xAA
+    movwf   EEDATA
+    write_int_eeprom	d'5'        ; Set flag
+    clrf    EEADRH
 	DISPLAYTEXTH	d'303'			; Yes, "Please wait!"
 	clrf	INTCON					; Interrupts disabled
 	bcf		PIR1,RCIF				; clear flag

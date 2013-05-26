@@ -223,7 +223,7 @@ menu_interface2:
 	WAITMS	d'250'
 	bcf			LED_blue
 	bsf			PIE1,RCIE					; Interrupt for RS232
-	goto		surfloop					; back to surfacemode
+	goto		surfloop_no_display_init	; back to surfacemode
 
 send_internal_eeprom1:
 	movwf		EEADRH						; Point to Bank "WREG"

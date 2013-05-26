@@ -109,15 +109,15 @@ altimeter_display:
         return                          ; NO: return
 
         WIN_TOP     .35                 ; Custom view drawing zone...
-        WIN_LEFT    .90
-        WIN_FONT    .0
+        WIN_LEFT    .82
+        WIN_FONT    FT_SMALL
         call    DISP_standard_color
 
         STRCPY  TXT_ALT5
 
         movff   altitude+0,lo           ; BANK-SAFE read altitude
         movff   altitude+1,hi
-        btfss   hi,7                    ; Is altitude negativ ?
+        btfss   hi,7                    ; Is altitude negative ?
         bra     altimeter_2             ; No: just print it
 
         PUTC    '-'                     ; Yes: print the minus sign
@@ -130,15 +130,17 @@ altimeter_2:
         bsf     leftbind
         output_16
         bcf     leftbind
-
-        STRCAT_PRINT TXT_METER5
+        STRCAT  TXT_METER5
+        clrf    WREG
+        movff   WREG,letter+.11         ;limit to 12chars
+        STRCAT_PRINT    ""
         return
 
 ;=============================================================================
 ; Compute altitude, using the formula:
 ; H(P) = 18.787 log10(P0/P)  (Log base 10)
 
-;---- Interface the the Mayh library -----------------------------------------
+;---- Interface the the Math library -----------------------------------------
         extern  __AARGB2                ; A float in fA2, fA1, fA0, fAExo
         extern  __BARGB2                ; B float in fB2, fB1, fB0, fBExo
         extern  FLO1632U                ; convert uint16 fA+1 --> fp32 fA
@@ -274,7 +276,7 @@ alt_menu_2:
         DISPLAYTEXTH .293               ; Action sub
         DISPLAYTEXT  .011               ; Action exit
 
-        WIN_LEFT    .85                 ; Bottom right. 
+        WIN_LEFT    .80                 ; Bottom right.
         lfsr    FSR2, letter
         OUTPUTTEXTH .294                ; "Alt: "
 
@@ -293,7 +295,10 @@ altimeter_menu_3:
         bsf         leftbind
         output_16
         bcf         leftbind
-        STRCAT_PRINT    TXT_METER5
+        STRCAT  TXT_METER5
+        clrf    WREG
+        movff   WREG,letter+.11         ;limit to 12chars
+        STRCAT_PRINT    ""
 
 alt_menu_loop:
         call        DISP_menu_cursor    ; Display cursor

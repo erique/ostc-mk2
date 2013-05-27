@@ -194,6 +194,8 @@ diveloop_loop3:
 	btfsc	menubit							; Sleep only with inactive menu...
 	bra		diveloop_loop5
 
+    bcf     T0CON,TMR0ON                    ; Stop Timer0 before sleep
+    nop
 	sleep
 	nop
 	bra		diveloop_loop					; Loop the divemode

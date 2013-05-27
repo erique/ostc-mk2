@@ -222,9 +222,9 @@ RTCinit:						; resets RTC
 	bra		RTCinit2			; Reset time...
 ; Make sure day and month <> zero
 	movlw	.0
-	cpfseq	day					; =0?
+	cpfsgt	day					; =0?
 	incf	day,F				; Yes, +1
-	cpfseq	month				; =0?
+	cpfsgt	month				; =0?
 	incf	month,F				; Yes, +1
 	bsf		PIE1, TMR1IE		; Enable clock int
 	return

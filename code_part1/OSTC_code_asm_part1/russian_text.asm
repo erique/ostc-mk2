@@ -208,7 +208,7 @@
     TCODE    .0,   .125,     "Смотри GNU General"        ;078 See the GNU General
     TCODE    .0,   .155,     "Public License для"        ;079 Public License for
     TCODE    .0,   .185,     "полной информации:"        ;080 more details:
-    TCODE    .0,   .215,     "www.heinrichsweikamp.de"   ;081 www.heinrichsweikamp.de
+    TCODE    .0,   .215,     "heinrichsweikamp.com"      ;081 heinrichsweikamp.com
 ; end of licence
 ;
     TCODE    .102,  .54,     "Декостоп"                  ;082 Decostop

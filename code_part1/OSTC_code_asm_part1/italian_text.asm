@@ -207,7 +207,7 @@
     TCODE    .0,   .125,     "Vedi anche GNU General"    ;078 See the GNU General
     TCODE    .0,   .155,     "Public License per"        ;079 Public License for
     TCODE    .0,   .185,     "maggiori dettagli:"        ;080 more details:
-    TCODE    .0,   .215,     "www.heinrichsweikamp.de"   ;081 www.heinrichsweikamp.de
+    TCODE    .0,   .215,     "heinrichsweikamp.com"      ;081 heinrichsweikamp.com
 ; end of licence
 ;
     TCODE    .95,   .54,     "TappaDeco"                 ;082 Decostop

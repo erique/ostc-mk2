@@ -1,5 +1,6 @@
-New in 2.64:
+New in 2.65:
 BETA Version - Do NOT use for diving!
+CHANGE: show old decoplan after gas change until new decoplan is ready
 CHANGE: "ostc3-style" menu titles
 NEW: Vault date and time during update
 

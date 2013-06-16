@@ -102,16 +102,16 @@ get_battery_voltage4:
 	movwf	sub_a+0
 	movlw	HIGH	d'2000'
 	movwf	sub_a+1
-	call	subU16					;  sub_c = sub_a - sub_b
-	btfsc	neg_flag				; neg_flag=1 if eeprom40:41 < 2000
+	call	subU16					; sub_c = sub_a - sub_b
+	btfss	neg_flag				; neg_flag=1 if eeprom40:41 < 2000
 	bsf		initialize_battery1		; battery need to be initialised
 
 	movlw	LOW		d'4500'			; must be lower then 4500mV...
 	movwf	sub_a+0
 	movlw	HIGH	d'4500'
 	movwf	sub_a+1
-	call	subU16					;  sub_c = sub_a - sub_b
-	btfss	neg_flag				; neg_flag=1 if eeprom40:41 < 4500
+	call	subU16					; sub_c = sub_a - sub_b
+	btfsc	neg_flag				; neg_flag=1 if eeprom40:41 < 4500
 	bsf		initialize_battery1		; battery need to be initialised
 	
 	btfss	initialize_battery1		; battery need to be initialised?

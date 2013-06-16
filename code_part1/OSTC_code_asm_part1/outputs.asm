@@ -3582,7 +3582,10 @@ DISP_show_end_ead_divemode_1:
 	bsf		leftbind
 	output_16dp	d'3'					; Show ppO2 w/o leading zero
 	bcf		leftbind
-	STRCAT_PRINT  " "					;  Display ppO2[Diluent]
+    PUTC    " "
+    clrf    WREG
+    movff   WREG,letter+4               ; limit to five chars
+	STRCAT_PRINT  ""					; Display ppO2[Diluent]
 	goto    DISP_standard_color         ; Back to white.
 
 ;=============================================================================

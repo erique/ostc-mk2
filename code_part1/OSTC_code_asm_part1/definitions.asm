@@ -574,4 +574,5 @@ ASSERT_BANK1    MACRO   tag
 #DEFINE	maxdepth_greater_100m	flag15,6	;=1: Max Depth greater>100m
 #DEFINE	show_cns_in_logbook		flag15,7	;=1: Show CNS value in logbook (>= V1.84)
 
+#DEFINE store_bailout_event     flag16,0    ;=1: Store the bailout event
 

@@ -214,6 +214,7 @@ restart0:
 	clrf	flag13
 	clrf	flag14
 	clrf	flag15
+    clrf	flag16
 
     ; Should we set win_flip_screen ?
 	bsf		flag1,0                 ; Precondition to yes

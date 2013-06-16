@@ -758,6 +758,12 @@ check_event2:
 	addwf	ProfileFlagByte,F	; add to ProfileFlagByte
 	bsf		EventByte,6			; Also set Flag in EventByte!
 check_event3:
+    btfss	store_bailout_event ; Check flag
+	bra		check_event4
+	movlw	d'2'				; Information length
+	addwf	ProfileFlagByte,F	; add to ProfileFlagByte
+	bsf		EventByte,7			; Also set Flag in EventByte!
+check_event4:
 	bsf		ProfileFlagByte,7	; Set EventByte Flag in ProfileFlagByte
 
 store_dive_data3:
@@ -841,6 +847,14 @@ store_extended6:
 	bcf		setpoint_changed		; Clear this event
 
 store_dive_data5:
+    btfss	store_bailout_event     ; Check flag
+    bra		store_dive_data6
+    movff   char_I_O2_ratio,WREG
+    call	write_external_eeprom
+    movff   char_I_He_ratio,WREG
+    call	write_external_eeprom
+    bcf		store_bailout_event		; Clear this event
+store_dive_data6:
 	bcf		event_occured		; Clear the global event flag
 	return						; Done. (Sample with all informations written to EEPROM)
 	
@@ -2028,6 +2042,7 @@ diveloop_boot:
 	clrf	AlarmType					; Clear all alarms
 	bcf		event_occured				; clear flag
 	bcf		setpoint_changed			; clear flag
+    bcf     store_bailout_event         ; clear flag
 	rcall	reset_average1				; Reset the resettable average depth
 	clrf	average_depth_hold_total+0
 	clrf	average_depth_hold_total+1

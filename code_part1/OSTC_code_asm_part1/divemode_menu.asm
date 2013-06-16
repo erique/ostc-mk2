@@ -619,7 +619,8 @@ divemenu_set_xgas2_exit:
     bsf     decoplan_invalid            ; The decoplan needs to updated
     clrf    WREG
     movff   WREG,char_O_deco_status     ; Restart decoplan computation mH
-    bsf		is_bailout					;=1: CC mode, but bailout active!		
+    bsf		is_bailout					;=1: CC mode, but bailout active!
+    bsf     store_bailout_event
 	clrf	lo							; clear Setpoint, DISP_const_ppO2_value now displayes "Bail"
 	movff	lo,char_I_const_ppO2
     movlw   6
@@ -745,7 +746,9 @@ divemenu_set_gas2a:
 	bra		divemode_set_xgas			; Configure the extra gas
 
 divemenu_set_gas2b:
-	bsf		is_bailout					;=1: CC mode, but bailout active!		
+	bsf		is_bailout					;=1: CC mode, but bailout active!
+    bsf     store_bailout_event
+	bsf		event_occured				; set global event flag
 	clrf	lo							; clear Setpoint, DISP_const_ppO2_value now displayes "Bail"
 	movff	lo,char_I_const_ppO2		
 

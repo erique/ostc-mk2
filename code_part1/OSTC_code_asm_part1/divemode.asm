@@ -1457,34 +1457,34 @@ end_dive3:
 ;Diluent 5 Current (%O2,%He)
 ;Byte116:
 ;First Diluent (1-5)
+	read_int_eeprom 	d'97'		; Read byte (stored in EEDATA)
+	movf	EEDATA,W
+	call	write_external_eeprom
 	read_int_eeprom 	d'98'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
-	read_int_eeprom 	d'99'		; Read byte (stored in EEDATA)
+	read_int_eeprom 	d'101'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
 	read_int_eeprom 	d'102'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
-	read_int_eeprom 	d'103'		; Read byte (stored in EEDATA)
+	read_int_eeprom 	d'105'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
 	read_int_eeprom 	d'106'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
-	read_int_eeprom 	d'107'		; Read byte (stored in EEDATA)
+	read_int_eeprom 	d'109'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
 	read_int_eeprom 	d'110'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
-	read_int_eeprom 	d'111'		; Read byte (stored in EEDATA)
+	read_int_eeprom 	d'113'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
 	read_int_eeprom 	d'114'		; Read byte (stored in EEDATA)
-	movf	EEDATA,W
-	call	write_external_eeprom
-	read_int_eeprom 	d'115'		; Read byte (stored in EEDATA)
 	movf	EEDATA,W
 	call	write_external_eeprom
 

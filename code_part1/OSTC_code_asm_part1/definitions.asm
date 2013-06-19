@@ -22,11 +22,11 @@
 ; ToDo:
 
 #DEFINE	softwareversion_x		d'2'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'66'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'71'		; Software version  XX.YY
 
-#DEFINE softwareversion_beta 	1 			; (and 0 for release) 
+#DEFINE softwareversion_beta 	1 			; (and 0 for release)
 
-#DEFINE	max_custom_number		d'69'		; Number of last used custom function
+#DEFINE	max_custom_number		d'73'		; Number of last used custom function
 
 ; International extension. Selecting messages source:
 #DEFINE    ENGLISH                         ; Use english_text.asm

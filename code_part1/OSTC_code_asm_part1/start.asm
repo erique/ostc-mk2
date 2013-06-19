@@ -263,7 +263,7 @@ restart0:
 restart1:
 ; Reset all CF and Gases
 	call	reset_gases
-;	call	reset_all_cf
+;    call    reset_all_cf_bank2
 ; Show info screen
 	call	DISPLAY_boot               ; DISP boot (Incl. Clear Screen!)
 	rcall	display_new_cf_installed; Show info screen

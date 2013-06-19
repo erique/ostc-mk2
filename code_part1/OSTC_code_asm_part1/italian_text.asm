@@ -451,7 +451,7 @@
     TCODE    .0,    .2,      "OCR Gas Usage:"            ;301 OCR Gas Usage:        (Planned gas consumtion by tank).
 ; 115k Bootloader support:
     TCODE    .45,   .100,    "Bootloader"		 ;302 Bootloader
-    TCODE    .40,   .110,    "Perfavore aspetta!"	 ;303 Please wait!
+    TCODE    .30,   .130,    "Perfavore aspetta!"	 ;303 Please wait!
     TCODE    .50,   .130,    "Aborted!"		         ;304 Aborted
 ; @5 variant
     TCODE    .0,    .0,      "TTS Futuro"                ;305 Future TTS            (=10 chars. Title for @5 customview).

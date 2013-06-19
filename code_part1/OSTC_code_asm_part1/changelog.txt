@@ -1,3 +1,6 @@
+New in 2.70:
+Intermediate release for OSTC 2C users (Language support)
+
 New in 2.65:
 BETA Version - Do NOT use for diving!
 CHANGE: show old decoplan after gas change until new decoplan is ready

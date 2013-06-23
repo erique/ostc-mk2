@@ -3105,6 +3105,7 @@ DISP_gas_list_loop1:
 	cpfseq	hi				; All gases shown?
 	bra		DISP_gas_list_loop	; No
 
+    WIN_INVERT	.0
 	DISPLAYTEXT		d'122'		; More
 	return					;  return (OC mode)
 

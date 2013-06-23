@@ -665,18 +665,26 @@ divemenu_set_gas2:
 	btfss	FLAG_const_ppO2_mode		; are we in ppO2 mode?
 	bra		divemenu_set_gas2a			; no, choose gas
 	; Yes, so select SP 1-3
-	bcf		is_bailout					;=1: CC mode, but bailout active!		
-	call	DISP_show_ppO2_clear		; Clear ppO2 value
 	
 divemenu_set_gas1:
 	movlw	d'1'				
 	cpfseq	menupos						; At the "Bailout" position?		
 	bra		divemenu_set_gas1b			; No, select SetPoint 1-3 or Diluent
-	bsf		select_bailoutgas			; Set Flag
+
+    bsf		select_bailoutgas			; Set Flag
 	bcf		display_set_setpoint		; Clear Flag
+    btfsc   is_bailout                  ; Already in bailout?
+	bra		divemenu_set_gas_2			; Yes.
+    
+    ;Setup first gas as better gas
+    bsf     better_gas_available
+    read_int_eeprom .33                 ; 1-5
+    movff   EEDATA,better_gas_number
 	bra		divemenu_set_gas_2			; Configure the extra gas / Select Bailout
 
 divemenu_set_gas1b:
+	bcf		is_bailout					;=1: CC mode, but bailout active!
+	call	DISP_show_ppO2_clear		; Clear ppO2 value
 	movlw	d'5'
 	cpfseq	menupos						; At the "Diluent" position?
 	bra		divemenu_set_gas1c			; No, select SetPoint 1-3

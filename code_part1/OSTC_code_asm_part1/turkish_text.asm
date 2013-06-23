@@ -146,9 +146,9 @@
     TCODE    .6,   .0,       "Sifirla...     "           ;025 Reset...
     TCODE    .55,  .2,       "LogBook"                   ;026 Logbook
     TCODE    .14,  .2,       "Ozel Fonksiyonlar I"       ;027 Custom Functions I
-    TCODE    .14,  .2,       "Cihaz Sifirla      "        ;028 Reset Menu
+    TCODE    .14,  .2,       "Cihaz Sifirla      "       ;028 Reset Menu
     TCODE    .14,  .2,       "Saati Ayarla:      "       ;029 Set Time:
-    TCODE    .100, .50,      "Isaret "                   ;030 SetMarker         (Add a mark in logbook profile)
+    TCODE    .100, .50,      "Isaret"                    ;030 Marker            (Add a mark in logbook profile)
     TCODE    .100, .25,      "Dekoplan"                  ;031 Decoplan
     TCODE    .100, .0,       "GazListe"                  ;032 Gaslist
     TCODE    .100, .50,      "Sifirla "                  ;033 ResetAvr          (Reset average depth)

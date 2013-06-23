@@ -151,7 +151,7 @@
     TCODE    .14,  .2,       "Custom Functions I"        ;027 Custom Functions I
     TCODE    .40,  .2,       "Reset Menu"                ;028 Reset Menu
     TCODE    .50,  .2,       "Set Time:"                 ;029 Set Time:
-    TCODE    .100, .50,      "SetMarker"                 ;030 SetMarker         (Add a mark in logbook profile)
+    TCODE    .100, .50,      "Marker"                    ;030 Marker            (Add a mark in logbook profile)
     TCODE    .100, .25,      "Decoplan"                  ;031 Decoplan
     TCODE    .100, .0,       "Gaslist"                   ;032 Gaslist
     TCODE    .100, .50,      "ResetAvr"                  ;033 ResetAvr          (Reset average depth)

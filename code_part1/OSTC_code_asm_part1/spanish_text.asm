@@ -150,7 +150,7 @@
     TCODE    .14,  .2,       "Func. Personaliz. I"       ;027 Custom Functions I
     TCODE    .20,  .2,       "Menú Reinicio"             ;028 Reset Menu
     TCODE    .35,  .2,       "Fijar Hora:"               ;029 Set Time:
-    TCODE    .100, .50,      "Marcar  "                  ;030 SetMarker         (Add a mark in logbook profile)
+    TCODE    .100, .50,      "Marcar"                    ;030 Marker             (Add a mark in logbook profile)
     TCODE    .100, .25,      "Plandeco"                  ;031 Decoplan
     TCODE    .100, .0,       "Listagas"                  ;032 Gaslist
     TCODE    .100, .50,      "ReiniMed"                  ;033 ResetAvr          (Reset average depth)

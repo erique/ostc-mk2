@@ -690,7 +690,7 @@ DISP_divemode_timeout_clear:
 	call		DISP_display_deko_mask		; Yes, redraw mask
 
 	WIN_TOP		.54
-	WIN_LEFT	.112
+	WIN_LEFT	.110
 	movlw		d'6'
 	movwf		temp1
 	bcf			timeout_display				; Clear flag

@@ -221,7 +221,6 @@ static float			CNS_fraction;			        // new in v.101
 static float			float_saturation_multiplier;    // new in v.101
 static float			float_desaturation_multiplier;  // new in v.101
 static float			float_deco_distance;            // new in v.101
-static char			    flag_in_divemode;		        // new in v.108
 
 static unsigned char    deco_gas_change[NUM_GAS];       // new in v.109
 
@@ -998,7 +997,6 @@ static void sim_alveolar_presures(void)
 static void clear_tissue(void)
 {
     overlay float p;
-    flag_in_divemode = 0;
 
     // Kludge: the 0.0002 of 0.7902 are missing with standard air.
     N2_ratio = 0.7902;

@@ -118,7 +118,9 @@
 #DEFINE	TXT_TX2				 "x"						 ; "x"
 #DEFINE	TXT_NX1				 "N"						 ; "N"
 #DEFINE	TXT_NX2				 "x"						 ; "x"
-#DEFINE TXT_aGF4             "aGF:"                      ; "aGF:"
+#DEFINE TXT_DIL_C			 "D"						 ; "D"
+#DEFINE	TXT_DIL5			 "Дил.#"					 ; "Dil.#"
+#DEFINE TXT_aGF4			 "дГФ:"						 ; "aGF:"
 
 #ENDIF
 ;=============================================================================
@@ -330,14 +332,14 @@
 ; 32 custom function descriptors III (FIXED LENGTH = 15 chars).
     TCODE    .40,   .35,     "Цвет#  неактивн"           ;193 Color# inactive
     TCODE    .40,   .35,     "Остан. безопасн"           ;194 Use safety stop
-    TCODE    .40,   .35,     "Показ GF в NDL "           ;195 Show GF in NDL	(If GF > CF08)
-    TCODE    .40,   .35,     "Alt. GF Low [%]"           ;196 Alt. GF Low [%]
-    TCODE    .40,   .35,     "Alt. GF High[%]"           ;197 Alt. GF High[%]
-    TCODE    .40,   .35,     "Allow GF change"           ;198 Allow GF change
-    TCODE    .40,   .35,     "S.StopLength[s]"           ;199 S.StopLength[s] (CF70: Safety Stop Duration [s])
-    TCODE    .40,   .35,     "S.StopStart [m]"           ;200 S.StopStart [m] (CF71: Safety Stop Start Depth [m])
-    TCODE    .40,   .35,     "S.StopEnd   [m]"           ;201 S.StopEnd   [m] (CF72: Safety Stop End Depth [m])
-    TCODE    .40,   .35,     "S.StopReset [m]"           ;202 S.StopReset [m] (CF73: Safety Stop Reset Depth [m])
+    TCODE    .40,   .35,     "Показ ГФ в NDL "           ;195 Show GF in NDL	(If GF > CF08)
+    TCODE    .40,   .35,     "Доп. ГФ Ниж [%]"           ;196 Alt. GF Low [%]
+    TCODE    .40,   .35,     "Доп. ГФ Верх[%]"           ;197 Alt. GF High[%]
+    TCODE    .40,   .35,     "Разреш. Доп. ГФ"           ;198 Allow GF change
+    TCODE    .40,   .35,     "Ост.Без.Длит[s]"           ;199 S.StopLength[s] (CF70: Safety Stop Duration [s])
+    TCODE    .40,   .35,     "Ост.Без. Нач[m]"           ;200 S.StopStart [m] (CF71: Safety Stop Start Depth [m])
+    TCODE    .40,   .35,     "Ост.Без. Кнц[m]"           ;201 S.StopEnd   [m] (CF72: Safety Stop End Depth [m])
+    TCODE    .40,   .35,     "Ост.Без. Сбр[m]"           ;202 S.StopReset [m] (CF73: Safety Stop Reset Depth [m])
     TCODE    .40,   .35,     "unused         "           ;203 unused
     TCODE    .40,   .35,     "unused         "           ;204 unused
     TCODE    .40,   .35,     "unused         "           ;205 unused
@@ -409,8 +411,8 @@
 
     TCODE    .0,    .0,      "pSCR Инфо"             	 ;266 pSCR Info (Must be 9Chars!)
     TCODE    .0,    .184,    "Макс."                     ;267 Max.
-    TCODE    .93,   .170,    "GF Values"                 ;268 GF Values
-    TCODE    .100,  .50,     "ToggleGF"               	 ;269 ToggleGF (In Divemode Menu)
+    TCODE    .93,   .170,    "Па®ам. ГФ"                 ;268 GF Values
+    TCODE    .100,  .50,     "Смена ГФ"               	 ;269 ToggleGF (In Divemode Menu)
     TCODE    .0,    .0,      ""		                     ;270 unused
 
 ; New CFs Warning

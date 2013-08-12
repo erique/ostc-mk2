@@ -371,8 +371,7 @@ void assert_failed(PARAMETER short int line)
 static short read_custom_function(PARAMETER unsigned char cf)
 {
 #ifdef CROSS_COMPILE
-    return (cf & 32) ? eeprom.bank1_CF[cf-32].value.lo
-                     : eeprom.bank0_CF[cf   ].value.lo;
+    return READ_CF_MACRO(cf);
 #else
     extern unsigned char hi, lo;
     extern void getcustom15();
@@ -1064,7 +1063,7 @@ static void calc_hauptroutine(void)
     case 3: //---- At surface: start a new dive ------------------------------
         clear_deco_table();
         copy_deco_table();
-        int_O_ascenttime = 0;       // Reset DTR.
+        int_O_ascenttime = 0;       // Reset TTS.
         int_O_extra_ascenttime = 0;
         char_O_nullzeit = 0;        // Reset bottom time.
         char_O_deco_status = 0;     // Calc bottom-time/nullzeit next iteration.
@@ -2244,7 +2243,7 @@ void deco_calc_CNS_planning(void)
     sim_gas_last_depth = 0;             // Surface gas marker.
     gas_switch_set();                   // Sets initial calc_N2/He_ratio
 
-    //---- CCR mode : do the full TTS at once --------------------------------
+    //---- CCR mode : do the full CNS at once --------------------------------
     if( char_I_const_ppO2 != 0 )
     {
         overlay unsigned short t;       // Needs 16bits here !

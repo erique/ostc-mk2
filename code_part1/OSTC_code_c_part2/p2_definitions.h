@@ -111,8 +111,6 @@ extern void deco_gas_volumes(void);
 #   define overlay
 #   define PARAMETER
 
-#   include <assert.h>
-
     // Avoid warnings about float/double mismatches:
 #   ifdef WIN32
 #       pragma warning(disable: 4244 4068 4305)

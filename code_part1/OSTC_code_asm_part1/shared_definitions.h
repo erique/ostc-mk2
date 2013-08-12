@@ -78,8 +78,8 @@ bank2   udata_ovr  0x200
 
 #ifdef xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     Define model dimensions.
-    NUM_COMP  is the number of compartiments in the Bühlmann ZH-L16 model, ie 16.
-    NUM_STOPS is the maximum number of stops computed by decoplanning. 
+    NUM_COMP  is the number of compartiments in the Buhlmann ZH-L16 model, ie 16.
+    NUM_STOPS is the maximum number of stops computed by decoplanning.
               Note that the deapest stop is roughly limited to 3m * NUM_STOPS
                    (this is assuming all stops up to the surface are used).
               Note also that if the table overflow, extra stops are ignored,
@@ -93,15 +93,15 @@ bank2   udata_ovr  0x200
 
 VAR_UINT  (int_O_gtissue_limit);
 VAR_UINT  (int_O_gtissue_press);
-VAR_UINT  (int_O_desaturation_time);       // 
+VAR_UINT  (int_O_desaturation_time);       //
 VAR_UINT  (int_O_ascenttime);              // TTS (in minutes)
 VAR_UINT  (int_O_extra_ascenttime);        // TTS for @+5min variant (in minutes)
 
-VAR_UCHAR (char_O_nullzeit);               // 
+VAR_UCHAR (char_O_nullzeit);               //
 VAR_UCHAR (char_O_deco_status);            // Deko state-machine state.
 VAR_UCHAR (char_O_deco_last_stop);         // Depth reached during deko planning.
-VAR_UCHAR (char_O_gradient_factor);        // 
-VAR_UCHAR (char_O_gtissue_no);             // 
+VAR_UCHAR (char_O_gradient_factor);        //
+VAR_UCHAR (char_O_gtissue_no);             //
 VAR_UCHAR (char_O_diluent);                // new in v.101
 VAR_UCHAR (char_O_flush_ppO2);             // 2011-05-01: ppO2 from diluant (CCR mode).
 VAR_UCHAR (char_O_EAD);                    // 2011-05-01: Added EAD/END in deco model.
@@ -135,21 +135,21 @@ bank3   udata_ovr  0x300
 
 VAR_UCHAR (char_I_step_is_1min);           // Use 1min integration for tissue and CNS.
 
-VAR_UINT  (int_I_pres_respiration);        // 
-VAR_UINT  (int_I_pres_surface);            // 
+VAR_UINT  (int_I_pres_respiration);        //
+VAR_UINT  (int_I_pres_surface);            //
 VAR_UINT  (int_I_temp);                    // new in v101
 VAR_UINT  (int_I_divemins);                // Dive time (minutes)
 VAR_UCHAR (char_I_temp);                   // new in v101
-VAR_UCHAR (char_I_actual_ppO2);            // 
+VAR_UCHAR (char_I_actual_ppO2);            //
 VAR_UCHAR (char_I_first_gas);              // Gas used at start of dive (bottom mix)
 VAR_UCHAR (char_I_current_gas);            // Current gas breathed (1..6).
 VAR_UCHAR (char_I_N2_ratio);               //
 VAR_UCHAR (char_I_He_ratio);               //
 VAR_UCHAR (char_I_saturation_multiplier);  // for conservatism/safety values 1.0  no conservatism to 1.5  50% faster saturation
-VAR_UCHAR (char_I_desaturation_multiplier);// for conservatism/safety values 0.66  50% slower desaturation to 1.0  no conservatism// consveratism used in calc_tissue , calc_tissue_step_1_min  and sim_tissue_1min 
+VAR_UCHAR (char_I_desaturation_multiplier);// for conservatism/safety values 0.66  50% slower desaturation to 1.0  no conservatism// consveratism used in calc_tissue , calc_tissue_step_1_min  and sim_tissue_1min
 VAR_UCHAR (char_I_GF_High_percentage);     // new in v.102
 VAR_UCHAR (char_I_GF_Low_percentage);      // new in v.102
-VAR_UCHAR (char_I_deco_distance);          // 
+VAR_UCHAR (char_I_deco_distance);          //
 VAR_UCHAR (char_I_const_ppO2);             // new in v.101
 VAR_UCHAR (char_I_depth_last_deco);        // new in v.101 unit: [m]
 VAR_UCHAR (char_I_deco_model);             // new in v.102. 0 == ZH-L16, 1 = ZH-L16-GF (Grandiant facttor)

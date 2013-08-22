@@ -363,10 +363,10 @@
     TCODE    .85,   .125,    "pSCR-GF  "                 ;226 pSCR-GF
     TCODE    .90,   .54,     "Parada Segur."             ;227 SafetyStop
     TCODE    .0,    .0,      "Inmer. Totales"            ;228 Total Dives: 
-    TCODE    .0,    .0,      ""		                 ;229 unused
-    TCODE    .0,    .0,      ""		                 ;230 unused
-    TCODE    .0,    .0,      ""     	                 ;231 unused
-    TCODE    .0,    .0,      ""		                   	 ;232 unused
+    TCODE    .20,   .35,     "Diluent Setup"             ;229 Diluent Setup
+    TCODE    .20,   .65,     "Setpoint Setup"            ;230 Setpoint Setup
+    TCODE    .5,    .2,      "Dil. Setup - Gaslist"	 	 ;231 Dil. Setup - Gaslist
+    TCODE    .100,  .100,	 "Diluent"                   ;232 Diluent
     TCODE    .0,    .0,      ""		                     ;233 unused
     TCODE    .0,    .0,      ""     	                 ;234 unused
 

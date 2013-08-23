@@ -237,8 +237,8 @@
     TCODE    .20,   .95,     "Prof. +/-:"                ;107 Depth +/-:
     TCODE    .20,   .125,    "Cambiar:"                  ;108 Change:
     TCODE    .20,   .155,    "Defecto:"                  ;109 Default:
-    TCODE    .20,   .65,     "Menú SetPoint CCR"         ;110 CCR SetPoint Menu
-    TCODE    .20,   .2,      "Menú SetPoint CCR"         ;111 CCR SetPoint Menu
+    TCODE    .20,   .65,     "Menú CCR"                  ;110 CCR SetPoint Menu (In Main Menu)
+    TCODE    .20,   .2,      "Menú CCR"                  ;111 CCR SetPoint Menu (Submenu title)
     TCODE    .0,    .0,      "#SP"                       ;112 SP#
     TCODE    .20,   .95,     "Info.Batería"              ;113 Battery Info
     TCODE    .10,   .2,      "Información Batería"       ;114 Battery Information

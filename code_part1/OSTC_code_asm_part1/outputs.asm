@@ -1131,7 +1131,7 @@ DISP_more_menu_mask:
 	DISPLAYTEXT	.144		; Menu 2:
 	call	DISP_standard_color
 	DISPLAYTEXT .8			; Set Time
-	DISPLAYTEXT	.110		; Const. ppO2 Setup
+	DISPLAYTEXT	.110		; CCR Setup Menu
 	DISPLAYTEXT	.113		; Battery Info
 	DISPLAYTEXT	.247		; Simulator
 	DISPLAYTEXTH .287		; Altimeter

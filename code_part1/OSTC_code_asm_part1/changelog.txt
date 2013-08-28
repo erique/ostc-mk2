@@ -1,5 +1,7 @@
 New in 2.72:
-BETA Version - Do NOT use for diving!
+BETA Version - Do NOT use for diving
+CHANGE: Some minor code cleanups
+CHANGE: Spanish language updates
 
 New in 2.71:
 BETA Version - Do NOT use for diving!

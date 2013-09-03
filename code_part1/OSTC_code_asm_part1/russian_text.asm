@@ -367,10 +367,10 @@
     TCODE    .85,   .125,    "pSCR-GF  "                 ;226 pSCR-GF
 	TCODE    .90,   .54,     "Ост.Безоп."                ;227 SafetyStop
     TCODE    .0,    .0,      "Всего погружений: "        ;228 Total Dives: 
-    TCODE    .0,    .0,      ""		                   	 ;229 unused
-    TCODE    .0,    .0,      ""		                     ;230 unused
-    TCODE    .0,    .0,      ""     	                 ;231 unused
-    TCODE    .0,    .0,      ""		                   	 ;232 unused
+    TCODE    .20,   .35,     "Настройка дилюентов"       ;229 Diluent Setup
+    TCODE    .20,   .65,     "Настройка сетпоинтов"      ;230 Setpoint Setup
+    TCODE    .3,    .2,      "Список газов-дилюентов"	 ;231 Dil. Setup - Gaslist
+    TCODE    .100,  .100,	 "Дилюент"                   ;232 Diluent
     TCODE    .0,    .0,      ""		                     ;233 unused
     TCODE    .0,    .0,      ""     	                 ;234 unused
 

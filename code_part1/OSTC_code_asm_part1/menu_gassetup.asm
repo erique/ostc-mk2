@@ -667,6 +667,8 @@ menu_firstgas1:
 	WIN_LEFT	.110
 	lfsr	FSR2,letter
 	rcall	gassetup_show_ppO2			; Display the ppO2 of the change depth with the current gas
+    clrf    WREG
+    movff   WREG,letter+7               ; limit to 7 chars
 
 	movff		xC+0,sub_a+0
 	movff		xC+1,sub_a+1
@@ -1019,7 +1021,7 @@ gassetup_show_ppO2:
 	movff	xC+0,lo				; ((Depth+10m)*O2)/10 = [0.01bar] ppO2
 	movff	xC+1,hi
 	output_16dp	d'3'
-	OUTPUTTEXT 	d'150'		; bar: 
+	OUTPUTTEXT 	d'150'		; "bar "
 	return
 
 gassetup_get_mod:

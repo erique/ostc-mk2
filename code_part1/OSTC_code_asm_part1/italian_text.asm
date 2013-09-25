@@ -320,7 +320,7 @@
 ;
     TCODE    .13,   .2,      "Funzioni Custom II"        ;186 Custom Functions II
     TCODE    .20,   .95,     "Vedi Licenza"              ;187 Show License
-    TCODE    .0,    .2,      "Risultati simul:"          ;188 Sim. Results:
+    TCODE    .0,    .2,      "Risul. simul:"             ;188 Sim. Results:
     TCODE    .90,   .25,     "Superficie"                ;189 Surface
     TCODE    .0,    .0,      "PpO2 +"                    ;190 ppO2 +
     TCODE    .0,    .0,      "PpO2 -"                    ;191 ppO2 -
@@ -420,7 +420,7 @@
     TCODE    .0,    .125,    "per i Dettagli!"           ;275 for Details!
     TCODE    .20,   .125,    "Salinitá: "                ;276 Salinity:
 ;
-    TCODE    .20,   .95,     "Tempo di fondo:"           ;277 Bottom Time:
+    TCODE    .20,   .95,     "Tempo fondo:"              ;277 Bottom Time:
     TCODE    .20,   .125,    "Profonditá Max:"           ;278 Max. Depth:
     TCODE    .20,   .155,    "Calcola Deco"              ;279 Calculate Deco
     TCODE    .20,   .155,    "Luminositá:"          	 ;280 Brightness:

@@ -249,6 +249,7 @@ half_pixel_write_1_display1:
 ; DISP Display Off
 ; -----------------------------
 DISP_DisplayOff:
+    rcall   DISP_ClearScreen
 	clrf	PORTD
 	bcf		DISPLAY_hv
 	bcf		DISPLAY_vdd

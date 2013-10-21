@@ -1,3 +1,7 @@
+New in 2.74:
+BETA Version - Do NOT use for diving
+remove ghost image (On 2C only) during first second in sleep mode
+
 New in 2.73:
 BETA Version - Do NOT use for diving
 BUGFIX: Show ppo2 of change depth in gas setup for OSTC 2C hardware

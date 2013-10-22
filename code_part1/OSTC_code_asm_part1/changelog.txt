@@ -1,6 +1,8 @@
 New in 2.74:
 BETA Version - Do NOT use for diving
-remove ghost image (On 2C only) during first second in sleep mode
+BUGFIX: remove ghost image (On 2C only) during first second in sleep mode
+CHANGE: Remove CF55 from decolist
+TODO: show gas change stops different from decostops
 
 New in 2.73:
 BETA Version - Do NOT use for diving

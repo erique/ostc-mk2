@@ -88,6 +88,7 @@
 // 2013/03/05: [jDG] Should vault low_depth too.
 // 2013/03/05: [jDG] Wrobell remark: ascent_to_first_stop works better with finer steps (2sec).
 // 2013/05/08: [jDG] A. Salm remark: NOAA tables for CNS are in ATA, not bar.
+// 2013/10/22: [mH] Remove CF55 stuff
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -213,7 +214,6 @@ static float            const_ppO2;                     // new in v.101
 
 static unsigned char    sim_gas_last_depth;             // Depth of last used gas, to detected a gas switch.
 static unsigned char    sim_gas_last_used;              // Number of last used gas, to detected a gas switch.
-static unsigned short   sim_gas_delay;                  // Time of gas-switch-stop ends [min on dive].
 static unsigned short   sim_dive_mins;                  // Simulated dive time.
 static float			calc_N2_ratio;                  // Simulated (switched) nitrogen ratio.
 static float			calc_He_ratio;                  // Simulated (switched) helium ratio.
@@ -884,29 +884,12 @@ static unsigned char gas_switch_deepest(void)
     // If there is a better gas available
     if( switch_deco )
     {
-        unsigned char delay;
-        delay = read_custom_function(55);
-
         assert( !sim_gas_last_depth || sim_gas_last_depth > switch_deco );
-
-        // Should restart gas-switch delay only when gas do changes...
-        assert( sim_gas_delay <= sim_dive_mins );
 
         sim_gas_last_depth = switch_deco;
         sim_gas_last_used  = switch_last;
-        sim_gas_delay      = delay
-                           + sim_dive_mins;
-
-        if( delay )
-        {
-            temp_depth_limit = switch_deco;
-            return 1;
-        }
-        else
-            return 0;
+        return 0;
     }
-
-    sim_gas_delay = 0;
     return 0;
 }
 
@@ -1046,7 +1029,6 @@ static void calc_hauptroutine(void)
 {
     static unsigned char backup_gas_used  = 0;
     static unsigned char backup_gas_depth = 0;
-    static unsigned char backup_gas_delay = 0;
 
     calc_hauptroutine_data_input();
 
@@ -1075,7 +1057,6 @@ static void calc_hauptroutine(void)
         // Reset gas switch history.
         backup_gas_used  = sim_gas_last_used  = 0;
         backup_gas_depth = sim_gas_last_depth = 0;
-        backup_gas_delay = sim_gas_delay = 0;
         sim_dive_mins = 0;
         break;
 
@@ -1106,7 +1087,6 @@ static void calc_hauptroutine(void)
 
         backup_gas_used  = sim_gas_last_used;   // And save for later simu steps.
         backup_gas_depth = sim_gas_last_depth;  // And save for later simu steps.
-        backup_gas_delay = sim_gas_delay;
 
         sim_ascent_to_first_stop();
 
@@ -1124,7 +1104,6 @@ static void calc_hauptroutine(void)
         {
             sim_gas_last_used  = backup_gas_used;
             sim_gas_last_depth = backup_gas_depth;
-            sim_gas_delay      = backup_gas_delay;
         }
         break;
     }
@@ -1270,17 +1249,14 @@ void calc_hauptroutine_calc_deco(void)
         if( tmr3() & (512*32) )
             break;
 
-        // Do not ascent while doing a gas switch ?
-        if( sim_gas_delay <= sim_dive_mins )
-        {
-            if( calc_nextdecodepth() )
+           if( calc_nextdecodepth() )
             {
                 if( temp_depth_limit == 0 )
                     goto Surface;
 
                 //---- We hit a stop at temp_depth_limit ---------------------
                 temp_deco = temp_depth_limit * METER_TO_BAR // Convert to relative bar,
-                          + pres_surface;                   // To absolute.
+                              + pres_surface;                   // To absolute.
                 if( !update_deco_table() )                  // Adds a one minute stops.
                     goto Surface;                           // Deco table full: abort...
             }
@@ -1299,18 +1275,9 @@ Surface:
                     calc_ascenttime();
                     char_O_deco_status = 0;         // calc nullzeit next time.
                     char_O_deco_last_stop = 0;      // Surface reached (to animate menu)
-                    return;
+                        return;
                 }
             }
-        }
-        else
-        {
-            // Note: if loop==0, temp_depth_limit might not be already set here.
-            temp_depth_limit = (int)(0.5 + (temp_deco - pres_surface) * BAR_TO_METER);
-            if( !update_deco_table() )  // Just pass one minute.
-                goto Surface;           // Deco table full: abort...
-        }
-
         //---- Then update tissue --------------------------------------------
         sim_dive_mins++;            // Advance simulated time by 1 minute.
         gas_switch_set();           // Apply any simulated gas change, once validated.
@@ -1346,10 +1313,6 @@ void sim_ascent_to_first_stop(void)
     // Are we doing the special @+5min variation ?
     if(char_O_deco_status & 4)
         sim_extra_time();
-
-    // Do we have a gas switch going on ?
-    if( sim_gas_delay > sim_dive_mins )
-        return;
 
     //---- Loop until first stop, gas switch, or surface is reached ----------
     for(;;)
@@ -1760,8 +1723,6 @@ static unsigned char update_deco_table()
         if( internal_deco_depth[x] == 0 )
         {
             internal_deco_depth[x] = temp_depth_limit;
-            if( sim_gas_delay >= sim_dive_mins )
-                internal_deco_depth[x] |= 0x80;
 
             internal_deco_time[x]  = 1;
             return 1;
@@ -2229,7 +2190,6 @@ void deco_calc_CNS_planning(void)
     // Backup state machine
     backup_gas_last_depth = sim_gas_last_depth;
     backup_gas_last_used  = sim_gas_last_used;
-    backup_gas_delay      = sim_gas_delay;
     backup_dive_mins      = sim_dive_mins;
     backup_actual_ppO2    = char_I_actual_ppO2;
 
@@ -2322,7 +2282,6 @@ void deco_calc_CNS_planning(void)
     char_I_step_is_1min = 0;
     sim_gas_last_depth  = backup_gas_last_depth;
     sim_gas_last_used   = backup_gas_last_used;
-    sim_gas_delay       = backup_gas_delay;
     sim_dive_mins       = backup_dive_mins;
     char_I_actual_ppO2  = backup_actual_ppO2;
 }

@@ -3629,7 +3629,9 @@ DISP_show_@5:
 	bsf         leftbind
 	output_16
 	bcf         leftbind
-	STRCAT_PRINT "'  "                  ; From "none" to "1'" we need 2 trailing spaces
+	STRCAT      "'  "                  ; From "none" to "1'" we need 2 trailing spaces
+    movff       WREG,letter+3          ; limit to four chars
+	STRCAT_PRINT ""
 	return
 
 DISP_show_@5_nodeco:

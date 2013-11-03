@@ -171,15 +171,9 @@ static float			locked_GF_step;             // GF_delta / low_depth
 static unsigned char    temp_depth_limit;
 float                   low_depth;                  // Depth of deepest stop
 
-// Simulation context: used to predict ascent.
-unsigned char           sim_lead_tissue_no;         // Leading compatiment number.
-float	                sim_lead_tissue_limit;      // Buhlmann tolerated pressure.
-
-// Real context: what we are doing now.
-static float			calc_lead_tissue_limit;     //
-
-static unsigned char	internal_deco_time[NUM_STOPS];
+static unsigned char	internal_deco_time [NUM_STOPS];
 static unsigned char	internal_deco_depth[NUM_STOPS];
+static unsigned char	internal_deco_gas  [NUM_STOPS];
 
 static float cns_vault;
 static float low_depth_vault;
@@ -223,6 +217,13 @@ static float			float_desaturation_multiplier;  // new in v.101
 static float			float_deco_distance;            // new in v.101
 
 static unsigned char    deco_gas_change[NUM_GAS];       // new in v.109
+
+// Simulation context: used to predict ascent.
+unsigned char           sim_lead_tissue_no;         // Leading compatiment number.
+float	                sim_lead_tissue_limit;      // Buhlmann tolerated pressure.
+
+// Real context: what we are doing now.
+static float			calc_lead_tissue_limit;     //
 
 //---- Bank 6 parameters -----------------------------------------------------
 #ifndef UNIX
@@ -685,6 +686,7 @@ static void copy_deco_table(void)
             char_O_deco_depth[y] = internal_deco_depth[x];
             char_O_deco_time_for_log[y] = internal_deco_time [x];
             char_O_deco_time [y] = internal_deco_time [x];
+            char_O_deco_gas  [y] = internal_deco_gas  [x];
 
             // Stop only once the last transfer is done.
             if( x == 0 ) break;
@@ -696,6 +698,7 @@ static void copy_deco_table(void)
             char_O_deco_time [y] = 0;
             char_O_deco_depth[y] = 0;
             char_O_deco_time_for_log[y] = 0;
+            char_O_deco_gas  [y] = 0;
         }
     }
     else //---- Straight copy ------------------------------------------------
@@ -706,6 +709,7 @@ static void copy_deco_table(void)
         {
             char_O_deco_depth[x] = internal_deco_depth[x];
             char_O_deco_time [x] = internal_deco_time [x];
+            char_O_deco_gas  [x] = internal_deco_gas  [x];
         }
 
         //Now fill the char_O_deco_time_for_log array
@@ -727,7 +731,6 @@ static void copy_deco_table(void)
         {
             char_O_deco_time_for_log [y] = 0;
         }
-
     }
 }
 
@@ -1250,13 +1253,13 @@ void calc_hauptroutine_calc_deco(void)
             break;
 
            if( calc_nextdecodepth() )
-            {
+           {
                 if( temp_depth_limit == 0 )
                     goto Surface;
 
                 //---- We hit a stop at temp_depth_limit ---------------------
                 temp_deco = temp_depth_limit * METER_TO_BAR // Convert to relative bar,
-                              + pres_surface;                   // To absolute.
+                          + pres_surface;                   // To absolute.
                 if( !update_deco_table() )                  // Adds a one minute stops.
                     goto Surface;                           // Deco table full: abort...
             }
@@ -1725,6 +1728,7 @@ static unsigned char update_deco_table()
             internal_deco_depth[x] = temp_depth_limit;
 
             internal_deco_time[x]  = 1;
+            internal_deco_gas[x] = sim_gas_last_used;
             return 1;
         }
     }

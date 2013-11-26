@@ -4,6 +4,7 @@ BUGFIX: remove ghost image (On 2C only) during first second in sleep mode
 CHANGE: Remove CF55 from decolist
 TODO: show gas change stops different from decostops
 BUGFIX: FTTS>9min in OSTC 2C hardware
+NEW: Show the bailout list in surfacemode (CC Modes)
 
 New in 2.73:
 BETA Version - Do NOT use for diving

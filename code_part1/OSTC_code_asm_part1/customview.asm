@@ -397,7 +397,7 @@ customview_toggle_exit:
 surfcustomview_toggle:
 	incf	menupos3,F			; Number of customview to show
 surfcustomview_toggle2:
-	movlw	d'4'				; Max number
+	movlw	d'6'				; Max number
 	cpfsgt	menupos3			; Max reached?
 	bra		surfcustomview_mask	; No, show
 	clrf	menupos3			; Reset to zero (Zero=no custom view)
@@ -409,12 +409,28 @@ surfcustomview_mask:
 	dcfsnz	WREG,F
 	bra		surfcustomview_init_gaslist			; Show pre-dive gaslist/setpoint list
 	dcfsnz	WREG,F
-	bra		surfcustomview_init_interval; Show the interval counter
+	bra		surfcustomview_init_interval        ; Show the interval counter
 	dcfsnz	WREG,F
-	bra		surfcustomview_init_cfview			; Show the interval counter
+	bra		surfcustomview_init_cfview			; Show important CF settings
+	dcfsnz	WREG,F
+	bra		surfcustomview_init_first_bail		; Show the first bailout gas
+	dcfsnz	WREG,F
+	bra		surfcustomview_init_bailoutlist		; Show the bailout list
 
 surfcustomview_init_nocustomview:
 	bra		surfcustomview_toggle_exit	
+
+surfcustomview_init_first_bail:     		; Show the first bailout gas
+    btfss   FLAG_const_ppO2_mode            ; in ppO2 mode
+    bra		surfcustomview_toggle			; No, use next Customview!
+    call	DISP_bailoutgas                 ; Show the first bailout gas
+	bra		surfcustomview_toggle_exit
+
+surfcustomview_init_bailoutlist:            ; Show the bailout list
+    btfss   FLAG_const_ppO2_mode            ; in ppO2 mode
+    bra		surfcustomview_toggle			; No, use next Customview!
+    call	DISP_bailoutlist                ; Show the Bailout list
+	bra		surfcustomview_toggle_exit
 
 surfcustomview_init_graphs:
 	btfsc	no_deco_customviews				; no-deco-mode-flag = 1

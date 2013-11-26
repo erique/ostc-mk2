@@ -1393,6 +1393,38 @@ DISP_grey:
 	goto	DISP_set_color	            ; grey out inactive gases!
     ; return
 
+DISP_bailoutgas:        ; Show the first bailout gas
+	WIN_TOP		.25
+	WIN_LEFT	.90
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0					; Init new Wordprocessor
+	call	DISP_standard_color
+    lfsr	FSR2,letter
+	OUTPUTTEXT	.137			; Bailout
+    call	word_processor
+	WIN_TOP		.50
+	WIN_LEFT	.90
+    bsf		leftbind
+    lfsr	FSR2,letter
+	STRCAT  TXT_G1_3
+	movlw   .6              ; Gas #1: %O2 - Set address in internal EEPROM
+    movwf   EEADR
+	call	read_eeprom		; get byte (stored in EEDATA)
+	movff	EEDATA,lo		; copy to lo
+	output_8				; outputs into Postinc2!
+	PUTC    '/'
+	movlw   .7              ; Gas #1: %He - Set address in internal EEPROM
+    movwf   EEADR
+	call	read_eeprom		; get byte (stored in EEDATA)
+	movff	EEDATA,lo		; copy to lo
+	output_8				; outputs into Postinc2!
+    bcf		leftbind
+    call	word_processor
+    return
+
+DISP_bailoutlist:       ; Show the bailout list:
+    bra     DISP_pre_dive_screen2
+
 ;-----------------------------------------------------------------------------
 ; Display Pre-Dive Screen
 

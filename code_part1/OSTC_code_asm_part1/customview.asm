@@ -103,6 +103,8 @@ customview_second:
 	bra		customview_1sec_pSCR_ppO2	; Show/Update pSCR ppO2
 	dcfsnz	WREG,F
 	bra		customview_1sec_show_change_gf; Show and/or change GF values
+    dcfsnz	WREG,F
+    bra     customview_1sec_show_deco_gas
 	; Menupos3=0, do nothing
 	return
 
@@ -149,8 +151,11 @@ customview_1sec_cave_bailout:
 
 customview_1sec_pSCR_ppO2:
 	goto	DISP_show_pSCR_ppO2			; Yes, compute and show value
-	
 
+customview_1sec_show_deco_gas:
+    goto    DISP_show_deco_gas1           ; Show the next decogas
+
+	
 ;=============================================================================
 ; Do every-minute tasks for the custom view area
 
@@ -178,6 +183,8 @@ customview_minute:
 	bra		customview_minute_pSCR_ppO2; Show pSCR ppO2 level
 	dcfsnz	WREG,F
 	bra		customview_minute_show_change_gf; Show and/or change GF values
+    dcfsnz	WREG,F
+    bra     customview_minute_show_deco_gas ; Show the next decogas
 
 	; Menupos3=0, do nothing
 	return
@@ -197,6 +204,7 @@ customview_minute_stopwatch:            ; Do nothing extra
 customview_minute_average:				; Do nothing extra
 customview_minute_graphs:               ; Do nothing extra
 customview_minute_pSCR_ppO2:            ; Do nothing extra
+customview_minute_show_deco_gas:        ; Do nothing extra
 	return
 
 ;=============================================================================
@@ -211,7 +219,7 @@ customview_toggle2:
 	btfsc	FLAG_apnoe_mode					; In Apnoe mode?
 	bra		customview_toggle_exit			; Yes, ignore custom view in divemode completely
 
-	movlw	d'11'							; Max number
+	movlw	d'12'							; Max number
 	cpfsgt	menupos3			            ; Max reached?
 	bra		customview_mask		            ; No, show
 	clrf	menupos3			            ; Reset to zero (Zero=no custom view)
@@ -243,6 +251,8 @@ customview_mask:
 	bra		customview_init_pSCR_ppo2	    ; 10: Show ppO2 for pSCR users
     dcfsnz	WREG,F
 	bra		customview_init_show_change_gf  ; 11: Show and/or change GF values
+    dcfsnz	WREG,F
+	bra		customview_init_show_deco_gas   ; 12: Show deco gas
 
 customview_init_nocustomview:
 	bra		customview_toggle_exit	
@@ -384,6 +394,18 @@ customview_init_show_change_gf:
 
 	bsf			menu3_active            ; Set Flag
     call        DISP_show_gf_customview ; Show info
+    bra         customview_toggle_exit
+
+customview_init_show_deco_gas:
+    bra			customview_toggle		; mH: Ignore now
+
+    btfsc		no_deco_customviews		; no-deco-mode-flag = 1
+	bra			customview_toggle		; Yes, use next Customview!
+    btfsc       FLAG_const_ppO2_mode    ; in ppO2 mode
+    bra         surfcustomview_toggle	; Yes, use next Customview!
+
+    call        DISP_show_deco_gas      ; Show the next decogas
+
     bra         customview_toggle_exit
 
 customview_toggle_exit:

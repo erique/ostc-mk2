@@ -409,7 +409,7 @@
     TCODE    .0,    .184,    "Max"                       ;267 Max.
     TCODE    .0,    .0,      ""     	                 ;268 unused
     TCODE    .0,    .0,      ""	                   	 ;269 unused
-    TCODE    .0,    .0,      ""	                         ;270 unused
+    TCODE    .93,   .170,    "Decogas"		             ;270 Decogas
 
 ; New CFs Warning
     TCODE    .10,   .2,      "Bilgilendirme :     "      ;271 New CF added!

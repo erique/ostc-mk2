@@ -413,7 +413,7 @@
     TCODE    .0,    .184,    "Макс."                     ;267 Max.
     TCODE    .93,   .170,    "Па®ам. ГФ"                 ;268 GF Values
     TCODE    .100,  .50,     "Смена ГФ"               	 ;269 ToggleGF (In Divemode Menu)
-    TCODE    .0,    .0,      ""		                     ;270 unused
+    TCODE    .93,   .170,    "Decogas"		             ;270 Decogas
 
 ; New CFs Warning
     TCODE    .24,   .2,      "Добавлены ДП!"             ;271 New CF added!

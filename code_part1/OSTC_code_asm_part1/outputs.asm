@@ -890,6 +890,80 @@ DISP_interval:
 	STRCAT_PRINT " "
 	return
 
+
+DISP_show_deco_gas:                 ; Show the next decogas
+	WIN_LEFT	.90
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0					; Init new Wordprocessor
+    call    DISP_divemask_color     ; Set Color for Divemode mask
+    DISPLAYTEXTH .270               ; Decogas
+
+DISP_show_deco_gas1:
+	WIN_LEFT	.90
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0					; Init new Wordprocessor
+    call    DISP_standard_color
+	WIN_TOP		.192
+    movff       char_O_deco_gas+0,lo
+    tstfsz      lo              ; =0?
+    bra         $+4             ; No
+    bra     DISP_show_deco_gas2
+    incf        lo,F            ;+1
+    STRCPY  TXT_GAS1            ; "G"
+    bsf     leftbind
+    output_8
+    STRCAT  TXT_AT4             ; " at "
+    movlw   .27                 ; 28=Gas 1
+    addwf   lo,W
+    movwf   EEADR
+    clrf    EEADRH              ; Get Change depth
+    call    read_eeprom
+    movff   EEDATA,lo
+    tstfsz      lo              ; =0?
+    bra     $+4                 ; No
+    bra     DISP_show_deco_gas2
+    output_8                    ; Change depth
+    bcf     leftbind
+    STRCAT  "m "
+    clrf    WREG
+    movff   WREG,letter+9       ; Limit to 8 chars
+    STRCAT_PRINT  ""
+
+	WIN_TOP		.216
+    movff       char_O_deco_gas+1,lo
+    tstfsz      lo              ; =0?
+    bra     $+4                 ; No
+    bra     DISP_show_deco_gas3
+    incf        lo,F            ;+1
+    STRCPY  TXT_GAS1            ; "G"
+    bsf     leftbind
+    output_8
+    STRCAT  TXT_AT4             ; " at "
+    movlw   .27                 ; 28=Gas 1
+    addwf   lo,W
+    movwf   EEADR
+    clrf    EEADRH              ; Get Change depth
+    call    read_eeprom
+    movff   EEDATA,lo
+    tstfsz      lo              ; =0?
+    bra     $+4                 ; No
+    bra     DISP_show_deco_gas3
+    output_8                    ; Change depth
+    bcf     leftbind
+    STRCAT  "m "
+    clrf    WREG
+    movff   WREG,letter+9       ; Limit to 8 chars
+    STRCAT_PRINT  ""
+    return
+
+DISP_show_deco_gas2:
+    WIN_BOX_BLACK   .192, .239, .90, .159		;top, bottom, left, right
+    return
+
+DISP_show_deco_gas3:
+    WIN_BOX_BLACK   .216, .239, .90, .159		;top, bottom, left, right
+    return
+
 DISP_show_gf_customview:
 	WIN_LEFT	.93
 	WIN_FONT 	FT_SMALL

@@ -412,7 +412,7 @@
 	TCODE    .0,    .184,    "Max."                      ;267 Max.
     TCODE    .93,   .170,    "GF Values"                 ;268 GF Values
     TCODE    .100,  .50,     "ToggleGF"               	 ;269 ToggleGF (In Divemode Menu)
-    TCODE    .0,    .0,      ""		                     ;270 unused
+    TCODE    .93,   .170,    "Decogas"		             ;270 Decogas
 
 ; New CFs Warning
     TCODE    .3,    .2,      "Nouvelles CF ajoutées!"    ;271 New CF added!

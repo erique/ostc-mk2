@@ -5,6 +5,7 @@ CHANGE: Remove CF55 from decolist
 TODO: show gas change stops different from decostops
 BUGFIX: FTTS>9min in OSTC 2C hardware
 NEW: Show the bailout list in surfacemode (CC Modes)
+CHANGE: Faster button response
 
 New in 2.73:
 BETA Version - Do NOT use for diving

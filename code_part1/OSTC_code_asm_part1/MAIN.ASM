@@ -47,20 +47,20 @@ HighInt:
 
 		movf	PORTB,W						; move portb into latch register
 
-		btfsc	PIR1,TMR1IF					; Timer1 INT (external 32.768kHz Clock)
-		call	timer1int
-
 		btfsc	INTCON,TMR0IF				; Timer0 INT (Debounce Timer)
 		call	timer0int
-
-		btfsc	PIR1,RCIF					; UART
-		call	uartint
 
 		btfsc	INTCON,INT0IF				; Switch left
 		call	switch_left_int
 
 		btfsc	INTCON3,INT1IF				; switch right
 		call	switch_right_int
+
+		btfsc	PIR1,TMR1IF					; Timer1 INT (external 32.768kHz Clock)
+		call	timer1int
+
+		btfsc	PIR1,RCIF					; UART
+		call	uartint
 
 		movff   prod_temp+1,PRODH
 		movff   prod_temp+0,PRODL

@@ -57,8 +57,9 @@
 ;	#DEFINE	SSPADD_VALUE	d'16'			; 400kHz I2C clock @ 32MHz Fcy
 	#DEFINE	SSPADD_VALUE	d'32'			; 200kHz I2C clock @ 32MHz Fcy
 	#DEFINE	SSPSTAT_VALUE	b'00000000'		; with slew rate control
-;    #DEFINE	T0CON_VALUE 	b'00010000'		; Timer0    1:2     -> 32ms
-	#DEFINE	T0CON_VALUE 	b'00010011'		; Timer0    1:16    -> 256ms
+;   #DEFINE	T0CON_VALUE 	b'00010000'		; Timer0    1:2     -> 32ms
+;	#DEFINE	T0CON_VALUE 	b'00010011'		; Timer0    1:16    -> 256ms
+	#DEFINE	T0CON_VALUE 	b'00010010'		; Timer0    1:8     -> 128ms
  	#DEFINE	SPEED_32MHz
 
 #DEFINE		FT_SMALL		.0
@@ -363,6 +364,11 @@ better_gas_number		res 1	; number (1-5) of the "better gas" in divemode, =0: no 
 
 marker_depth            res 2   ; rel. pressure [mbar] of last set marker
 marker_time             res 3   ; divetime mins:2 and sec of last marker
+
+sim_btm_time            res 1   ; Simulated bottom time
+sim_btm_depth           res 1   ; Simulated max depth
+sim_CNS                 res 1   ; Backup CNS value during decoplanning.
+
 
 
 ASSERT_BANK1    MACRO   tag

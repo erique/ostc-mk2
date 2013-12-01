@@ -26,11 +26,11 @@
 ;=============================================================================
 ; Temp data, local to this module, moved to ACCES0 area.
 ;
-    CBLOCK tmp                  ; Into safe (from C library) area.
-        sim_btm_time            ; Simulated bottom time
-        sim_btm_depth           ; Simulated max depth
-        sim_CNS                 ; Backup CNS value during decoplanning.
-    ENDC
+;    CBLOCK tmp                  ; Into safe (from C library) area.
+;        sim_btm_time            ; Simulated bottom time
+;        sim_btm_depth           ; Simulated max depth
+;        sim_CNS                 ; Backup CNS value during decoplanning.
+;    ENDC
 
 ;=============================================================================
 

@@ -3801,16 +3801,14 @@ DISP_show_pSCR_ppO2:
 	call		DISP_divemask_color     ; Set Color for Divemode mask
     lfsr        FSR2,letter
     OUTPUTTEXTH .266                    ; "pSCR Info"
-    call        word_processor			; pCCR
-
-	rcall		compute_pscr_ppo2		; pSCR ppO2 into sub_c:2
+    call        word_processor
 
 	WIN_FONT	FT_SMALL
 	WIN_LEFT	.95
 	WIN_TOP		.192
 	lfsr	FSR2,letter
 	STRCPY_PRINT TXT_PPO2_5             ; ppO2:
-
+	rcall   compute_pscr_ppo2		; pSCR ppO2 into sub_c:2
 	movff	sub_c+0,xC+0
 	movff	sub_c+1,xC+1
 	clrf	xC+2
@@ -3818,13 +3816,16 @@ DISP_show_pSCR_ppO2:
 	DISP_color_code		warn_ppo2		; Color-code output (ppO2 stored in xC)	
 	WIN_LEFT	.130
 	WIN_TOP		.192
-	lfsr        FSR2,letter
-	movff		xC+0,lo
-	movff		xC+1,hi
+	lfsr    FSR2,letter
+	movff	xC+0,lo
+	movff	xC+1,hi
 	bsf		ignore_digit4
 	output_16dp	d'1'
 	bcf		ignore_digit4
-    STRCAT_PRINT " "
+    PUTC    " "
+    movlw   .0
+    movff   WREG,letter+.4         ; Limit to 4chars
+    STRCAT_PRINT ""
 	call        DISP_standard_color     ; Back to white.
 ; Show O2 drop and counter lung ration in second row
 	WIN_LEFT	.98
@@ -3839,7 +3840,10 @@ DISP_show_pSCR_ppO2:
 	movwf		lo
 	output_8
 	bcf			leftbind
-    STRCAT_PRINT " "		; Trailing space needed when changing the O2 drop
+    PUTC    " "
+    movlw   .0
+    movff   WREG,letter+.9           ; Limit to 9chars
+    STRCAT_PRINT ""
 	return
 
 ;=============================================================================

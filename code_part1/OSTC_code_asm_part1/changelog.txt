@@ -1,3 +1,7 @@
+New in 2.75:
+BETA Version - Do NOT use for diving
+BUGFIX: ppO2 display in PSCR Mode
+
 New in 2.74:
 BETA Version - Do NOT use for diving
 BUGFIX: remove ghost image (On 2C only) during first second in sleep mode

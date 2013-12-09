@@ -1,3 +1,9 @@
+New in 2.81:
+BETA Version - Do NOT use for diving
+
+New in 2.80:
+Stable Release
+
 New in 2.75:
 BETA Version - Do NOT use for diving
 BUGFIX: ppO2 display in PSCR Mode

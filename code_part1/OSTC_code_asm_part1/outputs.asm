@@ -1478,16 +1478,27 @@ DISP_bailoutgas:        ; Show the first bailout gas
     call	word_processor
 	WIN_TOP		.50
 	WIN_LEFT	.90
+	read_int_eeprom 	d'33'	; Read start gas (1-5)
+	movff	EEDATA,hi       ; Store start gas
     bsf		leftbind
     lfsr	FSR2,letter
-	STRCAT  TXT_G1_3
-	movlw   .6              ; Gas #1: %O2 - Set address in internal EEPROM
+	STRCPY  TXT_GAS1
+	movff	hi,lo			; copy gas number
+	output_8				; display gas number
+	STRCAT  ": "
+    movlw   .4
+    mulwf   hi              ; 1-5
+    movf    PRODL,W
+	addlw   .2              ; Gas #x: %O2 - Set address in internal EEPROM
     movwf   EEADR
 	call	read_eeprom		; get byte (stored in EEDATA)
 	movff	EEDATA,lo		; copy to lo
 	output_8				; outputs into Postinc2!
 	PUTC    '/'
-	movlw   .7              ; Gas #1: %He - Set address in internal EEPROM
+    movlw   .4
+    mulwf   hi,W            ; 1-5
+    movf    PRODL,W
+	addlw   .3              ; Gas #x: %He - Set address in internal EEPROM
     movwf   EEADR
 	call	read_eeprom		; get byte (stored in EEDATA)
 	movff	EEDATA,lo		; copy to lo
@@ -1514,11 +1525,10 @@ DISP_pre_dive_screen2:
 	WIN_LEFT	.90
 	WIN_FONT	FT_SMALL
 	bsf		leftbind
-	
 	movlw	d'2'
 	movwf	wait_temp			; here: stores eeprom address for gas list
 	movlw	d'0'
-	movwf	waitms_temp		; here: stores row for gas list
+	movwf	waitms_temp         ; here: stores row for gas list
 	clrf	hi					; here: Gas counter
 
 DISP_pre_dive_screen2_loop:
@@ -1543,25 +1553,25 @@ DISP_pre_dive_screen2_loop:
     decf    hi,W            ; Gas # in 0..4
 	call    DISP_grey_inactive_gas
 
-	read_int_eeprom 	d'33'			; Read start gas (1-5)
+	read_int_eeprom 	d'33'	; Read start gas (1-5)
 	movf	EEDATA,W
-	cpfseq	hi				; Current Gas the active gas?
-	bra		DISP_pre_dive_screen2a
-	bra		DISP_pre_dive_screen2b
+	cpfseq	hi                  ; Current Gas the start gas?
+	bra		DISP_pre_dive_screen2a  ; Yes
+	bra		DISP_pre_dive_screen2b  ; No
 
 DISP_pre_dive_screen2a:
 	movlw	d'25'
 	addwf	waitms_temp,F		; Increase row
 	WIN_LEFT	.90
 	movff	waitms_temp,win_top ; Set Row
-	call	word_processor	; No, display gas
+	call	word_processor      ; Display gas
 
 DISP_pre_dive_screen2b:
-	movlw	d'5'			; list all four (remaining) gases
-	cpfseq	hi				; All gases shown?
+	movlw	d'5'                ; list all four (remaining) gases
+	cpfseq	hi                  ; All gases shown?
 	bra		DISP_pre_dive_screen2_loop	; No
 	
-	return							; No, return (OC mode)
+	return						; No, return (OC mode)
 
 DISP_pre_dive_screen3:	
 	WIN_LEFT	.90

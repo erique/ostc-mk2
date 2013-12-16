@@ -1,5 +1,5 @@
 New in 2.81:
-BETA Version - Do NOT use for diving
+BUGFIX: Show bailout list if first bailout gas <> gas 1
 
 New in 2.80:
 Stable Release

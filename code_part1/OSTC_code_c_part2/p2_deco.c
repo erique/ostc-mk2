@@ -88,7 +88,8 @@
 // 2013/03/05: [jDG] Should vault low_depth too.
 // 2013/03/05: [jDG] Wrobell remark: ascent_to_first_stop works better with finer steps (2sec).
 // 2013/05/08: [jDG] A. Salm remark: NOAA tables for CNS are in ATA, not bar.
-// 2013/10/22: [mH] Remove CF55 stuff
+// 2013/10/22: [mH]  Remove CF55 stuff
+// 2013/12/21: [jDG] Fix CNS calculation in decoplan w/o marked gas switch
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -669,7 +670,7 @@ static void copy_deco_table(void)
 {
     // Copy depth of the first (deepest) stop, because when reversing
     // order, it will be hard to find...
-    char_O_first_deco_depth = internal_deco_depth[0] & 0x7F;
+    char_O_first_deco_depth = internal_deco_depth[0];
     char_O_first_deco_time  = internal_deco_time [0];
 
     if( read_custom_function(54) & 1 ) //---- Should we reverse table ? ------
@@ -845,14 +846,14 @@ static void gas_switch_find_current(void)
 //
 // Input:  temp_depth_limit,
 //         deco_gas_change[]
-//         sim_gas_delay, sim_gas_depth_used, sim_dive_mins.
+//         sim_gas_depth_used, sim_dive_mins.
 //
 // RETURNS TRUE if a stop is needed for gas switch.
 //
-// Output: temp_depth_limit, sim_gas_delay, sim_gas_depth_used IFF the is a switch.
+// Output: temp_depth_limit, sim_gas_depth_used IFF the is a switch.
 //
-// NOTE: might be called from bottom (when sim_gas_delay and sim_gas_depth_used
-//       are null), or during the ascent to make sure we are not passing a
+// NOTE: might be called from bottom (when sim_gas_depth_used
+//       is null), or during the ascent to make sure we are not passing a
 //       stop (in which case both can be already set).
 //
 static unsigned char gas_switch_deepest(void)
@@ -1710,9 +1711,9 @@ static unsigned char update_deco_table()
     for(x=0; x<NUM_STOPS; ++x)
     {
         // Make sure deco-stops are recorded in order:
-        assert( !internal_deco_depth[x] || temp_depth_limit <= (internal_deco_depth[x]& 0x7F) );
+        assert( !internal_deco_depth[x] || temp_depth_limit <= internal_deco_depth[x] );
 
-        if( (internal_deco_depth[x] & 0x7F) == temp_depth_limit )
+        if( internal_deco_depth[x]== temp_depth_limit )
         {
             // Do not overflow (max 255')
             if( internal_deco_time[x] < 255 )
@@ -2185,7 +2186,6 @@ void deco_calc_CNS_planning(void)
 {
     overlay unsigned char  backup_gas_last_depth;
     overlay unsigned char  backup_gas_last_used;
-    overlay unsigned short backup_gas_delay;
     overlay unsigned short backup_dive_mins;
     overlay unsigned char  backup_actual_ppO2;
 
@@ -2241,28 +2241,28 @@ void deco_calc_CNS_planning(void)
         //---- Do all further stops ------------------------------------------
         for(i=0; i<NUM_STOPS; ++i)
         {
-            overlay unsigned char switch_gas;
+            overlay unsigned char stop_gas;
 
             //---- Get next stop, possibly in reverse order ------------------
             if( deepest_first )
             {
                 time             = char_O_deco_time[i];
                 temp_depth_limit = char_O_deco_depth[i];
+                stop_gas         = char_O_deco_gas[i];
             }
             else
             {
                 time             = char_O_deco_time[(NUM_STOPS-1)-i];
                 temp_depth_limit = char_O_deco_depth[(NUM_STOPS-1)-i];
+                stop_gas         = char_O_deco_gas[(NUM_STOPS-1)-i];
             }
             if( time == 0 ) continue;
 
             //---- Gas Switch ? ----------------------------------------------
-            switch_gas = temp_depth_limit & 0x80;   // Switch flag.
-            temp_depth_limit &= 0x7F;               // True stop depth.
-
-            if( switch_gas )
+            if( stop_gas != sim_gas_last_used )
             {
-                gas_switch_deepest();
+                sim_gas_last_depth = deco_gas_change[stop_gas-1];
+                sim_gas_last_used  = stop_gas;
                 gas_switch_set();
             }
 
@@ -2387,14 +2387,14 @@ void deco_gas_volumes(void)
             time = char_O_deco_time[i];
             if( time == 0 ) break;          // End of table: done.
 
-             newDepth  = char_O_deco_depth[i] & 0x7F;
+             newDepth  = char_O_deco_depth[i];
         }
         else
         {
             time = char_O_deco_time[31-i];
             if( time == 0 ) continue;       // not yet: still search table.
 
-            newDepth = char_O_deco_depth[31-i] & 0x7F;
+            newDepth = char_O_deco_depth[31-i];
         }
 
         //---- Gas switch during this step -----------------------------------

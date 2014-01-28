@@ -1,5 +1,7 @@
 New in 2.81:
 BUGFIX: Show bailout list if first bailout gas <> gas 1
+BUGFIX: Italian language fix (Divemode menu)
+BUGFIX: Gas change depth display in divemode menu (OSTC 2C only)
 
 New in 2.80:
 Stable Release

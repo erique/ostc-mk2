@@ -152,9 +152,9 @@
     TCODE    .40,  .2,       "Reset Menu"                ;028 Reset Menu
     TCODE    .43,  .2,       "Imposta ora:"              ;029 Set Time:
     TCODE    .100, .50,      "Marker"                    ;030 Marker            (Add a mark in logbook profile)
-    TCODE    .100, .25,      "PianoDeco"                 ;031 Decoplan
+    TCODE    .100, .25,      "Decoplan"                  ;031 Decoplan
     TCODE    .100, .0,       "ListaGas"                  ;032 Gaslist
-    TCODE    .100, .50,      "AzzeraAvr"                 ;033 ResetAvr          (Reset average depth)
+    TCODE    .100, .50,      "Azz. Avr"                  ;033 ResetAvr          (Reset average depth)
     TCODE    .100, .100,     "Esci"                      ;034 Exit		        (Exit current menu)
     TCODE    .0,   .0,       "NonVolo"                   ;035 NoFly		        (No-flight count-down)
 ;

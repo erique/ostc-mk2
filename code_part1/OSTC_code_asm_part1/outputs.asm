@@ -926,7 +926,7 @@ DISP_show_deco_gas1:
     bcf     leftbind
     STRCAT  "m "
     clrf    WREG
-    movff   WREG,letter+9       ; Limit to 8 chars
+    movff   WREG,letter+.9       ; Limit to 9 chars
     STRCAT_PRINT  ""
 
 	WIN_TOP		.216
@@ -952,7 +952,7 @@ DISP_show_deco_gas1:
     bcf     leftbind
     STRCAT  "m "
     clrf    WREG
-    movff   WREG,letter+9       ; Limit to 8 chars
+    movff   WREG,letter+.9       ; Limit to 9 chars
     STRCAT_PRINT  ""
     return
 
@@ -3097,7 +3097,10 @@ DISP_show_change_depth:		; Yes, show change depth for gas #menupos
 	call	read_eeprom			; Low-value
 	movff	EEDATA,lo
 	output_8					; Show gas number
-    STRCAT_PRINT  TXT_METER2	; "m "
+    STRCAT  "m "
+    clrf    WREG
+    movff   WREG,letter+.9       ; Limit to 9 chars
+    STRCAT_PRINT  ""
 	bcf		leftbind
 	call	DISP_standard_color
 	return

@@ -1,3 +1,7 @@
+New in 2.90:
+Stable Release
+BUGFIX: CNS calculation in decoplan should track gas (no marked changes anymore)
+
 New in 2.81:
 BUGFIX: Show bailout list if first bailout gas <> gas 1
 BUGFIX: Italian language fix (Divemode menu)

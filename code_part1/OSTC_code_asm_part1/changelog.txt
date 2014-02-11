@@ -1,3 +1,6 @@
+New in 2.91:
+BETA Version - Do NOT use for diving
+
 New in 2.90:
 Stable Release
 BUGFIX: CNS calculation in decoplan should track gas (no marked changes anymore)

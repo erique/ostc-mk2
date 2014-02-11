@@ -1495,11 +1495,7 @@ DISP_bailoutgas:        ; Show the first bailout gas
 	movff	EEDATA,lo		; copy to lo
 	output_8				; outputs into Postinc2!
 	PUTC    '/'
-    movlw   .4
-    mulwf   hi,W            ; 1-5
-    movf    PRODL,W
-	addlw   .3              ; Gas #x: %He - Set address in internal EEPROM
-    movwf   EEADR
+	incf	EEADR,F			; Gas #hi: %He - Set address in internal EEPROM
 	call	read_eeprom		; get byte (stored in EEDATA)
 	movff	EEDATA,lo		; copy to lo
 	output_8				; outputs into Postinc2!

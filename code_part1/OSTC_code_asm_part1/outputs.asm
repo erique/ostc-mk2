@@ -1639,14 +1639,24 @@ DISP_active_gas_surfmode:				; Displays start gas/SP 1
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	DISP_standard_color
 
-	lfsr	FSR2,letter		
+	lfsr	FSR2,letter
 	read_int_eeprom	d'36'
 	movff	EEDATA,lo				; copy to lo
 	clrf	hi
 	output_16dp	d'3'		; outputs into Postinc2!
-	bcf		leftbind
-
 	STRCAT_PRINT  TXT_BAR3
+
+    bsf     leftbind
+    call    get_first_diluent           ; Read first diluent into lo(O2) and hi(He)
+	WIN_TOP		.160
+	WIN_LEFT	.104
+	lfsr	FSR2,letter
+	output_8				; O2 Ratio
+	PUTC    '/'
+	movff	hi,lo
+	output_8				; He Ratio
+	STRCAT_PRINT  ""
+	bcf		leftbind
 	return								; Done.
 
 DISP_active_gas_surfmode2:

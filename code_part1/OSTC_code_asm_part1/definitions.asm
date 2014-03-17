@@ -65,6 +65,7 @@
 #DEFINE		FT_SMALL		.0
 #DEFINE		FT_MEDIUM		.1
 #DEFINE		FT_LARGE		.2
+#DEFINE		FT_HUGE 		.3
 
 ; "Better Gas" behavior
 ; better_gas_window <= minimum_change_depth !

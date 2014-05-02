@@ -1,5 +1,6 @@
 New in 2.91:
-BETA Version - Do NOT use for diving
+BETA Version
+New: Show bailout event in internal logbook
 
 New in 2.90:
 Stable Release

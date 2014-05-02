@@ -24,7 +24,7 @@
 #DEFINE	softwareversion_x		d'2'		; Software version  XX.YY
 #DEFINE	softwareversion_y		d'91'		; Software version  XX.YY
 
-#DEFINE softwareversion_beta 	0 			; (and 0 for release)
+#DEFINE softwareversion_beta 	1 			; (and 0 for release)
 
 #DEFINE	max_custom_number		d'73'		; Number of last used custom function
 
@@ -42,6 +42,7 @@
 #DEFINE	logbook_profile_version	0x21        ; Do not touch!
 #DEFINE	T0CON_debounce	b'00000000'         ; Timer0 Switch Debounce
 
+;#DEFINE __DEBUG
 
 ; CPU Speed Settings
 ; Standard 16MHz mode
@@ -293,7 +294,7 @@ samplesecs_value        res 1   ; holds the CF20 value
 decodata                res 2   ; Deco data
 mintemp                 res 2   ; min temperature
 ProfileFlagByte         res 1   ; stores number of addional bytes per sample
-EventByte               res 1   ; Stores the Event type plus flags	
+EventByte               res 1   ; Stores the Event type plus flags
 AlarmType               res 1   ; 0= No Alarm
 								; 1= SLOW
 								; 2= DecoStop missed

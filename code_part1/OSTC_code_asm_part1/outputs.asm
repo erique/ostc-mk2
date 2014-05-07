@@ -831,7 +831,7 @@ DISP_display_clear_common2:
 
 DISP_diveclock:
 	call	DISP_divemask_color	; Set Color for Divemode mask
-	DISPLAYTEXT		d'255'			; Clock
+	DISPLAYTEXT		d'255'			; Time:
 	call	DISP_standard_color
 
 DISP_diveclock2:
@@ -847,7 +847,47 @@ DISP_diveclock2:
 	movff	mins,lo
 	output_99x
 	call	word_processor
+
+DISP_diveclock3:                    ; Update end of divetime only
+	WIN_TOP		.216
+	WIN_LEFT	.116
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0
+	call	DISP_standard_color
+
+    btfss	dekostop_active         ; Already in nodeco mode ?
+	bra     DISP_diveclock4         ; No, overwrite with some spaces
+
+	STRCPY  0x94					; "End of dive" icon
+    movff	hours,WREG
+    mullw   .60
+    movf    mins,W
+    addwf   PRODL
+    movlw   .0
+    addwfc  PRODH
+	movff	PRODL, lo
+	movff	PRODH, hi
+
+    ; Add TTS
+    movff	int_O_ascenttime+0,WREG     ; TTS
+    addwf   lo,F
+	movff	int_O_ascenttime+1,WREG     ; TTS is 16bits
+    addwfc  hi,F
+
+	call	convert_time				; converts hi:lo in minutes to hours (hi) and minutes (lo)
+	movf	hi,W
+	movff	lo,hi
+	movwf	lo							; exchange lo and hi
+	output_99x
+	PUTC    ':'
+	movff	hi,lo
+	output_99x
+	STRCAT_PRINT ""
 	return
+
+DISP_diveclock4:
+    STRCPY_PRINT "      "
+    return
 
 DISP_clock:
 	ostc_debug	'c'

@@ -582,6 +582,52 @@ DISP_show_safety_stop3:
 	call	DISP_standard_color
 	return
 
+DISP_show_gas_change_countdown:
+    btfss   gaschange_cnt_active
+    return
+    decf	apnoe_surface_secs,F			; Reduce countdown
+    btfss   STATUS,N
+    bra     DISP_show_gas_change_countdown2
+    movlw   .59
+    movwf   apnoe_surface_secs
+    decf    apnoe_surface_mins,F
+    btfss   STATUS,N
+    bra     DISP_show_gas_change_countdown2
+    bcf     gaschange_cnt_active            ; Clear flag
+	WIN_TOP		.86
+	WIN_LEFT	.64
+	WIN_FONT 	FT_SMALL
+	movlw	d'4'
+	movwf	temp1
+	call    DISP_display_clear_common_y1
+    ; Reload countdown
+    GETCUSTOM8  d'55'
+    movwf   apnoe_surface_mins
+    clrf    apnoe_surface_secs
+    return
+
+DISP_show_gas_change_countdown2:
+	btfsc	menubit							; Divemode menu active?
+	return									; Yes, do not show
+   	movlw	color_yellow                    ; show in yellow
+    call	DISP_set_color
+	WIN_TOP		.86
+	WIN_LEFT	.64
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0                      	; Init new Wordprocessor
+	lfsr	FSR2,letter
+	movff	apnoe_surface_mins,lo
+    bsf     leftbind
+	output_8
+	PUTC    ':'
+	movff	apnoe_surface_secs,lo
+	output_99x
+	STRCAT_PRINT ""
+	call	DISP_standard_color
+    bcf     leftbind
+	return
+
+
 ;=============================================================================
 ; Update simulator menu with time/depth
 ; Note: because translations might change a bit the string length, we reprint

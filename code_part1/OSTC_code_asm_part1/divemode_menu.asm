@@ -743,6 +743,8 @@ divemenu_set_gas1a:
 	bsf		stored_gas_changed			; set event flag
 	bsf		event_occured				; set global event flag
     bsf     decoplan_invalid            ; The decoplan needs to updated
+    btfsc   better_gas_available        ; If a gas change was planned...
+    bsf     gaschange_cnt_active        ; Show the countdown
     clrf    WREG
     movff   WREG,char_O_deco_status     ; Restart decoplan computation mH
 	bra		timeout_divemenu2			; quit menu!
@@ -785,6 +787,8 @@ divemenu_set_gas2b:
 	movff	EEDATA, char_I_N2_ratio		; = N2!
 	bsf		stored_gas_changed			; set event flag
 	bsf		event_occured				; set global event flag
+    btfsc   better_gas_available        ; If a gas change was planned...
+    bsf     gaschange_cnt_active        ; Show the countdown
     bsf     decoplan_invalid            ; The decoplan needs to updated
     clrf    WREG
     movff   WREG,char_O_deco_status     ; Restart decoplan computation mH

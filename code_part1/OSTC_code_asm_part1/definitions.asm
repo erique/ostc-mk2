@@ -583,4 +583,5 @@ ASSERT_BANK1    MACRO   tag
 #DEFINE	show_cns_in_logbook		flag15,7	;=1: Show CNS value in logbook (>= V1.84)
 
 #DEFINE store_bailout_event     flag16,0    ;=1: Store the bailout event
+#DEFINE gaschange_cnt_active    flag16,1    ;=1: The gas switch countdown is active
 

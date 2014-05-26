@@ -307,7 +307,7 @@
     TCODE    .40,   .35,     "ShowTissueGraph"           ;174 ShowTissueGraph
     TCODE    .40,   .35,     "Show Lead.Tiss."           ;175 Show Lead.Tiss.
     TCODE    .40,   .35,     "ShallowStop 1st"           ;176 Shallow stop 1st  (Reverse order of deco plans)
-    TCODE    .40,   .35,     "Gas switch[min]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
+    TCODE    .40,   .35,     "unused         "           ;177 unused
     TCODE    .40,   .35,     "BottomGas[/min]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
     TCODE    .40,   .35,     "AscentGas[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
     TCODE    .40,   .35,     "Future TTS[min]"           ;180 Future TTS[min]   (Compute TTS for extra time at current depth)

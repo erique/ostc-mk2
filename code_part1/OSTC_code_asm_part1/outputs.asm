@@ -849,6 +849,7 @@ DISP_diveclock2:
 	call	word_processor
 
 DISP_diveclock3:                    ; Update end of divetime only
+    return
 	WIN_TOP		.216
 	WIN_LEFT	.116
 	WIN_FONT 	FT_SMALL

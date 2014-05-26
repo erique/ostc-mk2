@@ -1,6 +1,6 @@
 New in 2.92:
 BETA Version
-NEW: Show End-of-Dive time together with clock during deco
+
 
 New in 2.91:
 BETA Version

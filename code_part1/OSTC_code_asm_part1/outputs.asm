@@ -594,7 +594,7 @@ DISP_show_gas_change_countdown:
     btfss   STATUS,N
     bra     DISP_show_gas_change_countdown2
     bcf     gaschange_cnt_active            ; Clear flag
-	WIN_TOP		.86
+	WIN_TOP		.91
 	WIN_LEFT	.64
 	WIN_FONT 	FT_SMALL
 	movlw	d'4'
@@ -611,7 +611,7 @@ DISP_show_gas_change_countdown2:
 	return									; Yes, do not show
    	movlw	color_yellow                    ; show in yellow
     call	DISP_set_color
-	WIN_TOP		.86
+	WIN_TOP		.91
 	WIN_LEFT	.64
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0                      	; Init new Wordprocessor

@@ -90,6 +90,7 @@
 // 2013/05/08: [jDG] A. Salm remark: NOAA tables for CNS are in ATA, not bar.
 // 2013/10/22: [mH]  Remove CF55 stuff
 // 2013/12/21: [jDG] Fix CNS calculation in decoplan w/o marked gas switch
+// 2014/06/16: [jDG] Fix Helium diluant. Fix volumes with many travel mix.
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -2355,6 +2356,7 @@ void deco_gas_volumes(void)
     overlay float bottom_usage, deco_usage;
     overlay unsigned char i, deepest_first;
     overlay unsigned char gas, depth;
+    overlay unsigned char lastGasStop = 255;
     RESET_C_STACK
 
     //---- initialize with bottom consumption --------------------------------
@@ -2397,7 +2399,8 @@ void deco_gas_volumes(void)
             newDepth = char_O_deco_depth[31-i];
         }
 
-        //---- Gas switch during this step -----------------------------------
+        //---- Gas switch during or before this stop --------------------------
+        for(;;)
         {
             overlay unsigned char newGas = 0;
             overlay unsigned char newStop = 0;  // NO CHANGE yet
@@ -2408,12 +2411,13 @@ void deco_gas_volumes(void)
                 // Skip gas without changing depth:
                 if( ! char_I_deco_gas_change[j] )
                     continue;
-                // Select gas changed between [newDepth .. depth]
+                // Select gas changed between [newDepth .. lastGasStop[
+                // Note that <= means changing gas at BEGINNING of this stop.
+                // Note that < means we cant use the same gas twice
                 if( newDepth <= char_I_deco_gas_change[j]
-                 && char_I_deco_gas_change[j] <= depth )
+                 && char_I_deco_gas_change[j] < lastGasStop )
                 {
                     // Keep the DEEPEST gas in that range:
-                    // Note: that = means changing gas at BEGINNING of this stop.
                     if( char_I_deco_gas_change[j] >= newStop )
                     {
                         newGas  = j;
@@ -2422,28 +2426,32 @@ void deco_gas_volumes(void)
                 }
             }
 
-            if( newStop ) // Did we find something ?
-            {
-                // usage BEFORE gas switch (if any), at 10m/min :
-                if( deco_usage > 0.0 && depth > newStop )
-                    // Plus usage during ascent to the next stop, at 10m/min.
-                    volumes[gas] += ((depth+newStop)*0.05 + 1.0)    // average depth --> bar.
-                                  * (depth-newStop)*0.1             // metre --> min
-                                  * deco_usage;
+             // Did we find something ?
+            if( !newStop )
+                break;
 
-                // Do gas switch:
-                gas = newGas;
+            //---- usage BEFORE gas switch (if any), at 10m/min :
+            if( deco_usage > 0.0 && depth > newStop )
+                // Plus usage during ascent to the next stop, at 10m/min.
+                volumes[gas] += ((depth+newStop)*0.05 + 1.0)    // average depth --> bar.
+                              * (depth-newStop)*0.1             // metre --> min
+                              * deco_usage;
+
+            //---- Do gas switch:
+            gas = newGas;
+
+            lastGasStop = newStop;          // Mark last used gas
+            if( newStop < depth )           // ascent to gas switch,
                 depth = newStop;
-            }
         }
 
-        // usage AFTER gas switch (if any), at 10m/min :
+        //---- usage AFTER gas switch (if any), at 10m/min :
         if( depth > newDepth )
             volumes[gas] += ((depth+newDepth)*0.05 + 1.0)    // average depth --> bar.
                           * (depth-newDepth)*0.1             // metre --> min
                           * deco_usage;
 
-        // Do stop:
+        //---- Do stop:
         depth = newDepth;
 
         // Usage at stop:

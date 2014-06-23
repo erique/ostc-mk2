@@ -194,49 +194,14 @@ pressuretest_sleep_fast:				; Get pressure without averaging (Faster to save som
 	return
 
 fatal_error_sleep:
-	call	get_calibration_data    	; Get calibration data from pressure sensor
-    banksel	flag5
-	bcf		no_sensor_int               ; Enable sensor interrupt
-	WAITMS	d'250'
-	WAITMS	d'250'
-	call	get_battery_voltage			; get battery voltage
-	btfss	enter_error_sleep			; REALLY enter Fatal Error Routine?
-	return								; No!
-    SAFE_2BYTE_COPY amb_pressure, sub_b
-	movlw	LOW		d'15001'			; must be lower then 15001mbar
-	movwf	sub_a+0
-	movlw	HIGH	d'15001'
-	movwf	sub_a+1
-	call	subU16					;  sub_c = sub_a - sub_b
-	bcf		enter_error_sleep		; Clear flag
-	btfss	neg_flag				;
-	return                          ; No!
-    bsf		enter_error_sleep		; Set flag
-	clrf	INTCON
-	clrf	INTCON2
-	clrf	INTCON3
-	bcf		ADCON0,0			; AD converter off
-	call	disable_rs232		; disable UART module
-	movlw	b'00010000'		
-	movwf	TRISA
-	clrf	PORTA				; And pulled to GND
-	clrf	TRISB				; All output
-	clrf	PORTB				; And pulled to GND
-	movlw	b'00011101'			; UART
-	movwf	TRISC
-	clrf	PORTC				; And pulled to GND
-	clrf	TRISD				; All output
-	clrf	PORTD				; And pulled to GND
-	clrf	TRISE				; All output
-	clrf	PORTE				; And pulled to GND
-	clrf 	T0CON				; Timer OFF	
-	clrf 	T1CON				; Timer OFF
-	clrf 	T2CON				; Timer OFF
-	clrf	OSCTUNE
-	movlw	b'00000010'		; 31kHz
-	movwf	OSCCON
-	bsf		WDTCON,0		; Watchdog timer on...
-fatal_error_sleep_loop:		; Device will never quit this loop!
+	call	DISP_DisplayOff			; display off
+	call	disable_rs232			; disable UART module
+
+	bcf		TRISB,6
+	bcf		TRISB,7
+	bcf		PORTB,6
+	bcf		PORTB,7					; Disable UART
+fatal_error_sleep_loop:
 	movff	fatal_error_code,temp4
 	movlw	d'15'
 	movwf	temp1
@@ -246,6 +211,9 @@ fatal_error_sleep_loop1:
 	decfsz	temp1,F
 	bra		fatal_error_sleep_loop1
 fatal_error_sleep_loop2:
+	call	get_battery_voltage			; get battery voltage
+	btfss	enter_error_sleep			; REALLY enter Fatal Error Routine?
+	goto    restart                     ; No
 	bsf		LED_red
 	clrwdt
 	WAIT10US	d'5'

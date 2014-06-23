@@ -195,7 +195,24 @@ aa_font90_block:
 aa_font90_end:
 ; Make sure this is coherent...
 	if aa_font90_nbbits != 3
-		error SMALL fount should be encoded with 3bits anti-aliasing...
+		error LARGE fount should be encoded with 3bits anti-aliasing...
+	endif
+
+;---- HUGE font description and data ----------------------------------------
+aa_font120_block:
+			DB	' ', 0x2F
+			DB	0
+			DB	c120_aa_firstChar
+			DB	c120_aa_chars
+			DB	0x2F-c120_aa_firstChar
+			DB	c120_aa_height + 0x80		; AA flag.
+;
+#include	"c120_aa_idx.inc"
+#include	"c120_aa.inc"
+aa_font92_end:
+; Make sure this is coherent...
+	if aa_font90_nbbits != 3
+		error HUGE fount should be encoded with 3bits anti-aliasing...
 	endif
 
 ;=============================================================================

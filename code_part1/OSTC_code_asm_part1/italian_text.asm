@@ -293,7 +293,7 @@
     TCODE    .40,   .35,     "Sec. in Immers."           ;160 Divemode secs. 
     TCODE    .40,   .35,     "Regola SP fisso"           ;161 Adjust fixed SP
     TCODE    .40,   .35,     "All. salto deco"           ;162 Warn Ceiling
-    TCODE    .40,   .35,     "Icone Misc. Gas"           ;163 Mix type icons
+    TCODE    .40,   .35,     "unused         "           ;163 unused
     TCODE    .40,   .35,     "Avv.Miglior Gas"           ;164 Blink BetterGas	(Remainder in divemode to switch to a better decompression gas).
     TCODE    .40,   .35,     "All. Prof[mbar]"           ;165 DepthWarn[mbar]
     TCODE    .40,   .35,     "Allarme CNS [%]"           ;166 CNS warning [%]
@@ -307,7 +307,7 @@
     TCODE    .40,   .35,     "VediGrafTessuti"           ;174 ShowTissueGraph
     TCODE    .40,   .35,     "Vedi Tess.Prim."           ;175 Show Lead.Tiss.
     TCODE    .40,   .35,     "Inver. Tab Deco"           ;176 Shallow stop 1st  (Reverse order of deco plans)
-    TCODE    .40,   .35,     "Cambio Gas[min]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
+    TCODE    .40,   .35,     "Gas switch[min]"           ;177 Gas switch[min]   (Show Countdown after gas change)
     TCODE    .40,   .35,     "Gas Fondo[/min]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
     TCODE    .40,   .35,     "Gas Risal[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
     TCODE    .40,   .35,     "TTS Futuro[min]"           ;180 Future TTS[min]   (Compute TTS for extra time at current depth)

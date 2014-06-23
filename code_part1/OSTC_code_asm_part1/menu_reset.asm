@@ -183,7 +183,7 @@ cf_default_table1:
 	CF_DEFAULT    CF_INT8,      d'20',  d'5',   d'50'   ; CF57 Ascent/deco gas usage (SAC l/min)
 	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'10'   ; CF58 TTS for extra time at current depth [min]
 	CF_DEFAULT    CF_INT15,     d'0',   d'0',   d'7000' ; CF59 Cave conso warning [l]
-	CF_DEFAULT    CF_BOOL,     	0,   	0,      0 		; CF60 Show Graphical ascend speed indicator
+	CF_DEFAULT    CF_BOOL,     	1,   	0,      0 		; CF60 Show Graphical ascend speed indicator
 	CF_DEFAULT    CF_BOOL,      0,      0,      0 		; CF61 Show pSCR ppO2
 	                
 	CF_DEFAULT    CF_PERCENT,   .4,     .0,     .100	; CF62 pSCR O2 Drop

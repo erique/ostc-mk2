@@ -1,3 +1,12 @@
+New in 2.92:
+BETA Version
+NEW: Show Gas change countdown if CF55>0
+CHANGE: Graphical velocity on by default (CF60=1)
+
+New in 2.91:
+BETA Version
+New: Show bailout event in internal logbook
+
 New in 2.90:
 Stable Release
 BUGFIX: CNS calculation in decoplan should track gas (no marked changes anymore)

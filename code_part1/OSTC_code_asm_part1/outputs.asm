@@ -582,6 +582,52 @@ DISP_show_safety_stop3:
 	call	DISP_standard_color
 	return
 
+DISP_show_gas_change_countdown:
+    btfss   gaschange_cnt_active
+    return
+    decf	apnoe_surface_secs,F			; Reduce countdown
+    btfss   STATUS,N
+    bra     DISP_show_gas_change_countdown2
+    movlw   .59
+    movwf   apnoe_surface_secs
+    decf    apnoe_surface_mins,F
+    btfss   STATUS,N
+    bra     DISP_show_gas_change_countdown2
+    bcf     gaschange_cnt_active            ; Clear flag
+	WIN_TOP		.91
+	WIN_LEFT	.64
+	WIN_FONT 	FT_SMALL
+	movlw	d'4'
+	movwf	temp1
+	call    DISP_display_clear_common_y1
+    ; Reload countdown
+    GETCUSTOM8  d'55'
+    movwf   apnoe_surface_mins
+    clrf    apnoe_surface_secs
+    return
+
+DISP_show_gas_change_countdown2:
+	btfsc	menubit							; Divemode menu active?
+	return									; Yes, do not show
+   	movlw	color_yellow                    ; show in yellow
+    call	DISP_set_color
+	WIN_TOP		.91
+	WIN_LEFT	.64
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0                      	; Init new Wordprocessor
+	lfsr	FSR2,letter
+	movff	apnoe_surface_mins,lo
+    bsf     leftbind
+	output_8
+	PUTC    ':'
+	movff	apnoe_surface_secs,lo
+	output_99x
+	STRCAT_PRINT ""
+	call	DISP_standard_color
+    bcf     leftbind
+	return
+
+
 ;=============================================================================
 ; Update simulator menu with time/depth
 ; Note: because translations might change a bit the string length, we reprint
@@ -831,7 +877,7 @@ DISP_display_clear_common2:
 
 DISP_diveclock:
 	call	DISP_divemask_color	; Set Color for Divemode mask
-	DISPLAYTEXT		d'255'			; Clock
+	DISPLAYTEXT		d'255'			; Time:
 	call	DISP_standard_color
 
 DISP_diveclock2:
@@ -847,7 +893,48 @@ DISP_diveclock2:
 	movff	mins,lo
 	output_99x
 	call	word_processor
+
+DISP_diveclock3:                    ; Update end of divetime only
+    return
+	WIN_TOP		.216
+	WIN_LEFT	.116
+	WIN_FONT 	FT_SMALL
+	WIN_INVERT	.0
+	call	DISP_standard_color
+
+    btfss	dekostop_active         ; Already in nodeco mode ?
+	bra     DISP_diveclock4         ; No, overwrite with some spaces
+
+	STRCPY  0x94					; "End of dive" icon
+    movff	hours,WREG
+    mullw   .60
+    movf    mins,W
+    addwf   PRODL
+    movlw   .0
+    addwfc  PRODH
+	movff	PRODL, lo
+	movff	PRODH, hi
+
+    ; Add TTS
+    movff	int_O_ascenttime+0,WREG     ; TTS
+    addwf   lo,F
+	movff	int_O_ascenttime+1,WREG     ; TTS is 16bits
+    addwfc  hi,F
+
+	call	convert_time				; converts hi:lo in minutes to hours (hi) and minutes (lo)
+	movf	hi,W
+	movff	lo,hi
+	movwf	lo							; exchange lo and hi
+	output_99x
+	PUTC    ':'
+	movff	hi,lo
+	output_99x
+	STRCAT_PRINT ""
 	return
+
+DISP_diveclock4:
+    STRCPY_PRINT "      "
+    return
 
 DISP_clock:
 	ostc_debug	'c'
@@ -1495,11 +1582,7 @@ DISP_bailoutgas:        ; Show the first bailout gas
 	movff	EEDATA,lo		; copy to lo
 	output_8				; outputs into Postinc2!
 	PUTC    '/'
-    movlw   .4
-    mulwf   hi,W            ; 1-5
-    movf    PRODL,W
-	addlw   .3              ; Gas #x: %He - Set address in internal EEPROM
-    movwf   EEADR
+	incf	EEADR,F			; Gas #hi: %He - Set address in internal EEPROM
 	call	read_eeprom		; get byte (stored in EEDATA)
 	movff	EEDATA,lo		; copy to lo
 	output_8				; outputs into Postinc2!
@@ -1643,14 +1726,24 @@ DISP_active_gas_surfmode:				; Displays start gas/SP 1
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	DISP_standard_color
 
-	lfsr	FSR2,letter		
+	lfsr	FSR2,letter
 	read_int_eeprom	d'36'
 	movff	EEDATA,lo				; copy to lo
 	clrf	hi
 	output_16dp	d'3'		; outputs into Postinc2!
-	bcf		leftbind
-
 	STRCAT_PRINT  TXT_BAR3
+
+    bsf     leftbind
+    call    get_first_diluent           ; Read first diluent into lo(O2) and hi(He)
+	WIN_TOP		.160
+	WIN_LEFT	.104
+	lfsr	FSR2,letter
+	output_8				; O2 Ratio
+	PUTC    '/'
+	movff	hi,lo
+	output_8				; He Ratio
+	STRCAT_PRINT  ""
+	bcf		leftbind
 	return								; Done.
 
 DISP_active_gas_surfmode2:

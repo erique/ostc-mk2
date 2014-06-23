@@ -308,7 +308,7 @@
     TCODE    .40,   .35,     "Gewebegraph anz"           ;174 ShowTissueGraph
     TCODE    .40,   .35,     "Leitgewebe anz "           ;175 Show Lead.Tiss.
     TCODE    .40,   .35,     "Flach.StoppOben"           ;176 Shallow stop 1st  (Reverse order of deco plans)
-    TCODE    .40,   .35,     "Gaswechsel[min]"           ;177 Gas switch[min]   (Additional delay in decoplan for gas switches).
+    TCODE    .40,   .35,     "Gas switch[min]"           ;177 Gas switch[min]   (Show Countdown after gas change)
     TCODE    .40,   .35,     "BottomGas[/min]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
     TCODE    .40,   .35,     "Sonst.Gas[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
     TCODE    .40,   .35,     "TTS @ Zeit[min]"           ;180 Future TTS[min]   (Compute TTS for extra time at current depth)

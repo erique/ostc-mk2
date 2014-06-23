@@ -52,6 +52,9 @@ diveloop:
 
 ; Startup Tasks for deco modes
 	call	DISP_display_ndl_mask		; display "no stop" if not in gauge or apnoe mode
+    GETCUSTOM8  d'55'
+    movwf   apnoe_surface_mins
+    clrf    apnoe_surface_secs
 
 	btfss	FLAG_const_ppO2_mode		; only in const_ppO2_mode
 	bra		diveloop_loop				; OC modes, skip
@@ -83,6 +86,8 @@ diveloop_loop1y:
 	call	DISP_divemins				; Display (new) divetime!
 diveloop_loop1z:
 	bcf		update_divetime				; clear flag
+
+    call    DISP_show_gas_change_countdown  ; Show the gas change countdown (If required)
 
 	btfsc	FLAG_const_ppO2_mode			; only in const_ppO2_mode
 	bra		diveloop_loop1c					; One Second Tasks in const_ppO2 mode
@@ -1907,7 +1912,7 @@ set_powersafe2:
 	return
 
 calc_average_depth:
-	btfsc	reset_average_depth		; Reset the Avewrage depth?
+	btfsc	reset_average_depth		; Reset the Average depth?
 	rcall	reset_average1			; Reset the resettable average depth
 
 	; 1. Add new 2xdepth to the Sum of depths registers
@@ -2014,7 +2019,6 @@ diveloop_boot:
 	movwf	apnoe_max_pressure+0
 	clrf	apnoe_max_pressure+1
 	clrf	apnoe_surface_mins			
-	clrf	apnoe_surface_secs		
 	clrf	apnoe_mins
 	clrf	apnoe_secs
 	clrf	divemins+0
@@ -2057,6 +2061,7 @@ diveloop_boot:
     bcf     tts_extra_time              ;=1: Compute TTS if extra time spent at current depth
 	bcf		show_safety_stop			;=1: Show the safety stop
 	clrf	safety_stop_countdown		; Clear count-down
+    bcf     gaschange_cnt_active        ; Do not show the countdown on start
 
 	call	get_free_EEPROM_location	; get last position in external EEPROM, may be up to 2 secs!
 

@@ -125,9 +125,11 @@ customview_1sec_stopwatch_gauge:
 customview_1sec_marker:                 ; Do nothing extra
 customview_1sec_show_change_gf:         ; Do nothing extra
 	bsf		menu3_active                ; Set Flag
-customview_1sec_clock:                  ; Do nothing extra
 customview_1sec_lead_tiss:              ; Do nothing extra
 	return
+
+customview_1sec_clock:
+    goto    DISP_diveclock3             ; Update end of divetime only
 
 customview_1sec_graphs:                 ; Do nothing extra
     decfsz  apnoe_mins                  ; 10 sec passed ?

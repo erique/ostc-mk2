@@ -243,7 +243,8 @@ display_profile_or_exit:
 	bra			display_profile				; No, show details/profile
 	goto		menu
 
-display_profile:	
+display_profile:
+    bcf         is_bailout
 	movff		menupos,mintemp+1				; store current cursor position
 	bsf			return_from_profileview			; tweak search routine to exit after found
 
@@ -817,6 +818,18 @@ profile_display_loop3:
 	bra			profile_display_loop		; Not ready yet
 ; Done.
 profile_display_loop_done:
+    btfss   is_bailout                       ; Bailout during the dive?
+    bra     profile_display_loop_done_nobail ; No
+    ; Yes, show "Bailout"
+   	movlw   color_pink
+	call    DISP_set_color
+	WIN_TOP		.210
+	WIN_LEFT	.105
+	WIN_FONT 	FT_SMALL
+	lfsr	FSR2,letter
+    OUTPUTTEXT d'137'                      ; Bailout
+    call	word_processor
+profile_display_loop_done_nobail:
 	call		DISP_standard_color			; Restore color
 	call		menu_pre_loop_common		; Clear some menu flags, timeout and switches
 
@@ -849,7 +862,7 @@ profile_display_color:
 	dcfsnz		active_gas,F
 	movlw		color_violet				; Color for Gas 5
 	dcfsnz		active_gas,F
-	movlw		color_cyan					; Color for Gas 6
+	movlw		color_pink                  ; Color for Gas 6
 	goto		DISP_set_color				; Set Color...
 
 ;=============================================================================
@@ -1279,14 +1292,20 @@ profile_view_get_depth_no_deco:
 	return
 
 profile_view_get_depth_new2:
+    clrf        EventByte
 	call		I2CREAD2					; Read Event byte
 	movff		SSPBUF,EventByte			; store EventByte
 	decf		timeout_counter2,F			; reduce counter
+
 ; Check Event flags in the EventByte
-	btfsc		EventByte,4					; Manual Gas Changed?
-	bra			logbook_event1				; Yes!
-	btfss		EventByte,5					; Stored Gas Changed?
-	return									; No, return
+	btfsc		EventByte,7                 ; Bailout?
+	bra			logbook_event2				; Yes!
+ 	btfsc		EventByte,4					; Manual Gas Changed?
+ 	bra			logbook_event1				; Yes!
+	btfsc		EventByte,6                 ; Setpoint Change?
+	bra			logbook_event3				; Yes!
+ 	btfss		EventByte,5					; Stored Gas Changed?
+ 	return									; No, return
 ; Stored Gas changed!
 	call		I2CREAD2					; Read Gas#
 	movff		SSPBUF,average_depth_hold_total+3
@@ -1300,6 +1319,22 @@ logbook_event1:
     movwf       average_depth_hold_total+3
     rcall       profile_display_color       ; Back to normal profile color.
 	return		;(The two bytes indicating the manual gas change will be ignored in the standard "ignore loop" above...)
+
+logbook_event2: ; Bailout
+    bsf         is_bailout                  ; Set flag
+    movff       average_depth_hold_total+3,total_divetime_seconds+0 ; Backup last gas color in case we return to CCR
+    movlw       6                           ; Use Gas6 color
+    movwf       average_depth_hold_total+3
+    rcall       profile_display_color       ; Back to normal profile color.
+	return		;(The two bytes indicating the bailout gas selected will be ignored in the standard "ignore loop" above...)
+
+logbook_event3: ; Setpoint change
+    btfss       is_bailout                  ; Are we in bailout?
+    return      ; No, return
+    ; We were in bailout before, restore profile color
+    movff       total_divetime_seconds+0,average_depth_hold_total+3 ; Restore color
+    rcall       profile_display_color       ; Back to normal profile color.
+    return
 
 exit_profileview:
 	bcf			sleepmode

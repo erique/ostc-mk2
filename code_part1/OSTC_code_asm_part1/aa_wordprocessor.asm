@@ -102,11 +102,24 @@ aa_char_1:
 
 		; LARGE font ---------------------------------------------------------
 aa_char_2:
+		decfsz	WREG,A				    ; This is medium font ???
+		bra		aa_char_2a
+
 		; Font LARGE block:
 		movlw	LOW aa_font90_block
 		movwf	TBLPTRL,A
 		movlw	HIGH aa_font90_block
 		movwf	TBLPTRH,A
+        bra		aa_char_3
+
+		; HUGE font ---------------------------------------------------------
+aa_char_2a:
+		; Font HUGE block:
+		movlw	LOW aa_font120_block
+		movwf	TBLPTRL,A
+		movlw	HIGH aa_font120_block
+		movwf	TBLPTRH,A
+
 
 		; Execute font block -------------------------------------------------
 aa_char_3:

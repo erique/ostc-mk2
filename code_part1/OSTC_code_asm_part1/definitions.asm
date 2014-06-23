@@ -22,9 +22,9 @@
 ; ToDo:
 
 #DEFINE	softwareversion_x		d'2'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'90'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'92'		; Software version  XX.YY
 
-#DEFINE softwareversion_beta 	0 			; (and 0 for release)
+#DEFINE softwareversion_beta 	1 			; (and 0 for release)
 
 #DEFINE	max_custom_number		d'73'		; Number of last used custom function
 
@@ -42,6 +42,7 @@
 #DEFINE	logbook_profile_version	0x21        ; Do not touch!
 #DEFINE	T0CON_debounce	b'00000000'         ; Timer0 Switch Debounce
 
+;#DEFINE __DEBUG
 
 ; CPU Speed Settings
 ; Standard 16MHz mode
@@ -65,6 +66,7 @@
 #DEFINE		FT_SMALL		.0
 #DEFINE		FT_MEDIUM		.1
 #DEFINE		FT_LARGE		.2
+#DEFINE		FT_HUGE 		.3
 
 ; "Better Gas" behavior
 ; better_gas_window <= minimum_change_depth !
@@ -292,7 +294,7 @@ samplesecs_value        res 1   ; holds the CF20 value
 decodata                res 2   ; Deco data
 mintemp                 res 2   ; min temperature
 ProfileFlagByte         res 1   ; stores number of addional bytes per sample
-EventByte               res 1   ; Stores the Event type plus flags	
+EventByte               res 1   ; Stores the Event type plus flags
 AlarmType               res 1   ; 0= No Alarm
 								; 1= SLOW
 								; 2= DecoStop missed
@@ -581,4 +583,5 @@ ASSERT_BANK1    MACRO   tag
 #DEFINE	show_cns_in_logbook		flag15,7	;=1: Show CNS value in logbook (>= V1.84)
 
 #DEFINE store_bailout_event     flag16,0    ;=1: Store the bailout event
+#DEFINE gaschange_cnt_active    flag16,1    ;=1: The gas switch countdown is active
 

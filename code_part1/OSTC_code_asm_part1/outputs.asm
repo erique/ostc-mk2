@@ -3727,6 +3727,26 @@ DISP_const_ppO2_too_hi:
 	call	DISP_warnings_color		; Set Warning color
 	return
 
+
+DISP_show_ceiling:
+    call		DISP_divemask_color ; Set Color for Divemode mask
+	WIN_FONT	FT_SMALL
+    DISPLAYTEXT	d'233'              ; Ceiling
+DISP_show_ceiling_1:
+    call	DISP_standard_color
+    WIN_FONT	FT_MEDIUM
+	WIN_LEFT	.100
+	WIN_TOP		.195
+    lfsr        FSR2,letter
+    movff       int_O_ceiling+0,lo
+    movff       int_O_ceiling+1,hi
+    call        adjust_depth_with_salinity			; computes salinity setting into lo:hi [mbar]
+    bsf         ignore_digit5         ; no cm
+    output_16dp  .3               ; yxz.a
+    bcf         ignore_digit5
+    STRCAT_PRINT ""
+    return
+
 ;=============================================================================
 ; Display EAD/END computed in calc_hauptroutine_update_tissues() every 2sec.
 ;

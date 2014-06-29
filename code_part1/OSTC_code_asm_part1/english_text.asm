@@ -368,7 +368,7 @@
     TCODE    .20,   .65,     "Setpoint Setup"            ;230 Setpoint Setup
     TCODE    .5,    .2,      "Dil. Setup - Gaslist"	 	 ;231 Dil. Setup - Gaslist
     TCODE    .100,  .100,	 "Diluent"                   ;232 Diluent
-    TCODE    .0,    .0,      ""		                     ;233 unused
+    TCODE    .93,   .170,    "  Ceiling"                 ;233 Ceiling (9Chars, right alligned)
     TCODE    .0,    .0,      ""     	                 ;234 unused
 
     TCODE    .10,   .2,      "Decomode changed!"       	 ;235 Decomode changed!

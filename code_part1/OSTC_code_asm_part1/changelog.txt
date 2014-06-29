@@ -2,6 +2,9 @@ New in 2.92:
 BETA Version
 NEW: Show Gas change countdown if CF55>0
 CHANGE: Graphical velocity on by default (CF60=1)
+NEW: Ceiling display (GF_hi based) in divemode
+CHANGE: No turkish language support anymore
+BUGFIX: Gas volume computation when using several travel mixes
 
 New in 2.91:
 BETA Version

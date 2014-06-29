@@ -22,7 +22,7 @@
 ; ToDo:
 
 #DEFINE	softwareversion_x		d'2'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'92'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'93'		; Software version  XX.YY
 
 #DEFINE softwareversion_beta 	1 			; (and 0 for release)
 
@@ -34,7 +34,6 @@
 ;#DEFINE	GERMAN							; Use german_text.asm
 ;#DEFINE	SPANISH							; Use spanish_text.asm
 ;#DEFINE	RUSSIAN							; Use russian_text.asm
-;#DEFINE	TURKISH							; Use turkish_text.asm
 ;#DEFINE	ITALIAN							; Use italian_text.asm
 
 ;#DEFINE	DISPLAY_TEST	; Enables Display-Test in RAW data menu

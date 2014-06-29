@@ -105,6 +105,8 @@ customview_second:
 	bra		customview_1sec_show_change_gf; Show and/or change GF values
     dcfsnz	WREG,F
     bra     customview_1sec_show_deco_gas
+    dcfsnz	WREG,F
+    bra     customview_1sec_show_ceiling
 	; Menupos3=0, do nothing
 	return
 
@@ -155,8 +157,10 @@ customview_1sec_pSCR_ppO2:
 	goto	DISP_show_pSCR_ppO2			; Yes, compute and show value
 
 customview_1sec_show_deco_gas:
-    goto    DISP_show_deco_gas1           ; Show the next decogas
+    goto    DISP_show_deco_gas1         ; Show the next decogas
 
+customview_1sec_show_ceiling:
+    goto    DISP_show_ceiling_1         ; Update the ceiling
 	
 ;=============================================================================
 ; Do every-minute tasks for the custom view area
@@ -187,7 +191,8 @@ customview_minute:
 	bra		customview_minute_show_change_gf; Show and/or change GF values
     dcfsnz	WREG,F
     bra     customview_minute_show_deco_gas ; Show the next decogas
-
+    dcfsnz	WREG,F
+    bra     customview_minute_show_ceiling  ; Update the ceiling
 	; Menupos3=0, do nothing
 	return
 
@@ -207,6 +212,7 @@ customview_minute_average:				; Do nothing extra
 customview_minute_graphs:               ; Do nothing extra
 customview_minute_pSCR_ppO2:            ; Do nothing extra
 customview_minute_show_deco_gas:        ; Do nothing extra
+customview_minute_show_ceiling:         ; Do nothing extra
 	return
 
 ;=============================================================================
@@ -221,7 +227,7 @@ customview_toggle2:
 	btfsc	FLAG_apnoe_mode					; In Apnoe mode?
 	bra		customview_toggle_exit			; Yes, ignore custom view in divemode completely
 
-	movlw	d'12'							; Max number
+	movlw	d'13'							; Max number
 	cpfsgt	menupos3			            ; Max reached?
 	bra		customview_mask		            ; No, show
 	clrf	menupos3			            ; Reset to zero (Zero=no custom view)
@@ -255,6 +261,9 @@ customview_mask:
 	bra		customview_init_show_change_gf  ; 11: Show and/or change GF values
     dcfsnz	WREG,F
 	bra		customview_init_show_deco_gas   ; 12: Show deco gas
+    dcfsnz	WREG,F
+	bra		customview_init_show_ceiling    ; 13: Show ceiling
+
 
 customview_init_nocustomview:
 	bra		customview_toggle_exit	
@@ -408,6 +417,12 @@ customview_init_show_deco_gas:
 
     call        DISP_show_deco_gas      ; Show the next decogas
 
+    bra         customview_toggle_exit
+
+customview_init_show_ceiling:
+    btfsc		no_deco_customviews		; no-deco-mode-flag = 1
+	bra			customview_toggle		; Yes, use next Customview!
+    call        DISP_show_ceiling       ; Update the ceiling
     bra         customview_toggle_exit
 
 customview_toggle_exit:

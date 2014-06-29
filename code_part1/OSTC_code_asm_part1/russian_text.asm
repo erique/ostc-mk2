@@ -371,7 +371,7 @@
     TCODE    .20,   .65,     "Настройка сетпоинтов"      ;230 Setpoint Setup
     TCODE    .3,    .2,      "Список газов-дилюентов"	 ;231 Dil. Setup - Gaslist
     TCODE    .100,  .100,	 "Дилюент"                   ;232 Diluent
-    TCODE    .0,    .0,      ""		                     ;233 unused
+    TCODE    .93,   .170,    "  Ceiling"                 ;233 Ceiling (9Chars, right alligned)
     TCODE    .0,    .0,      ""     	                 ;234 unused
 
     TCODE    .10,   .2,      "Алгоритм изменен!  "       ;235 Decomode changed!

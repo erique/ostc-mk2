@@ -1,4 +1,4 @@
-New in 2.92:
+New in 2.93:
 BETA Version
 NEW: Show Gas change countdown if CF55>0
 CHANGE: Graphical velocity on by default (CF60=1)

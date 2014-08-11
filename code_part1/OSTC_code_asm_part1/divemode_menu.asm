@@ -756,9 +756,12 @@ divemenu_set_gas2a:
 	bra		divemode_set_xgas			; Configure the extra gas
 
 divemenu_set_gas2b:
+    btfss   FLAG_const_ppO2_mode        ; In CCR mode ?
+    bra     divemenu_set_gas2c          ; No
 	bsf		is_bailout					;=1: CC mode, but bailout active!
     bsf     store_bailout_event
 	bsf		event_occured				; set global event flag
+divemenu_set_gas2c:
 	clrf	lo							; clear Setpoint, DISP_const_ppO2_value now displayes "Bail"
 	movff	lo,char_I_const_ppO2		
 

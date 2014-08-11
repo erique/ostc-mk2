@@ -1,3 +1,7 @@
+New in 2.94:
+BETA Version
+BUGFIX: False bailout flag in logbook
+
 New in 2.93:
 BETA Version
 NEW: Show Gas change countdown if CF55>0

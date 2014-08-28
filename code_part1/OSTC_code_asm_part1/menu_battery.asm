@@ -77,15 +77,33 @@ menu_battery_state:
 
 	WIN_TOP		.119
 	lfsr	FSR2,letter
-	OUTPUTTEXT .119		; Lowest Battery at:
-	read_int_eeprom	d'42'	; Month
-	movff	EEDATA,convert_value_temp+0
-	read_int_eeprom	d'43'	; Day
-	movff	EEDATA,convert_value_temp+1
-	read_int_eeprom	d'44'	; Year
-	movff	EEDATA,convert_value_temp+2
-	call	DISP_convert_date		; coverts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
+
+    STRCPY  "On-Time: "         ; On-Time in minutes:seconds
+    movff   on_time_seconds+0,xC+0
+    movff   on_time_seconds+1,xC+1
+    movff   on_time_seconds+2,xC+2
+    clrf    xC+4
+    movlw   .60
+    movwf   xB+0
+    clrf    xB+1
+    call    div32x16  ; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
+    movff   xC+1,hi
+    movff   xC+0,lo
+	bsf		leftbind
+	output_16                   ; full minutes
+    PUTC    " "
+    OUTPUTTEXT  .90             ; Minutes
 	call	word_processor
+
+;	OUTPUTTEXT .119		; Lowest Battery at:
+;	read_int_eeprom	d'42'	; Month
+;	movff	EEDATA,convert_value_temp+0
+;	read_int_eeprom	d'43'	; Day
+;	movff	EEDATA,convert_value_temp+1
+;	read_int_eeprom	d'44'	; Year
+;	movff	EEDATA,convert_value_temp+2
+;	call	DISP_convert_date		; coverts into "DD/MM/YY" or "MM/DD/YY" or "YY/MM/DD" in postinc2
+;	call	word_processor
 
 	WIN_TOP		.147
 	lfsr	FSR2,letter

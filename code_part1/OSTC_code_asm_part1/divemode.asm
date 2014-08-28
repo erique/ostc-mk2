@@ -1608,8 +1608,17 @@ end_dive4:
 	movff   gaslist_active,WREG             ; "Gas active" flag register
 	call	write_external_eeprom			; write WREG into external memory
 
-	clrf	WREG
-	call	write_external_eeprom			; Spare1
+    movff   on_time_seconds+0,xC+0
+    movff   on_time_seconds+1,xC+1
+    movff   on_time_seconds+2,xC+2
+    clrf    xC+4
+    movlw   LOW     .3600
+    movwf   xB+0
+    movlw   HIGH    .3600
+    movwf   xB+1
+    call    div32x16  ; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
+    movf    xC+0,W
+	call	write_external_eeprom			; Full hours of on-time since last full charge
 
 	movlw	0xFB						; Header stop
 	call	write_external_eeprom

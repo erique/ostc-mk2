@@ -2232,9 +2232,32 @@ update_batt_voltage_divemode:
 	call	DISP_standard_color
 	return
 
+update_batt_voltage_clear:   ; Clear every two seconds if on_time_seconds:3 > CF74*60
+    movff   on_time_seconds+0,xC+0
+    movff   on_time_seconds+1,xC+1
+    movff   on_time_seconds+2,xC+2
+    clrf    xC+4
+    movlw   .60
+    movwf   xB+0
+    clrf    xB+1
+    call    div32x16  ; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
+    movff   xC+0,sub_b+0
+    movff   xC+1,sub_b+1
+    GETCUSTOM15     d'74'
+    movff   lo,sub_a+0
+    movff   hi,sub_a+1
+    call    sub16       ;  sub_c = sub_a - sub_b
+    btfss   neg_flag
+    bra     update_batt_voltage0    ; Normal display
+    WIN_BOX_BLACK   .174, .194, .1, .34			;top, bottom, left, right
+    return
+
 update_batt_voltage:
 	ostc_debug	'f'
+    btfss   secs,0
+    bra     update_batt_voltage_clear   ; Clear every two seconds if on_time_seconds:3 > CF74*60
 
+update_batt_voltage0:
 	GETCUSTOM8	d'31'			; =1 if battery voltage should be visible
 	movwf	lo
 	movlw	d'1'

@@ -338,7 +338,7 @@
     TCODE    .40,   .35,     "S.Stop Start[m]"           ;200 S.StopStart [m] (CF71: Safety Stop Start Depth [m])
     TCODE    .40,   .35,     "S.Stop Ende [m]"           ;201 S.StopEnd   [m] (CF72: Safety Stop End Depth [m])
     TCODE    .40,   .35,     "S.Stop Reset[m]"           ;202 S.StopReset [m] (CF73: Safety Stop Reset Depth [m])
-    TCODE    .40,   .35,     "unbenutzt      "           ;203 unused
+    TCODE    .40,   .35,     "Batt.Zeit [min]"           ;203 Batt. Time [min] (CF74: Battery time-out [min])
     TCODE    .40,   .35,     "unbenutzt      "           ;204 unused
     TCODE    .40,   .35,     "unbenutzt      "           ;205 unused
     TCODE    .40,   .35,     "unbenutzt      "           ;206 unused

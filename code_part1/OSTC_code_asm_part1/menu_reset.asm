@@ -203,7 +203,7 @@ cf_default_table2:
 	CF_DEFAULT    CF_DECI,      d'29',  d'25',  d'50'   ; CF72 Safety Stop End Depth [dm]
 	CF_DEFAULT    CF_DECI,      d'101', d'75',  d'201'  ; CF73 Safety Stop Reset Depth [dm]
 
-	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF74 unused
+	CF_DEFAULT    CF_INT15,     d'1800',d'0',   d'3600' ; CF74 Battery Timeout [min]
 	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF75 unused
 	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF76 unused
 	CF_DEFAULT    CF_INT8,      d'0',   d'0',   d'0'    ; CF77 unused

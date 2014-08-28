@@ -2,7 +2,10 @@ New in 2.94:
 BETA Version
 BUGFIX: False bailout flag in logbook
 NEW: On-Time counter for better battery information
-NEW: Store useage timer in logbook header (Byte 54)
+NEW: Store useage timer in logbook header (Byte 54, see documentation)
+NEW: CF74: Battery Timeout [min] - Battery symbol will blink if the OSTC was 
+     longer in active mode (since the last _full_ charge) then CF74.
+     Default=1800 (30hours)
 
 New in 2.93:
 BETA Version

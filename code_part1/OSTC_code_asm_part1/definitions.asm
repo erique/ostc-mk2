@@ -339,7 +339,7 @@ char_I_O2_ratio         res 1   ; 02 ratio
 active_gas              res 1   ; Holds number of active gas (1-5)
 active_diluent          res 1   ; Holds number of active diluent (1-5)
 
-debug_char              res 6    ; For debugmode
+debug_char              res 6   ; For debugmode
 
 apnoe_mins              res 1   ; single descent minutes for Apnoe mode
 apnoe_secs              res 1   ; single descent seconds for Apnoe mode
@@ -370,6 +370,7 @@ sim_btm_time            res 1   ; Simulated bottom time
 sim_btm_depth           res 1   ; Simulated max depth
 sim_CNS                 res 1   ; Backup CNS value during decoplanning.
 
+on_time_seconds         res 3   ; Counts on-time seconds since last full charge
 
 
 ASSERT_BANK1    MACRO   tag

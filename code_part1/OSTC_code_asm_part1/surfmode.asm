@@ -315,6 +315,11 @@ test_charger:
 	bra		test_charger2				; No, add incomplete cycle!
 	
 	; Yes, store all data for complete cycle
+
+    clrf    on_time_seconds+0
+    clrf    on_time_seconds+1
+    clrf    on_time_seconds+2           ; Clear on-time counter
+
 	bcf		charge_started				; Clear flag
 	bcf		charge_done					; Clear flag
 	; Store incomplete cycles

@@ -334,6 +334,16 @@ RTCisr:
 		clrf		timer1int_counter1		; counts to 16 (one second / 62.5ms)
 		bsf			onesecupdate			; we have a new second!
 
+        btfsc       sleepmode               ; are we in sleep mode?
+        bra         RTCisr0                 ; Yes
+
+        movlw       .1
+        addwf       on_time_seconds+0,F
+        movlw       .0
+        addwfc      on_time_seconds+1,F
+        addwfc      on_time_seconds+2,F     ; Increase counter
+
+RTCisr0:
 		bcf			STATUS,Z				; are we in dive mode?
 		btfss		divemode
 		bra			RTCisr2					; No, must be surface or sleepmode

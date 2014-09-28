@@ -1302,7 +1302,7 @@ end_dive:
 ; In DEBUG compile, keep all simulated dives in logbook, Desat time, nofly, etc...
     ifndef __DEBUG
     	btfsc	simulatormode_active		; Are we in simulator mode?
-    	goto	end_dive_common				; Yes, discard everything
+    	goto	end_dive_common_sim         ; Yes, discard everything
     endif
 
 	; Dive finished (and longer then one minute or Apnoe timeout occured)
@@ -1681,6 +1681,13 @@ end_dive_common:
 	endif
 
 	goto	surfloop_no_display_init	; and return to surfaceloop
+
+end_dive_common_sim:
+    movf    divemins+0,W
+    addwf   surface_interval+0,F
+    movf    divemins+1,W
+	addwfc  surface_interval+1				; Add simulated divetime to surface interval
+    bra     end_dive_common
 
 timeout_divemode:
 	btfss	realdive					; Dive longer then one minute

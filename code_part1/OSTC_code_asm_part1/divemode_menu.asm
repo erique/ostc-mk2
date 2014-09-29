@@ -49,9 +49,11 @@ test_switches_divemode_a:
 	btfsc	FLAG_apnoe_mode			; In Apnoe mode?
 	bra		test_switches_divemode1	; Yes!
 
+	call		DISP_divemask_color	; Set Color for Divemode mask
 	WIN_INVERT		.1
 	DISPLAYTEXT	.4			;Menu?
 	WIN_INVERT		.0
+    call	DISP_standard_color
 	return
 
 test_switches_divemode0:
@@ -111,10 +113,11 @@ test_switches_divemode_menu:
 	btfss	switch_right
 	return
 
+	bcf		switch_right				; Left button pressed
+
 	btfsc 	display_see_deco			; Is the Decoplan displayed?
 	bra		divemenu_see_decoplan2		; Yes, exit menu on left button press
 
-	bcf		switch_right				; Left button pressed
 	clrf	timeout_counter3			; timout_divemenu!
 	incf	menupos,F
 

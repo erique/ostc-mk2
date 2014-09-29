@@ -2,6 +2,7 @@ New in 2.95:
 BETA Version
 BUGFIX: Surface interval was paused during simulator
 BUGFIX: False Bailout and Gas 6 flags in logbook
+BUGFIX: Color of "Menu?" in divemode
 
 New in 2.94:
 BETA Version

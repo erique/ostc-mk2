@@ -808,6 +808,10 @@ profile_display_skip_loop1:					; skips readings!
 	bra			profile_display_loop3		; check 16bit....
 
 	rcall		profile_view_get_depth		; reads depth, temp and profile data
+
+	btfsc		second_FD					; end-of profile reached?
+	bra			profile_display_loop_done	; Yes, skip all remaining pixels
+
 	bra			profile_display_skip_loop1
 
 profile_display_loop3:
@@ -1239,7 +1243,7 @@ profile_view_get_depth_no_line:
 
 profile_view_get_depth_new1:
 	btfsc		event_occured				; Was there an event attached to this sample?
-	rcall		profile_view_get_depth_new2	; Yes, get information about this event
+	rcall		profile_view_get_depth_events	; Yes, get information about this event(s)
     
     ;---- Read Tp°, if any AND divisor reached AND bytes available -----------
     movf        divisor_temperature,W       ; Is Tp° divisor null ?
@@ -1278,6 +1282,8 @@ profile_view_get_depth_no_tp:
 	movff		SSPBUF,logbook_ceiling
 	decf        timeout_counter2,F
 	movff       divisor_deco,count_deco     ; Restart counter.
+    call		I2CREAD2                    ; Skip stop length
+	decf        timeout_counter2,F
 
     ;---- Read GF, if any AND divisor=0 AND bytes available ------------------
 profile_view_get_depth_no_deco:
@@ -1291,26 +1297,26 @@ profile_view_get_depth_no_deco:
 	call		incf_eeprom_address0		; increases bytes in eeprom_address:2 with 0x8000 bank switching
 	return
 
-profile_view_get_depth_new2:
-    clrf        EventByte
+profile_view_get_depth_events:
 	call		I2CREAD2					; Read Event byte
 	movff		SSPBUF,EventByte			; store EventByte
 	decf		timeout_counter2,F			; reduce counter
 
 ; Check Event flags in the EventByte
 	btfsc		EventByte,7                 ; Bailout?
-	bra			logbook_event2				; Yes!
+	rcall		logbook_event2				; Yes!
  	btfsc		EventByte,4					; Manual Gas Changed?
- 	bra			logbook_event1				; Yes!
+ 	rcall		logbook_event1				; Yes!
 	btfsc		EventByte,6                 ; Setpoint Change?
-	bra			logbook_event3				; Yes!
- 	btfss		EventByte,5					; Stored Gas Changed?
+	rcall		logbook_event3				; Yes!
+ 	btfsc		EventByte,5					; Stored Gas Changed?
+    rcall   	logbook_event4				; Yes!
  	return									; No, return
-; Stored Gas changed!
+
+logbook_event4: ; Stored Gas changed!
 	call		I2CREAD2					; Read Gas#
 	movff		SSPBUF,average_depth_hold_total+3
     rcall       profile_display_color       ; Back to normal profile color.
-
 	decf		timeout_counter2,F			; reduce counter
 	return
 
@@ -1318,7 +1324,11 @@ logbook_event1:
     movlw       6                           ; Just color backup to 6
     movwf       average_depth_hold_total+3
     rcall       profile_display_color       ; Back to normal profile color.
-	return		;(The two bytes indicating the manual gas change will be ignored in the standard "ignore loop" above...)
+	call		I2CREAD2					; Read O2
+    decf		timeout_counter2,F			; reduce counter
+	call		I2CREAD2					; Read He
+    decf		timeout_counter2,F			; reduce counter
+	return
 
 logbook_event2: ; Bailout
     bsf         is_bailout                  ; Set flag
@@ -1326,7 +1336,11 @@ logbook_event2: ; Bailout
     movlw       6                           ; Use Gas6 color
     movwf       average_depth_hold_total+3
     rcall       profile_display_color       ; Back to normal profile color.
-	return		;(The two bytes indicating the bailout gas selected will be ignored in the standard "ignore loop" above...)
+	call		I2CREAD2					; Read O2
+    decf		timeout_counter2,F			; reduce counter
+	call		I2CREAD2					; Read He
+    decf		timeout_counter2,F			; reduce counter
+	return
 
 logbook_event3: ; Setpoint change
     btfss       is_bailout                  ; Are we in bailout?
@@ -1334,6 +1348,8 @@ logbook_event3: ; Setpoint change
     ; We were in bailout before, restore profile color
     movff       total_divetime_seconds+0,average_depth_hold_total+3 ; Restore color
     rcall       profile_display_color       ; Back to normal profile color.
+	call		I2CREAD2					; Read Setpoint
+    decf		timeout_counter2,F			; reduce counter
     return
 
 exit_profileview:

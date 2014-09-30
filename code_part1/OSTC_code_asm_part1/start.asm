@@ -162,6 +162,8 @@ check_firmware_new:
 	call	write_eeprom			; write byte
 	clrf	EEADRH					; Reset EEADRH
 
+    call    reset_all_cf_bank2      ; Reset CF64-93 with this update....
+
 restart:
     ; check for time/date vault
     movlw   .1

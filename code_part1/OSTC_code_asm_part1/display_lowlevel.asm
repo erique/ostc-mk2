@@ -1221,9 +1221,9 @@ DISP_set_color:;Converts 8Bit RGB b'RRRGGGBB' into 16Bit RGB b'RRRRRGGG GGGBBBBB
 	dcfsnz	DISPLAY2_temp,F
 	movlw	b'00010100'
 	dcfsnz	DISPLAY2_temp,F
-	movlw	b'00100000'
+	movlw	b'00011000'
 	dcfsnz	DISPLAY2_temp,F
-	movlw	b'00111111'
+	movlw	b'00011111'
 	movwf	DISPLAY4_temp			
 
 	rrcf	DISPLAY4_temp,F

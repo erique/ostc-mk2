@@ -1,3 +1,7 @@
+New in 3.00:
+Stable Release
+BUGFIX: Fix color codes 192-223 (Mk.2 and 2N only)
+
 New in 2.95:
 BETA Version
 BUGFIX: Surface interval was paused during simulator

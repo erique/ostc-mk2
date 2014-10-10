@@ -309,7 +309,7 @@
     TCODE    .40,   .35,     "Aff.GraphTissus"           ;174 ShowTissueGraph
     TCODE    .40,   .35,     "Aff.Tiss.Direct"           ;175 Show Lead.Tiss.
     TCODE    .40,   .35,     "Ordre paliers  "           ;176 Shallow stop 1st   (Reverse order of deco plans)
-    TCODE    .40,   .35,     "Gas switch[min]"           ;177 Gas switch[min]   (Show Countdown after gas change)
+    TCODE    .40,   .35,     "Chgt gaz  [min]"           ;177 Gas switch[min]   (Show Countdown after gas change)
     TCODE    .40,   .35,     "ConsoFond[/min]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
     TCODE    .40,   .35,     "ConsoDeco[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
     TCODE    .40,   .35,     "DTR Réchap[min]"           ;180 Future TTS[min]   (Compute TTS for extra time at current depth)
@@ -339,7 +339,7 @@
     TCODE    .40,   .35,     "Début P.Sécu[m]"  		 ;200 S.StopStart [m] (CF71: Safety Stop Start Depth [m])
     TCODE    .40,   .35,     "Fin P.Sécu  [m]"  		 ;201 S.StopEnd   [m] (CF72: Safety Stop End Depth [m])
     TCODE    .40,   .35,     "RaZ P.Sécu  [m]"  		 ;202 S.StopReset [m] (CF73: Safety Stop Reset Depth [m])
-    TCODE    .40,   .35,     "Batt.Time [min]"           ;203 Batt. Time [min] (CF74: Battery time-out [min])
+    TCODE    .40,   .35,     "AlarmeAccu[min]"           ;203 Batt. Time [min] (CF74: Battery time-out [min])
     TCODE    .40,   .35,     "unused         "           ;204 unused
     TCODE    .40,   .35,     "unused         "           ;205 unused
     TCODE    .40,   .35,     "unused         "           ;206 unused
@@ -520,13 +520,13 @@
     TCODE    .0,    .185,    "Pour   Circuit   Fermé"    ;354 CF33!Closed Circuit
     TCODE    .0,    .215,    "avec paliers profonds."    ;355 with Deep Stops.
 ; pSCR-GF mode description
-    TCODE    .0,    .35,     "Decotype: pSCR-GF"     	;356 Decotype: pSCR-GF
-    TCODE    .0,    .65,     "For passive semi-"     	;357 For passive semi-
-    TCODE    .0,    .95,     "closed rebreather."    	;358 closed rebreather.
-    TCODE    .0,    .125,    "Check CF32 & CF33"     	;359 Check CF32 & CF33
-    TCODE    .0,    .155,    "for gradient factors"    	;360 for gradient factors
-    TCODE    .0,    .185,    "and CF61-CF63 for"     	;361 and CF61-CF63 for
-    TCODE    .0,    .215,    "pSCR features."    		;362 pSCR features.
+    TCODE    .0,    .35,     "Type déco: pSCR-GF"     	 ;356 Decotype: pSCR-GF
+    TCODE    .0,    .65,     "Pour semi passif-"     	 ;357 For passive semi-
+    TCODE    .0,    .95,     "circuit fermé."            ;358 closed rebreather.
+    TCODE    .0,    .125,    "Vérifiez CF32&CF33"     	 ;359 Check CF32 & CF33
+    TCODE    .0,    .155,    "pour facteurs gradient"    ;360 for gradient factors
+    TCODE    .0,    .185,    "et CF61-CF63 pour"     	 ;361 and CF61-CF63 for
+    TCODE    .0,    .215,    "fonctions pSCR."    		 ;362 pSCR features.
 ;
 
 ;=============================================================================

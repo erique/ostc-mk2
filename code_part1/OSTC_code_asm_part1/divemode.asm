@@ -65,6 +65,8 @@ diveloop_loop:		; The diveloop starts here
 	btfss	onesecupdate					; tasks any new second
 	bra		diveloop_loop3
 
+    bcf     onesecupdate					; one seconds update, clear flag here in case it's set again in ISR before all tasks are done.
+
 	btfsc	gauge_mode						; Only in gauge mode
 	bra		diveloop_loop1a					; One Second Tasks in Gauge mode
 	btfsc	FLAG_apnoe_mode					; Only in apnoe mode
@@ -167,8 +169,6 @@ diveloop_loop1x:
 	call	set_leds_divemode				; Sets warnings, if required. Also Sets buzzer
 	btfsc	enter_error_sleep				; Enter Fatal Error Routine?
 	call	fatal_error_sleep				; Yes (In Sleepmode.asm!)
-
-	bcf		onesecupdate					; one seconds update done
 
 diveloop_loop3:
 	btfss	menubit							; Divemode menu active?
@@ -1683,6 +1683,13 @@ end_dive_common:
 	goto	surfloop_no_display_init	; and return to surfaceloop
 
 end_dive_common_sim:
+    tstfsz  surface_interval+0              ; Was interval zero?
+    bra     end_dive_common_sim2            ; No
+    tstfsz  surface_interval+1              ; Was interval zero?
+    bra     end_dive_common_sim2            ; No
+    bra     end_dive_common                 ; Yes, done.
+
+end_dive_common_sim2:
     movf    divemins+0,W
     addwf   surface_interval+0,F
     movf    divemins+1,W

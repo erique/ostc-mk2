@@ -307,7 +307,7 @@
     TCODE    .40,   .35,     "VediGrafTessuti"           ;174 ShowTissueGraph
     TCODE    .40,   .35,     "Vedi Tess.Prim."           ;175 Show Lead.Tiss.
     TCODE    .40,   .35,     "Inver. Tab Deco"           ;176 Shallow stop 1st  (Reverse order of deco plans)
-    TCODE    .40,   .35,     "Gas switch[min]"           ;177 Gas switch[min]   (Show Countdown after gas change)
+    TCODE    .40,   .35,     "Cambio Gas[min]"           ;177 Gas switch[min]   (Show Countdown after gas change)
     TCODE    .40,   .35,     "Gas Fondo[/min]"           ;178 BottomGas[/min]   (Bottom gas usage, for volume estimation).
     TCODE    .40,   .35,     "Gas Risal[/min]"           ;179 AscentGas[/min]   (Ascent+Deco gas usage)
     TCODE    .40,   .35,     "TTS Futuro[min]"           ;180 Future TTS[min]   (Compute TTS for extra time at current depth)
@@ -337,7 +337,7 @@
     TCODE    .40,   .35,     "S.StopStart [m]"           ;200 S.StopStart [m] (CF71: Safety Stop Start Depth [m])
     TCODE    .40,   .35,     "S.StopEnd   [m]"           ;201 S.StopEnd   [m] (CF72: Safety Stop End Depth [m])
     TCODE    .40,   .35,     "S.StopReset [m]"           ;202 S.StopReset [m] (CF73: Safety Stop Reset Depth [m])
-    TCODE    .40,   .35,     "Batt.Time [min]"           ;203 Batt. Time [min] (CF74: Battery time-out [min])
+    TCODE    .40,   .35,     "Tempo Batt[min]"           ;203 Batt. Time [min] (CF74: Battery time-out [min])
     TCODE    .40,   .35,     "inutilizzato   "           ;204 unused
     TCODE    .40,   .35,     "inutilizzato   "           ;205 unused
     TCODE    .40,   .35,     "inutilizzato   "           ;206 unused

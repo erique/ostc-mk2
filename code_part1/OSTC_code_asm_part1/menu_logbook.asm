@@ -357,6 +357,21 @@ display_profile_offset3:
 	movff		PRODL,sub_a+0
 	movff		PRODH,sub_a+1
 	call		subU16					; sub_c = sub_a - sub_b (with UNSIGNED values)
+
+    btfss       neg_flag
+    bra         display_start_dive_normal       ; Not during midnight...
+
+    ; subtract result from 1440 (amount minutes/day)
+    bsf         premenu                ; Set temporary flag
+    movlw       LOW     .1440
+    movwf       sub_a+0
+    movlw       HIGH    .1440
+    movwf       sub_a+1
+    movff       sub_c+0,sub_b+0
+    movff       sub_c+1,sub_b+1
+    call        subU16					; sub_c = sub_a - sub_b (with UNSIGNED values)
+
+display_start_dive_normal:
 	; sub_c:2 holds entry time in minutes
 	movff		sub_c+0,lo
 	movff		sub_c+1,hi
@@ -367,6 +382,15 @@ display_profile_offset3:
 	PUTC		':'
 	movff		PRODL,lo			
 	output_99x							; minute
+
+    btfss       premenu                 ; premenu is still 1 if dive was during midnight...
+	bra			logbook_divetime_common
+
+    ; ...show a ",-1" behind the entry time to indicate that...
+    PUTC        ","
+    PUTC        "-"
+    PUTC        "1"
+    bcf         premenu
 	bra			logbook_divetime_common		; Skip end-of-divetime
 	
 display_end_of_divetime:

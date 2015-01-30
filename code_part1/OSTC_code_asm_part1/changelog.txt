@@ -1,3 +1,8 @@
+New in 3.01:
+Stable Release
+BUGFIX: Entry time in logbook when dive was around midnight
+
+
 New in 3.00:
 Stable Release
 BUGFIX: Fix color codes 192-223 (Mk.2 and 2N only)

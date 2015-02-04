@@ -2886,11 +2886,18 @@ DISP_divemode_set_xgas:				; Displayes the "Set Gas" menu
 	read_int_eeprom	d'24'			; Get Gas6 %O2
 	movff	EEDATA,lo
 	bcf		leftbind
+    movlw   .100
+    cpfseq  lo                      ; 100% O2?
+    bra     DISP_divemode_set_xgas2 ; No
+    STRCAT  "100/0"                 ; Draw 100/0 manually
+    bra     DISP_divemode_set_xgas3
+DISP_divemode_set_xgas2:
 	output_99					; outputs into Postinc2!
     PUTC    '/'
 	read_int_eeprom	d'25'			; Get Gas6 %He
 	movff	EEDATA,lo
 	output_99					; outputs into Postinc2!
+DISP_divemode_set_xgas3:
 	call	word_processor
 	DISPLAYTEXT	.123			; O2 +
 	DISPLAYTEXT	.124			; O2 -

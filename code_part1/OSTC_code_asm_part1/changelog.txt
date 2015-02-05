@@ -2,7 +2,7 @@ New in 3.01:
 Stable Release
 BUGFIX: Entry time in logbook when dive was around midnight
 BUGFIX: Show manually set O2 (Gas 6) correctly
-
+BUGFIX: Show dives with >999mins divetime correctly
 
 New in 3.00:
 Stable Release

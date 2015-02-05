@@ -109,6 +109,23 @@ output16_3_call:
 	incf	ignore_digits,F
 	bsf		show_last3	
 	clrf	WREG
+    ; Limit to 3
+    movlw   .4
+    cpfslt  hi
+    bra     output16_3_call_2
+    movlw   .3
+    cpfseq  hi          ; =3?
+    bra     output16_3_call_3   ; No, done.
+    movlw   .231                ; Limit to 231(+768=999...)
+    cpfslt  lo
+    movwf   lo
+    bra     output16_3_call_3   ; done.
+output16_3_call_2:  ; Set to .999
+    movlw   LOW     .999
+    movwf   lo
+    movlw   HIGH    .999
+    movwf   hi
+output16_3_call_3:
 	bra     output16
 
 output16_call:

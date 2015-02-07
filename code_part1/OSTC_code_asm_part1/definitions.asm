@@ -1,5 +1,5 @@
 ; OSTC - diving computer code
-; Copyright (C) 2008 HeinrichsWeikamp GbR
+; Copyright (C) 2015 HeinrichsWeikamp GbR
 
 ;    This program is free software: you can redistribute it and/or modifyn 3 of the License, or
 ;    (at your option) any later version.
@@ -22,7 +22,7 @@
 ; ToDo:
 
 #DEFINE	softwareversion_x		d'3'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'01'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'02'		; Software version  XX.YY
 
 #DEFINE softwareversion_beta 	0 			; (and 0 for release)
 

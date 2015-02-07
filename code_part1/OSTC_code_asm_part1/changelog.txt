@@ -1,3 +1,7 @@
+New in 3.02:
+Stable Release
+BUGFIX: Divetime had unwanted "." behind the minutes
+
 New in 3.01:
 Stable Release
 BUGFIX: Entry time in logbook when dive was around midnight

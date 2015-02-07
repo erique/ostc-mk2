@@ -1,5 +1,5 @@
 ; OSTC - diving computer code
-; Copyright (C) 2008 HeinrichsWeikamp GbR
+; Copyright (C) 2015 HeinrichsWeikamp GbR
 
 ;    This program is free software: you can redistribute it and/or modify
 ;    it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ output8_call:
 	incf	ignore_digits,F
 	clrf	temp4
 
-output8
+output8:
 	movff	lo, lo_temp		
 	clrf	hi_temp
 	bcf		pre_zero_flag	; do not display leading zeros
@@ -108,7 +108,6 @@ output16_3_call:
 	clrf	ignore_digits
 	incf	ignore_digits,F
 	bsf		show_last3	
-	clrf	WREG
     ; Limit to 3
     movlw   .4
     cpfslt  hi
@@ -126,6 +125,7 @@ output16_3_call_2:  ; Set to .999
     movlw   HIGH    .999
     movwf   hi
 output16_3_call_3:
+	clrf	WREG
 	bra     output16
 
 output16_call:
@@ -133,7 +133,7 @@ output16_call:
 	incf	ignore_digits,F
 	clrf	WREG
 
-output16
+output16:
 	movwf	temp4           ; Passed from output16dp macro, cleared by others.
 
 	bcf		all_zeros_flag	; do not display any zero from here unless there was at least one figure /zero

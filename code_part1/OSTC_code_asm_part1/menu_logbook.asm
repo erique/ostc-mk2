@@ -357,6 +357,8 @@ display_profile_offset3:
 	movff		PRODL,sub_a+0
 	movff		PRODH,sub_a+1
 	call		subU16					; sub_c = sub_a - sub_b (with UNSIGNED values)
+    
+    bcf         premenu                 ; Clear temporary flag
 
     btfss       neg_flag
     bra         display_start_dive_normal       ; Not during midnight...

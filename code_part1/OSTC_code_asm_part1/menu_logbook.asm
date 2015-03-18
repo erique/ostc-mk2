@@ -406,6 +406,8 @@ display_end_of_divetime:
 	output_99x			
 
 logbook_divetime_common:
+    clrf        WREG
+    movff       WREG,letter+.23         ; limit this line to 23 chars max (2C hardware)
 	call		word_processor			; Display 1st row of details
 
 	WIN_TOP		.25

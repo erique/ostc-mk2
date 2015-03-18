@@ -1,3 +1,7 @@
+New in 3.03:
+Stable Release
+BUGFIX: 1st line in logbook was not displayed in rare cases (2C hardware)
+
 New in 3.02:
 Stable Release
 BUGFIX: Divetime had unwanted "." behind the minutes

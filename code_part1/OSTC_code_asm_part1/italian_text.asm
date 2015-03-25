@@ -362,7 +362,7 @@
 ;
     TCODE    .7,    .2,      "Funzioni Custom III"       ;225 Custom Functions III
     TCODE    .85,   .125,    "pSCR-GF  "                 ;226 pSCR-GF
-    TCODE    .76,   .54,     "Tappa Sicur."              ;227 SafetyStop
+    TCODE    .90,   .54,     "TappaSicur"                ;227 SafetyStop
     TCODE    .0,    .0,      "Immersioni totali: "       ;228 Total Dives: 
     TCODE    .20,   .35,     "Diluent Setup"             ;229 Diluent Setup
     TCODE    .20,   .65,     "Setpoint Setup"            ;230 Setpoint Setup

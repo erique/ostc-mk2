@@ -64,7 +64,7 @@ sleeploop_loop:
 onemin_sleep:
 	call	get_battery_voltage		; get battery voltage
 	btfsc	enter_error_sleep		; Enter Fatal Error Routine?
-	call	fatal_error_sleep		; Yes (In Sleepmode_vxx.asm!)
+	goto	fatal_error_sleep		; Yes (In Sleepmode_vxx.asm!)
 	
     ;---- adjust airpressure compensation any 15 minutes
 	incf	divemins+1,F			; counts to 14...
@@ -214,6 +214,10 @@ fatal_error_sleep_loop2:
 	call	get_battery_voltage			; get battery voltage
 	btfss	enter_error_sleep			; REALLY enter Fatal Error Routine?
 	goto    restart                     ; No
+
+	btfss	CHRG_IN						; If CHRG_IN=0 -> CC active
+    goto    restart                     ; wake up
+
 	bsf		LED_red
 	clrwdt
 	WAIT10US	d'5'

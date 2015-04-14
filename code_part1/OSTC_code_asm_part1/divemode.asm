@@ -168,7 +168,7 @@ diveloop_loop1x:
 	call	timeout_divemenu				; Yes, so check for timeout divemenu
 	call	set_leds_divemode				; Sets warnings, if required. Also Sets buzzer
 	btfsc	enter_error_sleep				; Enter Fatal Error Routine?
-	call	fatal_error_sleep				; Yes (In Sleepmode.asm!)
+	goto	fatal_error_sleep				; Yes (In Sleepmode.asm!)
 
 diveloop_loop3:
 	btfss	menubit							; Divemode menu active?

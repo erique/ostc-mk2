@@ -143,7 +143,7 @@ surfloop_loop1:
     call    DISP_display_gf_surface     ; Display GF (if > CF8).
 
     btfsc	enter_error_sleep			; Enter Fatal Error Routine?
-    call	fatal_error_sleep			; Yes (In Sleepmode.asm!)
+    goto	fatal_error_sleep			; Yes (In Sleepmode.asm!)
     bcf		onesecupdate				; every second tasks done
 	
 surfloop_loop2:	

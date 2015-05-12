@@ -1,5 +1,5 @@
 ;=============================================================================
-; OSTC - diving computer code
+; OSTC Mk.2, 2N and 2C - diving computer code
 ; Copyright (C) 2015 HeinrichsWeikamp GbR
 ;
 ;    This program is free software: you can redistribute it and/or modify
@@ -195,9 +195,9 @@
 ; End of function descriptor I
 ;
 ;licence:
-    TCODE    .0,   .35,      "Dieses Programm wird in"   ;068 This program is
-    TCODE    .0,   .65,      "der Hoffnung bereit-"      ;069 distributed in the
-	TCODE    .0,   .95,      "gestellt, dass es nütz-"   ;070 hope that it will be
+    TCODE    .0,   .35,      "Dieses Programm wird"      ;068 This program is
+    TCODE    .0,   .65,      "in der Hoffnung bereit"    ;069 distributed in the
+	TCODE    .0,   .95,      "gestellt, dass es nütz"    ;070 hope that it will be
     TCODE    .0,   .125,     "lich ist, aber OHNE"       ;071 useful, but WITHOUT
     TCODE    .0,   .155,     "JEDE GEWAEHRLEISTUNG,"     ;072 ANY WARRANTY
     TCODE    .0,   .185,     "auch keine implizierte"    ;073 even the implied

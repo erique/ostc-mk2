@@ -1,4 +1,4 @@
-; OSTC - diving computer code
+; OSTC Mk.2, 2N and 2C - diving computer code
 ; Copyright (C) 2015 HeinrichsWeikamp GbR
 
 ;    This program is free software: you can redistribute it and/or modify
@@ -463,8 +463,9 @@ timeout_premenu:
 	bra		timeout_premenu2		; Skip in Apnoe mode
 
 timeout_premenu2:
-	call	update_surf_press		; rewrite serial number
+	call	update_surf_press		; rewrite surf pressure
 	call	DISP_serial				; rewrite serial number
+    call    surfcustomview_mask     ; rewrite customview
 	clrf	timeout_counter3		; Also clear timeout
 	bcf		switch_left				; and debounce switches
 	bcf		switch_right

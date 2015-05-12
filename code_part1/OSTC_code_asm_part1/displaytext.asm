@@ -1,4 +1,4 @@
-; OSTC - diving computer code
+; OSTC Mk.2, 2N and 2C - diving computer code
 ; Copyright (C) 2015 HeinrichsWeikamp GbR
 
 ;    This program is free software: you can redistribute it and/or modify
@@ -122,7 +122,12 @@ displaytext3:
 
 display_text_exit:
 	btfss	output_to_postinc_only		; output to postinc only?
-	goto    word_processor
+	bra     display_text_exit2
 	
 	bcf     output_to_postinc_only
 	return
+
+display_text_exit2:
+    clrf    WREG
+    movff   WREG,letter+.22
+    goto    word_processor

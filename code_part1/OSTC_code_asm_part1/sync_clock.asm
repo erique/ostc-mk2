@@ -1,5 +1,5 @@
 
-; OSTC - diving computer code
+; OSTC Mk.2, 2N and 2C - diving computer code
 ; Copyright (C) 2015 HeinrichsWeikamp GbR
 
 ;    This program is free software: you can redistribute it and/or modify

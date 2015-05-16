@@ -24,14 +24,14 @@
 #DEFINE	softwareversion_x		d'3'		; Software version  XX.YY
 #DEFINE	softwareversion_y		d'04'		; Software version  XX.YY
 
-#DEFINE softwareversion_beta 	0 			; (and 0 for release)
+#DEFINE softwareversion_beta 	1 			; (and 0 for release)
 
 #DEFINE	max_custom_number		d'73'		; Number of last used custom function
 
 ; International extension. Selecting messages source:
-;#DEFINE    ENGLISH                         ; Use english_text.asm
+#DEFINE    ENGLISH                         ; Use english_text.asm
 ;#DEFINE	FRENCH  						; Use french_text.asm
-#DEFINE	GERMAN							; Use german_text.asm
+;#DEFINE	GERMAN							; Use german_text.asm
 ;#DEFINE	SPANISH							; Use spanish_text.asm
 ;#DEFINE	RUSSIAN							; Use russian_text.asm
 ;#DEFINE	ITALIAN							; Use italian_text.asm

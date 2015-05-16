@@ -368,7 +368,7 @@
     TCODE    .5,    .2,      "Config Dil. - Listagas"	 ;231 Dil. Setup - Gaslist
     TCODE    .100,  .100,	 "Diluyente"                 ;232 Diluent
     TCODE    .93,   .170,    "  Ceiling"                 ;233 Ceiling (9Chars, right alligned)
-    TCODE    .0,    .0,      ""     	                 ;234 unused
+    TCODE    .20,   .95,     "SP Mode:  "                ;234 SP Mode: (10 chars)
 
     TCODE    .10,   .2,      "¡ModoDeco cambiado!"       ;235 Decomode changed!
     TCODE    .85,   .125,    "L16-GF CC"                 ;236 L16-GF CC

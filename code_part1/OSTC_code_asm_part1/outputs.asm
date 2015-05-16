@@ -1271,6 +1271,7 @@ DISP_ccr_setup_menu_mask:
 	call    DISP_standard_color
 	DISPLAYTEXT .229        ; Diluent Setup
 	DISPLAYTEXT	.230		; Setpoint Setup
+    DISPLAYTEXT .234        ; SP Mode:
 	DISPLAYTEXT .11			; Exit
 	return
 

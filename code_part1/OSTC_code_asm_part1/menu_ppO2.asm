@@ -66,18 +66,21 @@ menu_const_ppO2:
 	movwf	menupos
 menu_const_ppO2_return:
     call	DISP_ClearScreen
+menu_const_ppO2_return2:
     call    DISP_ccr_setup_menu_mask
 	call	refresh_cursor
     call    menu_pre_loop_common
+    call    show_sp_mode
 
 menu_const_ppO2_preloop:
 	call	check_switches_menu
-	movlw	d'3'
+	movlw	d'4'
 	cpfseq	menupos
 	bra		menu_const_ppO2_preloop2	; Returns
 	movlw	d'6'
     movwf   menupos
     call    DISP_menu_cursor
+
 
 menu_const_ppO2_preloop2:
 	btfsc	menubit2
@@ -97,7 +100,7 @@ do_ccr_pre_menu:
 	dcfsnz	menupos,F
 	goto	menu_const_ppO2_setpoints
 	dcfsnz	menupos,F
-	goto	exit_menu_const_ppO2			; exit...
+	goto	menu_const_ppO2_toggle_mode
 	dcfsnz	menupos,F
 	goto	exit_menu_const_ppO2			; exit...
 	dcfsnz	menupos,F
@@ -106,6 +109,28 @@ exit_menu_const_ppO2:			; exit...
 	movlw	d'2'
 	movwf	menupos
 	goto	more_menu2
+
+menu_const_ppO2_toggle_mode:
+    read_int_eeprom .116        ; SP Mode
+    movlw   .1                  ; Preload 1
+    tstfsz  EEDATA              ; =0?
+    movlw   .0                  ; No.
+    movwf   EEDATA              ; Set new value
+    write_int_eeprom .116       ; write back result
+	movlw	d'3'
+	movwf	menupos
+    goto    menu_const_ppO2_return2  ; Done.
+
+show_sp_mode:
+    read_int_eeprom .116        ; SP Mode
+    tstfsz  EEDATA              ; =0?
+	bra		show_sp_mode2       ; No
+	DISPLAYTEXTH	.312		; =0: Manual
+	return
+show_sp_mode2:
+	DISPLAYTEXTH	.313		; =1: Auto
+	return
+
 
 menu_diluentsetup:
 	movlw	d'1'
@@ -933,10 +958,10 @@ change_ppo2_plus:
 	movff	EEDATA,lo
 	
 	incf	lo,F				; increase depth
-	movlw	d'251'
+	movlw	d'201'
 	cpfseq	lo
 	bra		change_ppo2_plus2
-	movlw	d'250'
+	movlw	d'200'
 	movwf	lo
 change_ppo2_plus2:
 	movff	lo,EEDATA			; write result
@@ -953,10 +978,10 @@ change_ppo2_minus:
 	movff	EEDATA,lo
 	
 	decf	lo,F				; decrease depth
-	movlw	d'255'
+	movlw	d'29'
 	cpfseq	lo
 	bra	change_ppo2_minus2
-	movlw	d'0'
+	movlw	d'30'
 	movwf	lo
 
 change_ppo2_minus2:

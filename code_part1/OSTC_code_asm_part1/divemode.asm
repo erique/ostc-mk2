@@ -130,6 +130,7 @@ diveloop_loop1b:
 diveloop_loop1c:
 	btfsc	show_safety_stop				; Show the safety stop?
 	call	DISP_show_safety_stop			; Yes, show/delete if done.
+    call    dive_check_autosp               ; Check for Auto-SP
 	call	DISP_const_ppO2_value			; display const ppO2 setting in [bar]
 	call	calc_deko_divemode				; calculate decompression and display result (any two seconds)
 	btfsc	is_bailout						; Are we in Bailout mode?
@@ -2029,6 +2030,18 @@ reset_average1:
 	return
 
 ;=============================================================================
+; Check for Auto-SP
+;
+dive_check_autosp:               ; Check for Auto-SP
+    read_int_eeprom .116
+    tstfsz      EEDATA           ; =0: Manual
+    bra     dive_check_autosp2
+    return
+dive_check_autosp2:
+    ; Check for auto sp
+    return
+
+;=============================================================================
 ; Setup everything to enter divemode.
 ;
 diveloop_boot:	
@@ -2085,6 +2098,10 @@ diveloop_boot:
 	bcf		show_safety_stop			;=1: Show the safety stop
 	clrf	safety_stop_countdown		; Clear count-down
     bcf     gaschange_cnt_active        ; Do not show the countdown on start
+    ; clear auto-SP flags
+    bcf     sp1_switched
+    bcf     sp2_switched
+    bcf     sp3_switched
 
 	call	get_free_EEPROM_location	; get last position in external EEPROM, may be up to 2 secs!
 
@@ -2130,10 +2147,11 @@ diveloop_boot_2:
 	movwf	samplesecs_value	; to avoid EEPROM access in the ISR
 
 divemode1:
-	read_int_eeprom	d'36'				; Read mix 1 ppO2
+	read_int_eeprom	d'36'				; Read SP 1
 	btfsc	FLAG_const_ppO2_mode
 	movff	EEDATA,char_I_const_ppO2    ; Set ppO2 setpoint if in ppO2 mode
 	movff	EEDATA,ppO2_setpoint_store  ; Store also in this byte...
+    bsf     sp1_switched                ; Set flag so we won't auto-switch to it again
 
 	bcf		LED_blue
 	bcf		low_battery_state			; clear flag for battery warning mode
@@ -2175,7 +2193,7 @@ set_first_gas:
 ; Configure gaslist_active flag register
 	read_int_eeprom	d'27'
 	movff	EEDATA, gaslist_active
-	return
+	return                              ; Done with "boot"
 
 set_first_gas_ccr:                      ; Set Diluent
     call    get_first_diluent           ; Read first diluent into lo(O2) and hi(He)
@@ -2190,4 +2208,4 @@ set_first_gas_ccr:                      ; Set Diluent
 	movff	WREG, char_I_N2_ratio		; = N2!
     read_int_eeprom d'115'              ; Read First Diluent (1-5)
     movff   EEDATA,active_diluent
-    return
+    return                              ; Done with "boot"

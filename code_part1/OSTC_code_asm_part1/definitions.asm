@@ -584,4 +584,7 @@ ASSERT_BANK1    MACRO   tag
 
 #DEFINE store_bailout_event     flag16,0    ;=1: Store the bailout event
 #DEFINE gaschange_cnt_active    flag16,1    ;=1: The gas switch countdown is active
+#DEFINE sp1_switched            flag16,2    ;=1: This setpoint has been autoselected already
+#DEFINE sp2_switched            flag16,3    ;=1: This setpoint has been autoselected already
+#DEFINE sp3_switched            flag16,4    ;=1: This setpoint has been autoselected already
 

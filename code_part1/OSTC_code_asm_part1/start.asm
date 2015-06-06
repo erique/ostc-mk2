@@ -162,7 +162,14 @@ check_firmware_new:
 	call	write_eeprom			; write byte
 	clrf	EEADRH					; Reset EEADRH
 
-    call    reset_all_cf_bank2      ; Reset CF64-93 with this update....
+    ; Reset Setpoint depths
+    clrf    EEDATA
+    write_int_eeprom	d'117'
+    write_int_eeprom	d'118'
+    write_int_eeprom	d'119'
+    ; SP Mode (Manual)
+    write_int_eeprom	d'116'
+;    call    reset_all_cf_bank2      ; Reset CF64-93 with this update....
 
 restart:
     ; check for time/date vault

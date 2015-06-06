@@ -125,10 +125,10 @@ show_sp_mode:
     read_int_eeprom .116        ; SP Mode
     tstfsz  EEDATA              ; =0?
 	bra		show_sp_mode2       ; No
-	DISPLAYTEXTH	.312		; =0: Manual
+	DISPLAYTEXTH	.363		; =0: Manual
 	return
 show_sp_mode2:
-	DISPLAYTEXTH	.313		; =1: Auto
+	DISPLAYTEXTH	.364		; =1: Auto
 	return
 
 
@@ -867,31 +867,46 @@ menu_const_ppO21:
 	clrf	hi
 	bsf		leftbind
 	output_16dp	d'3'
+	STRCAT  TXT_BAR4
+	movf	decodata+0,W
+	addlw	d'117'				; offset in eeprom
+    movwf	EEADR
+	call	read_eeprom		; Change depth
+	movff	EEDATA,lo
+    output_8
 	bcf		leftbind
-	STRCAT_PRINT TXT_BAR4
+    STRCAT_PRINT    "m "
 
 	WIN_LEFT 	.20
 	WIN_TOP		.95
-
 	lfsr	FSR2,letter
 	OUTPUTTEXT	d'190'			; ppO2 +
 	call	word_processor		
 
 	WIN_LEFT 	.20
 	WIN_TOP		.125
-
 	lfsr	FSR2,letter
-	OUTPUTTEXT	d'191'			; ppO2 -
+	OUTPUTTEXT	d'250'			; +1 m
 	call	word_processor		
 
 	WIN_LEFT 	.20
 	WIN_TOP		.155
+	lfsr	FSR2,letter
+	OUTPUTTEXT	.251			; -1 m
+    call	word_processor
 
+	WIN_LEFT 	.20
+	WIN_TOP		.185
 	lfsr	FSR2,letter
 	OUTPUTTEXT	.89			; "Default: "
-	STRCAT_PRINT "1.00"
+	STRCAT_PRINT "1.00 / 0m"
 
-	DISPLAYTEXT	.11			; Exit
+	WIN_LEFT 	.20
+	WIN_TOP		.215
+    lfsr	FSR2,letter
+	OUTPUTTEXT   .11		; Exit
+    call	word_processor
+
 	call	wait_switches		; Waits until switches are released, resets flag if button stays pressed!
 	call	menu_pre_loop_common		; Clear some menu flags, timeout and switches
 	call	DISP_menu_cursor
@@ -924,8 +939,8 @@ menu_const_ppO22:
 	incf	menupos,F			; Skip pos. 2
 
 menu_const_ppO22a:
-	movlw	d'7'
-	cpfseq	menupos			; =7?
+	movlw	d'8'
+	cpfseq	menupos			; =8?
 	bra		menu_const_ppO23	; No
 	movlw	d'1'
 	movwf	menupos
@@ -943,12 +958,50 @@ do_menu_const_ppO2:
 	dcfsnz	menupos,F
 	bra		change_ppo2_plus
 	dcfsnz	menupos,F
-	bra		change_ppo2_minus
+	bra		change_ppo2_depth_plus
+	dcfsnz	menupos,F
+	bra		change_ppo2_depth_minus
 	dcfsnz	menupos,F
 	bra		change_ppo2_reset
 	movlw	d'2'
 	movwf	menupos
     goto    menu_const_ppO2_return
+
+change_ppo2_depth_plus:
+	movf	decodata+0,W
+	addlw	d'117'				; offset in eeprom
+    movwf	EEADR
+	call	read_eeprom		; Change depth
+	movff	EEDATA,lo
+    incf    lo,F
+	movlw	d'99'
+	cpfsgt	lo
+	bra		change_ppo2_depth_plus2
+    clrf    lo
+change_ppo2_depth_plus2:
+	movff	lo,EEDATA			; write result
+	call	write_eeprom		; save result in EEPROM
+	movlw	d'4'
+	movwf	menupos
+	bra		menu_const_ppO21
+
+change_ppo2_depth_minus:
+	movf	decodata+0,W
+	addlw	d'117'				; offset in eeprom
+    movwf	EEADR
+	call	read_eeprom		; Change depth
+	movff	EEDATA,lo
+    decf    lo,F
+	movlw	d'100'
+	cpfsgt	lo
+	bra		change_ppo2_depth_minus2
+    clrf    lo
+change_ppo2_depth_minus2:
+	movff	lo,EEDATA			; write result
+	call	write_eeprom		; save result in EEPROM
+	movlw	d'5'
+	movwf	menupos
+	bra		menu_const_ppO21
 
 change_ppo2_plus:
 	movf	decodata+0,W		; read current value 
@@ -957,11 +1010,12 @@ change_ppo2_plus:
 	call	read_eeprom			; Low-value
 	movff	EEDATA,lo
 	
-	incf	lo,F				; increase depth
-	movlw	d'201'
-	cpfseq	lo
-	bra		change_ppo2_plus2
+    movlw   .10
+    addwf   lo,F                ; increase ppO2
 	movlw	d'200'
+	cpfsgt	lo
+	bra		change_ppo2_plus2
+	movlw	d'30'
 	movwf	lo
 change_ppo2_plus2:
 	movff	lo,EEDATA			; write result
@@ -970,36 +1024,21 @@ change_ppo2_plus2:
 	movwf	menupos
 	bra		menu_const_ppO21
 
-change_ppo2_minus:
-	movf	decodata+0,W		; read current value 
-	addlw	d'36'				; offset in memory
-	movwf	EEADR
-	call	read_eeprom			; Low-value
-	movff	EEDATA,lo
-	
-	decf	lo,F				; decrease depth
-	movlw	d'29'
-	cpfseq	lo
-	bra	change_ppo2_minus2
-	movlw	d'30'
-	movwf	lo
-
-change_ppo2_minus2:
-	movff	lo,EEDATA			; write result
-	call	write_eeprom		; save result in EEPROM
-
-	movlw	d'4'
-	movwf	menupos
-	bra		menu_const_ppO21
-
-change_ppo2_reset:				; reset to 1.00Bar
+change_ppo2_reset:				; reset to 1.00bar and 0m depth
 	movf	decodata+0,W		; read current value 
 	addlw	d'36'				; offset in memory
 	movwf	EEADR
 	movlw	d'100'
 	movwf	EEDATA
 	call	write_eeprom		; save result in EEPROM
-	movlw	d'5'
+
+	movf	decodata+0,W
+	addlw	d'117'				; offset in eeprom
+    movwf	EEADR
+    clrf    EEDATA              ; 0m default
+    call	write_eeprom		; save result in EEPROM
+
+	movlw	d'6'
 	movwf	menupos
 	bra	menu_const_ppO21
 

@@ -325,7 +325,7 @@
     TCODE    .0,    .2,      "Résultat Sim:"             ;188 Sim. Results:
     TCODE    .90,   .25,     "Surface"                   ;189 Surface
     TCODE    .0,    .0,      "ppO2 +"                    ;190 ppO2 +
-    TCODE    .0,    .0,      "ppO2 -"                    ;191 ppO2 -
+    TCODE    .0,    .0,      ""                          ;191 unused
     TCODE    .0,    .0,      "Dil."                      ;192 Dil.			       (Rebreather diluant)
 
 ; 32 custom function descriptors III (FIXED LENGTH = 15 chars).
@@ -528,5 +528,8 @@
     TCODE    .0,    .185,    "et CF61-CF63 pour"     	 ;361 and CF61-CF63 for
     TCODE    .0,    .215,    "fonctions pSCR."    		 ;362 pSCR features.
 ;
+; Setpoint Mode
+    TCODE    .60,  .95,     "Manual"	    	        ;363 Manual      Same length as #364
+    TCODE    .60,  .95,     "Auto  " 	                ;364 Auto        Same length as #363
 
 ;=============================================================================

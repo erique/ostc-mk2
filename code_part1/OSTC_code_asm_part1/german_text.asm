@@ -324,7 +324,7 @@
     TCODE    .0,    .2,      "Sim. Daten:"               ;188 Sim. Results:
     TCODE    .90,   .25,     "Oberfl."                   ;189 Surface
     TCODE    .0,    .0,      "ppO2 +"                    ;190 ppO2 +
-    TCODE    .0,    .0,      "ppO2 -"                    ;191 ppO2 -
+    TCODE    .0,    .0,      ""                          ;191 unused
     TCODE    .0,    .0,      "Dil."                      ;192 Dil.			       (Rebreather diluent)
 
 ; 32 custom function descriptors III (FIXED LENGTH = 15 chars).
@@ -370,7 +370,7 @@
     TCODE    .5,    .2,      "Dil. Setup - Gasliste" 	 ;231 Dil. Setup - Gaslist
     TCODE    .100,  .100,	 "Diluent"                   ;232 Diluent
     TCODE    .93,   .170,    "  Ceiling"                 ;233 Ceiling (9Chars, right alligned)
-    TCODE    .20,   .95,     "SP Mode:  "                ;234 SP Mode: (10 chars)
+    TCODE    .20,   .95,     "SP Modus: "                ;234 SP Mode: (10 chars)
 
     TCODE    .10,   .2,      "Dekomodell verändert!"     ;235 Decomode changed!
     TCODE    .85,   .125,    "L16-GF CC"                 ;236 L16-GF CC
@@ -526,5 +526,9 @@
     TCODE    .0,    .185,    "und CF61-CF63 für"     	;361 and CF61-CF63 for
     TCODE    .0,    .215,    "pSCR Parameter."    		;362 pSCR features.
 ;
+; Setpoint Mode
+    TCODE    .90,  .95,     "Manuell"	    	        ;363 Manual      Same length as #364
+    TCODE    .90,  .95,     "Auto   " 	                ;364 Auto        Same length as #363
+
 
 ;=============================================================================

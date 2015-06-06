@@ -1217,6 +1217,8 @@ DISP_menu_cursor:
 	movlw	d'155'
 	dcfsnz	temp1,F
 	movlw	d'185'
+	dcfsnz	temp1,F
+	movlw	d'215'
 	
 	movff	WREG,win_top
 	STRCPY_PRINT "\xB7"

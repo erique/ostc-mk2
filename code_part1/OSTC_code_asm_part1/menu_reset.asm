@@ -407,6 +407,13 @@ reset_all_cf:
 	movlw	d'120'
 	movwf	EEDATA
 	write_int_eeprom	d'38'		; reset mix3 to ppO2=1.20bar
+    ; Change depths to zero
+    clrf    EEDATA
+    write_int_eeprom	d'117'
+    write_int_eeprom	d'118'
+    write_int_eeprom	d'119'
+    ; SP Mode (Manual)
+    write_int_eeprom	d'116'
 
 	clrf	nofly_time+0			; Clear nofly time
 	clrf	nofly_time+1			; Clear nofly time

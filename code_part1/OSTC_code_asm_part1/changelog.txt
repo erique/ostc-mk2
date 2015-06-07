@@ -1,7 +1,8 @@
 New in 3.04:
-Stable Release
+Beta Release
 BUGFIX: Fix licence in German
 BUGFIX: Fix minor layout bug in surface mode
+NEW: Auto Setpoint switch function (CC Modes)
 
 New in 3.03:
 Stable Release

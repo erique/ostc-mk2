@@ -130,7 +130,7 @@ diveloop_loop1b:
 diveloop_loop1c:
 	btfsc	show_safety_stop				; Show the safety stop?
 	call	DISP_show_safety_stop			; Yes, show/delete if done.
-    call    dive_check_autosp               ; Check for Auto-SP
+    call    check_dive_autosp               ; Check for Auto-SP
 	call	DISP_const_ppO2_value			; display const ppO2 setting in [bar]
 	call	calc_deko_divemode				; calculate decompression and display result (any two seconds)
 	btfsc	is_bailout						; Are we in Bailout mode?
@@ -2032,14 +2032,72 @@ reset_average1:
 ;=============================================================================
 ; Check for Auto-SP
 ;
-dive_check_autosp:               ; Check for Auto-SP
+check_dive_autosp:               ; Check for Auto-SP
     read_int_eeprom .116
     tstfsz      EEDATA           ; =0: Manual
-    bra     dive_check_autosp2
-    return
-dive_check_autosp2:
-    ; Check for auto sp
-    return
+    bra     check_dive_autosp2
+    return                       ; Skip check
+check_dive_autosp2:
+    SAFE_2BYTE_COPY rel_pressure,xA
+	movlw	d'100'
+	movwf	xB+0
+	clrf	xB+1
+	call	div16x16				; compute depth in full m -> result in xC+0
+    ; Check SP1
+    btfsc   sp1_switched            ;=1: This setpoint has been autoselected already
+    bra     check_dive_autosp3      ; Skip check
+    read_int_eeprom .117            ; Get depth in m
+    tstfsz  EEDATA                  ; =?
+    bra     $+4                     ; No, continue
+    bra     check_dive_autosp3      ; Skip check
+    decf    EEDATA,W                ; -1 -> WREG
+    cpfsgt  xC+0                    ; Compare with depth
+    bra     check_dive_autosp3      ; lower depth, do not switch
+    ; auto switch to SP1
+    read_int_eeprom .36             ; Get Setpoint
+	movff	EEDATA, char_I_const_ppO2	; Use SetPoint
+	movff	EEDATA, ppO2_setpoint_store	; Store also in this byte...
+	bsf		setpoint_changed
+	bsf		event_occured			; set global event flag
+    bsf     sp1_switched            ; Set flag
+check_dive_autosp3:
+    ; Check SP2
+    btfsc   sp2_switched            ;=1: This setpoint has been autoselected already
+    bra     check_dive_autosp4      ; Skip check
+    read_int_eeprom .118            ; Get depth in m
+    tstfsz  EEDATA                  ; =?
+    bra     $+4                     ; No, continue
+    bra     check_dive_autosp4      ; Skip check
+    decf    EEDATA,W                ; -1 -> WREG
+    cpfsgt  xC+0                    ; Compare with depth
+    bra     check_dive_autosp4      ; lower depth, do not switch
+    ; auto switch to SP2
+    read_int_eeprom .37             ; Get Setpoint
+	movff	EEDATA, char_I_const_ppO2	; Use SetPoint
+	movff	EEDATA, ppO2_setpoint_store	; Store also in this byte...
+	bsf		setpoint_changed
+	bsf		event_occured			; set global event flag
+    bsf     sp2_switched            ; Set flag
+check_dive_autosp4:
+    ; Check SP3
+    btfsc   sp3_switched            ;=1: This setpoint has been autoselected already
+    bra     check_dive_autosp5      ; Skip check
+    read_int_eeprom .119            ; Get depth in m
+    tstfsz  EEDATA                  ; =?
+    bra     $+4                     ; No, continue
+    bra     check_dive_autosp5      ; Skip check
+    decf    EEDATA,W                ; -1 -> WREG
+    cpfsgt  xC+0                    ; Compare with depth
+    bra     check_dive_autosp5      ; lower depth, do not switch
+    ; auto switch to SP3
+    read_int_eeprom .38             ; Get Setpoint
+	movff	EEDATA, char_I_const_ppO2	; Use SetPoint
+	movff	EEDATA, ppO2_setpoint_store	; Store also in this byte...
+	bsf		setpoint_changed
+	bsf		event_occured			; set global event flag
+    bsf     sp3_switched            ; Set flag
+check_dive_autosp5:
+    return                          ; Done.
 
 ;=============================================================================
 ; Setup everything to enter divemode.

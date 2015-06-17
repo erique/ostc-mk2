@@ -92,6 +92,7 @@
 // 2013/12/21: [jDG] Fix CNS calculation in decoplan w/o marked gas switch
 // 2014/06/16: [jDG] Fix Helium diluant. Fix volumes with many travel mix.
 // 2014/06/29: [mH] Compute int_O_ceiling
+// 2015/06/12: [jDG] Fix NDL prediction while desaturating with the Buhlmann model.
 //
 // TODO:
 //  + Allow to abort MD2 calculation (have to restart next time).
@@ -1515,8 +1516,13 @@ static void calc_nullzeit(void)
             //---- Apply security margin when using the non-GF model
             if( char_I_deco_model == 0 )
             {
-                dTN2 *= float_saturation_multiplier;
-                dTHe *= float_saturation_multiplier;
+                // NDL can be computed while ascending... SO we have
+                // to check wether we are saturating or desaturating.
+                if( dTN2 > 0.0 ) dTN2 *= float_saturation_multiplier;
+                else             dTN2 *= float_desaturation_multiplier;
+
+                if( dTHe > 0.0 ) dTHe *= float_saturation_multiplier;
+                else             dTHe *= float_saturation_multiplier;
             }
             else // Or GF-based model
                 M0 = GF_high * (M0 - pres_surface) + pres_surface;

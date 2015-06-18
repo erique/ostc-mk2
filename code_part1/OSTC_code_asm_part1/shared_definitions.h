@@ -52,6 +52,10 @@
 #       define VAR_UINT(n)       extern unsigned short n
 #       define TAB_UINT(n,size)  extern unsigned short n[size]
 #   else
+#       undef  VAR_UCHAR
+#       undef  TAB_UCHAR
+#       undef  VAR_UINT
+#       undef  TAB_UINT
 #       define VAR_UCHAR(n)      unsigned  char n
 #       define TAB_UCHAR(n,size) unsigned  char n[size]
 #       define VAR_UINT(n)       unsigned short n
@@ -119,7 +123,7 @@ TAB_UCHAR (char_O_tissue_N2_saturation, NUM_COMP); // Nitrogen compartiment desa
 TAB_UCHAR (char_O_tissue_He_saturation, NUM_COMP); // Helium compartiment desaturation time, in min.
 
 TAB_UINT (int_O_gas_volumes, 5);            // Volumes evaluation for each gas tank, in 0.1 liters.
-VAR_UINT (int_O_ceiling);                  // in mbar
+VAR_UINT (int_O_ceiling);                   // in mbar
 
 TAB_UCHAR (char_O_hash, 16);
 

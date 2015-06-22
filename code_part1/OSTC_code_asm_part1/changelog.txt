@@ -1,7 +1,7 @@
 New in 3.04:
 Beta Release
 BUGFIX: Fix licence in German
-BUGFIX: Fix minor layout bug in surface mode
+BUGFIX: Fix minor layout bugs in surface mode
 NEW: Auto Setpoint switch function (CC Modes)
 
 New in 3.03:

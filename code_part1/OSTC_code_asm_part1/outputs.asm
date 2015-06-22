@@ -4221,7 +4221,10 @@ DISP_display_cns_surface:
 	bsf		leftbind
 	output_8
 	bcf		leftbind
-	STRCAT_PRINT "% "
+	STRCAT  "% "
+    movlw   .0
+    movff   WREG,letter+.8          ; Limit to 8 chars
+    STRCAT_PRINT  ""
 	return
 
 ;-----------------------------------------------------------------------------
@@ -4243,7 +4246,10 @@ DISP_display_gf_surf_1:
         STRCPY  TXT_GF3
         movff   char_O_gradient_factor,lo		; gradient factor
         output_8
-        STRCAT_PRINT  "%  "
+        STRCAT  "%  "
+        movlw   .0
+        movff   WREG,letter+.8          ; Limit to 8 chars
+        STRCAT_PRINT  ""
         goto    DISP_standard_color
 
 ;-----------------------------------------------------------------------------

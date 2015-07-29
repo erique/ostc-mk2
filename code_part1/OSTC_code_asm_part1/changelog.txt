@@ -1,3 +1,7 @@
+New in 3.05:
+Beta Release
+NEW: Quit Simulator automatically when starting a real dive
+
 New in 3.04:
 Beta Release
 BUGFIX: Fix licence in German

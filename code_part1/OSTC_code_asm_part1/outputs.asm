@@ -2252,7 +2252,44 @@ update_batt_voltage_clear:   ; Clear every two seconds if on_time_seconds:3 > CF
     call    sub16       ;  sub_c = sub_a - sub_b
     btfss   neg_flag
     bra     update_batt_voltage0    ; Normal display
-    WIN_BOX_BLACK   .174, .194, .1, .34			;top, bottom, left, right
+    WIN_BOX_BLACK   .174, .194, .1, .35			;top, bottom, left, right
+    return
+
+update_batt_get_percent_in_lo:
+    ; percent = ontime [m] * 100 / CF74
+    movff   on_time_seconds+0,xC+0
+    movff   on_time_seconds+1,xC+1
+    movff   on_time_seconds+2,xC+2
+    clrf    xC+4
+    movlw   .60
+    movwf   xB+0
+    clrf    xB+1
+    call    div32x16  ; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
+    movff   xC+0,xA+0
+    movff   xC+1,xA+1   ; On-Time in full minutes
+    movlw   .100
+    movwf   xB+0
+    clrf    xB+1
+    call    mult16x16		;xA*xB=xC
+    GETCUSTOM15     d'74'
+    movff   lo,xB+0
+    movff   hi,xB+1
+    call    div32x16  ; xC:4 / xB:2 = xC+3:xC+2 with xC+1:xC+0 as remainder
+	movff	xC+0,lo     ; Copy result
+
+    ; Limit to 100
+    movlw   .100
+    cpfslt  lo
+    movwf   lo
+	; lo will be between 0 (Full) and 100 (empty)
+	movf	lo,W
+	sublw	.100
+	movwf	lo
+
+	movlw	.100
+	cpfslt	lo
+	movwf	lo
+	; lo will be between 100 (Full) and 0 (empty)
     return
 
 update_batt_voltage:
@@ -2272,64 +2309,35 @@ update_batt_voltage0:
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
 	call	DISP_standard_color
-
+    call    update_batt_get_percent_in_lo   ; 100 - 0
 	lfsr	FSR2,letter
-	movff	batt_voltage+0,lo
-	movff	batt_voltage+1,hi
-	movlw	d'1'
-	movwf	ignore_digits
-	bsf		ignore_digit5		; do not display mV
+    STRCPY  TXT_BATT            ; Batt:
 	bsf		leftbind
-	output_16dp	d'2'			; e.g. 3.45V
+	output_8
 	bcf		leftbind
-	STRCAT_PRINT  TXT_VOLT2
+	STRCAT_PRINT  "%"
 	return
-	
+
 update_batt_voltage2:
-    WIN_FRAME_STD .174, .194, .1, .32
+    WIN_FRAME_STD .174, .194, .1, .33
 
-; 4100-Vbatt
-	movlw	LOW		d'4100'
-	movwf	sub_a+0
-	movlw	HIGH	d'4100'
-	movwf	sub_a+1
-	movff	batt_voltage+0,sub_b+0
-	movff	batt_voltage+1,sub_b+1
-	call	sub16				;  sub_c = sub_a - sub_b
-; Battery full (>4100mV?
-	btfsc	neg_flag
-	bra		update_batt_voltage2_full
-
-; Vbatt-3500
-	movlw	LOW		d'3500'
-	movwf	sub_b+0
-	movlw	HIGH	d'3500'
-	movwf	sub_b+1
-	movff	batt_voltage+0,sub_a+0
-	movff	batt_voltage+1,sub_a+1
-	call	sub16				;  sub_c = sub_a - sub_b
-; Battery lower then 3500mV?
-	btfsc	neg_flag
-	bra		update_batt_voltage2_empty
-
-; Battery is between 3500 and 4100mV
-; sub_c:2 is between 0 and 600	
-	movff	sub_c+0,xA+0
-	movff	sub_c+1,xA+1
-	movlw	d'20'
-	movwf	xB+0
-	clrf	xB+1
-	call	div16x16					;xA/xB=xC with xA as remainder 	
-; xC is between 0 and 30
-	movff	xC+0,wait_temp				;save value
-	incf	wait_temp,F					; +1
+    call    update_batt_get_percent_in_lo   ; 100 - 0
+    movf    lo,W
+    mullw   .10         ; PRODH:PRODL = 1000 - 0
+    movff   PRODH,divA+1
+    movff   PRODL,divA+0
+    movlw   .5
+    movwf   divB
+    call    div16       ; divA=divA/2^divB (divB: 8Bit only!)
+; xC is between 0 and 32
+	movff	divA+0,wait_temp				;save value
 
 	movlw	d'3'
 	cpfsgt	wait_temp
 	movwf	wait_temp					; Minimum = 3
 
 update_batt_voltage2a:
-    WIN_BOX_STD .181, .187, .32, .34    ; Battery nose
+    WIN_BOX_STD .181, .187, .33, .35    ; Battery nose
 
 update_batt_voltage3:
 	GETCUSTOM8	d'34'			; Color battery
@@ -2351,15 +2359,15 @@ update_batt_voltage3:
 	call    DISP_standard_color
 	return
 
-update_batt_voltage2_empty:
-	movlw	d'1'
-	movwf	wait_temp
-	bra		update_batt_voltage2a
-
-update_batt_voltage2_full:
-	movlw	d'30'
-	movwf	wait_temp
-	bra		update_batt_voltage2a
+;update_batt_voltage2_empty:
+;	movlw	d'1'
+;	movwf	wait_temp
+;	bra		update_batt_voltage2a
+;
+;update_batt_voltage2_full:
+;	movlw	d'30'
+;	movwf	wait_temp
+;	bra		update_batt_voltage2a
 
 DISP_convert_signed_temperature:
    	btfss   	hi,7                    ; Negative temperature ?

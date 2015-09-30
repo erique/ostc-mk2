@@ -121,6 +121,7 @@
 #DEFINE TXT_DIL_C			 "D"						 ; "D"
 #DEFINE	TXT_DIL5			 "Дил.#"					 ; "Dil.#"
 #DEFINE TXT_aGF4			 "дГФ:"						 ; "aGF:"
+#DEFINE TXT_BATT             "B:"                        ; "B:"
 
 #ENDIF
 ;=============================================================================
@@ -193,7 +194,7 @@
     TCODE    .40,  .35,      "Номер в журнале"           ;064 Logbook offset
     TCODE    .40,  .35,      "Крайняя деко[м]"           ;065 Last Deco at[m]
     TCODE    .40,  .35,      "Конец Апноэ [ч]"           ;066 End Apnoe   [h]
-    TCODE    .40,  .35,      "Показ напр.бат."           ;067 Show Batt.Volts
+    TCODE    .40,  .35,      "Показ напр.бат."           ;067 Show Battery %
 ; End of function descriptor I
 ;
 ;licence:

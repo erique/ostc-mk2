@@ -1,6 +1,7 @@
 New in 3.05:
 Beta Release
 NEW: Quit Simulator automatically when starting a real dive
+CHANGE: Battery percent based on ON-Time instead of battery voltage
 
 New in 3.04:
 Beta Release

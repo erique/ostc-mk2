@@ -1915,9 +1915,10 @@ set_dive_modes3:					; High-altitude mode
 set_powersafe:
 	btfsc	low_battery_state		; battery warning alread active?
 	bra		set_powersafe2			; Yes, but is it still required?
-									; battery voltage in mV (value*256+Lowbyte=actual treshold)
-	movlw	d'12'					; 3,328V
-	cpfsgt	batt_voltage+1
+
+    call    update_batt_get_percent_in_lo
+	movlw	d'20'					; 20%
+	cpfsgt	lo
 	bra		set_powersafe1
 	return
 

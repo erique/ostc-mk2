@@ -117,6 +117,7 @@
 #DEFINE TXT_DIL_C            "D"                         ; "D"
 #DEFINE	TXT_DIL5			 "Dil.#"                     ; "Dil.#"
 #DEFINE TXT_aGF4             "aGF:"                      ; "aGF:"
+#DEFINE TXT_BATT             "B:"                        ; "B:"
                                                                          
 #ENDIF                                                                   
 ;=============================================================================
@@ -189,7 +190,7 @@
     TCODE    .40,  .35,      "Despl. diario  "           ;064 Logbook offset 
     TCODE    .40,  .35,      "Ult. Deco a [m]"           ;065 Last Deco at[m]
     TCODE    .40,  .35,      "Fin Apnea   [h]"           ;066 End Apnoe   [h]
-    TCODE    .40,  .35,      "Mues. volt. Bat"           ;067 Show Batt.Volts
+    TCODE    .40,  .35,      "Mues. Batt. %  "           ;067 Show Battery %
 ; End of function descriptor I
 ;
 ;licence:

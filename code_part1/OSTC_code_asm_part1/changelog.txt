@@ -1,3 +1,6 @@
+New in 3.10:
+Stable Release
+
 New in 3.05:
 Beta Release
 NEW: Quit Simulator automatically when starting a real dive

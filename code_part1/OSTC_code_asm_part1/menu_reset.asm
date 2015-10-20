@@ -521,7 +521,7 @@ reset_gases:
     movlw   .1
     movwf   EEDATA
     write_int_eeprom    .33         ; First Gas (1-5)
-    write_int_eeprom    .116        ; First Diluent (1-5)
+    write_int_eeprom    .115        ; First Diluent (1-5)
 	return
 
 ; Write WREG:lo twice, w/o any type clearing, pre-incrementing EEADR

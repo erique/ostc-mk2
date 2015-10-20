@@ -171,7 +171,7 @@ menu_diluentsetup_list:
 	movff	WREG,win_top
 	lfsr	FSR2,letter
 
-	movlw	d'116'
+	movlw	d'115'
 	movwf	EEADR
 	call	read_eeprom			; Get current startgas 1-5 # into EEDATA
 	decf	EEDATA,W			; 0-4
@@ -359,7 +359,7 @@ menu_diluentgas1:
 	OUTPUTTEXT	.88			; First Gas?
 	PUTC	' '
 
-	movlw	d'116'
+	movlw	d'115'
 	movwf	EEADR
 	call	read_eeprom		; Get current startgas 1-5 # into EEDATA
 	decf	EEDATA,W		; 0-4
@@ -566,7 +566,7 @@ exit_diluentgassetup:			; exit...
 make_first_diluent:
 	movff	decodata+0,EEDATA		; current gas (0-4) into EEDATA
 	incf	EEDATA,F				; current gas (1-5) into EEDATA
-	movlw	d'116'
+	movlw	d'115'
 	movwf	EEADR
 	call	write_eeprom			; store in internal EEPROM
 	movlw	d'1'
@@ -1054,7 +1054,7 @@ next_ppO22:
 	bra		menu_const_ppO21
 
 get_first_diluent:              ; Read first diluent into lo(O2) and hi(He)
-    read_int_eeprom d'116'      ; Read First Diluent (1-5)
+    read_int_eeprom d'115'      ; Read First Diluent (1-5)
     movf    EEDATA,W            ; WREG: 0-4
     mullw   .4                  ; PRODL: 0-16
     movlw   .93                 ; Base address for O2

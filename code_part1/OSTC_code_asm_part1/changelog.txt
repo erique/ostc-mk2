@@ -1,3 +1,6 @@
+New in 3.11:
+BUGFIX: "First Diluent" and "SP Mode" used same EEPROM location
+
 New in 3.10:
 Stable Release
 

@@ -2308,7 +2308,14 @@ update_batt_voltage0:
 	WIN_LEFT	.1
 	WIN_FONT 	FT_SMALL
 	WIN_INVERT	.0					; Init new Wordprocessor
-	call	DISP_standard_color
+
+	GETCUSTOM8	d'35'			; Standard output color
+	btfsc	cc_active
+    movlw   color_orange        ; CC active
+	btfsc	charge_done
+	movlw	color_green			; Charge done.
+    call	DISP_set_color
+
     call    update_batt_get_percent_in_lo   ; 100 - 0
 	lfsr	FSR2,letter
     STRCPY  TXT_BATT            ; Batt:
@@ -2316,6 +2323,7 @@ update_batt_voltage0:
 	output_8
 	bcf		leftbind
 	STRCAT_PRINT  "%"
+	call	DISP_standard_color
 	return
 
 update_batt_voltage2:

@@ -811,8 +811,27 @@ profile_display_skip_temp:
 	movff		xC+0,apnoe_mins				; Store last row for fill routine
     PIXEL_WRITE timeout_counter3,xC+0       ; Set col(0..159) x row (0..239), put a std color pixel.
 
-	incf		timeout_counter3,F
+	incf		timeout_counter3,F          ; Next column
+    ;---- Draw Marker square , if any ----------------------------------------
+    btfss       log_marker_found            ; Any marker to draw?
+    bra         profile_display_skip_marker ; No
 
+    ; 2x2 square
+    incf        apnoe_mins,W
+    movff       WREG,win_top
+    movlw       .4
+    movff       WREG,win_height
+    movlw       .2
+    movff       WREG,win_width
+    decf        timeout_counter3,W
+    movff       WREG,win_leftx2
+
+    movlw       color_orange
+    call        DISP_set_color
+    call        DISP_box                    ; Draw 2x2 Box
+    bcf         log_marker_found            ; Clear flag
+
+profile_display_skip_marker:
     ;---- Draw CNS curve, if any ---------------------------------------------
     movf        divisor_cns,W
     bz          profile_display_skip_cns
@@ -1253,7 +1272,7 @@ profile_view_get_depth_no_line:
 	call		I2CREAD2					; read first depth
 	movff		SSPBUF,logbook_cur_depth+1  ; high value
 	call		I2CREAD2					; read Profile Flag Byte
-	movff		SSPBUF,timeout_counter2		; Read Profile Flag Byte
+	movff		SSPBUF,timeout_counter2		; store Profile Flag Byte
 
 	bcf			event_occured				; clear flag
 	btfsc		timeout_counter2,7
@@ -1356,6 +1375,14 @@ logbook_event1:
     decf		timeout_counter2,F			; reduce counter
 	call		I2CREAD2					; Read He
     decf		timeout_counter2,F			; reduce counter
+    ; Any Alarm?
+    bcf         EventByte,4                 ; Clear bits already tested
+    bcf         EventByte,5
+    bcf         EventByte,6
+    movlw       .6                          ; manual marker?
+    cpfseq      EventByte
+    return	   ; No, return
+    bsf         log_marker_found            ; Manual marker! Draw small orange rectancle here
 	return
 
 logbook_event2: ; Bailout

@@ -1,3 +1,6 @@
+New in 3.13:
+NEW: Logbook shows markers with small orange boxes in the profile
+
 New in 3.12:
 BUGFIX: Minor layout fix (Battery warning in divemode)
 CHANGE: Color-code battery % display in surface mode (Charge, Full, Normal)

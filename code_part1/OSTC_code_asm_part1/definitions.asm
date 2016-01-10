@@ -22,7 +22,7 @@
 ; ToDo:
 
 #DEFINE	softwareversion_x		d'3'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'12'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'13'		; Software version  XX.YY
 
 #DEFINE softwareversion_beta 	0 			; (and 0 for release)
 
@@ -587,4 +587,5 @@ ASSERT_BANK1    MACRO   tag
 #DEFINE sp1_switched            flag16,2    ;=1: This setpoint has been autoselected already
 #DEFINE sp2_switched            flag16,3    ;=1: This setpoint has been autoselected already
 #DEFINE sp3_switched            flag16,4    ;=1: This setpoint has been autoselected already
+#DEFINE log_marker_found        flag16,5    ;=1: A logbook marker has been found
 

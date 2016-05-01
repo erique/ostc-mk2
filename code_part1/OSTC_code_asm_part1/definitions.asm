@@ -22,9 +22,9 @@
 ; ToDo:
 
 #DEFINE	softwareversion_x		d'3'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'13'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'14'		; Software version  XX.YY
 
-#DEFINE softwareversion_beta 	0 			; (and 0 for release)
+#DEFINE softwareversion_beta 	1 			; (and 0 for release)
 
 #DEFINE	max_custom_number		d'73'		; Number of last used custom function
 
@@ -278,7 +278,7 @@ rel_pressure    res 2		    ; amb_pressure - surface pressure [mbar]
 max_pressure    res 2           ; Max. pressure for the dive [mbar]
 avr_rel_pressure res 2          ; Average rel. pressure (Average depth) for the dive [mbar], Resettable
 avr_rel_pressure_total res 2    ; Average rel. pressure (Average depth) for the dive [mbar], Non-Resettable
-last_pressure   res 2
+last_pressure   res 6
 temperature_avg res 2           ; Temperature summing buffer.
 temperature     res 2           ; Final temperature. SIGNED.
 last_temperature res 2          ; Last displayed temperature (used to detect changes).

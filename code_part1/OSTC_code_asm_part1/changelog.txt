@@ -1,3 +1,7 @@
+New in 3.14:
+Beta Release
+CHANGE: Calculate velocity over a 6sec period
+
 New in 3.13:
 Stable Release
 NEW: Logbook shows markers with small orange boxes in the profile

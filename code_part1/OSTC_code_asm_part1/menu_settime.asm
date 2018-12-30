@@ -262,7 +262,7 @@ add_month:
 	bra	set_time_refresh_x
 add_year:
 	incf	year,F
-	movlw	d'20'					; calendar until 2020
+	movlw	d'22'					; calendar until 2022
 	cpfsgt	year
 	bra	set_time_refresh_x
 	movlw	d'10'

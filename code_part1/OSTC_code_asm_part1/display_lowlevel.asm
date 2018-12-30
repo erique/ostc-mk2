@@ -249,16 +249,50 @@ half_pixel_write_1_display1:
 ; DISP Display Off
 ; -----------------------------
 DISP_DisplayOff:
-    rcall   DISP_ClearScreen
+	rcall   DISP_ClearScreen
+	
+	movff   win_flags,WREG          ; Display0? win_flags is in bank0...
+        btfss   WREG,1                  ; Display0?
+        bra     DISP_DisplayOff_display0		; Yes
+
+	; Display 1
 	clrf	PORTD
 	bcf		DISPLAY_hv
-	bcf		DISPLAY_vdd
 	bcf		DISPLAY_cs
 	bcf		DISPLAY_e_nwr	
 	bcf		DISPLAY_rw
-    bcf		DISPLAY_rs
+	bcf		DISPLAY_rs
 	bcf		DISPLAY_nreset
+	bcf		DISPLAY_vdd
 	return
+	
+DISP_DisplayOff_display0:
+	movlw	0x05
+	rcall	DISP_CmdWrite
+	movlw	0x00
+	rcall	DISP_DataWrite
+	movlw	0x00
+	rcall	DISP_DataWrite
+	WAITMS	d'32'
+	bcf	DISPLAY_hv
+	WAITMS	d'32'
+	movlw	0x10
+	rcall	DISP_CmdWrite
+	movlw	0x00
+	rcall	DISP_DataWrite
+	movlw	0x01
+	rcall	DISP_DataWrite
+	WAITMS	d'100'
+	clrf	PORTD
+	bcf	DISPLAY_cs
+	bcf	DISPLAY_e_nwr	
+	bcf	DISPLAY_rw
+	bcf	DISPLAY_rs
+	bcf	DISPLAY_nreset
+	WAITMS	d'10'
+	bcf	DISPLAY_vdd
+	return
+
 
 ;=============================================================================
 ; Fast macros to write to DISPLAY display.

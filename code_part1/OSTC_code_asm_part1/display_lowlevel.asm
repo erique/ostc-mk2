@@ -189,7 +189,7 @@ half_pixel_write_1:
         bra     half_pixel_write_1_display1 ; Yes.
 
     	btfsc   PRODL,0                 ; 180° rotation ?
-    	sublw   .239                    ; 239-Y --> Y
+    	sublw   .239                   ; 239-Y --> Y
     	mullw   1                       ; Copy row to PRODL (PRODH=0)
 
     	movlw	0x20			        ; Horizontal Address START:END

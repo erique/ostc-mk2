@@ -264,7 +264,9 @@ ostc_debug1:
 	movff	debug_char+0,debug_char+1
 	movff	WREG,debug_char+0
 
-	btfss	debug_mode				; Are we in debugmode?
+	; Disable debug hard-coded. Too many users turned this on in the last years and then complained about "letters on the screen"....
+;	btfss	debug_mode				; Are we in debugmode?
+	
 	return							; No, return!
 
 	WIN_TOP		.192

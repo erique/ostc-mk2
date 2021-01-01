@@ -262,11 +262,11 @@ add_month:
 	bra	set_time_refresh_x
 add_year:
 	incf	year,F
-	movlw	d'22'					; calendar until 2022
+	movlw	d'29'					; calendar until 2029
 	cpfsgt	year
 	bra	set_time_refresh_x
-	movlw	d'10'
-	movwf	year					; Set Year to 2010
+	movlw	d'21'
+	movwf	year					; Set Year to 2021
 	
 set_time_refresh_x:
 	call	set_time_refresh

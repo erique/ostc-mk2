@@ -467,13 +467,23 @@ aa_decode_3_done:
 ; Setup pointers for a char:
 ; Inputs : letter : string to print (SHOULD BE NULL TERMINATED)
 ; Output : DISPLAY commands on port D + clocks.
-; 
+		
         global  aa_wordprocessor        ; Callable from C-code.
 aa_wordprocessor:
+		movlw	.20
+		cpfseq	win_leftx2
+		bra	aa_wordprocessor_no_menu
+	    
+		clrf    WREG
+		movff   WREG,letter+.18
+
+aa_wordprocessor_no_menu:		
 		; Make sure context is well known
 		movlb	HIGH win_top            ; Switch to bank 0...
 
 		rcall	aa_string_width		    ; Set win_height, compute win_width
+		
+		movlb	HIGH win_top            ; Switch to bank 0...
 		call	DISP_box_write		    ; Use that for the box.
 
 		; Restart the loop for each char to print

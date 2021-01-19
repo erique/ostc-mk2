@@ -908,7 +908,7 @@ gassetup_title_bar2:
 	incf	lo,F				
 	bsf		leftbind
 	output_99
-	STRCAT_PRINT ": "
+	STRCAT_PRINT ":"
 	
 	WIN_TOP		.2
 	WIN_LEFT	.50
@@ -992,7 +992,12 @@ gassetup_title_bar7:
 	call	read_eeprom			; Low-value
 	movff	EEDATA,lo
 	output_8
-    STRCAT_PRINT  TXT_METER2
+    STRCAT  TXT_METER2
+    
+    clrf    WREG
+    movff   WREG,letter+.22
+    call    word_processor
+
     call	DISP_standard_color
 	return
 

@@ -77,6 +77,7 @@ displaytext:
     movlw   UPPER(text_pointer-4)
     movwf   TBLPTRU
 
+    clrf    letter_counter		; reset the letter counter
     movlw   4                           ; textnumber * 4 --> PROD
     mulwf   textnumber
 
@@ -118,6 +119,7 @@ displaytext3:
 	movf    TABLAT,W
 	bz      display_text_exit           ; Text finished?
 	movwf   POSTINC2
+	incf	letter_counter,F	    ; ++1
 	bra     displaytext3
 
 display_text_exit:

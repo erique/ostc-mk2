@@ -179,6 +179,7 @@ wait_temp       res 1           ; " + used to copy data to c code + used for tem
                                 ; never use wait_temp in interrupt routines (isr) and never call any wait routine in interrupts
 
 textnumber      res 1           ; for textdisplay
+letter_counter	res 1		; for aa_wordprocessor      
 textaddress     res 2				
 
 average_depth_hold  res 4       ; Holds Sum of depths (Resettable)

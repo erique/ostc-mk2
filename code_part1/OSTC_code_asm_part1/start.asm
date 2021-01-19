@@ -129,7 +129,7 @@ wait_start_pressure:
 	clrf	EEADRH					; Reset EEADRH
 	
 	movlw	softwareversion_x
-	cpfseq	temp1					; compare version x
+;	cpfseq	temp1					; compare version x
 	bra		check_firmware_new		; is not equal -> reset CF and store new version in EEPROM
 
 	movlw	softwareversion_y
@@ -169,7 +169,7 @@ check_firmware_new:
     write_int_eeprom	d'119'
     ; SP Mode (Manual)
     write_int_eeprom	d'116'
-;    call    reset_all_cf_bank2      ; Reset CF64-93 with this update....
+    call    reset_all_cf_bank2      ; Reset CF64-93 with this update....
 
 restart:
     ; check for time/date vault

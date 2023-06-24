@@ -951,19 +951,11 @@ calc_velocity:								; called every two seconds
 	bra		do_not_display_velocity			; display velocity only in divemode
 
 calc_velocity2:
-	; Update ring buffer
-	movff	last_pressure+2,last_pressure+4
-	movff	last_pressure+3,last_pressure+5
-	movff	last_pressure+0,last_pressure+2
-	movff	last_pressure+1,last_pressure+3
-	SAFE_2BYTE_COPY amb_pressure, last_pressure
-
-
-	; use 6sec interval for velocity
-	movff	last_pressure+4,sub_b+0
-	movff	last_pressure+5,sub_b+1
-    	movff	last_pressure+0,sub_a+0
-	movff	last_pressure+1,sub_a+1
+    SAFE_2BYTE_COPY amb_pressure, sub_a
+	movff	last_pressure+0,sub_b+0
+	movff	last_pressure+1,sub_b+1
+	movff	sub_a+0,last_pressure+0	; store old value for velocity
+	movff	sub_a+1,last_pressure+1
 
 	call	sub16						; sub_c = amb_pressure - last_pressure
 

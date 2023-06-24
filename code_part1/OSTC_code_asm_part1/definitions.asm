@@ -22,7 +22,7 @@
 ; ToDo:
 
 #DEFINE	softwareversion_x		d'3'		; Software version  XX.YY
-#DEFINE	softwareversion_y		d'15'		; Software version  XX.YY
+#DEFINE	softwareversion_y		d'16'		; Software version  XX.YY
 
 #DEFINE softwareversion_beta 	0 			; (and 0 for release)
 
@@ -279,7 +279,7 @@ rel_pressure    res 2		    ; amb_pressure - surface pressure [mbar]
 max_pressure    res 2           ; Max. pressure for the dive [mbar]
 avr_rel_pressure res 2          ; Average rel. pressure (Average depth) for the dive [mbar], Resettable
 avr_rel_pressure_total res 2    ; Average rel. pressure (Average depth) for the dive [mbar], Non-Resettable
-last_pressure   res 6
+last_pressure   res 2
 temperature_avg res 2           ; Temperature summing buffer.
 temperature     res 2           ; Final temperature. SIGNED.
 last_temperature res 2          ; Last displayed temperature (used to detect changes).
@@ -323,7 +323,7 @@ eeprom_header_address   res 2
 
 batt_voltage            res 2   ; Battery voltage in mV
 
-i2c_temp                res 1   ; I²C timeout counter
+i2c_temp                res 1   ; Iï¿½C timeout counter
 i2c_temp2               res 1   ; 200
 
 sim_pressure            res 2   ; hold simulated pressure in mbar if in Simulator mode
@@ -441,7 +441,7 @@ ASSERT_BANK1    MACRO   tag
 #DEFINE	DISPLAY_e_nwr			PORTE,2 ;0
 
 ; Bank0 flags
-#DEFINE win_flip_screen     win_flags,0 ; 180° rotation of the DISPLAY screen.
+#DEFINE win_flip_screen     win_flags,0 ; 180ï¿½ rotation of the DISPLAY screen.
 #DEFINE win_display_type    win_flags,1 ; =1: Display1, =0: Display0
 
 ; Flags

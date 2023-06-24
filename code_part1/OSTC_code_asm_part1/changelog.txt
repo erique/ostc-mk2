@@ -1,3 +1,6 @@
+New in 3.16:
+BUGFIX: Ascent (and descent) rate was calculated at 2x velocity
+
 New in 3.14:
 Beta Release
 CHANGE: Calculate velocity over a 6sec period

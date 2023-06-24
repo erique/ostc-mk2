@@ -72,16 +72,12 @@ surfloop3:
 ; Startup tasks for all modes
 	clrf	timeout_counter2				
 	clrf 	timeout_counter3
-	bcf	premenu						; clear premenu flag
-	bcf	menubit						; clear menu flag
+	bcf		premenu						; clear premenu flag
+	bcf		menubit						; clear menu flag
 	clrf	timer1int_counter2			; reset state counter
-	bcf	pressure_refresh			; Start new sensor run
+	bcf		pressure_refresh			; Start new sensor run
 	clrf	last_pressure+0
 	clrf	last_pressure+1
-	clrf	last_pressure+2
-	clrf	last_pressure+3
-	clrf	last_pressure+4
-	clrf	last_pressure+5
 	clrf	last_temperature+0
 	clrf	last_temperature+1
 
